@@ -5,9 +5,6 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import clarin.cmdi.componentregistry.components.CMDComponentType;
-
-
 /**
  * Hello world!
  * 
@@ -15,12 +12,12 @@ import clarin.cmdi.componentregistry.components.CMDComponentType;
 public class Browser {
 
     public String printComponents() throws FileNotFoundException, JAXBException {
-        MDRegistry registry = new MDRegistryImpl();
+        ComponentRegistry registry = new ComponentRegistryImpl();
         StringBuilder result = new StringBuilder();
-        List<CMDComponentType> cmdComponents = registry.getCMDComponents();
-        result.append("There are " + cmdComponents.size() + " components registered\n");
-        for (CMDComponentType cmdComponentType : cmdComponents) {
-            result.append("component : " + cmdComponentType.getName() + "\n");
+        List<MDComponent> mdComponents = registry.getMDComponents();
+        result.append("There are " + mdComponents.size() + " components registered\n");
+        for (MDComponent component : mdComponents) {
+            result.append("component : " + component.getCmdComponentType().getName() + "\n");
         }
         result.append("\n");
         return result.toString();

@@ -21,5 +21,4 @@ public class BrowserTest {
         assertTrue("TODO Make real tests", false);
     }
 
-
 }

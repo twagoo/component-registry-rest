@@ -15,13 +15,13 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 
 
-public class MDRegistryImpl implements MDRegistry {
+public class ComponentRegistryImpl implements ComponentRegistry {
 
     private File componentDir = new File("/Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi");
 
-    public List<CMDComponentType> getCMDComponents() {
+    public List<MDComponent> getMDComponents() {
         File[] files = componentDir.listFiles((FileFilter) new WildcardFileFilter("component*.xml"));
-        List<CMDComponentType> result = new ArrayList<CMDComponentType>();
+        List<MDComponent> result = new ArrayList<MDComponent>();
         for (int i = 0; i < files.length; i++) {
             CMDComponentSpec spec;
             try {
@@ -30,7 +30,7 @@ public class MDRegistryImpl implements MDRegistry {
                 if (cmdComponents.size() != 1) {
                     throw new RuntimeException("a component can consist of only one CMDComponent.");
                 }
-                result.add(cmdComponents.get(0));
+                result.add(new MDComponent(cmdComponents.get(0)));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (JAXBException e) {
@@ -38,6 +38,26 @@ public class MDRegistryImpl implements MDRegistry {
             }
         }
         return result;
+    }
+
+    public String getMDProfile(String id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public List<MDProfile> getMDProfiles() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public boolean registerMDProfile(String profile) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public List<MDProfile> searchMDProfiles(String searchPattern) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
