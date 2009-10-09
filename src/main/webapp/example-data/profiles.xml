@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles>
+        <profile>
+            <name>Profile1</name>
+            <creator>Aap</creator>
+            <description>test</description>
+        </profile>
+        <profile>
+            <name>Profile2</name>
+            <creator>Noot</creator>
+            <description>IMDI</description>
+        </profile>
+        <profile>
+            <name>Profile3</name>
+            <creator>Mies</creator>
+            <description>Clarin</description>
+        </profile>
+</profiles>

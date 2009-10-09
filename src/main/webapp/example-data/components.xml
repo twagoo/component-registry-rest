@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <components>
+    <component>
+        <name>Component1</name>
+        <creator>Aap</creator>
+    </component>
+    <component>
+        <name>Component2</name>
+        <creator>Noot</creator>
+    </component>
+    <component>
+        <name>Component3</name>
+        <creator>Mies</creator>
+    </component>
+</components>
