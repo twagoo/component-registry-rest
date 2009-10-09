@@ -14,10 +14,15 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 
-
 public class ComponentRegistryImpl implements ComponentRegistry {
 
-    private File componentDir = new File("/Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi");
+    private final File componentDir;
+    private final Configuration configuration;
+
+    public ComponentRegistryImpl(Configuration configuration) {
+        this.configuration = configuration;
+        componentDir = this.configuration.getComponentDir();
+    }
 
     public List<MDComponent> getMDComponents() {
         File[] files = componentDir.listFiles((FileFilter) new WildcardFileFilter("component*.xml"));

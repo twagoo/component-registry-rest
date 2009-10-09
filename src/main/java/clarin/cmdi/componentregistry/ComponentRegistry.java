@@ -23,4 +23,5 @@ public interface ComponentRegistry {
 
     //Remove from registry?
     //getElements?
+    //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's
 }
