@@ -1,0 +1,17 @@
+The componentRegistry is setup as a Flex Gui frontend communicating with a java based backend.
+
+Creating initial setup files (eclipse config):
+
+ - in ComponentBrowserGui: mvn flex:eclipse
+ - in ComponentRegistry: mvn eclipse:eclipse
+
+Creating war artifact for deployment:
+
+ - in ComponentBrowserGui: mvn install
+ - in ComponentRegistry: mvn package
+ 
+ The ComponentRegistry war will include the flex swf file needed to start the application. 
+ So deploying the resulting war will be enough to start the application.
+ 
+ 
+
