@@ -109,7 +109,7 @@
                 </executions>
                 <configuration>
                     <!-- assuming claring metadata project is checked out in same folder as this project -->
-                    <schemaDirectory>../metadata/toolkit/</schemaDirectory>
+                    <schemaDirectory>../../metadata/toolkit/</schemaDirectory>
                     <schemaIncludes>
                         <include>general-component-schema.xsd</include>
                     </schemaIncludes>
