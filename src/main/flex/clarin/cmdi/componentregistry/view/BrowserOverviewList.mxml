@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+
+	<mx:Metadata>
+		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.events.BrowserSelectionEvent")]
+	</mx:Metadata>
+
+	<mx:ArrayCollection id="browserDataProvider"/>
+
+
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.events.BrowserSelectionEvent;
+			import clarin.cmdi.componentregistry.ItemDescription;
+			import adobe.utils.CustomActions;
+
+			private function dispatchBrowserSelectionEvent():void {
+				var event:BrowserSelectionEvent=new BrowserSelectionEvent(this.dataGrid.selectedItem as ItemDescription);
+				dispatchEvent(event);
+			}
+		]]>
+	</mx:Script>
+
+
+	<mx:DataGrid id="dataGrid"
+				 x="0"
+				 y="112"
+				 width="100%"
+				 height="100%"
+				 click="{dispatchBrowserSelectionEvent()}"
+				 dataProvider="{browserDataProvider}">
+		<mx:columns>
+			<mx:DataGridColumn dataField="name"
+							   headerText="Name"/>
+			<mx:DataGridColumn dataField="creatorName"
+							   headerText="Creator"/>
+			<mx:DataGridColumn dataField="description"
+							   headerText="Description"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:VBox>

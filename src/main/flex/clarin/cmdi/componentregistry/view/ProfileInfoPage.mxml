@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:local="clarin.cmdi.componentregistry.*"
+		 height="88"
+		 backgroundColor="#DDE3EF">
+
+	<local:Profile id="profile" />
+
+	<mx:Label text="{profile.description.name}"
+			  width="100%"/>
+	<mx:Label text="{profile.description.id}"
+			  width="100%"/>
+	<mx:Label text="{profile.description.description}"
+			  width="100%"/>
+	<mx:Label text="Profile consists of {profile.nrOfComponents} components"
+			  width="100%"/>
+	<mx:Repeater id="iter"
+				 dataProvider="{profile.components}">
+		<mx:Label text="{iter.currentItem.name}"/>
+		<mx:Label text="{iter.currentItem.xml.toString()}"/>
+	</mx:Repeater>
+
+</mx:VBox>
+

@@ -59,6 +59,7 @@
             <version>3.2.0.3958</version>
             <type>swc</type>
         </dependency>
+       
 </dependencies>
 
     <build>
@@ -70,7 +71,19 @@
                 <inherited>true</inherited>
                 <configuration>
                     <useLocalFlexSDK>true</useLocalFlexSDK>
-                </configuration>
+				    <modules>
+				        <module>
+							<name>Browse</name>
+							<moduleFile>src/main/flex/Browse.mxml</moduleFile>
+							<destinationDirectory>target/modules/</destinationDirectory>
+						</module>
+				        <module>
+							<name>Register</name>
+							<moduleFile>src/main/flex/Register.mxml</moduleFile>
+							<destinationDirectory>target/modules/</destinationDirectory>
+						</module>
+					</modules>
+            </configuration>
             </plugin>
         </plugins>
     </build>
@@ -82,6 +95,7 @@
            <name>ServeBox.org repository</name>
            <url>http://maven.servebox.org/repository</url>
        </repository>
+   
     </repositories>
 	
     <pluginRepositories>

@@ -1,120 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				layout="absolute">
+	<mx:Script>
+		<![CDATA[
+			import mx.managers.IPopUpManager;
+			private var iPopUpManager:IPopUpManager;
+		]]>
+	</mx:Script>
+	<mx:Panel width="100%"
+			  height="100%"
+			  layout="absolute"
+			  title="Clarin Component Browser">
 
-<mx:Script>
-        <![CDATA[
-        
-            import mx.controls.Alert;
-            import mx.collections.ArrayCollection;
-            import mx.rpc.events.FaultEvent;
-            import mx.rpc.events.ResultEvent;
+		<mx:VBox height="100%"
+				 width="100%">
+			<mx:HBox borderStyle="solid">
 
-            [Bindable] private var profiles:ArrayCollection;
-            [Bindable] private var components:ArrayCollection;
-            
-            private function resultHandlerProfiles(event:ResultEvent):void
-            {
-                profiles = event.result.profiles.profile;
-            }
+				<mx:Button id="browseButton"
+						   label="Browse Screen"
+						   click="myViewStack.selectedChild=browse;"/>
 
-            private function resultHandlerComponents(event:ResultEvent):void
-            {
-                components = event.result.components.component
-            }
+				<mx:Button id="registerButton"
+						   label="Register Screen"
+						   click="myViewStack.selectedChild=register;"/>
 
-              private function faultHandler(event:FaultEvent):void
-            {
-                Alert.show(event.fault.faultDetail, "Error");
-            }
-            
-              private function refresh():void
-            {
-                profilesSrv.send();
-                componentsSrv.send();
-            }
-            
-        ]]>
-    </mx:Script>
-    
+			</mx:HBox>
 
-<mx:HTTPService  id="profilesSrv" url="http://localhost:8080/ComponentRegistry/example-data/profiles.xml"
-        fault="faultHandler(event)" 
-	    result="resultHandlerProfiles(event)"
-        showBusyCursor="true"
-/>
-<mx:HTTPService id="componentsSrv" url="http://localhost:8080/ComponentRegistry/example-data/components.xml"
-        fault="faultHandler(event)"
-	    result="resultHandlerComponents(event)"
-        showBusyCursor="true"
-/>
+			<mx:ViewStack id="myViewStack"
+						  borderStyle="solid"
+						  height="100%"
+						  width="100%">
 
+				<mx:ModuleLoader id="browse"
+								 url="Browse.swf"/>
+				<mx:ModuleLoader id="register"
+								 url="Register.swf"/>
 
-
-<!--
-
-<mx:XMLList id="components">
-        <component>
-            <name>Component1</name>
-            <creator>Aap</creator>
-        </component>
-        <component>
-            <name>Component2</name>
-            <creator>Noot</creator>
-        </component>
-        <component>
-            <name>Component3</name>
-            <creator>Mies</creator>
-        </component>
-</mx:XMLList>
-
-<mx:XMLList id="profiles">
-        <component>
-            <name>Profile1</name>
-            <creator>Aap</creator>
-            <description>test</description>
-        </component>
-        <component>
-            <name>Profile2</name>
-            <creator>Noot</creator>
-            <description>IMDI</description>
-        </component>
-        <component>
-            <name>Profile3</name>
-            <creator>Mies</creator>
-            <description>Clarin</description>
-        </component>
-</mx:XMLList>-->
-
-<mx:Panel width="100%" height="100%" layout="absolute" title="Clarin Component Browser">
-
-<mx:Button label="Refresh" click="refresh()"/>
-
-<mx:TextInput x="190" y="25" width="170" height="26" text="Search..."/>
-
-<mx:TabNavigator id="tn"  width="100%" height="80%" color="0x323232"  y="59">
-
-      <mx:VBox label="Profiles">
-		<mx:DataGrid id="dataGridProfiles" rowCount="2" x="0" y="112" width="100%" height="100%" dataProvider="{profiles}">
-			<mx:columns>
-				<mx:DataGridColumn dataField="name" headerText="Name"/>
-				<mx:DataGridColumn dataField="creator" headerText="Creator"/>
-				<mx:DataGridColumn dataField="description" headerText="Description"/>
-			</mx:columns>
-		</mx:DataGrid>
-      </mx:VBox>
-
-      <mx:VBox label="Components">
-		<mx:DataGrid id="dataGridComponents" x="0" y="112" width="100%" height="100%" dataProvider="{components}">
-			<mx:columns>
-				<mx:DataGridColumn dataField="name" headerText="Name"/>
-				<mx:DataGridColumn dataField="creator" headerText="Creator"/>
-			</mx:columns>
-		</mx:DataGrid>
-       </mx:VBox>
-
-</mx:TabNavigator>
-
-
-</mx:Panel>
-	
+			</mx:ViewStack>
+		</mx:VBox>
+	</mx:Panel>
 </mx:Application>
