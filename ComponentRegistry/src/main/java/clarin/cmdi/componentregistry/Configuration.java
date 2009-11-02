@@ -9,17 +9,19 @@ public class Configuration {
 
     private final static Logger LOG = LoggerFactory.getLogger(Configuration.class);
 
-    //    private final static String REGISTRY_ROOT = "/Users/patdui/Workspace/Clarin/metadata/toolkit";
     private File registryRoot;
     private File componentDir;
+    private File profileDir;
 
     public void init() {
         boolean isValid = true;
         isValid &= validateAndCreate(registryRoot);
         componentDir = new File(registryRoot, "components");
         isValid &= validateAndCreate(componentDir);
+        profileDir = new File(registryRoot, "profiles");
+        isValid &= validateAndCreate(profileDir);
         if (isValid) {
-            LOG.info("Initialized Component Registry succesfull.");
+            LOG.info("Initialized Component Registry succesfully. Registry is located in: "+registryRoot);
         }
     }
 
@@ -43,6 +45,10 @@ public class Configuration {
 
     public File getComponentDir() {
         return componentDir;
+    }
+
+    public File getProfileDir() {
+        return profileDir;
     }
 
 }
