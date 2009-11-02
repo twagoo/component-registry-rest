@@ -32,5 +32,13 @@ public class MDMarshaller {
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         m.marshal(myProfile, writer);
     }
+    
+    public static <T> void marshall(T marshallableObject, Writer writer) throws JAXBException {
+        String packageName = marshallableObject.getClass().getPackage().getName();
+        JAXBContext jc = JAXBContext.newInstance(packageName);
+        Marshaller m = jc.createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        m.marshal(marshallableObject, writer);
+    }
 
 }
