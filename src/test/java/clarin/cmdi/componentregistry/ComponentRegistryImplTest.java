@@ -7,20 +7,20 @@ import java.io.File;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTest;
 
 public class ComponentRegistryImplTest {
 
     @Test
     public void testRegisterMDProfile() {
         ComponentRegistry register = getTestRegistry(createTempRegistryDir());
-        String profileContent = "<profile></profile>";
         ProfileDescription description = new ProfileDescription();
         description.setName("Aap");
         description.setId("Aap" + System.currentTimeMillis());
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, profileContent);
+        register.registerMDProfile(description, ComponentRegistryRestServiceTest.getTestProfile());
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
         //TODO Patrick test with empty name/id/description etc..

@@ -7,9 +7,6 @@
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
-  <listener>
-    <listener-class>org.apache.commons.fileupload.servlet.FileCleanerCleanup</listener-class>
-  </listener>
 
   <servlet>
     <servlet-name>Jersey Web Application</servlet-name>
@@ -24,17 +21,6 @@
     <servlet-name>Jersey Web Application</servlet-name>
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
-  
-  <servlet>
-    <description>Upload Service</description>
-    <display-name>uploadService</display-name>
-    <servlet-name>uploadService</servlet-name>
-    <servlet-class>clarin.cmdi.componentregistry.UploadServlet</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>uploadService</servlet-name>
-    <url-pattern>/upload</url-pattern>
-  </servlet-mapping>
+
 
 </web-app>

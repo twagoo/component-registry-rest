@@ -1,12 +1,18 @@
 package clarin.cmdi.componentregistry.rest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
+
+import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
@@ -15,90 +21,137 @@ import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryImplTest;
+import clarin.cmdi.componentregistry.MDValidator;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegisterResponse;
 
-public class ComponentRegistryRestServiceTest {
+import com.sun.jersey.api.client.GenericType;
+import com.sun.jersey.multipart.FormDataMultiPart;
+import com.sun.jersey.test.framework.AppDescriptor;
+import com.sun.jersey.test.framework.JerseyTest;
+import com.sun.jersey.test.framework.LowLevelAppDescriptor;
+import com.sun.jersey.test.framework.spi.container.TestContainerFactory;
+import com.sun.jersey.test.framework.spi.container.inmemory.InMemoryTestContainerFactory;
+
+public class ComponentRegistryRestServiceTest extends JerseyTest {
+
+    //CommandLine test e.g.:  curl -i -H "Accept:application/json" -X GET  http://localhost:8080/ComponentRegistry/rest/registry/profiles
 
     private static ComponentRegistry testRegistry;
     private static File registryDir;
 
+    private final static GenericType<List<ProfileDescription>> PROFILE_LIST_GENERICTYPE = new GenericType<List<ProfileDescription>>() {
+    };
+    private final static GenericType<List<ComponentDescription>> COMPONENT_LIST_GENERICTYPE = new GenericType<List<ComponentDescription>>() {
+    };
+
+    @Override
+    protected TestContainerFactory getTestContainerFactory() {
+        return new InMemoryTestContainerFactory();
+    }
+
+    @Override
+    protected AppDescriptor configure() {
+        String packageName = ComponentRegistryRestService.class.getPackage().getName();
+        return new LowLevelAppDescriptor.Builder(packageName).build();
+    }
+
     @Test
     public void testGetRegisteredProfiles() throws Exception {
-        ComponentRegistryRestService service = new ComponentRegistryRestService();
-        String profiles = service.getRegisteredProfiles();
-        String expected = "";
-        expected += "<profiles>\n";
-        expected += "<profile xlink=\"link:profile1\" registrationDate=\"Thu Jan 01 00:00:00 CET 2009\" name=\"testProfile\" id=\"profile1\" description=\"Test Description\" creatorName=\"J. Unit\"/>\n";
-        expected += "<profile xlink=\"link:profile2\" registrationDate=\"Thu Jan 01 00:00:00 CET 2009\" name=\"testProfile\" id=\"profile2\" description=\"Test Description\" creatorName=\"J. Unit\"/>\n";
-        expected += "</profiles>\n";
-        assertEquals(expected, profiles);
+        List<ProfileDescription> response = resource().path("/registry/profiles").accept(MediaType.APPLICATION_XML).get(
+                PROFILE_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = resource().path("/registry/profiles").accept(MediaType.APPLICATION_JSON).get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
     }
 
     @Test
     public void testGetRegisteredComponents() {
-        ComponentRegistryRestService service = new ComponentRegistryRestService();
-        String components = service.getRegisteredComponents();
-        String expected = "";
-        expected += "<components>\n";
-        expected += "<component xlink=\"link:component1\" registrationDate=\"Thu Jan 01 00:00:00 CET 2009\" name=\"testComponent\" id=\"component1\" description=\"Test Description\" creatorName=\"J. Unit\"/>\n";
-        expected += "<component xlink=\"link:component2\" registrationDate=\"Thu Jan 01 00:00:00 CET 2009\" name=\"testComponent\" id=\"component2\" description=\"Test Description\" creatorName=\"J. Unit\"/>\n";
-        expected += "</components>\n";
-        assertEquals(expected, components);
+        List<ComponentDescription> response = resource().path("/registry/components").accept(MediaType.APPLICATION_XML).get(
+                COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = resource().path("/registry/components").accept(MediaType.APPLICATION_JSON).get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
     }
 
     @Test
     public void testGetRegisteredComponent() {
-        ComponentRegistryRestService service = new ComponentRegistryRestService();
-        String components = service.getRegisteredComponent("clarin.eu:cr1:component1");
-        String expected = "";
-        expected += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        expected += "\n";
-        expected += "<CMD_ComponentSpec xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        expected += "    xsi:noNamespaceSchemaLocation=\"../../general-component-schema.xsd\">\n";
-        expected += "    \n";
-        expected += "    <Header/>\n";
-        expected += "    \n";
-        expected += "    <CMD_Component name=\"Access\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
-        expected += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        expected += "        <CMD_Element name=\"Date\">\n";
-        expected += "            <ValueScheme>\n";
-        expected += "                <!-- matching dates of the pattern yyyy-mm-dd (ISO 8601); this only matches dates from the years 1000 through 2999 and does allow some invalid dates (e.g. February, the 30th) -->\n";
-        expected += "                <pattern>(1|2)\\d{3}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])</pattern>                \n";
-        expected += "            </ValueScheme>\n";
-        expected += "        </CMD_Element>\n";
-        expected += "        <CMD_Element name=\"Owner\" ValueScheme=\"string\" />\n";
-        expected += "        <CMD_Element name=\"Publisher\" ValueScheme=\"string\" />\n";
-        expected += "    </CMD_Component>\n";
-        expected += "\n";
-        expected += "</CMD_ComponentSpec>\n";
-        assertEquals(expected, components);
+        CMDComponentSpec component = resource().path("/registry/components/clarin.eu:cr1:component1").accept(MediaType.APPLICATION_JSON)
+                .get(CMDComponentSpec.class);
+        assertNotNull(component);
+        assertEquals("Access", component.getCMDComponent().get(0).getName());
+        component = resource().path("/registry/components/clarin.eu:cr1:component2").accept(MediaType.APPLICATION_XML).get(
+                CMDComponentSpec.class);
+        assertNotNull(component);
+        assertEquals("Access", component.getCMDComponent().get(0).getName());
     }
 
     @Test
     public void testGetRegisteredProfile() throws Exception {
-        ComponentRegistryRestService service = new ComponentRegistryRestService();
-        String components = service.getRegisteredProfile("clarin.eu:cr1:profile2");
-        String expected = "";
-        expected += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        expected += "<CMD_ComponentSpec xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        expected += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-        expected += "    <Header />\n";
-        expected += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-        expected += "        <AttributeList>\n";
-        expected += "            <Attribute>\n";
-        expected += "                <Name>Name</Name>\n";
-        expected += "                <Type>string</Type>\n";
-        expected += "            </Attribute>\n";
-        expected += "        </AttributeList>\n";
-        expected += "        <CMD_Element name=\"Age\">\n";
-        expected += "            <ValueScheme>\n";
-        expected += "                <pattern>[23][0-9]</pattern>\n";
-        expected += "            </ValueScheme>\n";
-        expected += "        </CMD_Element>\n";
-        expected += "    </CMD_Component>\n";
-        expected += "</CMD_ComponentSpec>\n";
-        assertEquals(expected, components);
+        CMDComponentSpec profile = resource().path("/registry/profiles/clarin.eu:cr1:profile1").accept(MediaType.APPLICATION_JSON).get(
+                CMDComponentSpec.class);
+        assertNotNull(profile);
+        assertEquals("Actor", profile.getCMDComponent().get(0).getName());
+        profile = resource().path("/registry/profiles/clarin.eu:cr1:profile2").accept(MediaType.APPLICATION_XML)
+                .get(CMDComponentSpec.class);
+        assertNotNull(profile);
+        assertEquals("Actor", profile.getCMDComponent().get(0).getName());
+        //TODO Patrick, test header id when available
+    }
+
+    @Test
+    public void testRegisterProfile() throws Exception {
+        FormDataMultiPart form = new FormDataMultiPart();
+        form.field("profileData", getTestProfileContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field("name", "ProfileTest1");
+        form.field("description", "My Test Profile");
+        form.field("creatorName", "J. Unit");
+        RegisterResponse response = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
+                form);
+        ProfileDescription profileDesc = response.getProfileDescription();
+        assertNotNull(profileDesc);
+        assertEquals("ProfileTest1", profileDesc.getName());
+        assertEquals("My Test Profile", profileDesc.getDescription());
+        assertEquals("J. Unit", profileDesc.getCreatorName());
+        assertTrue(profileDesc.getId().startsWith("p_"));
+        assertNotNull(profileDesc.getRegistrationDate());
+    }
+
+    @Test
+    public void testRegisterProfileInvalidData() throws Exception {
+        FormDataMultiPart form = new FormDataMultiPart();
+        String notAValidProfile = "<CMD_ComponentSpec> </CMD_ComponentSpec>";
+        form.field("profileData", new ByteArrayInputStream(notAValidProfile.getBytes()), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field("name", "ProfileTest1");
+        form.field("description", "My Test Profile");
+        form.field("creatorName", "J. Unit");
+        RegisterResponse postResponse = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
+                RegisterResponse.class, form);
+        assertEquals(1, postResponse.getErrors().size());
+        assertTrue(postResponse.getErrors().get(0).contains("SAXParseException"));
+    }
+
+    //    @Test
+    //    public void testRegisterProfileInvalidDescription() throws Exception {
+    //        FormDataMultiPart form = new FormDataMultiPart();
+    //        form.field("profileData", new ByteArrayInputStream("<CMD_ComponentSpec> <CMD_ComponentSpec>".getBytes()),
+    //                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+    //        form.field("name", "ProfileTest1");
+    //        form.field("description", "My Test Profile");
+    //        form.field("creatorName", "J. Unit");
+    //        try {
+    //            resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).put(ProfileDescription.class, form);
+    //        } catch (UniformInterfaceException e) {
+    //            ClientResponse response = e.getResponse();
+    //            assertEquals(500, response.getStatus());
+    //            assertTrue("Error in validation", response.getEntity(String.class).contains("SAXParseException"));
+    //        }
+    //    }
+
+    @Test
+    public void testRegisterProfileBothInvalid() throws Exception {
     }
 
     @BeforeClass
@@ -120,6 +173,10 @@ public class ComponentRegistryRestServiceTest {
         desc.setId(id);
         desc.setXlink("link:" + id);
 
+        testRegistry.registerMDProfile(desc, getTestProfile());
+    }
+
+    private static InputStream getTestProfileContent() {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -139,7 +196,11 @@ public class ComponentRegistryRestServiceTest {
         profileContent += "        </CMD_Element>\n";
         profileContent += "    </CMD_Component>\n";
         profileContent += "</CMD_ComponentSpec>\n";
-        testRegistry.registerMDProfile(desc, profileContent);
+        return new ByteArrayInputStream(profileContent.getBytes());
+    }
+
+    public static CMDComponentSpec getTestProfile() {
+        return new MDValidator().validateInputStream(getTestProfileContent());
     }
 
     private static void addComponent(ComponentRegistry testRegistry, String id) throws ParseException {
@@ -173,7 +234,7 @@ public class ComponentRegistryRestServiceTest {
         compContent += "\n";
         compContent += "</CMD_ComponentSpec>\n";
 
-        testRegistry.registerMDComponent(desc, compContent);
+        testRegistry.registerMDComponent(desc, new MDValidator().validateInputStream(new ByteArrayInputStream(compContent.getBytes())));
     }
 
     @AfterClass

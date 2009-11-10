@@ -1,26 +1,16 @@
 package clarin.cmdi.componentregistry.model;
 
-import javax.xml.bind.annotation.XmlAccessOrder;
 import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorOrder;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
 public abstract class AbstractDescription {
 
-    @XmlAttribute
     private String id;
-    @XmlAttribute
     private String description;
-    @XmlAttribute
     private String name;
-    @XmlAttribute
     private String registrationDate;
-    @XmlAttribute
     private String creatorName;
-    @XmlAttribute
     private String xlink;
 
     public void setId(String id) {

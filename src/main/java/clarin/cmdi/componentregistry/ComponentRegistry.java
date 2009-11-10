@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry;
 
 import java.util.List;
 
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -9,15 +10,15 @@ public interface ComponentRegistry {
 
     List<MDComponent> getMDComponents();
 
-    List<String> getComponentDescriptions();
+    List<ComponentDescription> getComponentDescriptions();
 
     List<MDComponent> getMDProfiles();
 
-    List<String> getProfileDescriptions();
+    List<ProfileDescription> getProfileDescriptions();
 
-    String getMDProfile(String id);
+    CMDComponentSpec getMDProfile(String id);
 
-    String getMDComponent(String id);
+    CMDComponentSpec getMDComponent(String id);
 
     List<MDProfile> searchMDProfiles(String searchPattern);
 
@@ -25,10 +26,10 @@ public interface ComponentRegistry {
      * 
      * @return -1 if profile could not be registered
      */
-    int registerMDProfile(ProfileDescription description, String profileContent);
+    int registerMDProfile(ProfileDescription description, CMDComponentSpec spec);
     //What about some Credentials or metadata also add in the parameters?
 
-    int registerMDComponent(ComponentDescription description, String componentContent);
+    int registerMDComponent(ComponentDescription description, CMDComponentSpec spec);
 
     //Remove from registry?
     //getElements?

@@ -1,8 +1,6 @@
 package clarin.cmdi.componentregistry;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -45,6 +43,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
+        initCache();
+    }
+
+    private void initCache() {
+
     }
 
     private File getComponentDir() {
@@ -57,57 +60,41 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             CMDComponentSpec spec;
-            try {
-                spec = MDMarshaller.unmarshal(CMDComponentSpec.class, new FileInputStream(file));
-                List<CMDComponentType> cmdComponents = spec.getCMDComponent();
-                if (cmdComponents.size() != 1) {
-                    throw new RuntimeException("a component can consist of only one CMDComponent.");
-                }
-                result.add(new MDComponent(cmdComponents.get(0)));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (JAXBException e) {
-                e.printStackTrace();
+            spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+            List<CMDComponentType> cmdComponents = spec.getCMDComponent();
+            if (cmdComponents.size() != 1) {
+                throw new RuntimeException("a component can consist of only one CMDComponent.");
             }
+            result.add(new MDComponent(cmdComponents.get(0)));
         }
         return result;
     }
 
-    public List<String> getComponentDescriptions() {
+    public List<ComponentDescription> getComponentDescriptions() {
         Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter("description.xml"), TrueFileFilter.TRUE);
-        List<String> result = new ArrayList<String>();
+        List<ComponentDescription> result = new ArrayList<ComponentDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
-            try {
-                result.add(FileUtils.readFileToString(file));
-            } catch (IOException e) {
-                LOG.error("Cannot retrieve component description", e);
-            }
+            ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file);
+            if (desc != null)
+                result.add(desc);
         }
         return result;
     }
 
-    public String getMDProfile(String profileId) {
-        String result = null;
+    public CMDComponentSpec getMDProfile(String profileId) {
+        CMDComponentSpec result = null;
         String id = stripRegistryId(profileId);
         File file = new File(configuration.getProfileDir(), id + File.separator + id + ".xml");
-        try {
-            result = FileUtils.readFileToString(file);
-        } catch (IOException e) {
-            LOG.error("Cannot retrieve profile", e);
-        }
+        result = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
         return result;
     }
 
-    public String getMDComponent(String componentId) {
-        String result = null;
+    public CMDComponentSpec getMDComponent(String componentId) {
+        CMDComponentSpec result = null;
         String id = stripRegistryId(componentId);
         File file = new File(configuration.getComponentDir(), id + File.separator + id + ".xml");
-        try {
-            result = FileUtils.readFileToString(file);
-        } catch (IOException e) {
-            LOG.error("Cannot retrieve profile", e);
-        }
+        result = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
         return result;
     }
 
@@ -119,33 +106,37 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return Collections.EMPTY_LIST;
     }
 
-    public List<String> getProfileDescriptions() {
+    public List<ProfileDescription> getProfileDescriptions() {
         Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter("description.xml"),
                 TrueFileFilter.TRUE);
-        List<String> result = new ArrayList<String>();
+        List<ProfileDescription> result = new ArrayList<ProfileDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
-            try {
-                result.add(FileUtils.readFileToString(file));
-            } catch (IOException e) {
-                LOG.error("Cannot retrieve profile description", e);
-            }
+            ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file);
+            if (desc != null)
+                result.add(desc);
         }
         return result;
     }
 
-    public int registerMDComponent(ComponentDescription description, String content) {
+    /**
+     * CMDComponentSpec and description are assumed to be valid.
+     */
+    public synchronized int registerMDComponent(ComponentDescription description, CMDComponentSpec spec) {
         LOG.info("Attempt to register component: " + description);
-        return register(configuration.getComponentDir(), description, content, "component");
+        return register(configuration.getComponentDir(), description, spec, "component");
     }
 
-    public int registerMDProfile(ProfileDescription profileDescription, String profileContent) {
+    /**
+     * CMDComponentSpec and description are assumed to be valid.
+     */
+    public synchronized int registerMDProfile(ProfileDescription profileDescription, CMDComponentSpec spec) {
         LOG.info("Attempt to register profile: " + profileDescription);
-        return register(configuration.getProfileDir(), profileDescription, profileContent, "profile");
+        return register(configuration.getProfileDir(), profileDescription, spec, "profile");
 
     }
 
-    private int register(File storageDir, AbstractDescription description, String content, String type) {
+    private synchronized int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
         //Check if name not already exists, create profile dir put store all files.
         //Handle all errors and rollback if something didn't work. Put this all in a separate DAO or something
         //Create storage package
@@ -157,7 +148,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             boolean dirCreated = dir.mkdir(); //Check if file is not there already TODO Patrick
             if (dirCreated) {
                 writeDescription(dir, description);
-                writeProfile(dir, description.getId() + ".xml", content);
+                writeProfile(dir, description.getId() + ".xml", spec);
                 success = true;
             }
         } catch (IOException e) {
@@ -177,19 +168,18 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
         LOG.info("Succesfully registered a " + type + " in " + dir + " " + type + "= " + description);
         return 0;
-
     }
 
     private void writeDescription(File profileDir, AbstractDescription description) throws IOException, JAXBException {
         File metadataFile = new File(profileDir, "description.xml");
         Writer writer = new FileWriter(metadataFile);
-        MDMarshaller.marshall(description, writer);
+        MDMarshaller.marshal(description, writer);
         LOG.info("Saving metadata successful " + metadataFile);
     }
 
-    private void writeProfile(File profileDir, String profileName, String content) throws IOException {
+    private void writeProfile(File profileDir, String profileName, CMDComponentSpec spec) throws IOException, JAXBException {
         File file = new File(profileDir, profileName);
-        FileUtils.writeStringToFile(file, content, "UTF-8");
+        MDMarshaller.marshal(spec, new FileWriter(file));
         LOG.info("Saving profile successful " + file);
     }
 
