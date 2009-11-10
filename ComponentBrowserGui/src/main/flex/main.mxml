@@ -1,20 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
-				layout="absolute">
+				xmlns:view="clarin.cmdi.componentregistry.view.*"
+				layout="absolute"
+				applicationComplete="init();" backgroundColor="#DDE3EF">
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.events.UploadCompleteEvent;
+			import mx.controls.Alert;
+			import clarin.cmdi.componentregistry.services.UploadService;
 			import mx.managers.IPopUpManager;
 			private var iPopUpManager:IPopUpManager;
+
+			private function init():void {
+				this.register.uploadSrv.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, registryChange);
+			}
+
+			private function registryChange(event:UploadCompleteEvent):void {
+				browse.refresh();
+				myViewStack.selectedChild = browse;
+				browse.setSelectedProfileDescription(event.itemDescription);
+			}
 		]]>
 	</mx:Script>
+
 	<mx:Panel width="100%"
 			  height="100%"
 			  layout="absolute"
-			  title="Clarin Component Browser">
+			  title="Clarin Component Browser" x="0" y="0" >
 
 		<mx:VBox height="100%"
 				 width="100%">
-			<mx:HBox borderStyle="solid">
+			<mx:HBox borderStyle="none">
 
 				<mx:Button id="browseButton"
 						   label="Browse Screen"
@@ -27,14 +43,12 @@
 			</mx:HBox>
 
 			<mx:ViewStack id="myViewStack"
-						  borderStyle="solid"
+						  borderStyle="none"
 						  height="100%"
 						  width="100%">
 
-				<mx:ModuleLoader id="browse"
-								 url="Browse.swf"/>
-				<mx:ModuleLoader id="register"
-								 url="Register.swf"/>
+				<view:Browse id="browse"/>
+				<view:Register id="register"/>
 
 			</mx:ViewStack>
 		</mx:VBox>

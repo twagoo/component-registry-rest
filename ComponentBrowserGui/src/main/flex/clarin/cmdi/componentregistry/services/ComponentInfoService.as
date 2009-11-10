@@ -36,12 +36,10 @@ package clarin.cmdi.componentregistry.services {
 
 		private function result(resultEvent:ResultEvent):void {
 			var resultXml:XML=resultEvent.result as XML;
-			//TODO PD What shall we show?
 			var metaData:ComponentMD=new ComponentMD();
 			metaData.name=resultXml.CMD_Component.@name;
 			metaData.xml=resultXml;
 			component.componentMD=metaData;
-
 		}
 
 		public function fault(faultEvent:FaultEvent):void {

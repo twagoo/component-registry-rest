@@ -4,21 +4,20 @@
 		 height="88"
 		 backgroundColor="#DDE3EF">
 
-	<local:Profile id="profile" />
+	<local:Profile id="profile"/>
+	<mx:VBox width="100%"
+			 height="100%">
 
-	<mx:Label text="{profile.description.name}"
-			  width="100%"/>
-	<mx:Label text="{profile.description.id}"
-			  width="100%"/>
-	<mx:Label text="{profile.description.description}"
-			  width="100%"/>
-	<mx:Label text="Profile consists of {profile.nrOfComponents} components"
-			  width="100%"/>
-	<mx:Repeater id="iter"
-				 dataProvider="{profile.components}">
-		<mx:Label text="{iter.currentItem.name}"/>
-		<mx:Label text="{iter.currentItem.xml.toString()}"/>
-	</mx:Repeater>
+		<mx:Label text="Profile {profile.description.name} consists of {profile.nrOfComponents} components:"/>
+		<mx:Repeater id="iter"
+					 dataProvider="{profile.components}">
+			<mx:Label text="{iter.currentItem.name}"/>
+			<mx:TextArea editable="false"
+						 text="{iter.currentItem.xml.toXMLString()}"
+						 width="90%"
+						 height="80%"/>
+		</mx:Repeater>
+	</mx:VBox>
 
 </mx:VBox>
 

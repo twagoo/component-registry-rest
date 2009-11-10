@@ -3,17 +3,17 @@
 		 xmlns:local="clarin.cmdi.componentregistry.*"
 		 width="100%"
 		 height="88"
-		 backgroundColor="#DDE3EF">
+		 backgroundColor="#DDE3EF" backgroundImage="img/">
 
 	<local:Component id="component"/>
-
-	<mx:Label text="{component.description.name}"
-			  width="100%"/>
-	<mx:Label text="{component.description}"
-			  width="100%"/>
-	<mx:Label text="{component.description.description}"
-			  width="100%"/>
-	<mx:Label text="{component.componentMD.xml.toString()}"
-			  width="100%"/>
+	<mx:VBox width="100%"
+			 height="100%">
+		<mx:Label text="{component.description.name}"
+				  width="100%"/>
+		<mx:TextArea editable="false" visible="{component != null}"
+					 text="{component.componentMD.xml.toXMLString()}"
+					 width="90%"
+					 height="80%"/>
+	</mx:VBox>
 </mx:VBox>
 

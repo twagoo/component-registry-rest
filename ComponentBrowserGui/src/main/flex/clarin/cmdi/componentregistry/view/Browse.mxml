@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:local="clarin.cmdi.componentregistry.services.*"
 		   xmlns:view="clarin.cmdi.componentregistry.view.*"
 		   creationComplete="refresh()"
@@ -8,6 +8,8 @@
 
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.ItemDescription;
+			import mx.controls.Alert;
 			import clarin.cmdi.componentregistry.events.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.Profile;
 
@@ -23,6 +25,13 @@
 			private function loadComponentInfoPage(event:BrowserSelectionEvent):void {
 				componentSrv.load(event.itemDescription);
 			}
+
+			public function setSelectedProfileDescription(desc:ItemDescription):void {
+			    //Need to select the correct item, can't get it to highlight at the mo
+			    //profilesOverview.dataGrid.selectedIndex=2;
+			    //profilesOverview.dataGrid.validateNow();
+                //profilesOverview.dataGrid.scrollToIndex(2);
+			}
 		]]>
 	</mx:Script>
 
@@ -30,6 +39,7 @@
 	<local:ComponentListService id="componentsSrv"/>
 	<local:ProfileInfoService id="profileSrv"/>
 	<local:ComponentInfoService id="componentSrv"/>
+	<view:BrowserColumns id="browserColumns"/>
 
 
 	<mx:VBox borderStyle="none"
@@ -37,22 +47,17 @@
 			 height="100%"
 			 width="100%">
 
-		<mx:TextInput x="190"
-					  y="25"
-					  width="170"
-					  height="26"
-					  text="Search..."/>
-
 		<mx:TabNavigator id="tabnav"
 						 width="100%"
 						 height="100%"
 						 color="0x323232"
-						 y="59">
+						 y="59" borderStyle="outset">
 			<mx:VDividedBox label="Profiles"
 							width="100%">
 				<view:BrowserOverviewList id="profilesOverview"
 										  browserDataProvider="{profilesSrv.itemDescriptions}"
 										  browserItemSelected="{loadProfileInfoPage(event)}"
+										  browserColumns="{browserColumns.getProfileColumns()}"
 										  width="100%"
 										  height="70%"/>
 				<view:ProfileInfoPage id="profileInfoPage"
@@ -66,6 +71,7 @@
 				<view:BrowserOverviewList id="componentsOverview"
 										  browserDataProvider="{componentsSrv.itemDescriptions}"
 										  browserItemSelected="{loadComponentInfoPage(event)}"
+										  browserColumns="{browserColumns.getComponentColumns()}"
 										  width="100%"
 										  height="70%"/>
 				<view:ComponentInfoPage id="componentInfoPage"
@@ -76,4 +82,4 @@
 			</mx:VDividedBox>
 		</mx:TabNavigator>
 	</mx:VBox>
-</mx:Module>
+</mx:Canvas>
