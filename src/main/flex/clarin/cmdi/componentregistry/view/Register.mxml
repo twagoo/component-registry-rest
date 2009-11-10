@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+		   xmlns:local="clarin.cmdi.componentregistry.services.*"
+		   width="100%"
+		   height="100%">
+
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.ItemDescription;
+
+			private function submitProfile(event:Event):void {
+				var item:ItemDescription = new ItemDescription();
+				item.description = description.text;
+				item.creatorName = creatorName.text;
+				item.name = nameInput.text;
+				uploadSrv.submitProfile(item);
+			}
+		]]>
+	</mx:Script>
+
+	<local:UploadService id="uploadSrv"/>
+	<mx:VBox>
+		<mx:Form>
+			<mx:FormHeading label="Register Profile"/>
+			<mx:HBox>
+				<mx:Button label="Select profile.."
+						   id="btnSelectProfile"
+						   click="uploadSrv.selectProfile(event)"/>
+				<mx:Text id="txtSelectedFile"
+						 text="{uploadSrv.selectedFile}"/>
+			</mx:HBox>
+
+			<mx:FormItem label="Name">
+				<mx:TextInput id="nameInput"/>
+			</mx:FormItem>
+			<mx:FormItem label="Description">
+				<mx:TextInput id="description"/>
+			</mx:FormItem>
+			<mx:FormItem label="Creator Name">
+				<mx:TextInput id="creatorName"/>
+			</mx:FormItem>
+			<mx:Button label="Submit"
+					   click="submitProfile(event)"/>
+		</mx:Form>
+
+		<mx:Text id="errorMessageField"
+				 text="{uploadSrv.message}"/>
+
+	</mx:VBox>
+
+</mx:Canvas>
+

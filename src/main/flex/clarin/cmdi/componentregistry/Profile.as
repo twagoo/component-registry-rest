@@ -8,6 +8,7 @@ package clarin.cmdi.componentregistry {
 		public var description:ItemDescription;
 		public var components:ArrayCollection;
 		public var nrOfComponents:int;
+		public var profileSource:XML;
 
 		public function Profile() {
 		}
