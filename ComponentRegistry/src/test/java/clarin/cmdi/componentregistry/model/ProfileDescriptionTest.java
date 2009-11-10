@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -10,9 +11,8 @@ import org.junit.Test;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
 
-
 public class ProfileDescriptionTest {
-    
+
     @Test
     public void testProfileToXml() throws JAXBException {
         ProfileDescription desc = new ProfileDescription();
@@ -24,11 +24,21 @@ public class ProfileDescriptionTest {
         desc.setXlink("linkToMyProfile");
 
         Writer writer = new StringWriter();
-        MDMarshaller.marshall(desc, writer);
+        MDMarshaller.marshal(desc, writer);
         String expected = "";
-        expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"; 
-        expected += "<profile xlink=\"linkToMyProfile\" registrationDate=\"myDate\" name=\"Name\" id=\"myId\" description=\"myD\" creatorName=\"myC\"/>\n"; 
+        expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
+        expected += "<profileDescription>\n";
+        expected += "    <id>myId</id>\n";
+        expected += "    <description>myD</description>\n";
+        expected += "    <name>Name</name>\n";
+        expected += "    <registrationDate>myDate</registrationDate>\n";
+        expected += "    <creatorName>myC</creatorName>\n";
+        expected += "    <xlink>linkToMyProfile</xlink>\n";
+        expected += "</profileDescription>\n";
         assertEquals(expected, writer.toString());
+
+        ProfileDescription pd = MDMarshaller.unmarshal(ProfileDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
+        assertEquals(desc.getId(), pd.getId());
     }
 
 }

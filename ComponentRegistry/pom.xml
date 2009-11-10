@@ -68,7 +68,23 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>1.0.2</version>
+      <version>1.1.2-ea</version>
+    </dependency>
+    <dependency> <!-- Needed for "automatic" json support -->
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+      <version>1.1.2-ea</version>
+    </dependency>
+    <dependency> <!-- Needed for form upload support -->
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-multipart</artifactId>
+      <version>1.1.2-ea</version>
+    </dependency>    
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-test-framework</artifactId>
+      <version>1.1.2-ea</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -91,9 +107,9 @@
       </resource>
     </resources>
     <testResources>
-        <testResource>
-            <directory>src/test/resources</directory>
-        </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
     </testResources>
     <plugins>
       <plugin>
@@ -162,24 +178,6 @@
                   <overWrite>true</overWrite>
                   <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
                   <destFileName>${pom.artifactId}.swf</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>clarin.cmdi</groupId>
-                  <artifactId>ComponentBrowserGui-Register</artifactId>
-                  <version>1.0-SNAPSHOT</version>
-                  <type>swf</type>
-                  <overWrite>true</overWrite>
-                  <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
-                  <destFileName>Register.swf</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>clarin.cmdi</groupId>
-                  <artifactId>ComponentBrowserGui-Browse</artifactId>
-                  <version>1.0-SNAPSHOT</version>
-                  <type>swf</type>
-                  <overWrite>true</overWrite>
-                  <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
-                  <destFileName>Browse.swf</destFileName>
                 </artifactItem>
               </artifactItems>
             </configuration>
