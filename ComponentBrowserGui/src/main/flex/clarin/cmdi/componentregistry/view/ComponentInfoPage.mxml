@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 		 xmlns:local="clarin.cmdi.componentregistry.*"
+		 xmlns:view="clarin.cmdi.componentregistry.view.*"
 		 width="100%"
-		 height="88"
-		 backgroundColor="#DDE3EF" backgroundImage="img/">
+		 backgroundColor="#DDE3EF"
+		 >
 
 	<local:Component id="component"/>
-	<mx:VBox width="100%"
-			 height="100%">
-		<mx:Label text="{component.description.name}"
-				  width="100%"/>
-		<mx:TextArea editable="false" visible="{component != null}"
-					 text="{component.componentMD.xml.toXMLString()}"
-					 width="90%"
-					 height="80%"/>
-	</mx:VBox>
+
+	<view:infoPage id="infoPanel"
+				   cmdComponent="{component.componentMD.xml}"
+				   headerLabel="{component.description.name}"
+				   width="100%"
+				   height="100%"
+				   visible="{component != null}"/>
+
 </mx:VBox>
 

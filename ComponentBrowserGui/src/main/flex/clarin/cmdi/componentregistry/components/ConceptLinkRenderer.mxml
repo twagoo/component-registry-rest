@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Label xmlns:mx="http://www.adobe.com/2006/mxml" text="{data.conceptLink}"
+	click="linkListener(event)" mouseOver="mouseOver(event)" 
+				mouseOut="mouseOut(event)">
+ 
+	<mx:Script>
+		<![CDATA[
+			private function mouseOver(event:MouseEvent):void {
+			   event.currentTarget.setStyle("color","0x0000FF");
+			   event.currentTarget.setStyle("textDecoration","underline");
+			}
+ 
+			private function mouseOut(event:MouseEvent):void {
+			   event.currentTarget.setStyle("color","0x000000");
+			   event.currentTarget.setStyle("textDecoration","none");
+			}
+ 
+			private function linkListener(event:MouseEvent):void {
+			   var request:URLRequest = 
+				new URLRequest(event.currentTarget.data.conceptLink);
+			   navigateToURL(request, "_blank");
+			}
+		]]>
+	</mx:Script>
+</mx:Label>
