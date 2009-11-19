@@ -47,7 +47,7 @@
 						  height="100%"
 						  width="100%">
 
-				<view:Browse id="browse"/>
+				<view:Browse id="browse" />
 				<view:Register id="register"/>
 
 			</mx:ViewStack>

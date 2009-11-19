@@ -32,7 +32,7 @@
 				 height="100%"
 				 click="{dispatchBrowserSelectionEvent()}"
 				 dataProvider="{browserDataProvider}"
-				 columns="{browserColumns}">
+				 columns="{browserColumns}" >
 
 
 	</mx:DataGrid>
