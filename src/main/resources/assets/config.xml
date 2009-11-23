@@ -1,0 +1,7 @@
+<urls>
+	<url id="componentListService" value="http://localhost:8080/ComponentRegistry/rest/registry/components" />
+	<url id="componentInfoService" value="http://localhost:8080/ComponentRegistry/rest/registry/components/" /> 
+	<url id="profileListService" value="http://localhost:8080/ComponentRegistry/rest/registry/profiles" />
+	<url id="profileInfoService" value="http://localhost:8080/ComponentRegistry/rest/registry/profiles/" /> 
+	<url id="uploadService" value="http://localhost:8080/ComponentRegistry/rest/registry/profiles" />
+</urls>

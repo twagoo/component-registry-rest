@@ -41,7 +41,6 @@ package clarin.cmdi.componentregistry.services {
 
 		public function fault(faultEvent:FaultEvent):void {
 			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			Alert.show("Got profile error:" + errorMessage);
 			throw new Error(errorMessage);
 		}
 

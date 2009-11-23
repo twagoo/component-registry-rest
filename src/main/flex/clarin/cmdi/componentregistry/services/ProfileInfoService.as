@@ -3,8 +3,6 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.ItemDescription;
 	import clarin.cmdi.componentregistry.Profile;
 	
-	import flash.text.TextField;
-	
 	import mx.collections.ArrayCollection;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -24,7 +22,7 @@ package clarin.cmdi.componentregistry.services {
 
 		public function ProfileInfoService() {
 			this.service = new HTTPService();
-			this.service.method = HTTPRequestMessage.POST_METHOD;
+			this.service.method = HTTPRequestMessage.GET_METHOD;
 			this.service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
 			//Registry.serviceUrl; IoC it in!
 		}
@@ -33,15 +31,12 @@ package clarin.cmdi.componentregistry.services {
 			profile = new Profile();
 			if (item != null) {
 				profile.description = item;
-				this.service.url = "http://localhost:8080/ComponentRegistry/rest/registry/profiles/" + item.id;
+				this.service.url = Config.instance.getUrl(Config.PROFILE_INFO_SERVICE) + item.id;
 				var token:AsyncToken = this.service.send();
 				token.addResponder(new Responder(result, fault));
 			}
 		}
 
-		/**
-		 * Result handler for remote service calls to fetch Restaurant data.
-		 */
 		private function result(resultEvent:ResultEvent):void {
 			var resultXml:XML = resultEvent.result as XML;
 			var nodes:XMLList = resultXml.CMD_Component;

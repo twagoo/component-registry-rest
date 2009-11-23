@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.ItemDescription;
 	import clarin.cmdi.componentregistry.events.UploadCompleteEvent;
-
+	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
@@ -23,7 +23,7 @@ package clarin.cmdi.componentregistry.services {
 		public var message:String = "";
 
 		private var fileRef:FileReference = new FileReference();
-		private var request:URLRequest = new URLRequest("http://localhost:8080/ComponentRegistry/rest/registry/profiles/")
+		private var request:URLRequest = new URLRequest(Config.instance.getUrl(Config.UPLOAD_SERVICE));
 
 		public function submitProfile(description:ItemDescription):void {
 			try {

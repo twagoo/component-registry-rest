@@ -1,12 +1,12 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.ItemDescription;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.rpc.events.ResultEvent;
 
 	public class ProfileListService extends BrowserService {
 		public function ProfileListService() {
-			super("http://localhost:8080/ComponentRegistry/rest/registry/profiles");
+			super(Config.instance.getUrl(Config.PROFILE_LIST_SERVICE));
 		}
 
 		override protected function result(resultEvent:ResultEvent):void {
