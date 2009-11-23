@@ -10,9 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
 import clarin.cmdi.componentregistry.IdSequence;
-import clarin.cmdi.componentregistry.MDValidator;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -76,26 +73,40 @@ public class ComponentRegistryRestService {
     public synchronized RegisterResponse registeredProfile(@FormDataParam("profileData") InputStream input,
             @FormDataParam("name") String name, @FormDataParam("creatorName") String creatorName,
             @FormDataParam("description") String description) {
-        ProfileDescription desc = new ProfileDescription();
+        ProfileDescription desc = createNewProfileDescription();
         desc.setCreatorName(creatorName);
         desc.setName(name);
-        desc.setRegistrationDate(new Date().toString());
         desc.setDescription(description);
-        String id = "p_" + IdSequence.get();
-        desc.setId(id);
-        desc.setXlink("link:" + id);
+        desc.setRegistrationDate(new Date().toString());
         LOG.info("Trying to register Profile: " + desc);
-        MDValidator validator = new MDValidator();
-        CMDComponentSpec spec = validator.validateInputStream(input);
+        DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
+        MDValidator validator = new MDValidator(input);
         RegisterResponse response = new RegisterResponse();
-        if (spec != null) {
+        validate(response, descriptionValidator, validator);
+        if (response.getErrors().isEmpty()) {
+            CMDComponentSpec spec = validator.getCMDComponentSpec();
             registry.registerMDProfile(desc, spec);
             response.setRegistered(true);
             response.setProfileDescription(desc);
         } else {
             response.setRegistered(false);
-            response.addError(validator.getErrorMessage());
         }
         return response;
+    }
+
+    private ProfileDescription createNewProfileDescription() {
+        ProfileDescription desc = new ProfileDescription();
+        String id = "p_" + IdSequence.get();
+        desc.setId(id);
+        desc.setXlink("link:" + id);
+        return desc;
+    }
+
+    private void validate(RegisterResponse response, Validator... validators) {
+        for (Validator validator : validators) {
+            if (!validator.validate()) {
+                response.addError(validator.getErrorMessage());
+            }
+        }
     }
 }

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
+import javax.xml.bind.JAXBException;
+
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -12,7 +14,7 @@ import clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTest;
 public class ComponentRegistryImplTest {
 
     @Test
-    public void testRegisterMDProfile() {
+    public void testRegisterMDProfile() throws JAXBException {
         ComponentRegistry register = getTestRegistry(createTempRegistryDir());
         ProfileDescription description = new ProfileDescription();
         description.setName("Aap");
