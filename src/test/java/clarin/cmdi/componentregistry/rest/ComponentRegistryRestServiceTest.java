@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
@@ -21,7 +23,7 @@ import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryImplTest;
-import clarin.cmdi.componentregistry.MDValidator;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -129,33 +131,31 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         form.field("creatorName", "J. Unit");
         RegisterResponse postResponse = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
+        assertFalse(postResponse.isRegistered());
         assertEquals(1, postResponse.getErrors().size());
         assertTrue(postResponse.getErrors().get(0).contains("SAXParseException"));
     }
 
-    //    @Test
-    //    public void testRegisterProfileInvalidDescription() throws Exception {
-    //        FormDataMultiPart form = new FormDataMultiPart();
-    //        form.field("profileData", new ByteArrayInputStream("<CMD_ComponentSpec> <CMD_ComponentSpec>".getBytes()),
-    //                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-    //        form.field("name", "ProfileTest1");
-    //        form.field("description", "My Test Profile");
-    //        form.field("creatorName", "J. Unit");
-    //        try {
-    //            resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).put(ProfileDescription.class, form);
-    //        } catch (UniformInterfaceException e) {
-    //            ClientResponse response = e.getResponse();
-    //            assertEquals(500, response.getStatus());
-    //            assertTrue("Error in validation", response.getEntity(String.class).contains("SAXParseException"));
-    //        }
-    //    }
+    @Test
+    public void testRegisterProfileInvalidDescription() throws Exception {
+        FormDataMultiPart form = new FormDataMultiPart();
+        form.field("profileData", getTestProfileContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field("name", "");//Empty name so invalid
+        form.field("description", "My Test Profile");
+        form.field("creatorName", "J. Unit");
+        RegisterResponse response = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
+                form);
+        assertFalse(response.isRegistered());
+        assertEquals(1, response.getErrors().size());
+        assertNotNull(response.getErrors().get(0));
+    }
 
     @Test
     public void testRegisterProfileBothInvalid() throws Exception {
     }
 
     @BeforeClass
-    public static void setUpTestRegistry() throws ParseException {
+    public static void setUpTestRegistry() throws ParseException, JAXBException {
         registryDir = ComponentRegistryImplTest.createTempRegistryDir();
         testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
         addProfile(testRegistry, "profile1");
@@ -164,7 +164,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         addComponent(testRegistry, "component2");
     }
 
-    private static void addProfile(ComponentRegistry testRegistry, String id) throws ParseException {
+    private static void addProfile(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
         ProfileDescription desc = new ProfileDescription();
         desc.setCreatorName("J. Unit");
         desc.setName("testProfile");
@@ -199,11 +199,11 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         return new ByteArrayInputStream(profileContent.getBytes());
     }
 
-    public static CMDComponentSpec getTestProfile() {
-        return new MDValidator().validateInputStream(getTestProfileContent());
+    public static CMDComponentSpec getTestProfile() throws JAXBException {
+        return MDMarshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), MDMarshaller.getCMDComponentSchema());
     }
 
-    private static void addComponent(ComponentRegistry testRegistry, String id) throws ParseException {
+    private static void addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
         ComponentDescription desc = new ComponentDescription();
         desc.setCreatorName("J. Unit");
         desc.setName("testComponent");
@@ -234,7 +234,8 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         compContent += "\n";
         compContent += "</CMD_ComponentSpec>\n";
 
-        testRegistry.registerMDComponent(desc, new MDValidator().validateInputStream(new ByteArrayInputStream(compContent.getBytes())));
+        testRegistry.registerMDComponent(desc, MDMarshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(compContent
+                .getBytes()), MDMarshaller.getCMDComponentSchema()));
     }
 
     @AfterClass

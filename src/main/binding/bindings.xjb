@@ -8,6 +8,6 @@
    </bindings>
    <bindings schemaLocation="../../../../../metadata/toolkit/general-component-schema.xsd"
      node="/xs:schema/xs:attributeGroup[@name='clarin_element_attributes']/xs:attribute[@name='ValueScheme']">
-      <property name="ValueScheme2" />
+      <property name="ValueSchemeAttribute" />
    </bindings>
 </bindings>
