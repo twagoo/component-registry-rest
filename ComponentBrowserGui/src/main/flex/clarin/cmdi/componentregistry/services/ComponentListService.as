@@ -5,8 +5,9 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.events.ResultEvent;
 
 	public class ComponentListService extends BrowserService {
+	    
 		public function ComponentListService() {
-			super("http://localhost:8080/ComponentRegistry/rest/registry/components");
+			super(Config.instance.getUrl(Config.COMPONENT_LIST_SERVICE));//"http://localhost:8080/ComponentRegistry/rest/registry/components"
 		}
 
 		override protected function result(resultEvent:ResultEvent):void {

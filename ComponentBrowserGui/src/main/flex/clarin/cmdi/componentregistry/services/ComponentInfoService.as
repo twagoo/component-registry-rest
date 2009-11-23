@@ -21,7 +21,7 @@ package clarin.cmdi.componentregistry.services {
 
 		public function ComponentInfoService() {
 			this.service=new HTTPService();
-			this.service.method=HTTPRequestMessage.POST_METHOD;
+			this.service.method=HTTPRequestMessage.GET_METHOD;
 			this.service.resultFormat=HTTPService.RESULT_FORMAT_E4X;
 			//Registry.serviceUrl; IoC it in!
 		}
@@ -29,7 +29,7 @@ package clarin.cmdi.componentregistry.services {
 		public function load(item:ItemDescription):void {
 			this.component=new Component();
 			component.description=item;
-			this.service.url="http://localhost:8080/ComponentRegistry/rest/registry/components/" + item.id;
+			this.service.url=Config.instance.getUrl(Config.COMPONENT_INFO_SERVICE) + item.id;
 			var token:AsyncToken=this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}
