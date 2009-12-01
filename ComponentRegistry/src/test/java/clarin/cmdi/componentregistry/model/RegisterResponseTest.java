@@ -43,29 +43,72 @@ public class RegisterResponseTest {
     public void testRegisterSucces() throws JAXBException {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(true);
-        resp.setProfileDescription(getProfileDescription());
+        resp.setDescription(getProfileDescription());
         Writer writer = new StringWriter();
         MDMarshaller.marshal(resp, writer);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<registerResponse registered=\"true\">\n";
         expected += "    <errors/>\n";
-        expected += "    <profileDescription>\n";
+        expected += "    <description xsi:type=\"profileDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";
         expected += "        <description>myD</description>\n";
         expected += "        <name>Name</name>\n";
         expected += "        <registrationDate>myDate</registrationDate>\n";
         expected += "        <creatorName>myC</creatorName>\n";
         expected += "        <xlink>linkToMyProfile</xlink>\n";
-        expected += "    </profileDescription>\n";
+        expected += "    </description>\n";
         expected += "</registerResponse>\n";
         assertEquals(expected, writer.toString());
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertTrue(rr.isRegistered());
-        assertEquals("myId", rr.getProfileDescription().getId());
+        assertEquals("myId", rr.getDescription().getId());
+    }
+    
+    @Test
+    public void testRegisterSuccesComponent() throws JAXBException {
+        RegisterResponse resp = new RegisterResponse();
+        resp.setRegistered(true);
+        resp.setDescription(getComponentDescription());
+        Writer writer = new StringWriter();
+        MDMarshaller.marshal(resp, writer);
+        String expected = "";
+        expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
+        expected += "<registerResponse registered=\"true\">\n";
+        expected += "    <errors/>\n";
+        expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
+        expected += "        <id>myId</id>\n";
+        expected += "        <description>myD</description>\n";
+        expected += "        <name>Name</name>\n";
+        expected += "        <registrationDate>myDate</registrationDate>\n";
+        expected += "        <creatorName>myC</creatorName>\n";
+        expected += "        <xlink>linkToMyProfile</xlink>\n";
+        expected += "        <groupName>imdi</groupName>\n";
+        expected += "    </description>\n";
+        expected += "</registerResponse>\n";
+        assertEquals(expected, writer.toString());
+
+        RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
+        assertTrue(rr.isRegistered());
+        assertEquals("myId", rr.getDescription().getId());
     }
 
+    
+    private ComponentDescription getComponentDescription() {
+        ComponentDescription desc = new ComponentDescription();
+        desc.setName("Name");
+        desc.setId("myId");
+        desc.setGroupName("imdi");
+        desc.setCreatorName("myC");
+        desc.setDescription("myD");
+        desc.setRegistrationDate("myDate");
+        desc.setXlink("linkToMyProfile");
+        return desc;
+    }
+
+    //TODO PD add test for register returnCode -1
+    
     private ProfileDescription getProfileDescription() {
         ProfileDescription desc = new ProfileDescription();
         desc.setName("Name");

@@ -23,7 +23,7 @@ public class RegisterResponse {
     private List<String> errors = new ArrayList<String>();
 
     @XmlElement
-    private ProfileDescription profileDescription;
+    private AbstractDescription description;
 
     public void setRegistered(boolean registered) {
         this.registered = registered;
@@ -45,12 +45,12 @@ public class RegisterResponse {
         getErrors().add(error);
     }
 
-    public void setProfileDescription(ProfileDescription description) {
-        this.profileDescription = description;
+    public void setDescription(AbstractDescription description) {
+        this.description = description;
     }
 
-    public ProfileDescription getProfileDescription() {
-        return profileDescription;
+    public AbstractDescription getDescription() {
+        return description;
     }
-
+    
 }
