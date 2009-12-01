@@ -4,7 +4,8 @@
 		   xmlns:view="clarin.cmdi.componentregistry.view.*"
 		   creationComplete="refresh()"
 		   width="100%"
-		   height="100%">
+		   height="100%"
+		   >
 
 	<mx:Script>
 		<![CDATA[
@@ -63,7 +64,7 @@
 				<view:ProfileInfoPage id="profileInfoPage"
 									  profile="{profileSrv.profile}"
 									  width="100%"
-									  height="30%"/>
+									  height="50%"/>
 			</mx:VDividedBox>
 
 			<mx:VDividedBox label="Components"
@@ -73,11 +74,11 @@
 										  browserItemSelected="{loadComponentInfoPage(event)}"
 										  browserColumns="{browserColumns.getComponentColumns()}"
 										  width="100%"
-										  height="70%"/>
+										  height="50%"/>
 				<view:ComponentInfoPage id="componentInfoPage"
 										component="{componentSrv.component}"
 										width="100%"
-										height="30%"/>
+										height="50%"/>
 
 			</mx:VDividedBox>
 		</mx:TabNavigator>

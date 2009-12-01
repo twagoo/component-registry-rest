@@ -4,6 +4,8 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.Profile;
 	
 	import mx.collections.ArrayCollection;
+	import mx.messaging.ChannelSet;
+	import mx.messaging.config.ServerConfig;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;
@@ -15,6 +17,7 @@ package clarin.cmdi.componentregistry.services {
 	public class ProfileInfoService {
 
 		private var service:HTTPService;
+		private var service2:HTTPService;
 
 		[Bindable]
 		public var profile:Profile;
@@ -24,14 +27,13 @@ package clarin.cmdi.componentregistry.services {
 			this.service = new HTTPService();
 			this.service.method = HTTPRequestMessage.GET_METHOD;
 			this.service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
-			//Registry.serviceUrl; IoC it in!
 		}
 
 		public function load(item:ItemDescription):void {
 			profile = new Profile();
 			if (item != null) {
 				profile.description = item;
-				this.service.url = Config.instance.getUrl(Config.PROFILE_INFO_SERVICE) + item.id;
+				this.service.url = item.dataUrl;
 				var token:AsyncToken = this.service.send();
 				token.addResponder(new Responder(result, fault));
 			}

@@ -10,7 +10,6 @@
 			import mx.rpc.events.ResultEvent;
 
 			private function getData():XML {
-				trace(profile.profileSource);
 				return profile.profileSource;
 			}
 		]]>

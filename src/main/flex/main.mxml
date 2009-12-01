@@ -33,11 +33,11 @@
 			<mx:HBox borderStyle="none">
 
 				<mx:Button id="browseButton"
-						   label="Browse Screen"
+						   label="Browse..."
 						   click="myViewStack.selectedChild=browse;"/>
 
 				<mx:Button id="registerButton"
-						   label="Register Screen"
+						   label="Register..."
 						   click="myViewStack.selectedChild=register;"/>
 
 			</mx:HBox>
