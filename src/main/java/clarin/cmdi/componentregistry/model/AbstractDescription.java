@@ -1,5 +1,9 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -7,6 +11,8 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
 public abstract class AbstractDescription {
+
+    public final static DateFormat DATE_FORMAT = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, Locale.UK);
 
     private String id;
     private String description;
@@ -67,7 +73,7 @@ public abstract class AbstractDescription {
     public String toString() {
         return "Name=" + getName() + ", id=" + getId();
     }
-    
+
     public boolean isProfile() {
         return this instanceof ProfileDescription;
     }

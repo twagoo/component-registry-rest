@@ -65,7 +65,7 @@ public class RegisterResponseTest {
         assertTrue(rr.isRegistered());
         assertEquals("myId", rr.getDescription().getId());
     }
-    
+
     @Test
     public void testRegisterSuccesComponent() throws JAXBException {
         RegisterResponse resp = new RegisterResponse();
@@ -94,7 +94,6 @@ public class RegisterResponseTest {
         assertEquals("myId", rr.getDescription().getId());
     }
 
-    
     private ComponentDescription getComponentDescription() {
         ComponentDescription desc = new ComponentDescription();
         desc.setName("Name");
@@ -107,8 +106,6 @@ public class RegisterResponseTest {
         return desc;
     }
 
-    //TODO PD add test for register returnCode -1
-    
     private ProfileDescription getProfileDescription() {
         ProfileDescription desc = new ProfileDescription();
         desc.setName("Name");

@@ -73,7 +73,7 @@ public class ComponentRegistryRestService {
             result = registry.getMDComponentAsXsd(componentId);
         } else {
             throw new WebApplicationException(Response.serverError().entity(
-                    "unsupported rawType:" + rawType + " (only xml or xsd are supported)").build()); //TODO PD test this
+                    "unsupported rawType:" + rawType + " (only xml or xsd are supported)").build());
         }
         return result;
     }
@@ -98,7 +98,7 @@ public class ComponentRegistryRestService {
             result = registry.getMDProfileAsXsd(profileId);
         } else {
             throw new WebApplicationException(Response.serverError().entity(
-                    "unsupported rawType:" + rawType + " (only xml or xsd are supported)").build()); //TODO PD test this
+                    "unsupported rawType:" + rawType + " (only xml or xsd are supported)").build());
         }
         return result;
     }
@@ -113,7 +113,7 @@ public class ComponentRegistryRestService {
         desc.setCreatorName(creatorName);
         desc.setName(name);
         desc.setDescription(description);
-        desc.setRegistrationDate(new Date().toString()); //TODO PD use dateFormat
+        desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
         LOG.info("Trying to register Profile: " + desc);
         return register(input, desc);
     }
@@ -130,7 +130,7 @@ public class ComponentRegistryRestService {
         desc.setName(name);
         desc.setDescription(description);
         desc.setGroupName(group);
-        desc.setRegistrationDate(new Date().toString());
+        desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
         LOG.info("Trying to register Component: " + desc);
         return register(input, desc);
     }
@@ -144,11 +144,11 @@ public class ComponentRegistryRestService {
             CMDComponentSpec spec = validator.getCMDComponentSpec();
             int returnCode = spec.isIsProfile() ? registry.registerMDProfile((ProfileDescription) desc, spec) : registry
                     .registerMDComponent((ComponentDescription) desc, spec);
-            //TODO PD, check and validate register response
             if (returnCode == 0) {
                 response.setRegistered(true);
                 response.setDescription(desc);
             } else {
+                //TODO PD, check and validate register response
                 response.setRegistered(false);
                 response.addError("Unable to register at this moment. Internal server errors.");
             }
