@@ -23,7 +23,7 @@ package clarin.cmdi.componentregistry.services {
 		public var message:String = "";
 
 		private var fileRef:FileReference = new FileReference();
-		private var request:URLRequest = new URLRequest(Config.instance.getUrl(Config.UPLOAD_SERVICE));
+		private var request:URLRequest = new URLRequest(Config.instance.uploadUrl);
 
 		public function submitProfile(description:ItemDescription):void {
 			try {
@@ -33,7 +33,7 @@ package clarin.cmdi.componentregistry.services {
 				params.description = description.description;
 				params.name = description.name;
 				request.data = params;
-				fileRef.upload(request, "profileData");
+				fileRef.upload(request, "data");
 			} catch (error:Error) {
 				trace("Unable to upload file.");
 			}
@@ -60,7 +60,7 @@ package clarin.cmdi.componentregistry.services {
 			var response:XML = new XML(event.data);
 			if (response.@registered == true) {
 				var item:ItemDescription = new ItemDescription();
-				item.create(response.profileDescription[0]);
+				item.createProfile(response.description[0]);
 				dispatchEvent(new UploadCompleteEvent(item));
 			} else {
 				createErrorMessage(response);

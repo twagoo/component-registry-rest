@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.services {
 	import mx.collections.ArrayCollection;
-	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;
@@ -25,7 +24,6 @@ package clarin.cmdi.componentregistry.services {
 			this.service.method = HTTPRequestMessage.GET_METHOD;
 			this.service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
 			this.service.url = restUrl;
-			//Registry.serviceUrl; IoC it in!
 		}
 
 		public function load():void {

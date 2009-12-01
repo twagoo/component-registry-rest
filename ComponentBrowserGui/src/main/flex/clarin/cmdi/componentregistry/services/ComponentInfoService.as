@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.ComponentMD;
 	import clarin.cmdi.componentregistry.ItemDescription;
 	
+	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;
@@ -20,30 +21,29 @@ package clarin.cmdi.componentregistry.services {
 
 
 		public function ComponentInfoService() {
-			this.service=new HTTPService();
-			this.service.method=HTTPRequestMessage.GET_METHOD;
-			this.service.resultFormat=HTTPService.RESULT_FORMAT_E4X;
-			//Registry.serviceUrl; IoC it in!
+			this.service = new HTTPService();
+			this.service.method = HTTPRequestMessage.GET_METHOD;
+			this.service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
 		}
 
 		public function load(item:ItemDescription):void {
-			this.component=new Component();
-			component.description=item;
-			this.service.url=Config.instance.getUrl(Config.COMPONENT_INFO_SERVICE) + item.id;
-			var token:AsyncToken=this.service.send();
+			this.component = new Component();
+			component.description = item;
+			this.service.url = item.dataUrl;
+			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}
 
 		private function result(resultEvent:ResultEvent):void {
-			var resultXml:XML=resultEvent.result as XML;
-			var metaData:ComponentMD=new ComponentMD();
-			metaData.name=resultXml.CMD_Component.@name;
-			metaData.xml=resultXml;
-			component.componentMD=metaData;
+			var resultXml:XML = resultEvent.result as XML;
+			var metaData:ComponentMD = new ComponentMD();
+			metaData.name = resultXml.CMD_Component.@name;
+			metaData.xml = resultXml;
+			component.componentMD = metaData;
 		}
 
 		public function fault(faultEvent:FaultEvent):void {
-			var errorMessage:String=StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
+			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
 			throw new Error(errorMessage);
 		}
 	}

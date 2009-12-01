@@ -6,7 +6,7 @@ package clarin.cmdi.componentregistry.services {
 
 	public class ProfileListService extends BrowserService {
 		public function ProfileListService() {
-			super(Config.instance.getUrl(Config.PROFILE_LIST_SERVICE));
+			super(Config.instance.profileListUrl);
 		}
 
 		override protected function result(resultEvent:ResultEvent):void {
@@ -15,7 +15,7 @@ package clarin.cmdi.componentregistry.services {
 			var tempArray:Array = new Array();
 			for each (var node:XML in nodes) {
 				var item:ItemDescription = new ItemDescription();
-				item.create(node);
+				item.createProfile(node);
 				tempArray[tempArray.length] = item;
 			}
 			setItemDescriptions(new ArrayCollection(tempArray));
