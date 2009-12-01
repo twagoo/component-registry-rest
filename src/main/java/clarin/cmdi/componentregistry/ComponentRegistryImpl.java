@@ -1,8 +1,11 @@
 package clarin.cmdi.componentregistry;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +16,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
@@ -26,6 +30,8 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class ComponentRegistryImpl implements ComponentRegistry {
+
+    //TODO PD read in all files and marshall them, keep all in memory and check all on startup.
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
 
@@ -84,10 +90,35 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public CMDComponentSpec getMDProfile(String profileId) {
         CMDComponentSpec result = null;
-        String id = stripRegistryId(profileId);
-        File file = new File(configuration.getProfileDir(), id + File.separator + id + ".xml");
+        File file = getProfileFile(profileId);
         result = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
         return result;
+    }
+
+    public String getMDProfileAsXml(String profileId) {
+        String result = null;
+        File file = getProfileFile(profileId);
+        try {
+            result = IOUtils.toString(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            LOG.error("Cannot retrieve file: " + file, e);
+        } catch (IOException e) {
+            LOG.error("Cannot retrieve content from file: " + file, e);
+        }
+        return result;
+    }
+
+    public String getMDProfileAsXsd(String profileId) {
+        File file = getProfileFile(profileId);
+        Writer writer = new StringWriter();
+        MDMarshaller.generateXsd(file, writer);
+        return writer.toString(); //TODO Patrick need to figure what happens with all the exceptions
+    }
+
+    private File getProfileFile(String profileId) {
+        String id = stripRegistryId(profileId);
+        File file = new File(configuration.getProfileDir(), id + File.separator + id + ".xml");
+        return file;
     }
 
     public CMDComponentSpec getMDComponent(String componentId) {
@@ -96,6 +127,32 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         File file = new File(configuration.getComponentDir(), id + File.separator + id + ".xml");
         result = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
         return result;
+    }
+
+    public String getMDComponentAsXml(String componentId) {
+        String result = null;
+        File file = getComponentFile(componentId);
+        try {
+            result = IOUtils.toString(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            LOG.error("Cannot retrieve file: " + file, e);
+        } catch (IOException e) {
+            LOG.error("Cannot retrieve content from file: " + file, e);
+        }
+        return result;
+    }
+
+    public String getMDComponentAsXsd(String componentId) {
+        File file = getComponentFile(componentId);
+        Writer writer = new StringWriter();
+        MDMarshaller.generateXsd(file, writer);
+        return writer.toString();
+    }
+
+    private File getComponentFile(String componentId) {
+        String id = stripRegistryId(componentId);
+        File file = new File(configuration.getComponentDir(), id + File.separator + id + ".xml");
+        return file;
     }
 
     private String stripRegistryId(String id) {

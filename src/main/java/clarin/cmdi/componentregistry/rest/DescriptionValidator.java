@@ -2,14 +2,14 @@ package clarin.cmdi.componentregistry.rest;
 
 import org.apache.commons.lang.StringUtils;
 
-import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 
 public class DescriptionValidator implements Validator {
 
-    private final ProfileDescription desc;
+    private final AbstractDescription desc;
     private String errorMessage;
 
-    public DescriptionValidator(ProfileDescription desc) {
+    public DescriptionValidator(AbstractDescription desc) {
         this.desc = desc;
     }
 

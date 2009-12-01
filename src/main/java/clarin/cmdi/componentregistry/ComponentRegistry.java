@@ -31,6 +31,12 @@ public interface ComponentRegistry {
 
     int registerMDComponent(ComponentDescription description, CMDComponentSpec spec);
 
+    String getMDProfileAsXml(String profileId);
+    String getMDProfileAsXsd(String profileId);
+
+    String getMDComponentAsXml(String componentId);
+    String getMDComponentAsXsd(String componentId);
+
     //Remove from registry?
     //getElements?
     //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's

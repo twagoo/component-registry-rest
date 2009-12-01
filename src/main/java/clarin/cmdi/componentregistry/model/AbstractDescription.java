@@ -2,8 +2,10 @@ package clarin.cmdi.componentregistry.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
 public abstract class AbstractDescription {
 
     private String id;
@@ -64,6 +66,10 @@ public abstract class AbstractDescription {
     @Override
     public String toString() {
         return "Name=" + getName() + ", id=" + getId();
+    }
+    
+    public boolean isProfile() {
+        return this instanceof ProfileDescription;
     }
 
 }

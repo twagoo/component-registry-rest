@@ -2,17 +2,24 @@ package clarin.cmdi.componentregistry;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -22,7 +29,15 @@ import org.xml.sax.SAXException;
 
 public class MDMarshaller {
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
+
+    /**
+     * I define W3C_XML_SCHEMA_NS_URI here cannot get it from @see XMLConstants there is a conflict between stax-api and java5.
+     */
+    private static final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
+
     private static Schema generalComponentSchema;
+
+    private static Templates componentToSchemaTemplates;
 
     private MDMarshaller() {
     }
@@ -37,7 +52,7 @@ public class MDMarshaller {
         } catch (JAXBException e) {
             LOG.error("Cannot unmarshal xml file: " + file, e);
         } catch (IOException e) {
-            LOG.error("Cannot retrieve profile description from file: " + file, e);
+            LOG.error("Cannot retrieve content from file: " + file, e);
         }
         return result;
     }
@@ -73,7 +88,7 @@ public class MDMarshaller {
     public static Schema getCMDComponentSchema() {
         if (generalComponentSchema == null) {
             try {
-                generalComponentSchema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema(
+                generalComponentSchema = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(
                         new URL("http://www.clarin.eu/cmd/general-component-schema.xsd"));
             } catch (MalformedURLException e) {
                 LOG.error("Cannot instantiate schema", e);
@@ -82,6 +97,28 @@ public class MDMarshaller {
             }
         }
         return generalComponentSchema;
+    }
+
+    public static void generateXsd(File inputXmlFile, final Writer outputWriter) {
+        if (componentToSchemaTemplates == null) {
+            try {
+                System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
+                componentToSchemaTemplates = TransformerFactory.newInstance().newTemplates(
+                        new StreamSource("http://www.clarin.eu/cmd/comp2schema.xsl"));
+            } catch (TransformerConfigurationException e) {
+                LOG.error("Cannot create Template", e);
+            }
+        }
+        try {
+            Transformer transformer = componentToSchemaTemplates.newTransformer();
+            transformer.transform(new StreamSource(new FileInputStream(inputXmlFile)), new StreamResult(outputWriter));
+        } catch (TransformerConfigurationException e) {
+            LOG.error("Cannot create Transformer", e);
+        } catch (TransformerException e) {
+            LOG.error("Cannot transform xml file: " + inputXmlFile, e);
+        } catch (FileNotFoundException e) {
+            LOG.error("File: " + inputXmlFile, e);
+        }
     }
 
 }
