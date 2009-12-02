@@ -11,4 +11,4 @@ done
 
 echo $CLASSPATH
 
-$JAVA -Xmx1024M -cp $CLASSPATH clarin.cmdi.componentregistry.tools.RegistryFiller $@
+$JAVA -Xmx1024M -cp $CLASSPATH clarin.cmdi.componentregistry.tools.RegistryFiller "$@"
