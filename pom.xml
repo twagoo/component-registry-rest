@@ -3,14 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>clarin.cmdi</groupId>
   <artifactId>ComponentRegistry</artifactId>
-  <packaging>war</packaging>
+  <packaging>${packaging}</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>ComponentRegistry</name>
   <description>
         ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
         The goal of the ComponentRegistry will be to register and make searchable Metadata Components and Profiles. 
-    </description>
-
+  </description>
 
   <dependencies>
     <dependency>
@@ -96,6 +95,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
+    <packaging>war</packaging>
   </properties>
 
   <build>
@@ -190,9 +190,26 @@
           </execution>
         </executions>
       </plugin>
-
+      <!-- Assembly helper to create the RegistryFiller tool a command line tool which can help fill in a registry with existing components/profiles.
+           Build the tool with: mvn -Dpackaging=jar -Dmaven.test.skip=true assembly:assembly
+           This creates a in "target" a ComponentRegistry-1.0-SNAPSHOT-RegistryFiller directory with a bin and share directory.
+           You can start the tool from the bin dir.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <attach>false</attach>
+          <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
+          <descriptors>
+            <descriptor>src/main/assembly/registryFiller.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+
 
   <repositories>
     <repository>
