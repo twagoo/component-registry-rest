@@ -4,7 +4,8 @@ package clarin.cmdi.componentregistry.services {
 	public final class Config {
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
-		private static const UPLOAD_SERVICE_URL:String = "/rest/registry/profiles";
+		private static const UPLOAD_PROFILE_SERVICE_URL:String = "/rest/registry/profiles";
+		private static const UPLOAD_COMPONENT_SERVICE_URL:String = "/rest/registry/components";
 		private static const PROFILE_INFO_URL:String = "/rest/registry/profiles/";
 		private static const COMPONENT_INFO_URL:String = "/rest/registry/components/";
 
@@ -41,8 +42,12 @@ package clarin.cmdi.componentregistry.services {
 			return _serviceRootUrl + COMPONENT_INFO_URL;
 		}
 
-		public function get uploadUrl():String {
-			return _serviceRootUrl + UPLOAD_SERVICE_URL;
+		public function get uploadProfileUrl():String {
+			return _serviceRootUrl + UPLOAD_PROFILE_SERVICE_URL;
+		}
+
+		public function get uploadComponentUrl():String {
+			return _serviceRootUrl + UPLOAD_COMPONENT_SERVICE_URL;
 		}
 
 		public static function get instance():Config {

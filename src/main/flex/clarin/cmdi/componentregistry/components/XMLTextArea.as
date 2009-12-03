@@ -1,10 +1,10 @@
 package clarin.cmdi.componentregistry.components {
-	import mx.controls.TextArea;
+	import flash.events.MouseEvent;
 
-	public class XMLTextArea extends TextArea {
+	public class XMLTextArea extends ScrollableTextArea {
 
 		private static const BLOCKSIZE:int = 10;
-		
+
 		[Bindable]
 		public var hasData:Boolean = false;
 
@@ -23,11 +23,11 @@ package clarin.cmdi.componentregistry.components {
 				var xmlData:XML = data as XML;
 				result = printElements(xmlData.elements(), 0);
 				hasData = result.length > 0;
-    	        super.htmlText = result;
+				super.htmlText = result;
 			} else if (data is XMLList) {
 				result = printElements(data as XMLList, 0);
 				hasData = result.length > 0;
-        	    super.htmlText = result;
+				super.htmlText = result;
 			} else {
 				super.data = data;
 			}
@@ -63,7 +63,6 @@ package clarin.cmdi.componentregistry.components {
 			}
 			return result;
 		}
-
 
 
 	}

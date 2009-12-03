@@ -27,7 +27,12 @@
 				componentSrv.load(event.itemDescription);
 			}
 
-			public function setSelectedProfileDescription(desc:ItemDescription):void {
+			public function setSelectedDescription(desc:ItemDescription):void {
+			    if (desc.isProfile) {
+			        tabnav.selectedIndex = 0;
+			    } else {
+			        tabnav.selectedIndex = 1;  
+			    }
 			    //Need to select the correct item, can't get it to highlight at the mo
 			    //profilesOverview.dataGrid.selectedIndex=2;
 			    //profilesOverview.dataGrid.validateNow();
