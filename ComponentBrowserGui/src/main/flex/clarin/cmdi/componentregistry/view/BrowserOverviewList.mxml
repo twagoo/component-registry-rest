@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-    xmlns:comp="clarin.cmdi.componentregistry.components.*"
-    >
+		 xmlns:comp="clarin.cmdi.componentregistry.components.*">
 
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.events.BrowserSelectionEvent")]
@@ -20,13 +19,21 @@
 			import adobe.utils.CustomActions;
 
 			private function dispatchBrowserSelectionEvent():void {
-				var event:BrowserSelectionEvent = new BrowserSelectionEvent(this.dataGrid.selectedItem as ItemDescription);
-				dispatchEvent(event);
+				if (this.dataGrid.selectedItem != null) {
+					var event:BrowserSelectionEvent = new BrowserSelectionEvent(this.dataGrid.selectedItem as ItemDescription);
+					dispatchEvent(event);
+				}
 			}
 		]]>
 	</mx:Script>
 
-    <comp:DownloadMenu id="menu" dataGrid="{dataGrid}"/>
+	<comp:DownloadMenu id="menu"
+					   dataGrid="{dataGrid}"/>
+	<mx:HBox horizontalAlign="center"
+			 verticalAlign="middle"
+			 width="100%">
+		<mx:Label text="{browserDataProvider.length} registered"/>
+	</mx:HBox>
 
 	<mx:DataGrid id="dataGrid"
 				 x="0"
@@ -36,11 +43,9 @@
 				 click="{dispatchBrowserSelectionEvent()}"
 				 dataProvider="{browserDataProvider}"
 				 columns="{browserColumns}"
-				 contextMenu="{menu.cm}" 
+				 contextMenu="{menu.cm}"
 				 allowMultipleSelection="false"
-				 change="{dispatchBrowserSelectionEvent()}"
-				 >
-
+				 change="{dispatchBrowserSelectionEvent()}">
 
 	</mx:DataGrid>
 </mx:VBox>

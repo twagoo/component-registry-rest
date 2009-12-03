@@ -9,16 +9,18 @@
 			import mx.controls.Alert;
 			import clarin.cmdi.componentregistry.services.UploadService;
 			import mx.managers.IPopUpManager;
+    		import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 			private var iPopUpManager:IPopUpManager;
 
 			private function init():void {
 				this.register.uploadSrv.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, registryChange);
+               ExternalMouseWheelSupport.getInstance(stage);
 			}
 
 			private function registryChange(event:UploadCompleteEvent):void {
 				browse.refresh();
 				myViewStack.selectedChild = browse;
-				browse.setSelectedProfileDescription(event.itemDescription);
+				browse.setSelectedDescription(event.itemDescription);
 			}
 		]]>
 	</mx:Script>

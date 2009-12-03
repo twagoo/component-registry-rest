@@ -88,50 +88,49 @@
 	<mx:XML id="cmdComponent"/>
 
 
-		<mx:Box id="headerBox"
-				width="100%"
-				visible="{headerTextArea.hasData}"
-				includeInLayout="{headerTextArea.hasData}">
-			<mx:HBox styleName="boxElementStyle"
-					 click="animateList(headerTextArea);toggleLabel(hl, headerTextArea)">
-				<mx:Label id="hl"
-						  text="Header -"/>
-			</mx:HBox>
-			<comp:XMLTextArea id="headerTextArea"
-							  styleName="xmlTextArea"
-							  editable="false"
-							  xmlData="{cmdComponent.Header[0]}"
-							  width="100%"
-							  height="80"/>
-		</mx:Box>
+	<mx:Box id="headerBox"
+			width="100%"
+			visible="{headerTextArea.hasData}"
+			includeInLayout="{headerTextArea.hasData}">
+		<mx:HBox styleName="boxElementStyle"
+				 click="animateList(headerTextArea);toggleLabel(hl, headerTextArea)">
+			<mx:Label id="hl"
+					  text="Header -"/>
+		</mx:HBox>
+		<comp:XMLTextArea id="headerTextArea"
+						  styleName="xmlTextArea"
+						  editable="false"
+						  xmlData="{cmdComponent.Header[0]}"
+						  width="100%"
+						  height="80"/>
+	</mx:Box>
 
-		<mx:Repeater id="iter"
-					 dataProvider="{cmdComponent.CMD_Component}">
-			<mx:HBox styleName="boxElementStyle"
-					 name="{iter.currentIndex}"
-					 click="animateList(iterGrid[event.currentTarget.name]); toggleLabel(iterLabel[event.currentTarget.name], iterGrid[event.currentTarget.name])">
-				<mx:Label id="iterLabel"
-						  text="Component: {iter.currentItem.@name} -"/>
-			</mx:HBox>
-			<mx:DataGrid id="iterGrid"
-						 dataProvider="{createList(iter.currentItem)}"
-						 labelField="name"
-						 width="100%"
-						 styleName="dataGridInfoPage"
-						 variableRowHeight="true"
-						 selectable="false">
-				<mx:columns>
-					<mx:DataGridColumn dataField="name"
-									   headerText="Name"/>
-					<mx:DataGridColumn dataField="valueScheme"
-									   headerText="Type"
-									   itemRenderer="clarin.cmdi.componentregistry.components.ValueSchemeRenderer"
-									   sortable="false"/>
-					<mx:DataGridColumn dataField="conceptLink"
-									   headerText="ConceptLink"
-									   itemRenderer="clarin.cmdi.componentregistry.components.ConceptLinkRenderer"/>
-				</mx:columns>
-			</mx:DataGrid>
-		</mx:Repeater>
+	<mx:Repeater id="iter"
+				 dataProvider="{cmdComponent.CMD_Component}">
+		<mx:HBox styleName="boxElementStyle"
+				 name="{iter.currentIndex}"
+				 click="animateList(iterGrid[event.currentTarget.name]); toggleLabel(iterLabel[event.currentTarget.name], iterGrid[event.currentTarget.name])">
+			<mx:Label id="iterLabel"
+					  text="Component: {iter.currentItem.@name} -"/>
+		</mx:HBox>
+		<mx:DataGrid id="iterGrid"
+					 dataProvider="{createList(iter.currentItem)}"
+					 width="100%"
+					 styleName="dataGridInfoPage"
+					 variableRowHeight="true"
+					 selectable="false">
+			<mx:columns>
+				<mx:DataGridColumn dataField="name"
+								   headerText="Name"/>
+				<mx:DataGridColumn dataField="valueScheme"
+								   headerText="Type"
+								   itemRenderer="clarin.cmdi.componentregistry.components.ValueSchemeRenderer"
+								   sortable="false"/>
+				<mx:DataGridColumn dataField="conceptLink"
+								   headerText="ConceptLink"
+								   itemRenderer="clarin.cmdi.componentregistry.components.ConceptLinkRenderer"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</mx:Repeater>
 
 </mx:VBox>

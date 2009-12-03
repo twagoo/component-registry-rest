@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.ComponentMD;
 	import clarin.cmdi.componentregistry.ItemDescription;
 	import clarin.cmdi.componentregistry.Profile;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.messaging.ChannelSet;
 	import mx.messaging.config.ServerConfig;
@@ -31,12 +31,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function load(item:ItemDescription):void {
 			profile = new Profile();
-			if (item != null) {
-				profile.description = item;
-				this.service.url = item.dataUrl;
-				var token:AsyncToken = this.service.send();
-				token.addResponder(new Responder(result, fault));
-			}
+			profile.description = item;
+			this.service.url = item.dataUrl;
+			var token:AsyncToken = this.service.send();
+			token.addResponder(new Responder(result, fault));
 		}
 
 		private function result(resultEvent:ResultEvent):void {

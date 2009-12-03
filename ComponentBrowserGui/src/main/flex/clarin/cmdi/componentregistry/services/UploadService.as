@@ -23,12 +23,25 @@ package clarin.cmdi.componentregistry.services {
 		public var message:String = "";
 
 		private var fileRef:FileReference = new FileReference();
-		private var request:URLRequest = new URLRequest(Config.instance.uploadUrl);
+		private var request:URLRequest;
 
 		public function submitProfile(description:ItemDescription):void {
+		        request= new URLRequest(Config.instance.uploadProfileUrl);
+				var params:URLVariables = new URLVariables();
+				submit(description, params);
+		}
+
+		public function submitComponent(description:ItemDescription):void {
+		        request= new URLRequest(Config.instance.uploadComponentUrl);
+				var params:URLVariables = new URLVariables();
+				params.group = description.groupName;
+				submit(description, params);
+		}
+
+		public function submit(description:ItemDescription, params:URLVariables):void {
+		    message = "";
 			try {
 				request.method = URLRequestMethod.POST;
-				var params:URLVariables = new URLVariables();
 				params.creatorName = description.creatorName;
 				params.description = description.description;
 				params.name = description.name;
@@ -39,7 +52,7 @@ package clarin.cmdi.componentregistry.services {
 			}
 		}
 
-		public function selectProfile(event:Event):void {
+		public function selectXmlFile(event:Event):void {
 			fileRef.addEventListener(Event.SELECT, selectHandler);
 			fileRef.addEventListener(HTTPStatusEvent.HTTP_STATUS, errorHandler);
 			fileRef.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, responseHandler);
@@ -60,7 +73,11 @@ package clarin.cmdi.componentregistry.services {
 			var response:XML = new XML(event.data);
 			if (response.@registered == true) {
 				var item:ItemDescription = new ItemDescription();
-				item.createProfile(response.description[0]);
+				if (response.@isProfile == true) {
+				    item.createProfile(response.description[0]);
+				} else {
+				    item.createComponent(response.description[0]);
+				}				
 				dispatchEvent(new UploadCompleteEvent(item));
 			} else {
 				createErrorMessage(response);
