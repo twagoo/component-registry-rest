@@ -20,13 +20,14 @@ public class RegisterResponseTest {
     public void testRegisterError() throws JAXBException {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(false);
+        resp.setIsProfile(true);
         resp.addError("Error 1");
         resp.addError("Error 2, <!-- to be escaped -->");
         Writer writer = new StringWriter();
         MDMarshaller.marshal(resp, writer);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"false\">\n";
+        expected += "<registerResponse registered=\"false\" isProfile=\"true\">\n";
         expected += "    <errors>\n";
         expected += "        <error>Error 1</error>\n";
         expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
@@ -36,6 +37,7 @@ public class RegisterResponseTest {
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertFalse(rr.isRegistered());
+        assertTrue(rr.isProfile());        
         assertEquals(2, rr.getErrors().size());
     }
 
@@ -43,12 +45,13 @@ public class RegisterResponseTest {
     public void testRegisterSucces() throws JAXBException {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(true);
+        resp.setIsProfile(true);
         resp.setDescription(getProfileDescription());
         Writer writer = new StringWriter();
         MDMarshaller.marshal(resp, writer);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"true\">\n";
+        expected += "<registerResponse registered=\"true\" isProfile=\"true\">\n";
         expected += "    <errors/>\n";
         expected += "    <description xsi:type=\"profileDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";
@@ -63,6 +66,7 @@ public class RegisterResponseTest {
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertTrue(rr.isRegistered());
+        assertTrue(rr.isProfile());
         assertEquals("myId", rr.getDescription().getId());
     }
 
@@ -70,12 +74,13 @@ public class RegisterResponseTest {
     public void testRegisterSuccesComponent() throws JAXBException {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(true);
+        resp.setIsProfile(false);
         resp.setDescription(getComponentDescription());
         Writer writer = new StringWriter();
         MDMarshaller.marshal(resp, writer);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"true\">\n";
+        expected += "<registerResponse registered=\"true\" isProfile=\"false\">\n";
         expected += "    <errors/>\n";
         expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";
@@ -91,6 +96,7 @@ public class RegisterResponseTest {
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertTrue(rr.isRegistered());
+        assertFalse(rr.isProfile());        
         assertEquals("myId", rr.getDescription().getId());
     }
 
