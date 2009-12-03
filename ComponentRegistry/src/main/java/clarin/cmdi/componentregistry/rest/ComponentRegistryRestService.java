@@ -155,6 +155,7 @@ public class ComponentRegistryRestService {
         } else {
             response.setRegistered(false);
         }
+        response.setIsProfile(desc.isProfile());
         return response;
     }
 

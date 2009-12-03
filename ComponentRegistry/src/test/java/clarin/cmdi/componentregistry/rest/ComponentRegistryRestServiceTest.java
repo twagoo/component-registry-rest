@@ -149,6 +149,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         form.field("creatorName", "J. Unit");
         RegisterResponse response = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                 form);
+        assertTrue(response.isProfile());
         ProfileDescription profileDesc = (ProfileDescription) response.getDescription();
         assertNotNull(profileDesc);
         assertEquals("ProfileTest1", profileDesc.getName());
@@ -156,6 +157,28 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         assertEquals("J. Unit", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith("p_"));
         assertNotNull(profileDesc.getRegistrationDate());
+    }
+    
+    @Test
+    public void testRegisterComponent() throws Exception {
+        FormDataMultiPart form = new FormDataMultiPart();
+        form.field("data", getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field("name", "ComponentTest1");
+        form.field("description", "My Test Component");
+        form.field("creatorName", "J. Unit");
+        form.field("group", "TestGroup");
+        RegisterResponse response = resource().path("/registry/components").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
+                form);
+        assertTrue(response.isRegistered());
+        assertFalse(response.isProfile());
+        ComponentDescription desc = (ComponentDescription) response.getDescription();
+        assertNotNull(desc);
+        assertEquals("ComponentTest1", desc.getName());
+        assertEquals("My Test Component", desc.getDescription());
+        assertEquals("J. Unit", desc.getCreatorName());
+        assertEquals("TestGroup", desc.getGroupName());
+        assertTrue(desc.getId().startsWith("c_"));
+        assertNotNull(desc.getRegistrationDate());
     }
 
     @Test
@@ -168,6 +191,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         form.field("creatorName", "J. Unit");
         RegisterResponse postResponse = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
+        assertTrue(postResponse.isProfile());
         assertFalse(postResponse.isRegistered());
         assertEquals(1, postResponse.getErrors().size());
         assertTrue(postResponse.getErrors().get(0).contains("SAXParseException"));
@@ -211,6 +235,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         RegisterResponse response = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                 form);
         assertFalse(response.isRegistered());
+        assertTrue(response.isProfile());
         assertEquals(1, response.getErrors().size());
         assertEquals(MDValidator.MISMATCH_ERROR, response.getErrors().get(0));
     }

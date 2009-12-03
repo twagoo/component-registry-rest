@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 @XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
 public abstract class AbstractDescription {
 
-    public final static DateFormat DATE_FORMAT = SimpleDateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, Locale.UK);
+    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss zzz", Locale.UK);
 
     private String id;
     private String description;

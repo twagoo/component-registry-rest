@@ -28,6 +28,7 @@ Learn more about Flex at http://flex.org
 <style>
 body { margin: 0px; overflow:hidden }
 </style>
+<script type="text/javascript" src="./js/extMouseWheel.js"></script>
 <script language="JavaScript" type="text/javascript">
 <!--
 // -----------------------------------------------------------------------------
@@ -44,6 +45,7 @@ var requiredRevision = ${version_revision};
 </head>
 
 <body scroll="no">
+<div id="flashContainerDiv">
 <script language="JavaScript" type="text/javascript">
 <!--
 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
@@ -120,5 +122,6 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			</embed>
 	</object>
 </noscript>
+</div>
 </body>
 </html>

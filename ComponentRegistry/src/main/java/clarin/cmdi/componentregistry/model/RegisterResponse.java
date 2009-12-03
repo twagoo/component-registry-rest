@@ -11,9 +11,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "registerResponse")
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "registerResponse")
 public class RegisterResponse {
+
+    @XmlAttribute(required = true)
+    private Boolean isProfile;
 
     @XmlAttribute(required = true)
     private Boolean registered;
@@ -24,6 +27,7 @@ public class RegisterResponse {
 
     @XmlElement
     private AbstractDescription description;
+
 
     public void setRegistered(boolean registered) {
         this.registered = registered;
@@ -51,6 +55,14 @@ public class RegisterResponse {
 
     public AbstractDescription getDescription() {
         return description;
+    }
+
+    public boolean isProfile() {
+        return isProfile;
+    }
+
+    public void setIsProfile(boolean isProfile) {
+        this.isProfile = isProfile;
     }
     
 }
