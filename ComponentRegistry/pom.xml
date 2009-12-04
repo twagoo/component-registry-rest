@@ -95,6 +95,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
+    <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
     <packaging>war</packaging>
   </properties>
 
@@ -137,6 +138,7 @@
               <filtering>true</filtering>
               <includes>
                 <include>index.html</include>
+                <include>WEB-INF/applicationContext.xml</include>
               </includes>
             </resource>
           </webResources>
