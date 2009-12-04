@@ -33,7 +33,7 @@ package clarin.cmdi.componentregistry {
 
 		private function convertDate(dateString:String):String {
 			var validator:DateFormatter = new DateFormatter();
-			var s:String = dateString.replace("CET", "UTC");
+			var s:String = dateString.replace("CET", "UTC+0100");
 			var n:Number = Date.parse(s);
 			this.registrationDateValue = new Date(n);
 			var result:String;
