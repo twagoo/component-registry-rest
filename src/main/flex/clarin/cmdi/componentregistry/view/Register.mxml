@@ -41,7 +41,7 @@
 		]]>
 	</mx:Script>
 
-	<local:UploadService id="uploadSrv"/>
+	<local:UploadService id="uploadSrv" />
 	<mx:VBox>
 		<mx:Form>
 			<mx:HBox>
@@ -80,6 +80,7 @@
 			</mx:FormItem>
 			<mx:Button label="Submit"
 					   click="submit(event)"/>
+            <mx:ProgressBar id="uploadProgress" label="" mode="manual" creationComplete="uploadSrv.init(uploadProgress)" visible="false" />
 		</mx:Form>
 
 		<mx:Text id="errorMessageField"
