@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
   <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" init-method="init">
-    <property name="registryRoot" value="/Users/patdui/Workspace/Clarin/MyRegistry" />
+	    <property name="registryRoot" value="${registryRoot}" /> 
   </bean>
 
   <bean id="componentRegistry" class="clarin.cmdi.componentregistry.ComponentRegistryImpl" factory-method="getInstance">

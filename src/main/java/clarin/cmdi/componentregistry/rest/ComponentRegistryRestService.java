@@ -39,8 +39,9 @@ public class ComponentRegistryRestService {
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public List<ComponentDescription> getRegisteredComponents() {
+        long start = System.currentTimeMillis();
         List<ComponentDescription> components = registry.getComponentDescriptions();
-        LOG.info("Releasing " + components.size() + " registered components into the world");
+        LOG.info("Releasing " + components.size() + " registered components into the world ("+(System.currentTimeMillis()-start)+" millisecs)");
         return components;
     }
 
@@ -48,8 +49,9 @@ public class ComponentRegistryRestService {
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public List<ProfileDescription> getRegisteredProfiles() {
+        long start = System.currentTimeMillis();
         List<ProfileDescription> profiles = registry.getProfileDescriptions();
-        LOG.info("Releasing " + profiles.size() + " registered profiles into the world");
+        LOG.info("Releasing " + profiles.size() + " registered profiles into the world ("+(System.currentTimeMillis()-start)+" millisecs)");
         return profiles;
     }
 
@@ -88,7 +90,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/profiles/{profileId}/{rawType}")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
+    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public String getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType) {
         LOG.info("Profile with id:" + profileId + " and rawType:" + rawType + " is requested.");
         String result = "";
@@ -103,6 +105,7 @@ public class ComponentRegistryRestService {
         return result;
     }
 
+   
     @POST
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
