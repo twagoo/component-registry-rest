@@ -179,7 +179,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     /**
      * CMDComponentSpec and description are assumed to be valid.
      */
-    public synchronized int registerMDComponent(ComponentDescription description, CMDComponentSpec spec) {
+    public int registerMDComponent(ComponentDescription description, CMDComponentSpec spec) {
         LOG.info("Attempt to register component: " + description);
         return register(configuration.getComponentDir(), description, spec, "component");
     }
@@ -187,13 +187,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     /**
      * CMDComponentSpec and description are assumed to be valid.
      */
-    public synchronized int registerMDProfile(ProfileDescription profileDescription, CMDComponentSpec spec) {
+    public int registerMDProfile(ProfileDescription profileDescription, CMDComponentSpec spec) {
         LOG.info("Attempt to register profile: " + profileDescription);
         return register(configuration.getProfileDir(), profileDescription, spec, "profile");
 
     }
 
-    private synchronized int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
+    private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
         //Check if name not already exists, create profile dir put store all files.
         //Handle all errors and rollback if something didn't work. Put this all in a separate DAO or something
         //Create storage package
