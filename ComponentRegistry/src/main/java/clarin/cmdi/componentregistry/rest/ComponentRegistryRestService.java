@@ -110,7 +110,7 @@ public class ComponentRegistryRestService {
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public synchronized RegisterResponse registeredProfile(@FormDataParam("data") InputStream input, @FormDataParam("name") String name,
+    public RegisterResponse registeredProfile(@FormDataParam("data") InputStream input, @FormDataParam("name") String name,
             @FormDataParam("creatorName") String creatorName, @FormDataParam("description") String description) {
         ProfileDescription desc = createNewProfileDescription();
         desc.setCreatorName(creatorName);
@@ -125,7 +125,7 @@ public class ComponentRegistryRestService {
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public synchronized RegisterResponse registeredComponent(@FormDataParam("data") InputStream input, @FormDataParam("name") String name,
+    public RegisterResponse registeredComponent(@FormDataParam("data") InputStream input, @FormDataParam("name") String name,
             @FormDataParam("creatorName") String creatorName, @FormDataParam("description") String description,
             @FormDataParam("group") String group) {
         ComponentDescription desc = createNewComponentDescription();
