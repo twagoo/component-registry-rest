@@ -10,8 +10,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -24,19 +26,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class ComponentRegistryImpl implements ComponentRegistry {
 
-    //TODO PD read in all files and marshall them, keep all in memory and check all on startup.
-
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
 
     //bean will be injected
     private Configuration configuration;
+
+    //cache fields
+    private Map<String, ComponentDescription> componentDescriptions;
+    private Map<String, ProfileDescription> profileDescriptions;
+    private Map<String, CMDComponentSpec> componentsCache;
+    private Map<String, CMDComponentSpec> profilesCache;
 
     private final static ComponentRegistry INSTANCE = new ComponentRegistryImpl();
 
@@ -52,46 +57,93 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         initCache();
     }
 
-    private void initCache() {
+    private void initCache() { //TODO Patrick maybe set the xlink at this point
+        LOG.info("Initializing cache..");
+        LOG.info("CACHE: Reading and parsing all component descriptions.");
+        this.componentDescriptions = loadComponentDescriptions();
+        LOG.info("CACHE: Reading and parsing all profile descriptions.");
+        this.profileDescriptions = loadProfileDescriptions();
+        LOG.info("CACHE: Reading and parsing all components.");
+        this.componentsCache = loadComponents();
+        LOG.info("CACHE: Reading and parsing all profiles.");
+        this.profilesCache = loadProfiles();
+    }
 
+    private Map<String, CMDComponentSpec> loadProfiles() {
+        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
+        for (Iterator<String> iter = profileDescriptions.keySet().iterator(); iter.hasNext();) {
+            String id = iter.next();
+            File file = getProfileFile(id);
+            CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+            if (spec != null) {
+                result.put(id, spec);
+            } else {
+                iter.remove(); // cannot load actual profile so remove description from cache.
+            }
+        }
+        return result;
+    }
+
+    private Map<String, CMDComponentSpec> loadComponents() {
+        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
+        for (Iterator<String> iter = componentDescriptions.keySet().iterator(); iter.hasNext();) {
+            String id = iter.next();
+            File file = getComponentFile(id);
+            CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+            if (spec != null) {
+                result.put(id, spec);
+            } else {
+                iter.remove(); // cannot load actual component so remove description from cache.
+            }
+        }
+        return result;
+    }
+
+    private Map<String, ProfileDescription> loadProfileDescriptions() {
+        Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter("description.xml"),
+                TrueFileFilter.TRUE);
+        Map<String, ProfileDescription> result = new HashMap<String, ProfileDescription>();
+        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
+            File file = (File) iterator.next();
+            ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file);
+            if (desc != null)
+                result.put(desc.getId(), desc);
+        }
+        return result;
+    }
+
+    private Map<String, ComponentDescription> loadComponentDescriptions() {
+        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter("description.xml"), TrueFileFilter.TRUE);
+        Map<String, ComponentDescription> result = new HashMap<String, ComponentDescription>();
+        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
+            File file = (File) iterator.next();
+            ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file);
+            if (desc != null)
+                result.put(desc.getId(), desc);
+        }
+        return result;
+    }
+
+    private void updateCache(CMDComponentSpec spec, AbstractDescription description) {
+        if (description.isProfile()) {
+            profileDescriptions.put(description.getId(), (ProfileDescription) description);
+            profilesCache.put(description.getId(), spec);
+        } else {
+            componentDescriptions.put(description.getId(), (ComponentDescription) description);
+            componentsCache.put(description.getId(), spec);
+        }
     }
 
     private File getComponentDir() {
         return configuration.getComponentDir();
     }
 
-    public List<MDComponent> getMDComponents() {
-        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter("component*.xml"), TrueFileFilter.TRUE);
-        List<MDComponent> result = new ArrayList<MDComponent>();
-        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-            File file = (File) iterator.next();
-            CMDComponentSpec spec;
-            spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
-            List<CMDComponentType> cmdComponents = spec.getCMDComponent();
-            if (cmdComponents.size() != 1) {
-                throw new RuntimeException("a component can consist of only one CMDComponent.");
-            }
-            result.add(new MDComponent(cmdComponents.get(0)));
-        }
-        return result;
-    }
-
     public List<ComponentDescription> getComponentDescriptions() {
-        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter("description.xml"), TrueFileFilter.TRUE);
-        List<ComponentDescription> result = new ArrayList<ComponentDescription>();
-        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-            File file = (File) iterator.next();
-            ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file);
-            if (desc != null)
-                result.add(desc);
-        }
-        return result;
+        return new ArrayList(componentDescriptions.values());
     }
 
     public CMDComponentSpec getMDProfile(String profileId) {
-        CMDComponentSpec result = null;
-        File file = getProfileFile(profileId);
-        result = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+        CMDComponentSpec result = profilesCache.get(profileId);
         return result;
     }
 
@@ -112,7 +164,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         File file = getProfileFile(profileId);
         Writer writer = new StringWriter();
         MDMarshaller.generateXsd(file, writer);
-        return writer.toString(); //TODO Patrick need to figure what happens with all the exceptions
+        return writer.toString();
     }
 
     private File getProfileFile(String profileId) {
@@ -122,10 +174,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public CMDComponentSpec getMDComponent(String componentId) {
-        CMDComponentSpec result = null;
-        String id = stripRegistryId(componentId);
-        File file = new File(configuration.getComponentDir(), id + File.separator + id + ".xml");
-        result = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+        CMDComponentSpec result = componentsCache.get(componentId);
         return result;
     }
 
@@ -156,24 +205,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private String stripRegistryId(String id) {
-        return StringUtils.removeStart(id, "clarin.eu:cr1:");
-    }
-
-    public List<MDComponent> getMDProfiles() {
-        return Collections.EMPTY_LIST;
+        return StringUtils.removeStart(id, REGISTRY_ID);
     }
 
     public List<ProfileDescription> getProfileDescriptions() {
-        Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter("description.xml"),
-                TrueFileFilter.TRUE);
-        List<ProfileDescription> result = new ArrayList<ProfileDescription>();
-        for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-            File file = (File) iterator.next();
-            ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file);
-            if (desc != null)
-                result.add(desc);
-        }
-        return result;
+        return new ArrayList(profileDescriptions.values());
     }
 
     /**
@@ -190,7 +226,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     public int registerMDProfile(ProfileDescription profileDescription, CMDComponentSpec spec) {
         LOG.info("Attempt to register profile: " + profileDescription);
         return register(configuration.getProfileDir(), profileDescription, spec, "profile");
-
     }
 
     private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
@@ -198,14 +233,14 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         //Handle all errors and rollback if something didn't work. Put this all in a separate DAO or something
         //Create storage package
         //Create id, creationdate etc...
-        String id = description.getId();
+        String id = stripRegistryId(description.getId());
         File dir = new File(storageDir, id);
         boolean success = false;
         try {
             boolean dirCreated = dir.mkdir(); //Check if file is not there already TODO Patrick
             if (dirCreated) {
                 writeDescription(dir, description);
-                writeProfile(dir, description.getId() + ".xml", spec);
+                writeProfile(dir, id + ".xml", spec);
                 success = true;
             }
         } catch (IOException e) {
@@ -224,6 +259,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             }
         }
         LOG.info("Succesfully registered a " + type + " in " + dir + " " + type + "= " + description);
+        updateCache(spec, description);
         return 0;
     }
 

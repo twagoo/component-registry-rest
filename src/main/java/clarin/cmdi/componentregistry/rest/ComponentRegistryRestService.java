@@ -11,8 +11,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +32,19 @@ import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/registry")
 public class ComponentRegistryRestService {
+    
+    @Context UriInfo uriInfo;
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryRestService.class);
 
-    private ComponentRegistry registry = ComponentRegistryImpl.getInstance();
+    public static final String DATA_FORM_FIELD = "data";
+    public static final String NAME_FORM_FIELD = "name";
+    public static final String CREATOR_NAME_FORM_FIELD = "creatorName";
+    public static final String DESCRIPTION_FORM_FIELD = "description";
+    public static final String GROUP_FORM_FIELD = "group";
 
+    private ComponentRegistry registry = ComponentRegistryImpl.getInstance();
+    
     @GET
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -59,15 +69,15 @@ public class ComponentRegistryRestService {
     @Path("/components/{componentId}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public CMDComponentSpec getRegisteredComponent(@PathParam("componentId") String componentId) {
-        LOG.info("Component with id:" + componentId + " is requested.");
+        LOG.info("Component with id: " + componentId + " is requested.");
         return registry.getMDComponent(componentId);
     }
 
     @GET
-    @Path("/components/{profileId}/{rawType}")
+    @Path("/components/{componentId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public String getRegisteredComponentRawType(@PathParam("profileId") String componentId, @PathParam("rawType") String rawType) {
-        LOG.info("Component with id:" + componentId + " and rawType:" + rawType + " is requested.");
+    public String getRegisteredComponentRawType(@PathParam("componentId") String componentId, @PathParam("rawType") String rawType) {
+        LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
         String result = "";
         if ("xml".equalsIgnoreCase(rawType)) {
             result = registry.getMDComponentAsXml(componentId);
@@ -75,7 +85,7 @@ public class ComponentRegistryRestService {
             result = registry.getMDComponentAsXsd(componentId);
         } else {
             throw new WebApplicationException(Response.serverError().entity(
-                    "unsupported rawType:" + rawType + " (only xml or xsd are supported)").build());
+                    "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
         }
         return result;
     }
@@ -84,7 +94,7 @@ public class ComponentRegistryRestService {
     @Path("/profiles/{profileId}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public CMDComponentSpec getRegisteredProfile(@PathParam("profileId") String profileId) {
-        LOG.info("Profile with id:" + profileId + " is requested.");
+        LOG.info("Profile with id: " + profileId + " is requested.");
         return registry.getMDProfile(profileId);
     }
 
@@ -92,7 +102,7 @@ public class ComponentRegistryRestService {
     @Path("/profiles/{profileId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public String getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType) {
-        LOG.info("Profile with id:" + profileId + " and rawType:" + rawType + " is requested.");
+        LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
         String result = "";
         if ("xml".equalsIgnoreCase(rawType)) {
             result = registry.getMDProfileAsXml(profileId);
@@ -100,7 +110,7 @@ public class ComponentRegistryRestService {
             result = registry.getMDProfileAsXsd(profileId);
         } else {
             throw new WebApplicationException(Response.serverError().entity(
-                    "unsupported rawType:" + rawType + " (only xml or xsd are supported)").build());
+                    "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
         }
         return result;
     }
@@ -110,8 +120,8 @@ public class ComponentRegistryRestService {
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public RegisterResponse registeredProfile(@FormDataParam("data") InputStream input, @FormDataParam("name") String name,
-            @FormDataParam("creatorName") String creatorName, @FormDataParam("description") String description) {
+    public RegisterResponse registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
+            @FormDataParam(CREATOR_NAME_FORM_FIELD) String creatorName, @FormDataParam(DESCRIPTION_FORM_FIELD) String description) {
         ProfileDescription desc = createNewProfileDescription();
         desc.setCreatorName(creatorName);
         desc.setName(name);
@@ -125,9 +135,9 @@ public class ComponentRegistryRestService {
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public RegisterResponse registeredComponent(@FormDataParam("data") InputStream input, @FormDataParam("name") String name,
-            @FormDataParam("creatorName") String creatorName, @FormDataParam("description") String description,
-            @FormDataParam("group") String group) {
+    public RegisterResponse registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
+            @FormDataParam(CREATOR_NAME_FORM_FIELD) String creatorName, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+            @FormDataParam(GROUP_FORM_FIELD) String group) {
         ComponentDescription desc = createNewComponentDescription();
         desc.setCreatorName(creatorName);
         desc.setName(name);
@@ -164,18 +174,22 @@ public class ComponentRegistryRestService {
 
     private ComponentDescription createNewComponentDescription() {
         ComponentDescription desc = new ComponentDescription();
-        String id = "c_" + IdSequence.get();
+        String id = ComponentRegistry.REGISTRY_ID+"c_" + IdSequence.get();
         desc.setId(id);
-        desc.setXlink("link:" + id);
+        desc.setXlink(createXlink(id));
         return desc;
     }
 
     private ProfileDescription createNewProfileDescription() {
         ProfileDescription desc = new ProfileDescription();
-        String id = "p_" + IdSequence.get();
+        String id = ComponentRegistry.REGISTRY_ID+"p_" + IdSequence.get();
         desc.setId(id);
-        desc.setXlink("link:" + id);
+        desc.setXlink(createXlink(id));
         return desc;
+    }
+    
+    private String createXlink(String id) {
+        return uriInfo.getRequestUriBuilder().path(id).build().toString();
     }
 
     private void validate(RegisterResponse response, Validator... validators) {

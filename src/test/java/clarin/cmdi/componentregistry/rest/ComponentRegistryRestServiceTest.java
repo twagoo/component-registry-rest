@@ -143,10 +143,10 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field("data", getTestProfileContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field("name", "ProfileTest1");
-        form.field("description", "My Test Profile");
-        form.field("creatorName", "J. Unit");
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, getTestProfileContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
         RegisterResponse response = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                 form);
         assertTrue(response.isProfile());
@@ -155,20 +155,22 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         assertEquals("ProfileTest1", profileDesc.getName());
         assertEquals("My Test Profile", profileDesc.getDescription());
         assertEquals("J. Unit", profileDesc.getCreatorName());
-        assertTrue(profileDesc.getId().startsWith("p_"));
+        assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
+        String url = resource().getUriBuilder().build().toString();
+        assertEquals(url + "registry/profiles/" + profileDesc.getId(), profileDesc.getXlink());
     }
-    
+
     @Test
     public void testRegisterComponent() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field("data", getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field("name", "ComponentTest1");
-        form.field("description", "My Test Component");
-        form.field("creatorName", "J. Unit");
-        form.field("group", "TestGroup");
-        RegisterResponse response = resource().path("/registry/components").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
-                form);
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
+        form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        RegisterResponse response = resource().path("/registry/components").type(MediaType.MULTIPART_FORM_DATA).post(
+                RegisterResponse.class, form);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
         ComponentDescription desc = (ComponentDescription) response.getDescription();
@@ -177,18 +179,21 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         assertEquals("My Test Component", desc.getDescription());
         assertEquals("J. Unit", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
-        assertTrue(desc.getId().startsWith("c_"));
+        assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
         assertNotNull(desc.getRegistrationDate());
+        String url = resource().getUriBuilder().build().toString();
+        assertEquals(url + "registry/components/" + desc.getId(), desc.getXlink());
     }
 
     @Test
     public void testRegisterProfileInvalidData() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
         String notAValidProfile = "<CMD_ComponentSpec> </CMD_ComponentSpec>";
-        form.field("data", new ByteArrayInputStream(notAValidProfile.getBytes()), MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field("name", "ProfileTest1");
-        form.field("description", "My Test Profile");
-        form.field("creatorName", "J. Unit");
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, new ByteArrayInputStream(notAValidProfile.getBytes()),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
         RegisterResponse postResponse = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(postResponse.isProfile());
@@ -228,10 +233,10 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterComponentAsProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field("data", getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE); 
-        form.field("name", "t");
-        form.field("description", "My Test");
-        form.field("creatorName", "J. Unit");
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "t");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
+        form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
         RegisterResponse response = resource().path("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                 form);
         assertFalse(response.isRegistered());
@@ -249,10 +254,10 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     public static void setUpTestRegistry() throws ParseException, JAXBException {
         registryDir = ComponentRegistryImplTest.createTempRegistryDir();
         testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
-        addProfile(testRegistry, "profile1");
-        addProfile(testRegistry, "profile2");
-        addComponent(testRegistry, "component1");
-        addComponent(testRegistry, "component2");
+        addProfile(testRegistry, ComponentRegistry.REGISTRY_ID+"profile1");
+        addProfile(testRegistry, ComponentRegistry.REGISTRY_ID+"profile2");
+        addComponent(testRegistry, ComponentRegistry.REGISTRY_ID+"component1");
+        addComponent(testRegistry, ComponentRegistry.REGISTRY_ID+"component2");
     }
 
     private static void addProfile(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
@@ -334,9 +339,8 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
 
     @AfterClass
     public static void deleteRegistry() {
-        if (registryDir != null && registryDir.exists()) {
-            assertTrue(FileUtils.deleteQuietly(registryDir));
-        }
+        ComponentRegistryImplTest.cleanUpRegistryDir(registryDir);
+
     }
 
 }

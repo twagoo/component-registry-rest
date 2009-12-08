@@ -8,18 +8,12 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public interface ComponentRegistry {
 
-    List<MDComponent> getMDComponents();
-
+    public static final String REGISTRY_ID = "clarin.eu:cr1:";
+    
     List<ComponentDescription> getComponentDescriptions();
-
-    List<MDComponent> getMDProfiles();
-
     List<ProfileDescription> getProfileDescriptions();
-
     CMDComponentSpec getMDProfile(String id);
-
     CMDComponentSpec getMDComponent(String id);
-
     List<MDProfile> searchMDProfiles(String searchPattern);
 
     /**
