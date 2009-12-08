@@ -18,10 +18,16 @@
 			import clarin.cmdi.componentregistry.ItemDescription;
 			import adobe.utils.CustomActions;
 
+			private var currentSelectedItem:ItemDescription;
+
 			private function dispatchBrowserSelectionEvent():void {
 				if (this.dataGrid.selectedItem != null) {
-					var event:BrowserSelectionEvent = new BrowserSelectionEvent(this.dataGrid.selectedItem as ItemDescription);
-					dispatchEvent(event);
+					var item:ItemDescription = this.dataGrid.selectedItem as ItemDescription
+					if (currentSelectedItem == null || currentSelectedItem.id != item.id) { //Only update when the item selected is different.
+						currentSelectedItem = item;
+						var event:BrowserSelectionEvent = new BrowserSelectionEvent(item);
+						dispatchEvent(event);
+					}
 				}
 			}
 		]]>
@@ -45,7 +51,7 @@
 				 columns="{browserColumns}"
 				 contextMenu="{menu.cm}"
 				 allowMultipleSelection="false"
-				 change="{dispatchBrowserSelectionEvent()}">
+				 itemFocusIn="{dispatchBrowserSelectionEvent()}">
 
 	</mx:DataGrid>
 </mx:VBox>
