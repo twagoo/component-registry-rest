@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -77,11 +80,15 @@ public class MDMarshaller {
         return doc;
     }
 
-    public static <T> void marshal(T marshallableObject, Writer writer) throws JAXBException {
+    /**
+     * Will wrap the Outputstream in a OutputStreamWriter with encoding set to UTF-8. This to make sure profiles are stored correctly.
+     */
+    public static <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         String packageName = marshallableObject.getClass().getPackage().getName();
         JAXBContext jc = JAXBContext.newInstance(packageName);
         Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        Writer writer = new OutputStreamWriter(out, "UTF-8");
         m.marshal(marshallableObject, writer);
     }
 

@@ -5,10 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.io.Writer;
-
-import javax.xml.bind.JAXBException;
+import java.io.ByteArrayOutputStream;
 
 import org.junit.Test;
 
@@ -17,14 +14,14 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 public class RegisterResponseTest {
 
     @Test
-    public void testRegisterError() throws JAXBException {
+    public void testRegisterError() throws Exception {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(false);
         resp.setIsProfile(true);
         resp.addError("Error 1");
         resp.addError("Error 2, <!-- to be escaped -->");
-        Writer writer = new StringWriter();
-        MDMarshaller.marshal(resp, writer);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<registerResponse registered=\"false\" isProfile=\"true\">\n";
@@ -33,22 +30,22 @@ public class RegisterResponseTest {
         expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
         expected += "    </errors>\n";
         expected += "</registerResponse>\n";
-        assertEquals(expected, writer.toString());
+        assertEquals(expected, out.toString());
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertFalse(rr.isRegistered());
-        assertTrue(rr.isProfile());        
+        assertTrue(rr.isProfile());
         assertEquals(2, rr.getErrors().size());
     }
 
     @Test
-    public void testRegisterSucces() throws JAXBException {
+    public void testRegisterSucces() throws Exception {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(true);
         resp.setIsProfile(true);
         resp.setDescription(getProfileDescription());
-        Writer writer = new StringWriter();
-        MDMarshaller.marshal(resp, writer);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<registerResponse registered=\"true\" isProfile=\"true\">\n";
@@ -62,7 +59,7 @@ public class RegisterResponseTest {
         expected += "        <xlink>linkToMyProfile</xlink>\n";
         expected += "    </description>\n";
         expected += "</registerResponse>\n";
-        assertEquals(expected, writer.toString());
+        assertEquals(expected, out.toString());
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertTrue(rr.isRegistered());
@@ -71,13 +68,13 @@ public class RegisterResponseTest {
     }
 
     @Test
-    public void testRegisterSuccesComponent() throws JAXBException {
+    public void testRegisterSuccesComponent() throws Exception {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(true);
         resp.setIsProfile(false);
         resp.setDescription(getComponentDescription());
-        Writer writer = new StringWriter();
-        MDMarshaller.marshal(resp, writer);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<registerResponse registered=\"true\" isProfile=\"false\">\n";
@@ -92,11 +89,11 @@ public class RegisterResponseTest {
         expected += "        <groupName>imdi</groupName>\n";
         expected += "    </description>\n";
         expected += "</registerResponse>\n";
-        assertEquals(expected, writer.toString());
+        assertEquals(expected, out.toString());
 
         RegisterResponse rr = MDMarshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertTrue(rr.isRegistered());
-        assertFalse(rr.isProfile());        
+        assertFalse(rr.isProfile());
         assertEquals("myId", rr.getDescription().getId());
     }
 

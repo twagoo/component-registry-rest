@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.bind.JAXBException;
 
@@ -12,7 +13,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 public class EditorTest {
 
     @Test
-    public void testCreateProfile() throws FileNotFoundException, JAXBException {
+    public void testCreateProfile() throws FileNotFoundException, JAXBException, UnsupportedEncodingException {
         CMDComponentSpec locComponent = MDMarshaller.unmarshal(CMDComponentSpec.class, new File(
                 "/Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi/component-location.xml"));
         CMDComponentSpec writtenResourceComponent = MDMarshaller.unmarshal(CMDComponentSpec.class, new File(

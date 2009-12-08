@@ -1,12 +1,13 @@
 package clarin.cmdi.componentregistry.model;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.bind.JAXBException;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -14,7 +15,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 public class ComponentDescriptionTest {
 
     @Test
-    public void testComponentToXml() throws JAXBException {
+    public void testComponentToXml() throws JAXBException, UnsupportedEncodingException {
         ComponentDescription desc = new ComponentDescription();
         desc.setName("Name");
         desc.setId("myId");
@@ -24,8 +25,8 @@ public class ComponentDescriptionTest {
         desc.setXlink("linkToMyComponent");
         desc.setGroupName("MyGroup");
 
-        Writer writer = new StringWriter();
-        MDMarshaller.marshal(desc, writer);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MDMarshaller.marshal(desc, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<componentDescription>\n";
@@ -37,7 +38,7 @@ public class ComponentDescriptionTest {
         expected += "    <xlink>linkToMyComponent</xlink>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
         expected += "</componentDescription>\n";
-        assertEquals(expected, writer.toString());
+        assertEquals(expected, out.toString());
 
         ComponentDescription pd = MDMarshaller.unmarshal(ComponentDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertEquals(desc.getId(), pd.getId());
