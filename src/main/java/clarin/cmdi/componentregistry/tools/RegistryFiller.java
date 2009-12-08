@@ -1,8 +1,11 @@
 package clarin.cmdi.componentregistry.tools;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
 import java.util.Arrays;
 
@@ -10,10 +13,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rest.ComponentRegistryRestService;
 
@@ -23,7 +26,7 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 
 public class RegistryFiller {
 
-    private final static Logger LOG = LoggerFactory.getLogger(Configuration.class);
+    private final static Logger LOG = LoggerFactory.getLogger(RegistryFiller.class);
 
     private WebResource service;
 
@@ -56,7 +59,7 @@ public class RegistryFiller {
                 } else {
                     filler.registerComponent(file, creatorName, description, group);
                 }
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 failed++;
                 LOG.error("Error in file: " + file, e);
             }
@@ -68,22 +71,24 @@ public class RegistryFiller {
         }
     }
 
-    private void registerProfile(File file, String creatorName, String description) throws FileNotFoundException {
+    private void registerProfile(File file, String creatorName, String description) throws IOException {
         FormDataMultiPart form = createForm(file, creatorName, description);
         RegisterResponse response = service.path("/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         handleResult(response);
     }
 
-    private FormDataMultiPart createForm(File file, String creatorName, String description) throws FileNotFoundException {
+    private FormDataMultiPart createForm(File file, String creatorName, String description) throws IOException {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, new FileInputStream(file), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8"); //To handle unicode chars.
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, new ByteArrayInputStream(IOUtils.toByteArray(reader, "UTF-8")),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, FilenameUtils.getBaseName(file.getName()));
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, description);
         form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, creatorName);
         return form;
     }
 
-    private void registerComponent(File file, String creatorName, String description, String group) throws FileNotFoundException {
+    private void registerComponent(File file, String creatorName, String description, String group) throws IOException {
         FormDataMultiPart form = createForm(file, creatorName, description);
         form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, group);
         RegisterResponse response = service.path("/components").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);

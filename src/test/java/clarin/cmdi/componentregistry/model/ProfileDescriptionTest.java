@@ -1,12 +1,13 @@
 package clarin.cmdi.componentregistry.model;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.bind.JAXBException;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -14,7 +15,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 public class ProfileDescriptionTest {
 
     @Test
-    public void testProfileToXml() throws JAXBException {
+    public void testProfileToXml() throws JAXBException, UnsupportedEncodingException {
         ProfileDescription desc = new ProfileDescription();
         desc.setName("Name");
         desc.setId("myId");
@@ -23,8 +24,8 @@ public class ProfileDescriptionTest {
         desc.setRegistrationDate("myDate");
         desc.setXlink("linkToMyProfile");
 
-        Writer writer = new StringWriter();
-        MDMarshaller.marshal(desc, writer);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MDMarshaller.marshal(desc, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<profileDescription>\n";
@@ -35,7 +36,7 @@ public class ProfileDescriptionTest {
         expected += "    <creatorName>myC</creatorName>\n";
         expected += "    <xlink>linkToMyProfile</xlink>\n";
         expected += "</profileDescription>\n";
-        assertEquals(expected, writer.toString());
+        assertEquals(expected, out.toString());
 
         ProfileDescription pd = MDMarshaller.unmarshal(ProfileDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertEquals(desc.getId(), pd.getId());

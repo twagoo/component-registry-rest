@@ -3,7 +3,7 @@ package clarin.cmdi.componentregistry;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -57,7 +57,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         initCache();
     }
 
-    private void initCache() { //TODO Patrick maybe set the xlink at this point
+    private void initCache() {
         LOG.info("Initializing cache..");
         LOG.info("CACHE: Reading and parsing all component descriptions.");
         this.componentDescriptions = loadComponentDescriptions();
@@ -67,6 +67,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         this.componentsCache = loadComponents();
         LOG.info("CACHE: Reading and parsing all profiles.");
         this.profilesCache = loadProfiles();
+        LOG.info("CACHE initialized. Any occured errors should be adressed, files could be corrupt."
+                + " Components and Profiles with errors will not be shown to users.");
     }
 
     private Map<String, CMDComponentSpec> loadProfiles() {
@@ -182,7 +184,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         String result = null;
         File file = getComponentFile(componentId);
         try {
-            result = IOUtils.toString(new FileInputStream(file));
+            result = IOUtils.toString(new FileInputStream(file), "UTF-8");
         } catch (FileNotFoundException e) {
             LOG.error("Cannot retrieve file: " + file, e);
         } catch (IOException e) {
@@ -240,7 +242,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             boolean dirCreated = dir.mkdir(); //Check if file is not there already TODO Patrick
             if (dirCreated) {
                 writeDescription(dir, description);
-                writeProfile(dir, id + ".xml", spec);
+                writeCMDComponenetSpec(dir, id + ".xml", spec);
                 success = true;
             }
         } catch (IOException e) {
@@ -265,15 +267,16 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private void writeDescription(File profileDir, AbstractDescription description) throws IOException, JAXBException {
         File metadataFile = new File(profileDir, "description.xml");
-        Writer writer = new FileWriter(metadataFile);
-        MDMarshaller.marshal(description, writer);
+        FileOutputStream fos = new FileOutputStream(metadataFile);
+        MDMarshaller.marshal(description, fos);
         LOG.info("Saving metadata successful " + metadataFile);
     }
 
-    private void writeProfile(File profileDir, String profileName, CMDComponentSpec spec) throws IOException, JAXBException {
+    private void writeCMDComponenetSpec(File profileDir, String profileName, CMDComponentSpec spec) throws IOException, JAXBException {
         File file = new File(profileDir, profileName);
-        MDMarshaller.marshal(spec, new FileWriter(file));
-        LOG.info("Saving profile successful " + file);
+        FileOutputStream fos = new FileOutputStream(file);
+        MDMarshaller.marshal(spec, fos);
+        LOG.info("Saving profile/component successful " + file);
     }
 
     public List<MDProfile> searchMDProfiles(String searchPattern) {
