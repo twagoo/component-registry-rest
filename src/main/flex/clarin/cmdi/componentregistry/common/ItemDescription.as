@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry {
+package clarin.cmdi.componentregistry.common {
 	import clarin.cmdi.componentregistry.services.Config;
 
 	import mx.formatters.DateFormatter;

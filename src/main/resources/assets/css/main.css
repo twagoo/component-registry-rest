@@ -1,0 +1,9 @@
+/* CSS file */
+Application {
+    font-family: Verdana, Arial, Helv, Helvetica, sans-serif, "_sans";
+}
+
+ToggleButtonBar {
+   buttonWidth: 90;
+   horizontalGap: -1;
+}

@@ -1,12 +1,12 @@
-package clarin.cmdi.componentregistry.components {
-	import clarin.cmdi.componentregistry.ItemDescription;
+package clarin.cmdi.componentregistry.common.components {
+	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 
 	import flash.events.ContextMenuEvent;
 	import flash.events.MouseEvent;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 
-	import mx.controls.Alert;
 	import mx.controls.DataGrid;
 	import mx.events.ListEvent;
 
@@ -15,6 +15,9 @@ package clarin.cmdi.componentregistry.components {
 
 		[Bindable]
 		public var cm:ContextMenu;
+
+		[Bindable]
+		public var viewStack:RegistryViewStack;
 
 		[Bindable]
 		private var _dataGrid:DataGrid;
@@ -37,6 +40,10 @@ package clarin.cmdi.componentregistry.components {
 			cmi = new ContextMenuItem("Save as XSD...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXsd);
 			result.push(cmi);
+			cmi = new ContextMenuItem("Create New Profile...");
+			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createNewProfile);
+			result.push(cmi);
+
 			return result;
 		}
 
@@ -62,6 +69,11 @@ package clarin.cmdi.componentregistry.components {
 		private function saveAsXsd(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
 			saveItemDialog.saveAsXSD(item);
+		}
+
+		private function createNewProfile(event:ContextMenuEvent):void {
+			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
+			viewStack.switchToEditor();
 		}
 
 	}

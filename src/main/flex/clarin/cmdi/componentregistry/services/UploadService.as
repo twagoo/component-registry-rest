@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.ItemDescription;
-	import clarin.cmdi.componentregistry.events.UploadCompleteEvent;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.register.UploadCompleteEvent;
 
 	import flash.events.DataEvent;
 	import flash.events.Event;
@@ -15,7 +15,7 @@ package clarin.cmdi.componentregistry.services {
 	import mx.controls.ProgressBar;
 	import mx.core.UIComponent;
 
-	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.events.UploadCompleteEvent")]
+	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.register.UploadCompleteEvent")]
 	public class UploadService  {
 
 		public function UploadService() {
