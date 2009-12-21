@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.ComponentMD;
-	import clarin.cmdi.componentregistry.ItemDescription;
-	import clarin.cmdi.componentregistry.Profile;
+	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.Profile;
 
 	import mx.collections.ArrayCollection;
 	import mx.messaging.ChannelSet;

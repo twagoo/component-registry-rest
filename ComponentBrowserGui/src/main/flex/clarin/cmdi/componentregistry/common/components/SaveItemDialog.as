@@ -1,5 +1,5 @@
-package clarin.cmdi.componentregistry.components {
-	import clarin.cmdi.componentregistry.ItemDescription;
+package clarin.cmdi.componentregistry.common.components {
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 
 	import flash.events.ErrorEvent;
 	import flash.events.Event;

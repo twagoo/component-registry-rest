@@ -1,5 +1,5 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.ItemDescription;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
 	import mx.collections.ArrayCollection;
 	import mx.rpc.events.ResultEvent;

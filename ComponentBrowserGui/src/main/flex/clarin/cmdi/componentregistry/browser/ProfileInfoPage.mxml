@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:local="clarin.cmdi.componentregistry.*"
-		 xmlns:view="clarin.cmdi.componentregistry.view.*"
+		 xmlns:common="clarin.cmdi.componentregistry.common.*"
+		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		 width="100%"
 		 backgroundColor="#DDE3EF">
 
@@ -17,9 +17,9 @@
 
 
 
-	<local:Profile id="profile"/>
+	<common:Profile id="profile"/>
 
-	<view:infoPage id="infoPanel"
+	<browser:infoPage id="infoPanel"
 				   cmdComponent="{profile.profileSource}"
 				   headerLabel="{profile.description.name}"
 				   width="100%"

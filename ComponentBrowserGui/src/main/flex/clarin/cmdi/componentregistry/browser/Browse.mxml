@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:local="clarin.cmdi.componentregistry.services.*"
-		   xmlns:view="clarin.cmdi.componentregistry.view.*"
+		   xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		   creationComplete="refresh()"
 		   width="100%"
 		   height="100%"
+		   label="Browse..."
 		   >
 
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.ItemDescription;
+			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import mx.controls.Alert;
-			import clarin.cmdi.componentregistry.events.BrowserSelectionEvent;
-			import clarin.cmdi.componentregistry.Profile;
+			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
+			import clarin.cmdi.componentregistry.common.Profile;
 
 			public function refresh():void {
 				profilesSrv.load();
@@ -45,7 +46,7 @@
 	<local:ComponentListService id="componentsSrv"/>
 	<local:ProfileInfoService id="profileSrv"/>
 	<local:ComponentInfoService id="componentSrv"/>
-	<view:BrowserColumns id="browserColumns"/>
+	<browser:BrowserColumns id="browserColumns"/>
 
 
 	<mx:VBox borderStyle="none"
@@ -60,13 +61,13 @@
 						 y="59" borderStyle="outset">
 			<mx:VDividedBox label="Profiles"
 							width="100%">
-				<view:BrowserOverviewList id="profilesOverview"
+				<browser:BrowserOverviewList id="profilesOverview"
 										  browserDataProvider="{profilesSrv.itemDescriptions}"
 										  browserItemSelected="{loadProfileInfoPage(event)}"
 										  browserColumns="{browserColumns.getProfileColumns()}"
 										  width="100%"
 										  height="70%"/>
-				<view:ProfileInfoPage id="profileInfoPage"
+				<browser:ProfileInfoPage id="profileInfoPage"
 									  profile="{profileSrv.profile}"
 									  width="100%"
 									  height="50%"/>
@@ -74,13 +75,13 @@
 
 			<mx:VDividedBox label="Components"
 							width="100%">
-				<view:BrowserOverviewList id="componentsOverview"
+				<browser:BrowserOverviewList id="componentsOverview"
 										  browserDataProvider="{componentsSrv.itemDescriptions}"
 										  browserItemSelected="{loadComponentInfoPage(event)}"
 										  browserColumns="{browserColumns.getComponentColumns()}"
 										  width="100%"
 										  height="50%"/>
-				<view:ComponentInfoPage id="componentInfoPage"
+				<browser:ComponentInfoPage id="componentInfoPage"
 										component="{componentSrv.component}"
 										width="100%"
 										height="50%"/>

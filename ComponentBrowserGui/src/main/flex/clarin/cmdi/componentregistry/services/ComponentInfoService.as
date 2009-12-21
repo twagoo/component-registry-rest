@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.Component;
-	import clarin.cmdi.componentregistry.ComponentMD;
-	import clarin.cmdi.componentregistry.ItemDescription;
+
+	import clarin.cmdi.componentregistry.common.Component;
+	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
-	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;

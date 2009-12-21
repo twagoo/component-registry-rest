@@ -1,26 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
-				xmlns:view="clarin.cmdi.componentregistry.view.*"
+				xmlns:common="clarin.cmdi.componentregistry.common.components.*"
 				layout="absolute"
-				applicationComplete="init();" backgroundColor="#DDE3EF">
+				applicationComplete="init();"
+				backgroundColor="#DDE3EF">
+	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.events.UploadCompleteEvent;
-			import mx.controls.Alert;
 			import clarin.cmdi.componentregistry.services.UploadService;
 			import mx.managers.IPopUpManager;
-    		import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
+			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 			private var iPopUpManager:IPopUpManager;
 
 			private function init():void {
-				this.register.uploadSrv.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, registryChange);
-               ExternalMouseWheelSupport.getInstance(stage);
-			}
-
-			private function registryChange(event:UploadCompleteEvent):void {
-				browse.refresh();
-				myViewStack.selectedChild = browse;
-				browse.setSelectedDescription(event.itemDescription);
+				ExternalMouseWheelSupport.getInstance(stage);
 			}
 		]]>
 	</mx:Script>
@@ -28,31 +21,20 @@
 	<mx:Panel width="100%"
 			  height="100%"
 			  layout="absolute"
-			  title="Clarin Component Browser" x="0" y="0" >
+			  title="Clarin Component Browser"
+			  x="0"
+			  y="0">
 
 		<mx:VBox height="100%"
 				 width="100%">
 			<mx:HBox borderStyle="none">
-
-				<mx:Button id="browseButton"
-						   label="Browse..."
-						   click="myViewStack.selectedChild=browse;"/>
-
-				<mx:Button id="registerButton"
-						   label="Register..."
-						   click="myViewStack.selectedChild=register;"/>
-
+				<mx:ToggleButtonBar id="toggleBar"
+									dataProvider="{viewStack}"/>
 			</mx:HBox>
-
-			<mx:ViewStack id="myViewStack"
-						  borderStyle="none"
-						  height="100%"
-						  width="100%">
-
-				<view:Browse id="browse" />
-				<view:Register id="register"/>
-
-			</mx:ViewStack>
+			<common:RegistryViewStack id="viewStack"
+									  borderStyle="none"
+									  height="100%"
+									  width="100%"/>
 		</mx:VBox>
 	</mx:Panel>
 </mx:Application>

@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.view {
+package clarin.cmdi.componentregistry.browser {
 	import mx.controls.dataGridClasses.DataGridColumn;
 	import mx.utils.ObjectUtil;
 

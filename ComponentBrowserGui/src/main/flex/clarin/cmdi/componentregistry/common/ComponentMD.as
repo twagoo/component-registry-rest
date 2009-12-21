@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry {
+package clarin.cmdi.componentregistry.common {
 	import mx.collections.ArrayCollection;
 
 	[Bindable]

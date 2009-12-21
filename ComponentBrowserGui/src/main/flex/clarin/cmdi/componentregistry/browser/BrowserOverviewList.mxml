@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:comp="clarin.cmdi.componentregistry.components.*">
+		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*">
 
 	<mx:Metadata>
-		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.events.BrowserSelectionEvent")]
+		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
 	</mx:Metadata>
 
 	<mx:ArrayCollection id="browserDataProvider"/>
@@ -14,9 +14,8 @@
 	<mx:Script>
 		<![CDATA[
 			import mx.events.CollectionEvent;
-			import clarin.cmdi.componentregistry.events.BrowserSelectionEvent;
-			import clarin.cmdi.componentregistry.ItemDescription;
-			import adobe.utils.CustomActions;
+			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
+			import clarin.cmdi.componentregistry.common.ItemDescription;
 
 			private var currentSelectedItem:ItemDescription;
 
@@ -34,7 +33,7 @@
 	</mx:Script>
 
 	<comp:DownloadMenu id="menu"
-					   dataGrid="{dataGrid}"/>
+					   dataGrid="{dataGrid}" viewStack="{this.parentApplication.viewStack}"/>
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">

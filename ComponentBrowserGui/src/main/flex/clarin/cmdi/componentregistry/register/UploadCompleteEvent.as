@@ -1,5 +1,5 @@
-package clarin.cmdi.componentregistry.events {
-	import clarin.cmdi.componentregistry.ItemDescription;
+package clarin.cmdi.componentregistry.register {
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 
 	import flash.events.Event;
 
@@ -17,7 +17,7 @@ package clarin.cmdi.componentregistry.events {
 		}
 
 		override public function clone():Event {
-			return new BrowserSelectionEvent(_itemDescription, bubbles, cancelable);
+			return new UploadCompleteEvent(_itemDescription, bubbles, cancelable);
 		}
 
 	}

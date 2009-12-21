@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:comp="clarin.cmdi.componentregistry.components.*">
+		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*">
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.ComponentElement;
+			import clarin.cmdi.componentregistry.common.ComponentElement;
 			import mx.collections.ArrayCollection;
 			import mx.collections.XMLListCollection;
-			import clarin.cmdi.componentregistry.Component;
-			import clarin.cmdi.componentregistry.ComponentMD;
 			import mx.core.UIComponent;
 
 			private function animateList(comp:UIComponent):void {
@@ -124,11 +122,11 @@
 								   headerText="Name"/>
 				<mx:DataGridColumn dataField="valueScheme"
 								   headerText="Type"
-								   itemRenderer="clarin.cmdi.componentregistry.components.ValueSchemeRenderer"
+								   itemRenderer="clarin.cmdi.componentregistry.common.components.ValueSchemeRenderer"
 								   sortable="false"/>
 				<mx:DataGridColumn dataField="conceptLink"
 								   headerText="ConceptLink"
-								   itemRenderer="clarin.cmdi.componentregistry.components.ConceptLinkRenderer"/>
+								   itemRenderer="clarin.cmdi.componentregistry.common.components.ConceptLinkRenderer"/>
 			</mx:columns>
 		</mx:DataGrid>
 	</mx:Repeater>

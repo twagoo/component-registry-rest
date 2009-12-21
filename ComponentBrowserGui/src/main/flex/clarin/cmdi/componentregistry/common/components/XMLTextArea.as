@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.components {
+package clarin.cmdi.componentregistry.common.components {
 	import flash.events.MouseEvent;
 
 	public class XMLTextArea extends ScrollableTextArea {

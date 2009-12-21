@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.components {
+package clarin.cmdi.componentregistry.common.components {
 	import mx.collections.XMLListCollection;
 	import mx.containers.Box;
 	import mx.controls.ComboBase;
