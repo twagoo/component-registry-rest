@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.common {
 	import mx.collections.ArrayCollection;
-	import mx.utils.ObjectProxy;
 
     [Bindable]
 	public class Profile {
