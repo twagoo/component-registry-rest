@@ -31,7 +31,7 @@ package clarin.cmdi.componentregistry.common.components {
 			for (var i:Number = 0; i < xmlList.length; i++) {
 				var xmlLine:XMLLine = xmlList.getItemAt(i) as XMLLine;
 				var child:DisplayObject;
-				if (xmlLine.editable()) {
+				if (xmlLine.hasValue()) {
 					var f1:XMLEditorField = new XMLEditorField(xmlLine);
 					f1.label = xmlLine.name;
 					f1.setStyle("fontWeight", "bold");
