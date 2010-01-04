@@ -3,9 +3,9 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Profile;
 
+	import flash.events.Event;
+
 	import mx.collections.ArrayCollection;
-	import mx.messaging.ChannelSet;
-	import mx.messaging.config.ServerConfig;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;
@@ -14,10 +14,11 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
 
+	[Event(name="ProfileLoaded", type="flash.events.Event")]
 	public class ProfileInfoService {
+		public static const PROFILE_LOADED:String = "ProfileLoaded";
 
 		private var service:HTTPService;
-		private var service2:HTTPService;
 
 		[Bindable]
 		public var profile:Profile;
@@ -51,6 +52,7 @@ package clarin.cmdi.componentregistry.services {
 				tempArray[tempArray.length] = component;
 			}
 			this.profile.components = new ArrayCollection(tempArray);
+			dispatchEvent(new Event(PROFILE_LOADED));
 		}
 
 		public function fault(faultEvent:FaultEvent):void {

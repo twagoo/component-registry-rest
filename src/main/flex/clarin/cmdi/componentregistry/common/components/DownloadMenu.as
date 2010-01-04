@@ -73,7 +73,7 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private function createNewProfile(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
-			viewStack.switchToEditor();
+			viewStack.switchToEditor(item);
 		}
 
 	}
