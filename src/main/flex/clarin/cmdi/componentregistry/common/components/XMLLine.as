@@ -18,9 +18,13 @@ package clarin.cmdi.componentregistry.common.components {
 			this.xml = xml;
 		}
 
-		public function editable():Boolean {
+		public function hasValue():Boolean {
 			return value != null && value.length > 0;
 		}
 
+
+        public function toString():String {
+            return xml.toXMLString();            
+        }
 	}
 }

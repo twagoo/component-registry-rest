@@ -10,25 +10,21 @@ package clarin.cmdi.componentregistry.common.components {
 		public var editField:String;
 
 		private var _editField:TextInput;
-		private var _hasEditField:Boolean;
 		private var _xmlLine:XMLLine;
 
 
 		public function XMLEditorField(xmlLine:XMLLine) {
 			super();
-			_hasEditField = xmlLine.editable();
 			_xmlLine = xmlLine;
 		}
 
 		override protected function createChildren():void {
-			if (_hasEditField) {
-				_editField = new TextInput();
-				_editField.text = editField;
-				_editField.setStyle("borderStyle", "none");
-				_editField.setStyle("fontWeight", "normal");
-				_editField.addEventListener(Event.CHANGE, handleEdit);
-				addChild(_editField);
-			}
+			_editField = new TextInput();
+			_editField.text = editField;
+			_editField.setStyle("borderStyle", "none");
+			_editField.setStyle("fontWeight", "normal");
+			_editField.addEventListener(Event.CHANGE, handleEdit);
+			addChild(_editField);
 			super.createChildren();
 		}
 
