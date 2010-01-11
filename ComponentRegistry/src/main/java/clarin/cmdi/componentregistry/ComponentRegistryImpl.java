@@ -67,6 +67,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         this.componentsCache = loadComponents();
         LOG.info("CACHE: Reading and parsing all profiles.");
         this.profilesCache = loadProfiles();
+        LOG.info("CACHE: Loaded "+profileDescriptions.size()+" profile descriptions, "+profilesCache.size()+" profiles.");
+        LOG.info("CACHE: Loaded "+componentDescriptions.size()+" components descriptions, "+componentsCache.size()+" components.");
         LOG.info("CACHE initialized. Any occured errors should be adressed, files could be corrupt."
                 + " Components and Profiles with errors will not be shown to users.");
     }
