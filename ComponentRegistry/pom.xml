@@ -78,6 +78,18 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
       <version>1.1.2-ea</version>
+      <exclusions>
+      <!--Jersey has dependencies with different group ids therefore maven cannot resolve the conflict
+       and gives me both jars (two of stax and two of jaxb-impl). Excluding them manually to overcome the problem -->
+        <exclusion>              
+          <groupId>stax</groupId>
+          <artifactId>stax-api</artifactId> 
+        </exclusion>
+        <exclusion>              
+          <groupId>com.sun.xml.bind</groupId>
+          <artifactId>jaxb-impl</artifactId> 
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency> <!-- Needed for form upload support -->
       <groupId>com.sun.jersey.contribs</groupId>
@@ -94,14 +106,30 @@
       <artifactId>jersey-test-framework</artifactId>
       <version>1.1.2-ea</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.glassfish.embedded</groupId>
+          <artifactId>glassfish-embedded-all</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.grizzly</groupId>
+          <artifactId>grizzly-servlet-webserver</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.stream</groupId>
+      <artifactId>sjsxp</artifactId>
+      <version>1.0.1</version>
     </dependency>
   </dependencies>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <packaging>war</packaging>
+    <!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
-    <packaging>war</packaging>
   </properties>
 
   <build>
@@ -197,10 +225,11 @@
           </execution>
         </executions>
       </plugin>
-      <!-- Assembly helper to create the RegistryFiller tool a command line tool which can help fill in a registry with existing components/profiles.
-           Build the tool with: mvn -Dpackaging=jar -Dmaven.test.skip=true assembly:assembly
-           This creates a in "target" a ComponentRegistry-1.0-SNAPSHOT-RegistryFiller directory with a bin and share directory.
-           You can start the tool from the bin dir.
+      <!--
+        Assembly helper to create the RegistryFiller tool a command line tool which can help fill in a registry with
+        existing components/profiles. Build the tool with: mvn -Dpackaging=jar -Dmaven.test.skip=true assembly:assembly
+        This creates a in "target" a ComponentRegistry-1.0-SNAPSHOT-RegistryFiller directory with a bin and share
+        directory. You can start the tool from the bin dir.
       -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
