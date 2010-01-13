@@ -9,6 +9,6 @@ do
 	CLASSPATH=$CLASSPATH:$LIB/$f
 done
 
-echo $CLASSPATH
+#echo $CLASSPATH
 
 $JAVA -Xmx1024M -cp $CLASSPATH clarin.cmdi.componentregistry.tools.RegistryFiller "$@"
