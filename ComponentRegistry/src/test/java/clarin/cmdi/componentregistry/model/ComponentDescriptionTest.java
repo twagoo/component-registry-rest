@@ -22,20 +22,20 @@ public class ComponentDescriptionTest {
         desc.setCreatorName("myC");
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
-        desc.setXlink("linkToMyComponent");
+        desc.setHref("linkToMyComponent");
         desc.setGroupName("MyGroup");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(desc, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<componentDescription>\n";
+        expected += "<componentDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <id>myId</id>\n";
         expected += "    <description>myD</description>\n";
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
-        expected += "    <xlink>linkToMyComponent</xlink>\n";
+        expected += "    <ns2:href>linkToMyComponent</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
         expected += "</componentDescription>\n";
         assertEquals(expected, out.toString());

@@ -24,7 +24,7 @@ public class RegisterResponseTest {
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"false\" isProfile=\"true\">\n";
+        expected += "<registerResponse registered=\"false\" isProfile=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors>\n";
         expected += "        <error>Error 1</error>\n";
         expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
@@ -48,7 +48,7 @@ public class RegisterResponseTest {
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"true\" isProfile=\"true\">\n";
+        expected += "<registerResponse registered=\"true\" isProfile=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors/>\n";
         expected += "    <description xsi:type=\"profileDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";
@@ -56,7 +56,7 @@ public class RegisterResponseTest {
         expected += "        <name>Name</name>\n";
         expected += "        <registrationDate>myDate</registrationDate>\n";
         expected += "        <creatorName>myC</creatorName>\n";
-        expected += "        <xlink>linkToMyProfile</xlink>\n";
+        expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "    </description>\n";
         expected += "</registerResponse>\n";
         assertEquals(expected, out.toString());
@@ -77,7 +77,7 @@ public class RegisterResponseTest {
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"true\" isProfile=\"false\">\n";
+        expected += "<registerResponse registered=\"true\" isProfile=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors/>\n";
         expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";
@@ -85,7 +85,7 @@ public class RegisterResponseTest {
         expected += "        <name>Name</name>\n";
         expected += "        <registrationDate>myDate</registrationDate>\n";
         expected += "        <creatorName>myC</creatorName>\n";
-        expected += "        <xlink>linkToMyProfile</xlink>\n";
+        expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "        <groupName>imdi</groupName>\n";
         expected += "    </description>\n";
         expected += "</registerResponse>\n";
@@ -105,7 +105,7 @@ public class RegisterResponseTest {
         desc.setCreatorName("myC");
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
-        desc.setXlink("linkToMyProfile");
+        desc.setHref("linkToMyProfile");
         return desc;
     }
 
@@ -116,7 +116,7 @@ public class RegisterResponseTest {
         desc.setCreatorName("myC");
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
-        desc.setXlink("linkToMyProfile");
+        desc.setHref("linkToMyProfile");
         return desc;
     }
 }

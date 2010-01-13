@@ -86,6 +86,7 @@ public class MDMarshaller {
     public static <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         String packageName = marshallableObject.getClass().getPackage().getName();
         JAXBContext jc = JAXBContext.newInstance(packageName);
+        
         Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         Writer writer = new OutputStreamWriter(out, "UTF-8");
