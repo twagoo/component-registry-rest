@@ -14,8 +14,10 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
 
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTest;
+import clarin.cmdi.componentregistry.rest.TestHelper;
 
 public class ComponentRegistryImplTest {
 
@@ -24,18 +26,60 @@ public class ComponentRegistryImplTest {
     @Test
     public void testRegisterMDProfile() throws JAXBException {
         ComponentRegistry register = getTestRegistry(getRegistryDir());
-        ProfileDescription description = new ProfileDescription();
+        ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
-        description.setId("Aap" + System.currentTimeMillis());
+        description.setDescription("MyDescription");
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, ComponentRegistryRestServiceTest.getTestProfile());
+        
+        CMDComponentSpec testProfile = TestHelper.getTestProfile();
+        assertNull(testProfile.getHeader().getID());
+        assertNull(testProfile.getHeader().getName());
+        assertNull(testProfile.getHeader().getDescription());
+
+        register.registerMDProfile(description, testProfile);
+        
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
         ProfileDescription desc = register.getProfileDescriptions().get(0);
         assertNull(register.getMDComponent(desc.getId()));
-        assertNotNull(register.getMDProfile(desc.getId()));
+        
+        CMDComponentSpec profile = register.getMDProfile(desc.getId()); 
+        assertNotNull(profile);
+        assertEquals("Header id should be set from description id", description.getId(), profile.getHeader().getID());
+        assertEquals("Aap", profile.getHeader().getName());
+        assertEquals("MyDescription", profile.getHeader().getDescription());
+    }
+    
+    @Test
+    public void testRegisterMDComponent() throws JAXBException {
+        ComponentRegistry register = getTestRegistry(getRegistryDir());
+        ComponentDescription description = ComponentDescription.createNewDescription();
+        description.setName("Aap");
+        description.setDescription("MyDescription");
+
+        assertEquals(0, register.getComponentDescriptions().size());
+        assertEquals(0, register.getProfileDescriptions().size());
+        
+        CMDComponentSpec testComponent = TestHelper.getTestComponent();
+        assertNull(testComponent.getHeader().getID());
+        assertNull(testComponent.getHeader().getName());
+        assertNull(testComponent.getHeader().getDescription());
+        testComponent.getHeader().setDescription("Will not be overwritten");
+
+        register.registerMDComponent(description, testComponent);
+        
+        assertEquals(1, register.getComponentDescriptions().size());
+        assertEquals(0, register.getProfileDescriptions().size());
+        ComponentDescription desc = register.getComponentDescriptions().get(0);
+        assertNull(register.getMDProfile(desc.getId()));
+        
+        CMDComponentSpec component = register.getMDComponent(desc.getId()); 
+        assertNotNull(component);
+        assertEquals("Header id should be set from description id", description.getId(), component.getHeader().getID());
+        assertEquals("Aap", component.getHeader().getName());
+        assertEquals("Will not be overwritten", component.getHeader().getDescription());
     }
 
     @Test
@@ -53,7 +97,7 @@ public class ComponentRegistryImplTest {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, ComponentRegistryRestServiceTest.getTestProfile());
+        register.registerMDProfile(description, TestHelper.getTestProfile());
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
         assertNull(register.getMDComponent(id));
@@ -80,12 +124,12 @@ public class ComponentRegistryImplTest {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, ComponentRegistryRestServiceTest.getTestProfile());
+        register.registerMDProfile(description, TestHelper.getTestProfile());
         description = new ProfileDescription();
         description.setName("Aap2");
         String id2 = "Aap2" + System.currentTimeMillis();
         description.setId(id2);
-        register.registerMDProfile(description, ComponentRegistryRestServiceTest.getTestProfile());
+        register.registerMDProfile(description, TestHelper.getTestProfile());
 
         
         assertEquals(0, register.getComponentDescriptions().size());

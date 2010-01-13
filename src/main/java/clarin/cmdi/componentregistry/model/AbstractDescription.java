@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -19,7 +20,8 @@ public abstract class AbstractDescription {
     private String name;
     private String registrationDate;
     private String creatorName;
-    private String xlink;
+    @XmlElement(namespace="http://www.w3.org/1999/xlink")
+    private String href;
 
     public void setId(String id) {
         this.id = id;
@@ -61,12 +63,12 @@ public abstract class AbstractDescription {
         return creatorName;
     }
 
-    public void setXlink(String xlink) {
-        this.xlink = xlink;
+    public void setHref(String href) {
+        this.href = href;
     }
 
-    public String getXlink() {
-        return xlink;
+    public String getHref() {
+        return href;
     }
 
     @Override

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -233,18 +234,15 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
-        //Check if name not already exists, create profile dir put store all files.
-        //Handle all errors and rollback if something didn't work. Put this all in a separate DAO or something
-        //Create storage package
-        //Create id, creationdate etc...
-        String id = stripRegistryId(description.getId());
-        File dir = new File(storageDir, id);
+        String strippedId = stripRegistryId(description.getId());
+        File dir = new File(storageDir, strippedId);
         boolean success = false;
         try {
-            boolean dirCreated = dir.mkdir(); //Check if file is not there already TODO Patrick
+            boolean dirCreated = dir.mkdir();
             if (dirCreated) {
                 writeDescription(dir, description);
-                writeCMDComponenetSpec(dir, id + ".xml", spec);
+                enrichSpecHeader(spec, description);
+                writeCMDComponentSpec(dir, strippedId + ".xml", spec);
                 success = true;
             }
         } catch (IOException e) {
@@ -252,7 +250,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         } catch (JAXBException e) {
             LOG.error("Register failed:", e);
         } finally {
-            if (!success) { //TODO Patrick make a test for this also what about synchronisation?
+            if (!success) { 
                 LOG.info("Registration of " + type + " " + description + " unsuccessful. Cleaning up created folders.");
                 try {
                     FileUtils.deleteDirectory(dir);
@@ -267,18 +265,30 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return 0;
     }
 
+    private void enrichSpecHeader(CMDComponentSpec spec, AbstractDescription description) {
+        Header header = spec.getHeader();
+        header.setID(description.getId());
+        if (StringUtils.isEmpty(header.getName())) {
+            header.setName(description.getName());
+        }
+        if (StringUtils.isEmpty(header.getDescription())) {
+            header.setDescription(description.getDescription());
+        }
+        
+    }
+
     private void writeDescription(File profileDir, AbstractDescription description) throws IOException, JAXBException {
         File metadataFile = new File(profileDir, "description.xml");
         FileOutputStream fos = new FileOutputStream(metadataFile);
         MDMarshaller.marshal(description, fos);
-        LOG.info("Saving metadata successful " + metadataFile);
+        LOG.info("Saving metadata is successful " + metadataFile);
     }
 
-    private void writeCMDComponenetSpec(File profileDir, String profileName, CMDComponentSpec spec) throws IOException, JAXBException {
+    private void writeCMDComponentSpec(File profileDir, String profileName, CMDComponentSpec spec) throws IOException, JAXBException {
         File file = new File(profileDir, profileName);
         FileOutputStream fos = new FileOutputStream(file);
         MDMarshaller.marshal(spec, fos);
-        LOG.info("Saving profile/component successful " + file);
+        LOG.info("Saving profile/component is successful " + file);
     }
 
     public List<MDProfile> searchMDProfiles(String searchPattern) {

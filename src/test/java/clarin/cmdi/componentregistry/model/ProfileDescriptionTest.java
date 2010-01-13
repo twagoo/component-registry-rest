@@ -22,19 +22,19 @@ public class ProfileDescriptionTest {
         desc.setCreatorName("myC");
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
-        desc.setXlink("linkToMyProfile");
+        desc.setHref("linkToMyProfile");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(desc, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<profileDescription>\n";
+        expected += "<profileDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <id>myId</id>\n";
         expected += "    <description>myD</description>\n";
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
-        expected += "    <xlink>linkToMyProfile</xlink>\n";
+        expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "</profileDescription>\n";
         assertEquals(expected, out.toString());
 

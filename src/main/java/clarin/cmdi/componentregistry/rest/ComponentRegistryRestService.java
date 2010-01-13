@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
-import clarin.cmdi.componentregistry.IdSequence;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -32,8 +32,9 @@ import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/registry")
 public class ComponentRegistryRestService {
-    
-    @Context UriInfo uriInfo;
+
+    @Context
+    UriInfo uriInfo;
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryRestService.class);
 
@@ -44,14 +45,15 @@ public class ComponentRegistryRestService {
     public static final String GROUP_FORM_FIELD = "group";
 
     private ComponentRegistry registry = ComponentRegistryImpl.getInstance();
-    
+
     @GET
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public List<ComponentDescription> getRegisteredComponents() {
         long start = System.currentTimeMillis();
         List<ComponentDescription> components = registry.getComponentDescriptions();
-        LOG.info("Releasing " + components.size() + " registered components into the world ("+(System.currentTimeMillis()-start)+" millisecs)");
+        LOG.info("Releasing " + components.size() + " registered components into the world (" + (System.currentTimeMillis() - start)
+                + " millisecs)");
         return components;
     }
 
@@ -61,7 +63,8 @@ public class ComponentRegistryRestService {
     public List<ProfileDescription> getRegisteredProfiles() {
         long start = System.currentTimeMillis();
         List<ProfileDescription> profiles = registry.getProfileDescriptions();
-        LOG.info("Releasing " + profiles.size() + " registered profiles into the world ("+(System.currentTimeMillis()-start)+" millisecs)");
+        LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
+                + " millisecs)");
         return profiles;
     }
 
@@ -100,7 +103,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/profiles/{profileId}/{rawType}")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
     public String getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType) {
         LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
         String result = "";
@@ -115,7 +118,6 @@ public class ComponentRegistryRestService {
         return result;
     }
 
-   
     @POST
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -135,9 +137,9 @@ public class ComponentRegistryRestService {
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public RegisterResponse registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(CREATOR_NAME_FORM_FIELD) String creatorName, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group) {
+    public RegisterResponse registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input,
+            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(CREATOR_NAME_FORM_FIELD) String creatorName,
+            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group) {
         ComponentDescription desc = createNewComponentDescription();
         desc.setCreatorName(creatorName);
         desc.setName(name);
@@ -150,7 +152,7 @@ public class ComponentRegistryRestService {
 
     private RegisterResponse register(InputStream input, AbstractDescription desc) {
         DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-        MDValidator validator = new MDValidator(input, desc);
+        MDValidator validator = new MDValidator(input, desc, registry);
         RegisterResponse response = new RegisterResponse();
         validate(response, descriptionValidator, validator);
         if (response.getErrors().isEmpty()) {
@@ -161,9 +163,8 @@ public class ComponentRegistryRestService {
                 response.setRegistered(true);
                 response.setDescription(desc);
             } else {
-                //TODO PD, check and validate register response
                 response.setRegistered(false);
-                response.addError("Unable to register at this moment. Internal server errors.");
+                response.addError("Unable to register at this moment. Internal server error.");
             }
         } else {
             response.setRegistered(false);
@@ -173,29 +174,28 @@ public class ComponentRegistryRestService {
     }
 
     private ComponentDescription createNewComponentDescription() {
-        ComponentDescription desc = new ComponentDescription();
-        String id = ComponentRegistry.REGISTRY_ID+"c_" + IdSequence.get();
-        desc.setId(id);
-        desc.setXlink(createXlink(id));
+        ComponentDescription desc = ComponentDescription.createNewDescription();
+        desc.setHref(createXlink(desc.getId()));
         return desc;
     }
 
     private ProfileDescription createNewProfileDescription() {
-        ProfileDescription desc = new ProfileDescription();
-        String id = ComponentRegistry.REGISTRY_ID+"p_" + IdSequence.get();
-        desc.setId(id);
-        desc.setXlink(createXlink(id));
+        ProfileDescription desc = ProfileDescription.createNewDescription();
+        desc.setHref(createXlink(desc.getId()));
         return desc;
     }
-    
+
     private String createXlink(String id) {
-        return uriInfo.getRequestUriBuilder().path(id).build().toString();
+        URI uri = uriInfo.getRequestUriBuilder().path(id).build();
+        return uri.toString();
     }
 
     private void validate(RegisterResponse response, Validator... validators) {
         for (Validator validator : validators) {
             if (!validator.validate()) {
-                response.addError(validator.getErrorMessage());
+                for (String error : validator.getErrorMessages()) {
+                    response.addError(error);
+                }
             }
         }
     }

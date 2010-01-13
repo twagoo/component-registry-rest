@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "registerResponse")
 public class RegisterResponse {
