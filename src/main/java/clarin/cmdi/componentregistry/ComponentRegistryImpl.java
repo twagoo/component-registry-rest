@@ -33,6 +33,8 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class ComponentRegistryImpl implements ComponentRegistry {
 
+    private static final String DESCRIPTION_FILE_NAME = "description.xml";
+
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
 
     //bean will be injected
@@ -105,7 +107,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private Map<String, ProfileDescription> loadProfileDescriptions() {
-        Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter("description.xml"),
+        Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME),
                 TrueFileFilter.TRUE);
         Map<String, ProfileDescription> result = new HashMap<String, ProfileDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
@@ -118,7 +120,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private Map<String, ComponentDescription> loadComponentDescriptions() {
-        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter("description.xml"), TrueFileFilter.TRUE);
+        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), TrueFileFilter.TRUE);
         Map<String, ComponentDescription> result = new HashMap<String, ComponentDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
@@ -172,7 +174,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return writer.toString();
     }
 
-    private File getProfileFile(String profileId) {
+    public File getProfileFile(String profileId) {
         String id = stripRegistryId(profileId);
         File file = new File(configuration.getProfileDir(), id + File.separator + id + ".xml");
         return file;
@@ -203,7 +205,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return writer.toString();
     }
 
-    private File getComponentFile(String componentId) {
+    public File getComponentFile(String componentId) {
         String id = stripRegistryId(componentId);
         File file = new File(configuration.getComponentDir(), id + File.separator + id + ".xml");
         return file;
@@ -278,7 +280,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private void writeDescription(File profileDir, AbstractDescription description) throws IOException, JAXBException {
-        File metadataFile = new File(profileDir, "description.xml");
+        File metadataFile = new File(profileDir, DESCRIPTION_FILE_NAME);
         FileOutputStream fos = new FileOutputStream(metadataFile);
         MDMarshaller.marshal(description, fos);
         LOG.info("Saving metadata is successful " + metadataFile);
