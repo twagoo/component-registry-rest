@@ -101,10 +101,18 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
                 .get(CMDComponentSpec.class);
         assertNotNull(profile);
         assertEquals("Actor", profile.getCMDComponent().get(0).getName());
-        
+
         assertEquals("clarin.eu:cr1:profile2", profile.getHeader().getID());
         assertEquals("testProfile", profile.getHeader().getName());
         assertEquals("Test Description", profile.getHeader().getDescription());
+
+        try {
+            profile = resource().path("/registry/profiles/clarin.eu:cr1:profileXXXX").accept(MediaType.APPLICATION_XML).get(
+                    CMDComponentSpec.class);
+            fail("Exception should have been thrown resouce does not exist, HttpStatusCode 204");
+        } catch (UniformInterfaceException e) {
+            assertEquals(204, e.getResponse().getStatus());
+        }
     }
 
     @Test
@@ -145,7 +153,8 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getTestProfileContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getTestProfileContent(),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
         form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
@@ -165,7 +174,8 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterComponent() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getComponentTestContent(),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
         form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
@@ -234,7 +244,8 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterComponentAsProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getComponentTestContent(), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getComponentTestContent(),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "t");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
         form.field(ComponentRegistryRestService.CREATOR_NAME_FORM_FIELD, "J. Unit");
@@ -250,10 +261,10 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     public static void setUpTestRegistry() throws ParseException, JAXBException {
         registryDir = ComponentRegistryImplTest.createTempRegistryDir();
         testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
-        TestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID+"profile1");
-        TestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID+"profile2");
-        TestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID+"component1");
-        TestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID+"component2");
+        TestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile1");
+        TestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile2");
+        TestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component1");
+        TestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component2");
     }
 
     @AfterClass
