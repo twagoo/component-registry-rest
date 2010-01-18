@@ -24,6 +24,15 @@ public final class TestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
+        return addComponent(testRegistry, id, getComponentTestContent());
+    }
+
+    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content) throws ParseException, JAXBException {
+        return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
+    }
+    
+    private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
+            JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
         desc.setCreatorName("J. Unit");
         desc.setName("testComponent");
@@ -31,8 +40,8 @@ public final class TestHelper {
         desc.setDescription("Test Description");
         desc.setId(id);
         desc.setHref("link:" + id);
-        testRegistry.registerMDComponent(desc, MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), MDMarshaller
-                .getCMDComponentSchema()));
+        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
+        testRegistry.registerMDComponent(desc, spec);
         return desc;
     }
 
@@ -60,6 +69,16 @@ public final class TestHelper {
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
+        return addProfile(testRegistry, id, TestHelper.getTestProfileContent());
+    }
+
+    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content) throws ParseException,
+            JAXBException {
+        return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
+    }
+
+    private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
+            JAXBException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setCreatorName("J. Unit");
         desc.setName("testProfile");
@@ -67,8 +86,8 @@ public final class TestHelper {
         desc.setDescription("Test Description");
         desc.setId(id);
         desc.setHref("link:" + id);
-
-        testRegistry.registerMDProfile(desc, TestHelper.getTestProfile());
+        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
+        testRegistry.registerMDProfile(desc, spec);
         return desc;
     }
 
