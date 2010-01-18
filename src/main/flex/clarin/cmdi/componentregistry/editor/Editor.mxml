@@ -20,29 +20,38 @@
 					   click="createEmptyProfile()"/>
 		</mx:HBox>
 
-		<comp:XMLEditor id="xmlEditor"
-						xml="{cmdComponent}"
-						width="50%"
-						height="80%"
-						verticalGap="-3"
-						indicatorGap="1">
-			<mx:Button id="addComponentBtn"
-					   label="addComponent"
-					   click="addComponent()"/>
-		</comp:XMLEditor>
+		<mx:HBox width="100%"
+				 height="80%">
+			<comp:CMDComponentXMLEditor id="xmlEditor"
+										xml="{cmdComponent}"
+										width="50%"
+										dragEnter="{dragEnterHandler(event)}"
+										dragOver="{dragOverHandler(event)}"
+										dragDrop="{dragDropHandler(event)}"
+										toolTip="drag components from list to add..."/>
+			<mx:DataGrid id="dataGrid"
+						 width="100%"
+						 dragEnabled="true"
+						 dataProvider="{componentsSrv.itemDescriptions}"
+						 columns="{browserColumns.getComponentColumns()}"
+						 allowMultipleSelection="true"/>
 
-		<mx:HBox width="100%" height="300">
+		</mx:HBox>
+		<!--<mx:HBox width="100%"
+				 height="300">
 			<comp:XMLTextArea id="textView"
 							  styleName="xmlTextArea"
 							  editable="true"
 							  xmlData="{cmdComponent}"
-							  width="50%" height="300"/>
+							  width="50%"
+							  height="300"/>
 			<comp:ScrollableTextArea id="infoTextArea"
 									 styleName="xmlTextArea"
 									 editable="false"
 									 text="{cmdComponent}"
-									 width="50%" height="300"/>
-		</mx:HBox>
+									 width="50%"
+									 height="300"/>
+		</mx:HBox>-->
 	</mx:VBox>
 
 </mx:Canvas>

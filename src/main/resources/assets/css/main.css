@@ -7,3 +7,58 @@ ToggleButtonBar {
    buttonWidth: 90;
    horizontalGap: -1;
 }
+
+.borderStyle {
+   borderStyle: solid;
+   borderThickness: 2;
+   borderColor: #009dff;
+   cornerRadius: 8;
+}
+
+.xmlBrowser {
+   borderStyle: solid;
+   backgroundColor: #DDE3EF;
+   borderThickness: 1;
+   borderColor: #DDE3EF;
+   cornerRadius: 8;
+   dropShadowEnabled: true;
+   verticalGap: 1;
+   indicatorGap: 1;
+}
+
+
+.xmlBrowserField {
+    fontWeight: bold;
+    backgroundColor: #DDE3EF;
+}
+
+.xmlBrowserHeader {
+    labelWidth: 50;
+    backgroundColor: #DDE3EF;
+}
+
+.xmlEditorFieldEditField {
+    borderStyle: none;
+    fontWeight: normal;
+}
+
+.xmlBrowserValueLabel {
+    fontWeight: normal;
+}
+
+
+.xmlTextArea {
+   borderStyle: solid;
+   backgroundColor: #DDE3EF;
+   borderThickness: 1;
+   borderColor: #DDE3EF;
+   cornerRadius: 8;
+   dropShadowEnabled: true;
+}
+
+
+
+
+
+
+

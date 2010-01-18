@@ -74,14 +74,6 @@
    dropShadowEnabled: true;
 }
 
-.xmlTextArea {
-   borderStyle: solid;
-   backgroundColor: #DDE3EF;
-   borderThickness: 1;
-   borderColor: #DDE3EF;
-   cornerRadius: 8;
-   dropShadowEnabled: true;
-}
 </mx:Style>
 	<mx:XML id="cmdComponent"/>
 

@@ -12,16 +12,16 @@ package clarin.cmdi.componentregistry.common {
 		}
 
 		private static function setValueScheme(value:XML, item:ComponentElement):void {
-			if (value.hasOwnProperty("ValueScheme")) {
-				if (value.ValueScheme.hasOwnProperty("pattern")) {
+			if (value.hasOwnProperty(ComponentMD.VALUE_SCHEME)) { 
+				if (value.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
 					var d:Object = value.ValueScheme.pattern
 					item.valueScheme = d.name() + "(" + d.text().toXMLString() + ")";
-				} else if (value.ValueScheme.hasOwnProperty("enumeration")) {
+				} else if (value.ValueScheme.hasOwnProperty(ComponentMD.ENUMERATION)) {
 					item.valueScheme = new XMLListCollection(value.ValueScheme.enumeration.*);
 				}
-			} else if (value.hasOwnProperty("@ValueScheme")) {
+			} else if (value.hasOwnProperty("@"+ComponentMD.VALUE_SCHEME)) {
 				item.valueScheme = value.@ValueScheme;
-			} else if (value.hasOwnProperty("Type")) {
+			} else if (value.hasOwnProperty(ComponentMD.TYPE)) {
 				item.valueScheme = value.Type;
 			}
 		}
