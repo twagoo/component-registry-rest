@@ -7,7 +7,6 @@ package clarin.cmdi.componentregistry.common.components {
 
 		/**
 		 * data can be XML or XMLList any other type will result in super.setData() call.
-		 * The XML/XMLList will be transformed into htmltext
 		 * returns ArrayCollections of XMLLines.
 		 *
 		 */

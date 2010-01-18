@@ -50,7 +50,7 @@
 				 columns="{browserColumns}"
 				 contextMenu="{menu.cm}"
 				 allowMultipleSelection="false"
-				 itemFocusIn="{dispatchBrowserSelectionEvent()}">
+				>
 
 	</mx:DataGrid>
 </mx:VBox>

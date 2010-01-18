@@ -6,8 +6,14 @@ package clarin.cmdi.componentregistry.services {
 
 	public class ComponentListService extends BrowserService {
 
+
+		private static var _instance:ComponentListService = new ComponentListService();
+
 		public function ComponentListService() {
 			super(Config.instance.componentListUrl);
+			if (_instance != null) {
+				throw new Error("Service can only be accessed through ComponentListService.instance");
+			}
 		}
 
 		override protected function result(resultEvent:ResultEvent):void {
@@ -21,6 +27,22 @@ package clarin.cmdi.componentregistry.services {
 				tempArray[tempArray.length] = item;
 			}
 			setItemDescriptions(new ArrayCollection(tempArray));
+		}
+
+		public static function get instance():ComponentListService {
+			return _instance;
+		}
+
+		/**
+		 * Looks up itemDescription, returns null if not found.
+		 */
+		public function lookUpDescription(componentId:String):ItemDescription {
+			for each (var item:ItemDescription in itemDescriptions) {
+				if (item.id == componentId) {
+					return item;
+				}
+			}
+			return null;
 		}
 	}
 }

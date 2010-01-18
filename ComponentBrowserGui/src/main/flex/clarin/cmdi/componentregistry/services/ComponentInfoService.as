@@ -12,7 +12,9 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
 
+[Event(name="ComponentLoaded", type="flash.events.Event")]
 	public class ComponentInfoService {
+	    public static const COMPONENT_LOADED:String = "ComponentLoaded";
 
 		private var service:HTTPService;
 
@@ -40,6 +42,7 @@ package clarin.cmdi.componentregistry.services {
 			metaData.name = resultXml.CMD_Component.@name;
 			metaData.xml = resultXml;
 			component.componentMD = metaData;
+			dispatchEvent(new Event(COMPONENT_LOADED));
 		}
 
 		public function fault(faultEvent:FaultEvent):void {

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Label xmlns:mx="http://www.adobe.com/2006/mxml" text="{data.conceptLink}"
-	click="linkListener(event)" mouseOver="mouseOver(event)" 
+<mx:Label xmlns:mx="http://www.adobe.com/2006/mxml" click="linkListener(event)" mouseOver="mouseOver(event)" 
 				mouseOut="mouseOut(event)">
  
 	<mx:Script>
@@ -17,7 +16,7 @@
  
 			private function linkListener(event:MouseEvent):void {
 			   var request:URLRequest = 
-				new URLRequest(event.currentTarget.data.conceptLink);
+				new URLRequest(event.currentTarget.text);
 			   navigateToURL(request, "_blank");
 			}
 		]]>

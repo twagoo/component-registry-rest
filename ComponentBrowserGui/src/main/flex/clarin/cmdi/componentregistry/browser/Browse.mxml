@@ -10,10 +10,14 @@
 
 	<mx:Script>
 		<![CDATA[
+		    import clarin.cmdi.componentregistry.services.ComponentListService;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import mx.controls.Alert;
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.Profile;
+			
+			[Bindable]
+			private var componentsSrv:ComponentListService = ComponentListService.instance;
 
 			public function refresh():void {
 				profilesSrv.load();
@@ -43,7 +47,6 @@
 	</mx:Script>
 
 	<local:ProfileListService id="profilesSrv"/>
-	<local:ComponentListService id="componentsSrv"/>
 	<local:ProfileInfoService id="profileSrv"/>
 	<local:ComponentInfoService id="componentSrv"/>
 	<browser:BrowserColumns id="browserColumns"/>

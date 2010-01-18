@@ -7,10 +7,10 @@
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
+			import mx.managers.PopUpManager;
 			import clarin.cmdi.componentregistry.services.UploadService;
-			import mx.managers.IPopUpManager;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
-			private var iPopUpManager:IPopUpManager;
+
 
 			private function init():void {
 				ExternalMouseWheelSupport.getInstance(stage);

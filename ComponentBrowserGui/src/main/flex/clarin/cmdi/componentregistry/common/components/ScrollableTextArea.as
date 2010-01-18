@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.common.components {
 	import mx.events.ScrollEvent;
 	import mx.events.ScrollEventDirection;
 
+    [Inspectable]
 	public class ScrollableTextArea extends TextArea {
 		public function ScrollableTextArea() {
 			super();
