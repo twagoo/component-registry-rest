@@ -70,8 +70,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         this.componentsCache = loadComponents();
         LOG.info("CACHE: Reading and parsing all profiles.");
         this.profilesCache = loadProfiles();
-        LOG.info("CACHE: Loaded "+profileDescriptions.size()+" profile descriptions, "+profilesCache.size()+" profiles.");
-        LOG.info("CACHE: Loaded "+componentDescriptions.size()+" components descriptions, "+componentsCache.size()+" components.");
+        LOG.info("CACHE: Loaded " + profileDescriptions.size() + " profile descriptions, " + profilesCache.size() + " profiles.");
+        LOG.info("CACHE: Loaded " + componentDescriptions.size() + " components descriptions, " + componentsCache.size() + " components.");
         LOG.info("CACHE initialized. Any occured errors should be adressed, files could be corrupt."
                 + " Components and Profiles with errors will not be shown to users.");
     }
@@ -80,8 +80,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
         for (Iterator<String> iter = profileDescriptions.keySet().iterator(); iter.hasNext();) {
             String id = iter.next();
-            File file = getProfileFile(id);
-            CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+            CMDComponentSpec spec = getUncachedProfile(id);
             if (spec != null) {
                 result.put(id, spec);
             } else {
@@ -91,12 +90,17 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
+    CMDComponentSpec getUncachedProfile(String id) {
+        File file = getProfileFile(id);
+        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+        return spec;
+    }
+
     private Map<String, CMDComponentSpec> loadComponents() {
         Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
         for (Iterator<String> iter = componentDescriptions.keySet().iterator(); iter.hasNext();) {
             String id = iter.next();
-            File file = getComponentFile(id);
-            CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+            CMDComponentSpec spec = getUncachedComponent(id);
             if (spec != null) {
                 result.put(id, spec);
             } else {
@@ -104,6 +108,12 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             }
         }
         return result;
+    }
+
+    CMDComponentSpec getUncachedComponent(String id) {
+        File file = getComponentFile(id);
+        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+        return spec;
     }
 
     private Map<String, ProfileDescription> loadProfileDescriptions() {
@@ -168,9 +178,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public String getMDProfileAsXsd(String profileId) {
-        File file = getProfileFile(profileId);
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
+        return getXsd(expandedSpec);
+    }
+
+    private String getXsd(CMDComponentSpec expandedSpec) {
         Writer writer = new StringWriter();
-        MDMarshaller.generateXsd(file, writer);
+        MDMarshaller.generateXsd(expandedSpec, writer);
         return writer.toString();
     }
 
@@ -199,10 +213,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public String getMDComponentAsXsd(String componentId) {
-        File file = getComponentFile(componentId);
-        Writer writer = new StringWriter();
-        MDMarshaller.generateXsd(file, writer);
-        return writer.toString();
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
+        return getXsd(expandedSpec);
     }
 
     public File getComponentFile(String componentId) {
@@ -252,7 +264,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         } catch (JAXBException e) {
             LOG.error("Register failed:", e);
         } finally {
-            if (!success) { 
+            if (!success) {
                 LOG.info("Registration of " + type + " " + description + " unsuccessful. Cleaning up created folders.");
                 try {
                     FileUtils.deleteDirectory(dir);
@@ -276,7 +288,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         if (StringUtils.isEmpty(header.getDescription())) {
             header.setDescription(description.getDescription());
         }
-        
+
     }
 
     private void writeDescription(File profileDir, AbstractDescription description) throws IOException, JAXBException {

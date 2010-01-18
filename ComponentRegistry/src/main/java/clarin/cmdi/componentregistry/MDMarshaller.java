@@ -1,8 +1,9 @@
 package clarin.cmdi.componentregistry;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +30,8 @@ import javax.xml.validation.SchemaFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 
 public class MDMarshaller {
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
@@ -86,7 +89,7 @@ public class MDMarshaller {
     public static <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         String packageName = marshallableObject.getClass().getPackage().getName();
         JAXBContext jc = JAXBContext.newInstance(packageName);
-        
+
         Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         Writer writer = new OutputStreamWriter(out, "UTF-8");
@@ -107,7 +110,7 @@ public class MDMarshaller {
         return generalComponentSchema;
     }
 
-    public static void generateXsd(File inputXmlFile, final Writer outputWriter) {
+    public static void generateXsd(CMDComponentSpec spec, final Writer outputWriter) {
         if (componentToSchemaTemplates == null) {
             try {
                 System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
@@ -119,13 +122,18 @@ public class MDMarshaller {
         }
         try {
             Transformer transformer = componentToSchemaTemplates.newTransformer();
-            transformer.transform(new StreamSource(new FileInputStream(inputXmlFile)), new StreamResult(outputWriter));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            MDMarshaller.marshal(spec, out);
+            ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
+            transformer.transform(new StreamSource(input), new StreamResult(outputWriter));
         } catch (TransformerConfigurationException e) {
             LOG.error("Cannot create Transformer", e);
         } catch (TransformerException e) {
-            LOG.error("Cannot transform xml file: " + inputXmlFile, e);
-        } catch (FileNotFoundException e) {
-            LOG.error("File: " + inputXmlFile, e);
+            LOG.error("Cannot transform xml file: " + spec, e);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Error in encoding: ", e);
+        } catch (JAXBException e) {
+            LOG.error("Cannot marshall spec: " + spec, e);
         }
     }
 
