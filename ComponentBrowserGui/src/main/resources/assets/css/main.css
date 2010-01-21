@@ -29,12 +29,14 @@ ToggleButtonBar {
 
 .xmlBrowserField {
     fontWeight: bold;
-    backgroundColor: #DDE3EF;
 }
 
 .xmlBrowserHeader {
     labelWidth: 50;
-    backgroundColor: #DDE3EF;
+}
+
+.xmlBrowserHeaderCmdelement {
+    labelWidth: 70;
 }
 
 .xmlEditorFieldEditField {
