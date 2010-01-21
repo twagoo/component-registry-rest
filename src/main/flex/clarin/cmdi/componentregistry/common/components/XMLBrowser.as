@@ -72,7 +72,9 @@ package clarin.cmdi.componentregistry.common.components {
 
 		protected function handleComponents(components:XMLList):void {
 			for each (var component:XML in components) {
-				addFormChild(new HRule());
+			    var ruler:HRule = new HRule();
+			    ruler.percentWidth=80;
+				addFormChild(ruler);
 				addFormHeading(component.name());
 				addAttributes(component.attributes());
 				addElements(component.elements());
@@ -148,7 +150,11 @@ package clarin.cmdi.componentregistry.common.components {
 		protected function addFormHeading(name:String):void {
 			var heading:FormHeading = new FormHeading();
 			heading.label = name;
-			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
+			if (name == ComponentMD.CMD_ELEMENT) {
+			    heading.styleName= StyleConstants.XMLBROWSER_HEADER_CMD_ELEMENT;
+  			} else {
+    			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
+  			}
 			addFormChild(heading);
 		}
 
