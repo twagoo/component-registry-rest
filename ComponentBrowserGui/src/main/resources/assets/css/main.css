@@ -8,7 +8,7 @@ ToggleButtonBar {
    horizontalGap: -1;
 }
 
-.borderStyle {
+.borderStyles {
    borderStyle: solid;
    borderThickness: 2;
    borderColor: #009dff;
@@ -16,10 +16,9 @@ ToggleButtonBar {
 }
 
 .xmlBrowser {
-   borderStyle: solid;
+   borderStyle: none;
+   borderThickness: 0;
    backgroundColor: #DDE3EF;
-   borderThickness: 1;
-   borderColor: #DDE3EF;
    cornerRadius: 8;
    dropShadowEnabled: true;
    verticalGap: 1;

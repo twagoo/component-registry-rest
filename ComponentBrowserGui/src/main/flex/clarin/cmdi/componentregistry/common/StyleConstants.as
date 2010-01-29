@@ -8,6 +8,6 @@ package clarin.cmdi.componentregistry.common {
 		public static const XMLBROWSER_HEADER:String = "xmlBrowserHeader";
 		public static const XMLBROWSER_HEADER_CMD_ELEMENT:String = "xmlBrowserHeaderCmdelement";
 		public static const XMLEDITOR_EDIT_FIELD:String = "xmlEditorFieldEditField";
-		public static const EXPANDING_COMPONENT:String = "borderStyle";
+		public static const EXPANDING_COMPONENT:String = "borderStyles";
 	}
 }

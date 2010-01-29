@@ -24,8 +24,8 @@ package clarin.cmdi.componentregistry.common.components {
 		private var addedChildren:ArrayCollection = new ArrayCollection();
 		protected var indent:Boolean=false;
 
-		public function XMLBrowser() {
-		}
+		public function XMLBrowser() {}
+
 
 		public function set xml(xml:XML):void {
 			_xml = xml;

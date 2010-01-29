@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*">
+		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
+		 xmlns:rictus="com.rictus.controls.*">
 
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
 	</mx:Metadata>
 
-	<mx:ArrayCollection id="browserDataProvider"/>
+    
+	<mx:ArrayCollection id="browserDataProvider" />
 	<mx:Array id="browserColumns"/>
 
 
 	<mx:Script>
 		<![CDATA[
+		    import mx.collections.ArrayCollection;
 			import mx.events.CollectionEvent;
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 
 			private var currentSelectedItem:ItemDescription;
 
+            
 			private function dispatchBrowserSelectionEvent():void {
 				if (this.dataGrid.selectedItem != null) {
 					var item:ItemDescription = this.dataGrid.selectedItem as ItemDescription
@@ -37,10 +41,11 @@
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">
-		<mx:Label text="{browserDataProvider.length} registered"/>
+		<rictus:SearchBox id="searchBox" label="filter..."/>	 
+		<mx:Label text="Showing {browserDataProvider.length} of {dataGrid.unfilteredLength}"/>
 	</mx:HBox>
 
-	<mx:DataGrid id="dataGrid"
+	<comp:FilteringDataGrid id="dataGrid"
 				 x="0"
 				 y="112"
 				 width="100%"
@@ -50,7 +55,7 @@
 				 columns="{browserColumns}"
 				 contextMenu="{menu.cm}"
 				 allowMultipleSelection="false"
+				 searchInput="{searchBox}"
 				>
-
-	</mx:DataGrid>
+	</comp:FilteringDataGrid>
 </mx:VBox>
