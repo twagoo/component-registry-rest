@@ -3,11 +3,7 @@ package clarin.cmdi.componentregistry.tools;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.ArrayList;
@@ -22,7 +18,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +88,7 @@ public class RegistryFiller {
             LOG.info("Adding " + (i - 3) + "/" + (args.length - 4) + ": " + file.getName());
             try {
                 if (registerProfiles) {
-                    filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), creatorName, description);
+                    filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), creatorName, description, group);
                 } else {
                     filler.addComponent(file, FilenameUtils.getBaseName(file.getName()), creatorName, description, group);
                 }
@@ -114,8 +110,8 @@ public class RegistryFiller {
         System.exit(0);
     }
 
-    public void addProfile(File file, String name, String creatorName, String description) {
-        profiles.add(new RegObject(file, name, creatorName, description, null));
+    public void addProfile(File file, String name, String creatorName, String description, String group) {
+        profiles.add(new RegObject(file, name, creatorName, description, group));
     }
 
     public void addComponent(File file, String name, String creatorName, String description, String group) {
@@ -136,29 +132,42 @@ public class RegistryFiller {
             RegObject regObject = regObjects.get(i);
             LOG.info("Resolving " + (i + 1) + "/" + regObjects.size() + ": " + regObject.getName());
             try {
-                if (registerProfiles) {
-                    registerProfile(regObject);
-                } else {
-                    replaceFileNameForIds(regObject);
-                }
+                replaceFileNameForIds(regObject);
             } catch (Exception e) {
                 failed++;
                 LOG.error("Error in file: " + regObject.getFile(), e);
             }
         }
-        if (!registerProfiles) { //extra step for components
-            try {
+        try {
+            if (registerProfiles) {
+                registerProfiles();
+            } else {
                 registerComponents();
-            } catch (Exception e) {
-                failed++;
-                LOG.error("Error:", e);
             }
+        } catch (Exception e) {
+            failed++;
+            LOG.error("Error:", e);
         }
     }
 
-    private void registerProfile(RegObject regObject) throws IOException {
-        helper.registerProfile(createInputStream(regObject.getFile()), regObject.getCreatorName(), regObject.getDescription(), regObject
-                .getName());
+    private void registerProfiles() throws Exception {
+        int i = 1;
+        for (RegObject regObject : resolvedComponents.keySet()) {
+            LOG.info("Registering " + i++ + "/" + resolvedComponents.size() + ": " + regObject.getName());
+            CMDComponentSpec comp = resolvedComponents.get(regObject);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            MDMarshaller.marshal(comp, out);
+            ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
+            helper.registerProfile(input, regObject.getCreatorName(), regObject.getDescription(), regObject.getName());
+        }
+        if (!unresolvedComponents.isEmpty()) {
+            LOG.error("Cannot resolve all profiles manual intervention is needed.");
+            LOG.error("Files that could not be registered are:");
+            for (RegObject regObject : unresolvedComponents) {
+                LOG.error("- " + regObject.getFile());
+            }
+            failed += unresolvedComponents.size();
+        }
     }
 
     private void replaceFileNameForIds(RegObject regObject) throws JAXBException, IOException {
@@ -168,7 +177,7 @@ public class RegistryFiller {
             return;
         }
         List<CMDComponentType> cmdComponents = comp.getCMDComponent();
-        boolean resolved = replaceFileNames(cmdComponents);
+        boolean resolved = replaceFileNames(cmdComponents, regObject);
         if (!resolved) {
             unresolvedComponents.add(regObject);
         } else {
@@ -176,30 +185,61 @@ public class RegistryFiller {
         }
     }
 
-    private boolean replaceFileNames(List<CMDComponentType> cmdComponents) {
+    private boolean replaceFileNames(List<CMDComponentType> cmdComponents, RegObject regObject) {
         boolean resolved = true;
+        List<ComponentDescription> descriptions = service.path("/components").get(new GenericType<List<ComponentDescription>>() {
+        });
         for (CMDComponentType cmdComponentType : cmdComponents) {
             if (cmdComponentType.getFilename() != null) { //nested component so try to resolve the fileName to the id.
                 String name = FilenameUtils.getBaseName(cmdComponentType.getFilename());
-                List<ComponentDescription> descriptions = service.path("/components").get(new GenericType<List<ComponentDescription>>() {
-                });
+                List<ComponentDescription> matched = new ArrayList<ComponentDescription>();
                 for (ComponentDescription componentDescription : descriptions) {
-                    if (componentDescription.getName().equals(name)) { //NOTE: assuming here name is unique which is not guaranteed. Need to check manually if actually correct. Should be ok most of the times.
-                        LOG.info("Replacing fileName: " + cmdComponentType.getFilename() + " with componentId: "
-                                + componentDescription.getId());
-                        cmdComponentType.setComponentId(componentDescription.getId());
-                        break;
+                    if (componentDescription.getName().equals(name)) {
+                        matched.add(componentDescription);
+                    }
+                }
+                if (!matched.isEmpty()) {
+                    if (matched.size() == 1) {
+                        ComponentDescription desc = matched.get(0);
+                        setComponentId(cmdComponentType, desc);
+                    } else {
+                        LOG.info("Found multiple matching descriptions on name, making a best effort guess on group name.");
+                        String group = guessGroupName(cmdComponentType, regObject);
+                        for (ComponentDescription desc : matched) {
+                            if (StringUtils.isEmpty(group) || group.equals(desc.getGroupName())) { //NOTE: assuming here name is unique which is not guaranteed. Need to check manually if actually correct. Should be ok most of the times.
+                                setComponentId(cmdComponentType, desc);
+                                break;
+                            }
+                        }
                     }
                 }
                 resolved &= componentExist(cmdComponentType.getComponentId());
             } else {
-                resolved &= replaceFileNames(cmdComponentType.getCMDComponent());//Recursion
+                resolved &= replaceFileNames(cmdComponentType.getCMDComponent(), regObject);//Recursion
             }
         }
         return resolved;
     }
 
+    private void setComponentId(CMDComponentType cmdComponentType, ComponentDescription matched) {
+        LOG.info("Replacing fileName: " + cmdComponentType.getFilename() + " with componentId: " + matched.getId());
+        cmdComponentType.setComponentId(matched.getId());
+    }
+
+    private String guessGroupName(CMDComponentType cmdComponentType, RegObject regObject) {
+        String result = FilenameUtils.getName(FilenameUtils.getFullPathNoEndSeparator(cmdComponentType.getFilename()));
+        if (StringUtils.isEmpty(result)) {
+            result = regObject.getGroup();
+        } else if (result.equals("..")) {
+            result = regObject.getGroup().split("/")[0]; //Assuming someone uses as group for instance: clarin/webservices
+        }
+        return result;
+    }
+
     private boolean componentExist(String id) {
+        if (id == null) {
+            return false;
+        }
         try {
             service.path("/components/" + id).get(CMDComponentSpec.class);
         } catch (UniformInterfaceException e) {
@@ -240,11 +280,11 @@ public class RegistryFiller {
         }
     }
 
-    private InputStream createInputStream(File file) throws IOException {
-        Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8"); //To handle unicode chars.
-        InputStream input = new ByteArrayInputStream(IOUtils.toByteArray(reader, "UTF-8"));
-        return input;
-    }
+    //    private InputStream createInputStream(File file) throws IOException {
+    //        Reader reader = new InputStreamReader(new FileInputStream(file), "UTF-8"); //To handle unicode chars.
+    //        InputStream input = new ByteArrayInputStream(IOUtils.toByteArray(reader, "UTF-8"));
+    //        return input;
+    //    }
 
     private class RegObject {
 
