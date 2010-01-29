@@ -61,7 +61,7 @@ public class RegistryMigration {
         List<ProfileDescription> descriptions = registry.getProfileDescriptions();
         for (ProfileDescription desc : descriptions) {
             File file = registry.getProfileFile(desc.getId());
-            filler.addProfile(file, desc.getName(), desc.getCreatorName(), desc.getDescription());
+            filler.addProfile(file, desc.getName(), desc.getCreatorName(), desc.getDescription(), "");
         }
     }
 
