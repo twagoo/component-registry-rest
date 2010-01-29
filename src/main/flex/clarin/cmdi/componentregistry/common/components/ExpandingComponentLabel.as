@@ -9,6 +9,7 @@ package clarin.cmdi.componentregistry.common.components {
 	import flash.events.MouseEvent;
 	
 	import mx.containers.VBox;
+	import mx.controls.Alert;
 	import mx.controls.Label;
 
 	public class ExpandingComponentLabel extends VBox {
@@ -41,19 +42,24 @@ package clarin.cmdi.componentregistry.common.components {
 				isExpanded = false;
 			} else {
 				expand();
-				isExpanded = true;
 			}
 		}
 
 
 		private function unexpand():void {
-			removeChild(expanded);
+		    if (expanded != null) {
+			    removeChild(expanded);
+			}
 		}
 
 		private function expand():void {
 			var item:ItemDescription = ComponentListService.instance.lookUpDescription(componentId);
-			componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, handleComponentLoaded);
-			componentSrv.load(item);
+			if (item != null) {
+			    componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, handleComponentLoaded);
+			    componentSrv.load(item);
+			} else {
+			    Alert.show("Error: component cannot be found");
+			}
 		}
 
 		private function handleComponentLoaded(event:Event):void {
@@ -67,6 +73,7 @@ package clarin.cmdi.componentregistry.common.components {
 			expandedComponent.xml = comp.componentMD.xml;
 			expanded = expandedComponent;
 			addChild(expanded);
+			isExpanded = true;
 		}
 
 

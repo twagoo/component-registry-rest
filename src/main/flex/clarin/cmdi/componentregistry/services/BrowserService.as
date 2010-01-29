@@ -1,4 +1,6 @@
 package clarin.cmdi.componentregistry.services {
+	import clarin.cmdi.componentregistry.common.ItemDescription;
+	
 	import mx.collections.ArrayCollection;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -6,6 +8,7 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
+	import mx.utils.ObjectUtil;
 	import mx.utils.StringUtil;
 
 	public class BrowserService {
@@ -18,6 +21,10 @@ package clarin.cmdi.componentregistry.services {
 		[Bindable]
 		[ArrayElementType("ItemDescription")]
 		public var itemDescriptions:ArrayCollection;
+
+        // Not bindable needed for lookups over the whole collections of itemDescriptions
+		protected var unFilteredItemDescriptions:ArrayCollection; 
+
 
 		public function BrowserService(restUrl:String) {
 			this.service = new HTTPService();
@@ -43,7 +50,11 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		protected function setItemDescriptions(items:ArrayCollection):void {
-			this.itemDescriptions = items;
+			itemDescriptions = items;
+			unFilteredItemDescriptions = new ArrayCollection(); //create a copy
+			for each (var item:Object in items) {
+                unFilteredItemDescriptions.addItem(item);		    
+			}
 		}
 	}
 }

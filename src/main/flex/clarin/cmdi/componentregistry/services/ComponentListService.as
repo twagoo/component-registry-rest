@@ -37,7 +37,7 @@ package clarin.cmdi.componentregistry.services {
 		 * Looks up itemDescription, returns null if not found.
 		 */
 		public function lookUpDescription(componentId:String):ItemDescription {
-			for each (var item:ItemDescription in itemDescriptions) {
+			for each (var item:ItemDescription in unFilteredItemDescriptions) {
 				if (item.id == componentId) {
 					return item;
 				}
