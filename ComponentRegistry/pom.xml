@@ -134,6 +134,7 @@
     <!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
+    <ComponentBrowserGuiVersion>1.1-SNAPSHOT</ComponentBrowserGuiVersion>
   </properties>
 
   <build>
@@ -146,7 +147,7 @@
         <directory>src/generated/jaxb</directory>
       </resource>
       <resource>
-        <filtering>false</filtering>
+        <filtering>true</filtering>
         <directory>src/main/resources</directory>
       </resource>
     </resources>
@@ -218,7 +219,7 @@
                 <artifactItem>
                   <groupId>clarin.cmdi</groupId>
                   <artifactId>ComponentBrowserGui</artifactId>
-                  <version>1.1-SNAPSHOT</version>
+                  <version>${ComponentBrowserGuiVersion}</version>
                   <type>swf</type>
                   <overWrite>true</overWrite>
                   <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
