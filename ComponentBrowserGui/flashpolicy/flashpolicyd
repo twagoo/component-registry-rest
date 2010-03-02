@@ -1,0 +1,38 @@
+#! /bin/sh
+#
+# flashpolicyd   This starts and stops the Flash socket policy server
+#
+# description: The Flash socket policy server
+#
+#####################
+#BEGIN CONFIG SECTION
+
+#Location of daemon
+prog=/usr/local/sbin/flashpolicyd.pl
+
+#Location of socket policy file
+policy=/lat/apache/htdocs/crossdomain.xml
+
+#logfile=/var/log/flashpolicyd
+logfile=/dev/null
+
+#END CONFIG SECTION
+#####################
+
+case "$1" in
+'start')
+	$prog --file="$policy" 2>> "$logfile" &  
+	;;
+
+'stop')
+	echo "Shutting down flashpolicy daemon"
+	pkill flashpolicyd.pl
+	;;
+
+*)
+	echo "Usage: $0 { start | stop }"
+	exit 1
+	;;
+esac
+exit 0
+
