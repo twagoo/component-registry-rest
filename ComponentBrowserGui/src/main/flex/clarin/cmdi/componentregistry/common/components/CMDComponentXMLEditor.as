@@ -143,66 +143,6 @@ package clarin.cmdi.componentregistry.common.components {
             removeChild(event.currentTarget as DisplayObject);
         }
         
-//		protected override function createFormHeading(name:String):UIComponent {
-//			var heading:UIComponent = super.createFormHeading(name);
-//			if (name == COMPONENT) {
-//				var editBar:HBox = new HBox();
-//				editBar.addChild(heading);
-//				editBar.percentWidth = 100;
-//				var spacer:Spacer = new Spacer();
-//				spacer.percentWidth = 90;
-//				editBar.addChild(spacer);
-//				var removeButton:Button = new Button();
-//				removeButton.height = 20;
-//				removeButton.label = "X";
-//				removeButton.addEventListener(MouseEvent.CLICK, removeComponent);
-//				editBar.addChild(removeButton);
-//				return editBar;
-//			} else {
-//				return heading;
-//			}
-//		}
-//
-//		protected override function createAndAddFormChild(name:String, value:String, bindingFunction:Function = null):void {
-//			addFormChild(createFormItem(name, value, bindingFunction)); //Always add all children so they can be edited
-//		}
-//
-//		private function removeComponent(event:MouseEvent):void {
-//			Alert.show("Fire remove!");
-//		}
-//
-//		protected override function createFormItemFieldValue(name:String, value:String, bindingFunction:Function = null):DisplayObject {
-//			if (name == COMPONENT_ID) {
-//				return createComponentIdLabel(value);
-//			} else {
-//				return createDefaultEditField(name, value, bindingFunction);
-//			}
-//		}
-//
-//		private function createDefaultEditField(name:String, value:String, bindingFunction:Function = null):UIComponent {
-//			var result:UIComponent;
-//			if (name == DESCRIPTION) {
-//				var editArea:TextArea = new TextArea();
-//				editArea.text = value;
-//				editArea.styleName = StyleConstants.XMLEDITOR_EDIT_FIELD;
-//				editArea.width = 400;
-//				result = editArea;
-//			} else {
-//				var editField:TextInput = new TextInput();
-//				editField.text = value;
-//				editField.styleName = StyleConstants.XMLEDITOR_EDIT_FIELD;
-//				editField.width = 400;
-//				result = editField;
-//				BindingUtils.bindSetter(bindingFunction, editField, "text");
-//			}
-//			return result;
-//		}
-//
-//		private function createComponentIdLabel(value:String):ExpandingComponentLabel {
-//			var componentLabel:ExpandingComponentLabel = new ExpandingComponentLabel(value, true);
-//			return componentLabel;
-//		}
-//
 	}
 
 }
