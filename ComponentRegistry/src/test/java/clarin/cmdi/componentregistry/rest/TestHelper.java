@@ -27,14 +27,15 @@ public final class TestHelper {
         return addComponent(testRegistry, id, getComponentTestContent());
     }
 
-    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content) throws ParseException, JAXBException {
+    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content) throws ParseException,
+            JAXBException {
         return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
     }
-    
+
     private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
             JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
-        desc.setCreatorName("J. Unit");
+        desc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
         desc.setName("testComponent");
         desc.setRegistrationDate("" + SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse("1/1/2009"));
         desc.setDescription("Test Description");
@@ -80,7 +81,7 @@ public final class TestHelper {
     private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
             JAXBException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
-        desc.setCreatorName("J. Unit");
+        desc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
         desc.setName("testProfile");
         desc.setRegistrationDate("" + SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse("1/1/2009"));
         desc.setDescription("Test Description");

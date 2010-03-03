@@ -57,7 +57,6 @@ public class MDValidator implements Validator {
         return errorMessages.isEmpty();
     }
 
-
     private void validateComponents(List<CMDComponentType> cmdComponents) {
         for (CMDComponentType cmdComponentType : cmdComponents) {
             validateDescribedComponents(cmdComponentType);

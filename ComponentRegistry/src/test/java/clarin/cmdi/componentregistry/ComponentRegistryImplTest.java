@@ -1,10 +1,11 @@
 package clarin.cmdi.componentregistry;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.regex.Matcher;
@@ -19,11 +20,13 @@ import org.junit.Test;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.TestHelper;
 
 public class ComponentRegistryImplTest {
 
     private File tmpRegistryDir;
+    private final static DummyPrincipal PRINCIPAL = DummyPrincipal.DUMMY_PRINCIPAL;
 
     @Test
     public void testRegisterMDProfile() throws JAXBException {
@@ -259,6 +262,60 @@ public class ComponentRegistryImplTest {
         assertTrue(hasComponent(xsd, "YYY", "0", "2"));
         assertTrue(hasComponent(xsd, "XXX", "1", "10"));
         assertTrue(hasComponent(xsd, "XXX", "0", "99"));
+    }
+
+    @Test
+    public void testDeleteProfile() throws Exception {
+        ComponentRegistry register = getTestRegistry(getRegistryDir());
+        ProfileDescription description = ProfileDescription.createNewDescription();
+        description.setName("Aap");
+        description.setCreatorName(PRINCIPAL.getName());
+        description.setDescription("MyDescription");
+        CMDComponentSpec testProfile = TestHelper.getTestProfile();
+
+        register.registerMDProfile(description, testProfile);
+
+        assertEquals(1, register.getProfileDescriptions().size());
+        assertNotNull(register.getMDProfile(description.getId()));
+
+        try {
+            register.deleteMDProfile(description.getId(), new DummyPrincipal("Fake User"));
+            fail("Should have thrown exception");
+        }catch(UserUnauthorizedException e) {} 
+        register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
+
+        assertEquals(1, register.getProfileDescriptions().size());
+        assertNotNull(register.getMDProfile(description.getId()));
+
+        register.deleteMDProfile(description.getId(), PRINCIPAL);
+
+        assertEquals(0, register.getProfileDescriptions().size());
+        assertNull(register.getMDProfile(description.getId()));
+    }
+
+    @Test
+    public void testDeleteComponent() throws Exception {
+        ComponentRegistry register = getTestRegistry(getRegistryDir());
+        ComponentDescription description = ComponentDescription.createNewDescription();
+        description.setName("Aap");
+        description.setCreatorName(PRINCIPAL.getName());
+        description.setDescription("MyDescription");
+        CMDComponentSpec testProfile = TestHelper.getTestProfile();
+
+        register.registerMDComponent(description, testProfile);
+        try {
+            register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
+            fail("Should have thrown exception");
+        }catch(UserUnauthorizedException e) {} 
+
+        assertEquals(1, register.getComponentDescriptions().size());
+        assertNotNull(register.getMDComponent(description.getId()));
+
+        register.deleteMDComponent(description.getId(), PRINCIPAL);
+
+        assertEquals(0, register.getComponentDescriptions().size());
+        assertNull(register.getMDProfile(description.getId()));
+
     }
 
     private File getRegistryDir() {

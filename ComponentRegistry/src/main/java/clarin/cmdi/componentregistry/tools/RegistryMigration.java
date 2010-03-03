@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,16 +21,12 @@ public class RegistryMigration {
 
     private final static Logger LOG = LoggerFactory.getLogger(RegistryMigration.class);
     private Configuration config;
-    private final String targetUrl;
     private ComponentRegistryImpl registry;
 
     /*
-     * http://lux16.mpi.nl:8080/ds/ComponentRegistry/rest/registry
-     * 
      * /tmp/ComponentRegistry
      */
-    public RegistryMigration(String sourceDir, String targetUrl) {
-        this.targetUrl = targetUrl;
+    public RegistryMigration(String sourceDir) {
         config = new Configuration();
         config.setRegistryRoot(new File(sourceDir));
         config.init();
@@ -37,8 +34,8 @@ public class RegistryMigration {
         registry.setConfiguration(config);
     }
 
-    private void migrate() {
-        RegistryFiller filler = new RegistryFiller(targetUrl);
+    private void migrate() throws IOException {
+        RegistryFiller filler = new RegistryFiller(RegistryFiller.MIGRATION_URL_PROP);
         addComponents(filler);
         addProfiles(filler);
         int nrOfFailed = filler.register();
@@ -67,18 +64,20 @@ public class RegistryMigration {
 
     /**
      * @param args
+     * @throws IOException
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         LOG.info("RegistryMigration started with arguments: " + Arrays.toString(args));
-        if (args.length != 2) {
+        if (args.length != 1) {
             printUsage();
         }
-        RegistryMigration migration = new RegistryMigration(args[0], args[1]);
+        RegistryMigration migration = new RegistryMigration(args[0]);
         migration.migrate();
     }
 
     private static void printUsage() {
-        System.out.println("usage: <source registry directory> <target registry URL>");
+        System.out.println("usage: <source registry directory>");
+        System.out.println("It also needs a filled in registry.properties");
         System.exit(0);
     }
 

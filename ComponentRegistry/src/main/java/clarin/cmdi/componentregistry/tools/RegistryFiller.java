@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.tools;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.ws.rs.core.UriBuilder;
@@ -54,30 +56,42 @@ public class RegistryFiller {
 
     private RegistryToolHelper helper;
 
-    public RegistryFiller(String url) {
+    // Properties:
+    //userName=tomcat 
+    //password=tomcat
+    //registryFillerUrl=http://localhost:8080/ComponentRegistry/rest/registry
+    //registryMigrationUrl=http://lux16.mpi.nl:8080/ds/ComponentRegistry/rest/registry
+    Properties properties = new Properties();
+    static final String FILLER_URL_PROP = "registryFillerUrl";
+    static final String MIGRATION_URL_PROP = "registryMigrationUrl";
+    private static final String PASSWORD_PROP = "password";
+    private static final String USER_NAME_PROP = "userName";
+
+    public RegistryFiller(String urlPropName) throws IOException {
+        properties.load(new FileInputStream("/registry.properties"));
+        String url = properties.getProperty(urlPropName);
         URI uri = UriBuilder.fromUri(url).build();
         Client client = Client.create();
         service = client.resource(uri);
         unresolvedComponents = new HashSet<RegObject>();
         resolvedComponents = new HashMap<RegObject, CMDComponentSpec>();
-        helper = new RegistryToolHelper(service);
+        helper = new RegistryToolHelper(service, properties.getProperty(USER_NAME_PROP), properties.getProperty(PASSWORD_PROP));
     }
 
     /**
-     * RegistryFiller "P.Duin" "Test files" imdi -c /Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi/component*.xml
-     * @param args
-     * 
-     *            Uses a heuristic to resolve components which are linked together through fileName. It will try to find the component with
-     *            a name equal to the filename (without extension) and set the registered id correct.
+     * Uses a heuristic to resolve components which are linked together through fileName. It will try to find the component with a name
+     * equal to the filename (without extension) and set the registered id correct.
+     * @param args RegistryFiller "P.Duin" "Test files" imdi -c
+     *            /Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi/component*.xml
+     * @throws IOException when properties cannot be loaded
      * 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         LOG.info("RegistryFiller started with arguments: " + Arrays.toString(args));
         if (args.length == 0 || args.length < 5) {
             printUsage();
         }
-        String url = "http://localhost:8080/ComponentRegistry/rest/registry";
-        RegistryFiller filler = new RegistryFiller(url);
+        RegistryFiller filler = new RegistryFiller(FILLER_URL_PROP);
         String creatorName = args[0];
         String description = args[1];
         String group = args[2];
@@ -107,6 +121,7 @@ public class RegistryFiller {
 
     private static void printUsage() {
         System.out.println("usage: <creatorName> <description> <groupType> <-c|-p (components or profiles)> <xml file(s)>");
+        System.out.println("It also needs a filled in registry.properties");
         System.exit(0);
     }
 

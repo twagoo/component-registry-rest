@@ -20,7 +20,7 @@ public abstract class AbstractDescription {
     private String name;
     private String registrationDate;
     private String creatorName;
-    @XmlElement(namespace="http://www.w3.org/1999/xlink")
+    @XmlElement(namespace = "http://www.w3.org/1999/xlink")
     private String href;
 
     public void setId(String id) {
@@ -73,7 +73,7 @@ public abstract class AbstractDescription {
 
     @Override
     public String toString() {
-        return "Name=" + getName() + ", id=" + getId();
+        return "Name=" + getName() + ", id=" + getId() + ", creatorName=" + getCreatorName();
     }
 
     public boolean isProfile() {

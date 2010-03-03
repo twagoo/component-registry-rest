@@ -16,6 +16,7 @@
             <directory>src/main/bin</directory>
             <includes>
                 <include>log4j.properties</include> <!-- Copy log4j to the bin dir to make it a bit easier to change values in it -->
+                <include>registry.properties</include> <!-- Needs to be adjusted before running scripts -->
             </includes>
             <outputDirectory>bin</outputDirectory>
         </fileSet>

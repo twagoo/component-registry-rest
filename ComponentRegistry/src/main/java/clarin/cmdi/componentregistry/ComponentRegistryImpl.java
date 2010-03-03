@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +20,9 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -118,7 +121,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private Map<String, ProfileDescription> loadProfileDescriptions() {
         Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME),
-                TrueFileFilter.TRUE);
+                DIRS_WITH_DESCRIPTIONS);
         Map<String, ProfileDescription> result = new HashMap<String, ProfileDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
@@ -129,8 +132,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
+    private final static IOFileFilter DIRS_WITH_DESCRIPTIONS = new NotFileFilter(new NameFileFilter(Configuration.DELETED_DIR_NAME));
+
     private Map<String, ComponentDescription> loadComponentDescriptions() {
-        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), TrueFileFilter.TRUE);
+        Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), DIRS_WITH_DESCRIPTIONS);
         Map<String, ComponentDescription> result = new HashMap<String, ComponentDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
@@ -307,6 +312,39 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public List<MDProfile> searchMDProfiles(String searchPattern) {
         return Collections.EMPTY_LIST;
+    }
+
+    public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException {
+        ProfileDescription desc = profileDescriptions.get(profileId);
+        if (desc != null) {
+            checkAuthorisation(desc, principal);
+            File profileFile = getProfileFile(profileId);
+            if (profileFile.exists()) {
+                FileUtils.moveDirectoryToDirectory(profileFile.getParentFile(), configuration.getProfileDeletionDir(), true);
+                profileDescriptions.remove(profileId);
+                profilesCache.remove(profileId);
+            } // else no profile so nothing to delete
+        }
+    }
+
+    private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
+        if (!principal.getName().equals(desc.getCreatorName())) {
+            throw new UserUnauthorizedException("Unauthorized operation user: " + principal.getName()
+                    + " was not the creator of profile/component (description=" + desc + ").");
+        }
+    }
+
+    public void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException {
+        ComponentDescription desc = componentDescriptions.get(componentId);
+        if (desc != null) {
+            checkAuthorisation(desc, principal);
+            File componentFile = getComponentFile(componentId);
+            if (componentFile.exists()) {
+                FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), configuration.getComponentDeletionDir(), true);
+                componentDescriptions.remove(componentId);
+                componentsCache.remove(componentId);
+            } // else no component so nothing to delete
+        }
     }
 
 }

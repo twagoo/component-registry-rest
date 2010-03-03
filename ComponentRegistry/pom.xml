@@ -72,39 +72,47 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>1.1.2-ea</version>
+      <version>1.1.5</version>
     </dependency>
     <dependency> <!-- Needed for "automatic" json support -->
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-json</artifactId>
-      <version>1.1.2-ea</version>
+      <version>1.1.5</version>
       <exclusions>
-      <!--Jersey has dependencies with different group ids therefore maven cannot resolve the conflict
-       and gives me both jars (two of stax and two of jaxb-impl). Excluding them manually to overcome the problem -->
-        <exclusion>              
+        <!--
+          Jersey has dependencies with different group ids therefore maven cannot resolve the conflict and gives me both
+          jars (two of stax and two of jaxb-impl). Excluding them manually to overcome the problem
+        -->
+        <exclusion>
           <groupId>stax</groupId>
-          <artifactId>stax-api</artifactId> 
+          <artifactId>stax-api</artifactId>
         </exclusion>
-        <exclusion>              
+        <exclusion>
           <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId> 
+          <artifactId>jaxb-impl</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency> <!-- Needed for form upload support -->
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
-      <version>1.1.2-ea</version>
+      <version>1.1.5</version>
     </dependency>
     <dependency> <!-- Client used for RegistryFiller command line tool-->
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>1.1.2-ea</version>
+      <version>1.1.5</version>
     </dependency>
+    <dependency>
+      <groupId>net.sf.saxon</groupId>
+      <artifactId>saxon-dom</artifactId>
+      <version>8.7</version>
+    </dependency>
+
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-test-framework</artifactId>
-      <version>1.1.2-ea</version>
+      <version>1.1.5</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -115,9 +123,9 @@
           <groupId>com.sun.grizzly</groupId>
           <artifactId>grizzly-servlet-webserver</artifactId>
         </exclusion>
-        <exclusion>              
+        <exclusion>
           <groupId>com.sun.xml.bind</groupId>
-          <artifactId>jaxb-impl</artifactId> 
+          <artifactId>jaxb-impl</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -126,6 +134,18 @@
       <artifactId>sjsxp</artifactId>
       <version>1.0.1</version>
     </dependency>
+    <dependency>
+      <groupId>de.mpg.mpgaai</groupId>
+      <artifactId>mpgaai-jaas</artifactId>
+      <version>1.3.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>de.mpg.mpgaai</groupId>
+      <artifactId>mpgaai-shhaa</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+
   </dependencies>
 
   <properties>
