@@ -2,22 +2,35 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:local="clarin.cmdi.componentregistry.services.*"
 		   xmlns:browser="clarin.cmdi.componentregistry.browser.*"
+		   initialize="init()"
 		   creationComplete="refresh()"
 		   width="100%"
 		   height="100%"
-		   label="Browse..."
-		   >
+		   label="Browse...">
 
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.services.ComponentListService;
+		    import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
+			import clarin.cmdi.componentregistry.services.DeleteService;
+			import clarin.cmdi.componentregistry.services.ComponentListService;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import mx.controls.Alert;
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.Profile;
-			
+
 			[Bindable]
 			private var componentsSrv:ComponentListService = ComponentListService.instance;
+			private var deleteSrv:DeleteService = new DeleteService();
+			[Bindable]
+			private var browseMenu:BrowseContextMenu
+
+			public function init():void {
+			    browseMenu = new BrowseContextMenu();
+				browseMenu.viewStack = this.parent as RegistryViewStack;
+				browseMenu.deleteService = deleteSrv;
+				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
+			}
 
 			public function refresh():void {
 				profilesSrv.load();
@@ -33,15 +46,19 @@
 			}
 
 			public function setSelectedDescription(desc:ItemDescription):void {
-			    if (desc.isProfile) {
-			        tabnav.selectedIndex = 0;
-			    } else {
-			        tabnav.selectedIndex = 1;  
-			    }
-			    //Need to select the correct item, can't get it to highlight at the mo
-			    //profilesOverview.dataGrid.selectedIndex=2;
-			    //profilesOverview.dataGrid.validateNow();
-                //profilesOverview.dataGrid.scrollToIndex(2);
+				if (desc.isProfile) {
+					tabnav.selectedIndex = 0;
+				} else {
+					tabnav.selectedIndex = 1;
+				}
+				//Need to select the correct item, can't get it to highlight at the mo
+				//profilesOverview.dataGrid.selectedIndex=2;
+				//profilesOverview.dataGrid.validateNow();
+				//profilesOverview.dataGrid.scrollToIndex(2);
+			}
+
+			private function handleItemDeleted(event:Event):void {
+				refresh();
 			}
 		]]>
 	</mx:Script>
@@ -61,33 +78,36 @@
 						 width="100%"
 						 height="100%"
 						 color="0x323232"
-						 y="59" borderStyle="outset">
+						 y="59"
+						 borderStyle="outset">
 			<mx:VDividedBox label="Profiles"
 							width="100%">
 				<browser:BrowserOverviewList id="profilesOverview"
-										  browserDataProvider="{profilesSrv.itemDescriptions}"
-										  browserItemSelected="{loadProfileInfoPage(event)}"
-										  browserColumns="{browserColumns.getProfileColumns()}"
-										  width="100%"
-										  height="70%"/>
+											 browserDataProvider="{profilesSrv.itemDescriptions}"
+											 browserItemSelected="{loadProfileInfoPage(event)}"
+											 browserColumns="{browserColumns.getProfileColumns()}"
+											 width="100%"
+											 height="70%"
+											 browseMenu="{browseMenu}"/>
 				<browser:ProfileInfoPage id="profileInfoPage"
-									  profile="{profileSrv.profile}"
-									  width="100%"
-									  height="50%"/>
+										 profile="{profileSrv.profile}"
+										 width="100%"
+										 height="50%"/>
 			</mx:VDividedBox>
 
 			<mx:VDividedBox label="Components"
 							width="100%">
 				<browser:BrowserOverviewList id="componentsOverview"
-										  browserDataProvider="{componentsSrv.itemDescriptions}"
-										  browserItemSelected="{loadComponentInfoPage(event)}"
-										  browserColumns="{browserColumns.getComponentColumns()}"
-										  width="100%"
-										  height="50%"/>
+											 browserDataProvider="{componentsSrv.itemDescriptions}"
+											 browserItemSelected="{loadComponentInfoPage(event)}"
+											 browserColumns="{browserColumns.getComponentColumns()}"
+											 width="100%"
+											 height="50%"
+											 browseMenu="{browseMenu}"/>
 				<browser:ComponentInfoPage id="componentInfoPage"
-										component="{componentSrv.component}"
-										width="100%"
-										height="50%"/>
+										   component="{componentSrv.component}"
+										   width="100%"
+										   height="50%"/>
 
 			</mx:VDividedBox>
 		</mx:TabNavigator>

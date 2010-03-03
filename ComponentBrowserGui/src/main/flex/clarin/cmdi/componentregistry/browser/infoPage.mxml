@@ -9,7 +9,7 @@
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">
-		<mx:Label id="header"
+		<mx:Label id="header"		    
 				  text="{headerLabel}"
 				  fontWeight="bold"
 				  fontSize="14"/>

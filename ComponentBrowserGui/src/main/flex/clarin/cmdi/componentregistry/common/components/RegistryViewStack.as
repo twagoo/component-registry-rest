@@ -3,17 +3,16 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Login;
 	import clarin.cmdi.componentregistry.editor.Editor;
-	import clarin.cmdi.componentregistry.register.Register;
-
+	import clarin.cmdi.componentregistry.importer.Importer;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-
+	
 	import mx.containers.ViewStack;
-	import mx.events.FlexEvent;
 
 	public class RegistryViewStack extends ViewStack {
 		private var browse:Browse = new Browse();
-		private var register:Register = new Register();
+		private var importer:Importer = new Importer();
 		private var editor:Editor = new Editor();
 
 		private var loginPanel:Login;
@@ -25,10 +24,10 @@ package clarin.cmdi.componentregistry.common.components {
 
 			addChild(browse); //everyone can browse
 
-			register.addEventListener(FlexEvent.SHOW, checkLogin);
-			addChild(register);
+			//register.addEventListener(FlexEvent.SHOW, checkLogin);
+			addChild(importer);
 
-			editor.addEventListener(FlexEvent.SHOW, checkLogin);
+//			editor.addEventListener(FlexEvent.SHOW, checkLogin);
 			addChild(editor);
 		}
 

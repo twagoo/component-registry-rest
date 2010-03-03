@@ -1,7 +1,9 @@
 package clarin.cmdi.componentregistry.common.components {
+	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.Component;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
 	
@@ -26,16 +28,20 @@ package clarin.cmdi.componentregistry.common.components {
 		public function ExpandingComponentLabel(componentId:String, editable:Boolean = false) {
 			super();
 			this.editable = editable;
+			this.componentId = componentId;
+			styleName = StyleConstants.EXPANDING_COMPONENT;
+		}
+		
+		protected override function createChildren():void {
+            super.createChildren();
 			var id:Label = new Label();
 			id.text = componentId;
-			this.componentId = componentId;
-			addChild(id);
 			id.addEventListener(MouseEvent.CLICK, handleClick);
 			id.addEventListener(MouseEvent.MOUSE_OVER, mouseOver);
 			id.addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
-			styleName = StyleConstants.EXPANDING_COMPONENT;
+		    addChild(id);
 		}
-
+		
 		private function handleClick(event:MouseEvent):void {
 			if (isExpanded) {
 				unexpand();
@@ -47,31 +53,29 @@ package clarin.cmdi.componentregistry.common.components {
 
 
 		private function unexpand():void {
-		    if (expanded != null) {
-			    removeChild(expanded);
+			if (expanded != null) {
+				removeChild(expanded);
 			}
 		}
 
 		private function expand():void {
 			var item:ItemDescription = ComponentListService.instance.lookUpDescription(componentId);
 			if (item != null) {
-			    componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, handleComponentLoaded);
-			    componentSrv.load(item);
+				componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, handleComponentLoaded);
+				componentSrv.load(item);
 			} else {
-			    Alert.show("Error: component cannot be found");
+				Alert.show("Error: component cannot be found");
 			}
 		}
 
 		private function handleComponentLoaded(event:Event):void {
 			var comp:Component = componentSrv.component;
-			var expandedComponent:XMLBrowser;
 			if (editable) {
-				expandedComponent = new CMDComponentXMLEditor();
+				expanded = new CMDComponentXMLEditor();
 			} else {
-				expandedComponent = new CMDComponentXMLBrowser();
+				expanded = new CMDComponentXMLBrowser();
 			}
-			expandedComponent.xml = comp.componentMD.xml;
-			expanded = expandedComponent;
+			(expanded as CMDSpecRenderer).cmdSpec = CMDModelFactory.createModel(comp.componentMD.xml);
 			addChild(expanded);
 			isExpanded = true;
 		}

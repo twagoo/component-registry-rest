@@ -19,13 +19,12 @@ package clarin.cmdi.componentregistry.common {
 	    public static const VALUE_SCHEME:String = "ValueScheme";
 	    public static const ATTRIBUTE:String = "Attribute";
 	    public static const ATTRIBUTE_LIST:String = "AttributeList";
+	    public static const DESCRIPTION:String = "Description";
         //Attribute Names
         public static const APP_INFO:String = "AppInfo";
         public static const NAME:String = "name";
 
 		public var name:String;
-		public var attributeList:XMLList;
-		public var cmdElements:Array = new Array();
 
 
 		private var _xml:XML;
@@ -41,5 +40,5 @@ package clarin.cmdi.componentregistry.common {
 			return _xml;
 		}
 	}
-
+   
 }

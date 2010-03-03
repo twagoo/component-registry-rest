@@ -10,15 +10,47 @@
     <name>ComponentBrowserGui</name>
 	<properties>
 	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	  <targetPlayer>10.0.0</targetPlayer>
 	</properties>
 
 	<dependencies>
     <dependency>
       <groupId>com.adobe.flex.framework</groupId>
       <artifactId>flex-framework</artifactId>
-      <version>3.2.0.3958</version>
+      <version>3.5.0.12683</version>
       <type>pom</type>
+	  <exclusions>
+		<exclusion>
+		  <groupId>com.adobe.flex.framework</groupId>
+		  <artifactId>playerglobal</artifactId>
+		</exclusion>
+	  </exclusions>      
     </dependency>        
+    <dependency>
+      <groupId>com.adobe.flex.framework</groupId>
+      <artifactId>playerglobal</artifactId>
+      <version>3.5.0.12683</version>
+      <classifier>10</classifier>
+      <type>swc</type>
+    </dependency>        
+    <dependency>
+      <groupId>org.httpclient</groupId>
+      <artifactId>as3httpclientlib</artifactId>
+      <version>1.0.6</version>
+      <type>swc</type>
+    </dependency>     
+    <dependency>
+      <groupId>com.adobe</groupId>
+      <artifactId>as3corelib</artifactId>
+      <version>0.92.1</version>
+      <type>swc</type>
+    </dependency>    
+    <dependency>
+      <groupId>com.hurlant</groupId>
+      <artifactId>as3crypto</artifactId>
+      <version>1.3</version>
+      <type>swc</type>
+    </dependency>    
 	</dependencies>
 
     <build>
@@ -27,10 +59,19 @@
 		  <plugin> 
 			<groupId>org.sonatype.flexmojos</groupId>
 			<artifactId>flexmojos-maven-plugin</artifactId>
+			<version>3.5.0</version>
 			<extensions>true</extensions>
 			<configuration>
 			  <debug>true</debug>
 			</configuration>
+	        <dependencies>
+	          <dependency>
+    	        <groupId>com.adobe.flex</groupId>
+        	    <artifactId>compiler</artifactId>
+    	        <version>3.5.0.12683</version>
+	            <type>pom</type>
+    	      </dependency>
+	        </dependencies>
 		  </plugin>
         </plugins>
     </build>

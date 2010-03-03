@@ -31,11 +31,12 @@ ToggleButtonBar {
 }
 
 .xmlBrowserHeader {
-    labelWidth: 50;
+    fontWeight: bold;
+    fontSize: 12;
 }
 
-.xmlBrowserHeaderCmdelement {
-    labelWidth: 70;
+.xmlBrowserHeaderSmall {
+    fontWeight: bold;
 }
 
 .xmlEditorFieldEditField {

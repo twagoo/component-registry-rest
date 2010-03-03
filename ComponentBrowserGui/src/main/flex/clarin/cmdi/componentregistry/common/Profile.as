@@ -5,7 +5,7 @@ package clarin.cmdi.componentregistry.common {
 	public class Profile {
 	    
 		public var description:ItemDescription;
-		public var components:ArrayCollection;
+		public var components:ArrayCollection;//ComponentMD
 		public var nrOfComponents:int;
 		public var profileSource:XML;
 

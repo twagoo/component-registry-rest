@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.register {
+package clarin.cmdi.componentregistry.importer {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 
 	import flash.events.Event;

@@ -1,46 +1,208 @@
 package clarin.cmdi.componentregistry.common.components {
-	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.editor.ComponentEdit;
+	import clarin.cmdi.componentregistry.editor.FormItemInputLine;
+	import clarin.cmdi.componentregistry.editor.FormItemInputText;
+	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
+	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 	
 	import flash.display.DisplayObject;
+	import flash.events.Event;
+	import flash.events.MouseEvent;
+	import flash.utils.getTimer;
 	
+	import mx.collections.ArrayCollection;
+	import mx.containers.Form;
 	import mx.containers.FormItem;
+	import mx.controls.Button;
+	import mx.core.Container;
+	import mx.core.UIComponent;
+	import mx.events.ChildExistenceChangedEvent;
+	import mx.events.DragEvent;
+	import mx.managers.DragManager;
+	import mx.managers.IFocusManagerComponent;
 
-	public class CMDComponentXMLEditor extends XMLBrowser {
+    [Event(name="editorChange", type="flash.events.Event")]
+	public class CMDComponentXMLEditor extends Form implements IFocusManagerComponent, CMDSpecRenderer {
 
+        public static const EDITOR_CHANGE_EVENT:String = "editorChange";
+		private var _spec:CMDSpec;
 
 		public function CMDComponentXMLEditor() {
+			super();
+			focusEnabled = true;
+			tabEnabled = true;
 			styleName = StyleConstants.XMLBROWSER;
+			addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
+			addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
+			addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, dispatchEditorChangeEvent);
+			addEventListener(ChildExistenceChangedEvent.CHILD_REMOVE, dispatchEditorChangeEvent);
 		}
 
-		protected override function createFormItem(name:String, value:String = null, xmlElement:XML = null):FormItem {
-			var component:FormItem;
-			if (name == ComponentMD.COMPONENTID) {
-				component = createComponentIdLabel(name, value);
-			} else {
-				component = createDefaultEditField(name, value, xmlElement);
+		private function dragEnterHandler(event:DragEvent):void {
+			DragManager.acceptDragDrop(event.currentTarget as UIComponent);
+			UIComponent(event.currentTarget).drawFocus(true);
+		}
+
+		private function dragOverHandler(event:DragEvent):void {
+			if (event.dragSource.hasFormat("items")) {
+				DragManager.showFeedback(DragManager.COPY);
 			}
-			return component;
 		}
 
-
-		private function createDefaultEditField(name:String, value:String, xmlElement:XML):FormItem {
-			var field:XMLEditorField = new XMLEditorField(xmlElement, name);
-			field.label = name;
-			field.styleName = StyleConstants.XMLBROWSER_FIELD;
-			field.editField = value;
-			return field;
+		private function dragDropHandler(event:DragEvent):void {
+			var items:Array = event.dragSource.dataForFormat("items") as Array;
+			for each (var item:ItemDescription in items) {
+				var comp:CMDComponent = new CMDComponent();
+				comp.componentId = item.id;
+				_spec.cmdComponents.addItem(comp);
+				addComponent(comp);
+			}
 		}
 
-		private function createComponentIdLabel(name:String, value:String):FormItem {
-			var fi:FormItem = new FormItem();
-			fi.label = name;
-			fi.styleName = StyleConstants.XMLBROWSER_FIELD;
-			var componentLabel:ExpandingComponentLabel = new ExpandingComponentLabel(value, true);
-			fi.addChild(componentLabel);
-			return fi;
+		public function set cmdSpec(cmdSpec:CMDSpec):void {
+			_spec = cmdSpec;
+			createNewBrowser();
+			dispatchEditorChangeEvent();
+		}
+		
+		private function dispatchEditorChangeEvent(event:Event=null):void {
+		    dispatchEvent(new Event(EDITOR_CHANGE_EVENT));
 		}
 
+		[Bindable]
+		public function get cmdSpec():CMDSpec {
+			return _spec;
+		}
+
+		private function createNewBrowser():void {
+			var start:int = getTimer();
+			removeAllChildren()
+			handleHeader(_spec);
+			handleComponents(_spec.cmdComponents);
+			trace("Created browser2 view in " + (getTimer() - start) + " ms.");
+		}
+
+		private function handleHeader(spec:CMDSpec):void {
+			addChild(createHeading());
+			addChild(new FormItemInputLine("Name", spec.headerName, function(val:String):void {
+					spec.headerName = val;
+				}));
+			addChild(new FormItemInputLine("Id", spec.headerId, function(val:String):void {
+					spec.headerId = val;
+				}));
+			addChild(new FormItemInputText(XMLBrowser.DESCRIPTION, spec.headerDescription, function(val:String):void {
+					spec.headerDescription = val;
+				}));
+		}
+
+		private function createHeading():FormItem {
+			var heading:FormItem = new FormItem();
+			heading.label = "Header";
+			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
+			return heading;
+		}
+
+		private function handleComponents(components:ArrayCollection):void {
+			for each (var component:CMDComponent in components) {
+				addComponent(component);
+			}
+			var btn:Button = new Button();
+			btn.label = "add Component";
+			btn.addEventListener(MouseEvent.CLICK, handleAddComponentClick);
+			btn.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {drawFocus(true);});
+			btn.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {drawFocus(false);});
+			addChild(btn);
+		}
+		
+		private function handleAddComponentClick(event:MouseEvent):void {
+			var comp:CMDComponent = new CMDComponent();
+			_spec.cmdComponents.addItem(comp);
+			var index:int = getChildIndex(event.currentTarget as DisplayObject);
+			addComponent(comp, index);
+		}
+		
+
+		
+		public function addComponent(component:CMDComponent, index:int=-1):void {
+			var comp:Container = new ComponentEdit(component, this);
+			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
+			if (index == -1) {
+			    addChild(comp);
+			} else {
+			    addChildAt(comp, index);
+			}
+		}
+
+        private function removeComponent(event:Event):void {
+            var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
+            _spec.removeComponent(comp);
+            removeChild(event.currentTarget as DisplayObject);
+        }
+        
+//		protected override function createFormHeading(name:String):UIComponent {
+//			var heading:UIComponent = super.createFormHeading(name);
+//			if (name == COMPONENT) {
+//				var editBar:HBox = new HBox();
+//				editBar.addChild(heading);
+//				editBar.percentWidth = 100;
+//				var spacer:Spacer = new Spacer();
+//				spacer.percentWidth = 90;
+//				editBar.addChild(spacer);
+//				var removeButton:Button = new Button();
+//				removeButton.height = 20;
+//				removeButton.label = "X";
+//				removeButton.addEventListener(MouseEvent.CLICK, removeComponent);
+//				editBar.addChild(removeButton);
+//				return editBar;
+//			} else {
+//				return heading;
+//			}
+//		}
+//
+//		protected override function createAndAddFormChild(name:String, value:String, bindingFunction:Function = null):void {
+//			addFormChild(createFormItem(name, value, bindingFunction)); //Always add all children so they can be edited
+//		}
+//
+//		private function removeComponent(event:MouseEvent):void {
+//			Alert.show("Fire remove!");
+//		}
+//
+//		protected override function createFormItemFieldValue(name:String, value:String, bindingFunction:Function = null):DisplayObject {
+//			if (name == COMPONENT_ID) {
+//				return createComponentIdLabel(value);
+//			} else {
+//				return createDefaultEditField(name, value, bindingFunction);
+//			}
+//		}
+//
+//		private function createDefaultEditField(name:String, value:String, bindingFunction:Function = null):UIComponent {
+//			var result:UIComponent;
+//			if (name == DESCRIPTION) {
+//				var editArea:TextArea = new TextArea();
+//				editArea.text = value;
+//				editArea.styleName = StyleConstants.XMLEDITOR_EDIT_FIELD;
+//				editArea.width = 400;
+//				result = editArea;
+//			} else {
+//				var editField:TextInput = new TextInput();
+//				editField.text = value;
+//				editField.styleName = StyleConstants.XMLEDITOR_EDIT_FIELD;
+//				editField.width = 400;
+//				result = editField;
+//				BindingUtils.bindSetter(bindingFunction, editField, "text");
+//			}
+//			return result;
+//		}
+//
+//		private function createComponentIdLabel(value:String):ExpandingComponentLabel {
+//			var componentLabel:ExpandingComponentLabel = new ExpandingComponentLabel(value, true);
+//			return componentLabel;
+//		}
+//
 	}
 
 }

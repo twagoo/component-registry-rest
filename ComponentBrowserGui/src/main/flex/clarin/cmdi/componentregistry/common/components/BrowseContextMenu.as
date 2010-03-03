@@ -1,23 +1,27 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-	import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+	import clarin.cmdi.componentregistry.services.DeleteService;
 
 	import flash.events.ContextMenuEvent;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 
+	import mx.controls.Alert;
 	import mx.controls.DataGrid;
 	import mx.events.ListEvent;
 
 
-	public class DownloadMenu {
+	public class BrowseContextMenu {
 
 		[Bindable]
 		public var cm:ContextMenu;
 
 		[Bindable]
 		public var viewStack:RegistryViewStack;
+		[Bindable]
+		public var deleteService:DeleteService;
 
 		[Bindable]
 		private var _dataGrid:DataGrid;
@@ -25,7 +29,7 @@ package clarin.cmdi.componentregistry.common.components {
 		private var rollOverIndex:int;
 		private var saveItemDialog:SaveItemDialog = new SaveItemDialog();
 
-		public function DownloadMenu() {
+		public function BrowseContextMenu() {
 			cm = new ContextMenu();
 			cm.hideBuiltInItems();
 			cm.customItems = createMenuItems();
@@ -42,6 +46,9 @@ package clarin.cmdi.componentregistry.common.components {
 			result.push(cmi);
 			cmi = new ContextMenuItem("Create New Profile...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createNewProfile);
+			result.push(cmi);
+			cmi = new ContextMenuItem("Delete...");
+			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, handleDelete);
 			result.push(cmi);
 
 			return result;
@@ -74,6 +81,16 @@ package clarin.cmdi.componentregistry.common.components {
 		private function createNewProfile(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
 			viewStack.switchToEditor(item);
+		}
+
+		private function handleDelete(event:ContextMenuEvent):void {
+		    deleteSelectedItems();
+		}
+		
+		public function deleteSelectedItems():void {
+			for each (var item:ItemDescription in _dataGrid.selectedItems) {
+				deleteService.deleteItem(item);
+			}
 		}
 
 	}

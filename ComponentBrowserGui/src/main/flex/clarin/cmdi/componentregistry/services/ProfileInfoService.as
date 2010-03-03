@@ -2,9 +2,10 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Profile;
-
+	
 	import flash.events.Event;
-
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -15,7 +16,7 @@ package clarin.cmdi.componentregistry.services {
 	import mx.utils.StringUtil;
 
 	[Event(name="ProfileLoaded", type="flash.events.Event")]
-	public class ProfileInfoService {
+	public class ProfileInfoService  extends EventDispatcher {
 		public static const PROFILE_LOADED:String = "ProfileLoaded";
 
 		private var service:HTTPService;

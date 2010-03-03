@@ -6,7 +6,7 @@
 		   width="100%"
 		   height="100%"
 		   label="Editor..."
-		   creationComplete="{init();}">
+		   creationComplete="init()">
 
 	<mx:Script source="EditorAS.as"/>
 
@@ -18,40 +18,41 @@
 			<mx:Button id="createEmptyProfileBtn"
 					   label="createEmptyProfile"
 					   click="createEmptyProfile()"/>
+			<mx:Button id="saveBtn"
+					   label="save"
+					   click="saveProfile()"/>
 		</mx:HBox>
+    	<mx:Text id="errorMessageField"
+					 text="{uploadService.message}" visible='{uploadService.message != ""}' includeInLayout='{uploadService.message != ""}' />
+		<mx:ProgressBar id="uploadProgress"
+							label=""
+							mode="manual"
+							visible="false"
+							includeInLayout="false"/>
 
-		<mx:HBox width="100%"
+		<mx:VBox width="100%"
 				 height="80%">
 			<comp:CMDComponentXMLEditor id="xmlEditor"
-										xml="{cmdComponent}"
+										cmdSpec="{cmdSpec}"
 										width="50%"
-										dragEnter="{dragEnterHandler(event)}"
-										dragOver="{dragOverHandler(event)}"
-										dragDrop="{dragDropHandler(event)}"
-										toolTip="drag components from list to add..."/>
+										toolTip="drag components from list to add..." editorChange="handleEditorChange(event)" />
 			<mx:DataGrid id="dataGrid"
-						 width="100%"
+						 width="50%"
 						 dragEnabled="true"
 						 dataProvider="{componentsSrv.itemDescriptions}"
 						 columns="{browserColumns.getComponentColumns()}"
 						 allowMultipleSelection="true"/>
 
-		</mx:HBox>
-		<!--<mx:HBox width="100%"
+		</mx:VBox>
+		<mx:HBox width="100%"
 				 height="300">
-			<comp:XMLTextArea id="textView"
-							  styleName="xmlTextArea"
-							  editable="true"
-							  xmlData="{cmdComponent}"
-							  width="50%"
-							  height="300"/>
 			<comp:ScrollableTextArea id="infoTextArea"
 									 styleName="xmlTextArea"
 									 editable="false"
-									 text="{cmdComponent}"
+									 text="{cmdSpec.toXml()}"
 									 width="50%"
 									 height="300"/>
-		</mx:HBox>-->
+		</mx:HBox>
 	</mx:VBox>
 
 </mx:Canvas>

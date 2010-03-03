@@ -1,0 +1,3 @@
+mvn install:install-file -DgroupId=org.httpclient -DartifactId=as3httpclientlib -Dversion=1.0.6 -Dpackaging=swc -Dfile=as3httpclientlib-1_0_6.swc -DgeneratePom=true
+mvn install:install-file -DgroupId=com.adobe -DartifactId=as3corelib -Dversion=0.92.1 -Dpackaging=swc -Dfile=as3corelib-0.92.1.swc -DgeneratePom=true
+mvn install:install-file -DgroupId=com.hurlant -DartifactId=as3crypto -Dversion=1.3 -Dpackaging=swc -Dfile=as3crypto-1.3.swc -DgeneratePom=true
