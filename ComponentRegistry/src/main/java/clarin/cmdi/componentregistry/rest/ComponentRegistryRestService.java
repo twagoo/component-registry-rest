@@ -98,7 +98,7 @@ public class ComponentRegistryRestService {
             LOG.info("Component with id: " + componentId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
         } catch (UserUnauthorizedException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed.", e);
+            LOG.info("Component with id: " + componentId + " deletion failed: "+e.getMessage());
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
         LOG.info("Component with id: " + componentId + " deleted.");
@@ -144,7 +144,7 @@ public class ComponentRegistryRestService {
             LOG.info("Profile with id: " + profileId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
         } catch (UserUnauthorizedException e) {
-            LOG.info("Profile with id: " + profileId + " deletion failed.", e);
+            LOG.info("Profile with id: " + profileId + " deletion failed: "+e.getMessage());
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
         LOG.info("Profile with id: " + profileId + " deleted.");

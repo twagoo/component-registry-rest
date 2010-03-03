@@ -329,8 +329,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
         if (!principal.getName().equals(desc.getCreatorName())) {
-            throw new UserUnauthorizedException("Unauthorized operation user: " + principal.getName()
-                    + " was not the creator of profile/component (description=" + desc + ").");
+            throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
+                    + "' was not the creator of profile/component (description=" + desc + ").");
         }
     }
 
