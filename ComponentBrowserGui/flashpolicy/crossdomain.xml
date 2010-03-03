@@ -1,10 +1,8 @@
-<?xml version="1.0"?>
-<!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
-<!-- test crossdomain file, allows everything not for production use. 
- see http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
--->
-<cross-domain-policy>
-   <site-control permitted-cross-domain-policies="all"/>
-   <allow-access-from domain="*" secure="false"/>
-   <allow-http-request-headers-from domain="*" headers="*" secure="false"/>
-</cross-domain-policy>
+<?xml version="1.0"?> 
+<!DOCTYPE cross-domain-policy SYSTEM 
+"http://www.adobe.com/xml/dtds/cross-domain-policy.dtd"> 
+<cross-domain-policy> 
+   <site-control permitted-cross-domain-policies="all"/> 
+   <allow-access-from domain="*" to-ports="80,8080"/> 
+</cross-domain-policy> 
+
