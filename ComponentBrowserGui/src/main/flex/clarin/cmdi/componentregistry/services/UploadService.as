@@ -1,13 +1,13 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-
+	
 	import com.adobe.net.URI;
 	import com.hurlant.util.Base64;
-
+	
 	import flash.events.DataEvent;
+	import flash.events.ErrorEvent;
 	import flash.events.Event;
-	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
@@ -15,13 +15,12 @@ package clarin.cmdi.componentregistry.services {
 	import flash.net.FileReference;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
-
+	
 	import mx.controls.ProgressBar;
-
+	
 	import org.httpclient.HttpClient;
 	import org.httpclient.events.HttpDataEvent;
-	import org.httpclient.events.HttpErrorEvent;
-	import org.httpclient.events.HttpStatusEvent;
+	import org.httpclient.events.HttpResponseEvent;
 	import org.httpclient.http.Post;
 	import org.httpclient.http.multipart.Multipart;
 	import org.httpclient.http.multipart.Part;
@@ -50,8 +49,8 @@ package clarin.cmdi.componentregistry.services {
 			request = new URLRequest(url);
 			httpClient = new HttpClient();
 			httpClient.listener.onError = httpclientErrorHandler;
-			httpClient.listener.onData = httpclientDataHandler;
-			httpClient.listener.onStatus = httpclientStatusHandler;
+			httpClient.listener.onData = httpclientDataHandler; 
+			httpClient.listener.onComplete = httpclientCompleteHandler;
 		}
 
 		private function createAndInitFileReference():void {
@@ -135,9 +134,9 @@ package clarin.cmdi.componentregistry.services {
 			pb.visible = false;
 		}
 
-		private function httpclientStatusHandler(event:HttpStatusEvent):void {
-			if (event.code != "200") {
-				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.code + ")\n");
+		private function httpclientCompleteHandler(event:HttpResponseEvent):void {
+			if (!event.response.isSuccess) {
+				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.response.code + ")\n");
 			}
 		}
 
@@ -147,7 +146,7 @@ package clarin.cmdi.componentregistry.services {
 			handleResponse(response);
 		}
 
-		private function httpclientErrorHandler(event:HttpErrorEvent):void {
+		private function httpclientErrorHandler(event:ErrorEvent):void {
 			addToMessage("Server Failed to handle registration. Unexpected error, try again later. (error: " + event.text + ")\n");
 		}
 

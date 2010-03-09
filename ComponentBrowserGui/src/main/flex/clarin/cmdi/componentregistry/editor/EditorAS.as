@@ -1,6 +1,9 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
 import clarin.cmdi.componentregistry.common.ItemDescription;
+import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
+import clarin.cmdi.componentregistry.editor.model.CMDComponent;
+import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
@@ -12,13 +15,18 @@ import clarin.cmdi.componentregistry.services.UploadService;
 import flash.events.Event;
 import flash.net.FileReference;
 
+import mx.controls.Alert;
+import mx.core.DragSource;
+import mx.core.UIComponent;
+import mx.managers.DragManager;
+
 
 private var currentDescription:ItemDescription;
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
 private var componentSrv:ComponentInfoService = new ComponentInfoService();
 
 [Bindable]
-private var componentsSrv:ComponentListService = ComponentListService.instance;
+private var componentsSrv:ComponentListService = new ComponentListService(); //Don't create an instance we need a new one
 
 [Bindable]
 public var cmdComponent:XML;
@@ -58,7 +66,7 @@ public function createEmptyProfile():void {
 private var ref:FileReference = new FileReference();
 
 private function saveProfile():void {
-	//Alert.show(xmlEditor.cmdSpec.toXml());
+	Alert.show(xmlEditor.cmdSpec.toXml());
 	var item:ItemDescription = new ItemDescription();
 	item.description = xmlEditor.cmdSpec.headerDescription;
 	item.name = xmlEditor.cmdSpec.headerName;
@@ -78,4 +86,34 @@ private function handleEditorChange(event:Event):void {
 }
 
 
+private function enableComponentDrag(event:MouseEvent):void {
+	var ds:DragSource = new DragSource();
+	ds.addHandler(function():CMDComponent {
+			return new CMDComponent();
+		}, CMDComponentXMLEditor.DRAG_NEW_COMPONENT);
+	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
+}
+
+private function enableElementDrag(event:MouseEvent):void {
+	var ds:DragSource = new DragSource();
+	ds.addHandler(function():CMDComponentElement {
+			return new CMDComponentElement();
+		}, CMDComponentXMLEditor.DRAG_NEW_ELEMENT);
+	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
+}
+
+private function enableAttributeDrag(event:MouseEvent):void {
+	var ds:DragSource = new DragSource();
+	ds.addHandler(function():CMDAttribute {
+			return new CMDAttribute();
+		}, CMDComponentXMLEditor.DRAG_NEW_ATTRIBUTE);
+	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
+}
+
+private function initPaletteOverview():void {
+	componentsPaletteOverview.dataGrid.dragEnabled = true;
+	componentsPaletteOverview.dataGrid.allowMultipleSelection = true;
+	componentsPaletteOverview.dataGrid.horizontalScrollPolicy = "auto";
+	componentsPaletteOverview.dataGrid.resizableColumns = true;
+}
 

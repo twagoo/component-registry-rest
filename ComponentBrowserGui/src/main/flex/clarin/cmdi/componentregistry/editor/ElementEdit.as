@@ -2,10 +2,10 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.XMLBrowser;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-	
+
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	
+
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
@@ -26,20 +26,21 @@ package clarin.cmdi.componentregistry.editor {
 			styleName = StyleConstants.XMLBROWSER;
 		}
 
-        public function get element():CMDComponentElement {
-            return _element;
-        }
+		public function get element():CMDComponentElement {
+			return _element;
+		}
 
 		protected override function createChildren():void {
 			super.createChildren();
-			
+
 			addChild(createEditBar());
 			addChild(new FormItemInputLine("Name", _element.name, function(val:String):void {
 					_element.name = val;
 				}));
-			addChild(new FormItemInputLine(XMLBrowser.CONCEPTLINK, _element.conceptLink, function(val:String):void {
+			addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
 				}));
+
 			addChild(new FormItemInputLine("CardinalityMin", _element.cardinalityMin, function(val:String):void {
 					_element.cardinalityMin = val;
 				}));
@@ -51,14 +52,18 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createEditBar():HBox {
-		    var editBar:HBox = new HBox();
+			var editBar:HBox = new HBox();
 			editBar.addChild(createHeading());
 			var removeButton:Button = new Button();
 			removeButton.height = 20;
 			removeButton.label = "X";
 			removeButton.addEventListener(MouseEvent.CLICK, fireRemoveComponent);
-			removeButton.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {drawFocus(true);});
-			removeButton.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {drawFocus(false);});
+			removeButton.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+					drawFocus(true);
+				});
+			removeButton.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+					drawFocus(false);
+				});
 
 			editBar.addChild(removeButton);
 			return editBar;
@@ -76,12 +81,18 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createAndAddValueScheme():void {
-			if (_element.valueSchemeComplex == null) {
-				addChild(new FormItemInputLine("ValueScheme", _element.valueSchemeSimple, function(val:String):void {
-						_element.valueSchemeSimple = val;
-					}));
+			if (_element.valueSchemeEnumeration == null) {
+				if (_element.valueSchemePattern != null) {
+					addChild(new FormItemInputLine("ValueScheme", _element.valueSchemePattern, function(val:String):void {
+							_element.valueSchemeSimple = val;
+						}));
+				} else {
+					addChild(new FormItemInputLine("ValueScheme", _element.valueSchemeSimple, function(val:String):void {
+							_element.valueSchemeSimple = val;
+						}));
+				}
 			} else {
-				addChild(new EnumerationEdit(_element.valueSchemeComplex, this));
+				addChild(new EnumerationEdit(_element.valueSchemeEnumeration, this));
 			}
 		}
 

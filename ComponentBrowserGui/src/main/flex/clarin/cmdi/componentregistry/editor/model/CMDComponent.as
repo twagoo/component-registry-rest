@@ -39,17 +39,17 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function toXml():XML {
 			var result:XML = <CMD_Component></CMD_Component>;
-			if (isNotEmpty(name))
+			if (name)
 				result.@name = name;
-			if (isNotEmpty(componentId))
+			if (componentId)
 				result.@ComponentId = componentId;
-			if (isNotEmpty(conceptLink))
+			if (conceptLink)
 				result.@ConceptLink = conceptLink;
-			if (isNotEmpty(filename))
+			if (filename)
 				result.@filename = filename;
-			if (isNotEmpty(cardinalityMin))
+			if (cardinalityMin)
 				result.@CardinalityMin = cardinalityMin;
-			if (isNotEmpty(cardinalityMax))
+			if (cardinalityMax)
 				result.@CardinalityMax = cardinalityMax;
 			if (attributeList.length > 0) {
 				var attributeListTag:XML = <AttributeList></AttributeList>;
@@ -65,10 +65,6 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.appendChild(component.toXml());
 			}
 			return result;
-		}
-
-		private function isNotEmpty(value:String):Boolean {
-			return value != null && value != "";
 		}
 
 	}

@@ -11,9 +11,13 @@ package clarin.cmdi.componentregistry.services {
 
 		private static var _instance:Config = new Config();
 
-		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry"; 
+		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
-		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry" 
+		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
+
+		private var _isocatSearchUrl:String = "http://www.isocat.org/rest/user/guest/search";
+		//Default _isocatSearchUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
+		//Like this: "FlashVars", "isocatSearchUrl=http://www.isocat.org/rest/user/guest/search"
 
 
 		public function Config() {
@@ -23,6 +27,10 @@ package clarin.cmdi.componentregistry.services {
 			var serviceRootUrl:String = Application.application.parameters.serviceRootUrl;
 			if (serviceRootUrl != null) {
 				_serviceRootUrl = serviceRootUrl;
+			}
+			var isocatSearchUrl:String = Application.application.parameters.isocatSearchUrl;
+			if (isocatSearchUrl != null) {
+				_isocatSearchUrl = isocatSearchUrl;
 			}
 		}
 
@@ -48,6 +56,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function get uploadComponentUrl():String {
 			return _serviceRootUrl + UPLOAD_COMPONENT_SERVICE_URL;
+		}
+
+		public function get isocatSearchUrl():String {
+			return _isocatSearchUrl;
 		}
 
 		public static function get instance():Config {

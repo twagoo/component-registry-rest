@@ -16,7 +16,8 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		//elements
 		public var attributeList:ArrayCollection = new ArrayCollection();
-		public var valueSchemeComplex:XMLListCollection;
+		public var valueSchemeEnumeration:XMLListCollection;
+		public var valueSchemePattern:String;
 
 		public function CMDComponentElement() {
 		}
@@ -24,8 +25,35 @@ package clarin.cmdi.componentregistry.editor.model {
 
 
 		public function toXml():XML {
-			return <CMD_Element></CMD_Element>;//TODO PD implement
+			var result:XML = <CMD_Element></CMD_Element>; //TODO PD implement
+			if (name)
+				result.@name = name;
+			if (conceptLink)
+				result.@ConceptLink = conceptLink;
+			if (valueSchemeSimple)
+				result.@ValueScheme = valueSchemeSimple;
+			if (cardinalityMin)
+				result.@CardinalityMin = cardinalityMin;
+			if (cardinalityMax)
+				result.@CardinalityMax = cardinalityMax;
+			if (attributeList.length > 0) {
+				var attributeListTag:XML = <AttributeList></AttributeList>;
+				for each (var attribute:CMDAttribute in attributeList) {
+					attributeListTag.appendChild(attribute.toXml());
+				}
+				result.appendChild(attributeListTag);
+			}
+			if (valueSchemePattern) {
+				result.appendChild(<ValueScheme><pattern></pattern>{valueSchemePattern}</ValueScheme>)
+			}
+			if (valueSchemeEnumeration != null) {
+				var enumerationScheme:XML = <ValueScheme><enumeration></enumeration></ValueScheme>;
+				enumerationScheme.appendChild(valueSchemeEnumeration);
+				result.appendChild(enumerationScheme);
+			}
+			return result;
 		}
+
 
 	}
 }

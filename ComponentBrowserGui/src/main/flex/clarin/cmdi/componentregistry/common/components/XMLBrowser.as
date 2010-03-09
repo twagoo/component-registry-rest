@@ -112,7 +112,7 @@ package clarin.cmdi.componentregistry.common.components {
 				if (element.cardinalityMin != "" || element.cardinalityMax != "")
 					createAndAddFormChild("Cardinality", element.cardinalityMin + " - " + element.cardinalityMax);
 				handleCMDAttributeList(element.attributeList);
-				createAndAddValueScheme(element.valueSchemeSimple, element.valueSchemeComplex);
+				createAndAddValueScheme(element.valueSchemeSimple, element.valueSchemePattern, element.valueSchemeEnumeration);
 				indent = false;
 			}
 		}
@@ -125,16 +125,18 @@ package clarin.cmdi.componentregistry.common.components {
 					if (attribute.type != null) {
 						createAndAddFormChild("Type", attribute.type);
 					} else {
-						createAndAddValueScheme(attribute.valueSchemeSimple, attribute.valueSchemeComplex);
+						createAndAddValueScheme(null, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
 					}
 				}
 			}
 		}
 
-		protected function createAndAddValueScheme(value:String = null, valueList:XMLListCollection = null):void {
+		protected function createAndAddValueScheme(value:String = null, valuePattern:String = null, valueList:XMLListCollection = null):void {
 			var formItem:FormItem;
-			if (valueList == null) {
+			if (value  != null && value != "") {
 				formItem = createFormItem("ValueScheme", value);
+			} else if (valuePattern  != null && valuePattern != "") {
+			    formItem = createFormItem("ValueScheme", valuePattern);
 			} else {
 				formItem = createFormItem("ValueScheme", null);
 				var enumeration:DisplayObject = createEnumeration(valueList);

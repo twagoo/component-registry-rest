@@ -14,7 +14,7 @@ package clarin.cmdi.componentregistry.editor {
 			label = name;
 			styleName = StyleConstants.XMLBROWSER_FIELD;
 			editArea.styleName = StyleConstants.XMLEDITOR_EDIT_FIELD;
-			editArea.width = 400;
+			editArea.width = 300;
 			editArea.text = value;
 			BindingUtils.bindSetter(bindingFunction, editArea, "text");
 		}

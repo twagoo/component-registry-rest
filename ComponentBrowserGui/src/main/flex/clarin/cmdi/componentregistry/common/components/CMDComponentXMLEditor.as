@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.common.components {
-	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.ComponentEdit;
 	import clarin.cmdi.componentregistry.editor.FormItemInputLine;
 	import clarin.cmdi.componentregistry.editor.FormItemInputText;
@@ -10,13 +10,11 @@ package clarin.cmdi.componentregistry.common.components {
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	import flash.events.MouseEvent;
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
-	import mx.controls.Button;
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.ChildExistenceChangedEvent;
@@ -24,10 +22,14 @@ package clarin.cmdi.componentregistry.common.components {
 	import mx.managers.DragManager;
 	import mx.managers.IFocusManagerComponent;
 
-    [Event(name="editorChange", type="flash.events.Event")]
+	[Event(name="editorChange", type="flash.events.Event")]
 	public class CMDComponentXMLEditor extends Form implements IFocusManagerComponent, CMDSpecRenderer {
 
-        public static const EDITOR_CHANGE_EVENT:String = "editorChange";
+		public static const DRAG_NEW_COMPONENT:String = "newComponent";
+		public static const DRAG_NEW_ELEMENT:String = "newElement";
+		public static const DRAG_NEW_ATTRIBUTE:String = "newAttribute";
+
+		public static const EDITOR_CHANGE_EVENT:String = "editorChange";
 		private var _spec:CMDSpec;
 
 		public function CMDComponentXMLEditor() {
@@ -50,17 +52,28 @@ package clarin.cmdi.componentregistry.common.components {
 		private function dragOverHandler(event:DragEvent):void {
 			if (event.dragSource.hasFormat("items")) {
 				DragManager.showFeedback(DragManager.COPY);
+			} else if (event.dragSource.hasFormat(DRAG_NEW_COMPONENT)) {
+				DragManager.showFeedback(DragManager.COPY);
+			} else {
+				DragManager.showFeedback(DragManager.NONE);
 			}
 		}
 
 		private function dragDropHandler(event:DragEvent):void {
-			var items:Array = event.dragSource.dataForFormat("items") as Array;
-			for each (var item:ItemDescription in items) {
-				var comp:CMDComponent = new CMDComponent();
-				comp.componentId = item.id;
-				_spec.cmdComponents.addItem(comp);
-				addComponent(comp);
+			if (event.dragSource.hasFormat("items")) {
+				var items:Array = event.dragSource.dataForFormat("items") as Array;
+				for each (var item:ItemDescription in items) {
+					var comp:CMDComponent = new CMDComponent();
+					comp.componentId = item.id;
+					_spec.cmdComponents.addItem(comp);
+					addComponent(comp);
+				}
+			} else if (event.dragSource.hasFormat(DRAG_NEW_COMPONENT)) {
+				var emptyComp:CMDComponent = event.dragSource.dataForFormat(DRAG_NEW_COMPONENT) as CMDComponent;
+				_spec.cmdComponents.addItem(emptyComp);
+				addComponent(emptyComp);
 			}
+
 		}
 
 		public function set cmdSpec(cmdSpec:CMDSpec):void {
@@ -68,9 +81,9 @@ package clarin.cmdi.componentregistry.common.components {
 			createNewBrowser();
 			dispatchEditorChangeEvent();
 		}
-		
-		private function dispatchEditorChangeEvent(event:Event=null):void {
-		    dispatchEvent(new Event(EDITOR_CHANGE_EVENT));
+
+		private function dispatchEditorChangeEvent(event:Event = null):void {
+			dispatchEvent(new Event(EDITOR_CHANGE_EVENT));
 		}
 
 		[Bindable]
@@ -83,7 +96,7 @@ package clarin.cmdi.componentregistry.common.components {
 			removeAllChildren()
 			handleHeader(_spec);
 			handleComponents(_spec.cmdComponents);
-			trace("Created browser2 view in " + (getTimer() - start) + " ms.");
+			trace("Created editor view in " + (getTimer() - start) + " ms.");
 		}
 
 		private function handleHeader(spec:CMDSpec):void {
@@ -110,39 +123,24 @@ package clarin.cmdi.componentregistry.common.components {
 			for each (var component:CMDComponent in components) {
 				addComponent(component);
 			}
-			var btn:Button = new Button();
-			btn.label = "add Component";
-			btn.addEventListener(MouseEvent.CLICK, handleAddComponentClick);
-			btn.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {drawFocus(true);});
-			btn.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {drawFocus(false);});
-			addChild(btn);
 		}
-		
-		private function handleAddComponentClick(event:MouseEvent):void {
-			var comp:CMDComponent = new CMDComponent();
-			_spec.cmdComponents.addItem(comp);
-			var index:int = getChildIndex(event.currentTarget as DisplayObject);
-			addComponent(comp, index);
-		}
-		
 
-		
-		public function addComponent(component:CMDComponent, index:int=-1):void {
+		public function addComponent(component:CMDComponent, index:int = -1):void {
 			var comp:Container = new ComponentEdit(component, this);
 			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
 			if (index == -1) {
-			    addChild(comp);
+				addChild(comp);
 			} else {
-			    addChildAt(comp, index);
+				addChildAt(comp, index);
 			}
 		}
 
-        private function removeComponent(event:Event):void {
-            var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
-            _spec.removeComponent(comp);
-            removeChild(event.currentTarget as DisplayObject);
-        }
-        
+		private function removeComponent(event:Event):void {
+			var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
+			_spec.removeComponent(comp);
+			removeChild(event.currentTarget as DisplayObject);
+		}
+
 	}
 
 }

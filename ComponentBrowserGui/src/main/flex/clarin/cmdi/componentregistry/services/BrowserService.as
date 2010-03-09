@@ -2,13 +2,13 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
-	import mx.utils.ObjectUtil;
 	import mx.utils.StringUtil;
 
 	public class BrowserService {
@@ -46,7 +46,7 @@ package clarin.cmdi.componentregistry.services {
 
 		public function fault(faultEvent:FaultEvent):void {
 			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			throw new Error(errorMessage);
+			Alert.show(errorMessage);
 		}
 
 		protected function setItemDescriptions(items:ArrayCollection):void {

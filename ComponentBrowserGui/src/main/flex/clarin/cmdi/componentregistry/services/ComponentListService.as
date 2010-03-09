@@ -11,9 +11,6 @@ package clarin.cmdi.componentregistry.services {
 
 		public function ComponentListService() {
 			super(Config.instance.componentListUrl);
-			if (_instance != null) {
-				throw new Error("Service can only be accessed through ComponentListService.instance");
-			}
 		}
 
 		override protected function result(resultEvent:ResultEvent):void {

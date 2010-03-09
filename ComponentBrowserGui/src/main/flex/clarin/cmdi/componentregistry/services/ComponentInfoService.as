@@ -4,6 +4,7 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
+	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
 	import mx.rpc.Responder;
@@ -12,9 +13,9 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
 
-[Event(name="ComponentLoaded", type="flash.events.Event")]
+	[Event(name="ComponentLoaded", type="flash.events.Event")]
 	public class ComponentInfoService {
-	    public static const COMPONENT_LOADED:String = "ComponentLoaded";
+		public static const COMPONENT_LOADED:String = "ComponentLoaded";
 
 		private var service:HTTPService;
 
@@ -47,7 +48,7 @@ package clarin.cmdi.componentregistry.services {
 
 		public function fault(faultEvent:FaultEvent):void {
 			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			throw new Error(errorMessage);
+			Alert.show(errorMessage);
 		}
 	}
 }

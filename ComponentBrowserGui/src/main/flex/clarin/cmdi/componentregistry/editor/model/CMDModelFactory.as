@@ -53,9 +53,9 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.attributeList = createAttributeList(xml);
 			if (xml.hasOwnProperty(ComponentMD.VALUE_SCHEME)) {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
-					result.valueSchemeSimple = xml.ValueScheme.pattern;
+					result.valueSchemePattern = xml.ValueScheme.pattern;
 				} else if (xml.ValueScheme.hasOwnProperty(ComponentMD.ENUMERATION)) {
-					result.valueSchemeComplex = new XMLListCollection(xml.ValueScheme.enumeration.*);
+					result.valueSchemeEnumeration = new XMLListCollection(xml.ValueScheme.enumeration.*);
 				}
 			}
 			return result;
@@ -80,9 +80,9 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.type = xml.Type;
 			} else {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
-					result.valueSchemeSimple = xml.ValueScheme.pattern;
+					result.valueSchemePattern = xml.ValueScheme.pattern;
 				} else if (xml.ValueScheme.hasOwnProperty(ComponentMD.ENUMERATION)) {
-					result.valueSchemeComplex = new XMLListCollection(xml.ValueScheme.enumeration.*);
+					result.valueSchemeEnumeration = new XMLListCollection(xml.ValueScheme.enumeration.*);
 				}
 			}
 			return result;

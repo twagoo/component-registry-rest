@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:rictus="com.rictus.controls.*"
+				showCloseButton="true"
+				close="cleanUp();"
+				label="Search isocat..."
+				creationComplete="PopUpManager.centerPopUp(this)">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.TextInput;
+			import clarin.cmdi.componentregistry.services.IsocatService;
+			import mx.managers.PopUpManager;
+
+			[Bindable]
+			private var searchService:IsocatService = new IsocatService();
+
+			//To store the result
+			public var editField:TextInput;
+
+			private function cleanUp():void {
+				PopUpManager.removePopUp(this);
+			}
+
+			private function setItem():void {
+				var selectedItem:XML = dataGrid.selectedItem as XML;
+				if (selectedItem) {
+					editField.text = selectedItem.@pid;
+					editField.toolTip = selectedItem.@name + ": " + selectedItem.@definition;
+				}
+				cleanUp();
+			}
+
+			private function handleSearch(event:KeyboardEvent):void {
+				if (event.keyCode == Keyboard.ENTER) {
+					searchService.load(searchBox.text);
+				}
+			}
+		]]>
+	</mx:Script>
+
+	<mx:VBox>
+		<mx:HBox>
+			<rictus:SearchBox id="searchBox"
+							  label="enter keyword to find datacategory"
+							  keyDown="handleSearch(event);"
+							  minWidth="300"/>
+			<mx:Label text="{dataGrid.dataProvider.length} results"/>
+		</mx:HBox>
+		<mx:DataGrid id="dataGrid"
+					 dataProvider="{searchService.searchResults}"
+					 resizableColumns="true">
+			<mx:columns>
+				<mx:DataGridColumn dataField="@name"
+								   showDataTips="true"
+								   dataTipField="@name"
+								   headerText="Name"/>
+				<mx:DataGridColumn dataField="@definition"
+								   showDataTips="true"
+								   dataTipField="@definition"
+								   headerText="Definition"/>
+				<mx:DataGridColumn dataField="@identifier"
+								   showDataTips="true"
+								   dataTipField="@identifier"
+								   headerText="Identifier"/>
+				<mx:DataGridColumn dataField="@owner"
+								   showDataTips="true"
+								   dataTipField="@owner"
+								   headerText="Owner"/>
+				<mx:DataGridColumn dataField="@pid"
+								   showDataTips="true"
+								   dataTipField="@pid"
+								   headerText="Persistent Identifier"
+								   width="130"/>
+				<mx:DataGridColumn dataField="@type"
+								   headerText="Type"/>
+				<mx:DataGridColumn dataField="@version"
+								   headerText="Version"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:HBox>
+			<mx:Button label="OK"
+					   click="setItem()"/>
+			<mx:Button label="Cancel"
+					   click="cleanUp()"/>
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>
