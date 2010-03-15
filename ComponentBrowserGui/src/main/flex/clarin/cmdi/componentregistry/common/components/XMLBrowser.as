@@ -25,7 +25,7 @@ package clarin.cmdi.componentregistry.common.components {
 	 */
 	public class XMLBrowser extends Form implements IFocusManagerComponent, CMDSpecRenderer {
 
-   		//Names
+   		//Label names
 		public static const CONCEPTLINK:String = "ConceptLink";
 		public static const COMPONENT:String = "Component";
 		public static const COMPONENT_ID:String = "ComponentId";
