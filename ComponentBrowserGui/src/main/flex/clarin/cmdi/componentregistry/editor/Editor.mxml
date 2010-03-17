@@ -15,12 +15,12 @@
 
 		<mx:HBox width="100%"
 				 height="40">
-			<mx:Button id="createEmptyProfileBtn"
-					   label="createEmptyProfile"
-					   click="createEmptyProfile()"/>
+			<mx:Button id="clearBtn"
+					   label="clear"
+					   click="clearEditor()"/>
 			<mx:Button id="saveBtn"
 					   label="save"
-					   click="saveProfile()"/>
+					   click="saveSpec()"/>
 		</mx:HBox>
 		<mx:Text id="errorMessageField"
 				 text="{uploadService.message}"

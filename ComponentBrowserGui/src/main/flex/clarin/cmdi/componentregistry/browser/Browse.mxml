@@ -23,12 +23,17 @@
 			private var componentsSrv:ComponentListService = ComponentListService.instance;
 			private var deleteSrv:DeleteService = new DeleteService();
 			[Bindable]
-			private var browseMenu:BrowseContextMenu
+			private var profilesMenu:BrowseContextMenu
+			[Bindable]
+			private var componentsMenu:BrowseContextMenu
 
 			public function init():void {
-			    browseMenu = new BrowseContextMenu();
-				browseMenu.viewStack = this.parent as RegistryViewStack;
-				browseMenu.deleteService = deleteSrv;
+			    profilesMenu = new BrowseContextMenu();
+				profilesMenu.viewStack = this.parent as RegistryViewStack;
+				profilesMenu.deleteService = deleteSrv;
+			    componentsMenu = new BrowseContextMenu();
+				componentsMenu.viewStack = this.parent as RegistryViewStack;
+				componentsMenu.deleteService = deleteSrv;
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
 			}
 
@@ -51,6 +56,7 @@
 				} else {
 					tabnav.selectedIndex = 1;
 				}
+//				var indeprofilesOverview.browserDataProvider.getItemIndex(desc);
 				//Need to select the correct item, can't get it to highlight at the mo
 				//profilesOverview.dataGrid.selectedIndex=2;
 				//profilesOverview.dataGrid.validateNow();
@@ -88,7 +94,7 @@
 											 browserColumns="{browserColumns.getProfileColumns()}"
 											 width="100%"
 											 height="70%"
-											 browseMenu="{browseMenu}"/>
+											 browseMenu="{profilesMenu}"/>
 				<browser:ProfileInfoPage id="profileInfoPage"
 										 profile="{profileSrv.profile}"
 										 width="100%"
@@ -103,7 +109,7 @@
 											 browserColumns="{browserColumns.getComponentColumns()}"
 											 width="100%"
 											 height="50%"
-											 browseMenu="{browseMenu}"/>
+											 browseMenu="{componentsMenu}"/>
 				<browser:ComponentInfoPage id="componentInfoPage"
 										   component="{componentSrv.component}"
 										   width="100%"

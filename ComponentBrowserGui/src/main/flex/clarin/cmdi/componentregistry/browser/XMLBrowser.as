@@ -71,8 +71,8 @@ package clarin.cmdi.componentregistry.browser {
 		protected function handleHeader(spec:CMDSpec):void {
 			addFormHeading("Header");
 			createAndAddFormChild("Name", spec.headerName);
-			createAndAddFormChild("Id", spec.headerId);
 			createAndAddFormChild(DESCRIPTION, spec.headerDescription);
+			createAndAddFormChild("Id", spec.headerId);
 		}
 
 		protected function createAndAddFormChild(name:String, value:String):void {

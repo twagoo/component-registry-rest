@@ -1,10 +1,10 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-	
+
 	import com.adobe.net.URI;
 	import com.hurlant.util.Base64;
-	
+
 	import flash.events.DataEvent;
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
@@ -13,11 +13,10 @@ package clarin.cmdi.componentregistry.services {
 	import flash.events.SecurityErrorEvent;
 	import flash.net.FileFilter;
 	import flash.net.FileReference;
-	import flash.net.URLRequest;
 	import flash.net.URLVariables;
-	
+
 	import mx.controls.ProgressBar;
-	
+
 	import org.httpclient.HttpClient;
 	import org.httpclient.events.HttpDataEvent;
 	import org.httpclient.events.HttpResponseEvent;
@@ -38,18 +37,16 @@ package clarin.cmdi.componentregistry.services {
 
 		private var fileRef:FileReference;
 		private var httpClient:HttpClient;
-		private var request:URLRequest;
 		private var pb:ProgressBar;
 
 		public function init(progressBar:ProgressBar):void {
 			pb = progressBar;
 		}
 
-		private function createAndInitRequest(url:String):void {
-			request = new URLRequest(url);
+		private function createAndInitRequest():void {
 			httpClient = new HttpClient();
 			httpClient.listener.onError = httpclientErrorHandler;
-			httpClient.listener.onData = httpclientDataHandler; 
+			httpClient.listener.onData = httpclientDataHandler;
 			httpClient.listener.onComplete = httpclientCompleteHandler;
 		}
 
@@ -66,36 +63,33 @@ package clarin.cmdi.componentregistry.services {
 		 * submits a profile, data parameter can be null which implies a file was selected using selectXmlFile();
 		 */
 		public function submitProfile(description:ItemDescription, data:String = null):void {
-			createAndInitRequest(Config.instance.uploadProfileUrl);
-			var params:URLVariables = new URLVariables();
-			submit(description, params, data);
+			createAndInitRequest();
+			submit(description, data, new URI(Config.instance.uploadProfileUrl));
 		}
 
 		/**
 		 * submits a component, data parameter can be null which implies a file was selected using selectXmlFile();
 		 */
 		public function submitComponent(description:ItemDescription, data:String = null):void {
-			createAndInitRequest(Config.instance.uploadComponentUrl);
-			var params:URLVariables = new URLVariables();
-			params.group = description.groupName;
-			submit(description, params, data);
+			createAndInitRequest();
+			submit(description, data, new URI(Config.instance.uploadComponentUrl));
 		}
 
 		private function getCredentials():String {
 			return Base64.encode("tomcat:tomcat");
 		}
 
-		private function submit(description:ItemDescription, params:URLVariables, data:String = null):void {
+		private function submit(description:ItemDescription, data:String, uri:URI):void {
 			message = "";
 			try {
 				if (data != null) {
 					var parts:Array = new Array();
 					parts.push(new Part("description", description.description));
 					parts.push(new Part("name", description.name));
+					parts.push(new Part("group", description.groupName));
 					parts.push(new Part("data", data, "application/octet-stream", [{name: "filename", value: description.name + ".xml"}]));
 
 					var multipart:Multipart = new Multipart(parts);
-					var uri:URI = new URI(Config.instance.uploadProfileUrl);
 					startUploadHandler();
 					var post:Post = new Post();
 					post.addHeader("Authorization", "BASIC " + getCredentials());
@@ -107,11 +101,11 @@ package clarin.cmdi.componentregistry.services {
 					if (fileRef.data == null) {
 						//only load if not loaded before otherwise sent the already loaded file. You can only force a reload of the file by selecting it again (it is a flash thingy).
 						fileRef.addEventListener(Event.COMPLETE, function(event:Event):void {
-								submit(description, params, new String(fileRef.data));
+								submit(description, new String(fileRef.data), uri);
 							});
 						fileRef.load();
 					} else {
-						submit(description, params, new String(fileRef.data));
+						submit(description, new String(fileRef.data), uri);
 					}
 				}
 			} catch (error:Error) {
@@ -119,7 +113,6 @@ package clarin.cmdi.componentregistry.services {
 				throw error;
 			}
 		}
-
 
 		public function selectXmlFile(event:Event):void {
 			createAndInitFileReference();
@@ -137,7 +130,7 @@ package clarin.cmdi.componentregistry.services {
 			if (!event.response.isSuccess) {
 				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.response.code + ")\n");
 			}
-            httpClient.close();
+			httpClient.close();
 		}
 
 		private function httpclientDataHandler(event:HttpDataEvent):void {

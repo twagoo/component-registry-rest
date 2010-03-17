@@ -4,11 +4,12 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.utils.getTimer;
-	
+
+	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -70,12 +71,11 @@ package clarin.cmdi.componentregistry.editor {
 				_spec.cmdComponents.addItem(emptyComp);
 				addComponent(emptyComp);
 			}
-
 		}
 
 		public function set cmdSpec(cmdSpec:CMDSpec):void {
 			_spec = cmdSpec;
-			createNewBrowser();
+			createNewEditor();
 			dispatchEditorChangeEvent();
 		}
 
@@ -88,7 +88,7 @@ package clarin.cmdi.componentregistry.editor {
 			return _spec;
 		}
 
-		private function createNewBrowser():void {
+		private function createNewEditor():void {
 			var start:int = getTimer();
 			removeAllChildren()
 			handleHeader(_spec);
@@ -97,18 +97,30 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function handleHeader(spec:CMDSpec):void {
+			addChild(new SelectTypeRadioButtons(spec));
+			addChild(createOptionalGroupNameInput(spec));
 			addChild(createHeading());
 			addChild(new FormItemInputLine("Name", spec.headerName, function(val:String):void {
 					spec.headerName = val;
 				}));
-			var idInput:FormItemInputLine =	new FormItemInputLine("Id", spec.headerId, function(val:String):void {
-					spec.headerId = val;
-				}, false);
-			idInput.toolTip="Id will be generated";
-			addChild(idInput);
 			addChild(new FormItemInputText(XMLBrowser.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
 				}));
+			var idInput:FormItemInputLine = new FormItemInputLine("Id", spec.headerId, function(val:String):void {
+					spec.headerId = val;
+				}, false);
+			idInput.toolTip = "Id will be generated";
+			addChild(idInput);
+		}
+
+		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
+			var result:FormItem = new FormItemInputLine("Group Name", spec.groupName, function(val:String):void {
+					spec.groupName = val;
+				})
+			BindingUtils.bindSetter(function(val:Boolean):void {
+					result.visible = !val;
+				}, spec, "isProfile");
+			return result;
 		}
 
 		private function createHeading():FormItem {

@@ -59,20 +59,25 @@ public function setDescription(itemDescription:ItemDescription):void {
 	}
 }
 
-public function createEmptyProfile():void {
+public function clearEditor():void {
 	this.cmdSpec = new CMDSpec(true);
 }
 
 private var ref:FileReference = new FileReference();
 
-private function saveProfile():void {
-	Alert.show(xmlEditor.cmdSpec.toXml());
+private function saveSpec():void {
+//	Alert.show(xmlEditor.cmdSpec.toXml());
 	var item:ItemDescription = new ItemDescription();
 	item.description = xmlEditor.cmdSpec.headerDescription;
 	item.name = xmlEditor.cmdSpec.headerName;
 	item.isProfile = xmlEditor.cmdSpec.isProfile;
+	item.groupName = xmlEditor.cmdSpec.groupName;
 	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
-	uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
+	if (item.isProfile) {
+	    uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
+	} else {
+	    uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
+	}
 }
 
 private function handleSaveComplete(event:UploadCompleteEvent):void {

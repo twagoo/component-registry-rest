@@ -13,6 +13,8 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var headerId:String;
 		public var headerDescription:String;
 		public var cmdComponents:ArrayCollection = new ArrayCollection();
+		
+		public var groupName:String; //Not in xml but stored in the description
 
 		public function CMDSpec(isProfile:Boolean) {
 			this.isProfile = isProfile;
