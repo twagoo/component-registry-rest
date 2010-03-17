@@ -1,13 +1,13 @@
 package clarin.cmdi.componentregistry.services {
 	import com.adobe.net.URI;
-	
+
 	import flash.events.ErrorEvent;
 	import flash.events.EventDispatcher;
-	
+
 	import mx.controls.Alert;
 	import mx.managers.CursorManager;
 	import mx.utils.StringUtil;
-	
+
 	import org.httpclient.HttpClient;
 	import org.httpclient.events.HttpDataEvent;
 	import org.httpclient.events.HttpResponseEvent;
@@ -24,14 +24,11 @@ package clarin.cmdi.componentregistry.services {
 		public var searchResults:XMLList;
 
 		public function IsocatService() {
-			service = new HttpClient();
-			service.listener.onComplete = handleResult;
-			service.listener.onError = handleError;
-			service.listener.onData = handleData;
 		}
 
 		public function load(keyword:String):void {
 			if (keyword) {
+				createClient();
 				CursorManager.setBusyCursor();
 				var uri:URI = new URI(Config.instance.isocatSearchUrl);
 				uri.setQueryValue("keywords", keyword);
@@ -43,7 +40,21 @@ package clarin.cmdi.componentregistry.services {
 			}
 		}
 
-		public function handleData(event:HttpDataEvent):void {
+		public function close():void {
+			if (service) {
+				service.close();
+			}
+			CursorManager.removeBusyCursor();
+		}
+
+		private function createClient():void {
+			service = new HttpClient();
+			service.listener.onComplete = handleResult;
+			service.listener.onError = handleError;
+			service.listener.onData = handleData;
+		}
+
+		private function handleData(event:HttpDataEvent):void {
 			var data:XML = new XML(event.bytes);
 			searchResults = data.dcif::dataCategory;
 		}
@@ -57,10 +68,10 @@ package clarin.cmdi.componentregistry.services {
 			}
 		}
 
-		public function handleError(faultEvent:ErrorEvent):void {
+		private function handleError(faultEvent:ErrorEvent):void {
 			CursorManager.removeBusyCursor();
 			var errorMessage:String = StringUtil.substitute("Error in {0}: {1}", this, faultEvent.text);
-		    Alert.show(errorMessage);
+			Alert.show(errorMessage);
 		}
 
 

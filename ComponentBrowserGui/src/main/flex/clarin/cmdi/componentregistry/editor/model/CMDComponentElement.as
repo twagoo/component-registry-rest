@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 
@@ -25,7 +25,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 
 		public function toXml():XML {
-			var result:XML = <CMD_Element></CMD_Element>; //TODO PD implement
+			var result:XML = <CMD_Element></CMD_Element>;
 			if (name)
 				result.@name = name;
 			if (conceptLink)
@@ -44,12 +44,14 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.appendChild(attributeListTag);
 			}
 			if (valueSchemePattern) {
-				result.appendChild(<ValueScheme><pattern></pattern>{valueSchemePattern}</ValueScheme>)
+				result.appendChild(<ValueScheme><pattern>{valueSchemePattern}</pattern></ValueScheme>)
 			}
 			if (valueSchemeEnumeration != null) {
-				var enumerationScheme:XML = <ValueScheme><enumeration></enumeration></ValueScheme>;
-				enumerationScheme.appendChild(valueSchemeEnumeration);
-				result.appendChild(enumerationScheme);
+				var enumerationScheme:XML = <enumeration></enumeration>;
+				for each(var item:XML in valueSchemeEnumeration) {
+				    enumerationScheme.appendChild(item);
+    			}
+    			result.appendChild(<ValueScheme>{enumerationScheme}</ValueScheme>);
 			}
 			return result;
 		}

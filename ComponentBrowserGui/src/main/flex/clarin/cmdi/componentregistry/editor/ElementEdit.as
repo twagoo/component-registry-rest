@@ -1,11 +1,14 @@
 package clarin.cmdi.componentregistry.editor {
+	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.components.XMLBrowser;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 
+	import mx.binding.utils.BindingUtils;
+	import mx.binding.utils.ChangeWatcher;
+	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
@@ -81,19 +84,34 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createAndAddValueScheme():void {
+			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput("Type");
+			BindingUtils.bindSetter(function(val:String):void {
+					_element.valueSchemePattern = val;
+					_element.valueSchemeSimple = "";
+					_element.valueSchemeEnumeration = null;
+				}, valueSchemeInput, "valueSchemePattern");
+			BindingUtils.bindSetter(function(val:String):void {
+					_element.valueSchemeSimple = val;
+					_element.valueSchemeEnumeration = null;
+					_element.valueSchemePattern = "";
+				}, valueSchemeInput, "valueSchemeSimple");
+			BindingUtils.bindSetter(function(val:XMLListCollection):void {
+					_element.valueSchemeEnumeration = val;
+					_element.valueSchemeSimple = "";
+					_element.valueSchemePattern = "";
+				}, valueSchemeInput, "valueSchemeEnumeration");
+
 			if (_element.valueSchemeEnumeration == null) {
 				if (_element.valueSchemePattern != null) {
-					addChild(new FormItemInputLine("ValueScheme", _element.valueSchemePattern, function(val:String):void {
-							_element.valueSchemeSimple = val;
-						}));
+					valueSchemeInput.valueSchemePattern = _element.valueSchemePattern;
 				} else {
-					addChild(new FormItemInputLine("ValueScheme", _element.valueSchemeSimple, function(val:String):void {
-							_element.valueSchemeSimple = val;
-						}));
+					valueSchemeInput.valueSchemeSimple = _element.valueSchemeSimple;
 				}
 			} else {
-				addChild(new EnumerationEdit(_element.valueSchemeEnumeration, this));
+				valueSchemeInput.valueSchemeEnumeration = _element.valueSchemeEnumeration;
+
 			}
+			addChild(valueSchemeInput);
 		}
 
 		private function createHeading():FormItem {

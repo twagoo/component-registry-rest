@@ -1,11 +1,9 @@
-package clarin.cmdi.componentregistry.common.components {
-	import clarin.cmdi.componentregistry.common.ComponentMD;
+package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-
+	import clarin.cmdi.componentregistry.common.components.ConceptLinkRenderer;
+	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
+	
 	import flash.display.DisplayObject;
-
-	import mx.collections.XMLListCollection;
-	import mx.controls.ComboBox;
 
 	/**
 	 * Browser form created from CMDComponent xml

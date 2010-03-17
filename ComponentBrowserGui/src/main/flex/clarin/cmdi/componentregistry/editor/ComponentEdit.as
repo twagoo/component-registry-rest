@@ -1,9 +1,8 @@
 package clarin.cmdi.componentregistry.editor {
+	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.components.CMDComponentXMLEditor;
 	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
-	import clarin.cmdi.componentregistry.common.components.XMLBrowser;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	

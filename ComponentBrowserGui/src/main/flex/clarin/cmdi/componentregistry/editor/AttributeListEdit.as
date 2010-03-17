@@ -1,13 +1,13 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.components.CMDComponentXMLEditor;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 
-	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 
+	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
+	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
@@ -48,24 +48,37 @@ package clarin.cmdi.componentregistry.editor {
 			var attributeBox:Form = new Form();
 			attributeBox.styleName = StyleConstants.XMLBROWSER;
 			addEditBar(attribute, attributeBox);
-			if (attribute.type != null) {
-				attributeBox.addChild(new FormItemInputLine("Type", attribute.type, function(val:String):void {
-						attribute.type = val;
-					}));
-			} else {
-				attributeBox.addChild(createAndAddValueScheme(attribute));
-			}
+			attributeBox.addChild(createAndAddValueScheme(attribute));
 			return attributeBox;
 		}
 
 		private function createAndAddValueScheme(attribute:CMDAttribute):UIComponent {
+			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput("Type");
+			BindingUtils.bindSetter(function(val:String):void {
+					attribute.valueSchemePattern = val;
+					attribute.valueSchemeEnumeration = null;
+					attribute.type = "";
+				}, valueSchemeInput, "valueSchemePattern");
+			BindingUtils.bindSetter(function(val:String):void {
+					attribute.type = val;
+					attribute.valueSchemePattern ="";
+					attribute.valueSchemeEnumeration = null;
+				}, valueSchemeInput, "valueSchemeSimple");
+			BindingUtils.bindSetter(function(val:XMLListCollection):void {
+					attribute.valueSchemeEnumeration = val;
+					attribute.type = "";
+					attribute.valueSchemePattern = "";
+				}, valueSchemeInput, "valueSchemeEnumeration");
 			if (attribute.valueSchemeEnumeration == null) {
-				return new FormItemInputLine("ValueScheme", attribute.valueSchemePattern, function(val:String):void {
-						attribute.valueSchemePattern = val;
-					});
+				if (attribute.valueSchemePattern != null) {
+					valueSchemeInput.valueSchemePattern = attribute.valueSchemePattern;
+				} else {
+					valueSchemeInput.valueSchemeSimple = attribute.type;
+				}
 			} else {
-				return new EnumerationEdit(attribute.valueSchemeEnumeration, this);
+				valueSchemeInput.valueSchemeEnumeration = attribute.valueSchemeEnumeration;
 			}
+			return valueSchemeInput;
 		}
 
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {

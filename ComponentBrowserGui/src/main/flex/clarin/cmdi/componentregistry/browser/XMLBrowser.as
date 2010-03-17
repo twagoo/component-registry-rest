@@ -1,15 +1,15 @@
-package clarin.cmdi.componentregistry.common.components {
-	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
+package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-	
+
 	import flash.display.DisplayObject;
 	import flash.utils.getTimer;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
@@ -25,7 +25,7 @@ package clarin.cmdi.componentregistry.common.components {
 	 */
 	public class XMLBrowser extends Form implements IFocusManagerComponent, CMDSpecRenderer {
 
-   		//Label names
+		//Label names
 		public static const CONCEPTLINK:String = "ConceptLink";
 		public static const COMPONENT:String = "Component";
 		public static const COMPONENT_ID:String = "ComponentId";
@@ -76,7 +76,7 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		protected function createAndAddFormChild(name:String, value:String):void {
-			if (value != "" && value != null) { //only add if we have somekind of value
+			if (value) { //only add if we have somekind of value
 				addFormChild(createFormItem(name, value));
 			}
 		}
@@ -133,24 +133,29 @@ package clarin.cmdi.componentregistry.common.components {
 
 		protected function createAndAddValueScheme(value:String = null, valuePattern:String = null, valueList:XMLListCollection = null):void {
 			var formItem:FormItem;
-			if (value  != null && value != "") {
-				formItem = createFormItem("ValueScheme", value);
-			} else if (valuePattern  != null && valuePattern != "") {
-			    formItem = createFormItem("ValueScheme", valuePattern);
-			} else {
+			if (valueList) {
 				formItem = createFormItem("ValueScheme", null);
 				var enumeration:DisplayObject = createEnumeration(valueList);
 				formItem.addChild(enumeration);
+			} else if (valuePattern) {
+				formItem = createFormItem("ValueScheme", valuePattern);
+			} else {
+				formItem = createFormItem("ValueScheme", value);
 			}
 			addFormChild(formItem);
 		}
 
 		private function createEnumeration(enumeration:XMLListCollection):DisplayObject {
-			var result:ComboBox = new ComboBox();
+			var result:ComboBox = createValueSchemeComboBox();
 			result.dataProvider = enumeration;
+			return result;
+		}
+
+		public static function createValueSchemeComboBox():ComboBox {
+			var result:ComboBox = new ComboBox();
 			result.labelFunction = function(item:Object):String {
 				var xmlItem:XML = item as XML;
-				if (item..hasOwnProperty("@" + ComponentMD.APP_INFO)) {
+				if (item.hasOwnProperty("@" + ComponentMD.APP_INFO) && xmlItem.attribute(ComponentMD.APP_INFO) != "") { //TODO PD what about conceptlinks? also not shown in Browser.
 					return xmlItem.attribute(ComponentMD.APP_INFO) + " - " + xmlItem.text();
 				} else {
 					return xmlItem.text();
@@ -158,7 +163,6 @@ package clarin.cmdi.componentregistry.common.components {
 			};
 			return result;
 		}
-
 
 		/**
 		 * Responsible for creating a form item, override in subclasses to create different items if needed.
@@ -169,9 +173,9 @@ package clarin.cmdi.componentregistry.common.components {
 			var field:FormItem = new FormItem();
 			field.label = name;
 			field.styleName = StyleConstants.XMLBROWSER_FIELD;
-			if (value  != null && value != "") {
-    			var fieldValue:DisplayObject = createFormItemFieldValue(name, value);
-    			field.addChild(fieldValue);
+			if (value != null && value != "") {
+				var fieldValue:DisplayObject = createFormItemFieldValue(name, value);
+				field.addChild(fieldValue);
 			}
 			return field;
 		}

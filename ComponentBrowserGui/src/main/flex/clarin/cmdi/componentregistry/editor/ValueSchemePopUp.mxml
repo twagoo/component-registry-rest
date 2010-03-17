@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				showCloseButton="true"
+				close="cleanUp();"
+				creationComplete="PopUpManager.centerPopUp(this)"
+				title="Edit and choose a type"
+				xmlns:editor="clarin.cmdi.componentregistry.editor.*">
+
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.common.ComponentMD;
+			import mx.collections.XMLListCollection;
+			import mx.controls.TextInput;
+			import mx.managers.PopUpManager;
+			import mx.collections.ArrayCollection;
+
+			//Stores the result
+			[Bindable]
+			public var valueSchemeInput:ValueSchemeInput;
+
+            //Taken from http://www.clarin.eu/cmd/general-component-schema.xsd (allowed_attributetypes_type)
+			[Bindable]
+			private var simpleValueSchemeDataProvider:ArrayCollection = new ArrayCollection([{label: "boolean", data: "boolean"},
+				{label: "decimal", data: "decimal"},
+				{label: "float", data: "float"},
+				{label: "string", data: "string"},
+				{label: "anyURI", data: "anyURI"},
+				{label: "date", data: "date"},
+				{label: "gDay", data: "gDay"},
+				{label: "gMonth", data: "gMonth"},
+				{label: "gYear", data: "gYear"},
+				{label: "time", data: "time"},]);
+
+
+			private function setType():void {
+				valueSchemeInput.valueSchemeSimple = simpleValueSchemeBox.selectedItem.data;
+				cleanUp();
+			}
+
+			private function setPattern():void {
+				valueSchemeInput.valueSchemePattern = patternInput.text;
+				cleanUp();
+			}
+
+			private function setControlledVocabulary():void {
+				var enumeration:XMLListCollection = new XMLListCollection();
+				for (var i:int; i < enumerationGrid.valueSchemeEnumeration.length - 1; i++) {
+					var item:Object = enumerationGrid.valueSchemeEnumeration.getItemAt(i);
+					enumeration.addItem(<item {ComponentMD.APP_INFO}={item.appInfo} {ComponentMD.CONCEPTLINK}={item.conceptLink}>{item.item}</item>);
+				}
+				valueSchemeInput.valueSchemeEnumeration = enumeration;
+				cleanUp();
+			}
+
+			private function cleanUp():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+
+
+	<mx:Label text="Select type:"/>
+	<mx:HBox width="100%">
+		<mx:ComboBox id="simpleValueSchemeBox"
+					 dataProvider="{simpleValueSchemeDataProvider}">
+		</mx:ComboBox>
+		<mx:Spacer width="100%"/>
+		<mx:Button label="Use Type"
+				   click="setType()"/>
+	</mx:HBox>
+
+	<mx:Label text="Or enter pattern:"/>
+	<mx:HBox width="100%">
+		<mx:TextInput id="patternInput">
+			<!-- PD TODO how can I check this -->
+		</mx:TextInput>
+		<mx:Spacer width="100%"/>
+		<mx:Button label="Use Pattern"
+				   click="setPattern()"/>
+	</mx:HBox>
+
+	<!-- PD TODO how should we implement open vocabularies?? -->
+	<mx:Label text="Or create controlled vocabularies:"/>
+	<mx:HBox width="100%">
+		<editor:ValueSchemeEnumerationGrid id="enumerationGrid"/>
+		<mx:Button label="Use Controlled Vocabulary"
+				   click="setControlledVocabulary()"/>
+	</mx:HBox>
+
+	<mx:HBox width="100%">
+		<mx:Spacer width="100%"/>
+		<mx:Button label="Cancel"
+				   click="cleanUp()"/>
+	</mx:HBox>
+</mx:TitleWindow>

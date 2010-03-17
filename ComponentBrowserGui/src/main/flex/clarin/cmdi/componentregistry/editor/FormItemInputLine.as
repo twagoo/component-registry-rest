@@ -8,13 +8,14 @@ package clarin.cmdi.componentregistry.editor {
 	public class FormItemInputLine extends FormItem {
 		private var editField:TextInput = new TextInput();
 
-		public function FormItemInputLine(name:String, value:String, bindingFunction:Function) {
+		public function FormItemInputLine(name:String, value:String, bindingFunction:Function, editable:Boolean=true) {
 			super();
 			label = name;
 			styleName = StyleConstants.XMLBROWSER_FIELD;
 			editField.styleName = StyleConstants.XMLEDITOR_EDIT_FIELD;
 			editField.width = 300;
 			editField.text = value;
+			editField.editable=editable;
 			BindingUtils.bindSetter(bindingFunction, editField, "text");
 		}
 

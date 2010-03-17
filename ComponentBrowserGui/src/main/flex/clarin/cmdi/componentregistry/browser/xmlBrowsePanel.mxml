@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*" >
+		 xmlns:browser="clarin.cmdi.componentregistry.browser.*" >
 	<mx:Script>
 	    <![CDATA[
 	        import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
@@ -8,7 +8,7 @@
 	</mx:Script>
 
 	<mx:XML id="cmdComponent"/>
-	<comp:CMDComponentXMLBrowser id="xmlBrowse"
+	<browser:CMDComponentXMLBrowser id="xmlBrowse"
 								 cmdSpec="{CMDModelFactory.createModel(cmdComponent)}"
 								 width="100%"
 								 height="100%"

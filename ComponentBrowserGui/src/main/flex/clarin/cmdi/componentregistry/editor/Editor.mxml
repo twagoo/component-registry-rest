@@ -2,7 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		   xmlns:common="clarin.cmdi.componentregistry.common.*"
-		   xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
+		   xmlns:editor="clarin.cmdi.componentregistry.editor.*"
 		   width="100%"
 		   height="100%"
 		   label="Editor..."
@@ -34,19 +34,18 @@
 
 		<mx:VBox width="100%"
 				 height="80%">
-			<comp:CMDComponentXMLEditor id="xmlEditor"
-										cmdSpec="{cmdSpec}"
-										editorChange="handleEditorChange(event)"/>
+			<editor:CMDComponentXMLEditor id="xmlEditor"
+										  cmdSpec="{cmdSpec}"
+										  editorChange="handleEditorChange(event)"/>
 			<mx:VBox styleName="borderStyles">
-                <mx:Label text="Drag items onto edit canvas"/>
+				<mx:Label text="Drag items onto edit canvas"/>
 				<mx:HBox id="palette">
 					<mx:Canvas width="60"
 							   height="60"
 							   backgroundColor="blue"
 							   borderStyle="solid"
 							   id="ComponentDrag"
-							   mouseMove="enableComponentDrag(event);"
-							   >
+							   mouseMove="enableComponentDrag(event);">
 					</mx:Canvas>
 					<mx:Canvas width="45"
 							   height="45"

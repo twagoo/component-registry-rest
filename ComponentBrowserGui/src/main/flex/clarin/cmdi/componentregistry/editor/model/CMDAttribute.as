@@ -12,19 +12,20 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var valueSchemePattern:String; //pattern
 		public var valueSchemeEnumeration:XMLListCollection; // enumeration 
 
-		//TODO Patrick see element?? check usage in xmlBrowser
-
-
 		public function CMDAttribute() {
 		}
 
 		public function toXml():XML {
-			var result:XML = <Attribute></Attribute>;
+ 			var result:XML = <Attribute></Attribute>;
 			result.appendChild(<Name>{name}</Name>);
 			if (valueSchemePattern) {
-				result.appendChild(<pattern>{valueSchemePattern}</pattern>);
+				result.appendChild(<ValueScheme><pattern>{valueSchemePattern}</pattern></ValueScheme>);
 			} else if (valueSchemeEnumeration) {
-				result.appendChild(<enumeration>{valueSchemeEnumeration}</enumeration>);
+   				var enumerationScheme:XML = <enumeration></enumeration>;
+				for each(var item:XML in valueSchemeEnumeration) {
+				    enumerationScheme.appendChild(item);
+    			}
+    			result.appendChild(<ValueScheme>{enumerationScheme}</ValueScheme>);
 			} else {
 				result.appendChild(<Type>{type}</Type>);
 			}

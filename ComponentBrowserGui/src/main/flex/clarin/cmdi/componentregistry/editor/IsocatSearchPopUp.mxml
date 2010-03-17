@@ -3,8 +3,8 @@
 				xmlns:rictus="com.rictus.controls.*"
 				showCloseButton="true"
 				close="cleanUp();"
-				label="Search isocat..."
-				creationComplete="PopUpManager.centerPopUp(this)">
+				creationComplete="PopUpManager.centerPopUp(this)"
+				title="Search in Isocat.org">
 
 	<mx:Script>
 		<![CDATA[
@@ -19,6 +19,7 @@
 			public var editField:TextInput;
 
 			private function cleanUp():void {
+			    searchService.close();
 				PopUpManager.removePopUp(this);
 			}
 
@@ -78,7 +79,8 @@
 								   headerText="Version"/>
 			</mx:columns>
 		</mx:DataGrid>
-		<mx:HBox>
+		<mx:HBox width="100%">
+			<mx:Spacer width="100%"/>
 			<mx:Button label="OK"
 					   click="setItem()"/>
 			<mx:Button label="Cancel"

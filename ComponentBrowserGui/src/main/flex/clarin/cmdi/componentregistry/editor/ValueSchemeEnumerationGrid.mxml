@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.DataGridEventReason;
+			import clarin.cmdi.componentregistry.common.ComponentMD;
+			import mx.collections.XMLListCollection;
+			import mx.controls.TextInput;
+			import mx.events.DataGridEvent;
+			import mx.collections.ArrayCollection;
+			import mx.managers.PopUpManager;
+
+			private static const ADD_ROW:String = "Click to add a row";
+
+			[Bindable]
+			public var valueSchemeEnumeration:ArrayCollection = new ArrayCollection([{item: ADD_ROW, conceptLink: "", appInfo: ""}]);
+
+
+			private function editEnd(e:DataGridEvent):void {
+				if (e.rowIndex == valueSchemeEnumeration.length - 1 && e.columnIndex == 0 && e.reason != DataGridEventReason.CANCELLED) {
+					var row:Object = valueSchemeEnumeration.getItemAt(valueSchemeEnumeration.length - 1);
+					var input:Object = TextInput(e.currentTarget.itemEditorInstance);
+					if (row.item == ADD_ROW && input.text != ADD_ROW) {
+						valueSchemeEnumeration.addItem({item: ADD_ROW, conceptLink: "", appInfo: ""});
+						//scroll down
+						dataGrid.validateNow();
+						dataGrid.selectedIndex = valueSchemeEnumeration.length - 1;
+						dataGrid.scrollToIndex(valueSchemeEnumeration.length);
+					}
+				}
+			}
+
+			private function checkEdit(event:DataGridEvent):void {
+				// Do not allow editing of "Add row" row except for "Click to Add" column
+				if (event.rowIndex == valueSchemeEnumeration.length - 1 && event.columnIndex != 0)
+					event.preventDefault();
+			}
+
+			private function handleKeyUp(event:KeyboardEvent):void {
+				if (event.keyCode == Keyboard.DELETE) {
+					var indices:Array = dataGrid.selectedIndices;
+					for each (var index:int in indices) {
+						if (index != valueSchemeEnumeration.length - 1) { //Don't delete last row
+							valueSchemeEnumeration.removeItemAt(index);
+						}
+					}
+					dataGrid.validateNow();
+				}
+			}
+		]]>
+	</mx:Script>
+
+	<mx:DataGrid id="dataGrid"
+				 editable="true"
+				 doubleClickEnabled="true"
+				 sortableColumns="false"
+				 dataProvider="{valueSchemeEnumeration}"
+				 itemEditEnd="editEnd(event)"
+				 itemEditBeginning="checkEdit(event)"
+				 allowMultipleSelection="true"
+				 keyUp="handleKeyUp(event)">
+		<mx:columns>
+			<mx:DataGridColumn dataField="item"/>
+			<mx:DataGridColumn dataField="conceptLink"/>
+			<mx:DataGridColumn dataField="appInfo"/>
+		</mx:columns>
+	</mx:DataGrid>
+</mx:VBox>

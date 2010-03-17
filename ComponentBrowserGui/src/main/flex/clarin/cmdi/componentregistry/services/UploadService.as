@@ -60,7 +60,6 @@ package clarin.cmdi.componentregistry.services {
 			fileRef.addEventListener(ProgressEvent.PROGRESS, progressHandler);
 			fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 			fileRef.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-
 		}
 
 		/**
@@ -138,6 +137,7 @@ package clarin.cmdi.componentregistry.services {
 			if (!event.response.isSuccess) {
 				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.response.code + ")\n");
 			}
+            httpClient.close();
 		}
 
 		private function httpclientDataHandler(event:HttpDataEvent):void {

@@ -1,10 +1,7 @@
-package clarin.cmdi.componentregistry.common.components {
+package clarin.cmdi.componentregistry.editor {
+	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
-	import clarin.cmdi.componentregistry.editor.ComponentEdit;
-	import clarin.cmdi.componentregistry.editor.FormItemInputLine;
-	import clarin.cmdi.componentregistry.editor.FormItemInputText;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 	
@@ -104,9 +101,11 @@ package clarin.cmdi.componentregistry.common.components {
 			addChild(new FormItemInputLine("Name", spec.headerName, function(val:String):void {
 					spec.headerName = val;
 				}));
-			addChild(new FormItemInputLine("Id", spec.headerId, function(val:String):void {
+			var idInput:FormItemInputLine =	new FormItemInputLine("Id", spec.headerId, function(val:String):void {
 					spec.headerId = val;
-				}));
+				}, false);
+			idInput.toolTip="Id will be generated";
+			addChild(idInput);
 			addChild(new FormItemInputText(XMLBrowser.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
 				}));

@@ -1,8 +1,10 @@
 package clarin.cmdi.componentregistry.common.components {
-	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
+	import clarin.cmdi.componentregistry.browser.CMDComponentXMLBrowser;
 	import clarin.cmdi.componentregistry.common.Component;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.editor.CMDComponentXMLEditor;
+	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
@@ -31,17 +33,17 @@ package clarin.cmdi.componentregistry.common.components {
 			this.componentId = componentId;
 			styleName = StyleConstants.EXPANDING_COMPONENT;
 		}
-		
+
 		protected override function createChildren():void {
-            super.createChildren();
+			super.createChildren();
 			var id:Label = new Label();
 			id.text = componentId;
 			id.addEventListener(MouseEvent.CLICK, handleClick);
 			id.addEventListener(MouseEvent.MOUSE_OVER, mouseOver);
 			id.addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
-		    addChild(id);
+			addChild(id);
 		}
-		
+
 		private function handleClick(event:MouseEvent):void {
 			if (isExpanded) {
 				unexpand();
