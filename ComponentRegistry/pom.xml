@@ -153,6 +153,7 @@
     <packaging>war</packaging>
     <!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
+    <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
     <ComponentBrowserGuiVersion>1.1-SNAPSHOT</ComponentBrowserGuiVersion>
   </properties>

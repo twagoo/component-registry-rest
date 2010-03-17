@@ -91,7 +91,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer",
-			"FlashVars", "serviceRootUrl=${serviceRootUrl}" 
+			"FlashVars", "serviceRootUrl=${serviceRootUrl}&isocatSearchUrl=${isocatSearchUrl}" 
 			    
 	);
   } else {  // flash is too old or we can't detect the plugin
@@ -118,7 +118,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 				allowScriptAccess="sameDomain"
 				type="application/x-shockwave-flash"
 				pluginspage="http://www.adobe.com/go/getflashplayer"
-				FlashVars="serviceRootUrl=${serviceRootUrl}" >
+				FlashVars="serviceRootUrl=${serviceRootUrl}&isocatSearchUrl=${isocatSearchUrl}" >
 			</embed>
 	</object>
 </noscript>
