@@ -2,32 +2,45 @@
 
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
+		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:rictus="com.rictus.controls.*">
 
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
 	</mx:Metadata>
 
-    
-	<mx:ArrayCollection id="browserDataProvider" />
 	<mx:Array id="browserColumns"/>
 
 
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
-		    import mx.collections.ArrayCollection;
+			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
+			import mx.collections.ArrayCollection;
 			import mx.events.CollectionEvent;
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 
 			private var currentSelectedItem:ItemDescription;
 			[Bindable]
-            private var menu:BrowseContextMenu;
-            
+			private var menu:BrowseContextMenu;
+
+			private var _browserDataProvider:ArrayCollection;
+			private var _itemToScrollTo:ItemDescription;
+
+			[Bindable]
+			public function get browserDataProvider():ArrayCollection {
+				return _browserDataProvider;
+			}
+
+			public function set browserDataProvider(dataProvider:ArrayCollection):void {
+				_browserDataProvider = dataProvider;
+				this.dataGrid.dataProvider = _browserDataProvider;
+				scrollToSelected();
+			}
+
 			private function dispatchBrowserSelectionEvent():void {
 				if (this.dataGrid.selectedItem != null) {
-					var item:ItemDescription = this.dataGrid.selectedItem as ItemDescription
+					var item:ItemDescription = dataGrid.selectedItem as ItemDescription
 					if (currentSelectedItem == null || currentSelectedItem.id != item.id) { //Only update when the item selected is different.
 						currentSelectedItem = item;
 						var event:BrowserSelectionEvent = new BrowserSelectionEvent(item);
@@ -35,16 +48,36 @@
 					}
 				}
 			}
-			
-			public function set browseMenu(browseMenu:BrowseContextMenu):void {
-			    this.menu = browseMenu;
-			    menu.dataGrid= dataGrid;
+
+			public function set itemToScrollTo(itemToScrollTo:ItemDescription):void {
+				_itemToScrollTo = itemToScrollTo;
 			}
-			
+
+			private function scrollToSelected():void {
+				if (_itemToScrollTo) {
+					for (var i:int; i < browserDataProvider.length; i++) {
+						var item:ItemDescription = browserDataProvider.getItemAt(i) as ItemDescription;
+						if (item.id == _itemToScrollTo.id) {
+							dataGrid.selectedItem = item;
+							dispatchBrowserSelectionEvent();
+							dataGrid.validateNow();
+							dataGrid.scrollToIndex(i);
+							dataGrid.setFocus();
+							break;
+						}
+					}
+				}
+			}
+
+			public function set browseMenu(browseMenu:BrowseContextMenu):void {
+				this.menu = browseMenu;
+				menu.dataGrid = dataGrid;
+			}
+
 			private function handleKeyUp(event:KeyboardEvent):void {
-			    if (event.keyCode == Keyboard.DELETE) { 
-			        menu.deleteSelectedItems();
-			    }
+				if (event.keyCode == Keyboard.DELETE) {
+					menu.deleteSelectedItems();
+				}
 			}
 		]]>
 	</mx:Script>
@@ -52,7 +85,8 @@
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">
-		<rictus:SearchBox id="searchBox" label="filter..."/>	 
+		<rictus:SearchBox id="searchBox"
+						  label="filter..."/>
 		<mx:Label text="Showing {browserDataProvider.length} of {dataGrid.unfilteredLength}"/>
 	</mx:HBox>
 
@@ -62,10 +96,9 @@
 							width="100%"
 							height="100%"
 							click="dispatchBrowserSelectionEvent()"
-							dataProvider="{browserDataProvider}"
 							columns="{browserColumns}"
 							contextMenu="{menu.cm}"
-							allowMultipleSelection="true"
+							allowMultipleSelection="false"
 							searchInput="{searchBox}"
 							keyUp="handleKeyUp(event)">
 	</comp:FilteringDataGrid>

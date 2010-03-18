@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-		   xmlns:local="clarin.cmdi.componentregistry.services.*"
 		   xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		   initialize="init()"
 		   creationComplete="refresh()"
@@ -10,7 +9,12 @@
 
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+		    import clarin.cmdi.componentregistry.services.ComponentInfoService;
+		    import clarin.cmdi.componentregistry.services.ProfileInfoService;
+		    import clarin.cmdi.componentregistry.services.ProfileListService;
+		    import mx.events.CollectionEvent;
+			import mx.collections.ArrayCollection;
+			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.services.DeleteService;
 			import clarin.cmdi.componentregistry.services.ComponentListService;
@@ -19,19 +23,31 @@
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.Profile;
 
-			[Bindable]
+            [Bindable]
 			private var componentsSrv:ComponentListService = ComponentListService.instance;
+			[Bindable]
+			private var profilesSrv:ProfileListService = new ProfileListService();
+			[Bindable]
+			private var profileSrv:ProfileInfoService = new ProfileInfoService();
+			[Bindable]
+			private var componentSrv:ComponentInfoService = new ComponentInfoService();
+			
 			private var deleteSrv:DeleteService = new DeleteService();
+			
 			[Bindable]
-			private var profilesMenu:BrowseContextMenu
+			private var profilesMenu:BrowseContextMenu;
 			[Bindable]
-			private var componentsMenu:BrowseContextMenu
+			private var componentsMenu:BrowseContextMenu;
+			[Bindable]
+			private var selectedProfileItem:ItemDescription;
+			[Bindable]
+			private var selectedComponentItem:ItemDescription;
 
 			public function init():void {
-			    profilesMenu = new BrowseContextMenu();
+				profilesMenu = new BrowseContextMenu();
 				profilesMenu.viewStack = this.parent as RegistryViewStack;
 				profilesMenu.deleteService = deleteSrv;
-			    componentsMenu = new BrowseContextMenu();
+				componentsMenu = new BrowseContextMenu();
 				componentsMenu.viewStack = this.parent as RegistryViewStack;
 				componentsMenu.deleteService = deleteSrv;
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
@@ -53,14 +69,11 @@
 			public function setSelectedDescription(desc:ItemDescription):void {
 				if (desc.isProfile) {
 					tabnav.selectedIndex = 0;
+					this.selectedProfileItem = desc;
 				} else {
 					tabnav.selectedIndex = 1;
+					this.selectedComponentItem = desc;
 				}
-//				var indeprofilesOverview.browserDataProvider.getItemIndex(desc);
-				//Need to select the correct item, can't get it to highlight at the mo
-				//profilesOverview.dataGrid.selectedIndex=2;
-				//profilesOverview.dataGrid.validateNow();
-				//profilesOverview.dataGrid.scrollToIndex(2);
 			}
 
 			private function handleItemDeleted(event:Event):void {
@@ -69,9 +82,7 @@
 		]]>
 	</mx:Script>
 
-	<local:ProfileListService id="profilesSrv"/>
-	<local:ProfileInfoService id="profileSrv"/>
-	<local:ComponentInfoService id="componentSrv"/>
+
 	<browser:BrowserColumns id="browserColumns"/>
 
 
@@ -92,6 +103,7 @@
 											 browserDataProvider="{profilesSrv.itemDescriptions}"
 											 browserItemSelected="{loadProfileInfoPage(event)}"
 											 browserColumns="{browserColumns.getProfileColumns()}"
+											 itemToScrollTo="{selectedProfileItem}"
 											 width="100%"
 											 height="70%"
 											 browseMenu="{profilesMenu}"/>
@@ -107,6 +119,7 @@
 											 browserDataProvider="{componentsSrv.itemDescriptions}"
 											 browserItemSelected="{loadComponentInfoPage(event)}"
 											 browserColumns="{browserColumns.getComponentColumns()}"
+											 itemToScrollTo="{selectedComponentItem}"
 											 width="100%"
 											 height="50%"
 											 browseMenu="{componentsMenu}"/>
