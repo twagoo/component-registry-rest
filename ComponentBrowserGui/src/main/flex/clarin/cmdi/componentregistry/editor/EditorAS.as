@@ -43,19 +43,28 @@ private var uploadService:UploadService = new UploadService();
 
 public function init():void {
 	profileSrv.addEventListener(ProfileInfoService.PROFILE_LOADED, profileLoaded);
+	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
 	componentsSrv.load();
 	uploadService.init(uploadProgress);
 }
 
 private function profileLoaded(event:Event):void {
 	var cmdComponent:XML = profileSrv.profile.profileSource;
-	this.cmdSpec = CMDModelFactory.createModel(cmdComponent);
+	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
 }
+
+private function componentLoaded(event:Event):void {
+	var cmdComponent:XML = componentSrv.component.componentMD.xml;
+	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, componentSrv.component.description);
+}
+
 
 public function setDescription(itemDescription:ItemDescription):void {
 	this.currentDescription = itemDescription;
 	if (currentDescription.isProfile) {
 		profileSrv.load(currentDescription);
+	} else {
+		componentSrv.load(currentDescription);
 	}
 }
 
@@ -74,9 +83,9 @@ private function saveSpec():void {
 	item.groupName = xmlEditor.cmdSpec.groupName;
 	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 	if (item.isProfile) {
-	    uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
+		uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
 	} else {
-	    uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
+		uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
 	}
 }
 

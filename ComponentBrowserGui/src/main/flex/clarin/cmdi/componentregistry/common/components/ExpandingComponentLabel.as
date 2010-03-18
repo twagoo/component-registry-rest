@@ -77,7 +77,7 @@ package clarin.cmdi.componentregistry.common.components {
 			} else {
 				expanded = new CMDComponentXMLBrowser();
 			}
-			(expanded as CMDSpecRenderer).cmdSpec = CMDModelFactory.createModel(comp.componentMD.xml);
+			(expanded as CMDSpecRenderer).cmdSpec = CMDModelFactory.createModel(comp.componentMD.xml, comp.description);
 			addChild(expanded);
 			isExpanded = true;
 		}

@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
+		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*">
 
 	<mx:XML id="cmdComponent"/>
+	<common:ItemDescription id="itemDescription"/>
 	<mx:String id="headerLabel"/>
 
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">
-		<mx:Label id="header"		    
+		<mx:Label id="header"
 				  text="{headerLabel}"
 				  fontWeight="bold"
 				  fontSize="14"/>
-        <mx:ToggleButtonBar id="toggleBar" dataProvider="{infoViewStack}"/>
+		<mx:ToggleButtonBar id="toggleBar"
+							dataProvider="{infoViewStack}"/>
 	</mx:HBox>
 
 	<mx:ViewStack id="infoViewStack"
@@ -21,10 +24,13 @@
 				  width="100%"
 				  styleName="borderStyles">
 
-		<browser:xmlBrowsePanel id="viewPanel" label="view"
-						cmdComponent="{cmdComponent}"/>
-		<browser:xmlPanel id="xmlPanel" label="xml"
-					   cmdComponent="{cmdComponent}"/>
+		<browser:xmlBrowsePanel id="viewPanel"
+								label="view"
+								cmdComponent="{cmdComponent}"
+								itemDescription="{itemDescription}"/>
+		<browser:xmlPanel id="xmlPanel"
+						  label="xml"
+						  cmdComponent="{cmdComponent}"/>
 
 	</mx:ViewStack>
 

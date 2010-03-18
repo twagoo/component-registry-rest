@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:browser="clarin.cmdi.componentregistry.browser.*" >
+		   xmlns:common="clarin.cmdi.componentregistry.common.*"
+		   xmlns:browser="clarin.cmdi.componentregistry.browser.*">
 	<mx:Script>
-	    <![CDATA[
-	        import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
-	    ]]>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
+		]]>
 	</mx:Script>
 
 	<mx:XML id="cmdComponent"/>
+	<common:ItemDescription id="itemDescription"/>
+
 	<browser:CMDComponentXMLBrowser id="xmlBrowse"
-								 cmdSpec="{CMDModelFactory.createModel(cmdComponent)}"
-								 width="100%"
-								 height="100%"
-								 />
+									cmdSpec="{CMDModelFactory.createModel(cmdComponent, itemDescription)}"
+									width="100%"
+									height="100%"/>
 </mx:Canvas>

@@ -9,6 +9,7 @@
 
 	<browser:infoPage id="infoPanel"
 				   cmdComponent="{profile.profileSource}"
+				   itemDescription="{profile.description}"
 				   headerLabel="{profile.description.name}"
 				   width="100%"
 				   height="100%"

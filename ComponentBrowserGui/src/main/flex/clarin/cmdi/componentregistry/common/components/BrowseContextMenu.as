@@ -44,8 +44,8 @@ package clarin.cmdi.componentregistry.common.components {
 			cmi = new ContextMenuItem("Save as XSD...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXsd);
 			result.push(cmi);
-			cmi = new ContextMenuItem("Create New Profile...");
-			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, createNewProfile);
+			cmi = new ContextMenuItem("Edit Item...");
+			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editItem);
 			result.push(cmi);
 			cmi = new ContextMenuItem("Delete...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, handleDelete);
@@ -78,7 +78,7 @@ package clarin.cmdi.componentregistry.common.components {
 			saveItemDialog.saveAsXSD(item);
 		}
 
-		private function createNewProfile(event:ContextMenuEvent):void {
+		private function editItem(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
 			viewStack.switchToEditor(item);
 		}

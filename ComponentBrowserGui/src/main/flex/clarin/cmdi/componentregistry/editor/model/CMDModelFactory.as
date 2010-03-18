@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
@@ -8,11 +9,12 @@ package clarin.cmdi.componentregistry.editor.model {
 		public function CMDModelFactory() {
 		}
 
-		public static function createModel(xml:XML):CMDSpec {
-			var result:CMDSpec = new CMDSpec(xml.@isProfile);
+		public static function createModel(xml:XML, description:ItemDescription):CMDSpec {
+			var result:CMDSpec = new CMDSpec(xml.@isProfile == "true");
 			result.headerName = xml.Header.Name;
 			result.headerId = xml.Header.ID;
 			result.headerDescription = xml.Header.Description;
+			result.groupName = description.groupName;
 			var components:XMLList = xml.elements(ComponentMD.CMD_COMPONENT);
 			for each (var component:XML in components) {
 				var cmdComp:CMDComponent = createComponent(component);
