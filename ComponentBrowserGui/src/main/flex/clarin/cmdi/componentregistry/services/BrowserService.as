@@ -21,19 +21,26 @@ package clarin.cmdi.componentregistry.services {
 		[Bindable]
 		[ArrayElementType("ItemDescription")]
 		public var itemDescriptions:ArrayCollection;
+		
+		private var serviceUrl:String;
 
         // Not bindable needed for lookups over the whole collections of itemDescriptions
 		protected var unFilteredItemDescriptions:ArrayCollection; 
 
 
 		public function BrowserService(restUrl:String) {
-			this.service = new HTTPService();
-			this.service.method = HTTPRequestMessage.GET_METHOD;
-			this.service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
-			this.service.url = restUrl;
+		    this.serviceUrl = restUrl;
+			service = new HTTPService();
+			service.method = HTTPRequestMessage.GET_METHOD;
+			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
+		}
+		
+		private function initService():void {
+			service.url = serviceUrl + "?"+new Date().getTime();
 		}
 
 		public function load():void {
+		    initService();
 			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}
