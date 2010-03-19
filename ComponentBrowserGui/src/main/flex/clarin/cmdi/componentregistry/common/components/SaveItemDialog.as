@@ -3,17 +3,14 @@ package clarin.cmdi.componentregistry.common.components {
 
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
-	import flash.events.IOErrorEvent;
-	import flash.events.SecurityErrorEvent;
 	import flash.net.FileReference;
 	import flash.net.URLRequest;
-	import flash.net.URLVariables;
+	import flash.net.navigateToURL;
 
 	import mx.controls.Alert;
 
 	public class SaveItemDialog {
 
-		private var ref:FileReference;
 
 		public function SaveItemDialog() {
 		}
@@ -27,27 +24,10 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		private function save(item:ItemDescription, extension:String, urlVariable:String = null):void {
-			ref = new FileReference()
 			var req:URLRequest = new URLRequest();
 			req.url = item.dataUrl + "/" + extension;
-			try {
-				ref.download(req, item.name + "." + extension);
-			} catch (error:Error) {
-				trace("Unable to download file.");
-			}
-			ref.addEventListener(Event.COMPLETE, saveComplete);
-			ref.addEventListener(IOErrorEvent.IO_ERROR, saveError);
-			ref.addEventListener(SecurityErrorEvent.SECURITY_ERROR, saveError);
+			navigateToURL(req, "_top");
 		}
-
-		private function saveComplete(event:Event):void {
-			Alert.show("Saved.", "OK", Alert.OK);
-		}
-
-		private function saveError(event:ErrorEvent):void {
-			Alert.show("Error: " + event.text, event.type, Alert.OK);
-		}
-
 
 	}
 }
