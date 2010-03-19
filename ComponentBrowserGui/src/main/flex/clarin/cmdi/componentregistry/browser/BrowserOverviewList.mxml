@@ -98,7 +98,7 @@
 							click="dispatchBrowserSelectionEvent()"
 							columns="{browserColumns}"
 							contextMenu="{menu.cm}"
-							allowMultipleSelection="false"
+							allowMultipleSelection="true"
 							searchInput="{searchBox}"
 							keyUp="handleKeyUp(event)">
 	</comp:FilteringDataGrid>
