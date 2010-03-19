@@ -98,7 +98,7 @@ public class ComponentRegistryRestService {
             LOG.info("Component with id: " + componentId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
         } catch (UserUnauthorizedException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed: "+e.getMessage());
+            LOG.info("Component with id: " + componentId + " deletion failed: " + e.getMessage());
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
         LOG.info("Component with id: " + componentId + " deleted.");
@@ -108,9 +108,14 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public String getRegisteredComponentRawType(@PathParam("componentId") String componentId, @PathParam("rawType") String rawType) {
+    public Response getRegisteredComponentRawType(@PathParam("componentId") String componentId, @PathParam("rawType") String rawType) {
         LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
         String result = "";
+        ComponentDescription desc = registry.getComponentDescription(componentId);
+        if (desc == null) {
+            throw new WebApplicationException(Response.serverError().entity("Requested component does not exist").build());
+        }
+        String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
             result = registry.getMDComponentAsXml(componentId);
         } else if ("xsd".equalsIgnoreCase(rawType)) {
@@ -119,7 +124,7 @@ public class ComponentRegistryRestService {
             throw new WebApplicationException(Response.serverError().entity(
                     "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
         }
-        return result;
+        return createDownloadResponse(result, fileName);
     }
 
     @GET
@@ -144,7 +149,7 @@ public class ComponentRegistryRestService {
             LOG.info("Profile with id: " + profileId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
         } catch (UserUnauthorizedException e) {
-            LOG.info("Profile with id: " + profileId + " deletion failed: "+e.getMessage());
+            LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
         LOG.info("Profile with id: " + profileId + " deleted.");
@@ -154,9 +159,14 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public String getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType) {
+    public Response getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType) {
         LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
         String result = "";
+        ProfileDescription desc = registry.getProfileDescription(profileId);
+        if (desc == null) {
+            throw new WebApplicationException(Response.serverError().entity("Requested component does not exist").build());
+        }
+        String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
             result = registry.getMDProfileAsXml(profileId);
         } else if ("xsd".equalsIgnoreCase(rawType)) {
@@ -165,7 +175,16 @@ public class ComponentRegistryRestService {
             throw new WebApplicationException(Response.serverError().entity(
                     "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
         }
-        return result;
+        return createDownloadResponse(result, fileName);
+
+    }
+
+    private Response createDownloadResponse(String result, String fileName) {
+        //Making response so it triggers browsers native save as dialog.
+        Response response = Response.ok().type("application/x-download").header("Content-Disposition", "attachment; filename=" + fileName)
+                .entity(result).build();
+        return response;
+
     }
 
     @POST

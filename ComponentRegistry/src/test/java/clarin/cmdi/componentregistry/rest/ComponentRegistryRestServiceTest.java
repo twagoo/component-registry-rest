@@ -214,7 +214,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getTestProfileContent(),
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getTestProfileContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
@@ -234,7 +234,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterComponent() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getComponentTestContent(),
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
@@ -301,7 +301,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     @Test
     public void testRegisterComponentAsProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, TestHelper.getComponentTestContent(),
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "t");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
@@ -317,10 +317,10 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     public void setUpTestRegistry() throws ParseException, JAXBException {
         registryDir = ComponentRegistryImplTest.createTempRegistryDir();
         testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
-        TestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile1");
-        TestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile2");
-        TestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component1");
-        TestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component2");
+        RegistryTestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile1");
+        RegistryTestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile2");
+        RegistryTestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component1");
+        RegistryTestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component2");
     }
 
     @After

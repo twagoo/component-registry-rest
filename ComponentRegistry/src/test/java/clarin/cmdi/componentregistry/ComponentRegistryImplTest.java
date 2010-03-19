@@ -21,7 +21,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
-import clarin.cmdi.componentregistry.rest.TestHelper;
+import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
 public class ComponentRegistryImplTest {
 
@@ -38,7 +38,7 @@ public class ComponentRegistryImplTest {
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
 
-        CMDComponentSpec testProfile = TestHelper.getTestProfile();
+        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
         assertNull(testProfile.getHeader().getID());
         assertNull(testProfile.getHeader().getName());
         assertNull(testProfile.getHeader().getDescription());
@@ -67,7 +67,7 @@ public class ComponentRegistryImplTest {
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
 
-        CMDComponentSpec testComponent = TestHelper.getTestComponent();
+        CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
         assertNull(testComponent.getHeader().getID());
         assertNull(testComponent.getHeader().getName());
         assertNull(testComponent.getHeader().getDescription());
@@ -102,7 +102,7 @@ public class ComponentRegistryImplTest {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, TestHelper.getTestProfile());
+        register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
         assertNull(register.getMDComponent(id));
@@ -129,12 +129,12 @@ public class ComponentRegistryImplTest {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, TestHelper.getTestProfile());
+        register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
         description = new ProfileDescription();
         description.setName("Aap2");
         String id2 = "Aap2" + System.currentTimeMillis();
         description.setId(id2);
-        register.registerMDProfile(description, TestHelper.getTestProfile());
+        register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(2, register.getProfileDescriptions().size());
@@ -171,7 +171,7 @@ public class ComponentRegistryImplTest {
         profileContent += "</CMD_ComponentSpec>\n";
 
         String id = "profile1";
-        ProfileDescription description = TestHelper.addProfile(register, id, profileContent);
+        ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
 
         String xsd = register.getMDProfileAsXsd(description.getId());
         assertTrue(xsd.endsWith("</xs:schema>"));
@@ -193,7 +193,7 @@ public class ComponentRegistryImplTest {
         compContent += "    </CMD_Component>\n";
         compContent += "</CMD_ComponentSpec>\n";
 
-        ComponentDescription compDesc = TestHelper.addComponent(register, compId, compContent);
+        ComponentDescription compDesc = RegistryTestHelper.addComponent(register, compId, compContent);
 
         String profileContent = "";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -205,7 +205,7 @@ public class ComponentRegistryImplTest {
         profileContent += "</CMD_ComponentSpec>\n";
 
         String id = "profile1";
-        ProfileDescription description = TestHelper.addProfile(register, id, profileContent);
+        ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
 
         String xsd = register.getMDProfileAsXsd(description.getId());
 
@@ -225,7 +225,7 @@ public class ComponentRegistryImplTest {
         compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
         compContent += "    </CMD_Component>\n";
         compContent += "</CMD_ComponentSpec>\n";
-        ComponentDescription compDesc1 = TestHelper.addComponent(register, "component1", compContent);
+        ComponentDescription compDesc1 = RegistryTestHelper.addComponent(register, "component1", compContent);
 
         compContent = "";
         compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -237,7 +237,7 @@ public class ComponentRegistryImplTest {
         compContent += "        </CMD_Component>\n";
         compContent += "    </CMD_Component>\n";
         compContent += "</CMD_ComponentSpec>\n";
-        ComponentDescription compDesc2 = TestHelper.addComponent(register, "component2", compContent);
+        ComponentDescription compDesc2 = RegistryTestHelper.addComponent(register, "component2", compContent);
 
         compContent = "";
         compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -252,7 +252,7 @@ public class ComponentRegistryImplTest {
         compContent += "        </CMD_Component>\n";
         compContent += "    </CMD_Component>\n";
         compContent += "</CMD_ComponentSpec>\n";
-        ComponentDescription compDesc3 = TestHelper.addComponent(register, "component3", compContent);
+        ComponentDescription compDesc3 = RegistryTestHelper.addComponent(register, "component3", compContent);
 
         String xsd = register.getMDComponentAsXsd(compDesc3.getId());
         assertTrue(xsd.endsWith("</xs:schema>"));
@@ -271,7 +271,7 @@ public class ComponentRegistryImplTest {
         description.setName("Aap");
         description.setCreatorName(PRINCIPAL.getName());
         description.setDescription("MyDescription");
-        CMDComponentSpec testProfile = TestHelper.getTestProfile();
+        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
 
         register.registerMDProfile(description, testProfile);
 
@@ -300,7 +300,7 @@ public class ComponentRegistryImplTest {
         description.setName("Aap");
         description.setCreatorName(PRINCIPAL.getName());
         description.setDescription("MyDescription");
-        CMDComponentSpec testProfile = TestHelper.getTestProfile();
+        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
 
         register.registerMDComponent(description, testProfile);
         try {

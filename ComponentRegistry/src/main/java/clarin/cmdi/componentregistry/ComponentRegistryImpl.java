@@ -165,6 +165,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         Collections.sort(result, ComponentDescription.COMPARE_ON_GROUP_AND_NAME);
         return result;
     }
+    
+    public ComponentDescription getComponentDescription(String id) {
+        return componentDescriptions.get(id);
+    }
 
     public CMDComponentSpec getMDProfile(String profileId) {
         CMDComponentSpec result = profilesCache.get(profileId);
@@ -238,6 +242,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         List<ProfileDescription> result = new ArrayList(profileDescriptions.values());
         Collections.sort(result, ProfileDescription.COMPARE_ON_NAME);
         return result;
+    }
+    
+    public ProfileDescription getProfileDescription(String id) {
+        return profileDescriptions.get(id);
     }
 
     /**

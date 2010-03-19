@@ -14,7 +14,11 @@ public interface ComponentRegistry {
 
     List<ComponentDescription> getComponentDescriptions();
 
+    ComponentDescription getComponentDescription(String id);
+
     List<ProfileDescription> getProfileDescriptions();
+
+    ProfileDescription getProfileDescription(String id);
 
     CMDComponentSpec getMDProfile(String id);
 

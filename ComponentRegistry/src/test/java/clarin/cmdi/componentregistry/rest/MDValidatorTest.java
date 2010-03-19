@@ -96,13 +96,13 @@ public class MDValidatorTest {
         assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
         assertTrue(validator.getErrorMessages().get(1).startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
 
-        TestHelper.addComponent(testRegistry, id1);
+        RegistryTestHelper.addComponent(testRegistry, id1);
         validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, testRegistry);
         assertFalse(validator.validate());
         assertEquals(1, validator.getErrorMessages().size());
         assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
 
-        TestHelper.addComponent(testRegistry, id2);
+        RegistryTestHelper.addComponent(testRegistry, id2);
         validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, testRegistry);
         assertTrue("component is registered should be valid now", validator.validate());
         assertEquals(0, validator.getErrorMessages().size());
@@ -129,7 +129,7 @@ public class MDValidatorTest {
         assertEquals(1, validator.getErrorMessages().size());
         assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
 
-        TestHelper.addComponent(testRegistry, id1);
+        RegistryTestHelper.addComponent(testRegistry, id1);
         validator = new MDValidator(new ByteArrayInputStream(content.getBytes()), desc, testRegistry);
         assertTrue(validator.validate());
         assertEquals(0, validator.getErrorMessages().size());

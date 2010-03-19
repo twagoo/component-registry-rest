@@ -18,9 +18,9 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
  * Static helper methods to be used in tests
  * 
  */
-public final class TestHelper {
+public final class RegistryTestHelper {
 
-    private TestHelper() {
+    private RegistryTestHelper() {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
@@ -70,7 +70,7 @@ public final class TestHelper {
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
-        return addProfile(testRegistry, id, TestHelper.getTestProfileContent());
+        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent());
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content) throws ParseException,
