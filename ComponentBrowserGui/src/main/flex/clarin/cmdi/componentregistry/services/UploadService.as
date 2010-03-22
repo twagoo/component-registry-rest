@@ -1,10 +1,10 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-
+	
 	import com.adobe.net.URI;
 	import com.hurlant.util.Base64;
-
+	
 	import flash.events.DataEvent;
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
@@ -13,10 +13,10 @@ package clarin.cmdi.componentregistry.services {
 	import flash.events.SecurityErrorEvent;
 	import flash.net.FileFilter;
 	import flash.net.FileReference;
-	import flash.net.URLVariables;
-
+	
 	import mx.controls.ProgressBar;
-
+	import mx.managers.CursorManager;
+	
 	import org.httpclient.HttpClient;
 	import org.httpclient.events.HttpDataEvent;
 	import org.httpclient.events.HttpResponseEvent;
@@ -44,6 +44,7 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		private function createAndInitRequest():void {
+			CursorManager.setBusyCursor();
 			httpClient = new HttpClient();
 			httpClient.listener.onError = httpclientErrorHandler;
 			httpClient.listener.onData = httpclientDataHandler;
@@ -110,6 +111,7 @@ package clarin.cmdi.componentregistry.services {
 				}
 			} catch (error:Error) {
 				trace("Unable to upload file. Error: " + error);
+				CursorManager.removeBusyCursor();
 				throw error;
 			}
 		}
@@ -130,6 +132,7 @@ package clarin.cmdi.componentregistry.services {
 			if (!event.response.isSuccess) {
 				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.response.code + ")\n");
 			}
+            CursorManager.removeBusyCursor();
 			httpClient.close();
 		}
 

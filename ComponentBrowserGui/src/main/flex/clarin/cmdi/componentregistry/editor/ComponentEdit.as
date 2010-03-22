@@ -34,7 +34,7 @@ package clarin.cmdi.componentregistry.editor {
 			_component = component;
 			_parent = parent;
 			styleName = StyleConstants.XMLBROWSER;
-			if (component.componentId == null) { // new empty component, otherwise it would be an already existed component which cannot be edited.
+			if (!component.componentId) { // new empty component, otherwise it would be an already existed component which cannot be edited.
 				addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
 				addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
 				addEventListener(DragEvent.DRAG_DROP, dragDropHandler);

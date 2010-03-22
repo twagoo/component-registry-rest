@@ -2,11 +2,11 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
-	
+
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	
-	import mx.binding.utils.BindingUtils;
+
+	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
@@ -53,9 +53,9 @@ package clarin.cmdi.componentregistry.editor {
 			return attributeBox;
 		}
 
-        /**
-        * Public utility method to create ValueScheme Component. By lack of better placed put in this class
-        **/ 
+		/**
+		 * Public utility method to create ValueScheme Component. By lack of better placed put in this class
+		 **/
 		public static function createAndAddValueScheme(valueScheme:ValueSchemeInterface):UIComponent {
 			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput("Type");
 			if (valueScheme.valueSchemeEnumeration == null) {
@@ -67,21 +67,21 @@ package clarin.cmdi.componentregistry.editor {
 			} else {
 				valueSchemeInput.valueSchemeEnumeration = valueScheme.valueSchemeEnumeration;
 			}
-			BindingUtils.bindSetter(function(val:String):void {
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemeSimple", function(val:String):void {
+					valueScheme.valueSchemeSimple = val;
+					valueScheme.valueSchemePattern = "";
+					valueScheme.valueSchemeEnumeration = null;
+				});
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemePattern", function(val:String):void {
 					valueScheme.valueSchemePattern = val;
 					valueScheme.valueSchemeEnumeration = null;
 					valueScheme.valueSchemeSimple = "";
-				}, valueSchemeInput, "valueSchemePattern");
-			BindingUtils.bindSetter(function(val:String):void {
-					valueScheme.valueSchemeSimple = val;
-					valueScheme.valueSchemePattern ="";
-					valueScheme.valueSchemeEnumeration = null;
-				}, valueSchemeInput, "valueSchemeSimple");
-			BindingUtils.bindSetter(function(val:XMLListCollection):void {
+				});
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemeEnumeration", function(val:XMLListCollection):void {
 					valueScheme.valueSchemeEnumeration = val;
 					valueScheme.valueSchemeSimple = "";
 					valueScheme.valueSchemePattern = "";
-				}, valueSchemeInput, "valueSchemeEnumeration");
+				});
 			return valueSchemeInput;
 		}
 
