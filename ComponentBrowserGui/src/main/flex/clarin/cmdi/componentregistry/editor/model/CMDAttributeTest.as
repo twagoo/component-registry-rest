@@ -18,7 +18,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		public function testToXml():void {
 			var result:CMDAttribute = new CMDAttribute();
 			result.name = "aap";
-			result.type = "string";
+			result.valueSchemeSimple = "string";
 			var expected:XML = <Attribute>
 					<Name>aap</Name>
 					<Type>string</Type>

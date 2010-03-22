@@ -6,9 +6,6 @@ package clarin.cmdi.componentregistry.editor {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 
-	import mx.binding.utils.BindingUtils;
-	import mx.binding.utils.ChangeWatcher;
-	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
@@ -50,7 +47,7 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(new FormItemInputLine("CardinalityMax", _element.cardinalityMax, function(val:String):void {
 					_element.cardinalityMax = val;
 				}));
-			createAndAddValueScheme();
+			addChild(AttributeListEdit.createAndAddValueScheme(_element));
 			handleCMDAttributeList();
 		}
 
@@ -81,37 +78,6 @@ package clarin.cmdi.componentregistry.editor {
 		private function handleCMDAttributeList():void {
 			var attributeEdit:Container = new AttributeListEdit(_element.attributeList, this);
 			addChild(attributeEdit);
-		}
-
-		private function createAndAddValueScheme():void {
-			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput("Type");
-			BindingUtils.bindSetter(function(val:String):void {
-					_element.valueSchemePattern = val;
-					_element.valueSchemeSimple = "";
-					_element.valueSchemeEnumeration = null;
-				}, valueSchemeInput, "valueSchemePattern");
-			BindingUtils.bindSetter(function(val:String):void {
-					_element.valueSchemeSimple = val;
-					_element.valueSchemeEnumeration = null;
-					_element.valueSchemePattern = "";
-				}, valueSchemeInput, "valueSchemeSimple");
-			BindingUtils.bindSetter(function(val:XMLListCollection):void {
-					_element.valueSchemeEnumeration = val;
-					_element.valueSchemeSimple = "";
-					_element.valueSchemePattern = "";
-				}, valueSchemeInput, "valueSchemeEnumeration");
-
-			if (_element.valueSchemeEnumeration == null) {
-				if (_element.valueSchemePattern != null) {
-					valueSchemeInput.valueSchemePattern = _element.valueSchemePattern;
-				} else {
-					valueSchemeInput.valueSchemeSimple = _element.valueSchemeSimple;
-				}
-			} else {
-				valueSchemeInput.valueSchemeEnumeration = _element.valueSchemeEnumeration;
-
-			}
-			addChild(valueSchemeInput);
 		}
 
 		private function createHeading():FormItem {

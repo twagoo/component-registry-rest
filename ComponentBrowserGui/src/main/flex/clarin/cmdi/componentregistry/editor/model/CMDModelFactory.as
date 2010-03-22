@@ -79,7 +79,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			var result:CMDAttribute = new CMDAttribute();
 			result.name = xml.Name;
 			if (xml.hasOwnProperty(ComponentMD.TYPE)) {
-				result.type = xml.Type;
+				result.valueSchemeSimple = xml.Type;
 			} else {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
 					result.valueSchemePattern = xml.ValueScheme.pattern;

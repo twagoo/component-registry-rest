@@ -13,8 +13,16 @@
 			private static const ADD_ROW:String = "Click to add a row";
 
 			[Bindable]
-			public var valueSchemeEnumeration:ArrayCollection = new ArrayCollection([{item: ADD_ROW, conceptLink: "", appInfo: ""}]);
+			public var valueSchemeEnumeration:ArrayCollection = new ArrayCollection();
 
+			public function initEnumeration(valueSchemeData:XMLListCollection):void {
+				if (valueSchemeData) {
+					for each (var item:XML in valueSchemeData) {
+						valueSchemeEnumeration.addItem({item: item.text(), conceptLink: item.@ConceptLink, appInfo: item.@AppInfo});
+					}
+				}
+				valueSchemeEnumeration.addItem({item: ADD_ROW, conceptLink: "", appInfo: ""});
+			}
 
 			private function editEnd(e:DataGridEvent):void {
 				if (e.rowIndex == valueSchemeEnumeration.length - 1 && e.columnIndex == 0 && e.reason != DataGridEventReason.CANCELLED) {

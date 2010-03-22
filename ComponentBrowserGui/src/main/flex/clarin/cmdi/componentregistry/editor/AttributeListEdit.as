@@ -1,10 +1,11 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
-
+	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
@@ -52,32 +53,35 @@ package clarin.cmdi.componentregistry.editor {
 			return attributeBox;
 		}
 
-		private function createAndAddValueScheme(attribute:CMDAttribute):UIComponent {
+        /**
+        * Public utility method to create ValueScheme Component. By lack of better placed put in this class
+        **/ 
+		public static function createAndAddValueScheme(valueScheme:ValueSchemeInterface):UIComponent {
 			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput("Type");
-			BindingUtils.bindSetter(function(val:String):void {
-					attribute.valueSchemePattern = val;
-					attribute.valueSchemeEnumeration = null;
-					attribute.type = "";
-				}, valueSchemeInput, "valueSchemePattern");
-			BindingUtils.bindSetter(function(val:String):void {
-					attribute.type = val;
-					attribute.valueSchemePattern ="";
-					attribute.valueSchemeEnumeration = null;
-				}, valueSchemeInput, "valueSchemeSimple");
-			BindingUtils.bindSetter(function(val:XMLListCollection):void {
-					attribute.valueSchemeEnumeration = val;
-					attribute.type = "";
-					attribute.valueSchemePattern = "";
-				}, valueSchemeInput, "valueSchemeEnumeration");
-			if (attribute.valueSchemeEnumeration == null) {
-				if (attribute.valueSchemePattern != null) {
-					valueSchemeInput.valueSchemePattern = attribute.valueSchemePattern;
+			if (valueScheme.valueSchemeEnumeration == null) {
+				if (valueScheme.valueSchemePattern) {
+					valueSchemeInput.valueSchemePattern = valueScheme.valueSchemePattern;
 				} else {
-					valueSchemeInput.valueSchemeSimple = attribute.type;
+					valueSchemeInput.valueSchemeSimple = valueScheme.valueSchemeSimple;
 				}
 			} else {
-				valueSchemeInput.valueSchemeEnumeration = attribute.valueSchemeEnumeration;
+				valueSchemeInput.valueSchemeEnumeration = valueScheme.valueSchemeEnumeration;
 			}
+			BindingUtils.bindSetter(function(val:String):void {
+					valueScheme.valueSchemePattern = val;
+					valueScheme.valueSchemeEnumeration = null;
+					valueScheme.valueSchemeSimple = "";
+				}, valueSchemeInput, "valueSchemePattern");
+			BindingUtils.bindSetter(function(val:String):void {
+					valueScheme.valueSchemeSimple = val;
+					valueScheme.valueSchemePattern ="";
+					valueScheme.valueSchemeEnumeration = null;
+				}, valueSchemeInput, "valueSchemeSimple");
+			BindingUtils.bindSetter(function(val:XMLListCollection):void {
+					valueScheme.valueSchemeEnumeration = val;
+					valueScheme.valueSchemeSimple = "";
+					valueScheme.valueSchemePattern = "";
+				}, valueSchemeInput, "valueSchemeEnumeration");
 			return valueSchemeInput;
 		}
 

@@ -122,8 +122,8 @@ package clarin.cmdi.componentregistry.browser {
 				addFormHeading("AttributeList");
 				for each (var attribute:CMDAttribute in attributes) {
 					createAndAddFormChild("Name", attribute.name);
-					if (attribute.type != null) {
-						createAndAddFormChild("Type", attribute.type);
+					if (!attribute.valueSchemeSimple) {
+						createAndAddFormChild("Type", attribute.valueSchemeSimple);
 					} else {
 						createAndAddValueScheme(null, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
 					}

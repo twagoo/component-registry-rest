@@ -36,7 +36,6 @@ package clarin.cmdi.componentregistry.editor {
 
 		protected override function createChildren():void {
 			super.createChildren();
-			addChild(textField);
 			addChild(valueSchemeButton);
 		}
 
@@ -52,8 +51,8 @@ package clarin.cmdi.componentregistry.editor {
 			textField.text = valueSchemeSimple as String;
 			if (getChildren().length > 1) {
 				removeChildAt(0);
-				addChildAt(textField, 0);
 			}
+			addChildAt(textField, 0);
 		}
 
 		[Bindable]
@@ -68,8 +67,8 @@ package clarin.cmdi.componentregistry.editor {
 			textField.text = valueSchemePattern;
 			if (getChildren().length > 1) {
 				removeChildAt(0);
-				addChildAt(textField, 0);
 			}
+			addChildAt(textField, 0);
 		}
 
 		[Bindable]
@@ -84,8 +83,8 @@ package clarin.cmdi.componentregistry.editor {
 			enumeration.dataProvider = valueScheme;
 			if (getChildren().length > 1) {
 				removeChildAt(0);
-				addChildAt(enumeration, 0);
 			}
+			addChildAt(enumeration, 0);
 		}
 
 		private function createEnumeration():ComboBox {
@@ -98,7 +97,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function handleButtonClick(event:MouseEvent):void {
-			var popup:ValueSchemePopUp = EditorManager.getValueSchemePopUp();
+			var popup:ValueSchemePopUp = new ValueSchemePopUp();
 			popup.valueSchemeInput = this;
 			PopUpManager.addPopUp(popup, this, false);
 		}
