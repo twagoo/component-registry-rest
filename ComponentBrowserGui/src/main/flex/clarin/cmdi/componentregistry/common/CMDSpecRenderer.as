@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.editor
+package clarin.cmdi.componentregistry.common
 {
     import clarin.cmdi.componentregistry.editor.model.CMDSpec;
     

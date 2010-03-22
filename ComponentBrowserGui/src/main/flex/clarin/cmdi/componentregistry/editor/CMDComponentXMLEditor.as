@@ -2,13 +2,14 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.utils.getTimer;
-
+	
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;

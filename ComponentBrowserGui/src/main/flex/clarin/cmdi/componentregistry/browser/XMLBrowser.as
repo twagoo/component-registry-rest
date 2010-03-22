@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
+	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;

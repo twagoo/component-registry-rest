@@ -1,10 +1,10 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.browser.CMDComponentXMLBrowser;
+	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.Component;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.CMDComponentXMLEditor;
-	import clarin.cmdi.componentregistry.editor.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
