@@ -110,7 +110,8 @@
 				<browser:ProfileInfoPage id="profileInfoPage"
 										 profile="{profileSrv.profile}"
 										 width="100%"
-										 height="50%"/>
+										 height="50%"
+										 contextMenu="{profilesMenu.cm}"/>
 			</mx:VDividedBox>
 
 			<mx:VDividedBox label="Components"
@@ -126,7 +127,8 @@
 				<browser:ComponentInfoPage id="componentInfoPage"
 										   component="{componentSrv.component}"
 										   width="100%"
-										   height="50%"/>
+										   height="50%"
+										   contextMenu="{componentsMenu.cm}"/>
 
 			</mx:VDividedBox>
 		</mx:TabNavigator>

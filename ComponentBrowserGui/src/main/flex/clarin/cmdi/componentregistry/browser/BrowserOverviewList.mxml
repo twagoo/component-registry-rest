@@ -100,6 +100,7 @@
 							contextMenu="{menu.cm}"
 							allowMultipleSelection="true"
 							searchInput="{searchBox}"
-							keyUp="handleKeyUp(event)">
+							keyUp="handleKeyUp(event)"
+							useRollOver="false">
 	</comp:FilteringDataGrid>
 </mx:VBox>

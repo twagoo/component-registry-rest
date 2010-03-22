@@ -26,14 +26,12 @@ package clarin.cmdi.componentregistry.common.components {
 		[Bindable]
 		private var _dataGrid:DataGrid;
 
-		private var rollOverIndex:int;
 		private var saveItemDialog:SaveItemDialog = new SaveItemDialog();
 
 		public function BrowseContextMenu() {
 			cm = new ContextMenu();
 			cm.hideBuiltInItems();
 			cm.customItems = createMenuItems();
-			cm.addEventListener(ContextMenuEvent.MENU_SELECT, menuSelect);
 		}
 
 		private function createMenuItems():Array {
@@ -56,16 +54,6 @@ package clarin.cmdi.componentregistry.common.components {
 
 		public function set dataGrid(dataGrid:DataGrid):void {
 			_dataGrid = dataGrid;
-			_dataGrid.addEventListener(ListEvent.ITEM_ROLL_OVER, setRollOverIndex);
-		}
-
-		private function setRollOverIndex(event:ListEvent):void {
-			rollOverIndex = event.rowIndex;
-		}
-
-		private function menuSelect(event:ContextMenuEvent):void {
-			_dataGrid.selectedIndex = rollOverIndex;
-			_dataGrid.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
 		}
 
 		private function saveAsXml(event:ContextMenuEvent):void {
