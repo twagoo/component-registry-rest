@@ -6,17 +6,19 @@ package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-
+	
 	import flash.display.DisplayObject;
 	import flash.utils.getTimer;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.controls.ComboBox;
 	import mx.controls.HRule;
+	import mx.controls.Label;
 	import mx.controls.Text;
+	import mx.core.ClassFactory;
 	import mx.core.UIComponent;
 	import mx.managers.IFocusManagerComponent;
 
@@ -153,6 +155,7 @@ package clarin.cmdi.componentregistry.browser {
 
 		public static function createValueSchemeComboBox():ComboBox {
 			var result:ComboBox = new ComboBox();
+			result.itemRenderer=new ClassFactory(Label);			
 			result.labelFunction = function(item:Object):String {
 				var xmlItem:XML = item as XML;
 				if (item.hasOwnProperty("@" + ComponentMD.APP_INFO) && xmlItem.attribute(ComponentMD.APP_INFO) != "") { //TODO PD what about conceptlinks? also not shown in Browser.

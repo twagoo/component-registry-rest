@@ -32,6 +32,7 @@ package clarin.cmdi.componentregistry.editor {
 			textField.width = 300;
 			textField.editable = false;
 			enumeration = createEnumeration();
+			enumeration.width = 300;
 		}
 
 		protected override function createChildren():void {
