@@ -113,8 +113,8 @@ package clarin.cmdi.componentregistry.browser {
 				createAndAddFormChild(CONCEPTLINK, element.conceptLink);
 				if (element.cardinalityMin != "" || element.cardinalityMax != "")
 					createAndAddFormChild("Cardinality", element.cardinalityMin + " - " + element.cardinalityMax);
-				handleCMDAttributeList(element.attributeList);
 				createAndAddValueScheme(element.valueSchemeSimple, element.valueSchemePattern, element.valueSchemeEnumeration);
+				handleCMDAttributeList(element.attributeList);
 				indent = false;
 			}
 		}
@@ -124,11 +124,7 @@ package clarin.cmdi.componentregistry.browser {
 				addFormHeading("AttributeList");
 				for each (var attribute:CMDAttribute in attributes) {
 					createAndAddFormChild("Name", attribute.name);
-					if (!attribute.valueSchemeSimple) {
-						createAndAddFormChild("Type", attribute.valueSchemeSimple);
-					} else {
-						createAndAddValueScheme(null, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
-					}
+					createAndAddValueScheme(attribute.valueSchemeSimple, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
 				}
 			}
 		}
@@ -136,13 +132,13 @@ package clarin.cmdi.componentregistry.browser {
 		protected function createAndAddValueScheme(value:String = null, valuePattern:String = null, valueList:XMLListCollection = null):void {
 			var formItem:FormItem;
 			if (valueList) {
-				formItem = createFormItem("ValueScheme", null);
+				formItem = createFormItem("Type", null);
 				var enumeration:DisplayObject = createEnumeration(valueList);
 				formItem.addChild(enumeration);
 			} else if (valuePattern) {
-				formItem = createFormItem("ValueScheme", valuePattern);
+				formItem = createFormItem("Type", valuePattern);
 			} else {
-				formItem = createFormItem("ValueScheme", value);
+				formItem = createFormItem("Type", value);
 			}
 			addFormChild(formItem);
 		}
