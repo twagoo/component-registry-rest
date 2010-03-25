@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.common.components {
-	import mx.controls.dataGridClasses.DataGridItemRenderer;
+	import mx.controls.Label;
 
-	public class HighlightSelectionItemRenderer extends OptionalTooltipDataGridItemRenderer {
+	public class HighlightSelectionItemRenderer extends Label {
 
 		private static const OPEN_TAG:String = "<b>";
 		private static const CLOSE_TAG:String = "</b>";

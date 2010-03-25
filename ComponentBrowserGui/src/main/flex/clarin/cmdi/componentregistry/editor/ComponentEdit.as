@@ -98,6 +98,7 @@ package clarin.cmdi.componentregistry.editor {
 
 			var componentLink:FormItem = createComponentLink(_component);
 			if (componentLink != null) {
+			    addCardinalityInput();
 				addChild(componentLink);
 			} else {
 				addChild(new FormItemInputLine("Name", _component.name, function(val:String):void {
@@ -106,16 +107,20 @@ package clarin.cmdi.componentregistry.editor {
 				addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _component.conceptLink, function(val:String):void {
 						_component.conceptLink = val;
 					}));
+			    addCardinalityInput();
+				handleCMDAttributeList();
+				handleElements(_component.cmdElements);
+				handleComponents(_component.cmdComponents); //recursion
+			}
+		}
+		
+		private function addCardinalityInput():void {
 				addChild(new FormItemInputLine("CardinalityMin", _component.cardinalityMin, function(val:String):void {
 						_component.cardinalityMin = val;
 					}));
 				addChild(new FormItemInputLine("CardinalityMax", _component.cardinalityMax, function(val:String):void {
 						_component.cardinalityMax = val;
 					}));
-				handleCMDAttributeList();
-				handleElements(_component.cmdElements);
-				handleComponents(_component.cmdComponents); //recursion
-			}
 		}
 
 		private function createComponentEditBar():HBox {

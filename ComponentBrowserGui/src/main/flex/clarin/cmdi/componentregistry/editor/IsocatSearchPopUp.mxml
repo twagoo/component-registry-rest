@@ -51,7 +51,7 @@
 		<mx:DataGrid id="dataGrid"
 					 dataProvider="{searchService.searchResults}"
 					 resizableColumns="true"
-					 itemRenderer="clarin.cmdi.componentregistry.common.components.OptionalTooltipDataGridItemRenderer"
+					 itemRenderer="mx.controls.Label"
 					 showDataTips="true">
 			<mx:columns>
 				<mx:DataGridColumn dataField="@name"
