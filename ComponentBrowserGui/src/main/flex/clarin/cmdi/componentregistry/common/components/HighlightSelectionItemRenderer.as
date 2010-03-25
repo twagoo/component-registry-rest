@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.common.components {
 	import mx.controls.dataGridClasses.DataGridItemRenderer;
 
-	public class HighlightSelectionItemRenderer extends DataGridItemRenderer {
+	public class HighlightSelectionItemRenderer extends OptionalTooltipDataGridItemRenderer {
 
 		private static const OPEN_TAG:String = "<b>";
 		private static const CLOSE_TAG:String = "</b>";
@@ -34,6 +34,7 @@ package clarin.cmdi.componentregistry.common.components {
 		private function highlightMatch(value:String, len:int, index:int):String {
 			return value.substr(0, index).concat(OPEN_TAG, value.substr(index, len), CLOSE_TAG, value.substr(index + len));
 		}
+
 
 	}
 }

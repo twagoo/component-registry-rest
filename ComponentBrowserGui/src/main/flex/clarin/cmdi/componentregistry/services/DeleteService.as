@@ -22,21 +22,26 @@ package clarin.cmdi.componentregistry.services {
 		public static const ITEM_DELETED:String = "itemDeleted";
 		private var service:HttpClient;
 
+        private static var _instance:DeleteService = new DeleteService();
+
 		public function DeleteService() {
+   			if (_instance != null) {
+				throw new Error("DeleteService should only be accessed through DeleteService.instance");
+			}
 			service = new HttpClient();
 			service.listener.onComplete = handleResult;
 			service.listener.onError = handleError;
 		}
 
-		private function getCredentials():String {
-			return Base64.encode("tomcat:tomcat");
-		}
+//		private function getCredentials():String {
+//			return Base64.encode("tomcat:tomcat");
+//		}
 
 		public function deleteItem(item:ItemDescription):void {
 			CursorManager.setBusyCursor();
-			var uri:URI = new URI(item.dataUrl);
+			var uri:URI = new URI(item.dataUrl);//+";JSESSIONID="+Config.instance.sessionId
 			var httpDelete:Delete = new Delete();
-			httpDelete.addHeader("Authorization", "BASIC " + getCredentials());
+//			httpDelete.addHeader("Authorization", "BASIC " + getCredentials());
 			service.request(uri, httpDelete);
 		}
 
@@ -57,5 +62,8 @@ package clarin.cmdi.componentregistry.services {
 		    Alert.show(errorMessage);
 		}
 
+		public static function get instance():DeleteService {
+			return _instance;
+		}
 	}
 }

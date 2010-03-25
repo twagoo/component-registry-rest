@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
@@ -21,26 +21,26 @@ package clarin.cmdi.componentregistry.services {
 		[Bindable]
 		[ArrayElementType("ItemDescription")]
 		public var itemDescriptions:ArrayCollection;
-		
+
 		private var serviceUrl:String;
 
-        // Not bindable needed for lookups over the whole collections of itemDescriptions
-		protected var unFilteredItemDescriptions:ArrayCollection; 
+		// Not bindable needed for lookups over the whole collections of itemDescriptions
+		protected var unFilteredItemDescriptions:ArrayCollection;
 
 
 		public function BrowserService(restUrl:String) {
-		    this.serviceUrl = restUrl;
+			this.serviceUrl = restUrl;
 			service = new HTTPService();
 			service.method = HTTPRequestMessage.GET_METHOD;
 			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
 		}
-		
+
 		private function initService():void {
-			service.url = serviceUrl + "?"+new Date().getTime();
+			service.url = serviceUrl + "?" + new Date().getTime();// +";JSESSIONID="+Config.instance.sessionId;
 		}
 
 		public function load():void {
-		    initService();
+			initService();
 			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}
@@ -52,7 +52,7 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		public function fault(faultEvent:FaultEvent):void {
-			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
+			var errorMessage:String = StringUtil.substitute("Error in {0}: Message: {1} \n Fault: {2} - {3}", this, faultEvent.message, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
 			Alert.show(errorMessage);
 		}
 
@@ -60,7 +60,7 @@ package clarin.cmdi.componentregistry.services {
 			itemDescriptions = items;
 			unFilteredItemDescriptions = new ArrayCollection(); //create a copy
 			for each (var item:Object in items) {
-                unFilteredItemDescriptions.addItem(item);		    
+				unFilteredItemDescriptions.addItem(item);
 			}
 		}
 	}

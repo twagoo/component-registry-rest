@@ -2,10 +2,10 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
-
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
 	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
@@ -15,6 +15,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.controls.Button;
 	import mx.core.UIComponent;
 	import mx.events.DragEvent;
+	import mx.events.PropertyChangeEvent;
 	import mx.managers.DragManager;
 
 	[Event(name="removeAttribute", type="flash.events.Event")]
@@ -67,18 +68,18 @@ package clarin.cmdi.componentregistry.editor {
 			} else {
 				valueSchemeInput.valueSchemeEnumeration = valueScheme.valueSchemeEnumeration;
 			}
-			ChangeWatcher.watch(valueSchemeInput, "valueSchemeSimple", function(val:String):void {
-					valueScheme.valueSchemeSimple = val;
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemeSimple", function(e:PropertyChangeEvent):void {
+					valueScheme.valueSchemeSimple = e.newValue as String;
 					valueScheme.valueSchemePattern = "";
 					valueScheme.valueSchemeEnumeration = null;
 				});
-			ChangeWatcher.watch(valueSchemeInput, "valueSchemePattern", function(val:String):void {
-					valueScheme.valueSchemePattern = val;
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemePattern", function(e:PropertyChangeEvent):void {
+					valueScheme.valueSchemePattern = e.newValue as String;
 					valueScheme.valueSchemeEnumeration = null;
 					valueScheme.valueSchemeSimple = "";
 				});
-			ChangeWatcher.watch(valueSchemeInput, "valueSchemeEnumeration", function(val:XMLListCollection):void {
-					valueScheme.valueSchemeEnumeration = val;
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemeEnumeration", function(e:PropertyChangeEvent):void {
+					valueScheme.valueSchemeEnumeration = e.newValue as XMLListCollection;
 					valueScheme.valueSchemeSimple = "";
 					valueScheme.valueSchemePattern = "";
 				});

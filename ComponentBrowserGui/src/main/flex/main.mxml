@@ -7,12 +7,35 @@
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.services.Config;
+			import flash.net.navigateToURL;
 			import mx.managers.PopUpManager;
 			import clarin.cmdi.componentregistry.services.UploadService;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 
 			private function init():void {
 				ExternalMouseWheelSupport.getInstance(stage);
+				//var sessionId:String = Application.application.parameters.jsessionid;
+				//trace("JSession=" + sessionId);
+//    var urltext:String = "/webapp/ChartXML.do;JSESSIONID="+JSESSIONID;
+//    trace ("Requested URL:",urltext);
+//    httpService.url= urltext;
+//    httpService.send();
+//    trace("httpService sent");
+			}
+
+			private function handleLogin(event:MouseEvent):void {
+				var req:URLRequest = new URLRequest();
+				req.url = Config.instance.serviceRootUrl + "?shhaaDo=lI";
+				navigateToURL(req, "_top");
+			}
+
+			[Bindable]
+			private var userName:String = "";
+
+			private function checkUser():void {
+				userName = Application.application.parameters.userName;
+				trace("user = " + userName);
 			}
 		]]>
 	</mx:Script>
@@ -28,7 +51,11 @@
 				 width="100%">
 			<mx:HBox borderStyle="none">
 				<mx:ToggleButtonBar id="toggleBar"
-									dataProvider="{viewStack}"/>
+									dataProvider="{viewStack}"
+									initialize="checkUser();"/>
+				<mx:Button id="login"
+						   label="login {userName}"
+						   click="handleLogin(event)"/>
 			</mx:HBox>
 			<common:RegistryViewStack id="viewStack"
 									  borderStyle="none"

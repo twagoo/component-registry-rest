@@ -9,18 +9,18 @@ import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
 import clarin.cmdi.componentregistry.services.ComponentInfoService;
 import clarin.cmdi.componentregistry.services.ComponentListService;
+import clarin.cmdi.componentregistry.services.DeleteService;
 import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
-import flash.net.FileReference;
 
 import mx.core.DragSource;
 import mx.core.UIComponent;
+import mx.managers.CursorManager;
 import mx.managers.DragManager;
 
 
-private var currentDescription:ItemDescription;
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
 private var componentSrv:ComponentInfoService = new ComponentInfoService();
 
@@ -45,25 +45,30 @@ public function init():void {
 	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
 	componentsSrv.load();
 	uploadService.init(uploadProgress);
+	DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, refreshComponentList);
 }
 
 private function profileLoaded(event:Event):void {
 	var cmdComponent:XML = profileSrv.profile.profileSource;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
+	CursorManager.removeBusyCursor();
 }
 
 private function componentLoaded(event:Event):void {
 	var cmdComponent:XML = componentSrv.component.componentMD.xml;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, componentSrv.component.description);
+	CursorManager.removeBusyCursor();
 }
 
 
 public function setDescription(itemDescription:ItemDescription):void {
-	this.currentDescription = itemDescription;
-	if (currentDescription.isProfile) {
-		profileSrv.load(currentDescription);
-	} else {
-		componentSrv.load(currentDescription);
+	if (itemDescription) {
+	    CursorManager.setBusyCursor();
+		if (itemDescription.isProfile) {
+			profileSrv.load(itemDescription);
+		} else {
+			componentSrv.load(itemDescription);
+		}
 	}
 }
 
@@ -92,6 +97,11 @@ private function saveSpec():void {
 
 private function handleSaveComplete(event:UploadCompleteEvent):void {
 	parentApplication.viewStack.switchToBrowse(event.itemDescription);
+	refreshComponentList();
+}
+
+private function refreshComponentList(event:*=null):void {
+    componentsSrv.load();
 }
 
 private function handleEditorChange(event:Event):void {
@@ -128,7 +138,6 @@ private function enableAttributeDrag(event:MouseEvent):void {
 private function initPaletteOverview():void {
 	componentsPaletteOverview.dataGrid.dragEnabled = true;
 	componentsPaletteOverview.dataGrid.allowMultipleSelection = true;
-	componentsPaletteOverview.dataGrid.horizontalScrollPolicy = "auto";
 	componentsPaletteOverview.dataGrid.resizableColumns = true;
 }
 

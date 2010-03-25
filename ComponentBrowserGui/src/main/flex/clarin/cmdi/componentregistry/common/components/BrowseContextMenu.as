@@ -68,7 +68,7 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private function editItem(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
-			viewStack.switchToEditor(item);
+		    viewStack.switchToEditor(item);
 		}
 
 		private function handleDelete(event:ContextMenuEvent):void {

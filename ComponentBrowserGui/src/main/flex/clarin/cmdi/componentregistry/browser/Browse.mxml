@@ -32,7 +32,7 @@
 			[Bindable]
 			private var componentSrv:ComponentInfoService = new ComponentInfoService();
 			
-			private var deleteSrv:DeleteService = new DeleteService();
+			private var deleteSrv:DeleteService = DeleteService.instance;
 			
 			[Bindable]
 			private var profilesMenu:BrowseContextMenu;

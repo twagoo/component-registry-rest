@@ -37,32 +37,31 @@
 			<editor:CMDComponentXMLEditor id="xmlEditor"
 										  cmdSpec="{cmdSpec}"
 										  editorChange="handleEditorChange(event)"/>
-			<mx:VBox styleName="borderStyles">
+			<mx:VBox styleName="borderStyles"
+					 width="100%">
 				<mx:Label text="Drag items onto edit canvas"/>
 				<mx:HBox id="palette">
-					<mx:Canvas width="60"
-							   height="60"
-							   backgroundColor="blue"
-							   borderStyle="solid"
+					<mx:Button height="30"
 							   id="ComponentDrag"
+							   label="Component"
+							   toolTip="Drag component to add a new empty component"
 							   mouseMove="enableComponentDrag(event);">
-					</mx:Canvas>
-					<mx:Canvas width="45"
-							   height="45"
-							   backgroundColor="green"
-							   borderStyle="solid"
+					</mx:Button>
+					<mx:Button height="30"
 							   id="ElementDrag"
+							   label="Element"
+							   toolTip="Drag element onto components"
 							   mouseMove="enableElementDrag(event);">
-					</mx:Canvas>
-					<mx:Canvas width="30"
-							   height="30"
-							   backgroundColor="red"
-							   borderStyle="solid"
+					</mx:Button>
+					<mx:Button height="30"
 							   id="AttributeDrag"
+							   label="Attribute"
+							   toolTip="Drag attribute onto an attribute list"
 							   mouseMove="enableAttributeDrag(event);">
-					</mx:Canvas>
+					</mx:Button>
 				</mx:HBox>
 				<browser:BrowserOverviewList id="componentsPaletteOverview"
+											 width="100%"
 											 browserDataProvider="{componentsSrv.itemDescriptions}"
 											 browserColumns="{browserColumns.getComponentColumns()}"
 											 creationComplete="initPaletteOverview();"/>

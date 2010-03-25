@@ -101,6 +101,7 @@
 							allowMultipleSelection="true"
 							searchInput="{searchBox}"
 							keyUp="handleKeyUp(event)"
-							useRollOver="false">
+							useRollOver="false"
+							showDataTips="true">
 	</comp:FilteringDataGrid>
 </mx:VBox>

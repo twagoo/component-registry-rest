@@ -29,6 +29,7 @@ package clarin.cmdi.componentregistry.browser {
 			var c:DataGridColumn = new DataGridColumn();
 			c.dataField = dataField;
 			c.headerText = headerText;
+			c.dataTipField = dataField;
 			return c;
 		}
 

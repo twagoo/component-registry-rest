@@ -19,6 +19,7 @@ package clarin.cmdi.componentregistry.services {
 		//Default _isocatSearchUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "isocatSearchUrl=http://www.isocat.org/rest/user/guest/search"
 
+       // private var _sessionId:String = "";
 
 		public function Config() {
 			if (_instance != null) {
@@ -32,6 +33,10 @@ package clarin.cmdi.componentregistry.services {
 			if (isocatSearchUrl != null) {
 				_isocatSearchUrl = isocatSearchUrl;
 			}
+//			var sessionId:String = Application.application.parameters.jsessionid;
+//			if (sessionId != null) {
+//				_sessionId = sessionId;
+//			}
 		}
 
 		public function get profileListUrl():String {
@@ -61,10 +66,19 @@ package clarin.cmdi.componentregistry.services {
 		public function get isocatSearchUrl():String {
 			return _isocatSearchUrl;
 		}
+		
+//		public function get sessionId():String {
+//			return _sessionId;
+//		}
+
+		public function get serviceRootUrl():String {
+			return _serviceRootUrl;
+		}
+
 
 		public static function get instance():Config {
 			return _instance;
 		}
-
+		
 	}
 }

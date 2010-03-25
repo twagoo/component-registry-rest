@@ -19,7 +19,7 @@
 			public var editField:TextInput;
 
 			private function cleanUp():void {
-			    searchService.close();
+				searchService.close();
 				PopUpManager.removePopUp(this);
 			}
 
@@ -50,32 +50,31 @@
 		</mx:HBox>
 		<mx:DataGrid id="dataGrid"
 					 dataProvider="{searchService.searchResults}"
-					 resizableColumns="true">
+					 resizableColumns="true"
+					 itemRenderer="clarin.cmdi.componentregistry.common.components.OptionalTooltipDataGridItemRenderer"
+					 showDataTips="true">
 			<mx:columns>
 				<mx:DataGridColumn dataField="@name"
-								   showDataTips="true"
 								   dataTipField="@name"
 								   headerText="Name"/>
 				<mx:DataGridColumn dataField="@definition"
-								   showDataTips="true"
 								   dataTipField="@definition"
 								   headerText="Definition"/>
 				<mx:DataGridColumn dataField="@identifier"
-								   showDataTips="true"
 								   dataTipField="@identifier"
 								   headerText="Identifier"/>
 				<mx:DataGridColumn dataField="@owner"
-								   showDataTips="true"
 								   dataTipField="@owner"
 								   headerText="Owner"/>
 				<mx:DataGridColumn dataField="@pid"
-								   showDataTips="true"
 								   dataTipField="@pid"
 								   headerText="Persistent Identifier"
 								   width="130"/>
 				<mx:DataGridColumn dataField="@type"
+								   dataTipField="@type"
 								   headerText="Type"/>
 				<mx:DataGridColumn dataField="@version"
+								   dataTipField="@version"
 								   headerText="Version"/>
 			</mx:columns>
 		</mx:DataGrid>
