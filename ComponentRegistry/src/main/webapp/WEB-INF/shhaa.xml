@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ROOT>
+<shhaa>
+	
+	<authentication>
+		<shibheader>
+			<username>eduPersonPrincipalName</username>
+			<session>Shib-Session-ID</session>
+			<idp>Shib-Identity-Provider</idp>
+			<timestamp>Shib-Authentication-Instant</timestamp>
+		</shibheader>
+		<fallback>
+			<username>anonymous</username>
+		</fallback>
+		<sso action="lI">http://lux16.mpi.nl/Shibboleth.sso/Login</sso> 
+		<slo action="lO">http://lux16.mpi.nl/Shibboleth.sso/Logout</slo>
+	</authentication>
+	
+	
+	<composition action="rF">
+		<shibheader>
+			<attribute>eduPersonAffiliation</attribute>
+			<attribute>eduPersonEntitlement</attribute>
+			<attribute>email</attribute>
+			<attribute>ou</attribute>
+			<attribute>o</attribute>
+		</shibheader>
+	</composition>
+
+	
+	<authorization>
+		<location  target="/index.jsp" />
+	</authorization>
+	
+	
+	<handler>
+		<ignore>
+			<location target="/css/*" />
+			<location target="/img/*" />
+		</ignore>
+		
+		<!-- configures the view-control targets -->
+        <pages>
+           <!--  <info action="dI">/protected/info.jsp</info> -->
+            <denied action="dD">pages/noaccess.jsp</denied> 
+        </pages>
+		
+	</handler>
+	
+</shhaa>
+</ROOT>

@@ -1,18 +1,10 @@
-<!-- saved from url=(0014)about:internet -->
-<html lang="en">
-
-<!-- 
-Smart developers always View Source. 
-
-This application was built using Adobe Flex, an open source framework
-for building rich Internet applications that get delivered via the
-Flash Player or to desktops via Adobe AIR. 
-
-Learn more about Flex at http://flex.org 
-// -->
-
+<?xml version="1.0" encoding="UTF-8" ?>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
 <!--  BEGIN Browser History required section -->
 <link rel="stylesheet" type="text/css" href="history/history.css" />
@@ -45,7 +37,7 @@ var requiredRevision = ${version_revision};
 </head>
 
 <body scroll="no">
-<div id="flashContainerDiv">
+<div id="flashContainerDiv" style="position:absolute; width:100%; height:100%">
 <script language="JavaScript" type="text/javascript">
 <!--
 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
@@ -91,12 +83,11 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer",
-			"FlashVars", "serviceRootUrl=${serviceRootUrl}&isocatSearchUrl=${isocatSearchUrl}" 
+			"FlashVars", "serviceRootUrl=${serviceRootUrl}&isocatSearchUrl=${isocatSearchUrl}&jsessionid=${pageContext.session.id}&userName=${request.remoteUser}" 
 			    
 	);
   } else {  // flash is too old or we can't detect the plugin
-    var alternateContent = 'Alternate HTML content should be placed here. '
-  	+ 'This content requires the Adobe Flash Player. '
+    var alternateContent = 'This content requires the Adobe Flash Player. '
    	+ '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
     document.write(alternateContent);  // insert non-flash content
   }
@@ -118,7 +109,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 				allowScriptAccess="sameDomain"
 				type="application/x-shockwave-flash"
 				pluginspage="http://www.adobe.com/go/getflashplayer"
-				FlashVars="serviceRootUrl=${serviceRootUrl}&isocatSearchUrl=${isocatSearchUrl}" >
+				FlashVars="serviceRootUrl=${serviceRootUrl}&isocatSearchUrl=${isocatSearchUrl}&jsessionid=${pageContext.session.id}&userName=${request.remoteUser}" >
 			</embed>
 	</object>
 </noscript>
