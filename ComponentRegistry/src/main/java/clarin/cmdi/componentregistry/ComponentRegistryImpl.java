@@ -161,11 +161,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public List<ComponentDescription> getComponentDescriptions() {
-        List<ComponentDescription> result = new ArrayList(componentDescriptions.values());
+        List<ComponentDescription> result = new ArrayList<ComponentDescription>(componentDescriptions.values());
         Collections.sort(result, ComponentDescription.COMPARE_ON_GROUP_AND_NAME);
         return result;
     }
-    
+
     public ComponentDescription getComponentDescription(String id) {
         return componentDescriptions.get(id);
     }
@@ -239,11 +239,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public List<ProfileDescription> getProfileDescriptions() {
-        List<ProfileDescription> result = new ArrayList(profileDescriptions.values());
+        List<ProfileDescription> result = new ArrayList<ProfileDescription>(profileDescriptions.values());
         Collections.sort(result, ProfileDescription.COMPARE_ON_NAME);
         return result;
     }
-    
+
     public ProfileDescription getProfileDescription(String id) {
         return profileDescriptions.get(id);
     }
@@ -323,7 +323,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public List<MDProfile> searchMDProfiles(String searchPattern) {
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException {
