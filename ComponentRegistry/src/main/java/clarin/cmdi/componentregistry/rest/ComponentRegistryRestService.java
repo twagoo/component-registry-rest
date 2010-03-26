@@ -181,7 +181,7 @@ public class ComponentRegistryRestService {
 
     private Response createDownloadResponse(String result, String fileName) {
         //Making response so it triggers browsers native save as dialog.
-        Response response = Response.ok().type("application/x-download").header("Content-Disposition", "attachment; filename=" + fileName)
+        Response response = Response.ok().type("application/x-download").header("Content-Disposition", "attachment; filename=\"" + fileName+"\"")
                 .entity(result).build();
         return response;
 
