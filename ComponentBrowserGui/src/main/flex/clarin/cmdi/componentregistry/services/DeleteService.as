@@ -33,15 +33,15 @@ package clarin.cmdi.componentregistry.services {
 			service.listener.onError = handleError;
 		}
 
-//		private function getCredentials():String {
-//			return Base64.encode("tomcat:tomcat");
-//		}
+		private function getCredentials():String {
+			return Base64.encode("tomcat:tomcat");
+		}
 
 		public function deleteItem(item:ItemDescription):void {
 			CursorManager.setBusyCursor();
 			var uri:URI = new URI(item.dataUrl);//+";JSESSIONID="+Config.instance.sessionId
 			var httpDelete:Delete = new Delete();
-//			httpDelete.addHeader("Authorization", "BASIC " + getCredentials());
+			httpDelete.addHeader("Authorization", "BASIC " + getCredentials());
 			service.request(uri, httpDelete);
 		}
 
