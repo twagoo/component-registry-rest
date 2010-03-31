@@ -36,10 +36,10 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private function createMenuItems():Array {
 			var result:Array = new Array();
-			var cmi:ContextMenuItem = new ContextMenuItem("Save as XML...");
+			var cmi:ContextMenuItem = new ContextMenuItem("Download as XML...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXml);
 			result.push(cmi);
-			cmi = new ContextMenuItem("Save as XSD...");
+			cmi = new ContextMenuItem("Download as XSD...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXsd);
 			result.push(cmi);
 			cmi = new ContextMenuItem("Edit Item...");
