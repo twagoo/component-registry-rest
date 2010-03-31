@@ -67,18 +67,34 @@
 				}
 			}
 
-// TODO PD handle Delete through contextMenu
-// TODO show tooltip for iscat somewhere
+// TODO  PD Validate input!
+// TODO  show tooltip for iscat somewhere
 			private function handleKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.DELETE) {
-					var indices:Array = dataGrid.selectedIndices;
-					for each (var index:int in indices) {
-						if (index != valueSchemeEnumeration.length - 1) { //Don't delete last row
-							valueSchemeEnumeration.removeItemAt(index);
-						}
-					}
-					dataGrid.validateNow();
+					deleteRow(event);
 				}
+			}
+
+			private function deleteRow(event:*):void {
+				var indices:Array = dataGrid.selectedIndices;
+				for each (var index:int in indices) {
+					if (index != valueSchemeEnumeration.length - 1) { //Don't delete last row
+						valueSchemeEnumeration.removeItemAt(index);
+					}
+				}
+				dataGrid.validateNow();
+
+			}
+
+			private function createContextMenu():ContextMenu {
+				var cm:ContextMenu = new ContextMenu();
+				cm.hideBuiltInItems();
+				var items:Array = new Array();
+				var cmi:ContextMenuItem = new ContextMenuItem("Delete row...");
+				cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteRow);
+				items.push(cmi);
+				cm.customItems = items;
+				return cm;
 			}
 		]]>
 	</mx:Script>
@@ -92,7 +108,8 @@
 				 itemEditBeginning="checkEdit(event)"
 				 itemEditBegin="handleItemEditBegin(event)"
 				 allowMultipleSelection="true"
-				 keyUp="handleKeyUp(event)">
+				 keyUp="handleKeyUp(event)"
+				 contextMenu="{createContextMenu()}">
 		<mx:columns>
 			<mx:DataGridColumn dataField="item"/>
 			<mx:DataGridColumn dataField="conceptLink"/>
