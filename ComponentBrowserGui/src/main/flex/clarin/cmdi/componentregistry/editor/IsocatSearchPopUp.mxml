@@ -6,21 +6,34 @@
 				creationComplete="PopUpManager.centerPopUp(this)"
 				title="Search in Isocat.org">
 
+	<mx:Metadata>
+		[Event(name="OK", type="flash.events.Event")]
+	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
 			import mx.controls.TextInput;
 			import clarin.cmdi.componentregistry.services.IsocatService;
 			import mx.managers.PopUpManager;
 
+			public static const OK_EVENT:String = "OK";
 			[Bindable]
 			private var searchService:IsocatService = new IsocatService();
 
 			//To store the result
 			public var editField:TextInput;
 
+			private function handleOkClick():void {
+				dispatchEvent(new Event(OK_EVENT));
+				cleanUp();
+			}
+
 			private function cleanUp():void {
 				searchService.close();
 				PopUpManager.removePopUp(this);
+			}
+
+			private function initializeDataGrid():void {
+				editField = new TextInput();
 			}
 
 			private function setItem():void {
@@ -29,7 +42,6 @@
 					editField.text = selectedItem.@pid;
 					editField.toolTip = selectedItem.@name + ": " + selectedItem.@definition;
 				}
-				cleanUp();
 			}
 
 			private function handleSearch(event:KeyboardEvent):void {
@@ -50,6 +62,8 @@
 		</mx:HBox>
 		<mx:DataGrid id="dataGrid"
 					 dataProvider="{searchService.searchResults}"
+					 initialize="initializeDataGrid()"
+					 itemClick="setItem()"
 					 resizableColumns="true"
 					 itemRenderer="mx.controls.Label"
 					 showDataTips="true">
@@ -80,8 +94,9 @@
 		</mx:DataGrid>
 		<mx:HBox width="100%">
 			<mx:Spacer width="100%"/>
-			<mx:Button label="OK"
-					   click="setItem()"/>
+			<mx:Button id="okBtn"
+					   label="OK"
+					   click="handleOkClick()"/>
 			<mx:Button label="Cancel"
 					   click="cleanUp()"/>
 		</mx:HBox>

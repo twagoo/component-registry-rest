@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	
+
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	
+
 	import mx.binding.utils.BindingUtils;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
@@ -26,7 +26,9 @@ package clarin.cmdi.componentregistry.editor {
 			editField.text = value;
 			BindingUtils.bindSetter(bindingFunction, editField, "text");
 			createSearchConceptLinkButton();
-			editField.addEventListener(Event.CHANGE, function():void {editField.toolTip = null});
+			editField.addEventListener(Event.CHANGE, function():void {
+					editField.toolTip = null
+				});
 		}
 
 		protected override function createChildren():void {
@@ -41,9 +43,12 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function handleButtonClick(event:MouseEvent):void {
-			var tw:IsocatSearchPopUp = EditorManager.getIsocatSearchPopUp();
-			tw.editField = editField;
-			PopUpManager.addPopUp(tw, this, false);
+			var popup:IsocatSearchPopUp = EditorManager.getIsocatSearchPopUp();
+			popup.addEventListener(IsocatSearchPopUp.OK_EVENT, function(e:Event):void {
+					editField.text = popup.editField.text;
+					editField.toolTip = popup.editField.toolTip;
+				});
+			PopUpManager.addPopUp(popup, this, false);
 		}
 
 	}

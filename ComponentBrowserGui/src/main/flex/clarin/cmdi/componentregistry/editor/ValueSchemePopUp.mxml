@@ -55,6 +55,14 @@
 			private function cleanUp():void {
 				PopUpManager.removePopUp(this);
 			}
+
+			private function handleIsocatButtonClick(event:MouseEvent):void {
+				var popup:IsocatSearchPopUp = EditorManager.getIsocatSearchPopUp();
+				popup.addEventListener(IsocatSearchPopUp.OK_EVENT, function(e:Event):void {
+						enumerationGrid.setConceptLink(popup.editField);
+					});
+				PopUpManager.addPopUp(popup, this, false);
+			}
 		]]>
 	</mx:Script>
 
@@ -72,7 +80,8 @@
 
 	<mx:Label text="Or enter pattern:"/>
 	<mx:HBox width="100%">
-		<mx:TextInput id="patternInput" text="{valueSchemeInput.valueSchemePattern}">
+		<mx:TextInput id="patternInput"
+					  text="{valueSchemeInput.valueSchemePattern}">
 			<!-- PD TODO how can I validate this -->
 		</mx:TextInput>
 		<mx:Spacer width="100%"/>
@@ -83,9 +92,15 @@
 	<!-- PD TODO how should we implement open vocabularies?? -->
 	<mx:Label text="Or create controlled vocabularies:"/>
 	<mx:HBox width="100%">
-		<editor:ValueSchemeEnumerationGrid id="enumerationGrid" creationComplete="enumerationGrid.initEnumeration(valueSchemeInput.valueSchemeEnumeration)"/>
-		<mx:Button label="Use Controlled Vocabulary"
-				   click="setControlledVocabulary()"/>
+		<editor:ValueSchemeEnumerationGrid id="enumerationGrid"
+										   creationComplete="enumerationGrid.initEnumeration(valueSchemeInput.valueSchemeEnumeration)"/>
+		<mx:VBox>
+			<mx:Button label="Use Controlled Vocabulary"
+					   click="setControlledVocabulary()"/>
+			<mx:Button label="Search in isocat..."
+					   click="handleIsocatButtonClick(event)"
+					   enabled="{enumerationGrid.conceptLinkEdit}"/>
+		</mx:VBox>
 	</mx:HBox>
 
 	<mx:HBox width="100%">

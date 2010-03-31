@@ -2,6 +2,10 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml">
 	<mx:Script>
 		<![CDATA[
+			import mx.binding.utils.BindingUtils;
+			import mx.core.IDataRenderer;
+			import mx.controls.Button;
+			import mx.events.ListEvent;
 			import mx.events.DataGridEventReason;
 			import clarin.cmdi.componentregistry.common.ComponentMD;
 			import mx.collections.XMLListCollection;
@@ -14,6 +18,9 @@
 
 			[Bindable]
 			public var valueSchemeEnumeration:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			public var conceptLinkEdit:Boolean = false;
+			private var currentEditPosition:Object; //This object is: dataGrid.editItemPostition {columnIndex:2, rowIndex:3}
 
 			public function initEnumeration(valueSchemeData:XMLListCollection):void {
 				if (valueSchemeData) {
@@ -44,6 +51,24 @@
 					event.preventDefault();
 			}
 
+			public function setConceptLink(input:TextInput):void {
+				var currentEditRow:Object = valueSchemeEnumeration.getItemAt(currentEditPosition.rowIndex);
+				currentEditRow.conceptLink = input.text;
+				dataGrid.invalidateList();
+				conceptLinkEdit = false;
+			}
+
+			private function handleItemEditBegin(e:DataGridEvent):void {
+				if (e.rowIndex < valueSchemeEnumeration.length - 1 && e.columnIndex == 1) {
+					conceptLinkEdit = true;
+					currentEditPosition = dataGrid.editedItemPosition;
+				} else {
+					conceptLinkEdit = false;
+				}
+			}
+
+// TODO PD handle Delete through contextMenu
+// TODO show tooltip for iscat somewhere
 			private function handleKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.DELETE) {
 					var indices:Array = dataGrid.selectedIndices;
@@ -65,6 +90,7 @@
 				 dataProvider="{valueSchemeEnumeration}"
 				 itemEditEnd="editEnd(event)"
 				 itemEditBeginning="checkEdit(event)"
+				 itemEditBegin="handleItemEditBegin(event)"
 				 allowMultipleSelection="true"
 				 keyUp="handleKeyUp(event)">
 		<mx:columns>
