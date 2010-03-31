@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 #
-# policyd.pl
+# flashpolicyd.pl
 # Simple socket policy file server
 #
-# Usage: policyd.pl [-port=N] -file=FILE
+# Usage: flashpolicyd.pl [-port=N] -file=FILE
 # Logs to stdout
 #
 
