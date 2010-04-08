@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -135,6 +136,24 @@ public class ComponentRegistryRestService {
         return registry.getMDProfile(profileId);
     }
 
+    /**
+     * 
+     * Purely helper method for my front-end (FLEX) which van only do post/get requests. 
+     * The query param is checked and the "proper" method is called.
+     * @param profileId
+     * @param method
+     * @return
+     */
+    @POST
+    @Path("/profiles/{profileId}")
+    public Response manipulateRegisteredProfile(@PathParam("profileId") String profileId, @FormParam("method") String method) {
+        if ("delete".equalsIgnoreCase(method)) {
+            return deleteRegisteredProfile(profileId);
+        } else {
+            return Response.ok().build();
+        }
+    }
+    
     @DELETE
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId) {
@@ -181,8 +200,8 @@ public class ComponentRegistryRestService {
 
     private Response createDownloadResponse(String result, String fileName) {
         //Making response so it triggers browsers native save as dialog.
-        Response response = Response.ok().type("application/x-download").header("Content-Disposition", "attachment; filename=\"" + fileName+"\"")
-                .entity(result).build();
+        Response response = Response.ok().type("application/x-download").header("Content-Disposition",
+                "attachment; filename=\"" + fileName + "\"").entity(result).build();
         return response;
 
     }
