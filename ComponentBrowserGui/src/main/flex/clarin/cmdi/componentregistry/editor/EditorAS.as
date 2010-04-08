@@ -76,12 +76,8 @@ public function clearEditor():void {
 	this.cmdSpec = new CMDSpec(true);
 }
 
-//private var ref:FileReference = new FileReference();
-
 private function saveSpec():void {
 //	Alert.show(xmlEditor.cmdSpec.toXml());
-//ref.save(xmlEditor.cmdSpec.toXml(), "test.xml");
-
 	var item:ItemDescription = new ItemDescription();
 	item.description = xmlEditor.cmdSpec.headerDescription;
 	item.name = xmlEditor.cmdSpec.headerName;

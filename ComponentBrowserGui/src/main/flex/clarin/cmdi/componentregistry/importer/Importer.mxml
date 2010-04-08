@@ -7,6 +7,8 @@
 
 	<mx:Script>
 		<![CDATA[
+		    import clarin.cmdi.componentregistry.common.Credentials;
+		    import mx.core.Application;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 
 			private static const BTN_PROFILE_LABEL:String = "Select profile xml...";
@@ -21,11 +23,11 @@
 				var item:ItemDescription = new ItemDescription();
 				item.description = description.text;
 				item.name = nameInput.text;
+				item.groupName = groupName.text;
 				item.isProfile = isProfile;
 				if (isProfile) {
 					uploadSrv.submitProfile(item);
 				} else {
-					item.groupName = groupName.text;
 					uploadSrv.submitComponent(item);
 				}
 			}
@@ -76,7 +78,7 @@
 				<mx:TextInput id="description"/>
 			</mx:FormItem>
 			<mx:FormItem label="Creator Name">
-				<mx:Text id="creatorName" text="loginName"/>
+				<mx:Text id="creatorName" text="{Credentials.instance.userName}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Group Name"
 						 visible="{!isProfile}"

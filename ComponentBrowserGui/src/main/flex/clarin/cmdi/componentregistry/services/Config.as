@@ -8,6 +8,7 @@ package clarin.cmdi.componentregistry.services {
 		private static const UPLOAD_COMPONENT_SERVICE_URL:String = "/rest/registry/components";
 		private static const PROFILE_INFO_URL:String = "/rest/registry/profiles/";
 		private static const COMPONENT_INFO_URL:String = "/rest/registry/components/";
+		private static const ISOCAT_SERVLET:String = "/isocat";
 
 		private static var _instance:Config = new Config();
 
@@ -15,28 +16,21 @@ package clarin.cmdi.componentregistry.services {
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
 
-		private var _isocatSearchUrl:String = "http://www.isocat.org/rest/user/guest/search";
-		//Default _isocatSearchUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
-		//Like this: "FlashVars", "isocatSearchUrl=http://www.isocat.org/rest/user/guest/search"
-
-       // private var _sessionId:String = "";
-
 		public function Config() {
 			if (_instance != null) {
 				throw new Error("Config can only be accessed through Config.instance");
 			}
-			var serviceRootUrl:String = Application.application.parameters.serviceRootUrl;
+		}
+		
+		private function init(applicationParameters:Object):void {
+			var serviceRootUrl:String = applicationParameters.serviceRootUrl;
 			if (serviceRootUrl != null) {
 				_serviceRootUrl = serviceRootUrl;
 			}
-			var isocatSearchUrl:String = Application.application.parameters.isocatSearchUrl;
-			if (isocatSearchUrl != null) {
-				_isocatSearchUrl = isocatSearchUrl;
-			}
-//			var sessionId:String = Application.application.parameters.jsessionid;
-//			if (sessionId != null) {
-//				_sessionId = sessionId;
-//			}
+		}
+		
+		public static function create(applicationParameters:Object):void {
+		    _instance.init(applicationParameters);
 		}
 
 		public function get profileListUrl():String {
@@ -64,12 +58,8 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		public function get isocatSearchUrl():String {
-			return _isocatSearchUrl;
+			return _serviceRootUrl + ISOCAT_SERVLET;
 		}
-		
-//		public function get sessionId():String {
-//			return _sessionId;
-//		}
 
 		public function get serviceRootUrl():String {
 			return _serviceRootUrl;

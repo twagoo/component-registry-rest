@@ -1,28 +1,23 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-	
+
 	import com.adobe.net.URI;
-	import com.hurlant.util.Base64;
-	
-	import flash.events.DataEvent;
-	import flash.events.ErrorEvent;
+
 	import flash.events.Event;
+	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.FileFilter;
 	import flash.net.FileReference;
-	
+	import flash.net.URLVariables;
+	import flash.utils.ByteArray;
+
 	import mx.controls.ProgressBar;
 	import mx.managers.CursorManager;
-	
-	import org.httpclient.HttpClient;
-	import org.httpclient.events.HttpDataEvent;
-	import org.httpclient.events.HttpResponseEvent;
-	import org.httpclient.http.Post;
-	import org.httpclient.http.multipart.Multipart;
-	import org.httpclient.http.multipart.Part;
+
+	import ru.inspirit.net.MultipartURLLoader;
 
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]
 	public class UploadService {
@@ -36,8 +31,8 @@ package clarin.cmdi.componentregistry.services {
 		public var message:String = "";
 
 		private var fileRef:FileReference;
-		private var httpClient:HttpClient;
 		private var pb:ProgressBar;
+		private var ml:MultipartURLLoader;
 
 		public function init(progressBar:ProgressBar):void {
 			pb = progressBar;
@@ -45,16 +40,19 @@ package clarin.cmdi.componentregistry.services {
 
 		private function createAndInitRequest():void {
 			CursorManager.setBusyCursor();
-			httpClient = new HttpClient();
-			httpClient.listener.onError = httpclientErrorHandler;
-			httpClient.listener.onData = httpclientDataHandler;
-			httpClient.listener.onComplete = httpclientCompleteHandler;
+			ml = new MultipartURLLoader();
+			ml.addEventListener(Event.COMPLETE, completeHandler);
+			ml.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+			ml.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			ml.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
+			ml.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 		}
 
 		private function createAndInitFileReference():void {
 			fileRef = new FileReference();
 			fileRef.addEventListener(Event.SELECT, selectHandler);
-			fileRef.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, responseHandler);
+			//no uploads are done through FileRef only loads so this UPLOAD_COMPLETE_DATA event will not be thrown
+			//fileRef.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, responseHandler);
 			fileRef.addEventListener(ProgressEvent.PROGRESS, progressHandler);
 			fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 			fileRef.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
@@ -65,7 +63,7 @@ package clarin.cmdi.componentregistry.services {
 		 */
 		public function submitProfile(description:ItemDescription, data:String = null):void {
 			createAndInitRequest();
-			submit(description, data, new URI(Config.instance.uploadProfileUrl));
+			submit(description, createByteArray(data), new URI(Config.instance.uploadProfileUrl));
 		}
 
 		/**
@@ -73,40 +71,41 @@ package clarin.cmdi.componentregistry.services {
 		 */
 		public function submitComponent(description:ItemDescription, data:String = null):void {
 			createAndInitRequest();
-			submit(description, data, new URI(Config.instance.uploadComponentUrl));
+			submit(description, createByteArray(data), new URI(Config.instance.uploadComponentUrl));
 		}
 
-		private function getCredentials():String {
-			return Base64.encode("tomcat:tomcat");
+		private function createByteArray(data:String):ByteArray {
+			var result:ByteArray = null;
+			if (data != null) {
+				result = new ByteArray();
+				result.writeUTFBytes(data);
+				result.position = 0;
+			}
+			return result
 		}
 
-		private function submit(description:ItemDescription, data:String, uri:URI):void {
+		private function submit(description:ItemDescription, data:ByteArray, uri:URI):void {
 			message = "";
 			try {
 				if (data != null) {
-					var parts:Array = new Array();
-					parts.push(new Part("description", description.description));
-					parts.push(new Part("name", description.name));
-					parts.push(new Part("group", description.groupName));
-					parts.push(new Part("data", data, "application/octet-stream", [{name: "filename", value: description.name + ".xml"}]));
-
-					var multipart:Multipart = new Multipart(parts);
-					startUploadHandler();
-					var post:Post = new Post();
-					post.addHeader("Authorization", "BASIC " + getCredentials());
-					post.setMultipart(multipart);
-					httpClient.request(uri, post);
+					var params:URLVariables = new URLVariables();
+					ml.addVariable("description", description.description);
+					ml.addVariable("name", description.name);
+					ml.addVariable("group", description.groupName);
+					ml.addFile(data, description.name + ".xml", "data");
+					ml.load(uri.toString());
 				} else {
-					// Cannot sent credentials with FileReference.upload so just load the data and then submit through HttpClient
+					// Cannot sent data that is not a file with FileReference.upload so just load the data and then submit through HttpClient.
+					// FileReference also does not handle authentication tokens.
 					startUploadHandler();
 					if (fileRef.data == null) {
 						//only load if not loaded before otherwise sent the already loaded file. You can only force a reload of the file by selecting it again (it is a flash thingy).
 						fileRef.addEventListener(Event.COMPLETE, function(event:Event):void {
-								submit(description, new String(fileRef.data), uri);
+								submit(description, fileRef.data, uri);
 							});
 						fileRef.load();
 					} else {
-						submit(description, new String(fileRef.data), uri);
+						submit(description, fileRef.data, uri);
 					}
 				}
 			} catch (error:Error) {
@@ -128,42 +127,32 @@ package clarin.cmdi.componentregistry.services {
 			pb.visible = false;
 		}
 
-		private function httpclientCompleteHandler(event:HttpResponseEvent):void {
-			if (!event.response.isSuccess) {
-				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.response.code + ")\n");
-			}
-            CursorManager.removeBusyCursor();
-			httpClient.close();
-		}
-
-		private function httpclientDataHandler(event:HttpDataEvent):void {
+		private function completeHandler(event:Event):void {
 			uploadComplete();
-			var response:XML = new XML(event.bytes);
+			var response:XML = new XML(ml.loader.data);
 			handleResponse(response);
 		}
 
-		private function httpclientErrorHandler(event:ErrorEvent):void {
-			addToMessage("Server Failed to handle registration. Unexpected error, try again later. (error: " + event.text + ")\n");
+		private function httpStatusHandler(event:HTTPStatusEvent):void {
+			if (event.status != 200) {
+				addToMessage("Server Failed to handle registration. Unexpected error, try again later. (httpstatus code was: " + event.status + ")\n");
+			}
+			CursorManager.removeBusyCursor();
 		}
 
 		private function securityErrorHandler(event:SecurityErrorEvent):void {
 			addToMessage("Server Failed to handle registration. Unexpected error, try again later. (error: " + event.text + ")\n");
+			CursorManager.removeBusyCursor();
 		}
 
 		private function ioErrorHandler(event:IOErrorEvent):void {
 			addToMessage("Unable to load file. (error: " + event.text + ")\n");
+			CursorManager.removeBusyCursor();
 		}
 
 		private function progressHandler(event:ProgressEvent):void {
 			trace("Uploading: " + event.bytesLoaded + "/" + event.bytesTotal);
 			pb.setProgress(event.bytesLoaded, event.bytesTotal);
-		}
-
-
-		private function responseHandler(event:DataEvent):void {
-			uploadComplete();
-			var response:XML = new XML(event.data);
-			handleResponse(response);
 		}
 
 		private function startUploadHandler():void {
@@ -185,12 +174,12 @@ package clarin.cmdi.componentregistry.services {
 			} else {
 				createErrorMessage(response);
 			}
-
 		}
 
 		private function uploadComplete():void {
 			pb.label = "Upload complete";
 			pb.setProgress(100, 100);
+			CursorManager.removeBusyCursor();
 		}
 
 		private function createErrorMessage(response:XML):void {

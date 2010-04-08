@@ -35,21 +35,9 @@
 			<type>swc</type>
 		</dependency>
 		<dependency>
-			<groupId>org.httpclient</groupId>
-			<artifactId>as3httpclientlib</artifactId>
-			<version>1.0.6</version>
-			<type>swc</type>
-		</dependency>
-		<dependency>
 			<groupId>com.adobe</groupId>
 			<artifactId>as3corelib</artifactId>
 			<version>0.92.1</version>
-			<type>swc</type>
-		</dependency>
-		<dependency>
-			<groupId>com.hurlant</groupId>
-			<artifactId>as3crypto</artifactId>
-			<version>1.3</version>
 			<type>swc</type>
 		</dependency>
 		<dependency>

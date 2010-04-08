@@ -1,24 +1,22 @@
 package clarin.cmdi.componentregistry.services {
 	import com.adobe.net.URI;
-
-	import flash.events.ErrorEvent;
+	
 	import flash.events.EventDispatcher;
-
+	
 	import mx.controls.Alert;
 	import mx.managers.CursorManager;
+	import mx.messaging.messages.HTTPRequestMessage;
+	import mx.rpc.events.FaultEvent;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
-
-	import org.httpclient.HttpClient;
-	import org.httpclient.events.HttpDataEvent;
-	import org.httpclient.events.HttpResponseEvent;
-	import org.httpclient.http.Get;
 
 	public class IsocatService extends EventDispatcher {
 		public static const PROFILE_LOADED:String = "ProfileLoaded";
 		namespace dcif = "http://www.isocat.org/ns/dcif";
 
 
-		private var service:HttpClient;
+		private var service:HTTPService;
 
 		[Bindable]
 		public var searchResults:XMLList;
@@ -32,45 +30,40 @@ package clarin.cmdi.componentregistry.services {
 				CursorManager.setBusyCursor();
 				var uri:URI = new URI(Config.instance.isocatSearchUrl);
 				uri.setQueryValue("keywords", keyword);
-				uri.setQueryValue("dcif-mode", "list");
-
-				var httpGet:Get = new Get();
-				httpGet.addHeader("Accept", "application/dcif+xml");
-				service.request(uri, httpGet);
+				service.url = uri.toString();
+				service.send();
 			}
 		}
 
 		public function close():void {
 			if (service) {
-				service.close();
+				service.cancel();
 			}
 			CursorManager.removeBusyCursor();
 		}
 
 		private function createClient():void {
-			service = new HttpClient();
-			service.listener.onComplete = handleResult;
-			service.listener.onError = handleError;
-			service.listener.onData = handleData;
+			service = new HTTPService();
+			service.method = HTTPRequestMessage.GET_METHOD;
+			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
+			service.addEventListener(ResultEvent.RESULT, handleResult);
+			service.addEventListener(FaultEvent.FAULT, handleError);
 		}
 
-		private function handleData(event:HttpDataEvent):void {
-			var data:XML = new XML(event.bytes);
-			searchResults = data.dcif::dataCategory;
-		}
 
-		private function handleResult(resultEvent:HttpResponseEvent):void {
+		private function handleResult(resultEvent:ResultEvent):void {
 			CursorManager.removeBusyCursor();
-			if (resultEvent.response.isClientError) {
-				Alert.show("Unauthorized search, server return status:" + resultEvent.response.code);
-			} else if (resultEvent.response.isServerError) {
-				Alert.show("Unexpected error, server returned status: " + resultEvent.response.code);
+			if (resultEvent.statusCode >= 200 && resultEvent.statusCode < 300) {
+				var data:XML = new XML(resultEvent.result);
+				searchResults = data.dcif::dataCategory;
+			} else {
+				Alert.show("Unexpected error, server returned status: " + resultEvent.statusCode + "\n Message = ");
 			}
 		}
 
-		private function handleError(faultEvent:ErrorEvent):void {
+		private function handleError(faultEvent:FaultEvent):void {
 			CursorManager.removeBusyCursor();
-			var errorMessage:String = StringUtil.substitute("Error in {0}: {1}", this, faultEvent.text);
+			var errorMessage:String = StringUtil.substitute("Error in {0} status {1}: {2}", this, faultEvent.statusCode, faultEvent.fault.faultString);
 			Alert.show(errorMessage);
 		}
 
