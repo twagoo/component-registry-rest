@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>clarin.cmdi</groupId>
+    <artifactId>ComponentBrowserGui</artifactId>
+    <version>1.0</version>
+    <packaging>swf</packaging>
+    <name>ComponentBrowserGui</name>
+	<properties>
+	  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+    <dependency>
+      <groupId>com.adobe.flex.framework</groupId>
+      <artifactId>flex-framework</artifactId>
+      <version>3.2.0.3958</version>
+      <type>pom</type>
+    </dependency>        
+	</dependencies>
+
+    <build>
+    	<sourceDirectory>src/main/flex</sourceDirectory>
+        <plugins>
+		  <plugin> 
+			<groupId>org.sonatype.flexmojos</groupId>
+			<artifactId>flexmojos-maven-plugin</artifactId>
+			<extensions>true</extensions>
+			<configuration>
+			  <debug>true</debug>
+			</configuration>
+		  </plugin>
+        </plugins>
+    </build>
+
+
+    <repositories>
+	    <repository>
+	      <id>forge</id>
+	      <url>http://repository.sonatype.org/content/groups/flexgroup</url>
+	      <snapshots> <enabled>true</enabled> </snapshots>
+	      <releases> <enabled>true</enabled> </releases>
+	    </repository>   
+    </repositories>
+	
+    <pluginRepositories>
+	    <pluginRepository>
+	      <id>forge</id>
+	      <url>http://repository.sonatype.org/content/groups/flexgroup</url>
+	      <snapshots> <enabled>true</enabled> </snapshots>
+	      <releases> <enabled>true</enabled> </releases>
+	    </pluginRepository>       
+    </pluginRepositories>
+
+
+</project>

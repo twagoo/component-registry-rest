@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+		   xmlns:local="clarin.cmdi.componentregistry.services.*"
+		   xmlns:browser="clarin.cmdi.componentregistry.browser.*"
+		   creationComplete="refresh()"
+		   width="100%"
+		   height="100%"
+		   label="Browse..."
+		   >
+
+	<mx:Script>
+		<![CDATA[
+		    import clarin.cmdi.componentregistry.services.ComponentListService;
+			import clarin.cmdi.componentregistry.common.ItemDescription;
+			import mx.controls.Alert;
+			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
+			import clarin.cmdi.componentregistry.common.Profile;
+			
+			[Bindable]
+			private var componentsSrv:ComponentListService = ComponentListService.instance;
+
+			public function refresh():void {
+				profilesSrv.load();
+				componentsSrv.load();
+			}
+
+			private function loadProfileInfoPage(event:BrowserSelectionEvent):void {
+				profileSrv.load(event.itemDescription);
+			}
+
+			private function loadComponentInfoPage(event:BrowserSelectionEvent):void {
+				componentSrv.load(event.itemDescription);
+			}
+
+			public function setSelectedDescription(desc:ItemDescription):void {
+			    if (desc.isProfile) {
+			        tabnav.selectedIndex = 0;
+			    } else {
+			        tabnav.selectedIndex = 1;  
+			    }
+			    //Need to select the correct item, can't get it to highlight at the mo
+			    //profilesOverview.dataGrid.selectedIndex=2;
+			    //profilesOverview.dataGrid.validateNow();
+                //profilesOverview.dataGrid.scrollToIndex(2);
+			}
+		]]>
+	</mx:Script>
+
+	<local:ProfileListService id="profilesSrv"/>
+	<local:ProfileInfoService id="profileSrv"/>
+	<local:ComponentInfoService id="componentSrv"/>
+	<browser:BrowserColumns id="browserColumns"/>
+
+
+	<mx:VBox borderStyle="none"
+			 horizontalAlign="center"
+			 height="100%"
+			 width="100%">
+
+		<mx:TabNavigator id="tabnav"
+						 width="100%"
+						 height="100%"
+						 color="0x323232"
+						 y="59" borderStyle="outset">
+			<mx:VDividedBox label="Profiles"
+							width="100%">
+				<browser:BrowserOverviewList id="profilesOverview"
+										  browserDataProvider="{profilesSrv.itemDescriptions}"
+										  browserItemSelected="{loadProfileInfoPage(event)}"
+										  browserColumns="{browserColumns.getProfileColumns()}"
+										  width="100%"
+										  height="70%"/>
+				<browser:ProfileInfoPage id="profileInfoPage"
+									  profile="{profileSrv.profile}"
+									  width="100%"
+									  height="50%"/>
+			</mx:VDividedBox>
+
+			<mx:VDividedBox label="Components"
+							width="100%">
+				<browser:BrowserOverviewList id="componentsOverview"
+										  browserDataProvider="{componentsSrv.itemDescriptions}"
+										  browserItemSelected="{loadComponentInfoPage(event)}"
+										  browserColumns="{browserColumns.getComponentColumns()}"
+										  width="100%"
+										  height="50%"/>
+				<browser:ComponentInfoPage id="componentInfoPage"
+										component="{componentSrv.component}"
+										width="100%"
+										height="50%"/>
+
+			</mx:VDividedBox>
+		</mx:TabNavigator>
+	</mx:VBox>
+</mx:Canvas>
