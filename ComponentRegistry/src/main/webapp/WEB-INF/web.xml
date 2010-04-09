@@ -56,17 +56,28 @@
 <!--      <web-resource-collection>-->
 <!--        <web-resource-name>ComponentRegistry edit</web-resource-name>-->
 <!--        <description></description>-->
-<!--        <url-pattern>/*</url-pattern>-->
+<!--        <url-pattern>/rest/*</url-pattern>-->
 <!--        <http-method>DELETE</http-method>-->
 <!--        <http-method>PUT</http-method>-->
 <!--        <http-method>POST</http-method>-->
+<!--      </web-resource-collection>-->
+<!--      <auth-constraint>-->
+<!--        <role-name>tomcat</role-name>-->
+<!--      </auth-constraint>-->
+<!--    </security-constraint>-->
+<!--    <security-constraint>-->
+<!--      <display-name>ComponentRegistry SWF GET</display-name>-->
+<!--      <web-resource-collection>-->
+<!--        <web-resource-name>ComponentRegistry access</web-resource-name>-->
+<!--        <description></description>-->
+<!--        <url-pattern>/*</url-pattern>-->
 <!--        <http-method>GET</http-method>-->
 <!--      </web-resource-collection>-->
 <!--      <auth-constraint>-->
 <!--        <role-name>tomcat</role-name>-->
 <!--      </auth-constraint>-->
 <!--    </security-constraint>-->
-<!--    <login-config>-->
+<!--     <login-config>-->
 <!--      <auth-method>BASIC</auth-method>-->
 <!--    </login-config>-->
 <!--    <security-role>-->
