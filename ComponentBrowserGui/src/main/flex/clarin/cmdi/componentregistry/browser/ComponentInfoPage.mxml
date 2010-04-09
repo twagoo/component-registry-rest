@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:common="clarin.cmdi.componentregistry.common.*"
+		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
+		 width="100%"
+		 backgroundColor="#DDE3EF"
+		 >
+
+	<common:Component id="component"/>
+
+	<browser:infoPage id="infoPanel"
+				   cmdComponent="{component.componentMD.xml}"
+				   headerLabel="{component.description.name}"
+				   width="100%"
+				   height="100%"
+				   visible="{component != null}"/>
+
+</mx:VBox>
+

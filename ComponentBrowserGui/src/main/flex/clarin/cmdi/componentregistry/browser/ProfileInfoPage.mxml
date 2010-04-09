@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:common="clarin.cmdi.componentregistry.common.*"
+		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
+		 width="100%"
+		 backgroundColor="#DDE3EF">
+
+	<common:Profile id="profile"/>
+
+	<browser:infoPage id="infoPanel"
+				   cmdComponent="{profile.profileSource}"
+				   headerLabel="{profile.description.name}"
+				   width="100%"
+				   height="100%"
+				   visible="{profile != null}"/>
+
+</mx:VBox>
+

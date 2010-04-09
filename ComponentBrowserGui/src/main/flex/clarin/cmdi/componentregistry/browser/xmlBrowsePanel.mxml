@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*" >
+
+<mx:Script>
+    <![CDATA[
+        // seting focus manually when a user clicks, this is the best I can do at the moment. 
+	    //A form handles focus differently then for instance a list or a TextArea so scrolling using keys is a bit inconsistent among the different view at the moment.
+		private function setFocusOnClick(event:MouseEvent):void {
+            setFocus();
+		}
+    ]]>
+</mx:Script>
+
+	<mx:XML id="cmdComponent"/>
+	<comp:CMDComponentXMLBrowser id="xmlBrowse"
+								 xml="{cmdComponent}"
+								 width="100%"
+								 height="100%"
+								 click="setFocusOnClick(event);"
+								 />
+</mx:Canvas>
