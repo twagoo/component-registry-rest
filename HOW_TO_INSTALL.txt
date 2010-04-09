@@ -28,14 +28,3 @@ Creating initial setup files (eclipse config):
  - in ComponentBrowserGui: mvn flexmojos:flexbuilder
  - in ComponentRegistry: mvn eclipse:eclipse
  
--------
-Flashpolicy (crossdomain.xml).
-
-In order for flash to allow communiction with the server it needs a crossdomain.xml file. 
-The componentRegistry uses the as3httpclientlib (http://code.google.com/p/as3httpclientlib/) to
-allow http DELETE calls to the server. For this to work it uses communication through sockets
-which needs the crossdomain.xml file to be served from a socket. There is a script and deamon 
-in the ComponentBrowserGui/flashpolicy dir which can be installed and used to start up such a listener.
-
-For more information about Flash distorted behaviour on this subject please read 
-and related documentation: http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
