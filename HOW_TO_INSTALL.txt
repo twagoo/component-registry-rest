@@ -1,0 +1,30 @@
+The componentRegistry is setup as a Flex Gui frontend communicating with a java based backend.
+
+Creating war artifact for deployment:
+
+ - in ComponentBrowserGui: mvn install
+ - in ComponentRegistry: mvn package
+ 
+ The ComponentRegistry war will include the flex swf file needed to start the application. 
+ So deploying the resulting war will be enough to start the application.
+ By default the application is set to work when deployed on localhost. If you want to change that 
+ change the serverRootUrl property in the pom.xml of ComponentRegistry.
+
+
+
+
+NOTE: on generating java classes from general-component-schema.xsd.
+The ComponentRegistry needs the general-component-schema.xsd, which can be found at:
+1) http://www.clarin.eu/cmd/general-component-schema.xsd
+2) or checkout from svn: svn co http://svn.clarin.eu/metadata/trunk metadata
+If you have it, the pom.xml of ComponentRegistry must point to the directory were the schema is located.
+Look for maven-jaxb2-plugin configuration and change the location accordingly e.g.:
+<schemaDirectory>../../metadata/toolkit/</schemaDirectory>
+
+ 
+------
+Creating initial setup files (eclipse config):
+ - in ComponentBrowserGui: mvn flexmojos:flexbuilder
+ - in ComponentRegistry: mvn eclipse:eclipse
+ 
+
