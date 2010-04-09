@@ -111,6 +111,7 @@ package clarin.cmdi.componentregistry.browser {
 				addFormHeading("Element");
 				createAndAddFormChild("Name", element.name);
 				createAndAddFormChild(CONCEPTLINK, element.conceptLink);
+				createAndAddFormChild("Documentation", element.documentation);
 				if (element.cardinalityMin != "" || element.cardinalityMax != "")
 					createAndAddFormChild("Cardinality", element.cardinalityMin + " - " + element.cardinalityMax);
 				createAndAddValueScheme(element.valueSchemeSimple, element.valueSchemePattern, element.valueSchemeEnumeration);

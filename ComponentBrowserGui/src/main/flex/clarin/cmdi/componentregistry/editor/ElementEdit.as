@@ -40,7 +40,9 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
 				}));
-
+			addChild(new FormItemInputLine("Documentation", _element.documentation, function(val:String):void {
+					_element.documentation = val;
+				}));
 			addChild(new FormItemInputLine("CardinalityMin", _element.cardinalityMin, function(val:String):void {
 					_element.cardinalityMin = val;
 				}));

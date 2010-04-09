@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 
@@ -9,6 +9,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		//Attributes
 		public var name:String;
 		public var conceptLink:String;
+		public var documentation:String;
 		private var _valueSchemeSimple:String;
 		public var cardinalityMin:String = "1";
 		public var cardinalityMax:String = "1";
@@ -52,6 +53,8 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.@name = name;
 			if (conceptLink)
 				result.@ConceptLink = conceptLink;
+			if (documentation)
+				result.@Documentation = documentation;
 			if (valueSchemeSimple)
 				result.@ValueScheme = valueSchemeSimple;
 			if (cardinalityMin)

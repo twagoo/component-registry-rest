@@ -19,11 +19,12 @@ package clarin.cmdi.componentregistry.editor.model {
 			var result:CMDComponentElement = new CMDComponentElement();
 			result.name = "aap";
 			result.valueSchemeSimple = "string";
+			result.documentation = "Docu";
 			var att:CMDAttribute = new CMDAttribute();
 			att.name = "test";
 			att.valueSchemeSimple = "string";
 			result.attributeList.addItem(att);
-			var expected:XML = <CMD_Element name="aap" ValueScheme="string" CardinalityMin="1" CardinalityMax="1">
+			var expected:XML = <CMD_Element name="aap" Documentation="Docu" ValueScheme="string" CardinalityMin="1" CardinalityMax="1">
 					<AttributeList>
 						<Attribute>
 							<Name>test</Name>

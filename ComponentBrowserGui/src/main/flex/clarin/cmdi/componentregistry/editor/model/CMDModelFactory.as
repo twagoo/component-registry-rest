@@ -49,6 +49,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			var result:CMDComponentElement = new CMDComponentElement();
 			result.name = xml.@name;
 			result.conceptLink = xml.@ConceptLink;
+			result.documentation = xml.@Documentation;
 			result.valueSchemeSimple = xml.@ValueScheme;
 			result.cardinalityMin = xml.@CardinalityMin;
 			result.cardinalityMax = xml.@CardinalityMax;
