@@ -4,7 +4,7 @@
   <groupId>clarin.cmdi</groupId>
   <artifactId>ComponentRegistry</artifactId>
   <packaging>${packaging}</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1</version>
   <name>ComponentRegistry</name>
   <description>
         ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
@@ -153,7 +153,7 @@
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
     <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
-    <ComponentBrowserGuiVersion>1.1-SNAPSHOT</ComponentBrowserGuiVersion>
+    <ComponentBrowserGuiVersion>1.1</ComponentBrowserGuiVersion>
   </properties>
 
   <build>
