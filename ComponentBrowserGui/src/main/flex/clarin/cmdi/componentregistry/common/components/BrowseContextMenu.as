@@ -1,16 +1,12 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.services.DeleteService;
-
+	
 	import flash.events.ContextMenuEvent;
-	import flash.events.Event;
-	import flash.events.MouseEvent;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
-
-	import mx.controls.Alert;
+	
 	import mx.controls.DataGrid;
-	import mx.events.ListEvent;
 
 
 	public class BrowseContextMenu {
@@ -45,7 +41,7 @@ package clarin.cmdi.componentregistry.common.components {
 			cmi = new ContextMenuItem("Edit Item...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editItem);
 			result.push(cmi);
-			cmi = new ContextMenuItem("Delete...");
+			cmi = new ContextMenuItem("Delete Item...", true);
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, handleDelete);
 			result.push(cmi);
 
