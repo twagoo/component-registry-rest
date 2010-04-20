@@ -24,6 +24,7 @@ package clarin.cmdi.componentregistry.editor {
 	[Event(name="removeComponent", type="flash.events.Event")]
 	public class ComponentEdit extends Form {
 		public static const REMOVE_COMPONENT_EVENT:String = "removeComponent";
+		private static const DRAG_ITEMS:String = "items";
 
 		private var _parent:UIComponent;
 		private var _component:CMDComponent;
@@ -52,7 +53,7 @@ package clarin.cmdi.componentregistry.editor {
 
 
 		private function dragOverHandler(event:DragEvent):void {
-			if (event.dragSource.hasFormat("items")) {
+			if (event.dragSource.hasFormat(DRAG_ITEMS)) {
 				DragManager.showFeedback(DragManager.COPY);
 			} else if (event.dragSource.hasFormat(CMDComponentXMLEditor.DRAG_NEW_COMPONENT)) {
 				DragManager.showFeedback(DragManager.COPY);
@@ -64,8 +65,8 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function dragDropHandler(event:DragEvent):void {
-			if (event.dragSource.hasFormat("items")) {
-				var items:Array = event.dragSource.dataForFormat("items") as Array;
+			if (event.dragSource.hasFormat(DRAG_ITEMS)) {
+				var items:Array = event.dragSource.dataForFormat(DRAG_ITEMS) as Array;
 				for each (var item:ItemDescription in items) {
 					var comp:CMDComponent = new CMDComponent();
 					comp.componentId = item.id;
@@ -98,7 +99,7 @@ package clarin.cmdi.componentregistry.editor {
 
 			var componentLink:FormItem = createComponentLink(_component);
 			if (componentLink != null) {
-			    addCardinalityInput();
+				addCardinalityInput();
 				addChild(componentLink);
 			} else {
 				addChild(new FormItemInputLine("Name", _component.name, function(val:String):void {
@@ -107,20 +108,23 @@ package clarin.cmdi.componentregistry.editor {
 				addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _component.conceptLink, function(val:String):void {
 						_component.conceptLink = val;
 					}));
-			    addCardinalityInput();
+				addCardinalityInput();
 				handleCMDAttributeList();
 				handleElements(_component.cmdElements);
 				handleComponents(_component.cmdComponents); //recursion
 			}
 		}
-		
+
 		private function addCardinalityInput():void {
-				addChild(new FormItemInputLine("CardinalityMin", _component.cardinalityMin, function(val:String):void {
-						_component.cardinalityMin = val;
-					}));
-				addChild(new FormItemInputLine("CardinalityMax", _component.cardinalityMax, function(val:String):void {
-						_component.cardinalityMax = val;
-					}));
+			addChild(new CardinalityInput("CardinalityMin", _component.cardinalityMin, function(val:String):void {
+					_component.cardinalityMin = val;
+				}));
+//			addChild(new FormItemInputLine("CardinalityMin", _component.cardinalityMin, function(val:String):void {
+//					_component.cardinalityMin = val;
+//				}));
+			addChild(new FormItemInputLine("CardinalityMax", _component.cardinalityMax, function(val:String):void {
+					_component.cardinalityMax = val;
+				}));
 		}
 
 		private function createComponentEditBar():HBox {
