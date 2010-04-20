@@ -40,25 +40,35 @@
 			<mx:VBox styleName="borderStyles"
 					 width="100%">
 				<mx:Label text="Drag items onto edit canvas"/>
-				<mx:HBox id="palette">
-					<mx:Button height="30"
-							   id="ComponentDrag"
-							   label="Component"
-							   toolTip="Drag component to add a new empty component"
-							   mouseMove="enableComponentDrag(event);">
-					</mx:Button>
-					<mx:Button height="30"
-							   id="ElementDrag"
-							   label="Element"
-							   toolTip="Drag element onto components"
-							   mouseMove="enableElementDrag(event);">
-					</mx:Button>
-					<mx:Button height="30"
-							   id="AttributeDrag"
-							   label="Attribute"
-							   toolTip="Drag attribute onto an attribute list"
-							   mouseMove="enableAttributeDrag(event);">
-					</mx:Button>
+				<mx:HBox id="palette"
+						 paddingLeft="8">
+					<mx:Box height="30"
+							backgroundColor="0x009DFF"
+							borderStyle="none"
+							paddingTop="5"
+							id="ComponentDrag"
+							mouseMove="enableComponentDrag(event);">
+						<mx:Label htmlText="&lt;b&gt;Component&lt;/b&gt;"
+								  toolTip="Drag component to add a new empty component"/>
+					</mx:Box>
+					<mx:Box height="30"
+							backgroundColor="0x009DFF"
+							borderStyle="none"
+							paddingTop="5"
+							id="ElementDrag"
+							mouseMove="enableElementDrag(event);">
+						<mx:Label htmlText="&lt;b&gt;Element&lt;/b&gt;"
+								  toolTip="Drag element onto components"/>
+					</mx:Box>
+					<mx:Box height="30"
+							backgroundColor="0x009DFF"
+							borderStyle="none"
+							paddingTop="5"
+							id="AttributeDrag"
+							mouseMove="enableAttributeDrag(event);">
+						<mx:Label htmlText="&lt;b&gt;Attribute&lt;/b&gt;"
+								  toolTip="Drag attribute onto an attribute list"/>
+					</mx:Box>
 				</mx:HBox>
 				<browser:BrowserOverviewList id="componentsPaletteOverview"
 											 width="100%"
