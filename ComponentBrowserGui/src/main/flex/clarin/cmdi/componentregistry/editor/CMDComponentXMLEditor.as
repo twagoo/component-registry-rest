@@ -1,15 +1,15 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.browser.XMLBrowser;
+	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.utils.getTimer;
-	
+
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
@@ -27,6 +27,7 @@ package clarin.cmdi.componentregistry.editor {
 		public static const DRAG_NEW_COMPONENT:String = "newComponent";
 		public static const DRAG_NEW_ELEMENT:String = "newElement";
 		public static const DRAG_NEW_ATTRIBUTE:String = "newAttribute";
+		private static const DRAG_ITEMS:String = "items";
 
 		public static const EDITOR_CHANGE_EVENT:String = "editorChange";
 		private var _spec:CMDSpec;
@@ -48,8 +49,9 @@ package clarin.cmdi.componentregistry.editor {
 			UIComponent(event.currentTarget).drawFocus(true);
 		}
 
+
 		private function dragOverHandler(event:DragEvent):void {
-			if (event.dragSource.hasFormat("items")) {
+			if (event.dragSource.hasFormat(DRAG_ITEMS)) {
 				DragManager.showFeedback(DragManager.COPY);
 			} else if (event.dragSource.hasFormat(DRAG_NEW_COMPONENT)) {
 				DragManager.showFeedback(DragManager.COPY);
@@ -59,8 +61,8 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function dragDropHandler(event:DragEvent):void {
-			if (event.dragSource.hasFormat("items")) {
-				var items:Array = event.dragSource.dataForFormat("items") as Array;
+			if (event.dragSource.hasFormat(DRAG_ITEMS)) {
+				var items:Array = event.dragSource.dataForFormat(DRAG_ITEMS) as Array;
 				for each (var item:ItemDescription in items) {
 					var comp:CMDComponent = new CMDComponent();
 					comp.componentId = item.id;
@@ -101,7 +103,7 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(new SelectTypeRadioButtons(spec));
 			addChild(createOptionalGroupNameInput(spec));
 			addChild(createHeading());
-			addChild(new FormItemInputLine("Name", spec.headerName, function(val:String):void {
+			addChild(new FormItemInputLine(XMLBrowser.NAME, spec.headerName, function(val:String):void {
 					spec.headerName = val;
 				}));
 			addChild(new FormItemInputText(XMLBrowser.DESCRIPTION, spec.headerDescription, function(val:String):void {

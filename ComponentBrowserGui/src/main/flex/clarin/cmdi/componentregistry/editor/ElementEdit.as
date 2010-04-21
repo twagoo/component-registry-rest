@@ -34,21 +34,21 @@ package clarin.cmdi.componentregistry.editor {
 			super.createChildren();
 
 			addChild(createEditBar());
-			addChild(new FormItemInputLine("Name", _element.name, function(val:String):void {
+			addChild(new FormItemInputLine(XMLBrowser.NAME, _element.name, function(val:String):void {
 					_element.name = val;
 				}));
 			addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
 				}));
-			addChild(new FormItemInputLine("Documentation", _element.documentation, function(val:String):void {
+			addChild(new FormItemInputLine(XMLBrowser.DOCUMENTATION, _element.documentation, function(val:String):void {
 					_element.documentation = val;
 				}));
-			addChild(new FormItemInputLine("CardinalityMin", _element.cardinalityMin, function(val:String):void {
+			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
 					_element.cardinalityMin = val;
 				}));
-			addChild(new FormItemInputLine("CardinalityMax", _element.cardinalityMax, function(val:String):void {
+			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
 					_element.cardinalityMax = val;
-				}));
+				}));				
 			addChild(AttributeListEdit.createAndAddValueScheme(_element));
 			handleCMDAttributeList();
 		}

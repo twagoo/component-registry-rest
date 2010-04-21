@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.browser {
+	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
@@ -28,10 +28,14 @@ package clarin.cmdi.componentregistry.browser {
 	public class XMLBrowser extends Form implements IFocusManagerComponent, CMDSpecRenderer {
 
 		//Label names
+		public static const NAME:String = "Name";
 		public static const CONCEPTLINK:String = "ConceptLink";
 		public static const COMPONENT:String = "Component";
 		public static const COMPONENT_ID:String = "ComponentId";
 		public static const DESCRIPTION:String = "Description";
+		public static const CARDINALITY_MIN:String = "CardinalityMin";
+		public static const CARDINALITY_MAX:String = "CardinalityMax";
+		public static const DOCUMENTATION:String = "Documentation";
 
 		private var _spec:CMDSpec;
 		private var addedChildren:ArrayCollection = new ArrayCollection();
