@@ -138,8 +138,8 @@ public class ComponentRegistryRestService {
 
     /**
      * 
-     * Purely helper method for my front-end (FLEX) which van only do post/get requests. 
-     * The query param is checked and the "proper" method is called.
+     * Purely helper method for my front-end (FLEX) which van only do post/get requests. The query param is checked and the "proper" method
+     * is called.
      * @param profileId
      * @param method
      * @return
@@ -153,7 +153,25 @@ public class ComponentRegistryRestService {
             return Response.ok().build();
         }
     }
-    
+
+    /**
+     * 
+     * Purely helper method for my front-end (FLEX) which van only do post/get requests. The query param is checked and the "proper" method
+     * is called.
+     * @param componentId
+     * @param method
+     * @return
+     */
+    @POST
+    @Path("/components/{componentId}")
+    public Response manipulateRegisteredComponent(@PathParam("componentId") String componentId, @FormParam("method") String method) {
+        if ("delete".equalsIgnoreCase(method)) {
+            return deleteRegisteredComponent(componentId);
+        } else {
+            return Response.ok().build();
+        }
+    }
+
     @DELETE
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId) {

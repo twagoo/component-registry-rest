@@ -5,7 +5,8 @@
 
 	<authentication>
 		<shibheader>
-			<username>eduPersonPrincipalName</username>
+			<username>displayName</username>
+            <username>eduPersonPrincipalName</username>
 			<session>Shib-Session-ID</session>
 			<idp>Shib-Identity-Provider</idp>
 			<timestamp>Shib-Authentication-Instant</timestamp>
