@@ -2,10 +2,10 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
@@ -42,6 +42,9 @@ package clarin.cmdi.componentregistry.editor {
 				}));
 			addChild(new FormItemInputLine(XMLBrowser.DOCUMENTATION, _element.documentation, function(val:String):void {
 					_element.documentation = val;
+				}));
+			addChild(new NumericStepperInputLine(XMLBrowser.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
+					_element.displayPriority = val;
 				}));
 			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
 					_element.cardinalityMin = val;

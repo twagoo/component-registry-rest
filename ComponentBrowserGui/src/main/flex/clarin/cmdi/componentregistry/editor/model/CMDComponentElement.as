@@ -10,6 +10,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var name:String;
 		public var conceptLink:String;
 		public var documentation:String;
+		public var displayPriority:String;
 		private var _valueSchemeSimple:String;
 		public var cardinalityMin:String = "1";
 		public var cardinalityMax:String = "1";
@@ -55,6 +56,8 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.@ConceptLink = conceptLink;
 			if (documentation)
 				result.@Documentation = documentation;
+			if (displayPriority)
+				result.@DisplayPriority = displayPriority;
 			if (valueSchemeSimple)
 				result.@ValueScheme = valueSchemeSimple;
 			if (cardinalityMin)

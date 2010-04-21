@@ -36,6 +36,7 @@ package clarin.cmdi.componentregistry.browser {
 		public static const CARDINALITY_MIN:String = "CardinalityMin";
 		public static const CARDINALITY_MAX:String = "CardinalityMax";
 		public static const DOCUMENTATION:String = "Documentation";
+		public static const DISPLAY_PRIORITY:String = "DisplayPriority";
 
 		private var _spec:CMDSpec;
 		private var addedChildren:ArrayCollection = new ArrayCollection();
@@ -98,7 +99,7 @@ package clarin.cmdi.componentregistry.browser {
 			ruler.percentWidth = 80;
 			addFormChild(ruler);
 			addFormHeading(COMPONENT);
-			createAndAddFormChild("Name", component.name);
+			createAndAddFormChild(NAME, component.name);
 			createAndAddFormChild(CONCEPTLINK, component.conceptLink);
 			createAndAddFormChild("FileName", component.filename);
 			if (component.cardinalityMin != "" || component.cardinalityMax != "")
@@ -113,9 +114,10 @@ package clarin.cmdi.componentregistry.browser {
 			for each (var element:CMDComponentElement in elements) {
 				indent = true;
 				addFormHeading("Element");
-				createAndAddFormChild("Name", element.name);
+				createAndAddFormChild(NAME, element.name);
 				createAndAddFormChild(CONCEPTLINK, element.conceptLink);
-				createAndAddFormChild("Documentation", element.documentation);
+				createAndAddFormChild(DOCUMENTATION, element.documentation);
+				createAndAddFormChild(DISPLAY_PRIORITY, element.displayPriority);
 				if (element.cardinalityMin != "" || element.cardinalityMax != "")
 					createAndAddFormChild("Cardinality", element.cardinalityMin + " - " + element.cardinalityMax);
 				createAndAddValueScheme(element.valueSchemeSimple, element.valueSchemePattern, element.valueSchemeEnumeration);

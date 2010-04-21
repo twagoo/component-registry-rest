@@ -50,6 +50,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.name = xml.@name;
 			result.conceptLink = xml.@ConceptLink;
 			result.documentation = xml.@Documentation;
+			result.displayPriority = xml.@DisplayPriority;
 			result.valueSchemeSimple = xml.@ValueScheme;
 			result.cardinalityMin = xml.@CardinalityMin;
 			result.cardinalityMax = xml.@CardinalityMax;
