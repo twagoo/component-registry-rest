@@ -12,8 +12,8 @@ package clarin.cmdi.componentregistry.common.components {
 
 	public class RegistryViewStack extends ViewStack {
 		private var browse:Browse = new Browse();
-		private var importer:Importer = new Importer();
 		private var editor:Editor = new Editor();
+		private var importer:Importer = new Importer();
 
 		private var loginPanel:Login;
 
@@ -24,11 +24,11 @@ package clarin.cmdi.componentregistry.common.components {
 
 			addChild(browse); //everyone can browse
 
+//			editor.addEventListener(FlexEvent.SHOW, checkLogin);
+			addChild(editor);
 			//register.addEventListener(FlexEvent.SHOW, checkLogin);
 			addChild(importer);
 
-//			editor.addEventListener(FlexEvent.SHOW, checkLogin);
-			addChild(editor);
 		}
 
 		public function switchToBrowse(itemDescription:ItemDescription):void {

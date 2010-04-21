@@ -78,18 +78,18 @@ public function clearEditor():void {
 }
 
 private function saveSpec():void {
-	Alert.show(xmlEditor.cmdSpec.toXml());
-//	var item:ItemDescription = new ItemDescription();
-//	item.description = xmlEditor.cmdSpec.headerDescription;
-//	item.name = xmlEditor.cmdSpec.headerName;
-//	item.isProfile = xmlEditor.cmdSpec.isProfile;
-//	item.groupName = xmlEditor.cmdSpec.groupName;
-//	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
-//	if (item.isProfile) {
-//		uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
-//	} else {
-//		uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
-//	}
+	//Alert.show(xmlEditor.cmdSpec.toXml()); 
+	var item:ItemDescription = new ItemDescription();
+	item.description = xmlEditor.cmdSpec.headerDescription;
+	item.name = xmlEditor.cmdSpec.headerName;
+	item.isProfile = xmlEditor.cmdSpec.isProfile;
+	item.groupName = xmlEditor.cmdSpec.groupName;    
+	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
+	if (item.isProfile) {
+		uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
+	} else {
+		uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
+	}
 }
 
 private function handleSaveComplete(event:UploadCompleteEvent):void {

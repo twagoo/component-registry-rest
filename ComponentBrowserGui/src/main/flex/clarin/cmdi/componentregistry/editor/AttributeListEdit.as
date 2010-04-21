@@ -1,4 +1,5 @@
 package clarin.cmdi.componentregistry.editor {
+	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
@@ -6,6 +7,7 @@ package clarin.cmdi.componentregistry.editor {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import mx.binding.utils.BindingUtils;
 	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
@@ -13,6 +15,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
 	import mx.controls.Button;
+	import mx.controls.Label;
 	import mx.core.UIComponent;
 	import mx.events.DragEvent;
 	import mx.events.PropertyChangeEvent;
@@ -20,21 +23,28 @@ package clarin.cmdi.componentregistry.editor {
 
 	[Event(name="removeAttribute", type="flash.events.Event")]
 	public class AttributeListEdit extends Form {
-		public static const REMOVE_ATTRIBUTE_EVENT:String = "removeAttribute";
+		private static const ATTRIBUTE_CHANGE_EVENT:String = "attributeChange";
 
 		private var _attributes:ArrayCollection;
 		private var _parent:UIComponent;
+		private var noAttributesLabel:Label = new Label();
+		[Bindable]
+		public var hasNoAttributes:Boolean = true;
 
 		public function AttributeListEdit(attributes:ArrayCollection, parent:UIComponent) {
 			super();
 			_attributes = attributes;
+			hasNoAttributes = _attributes.length == 0;
 			_parent = parent;
 			styleName = StyleConstants.XMLBROWSER;
+			noAttributesLabel.text = "No Attributes";
+			BindingUtils.bindProperty(noAttributesLabel, "visible", this, "hasNoAttributes");
+			noAttributesLabel.styleName = StyleConstants.XMLBROWSER_FIELD_VALUE;
 			addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
 			addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
 			addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
-
 		}
+
 
 		protected override function createChildren():void {
 			super.createChildren();
@@ -87,7 +97,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {
-			var name:FormItemInputLine = new FormItemInputLine("Name", attribute.name, function(val:String):void {
+			var name:FormItemInputLine = new FormItemInputLine(XMLBrowser.NAME, attribute.name, function(val:String):void {
 					attribute.name = val;
 				});
 			name.direction = FormItemDirection.HORIZONTAL
@@ -114,12 +124,14 @@ package clarin.cmdi.componentregistry.editor {
 			if (index != -1) {
 				_attributes.removeItemAt(index);
 			}
+			hasNoAttributes = _attributes.length == 0;
 		}
 
 		private function createHeading():FormItem {
 			var heading:FormItem = new FormItem();
 			heading.label = "AttributeList";
 			heading.styleName = StyleConstants.XMLBROWSER_HEADER_SMALL;
+			heading.addChild(noAttributesLabel);
 			return heading;
 		}
 
@@ -140,6 +152,7 @@ package clarin.cmdi.componentregistry.editor {
 			if (event.dragSource.hasFormat(CMDComponentXMLEditor.DRAG_NEW_ATTRIBUTE)) {
 				var attr:CMDAttribute = event.dragSource.dataForFormat(CMDComponentXMLEditor.DRAG_NEW_ATTRIBUTE) as CMDAttribute;
 				_attributes.addItem(attr);
+				hasNoAttributes = _attributes.length == 0;
 				addChild(createAttributeBox(attr));
 			}
 		}
