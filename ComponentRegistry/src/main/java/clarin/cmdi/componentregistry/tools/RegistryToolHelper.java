@@ -34,25 +34,26 @@ public class RegistryToolHelper {
         this.password = password;
     }
 
-    public void registerComponent(InputStream input, String creatorName, String description, String group, String name) throws IOException {
-        FormDataMultiPart form = createForm(input, creatorName, description, name);
+    public void registerComponent(InputStream input, String description, String group, String name) throws IOException {
+        FormDataMultiPart form = createForm(input, description, name);
         form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, group);
-        RegisterResponse response = getAuthenticatedResource("/components").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        RegisterResponse response = getAuthenticatedResource("/components").type(MediaType.MULTIPART_FORM_DATA).post(
+                RegisterResponse.class, form);
         handleResult(response);
     }
 
-    public void registerProfile(InputStream input, String creatorName, String description, String name) throws IOException {
-        FormDataMultiPart form = createForm(input, creatorName, description, name);
-        RegisterResponse response = getAuthenticatedResource("/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+    public void registerProfile(InputStream input, String description, String name) throws IOException {
+        FormDataMultiPart form = createForm(input, description, name);
+        RegisterResponse response = getAuthenticatedResource("/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
+                form);
         handleResult(response);
     }
-    
+
     private Builder getAuthenticatedResource(String path) {
-        return service.path(path).header(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encode(userName+":"+password)));
+        return service.path(path).header(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encode(userName + ":" + password)));
     }
 
-
-    private FormDataMultiPart createForm(InputStream input, String creatorName, String description, String name) throws IOException {
+    private FormDataMultiPart createForm(InputStream input, String description, String name) throws IOException {
         FormDataMultiPart form = new FormDataMultiPart();
         form.field(ComponentRegistryRestService.DATA_FORM_FIELD, input, MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, name);

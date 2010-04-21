@@ -3,10 +3,10 @@ package clarin.cmdi.componentregistry.tools;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,7 +35,7 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
 /**
- * Disclaimer: This class is only usable to automate the initialisation of an ComponentRegistry. It fill the registry with
+ * Disclaimer: This class is only usable to automate the initialisation of an ComponentRegistry. It fills the registry with
  * components/profiles from the file system, it is not meant to be used as a quick help setting up a Clarin Registry. Use the registry web
  * interface for "proper" adding of profiles/components.
  * 
@@ -68,7 +68,8 @@ public class RegistryFiller {
     private static final String USER_NAME_PROP = "userName";
 
     public RegistryFiller(String urlPropName) throws IOException {
-        properties.load(new FileInputStream("/registry.properties"));
+        URL urlResource = ClassLoader.getSystemResource("registry.properties");
+        properties.load(urlResource.openStream());
         String url = properties.getProperty(urlPropName);
         URI uri = UriBuilder.fromUri(url).build();
         Client client = Client.create();
@@ -81,30 +82,28 @@ public class RegistryFiller {
     /**
      * Uses a heuristic to resolve components which are linked together through fileName. It will try to find the component with a name
      * equal to the filename (without extension) and set the registered id correct.
-     * @param args RegistryFiller "P.Duin" "Test files" imdi -c
-     *            /Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi/component*.xml
+     * @param args RegistryFiller "Test files" imdi /Users/patdui/Workspace/Clarin/metadata/toolkit/components/imdi/component*.xml
      * @throws IOException when properties cannot be loaded
      * 
      */
     public static void main(String[] args) throws IOException {
         LOG.info("RegistryFiller started with arguments: " + Arrays.toString(args));
-        if (args.length == 0 || args.length < 5) {
+        if (args.length == 0 || args.length < 3) {
             printUsage();
         }
         RegistryFiller filler = new RegistryFiller(FILLER_URL_PROP);
-        String creatorName = args[0];
-        String description = args[1];
-        String group = args[2];
-        boolean registerProfiles = "-p".equals(args[3]); //Otherwise -c
+        String description = args[0];
+        String group = args[1];
         int nrOfFailed = 0;
-        for (int i = 4; i < args.length; i++) {
+        for (int i = 2; i < args.length; i++) {
             File file = new File(args[i]);
             LOG.info("Adding " + (i - 3) + "/" + (args.length - 4) + ": " + file.getName());
             try {
-                if (registerProfiles) {
-                    filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), creatorName, description, group);
+                CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+                if (spec.isIsProfile()) {
+                    filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), description, group);
                 } else {
-                    filler.addComponent(file, FilenameUtils.getBaseName(file.getName()), creatorName, description, group);
+                    filler.addComponent(file, FilenameUtils.getBaseName(file.getName()), description, group);
                 }
             } catch (Exception e) {
                 nrOfFailed++;
@@ -120,17 +119,17 @@ public class RegistryFiller {
     }
 
     private static void printUsage() {
-        System.out.println("usage: <creatorName> <description> <groupType> <-c|-p (components or profiles)> <xml file(s)>");
+        System.out.println("usage:  <description> <groupType> <xml file(s)>");
         System.out.println("It also needs a filled in registry.properties");
         System.exit(0);
     }
 
-    public void addProfile(File file, String name, String creatorName, String description, String group) {
-        profiles.add(new RegObject(file, name, creatorName, description, group));
+    public void addProfile(File file, String name, String description, String group) {
+        profiles.add(new RegObject(file, name, description, group));
     }
 
-    public void addComponent(File file, String name, String creatorName, String description, String group) {
-        components.add(new RegObject(file, name, creatorName, description, group));
+    public void addComponent(File file, String name, String description, String group) {
+        components.add(new RegObject(file, name, description, group));
     }
 
     public int register() {
@@ -173,7 +172,7 @@ public class RegistryFiller {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             MDMarshaller.marshal(comp, out);
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
-            helper.registerProfile(input, regObject.getCreatorName(), regObject.getDescription(), regObject.getName());
+            helper.registerProfile(input, regObject.getDescription(), regObject.getName());
         }
         if (!unresolvedComponents.isEmpty()) {
             LOG.error("Cannot resolve all profiles manual intervention is needed.");
@@ -274,8 +273,7 @@ public class RegistryFiller {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             MDMarshaller.marshal(comp, out);
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
-            helper.registerComponent(input, regObject.getCreatorName(), regObject.getDescription(), regObject.getGroup(), regObject
-                    .getName());
+            helper.registerComponent(input, regObject.getDescription(), regObject.getGroup(), regObject.getName());
         }
         resolvedComponents = new HashMap<RegObject, CMDComponentSpec>();
         Set<RegObject> unresolvedCopy = new HashSet<RegObject>(unresolvedComponents);
@@ -305,14 +303,12 @@ public class RegistryFiller {
 
         private final File file;
         private final String name;
-        private final String creatorName;
         private final String description;
         private final String group;
 
-        public RegObject(File file, String name, String creatorName, String description, String group) {
+        public RegObject(File file, String name, String description, String group) {
             this.file = file;
             this.name = name;
-            this.creatorName = creatorName;
             this.description = description;
             this.group = group;
         }
@@ -323,10 +319,6 @@ public class RegistryFiller {
 
         public String getName() {
             return name;
-        }
-
-        public String getCreatorName() {
-            return creatorName;
         }
 
         public String getDescription() {

@@ -50,7 +50,7 @@ public class RegistryMigration {
         List<ComponentDescription> descriptions = registry.getComponentDescriptions();
         for (ComponentDescription desc : descriptions) {
             File file = registry.getComponentFile(desc.getId());
-            filler.addComponent(file, desc.getName(), desc.getCreatorName(), desc.getDescription(), desc.getGroupName());
+            filler.addComponent(file, desc.getName(), desc.getDescription(), desc.getGroupName());
         }
     }
 
@@ -58,7 +58,7 @@ public class RegistryMigration {
         List<ProfileDescription> descriptions = registry.getProfileDescriptions();
         for (ProfileDescription desc : descriptions) {
             File file = registry.getProfileFile(desc.getId());
-            filler.addProfile(file, desc.getName(), desc.getCreatorName(), desc.getDescription(), "");
+            filler.addProfile(file, desc.getName(), desc.getDescription(), "");
         }
     }
 
