@@ -64,7 +64,7 @@ private function componentLoaded(event:Event):void {
 
 public function setDescription(itemDescription:ItemDescription):void {
 	if (itemDescription) {
-	    CursorManager.setBusyCursor();
+		CursorManager.setBusyCursor();
 		if (itemDescription.isProfile) {
 			profileSrv.load(itemDescription);
 		} else {
@@ -74,7 +74,11 @@ public function setDescription(itemDescription:ItemDescription):void {
 }
 
 public function clearEditor():void {
-	this.cmdSpec = new CMDSpec(true);
+	if (cmdSpec && !cmdSpec.isProfile) {
+		this.cmdSpec = new CMDSpec(false);
+	} else {
+		this.cmdSpec = new CMDSpec(true);
+	}
 }
 
 private function saveSpec():void {
@@ -83,7 +87,7 @@ private function saveSpec():void {
 	item.description = xmlEditor.cmdSpec.headerDescription;
 	item.name = xmlEditor.cmdSpec.headerName;
 	item.isProfile = xmlEditor.cmdSpec.isProfile;
-	item.groupName = xmlEditor.cmdSpec.groupName;    
+	item.groupName = xmlEditor.cmdSpec.groupName;
 	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 	if (item.isProfile) {
 		uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
@@ -97,8 +101,8 @@ private function handleSaveComplete(event:UploadCompleteEvent):void {
 	refreshComponentList();
 }
 
-private function refreshComponentList(event:*=null):void {
-    componentsSrv.load();
+private function refreshComponentList(event:* = null):void {
+	componentsSrv.load();
 }
 
 private function handleEditorChange(event:Event):void {
