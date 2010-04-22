@@ -16,8 +16,9 @@
 			import mx.managers.PopUpManager;
 
 			public static const OK_EVENT:String = "OK";
+			
 			[Bindable]
-			private var searchService:IsocatService = new IsocatService();
+			public var searchService:IsocatService = null;
 
 			//To store the result
 			public var editField:TextInput;
