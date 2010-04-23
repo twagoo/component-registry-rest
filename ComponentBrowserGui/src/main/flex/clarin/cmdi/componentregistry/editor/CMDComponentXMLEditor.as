@@ -4,6 +4,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
+	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 
 	import flash.display.DisplayObject;
@@ -31,6 +32,8 @@ package clarin.cmdi.componentregistry.editor {
 
 		public static const EDITOR_CHANGE_EVENT:String = "editorChange";
 		private var _spec:CMDSpec;
+		private var _firstComponent:CMDComponent;
+		private var currentElementIndex:int = -1;
 
 		public function CMDComponentXMLEditor() {
 			super();
@@ -55,6 +58,8 @@ package clarin.cmdi.componentregistry.editor {
 				DragManager.showFeedback(DragManager.COPY);
 			} else if (event.dragSource.hasFormat(DRAG_NEW_COMPONENT)) {
 				DragManager.showFeedback(DragManager.COPY);
+			} else if (event.dragSource.hasFormat(CMDComponentXMLEditor.DRAG_NEW_ELEMENT)) {
+				DragManager.showFeedback(DragManager.COPY);
 			} else {
 				DragManager.showFeedback(DragManager.NONE);
 			}
@@ -66,13 +71,17 @@ package clarin.cmdi.componentregistry.editor {
 				for each (var item:ItemDescription in items) {
 					var comp:CMDComponent = new CMDComponent();
 					comp.componentId = item.id;
-					_spec.cmdComponents.addItem(comp);
+					_firstComponent.cmdComponents.addItem(comp);
 					addComponent(comp);
 				}
 			} else if (event.dragSource.hasFormat(DRAG_NEW_COMPONENT)) {
 				var emptyComp:CMDComponent = event.dragSource.dataForFormat(DRAG_NEW_COMPONENT) as CMDComponent;
-				_spec.cmdComponents.addItem(emptyComp);
+				_firstComponent.cmdComponents.addItem(emptyComp);
 				addComponent(emptyComp);
+			} else if (event.dragSource.hasFormat(CMDComponentXMLEditor.DRAG_NEW_ELEMENT)) {
+				var element:CMDComponentElement = event.dragSource.dataForFormat(CMDComponentXMLEditor.DRAG_NEW_ELEMENT) as CMDComponentElement;
+				_firstComponent.cmdElements.addItem(element);
+				addElement(element, currentElementIndex);
 			}
 		}
 
@@ -93,27 +102,46 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function createNewEditor():void {
 			var start:int = getTimer();
+			this.currentElementIndex = -1;
 			removeAllChildren()
+			checkFirstDefiningComponent(_spec.cmdComponents);
 			handleHeader(_spec);
-			handleComponents(_spec.cmdComponents);
+			handleElements(_firstComponent.cmdElements);
+			handleComponents(_firstComponent.cmdComponents);
 			trace("Created editor view in " + (getTimer() - start) + " ms.");
+		}
+
+		/**
+		 * The xml model allows more component to be defined but we force only one component at the "root" level.
+		 */
+		private function checkFirstDefiningComponent(components:ArrayCollection):void {
+			if (components.length != 1) {
+				throw new Error("A profile/component must have 1 component defined.");
+			} else {
+				_firstComponent = components.getItemAt(0) as CMDComponent;
+			}
 		}
 
 		private function handleHeader(spec:CMDSpec):void {
 			addChild(new SelectTypeRadioButtons(spec));
 			addChild(createOptionalGroupNameInput(spec));
-			addChild(createHeading());
-			addChild(new FormItemInputLine(XMLBrowser.NAME, spec.headerName, function(val:String):void {
-					spec.headerName = val;
-				}));
 			addChild(new FormItemInputText(XMLBrowser.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
+				}));
+			addChild(new FormItemInputLine(XMLBrowser.NAME, _firstComponent.name, function(val:String):void {
+					_firstComponent.name = val;
+					_spec.headerName = val;
 				}));
 			var idInput:FormItemInputLine = new FormItemInputLine("Id", spec.headerId, function(val:String):void {
 					spec.headerId = val;
 				}, false);
 			idInput.toolTip = "Id will be generated";
 			addChild(idInput);
+			var link:ConceptLinkInput = new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _firstComponent.conceptLink, function(val:String):void {
+					_firstComponent.conceptLink = val;
+				});
+			link.enabled = false;
+			addChild(link);
 		}
 
 		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
@@ -124,13 +152,6 @@ package clarin.cmdi.componentregistry.editor {
 					result.visible = !val;
 				}, spec, "isProfile");
 			return result;
-		}
-
-		private function createHeading():FormItem {
-			var heading:FormItem = new FormItem();
-			heading.label = "Header";
-			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
-			return heading;
 		}
 
 		private function handleComponents(components:ArrayCollection):void {
@@ -151,8 +172,34 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function removeComponent(event:Event):void {
 			var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
-			_spec.removeComponent(comp);
+			_firstComponent.removeComponent(comp);
 			removeChild(event.currentTarget as DisplayObject);
+		}
+
+
+		private function handleElements(elements:ArrayCollection):void {
+			for each (var element:CMDComponentElement in elements) {
+				addElement(element);
+			}
+		}
+
+		public function addElement(element:CMDComponentElement, index:int = -1):void {
+			var elem:Container = new ElementEdit(element, this);
+			elem.setStyle("paddingLeft", "50");
+			elem.addEventListener(ElementEdit.REMOVE_ELEMENT_EVENT, removeElement);
+			if (index == -1) {
+				addChild(elem);
+			} else {
+				addChildAt(elem, index);
+			}
+			currentElementIndex = getChildIndex(elem) + 1;
+		}
+
+		private function removeElement(event:Event):void {
+			var elem:CMDComponentElement = ElementEdit(event.currentTarget).element;
+			_firstComponent.removeElement(elem);
+			removeChild(event.currentTarget as DisplayObject);
+			currentElementIndex--;
 		}
 
 	}

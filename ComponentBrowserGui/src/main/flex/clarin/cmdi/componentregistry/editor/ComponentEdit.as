@@ -5,11 +5,11 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -92,27 +92,39 @@ package clarin.cmdi.componentregistry.editor {
 
 		protected override function createChildren():void {
 			super.createChildren();
-			var ruler:HRule = new HRule();
-			ruler.percentWidth = 80;
-			addChild(ruler);
-			addChild(createComponentEditBar());
+			addRuler();
+			createComponentEditBar();
 
 			var componentLink:FormItem = createComponentLink(_component);
 			if (componentLink != null) {
 				addCardinalityInput();
 				addChild(componentLink);
 			} else {
-				addChild(new FormItemInputLine(XMLBrowser.NAME, _component.name, function(val:String):void {
-						_component.name = val;
-					}));
-				addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _component.conceptLink, function(val:String):void {
-						_component.conceptLink = val;
-					}));
+				addNameInput();
+				addConceptLink();
 				addCardinalityInput();
 				handleCMDAttributeList();
 				handleElements(_component.cmdElements);
 				handleComponents(_component.cmdComponents); //recursion
 			}
+		}
+
+		private function addConceptLink():void {
+			addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _component.conceptLink, function(val:String):void {
+					_component.conceptLink = val;
+				}));
+		}
+
+		private function addRuler():void {
+			var ruler:HRule = new HRule();
+			ruler.percentWidth = 80;
+			addChild(ruler);
+		}
+
+		private function addNameInput():void {
+			addChild(new FormItemInputLine(XMLBrowser.NAME, _component.name, function(val:String):void {
+					_component.name = val;
+				}));
 		}
 
 		private function addCardinalityInput():void {
@@ -124,7 +136,7 @@ package clarin.cmdi.componentregistry.editor {
 				}));
 		}
 
-		private function createComponentEditBar():HBox {
+		private function createComponentEditBar():void {
 			var editBar:HBox = new HBox();
 			editBar.addChild(createHeading());
 			var removeButton:Button = new Button();
@@ -139,7 +151,7 @@ package clarin.cmdi.componentregistry.editor {
 				});
 
 			editBar.addChild(removeButton);
-			return editBar;
+			addChild(editBar);
 		}
 
 		private function createComponentLink(component:CMDComponent):FormItem {

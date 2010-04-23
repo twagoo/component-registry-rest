@@ -11,7 +11,7 @@ package clarin.cmdi.componentregistry.editor {
 		private static var searchService:IsocatService = new IsocatService();
 
 		public static function getIsocatSearchPopUp():IsocatSearchPopUp {
-			var isocatSearchPopUp:IsocatSearchPopUp  = new IsocatSearchPopUp();
+			var isocatSearchPopUp:IsocatSearchPopUp = new IsocatSearchPopUp();
 			isocatSearchPopUp.searchService = searchService;
 			return isocatSearchPopUp;
 		}

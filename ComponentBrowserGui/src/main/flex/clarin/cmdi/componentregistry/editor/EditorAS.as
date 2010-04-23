@@ -15,7 +15,6 @@ import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
 
-import mx.controls.Alert;
 import mx.core.DragSource;
 import mx.core.UIComponent;
 import mx.managers.CursorManager;
@@ -32,7 +31,7 @@ private var componentsSrv:ComponentListService = new ComponentListService(); //D
 public var cmdComponent:XML;
 
 [Bindable]
-private var cmdSpec:CMDSpec = new CMDSpec(true);
+private var cmdSpec:CMDSpec = createEmptyProfile();
 
 [Bindable]
 private var browserColumns:BrowserColumns = new BrowserColumns();
@@ -75,14 +74,28 @@ public function setDescription(itemDescription:ItemDescription):void {
 
 public function clearEditor():void {
 	if (cmdSpec && !cmdSpec.isProfile) {
-		this.cmdSpec = new CMDSpec(false);
+	    this.cmdSpec = createEmptyComponent();
 	} else {
-		this.cmdSpec = new CMDSpec(true);
+		this.cmdSpec = createEmptyProfile();
 	}
 }
 
+private function createEmptyComponent():CMDSpec {
+		var result:CMDSpec = new CMDSpec(false);
+		result.cmdComponents.addItem(new CMDComponent());
+        return result
+}
+
+private function createEmptyProfile():CMDSpec {
+		var result:CMDSpec = new CMDSpec(true);
+		var c:CMDComponent = new CMDComponent();
+		result.cmdComponents.addItem(c);
+		c.cmdElements.addItem(new CMDComponentElement());		
+        return result
+}
+
 private function saveSpec():void {
-	//Alert.show(xmlEditor.cmdSpec.toXml()); 
+//	Alert.show(xmlEditor.cmdSpec.toXml()); 
 	var item:ItemDescription = new ItemDescription();
 	item.description = xmlEditor.cmdSpec.headerDescription;
 	item.name = xmlEditor.cmdSpec.headerName;
