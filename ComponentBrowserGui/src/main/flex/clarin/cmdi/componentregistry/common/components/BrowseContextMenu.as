@@ -1,12 +1,14 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.services.DeleteService;
-	
+
 	import flash.events.ContextMenuEvent;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
-	
+
+	import mx.controls.Alert;
 	import mx.controls.DataGrid;
+	import mx.events.CloseEvent;
 
 
 	public class BrowseContextMenu {
@@ -64,16 +66,29 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private function editItem(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
-		    viewStack.switchToEditor(item);
+			viewStack.switchToEditor(item);
 		}
 
 		private function handleDelete(event:ContextMenuEvent):void {
-		    deleteSelectedItems();
+			deleteSelectedItems();
 		}
-		
+
 		public function deleteSelectedItems():void {
+			var message:String = "";
 			for each (var item:ItemDescription in _dataGrid.selectedItems) {
-				deleteService.deleteItem(item);
+				if (message != "") {
+					message += "\n";
+				}
+				message += item.name;
+			}
+			Alert.show("You will delete the following item(s):\n" + message + "\n\n This cannot be undone.", "Delete items", Alert.OK | Alert.CANCEL, null, handleDeleteAlert);
+		}
+
+		private function handleDeleteAlert(event:CloseEvent):void {
+			if (event.detail == Alert.OK) {
+				for each (var item:ItemDescription in _dataGrid.selectedItems) {
+					deleteService.deleteItem(item);
+				}
 			}
 		}
 
