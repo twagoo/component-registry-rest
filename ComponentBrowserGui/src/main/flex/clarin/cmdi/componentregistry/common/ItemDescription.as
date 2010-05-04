@@ -31,9 +31,12 @@ package clarin.cmdi.componentregistry.common {
 			this.isProfile = isProfileValue;
 		}
 
+		/**
+		 * getting ISO-8601 (GMT/UTC timezone) dates from the server. Need to convert this, flex does not support ISO-8601 times out of the box.
+		 */
 		private function convertDate(dateString:String):String {
 			var validator:DateFormatter = new DateFormatter();
-			var s:String = dateString.replace("CET", "UTC+0100");
+			var s:String = parseDate(dateString);
 			var n:Number = Date.parse(s);
 			this.registrationDateValue = new Date(n);
 			var result:String;
@@ -41,10 +44,18 @@ package clarin.cmdi.componentregistry.common {
 				trace("cannot convert date: " + dateString);
 				result = dateString;
 			} else {
-				validator.formatString = "DD MMMM YYYY H:NN:SS "; //e.g. 02 December 2009 13:48:39 
+				validator.formatString = "DD MMMM YYYY H:NN:SS"; //e.g. 02 December 2009 13:48:39 
 				result = validator.format(registrationDateValue);
 			}
 			return result;
+		}
+
+		public static function parseDate(value:String):String {
+			var dateStr:String = value;
+			dateStr = dateStr.replace(/-/g, "/");
+			dateStr = dateStr.replace("T", " ");
+			dateStr = dateStr.replace("+00:00", " GMT-0000");
+			return dateStr;
 		}
 
 		public function createProfile(itemDescription:XML):void {
