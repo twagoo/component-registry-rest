@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -281,7 +283,8 @@ public class ComponentRegistryImplTest {
         try {
             register.deleteMDProfile(description.getId(), new DummyPrincipal("Fake User"));
             fail("Should have thrown exception");
-        }catch(UserUnauthorizedException e) {} 
+        } catch (UserUnauthorizedException e) {
+        }
         register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
 
         assertEquals(1, register.getProfileDescriptions().size());
@@ -300,13 +303,14 @@ public class ComponentRegistryImplTest {
         description.setName("Aap");
         description.setCreatorName(PRINCIPAL.getName());
         description.setDescription("MyDescription");
-        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
+        CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
-        register.registerMDComponent(description, testProfile);
+        register.registerMDComponent(description, testComp);
         try {
             register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
             fail("Should have thrown exception");
-        }catch(UserUnauthorizedException e) {} 
+        } catch (UserUnauthorizedException e) {
+        }
 
         assertEquals(1, register.getComponentDescriptions().size());
         assertNotNull(register.getMDComponent(description.getId()));
@@ -315,7 +319,29 @@ public class ComponentRegistryImplTest {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertNull(register.getMDProfile(description.getId()));
+    }
 
+    @Test
+    public void testUpdateDescription() throws Exception {
+        ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
+        ComponentDescription description = ComponentDescription.createNewDescription();
+        description.setName("Aap");
+        description.setCreatorName(PRINCIPAL.getName());
+        description.setDescription("MyDescription");
+        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
+        registry.registerMDComponent(description, testProfile);
+
+        assertEquals(1, registry.getComponentDescriptions().size());
+        ComponentDescription desc = registry.getComponentDescription(description.getId());
+        assertEquals("MyDescription", desc.getDescription());
+        desc.setDescription("NewDesc");
+        registry.updateDescription(desc, PRINCIPAL);
+
+        registry = getTestRegistry(getRegistryDir());
+        assertEquals(1, registry.getComponentDescriptions().size());
+        ComponentDescription result = registry.getComponentDescription(description.getId());
+        assertEquals("NewDesc", result.getDescription());
+        assertEquals("Aap", result.getName());
     }
 
     private File getRegistryDir() {
@@ -330,10 +356,13 @@ public class ComponentRegistryImplTest {
         tmpRegistryDir = null;
     }
 
-    public static ComponentRegistry getTestRegistry(File registryRoot) {
+    public static ComponentRegistryImpl getTestRegistry(File registryRoot) {
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
         Configuration config = new Configuration();
         config.setRegistryRoot(registryRoot);
+        Set<String> adminUsers = new HashSet<String>();
+        adminUsers.add(PRINCIPAL.getName());
+        config.setAdminUsers(adminUsers);
         config.init();
         register.setConfiguration(config);
         return register;

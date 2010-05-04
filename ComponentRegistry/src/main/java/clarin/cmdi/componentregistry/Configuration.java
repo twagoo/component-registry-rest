@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry;
 
 import java.io.File;
+import java.security.Principal;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,8 @@ public class Configuration {
     private File profileDeletionDir;
     private File componentDeletionDir;
 
+    private Set<String> adminUsers;
+
     public void init() {
         boolean isValid = true;
         isValid &= validateAndCreate(registryRoot);
@@ -29,7 +33,7 @@ public class Configuration {
         profileDeletionDir = new File(profileDir, DELETED_DIR_NAME);
         isValid &= validateAndCreate(profileDeletionDir);
         if (isValid) {
-            LOG.info("Initialized Component Registry succesfully. Registry is located in: "+registryRoot);
+            LOG.info("Initialized Component Registry succesfully. Registry is located in: " + registryRoot);
         }
     }
 
@@ -51,6 +55,10 @@ public class Configuration {
         return registryRoot;
     }
 
+    public void setAdminUsers(Set<String> adminUsers) {
+        this.adminUsers = adminUsers;
+    }
+
     public File getComponentDir() {
         return componentDir;
     }
@@ -58,13 +66,17 @@ public class Configuration {
     public File getProfileDir() {
         return profileDir;
     }
-    
+
     public File getProfileDeletionDir() {
         return profileDeletionDir;
     }
 
     public File getComponentDeletionDir() {
         return componentDeletionDir;
+    }
+
+    public boolean isAdminUser(Principal principal) {
+        return adminUsers.contains(principal.getName());
     }
 
 }

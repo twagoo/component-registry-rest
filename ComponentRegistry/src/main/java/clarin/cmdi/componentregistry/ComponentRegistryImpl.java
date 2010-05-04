@@ -120,8 +120,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private Map<String, ProfileDescription> loadProfileDescriptions() {
-        Collection files = FileUtils.listFiles(configuration.getProfileDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME),
-                DIRS_WITH_DESCRIPTIONS);
+        Collection files = FileUtils.listFiles(getProfileDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), DIRS_WITH_DESCRIPTIONS);
         Map<String, ProfileDescription> result = new HashMap<String, ProfileDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
@@ -158,6 +157,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private File getComponentDir() {
         return configuration.getComponentDir();
+    }
+
+    private File getProfileDir() {
+        return configuration.getProfileDir();
     }
 
     public List<ComponentDescription> getComponentDescriptions() {
@@ -308,8 +311,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     }
 
-    private void writeDescription(File profileDir, AbstractDescription description) throws IOException, JAXBException {
-        File metadataFile = new File(profileDir, DESCRIPTION_FILE_NAME);
+    private void writeDescription(File dir, AbstractDescription description) throws IOException, JAXBException {
+        File metadataFile = new File(dir, DESCRIPTION_FILE_NAME);
         FileOutputStream fos = new FileOutputStream(metadataFile);
         MDMarshaller.marshal(description, fos);
         LOG.info("Saving metadata is successful " + metadataFile);
@@ -357,6 +360,27 @@ public class ComponentRegistryImpl implements ComponentRegistry {
                 componentsCache.remove(componentId);
             } // else no component so nothing to delete
         }
+    }
+
+    public void updateDescription(AbstractDescription description, Principal principal) throws IOException, JAXBException,
+            UserUnauthorizedException {
+        if (!configuration.isAdminUser(principal)) {
+            throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
+                    + "' cannot update this description (" + description + ").");
+        }
+        File typeDir;
+        CMDComponentSpec spec;
+        if (description.isProfile()) {
+            typeDir = getProfileDir();
+            spec = getMDProfile(description.getId());
+        } else {
+            typeDir = getComponentDir();
+            spec = getMDComponent(description.getId());
+        }
+        String strippedId = stripRegistryId(description.getId());
+        File dir = new File(typeDir, strippedId);
+        writeDescription(dir, description);
+        updateCache(spec, description);
     }
 
 }

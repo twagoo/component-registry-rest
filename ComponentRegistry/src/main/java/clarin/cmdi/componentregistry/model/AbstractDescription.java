@@ -1,9 +1,5 @@
 package clarin.cmdi.componentregistry.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -12,8 +8,6 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
 public abstract class AbstractDescription {
-
-    public final static DateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss zzz", Locale.UK);
 
     private String id;
     private String description;

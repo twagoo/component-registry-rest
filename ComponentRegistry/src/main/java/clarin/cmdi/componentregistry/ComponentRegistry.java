@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -60,6 +63,8 @@ public interface ComponentRegistry {
      */
     void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException;
 
-    //getElements?
+    void updateDescription(AbstractDescription desc, Principal principal) throws IOException, JAXBException,
+    UserUnauthorizedException;
+
     //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's
 }

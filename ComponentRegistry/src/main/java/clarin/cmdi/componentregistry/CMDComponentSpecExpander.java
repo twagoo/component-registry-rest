@@ -66,7 +66,8 @@ public class CMDComponentSpecExpander {
                 overwriteAttributes(cmdComponentType, nested);
                 expanded.add(nested);
             } else {
-                expanded.add(cmdComponentType);//nothing expanded just add original
+                expandNestedComponent(cmdComponentType.getCMDComponent());
+                expanded.add(cmdComponentType);//no attributes overwritten
             }
         }
         cmdComponents.clear();

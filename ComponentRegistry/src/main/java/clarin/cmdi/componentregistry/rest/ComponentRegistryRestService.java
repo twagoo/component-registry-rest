@@ -24,6 +24,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -238,7 +239,8 @@ public class ComponentRegistryRestService {
         desc.setCreatorName(principal.getName());
         desc.setName(name);
         desc.setDescription(description);
-        desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
+        desc.setRegistrationDate(createNewDate());
+        //        desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
         LOG.info("Trying to register Profile: " + desc);
         return register(input, desc, principal);
     }
@@ -259,9 +261,14 @@ public class ComponentRegistryRestService {
         desc.setName(name);
         desc.setDescription(description);
         desc.setGroupName(group);
-        desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
+        desc.setRegistrationDate(createNewDate());
+        //desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
         LOG.info("Trying to register Component: " + desc);
         return register(input, desc, principal);
+    }
+
+    private String createNewDate() {
+        return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
     private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal) {
