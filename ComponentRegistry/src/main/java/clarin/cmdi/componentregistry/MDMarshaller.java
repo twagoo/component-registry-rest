@@ -51,10 +51,10 @@ public class MDMarshaller {
     /**
      * Helper method that logs errors and returns null if unmarshal failed
      */
-    public static <T> T unmarshal(Class<T> docClass, File file) {
+    public static <T> T unmarshal(Class<T> docClass, File file, Schema schema) {
         T result = null;
         try {
-            result = unmarshal(docClass, new FileInputStream(file), null);
+            result = unmarshal(docClass, new FileInputStream(file), schema);
         } catch (JAXBException e) {
             LOG.error("Cannot unmarshal xml file: " + file, e);
         } catch (IOException e) {

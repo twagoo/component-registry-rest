@@ -99,7 +99,7 @@ public class RegistryFiller {
             File file = new File(args[i]);
             LOG.info("Adding " + (i - 3) + "/" + (args.length - 4) + ": " + file.getName());
             try {
-                CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+                CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, null);
                 if (spec.isIsProfile()) {
                     filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), description, group);
                 } else {
@@ -185,7 +185,7 @@ public class RegistryFiller {
     }
 
     private void replaceFileNameForIds(RegObject regObject) throws JAXBException, IOException {
-        CMDComponentSpec comp = MDMarshaller.unmarshal(CMDComponentSpec.class, regObject.getFile());
+        CMDComponentSpec comp = MDMarshaller.unmarshal(CMDComponentSpec.class, regObject.getFile(), null);
         if (comp == null) {
             failed++;
             return;

@@ -95,7 +95,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     CMDComponentSpec getUncachedProfile(String id) {
         File file = getProfileFile(id);
-        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, MDMarshaller.getCMDComponentSchema());
         return spec;
     }
 
@@ -115,7 +115,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     CMDComponentSpec getUncachedComponent(String id) {
         File file = getComponentFile(id);
-        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file);
+        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, MDMarshaller.getCMDComponentSchema());
         return spec;
     }
 
@@ -124,7 +124,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         Map<String, ProfileDescription> result = new HashMap<String, ProfileDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
-            ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file);
+            ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file, null);
             if (desc != null)
                 result.put(desc.getId(), desc);
         }
@@ -138,7 +138,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         Map<String, ComponentDescription> result = new HashMap<String, ComponentDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
-            ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file);
+            ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file, null);
             if (desc != null)
                 result.put(desc.getId(), desc);
         }
