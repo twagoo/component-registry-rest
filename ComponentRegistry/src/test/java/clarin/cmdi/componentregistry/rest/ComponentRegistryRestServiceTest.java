@@ -162,6 +162,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class);
         assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
         assertTrue(profile.endsWith("</CMD_ComponentSpec>\n"));
+        assertTrue(profile.contains("xsi:schemaLocation"));
 
         try {
             getResource().path("/registry/components/clarin.eu:cr1:component1/xsl").accept(MediaType.TEXT_XML).get(String.class);
@@ -203,6 +204,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class);
         assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
         assertTrue(component.endsWith("</CMD_ComponentSpec>\n"));
+        assertTrue(component.contains("xsi:schemaLocation"));
 
         try {
             getResource().path("/registry/components/clarin.eu:cr1:component1/jpg").accept(MediaType.TEXT_XML).get(String.class);

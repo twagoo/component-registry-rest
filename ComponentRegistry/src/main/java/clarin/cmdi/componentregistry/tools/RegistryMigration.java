@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -20,18 +20,10 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 public class RegistryMigration {
 
     private final static Logger LOG = LoggerFactory.getLogger(RegistryMigration.class);
-    private Configuration config;
     private ComponentRegistryImpl registry;
 
-    /*
-     * /tmp/ComponentRegistry
-     */
     public RegistryMigration(String sourceDir) {
-        config = new Configuration();
-        config.setRegistryRoot(new File(sourceDir));
-        config.init();
         registry = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
-        registry.setConfiguration(config);
     }
 
     private void migrate() throws IOException {
@@ -71,13 +63,14 @@ public class RegistryMigration {
         if (args.length != 1) {
             printUsage();
         }
+        new ClassPathXmlApplicationContext(new String[] { "applicationContext.xml" }); //loads and instantiates the beans
         RegistryMigration migration = new RegistryMigration(args[0]);
         migration.migrate();
     }
 
     private static void printUsage() {
-        System.out.println("usage: <source registry directory>");
-        System.out.println("It also needs a filled in registry.properties");
+        System.out.println("usage: configure registry.properties and applicationContext.xml "
+                + "(applicationContext should contain the registryDir of the source url)");
         System.exit(0);
     }
 

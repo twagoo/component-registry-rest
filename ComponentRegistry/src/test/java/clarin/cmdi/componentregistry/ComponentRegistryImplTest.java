@@ -92,7 +92,7 @@ public class ComponentRegistryImplTest {
     @Test
     public void testCache() throws JAXBException {
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
-        Configuration config = new Configuration();
+        Configuration config = Configuration.getInstance();
         config.setRegistryRoot(getRegistryDir());
         config.init();
         register.setConfiguration(config);
@@ -119,7 +119,7 @@ public class ComponentRegistryImplTest {
     @Test
     public void testCacheCorruptFile() throws JAXBException {
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
-        Configuration config = new Configuration();
+        Configuration config = Configuration.getInstance();
         config.setRegistryRoot(getRegistryDir());
         config.init();
         register.setConfiguration(config);
@@ -335,7 +335,7 @@ public class ComponentRegistryImplTest {
         ComponentDescription desc = registry.getComponentDescription(description.getId());
         assertEquals("MyDescription", desc.getDescription());
         desc.setDescription("NewDesc");
-        registry.updateDescription(desc, PRINCIPAL);
+        registry.update(desc, PRINCIPAL, testProfile);
 
         registry = getTestRegistry(getRegistryDir());
         assertEquals(1, registry.getComponentDescriptions().size());
@@ -358,7 +358,7 @@ public class ComponentRegistryImplTest {
 
     public static ComponentRegistryImpl getTestRegistry(File registryRoot) {
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
-        Configuration config = new Configuration();
+        Configuration config = Configuration.getInstance();
         config.setRegistryRoot(registryRoot);
         Set<String> adminUsers = new HashSet<String>();
         adminUsers.add(PRINCIPAL.getName());

@@ -362,24 +362,22 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
-    public void updateDescription(AbstractDescription description, Principal principal) throws IOException, JAXBException,
+    public void update(AbstractDescription description, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
             UserUnauthorizedException {
         if (!configuration.isAdminUser(principal)) {
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
                     + "' cannot update this description (" + description + ").");
         }
         File typeDir;
-        CMDComponentSpec spec;
         if (description.isProfile()) {
             typeDir = getProfileDir();
-            spec = getMDProfile(description.getId());
         } else {
             typeDir = getComponentDir();
-            spec = getMDComponent(description.getId());
         }
         String strippedId = stripRegistryId(description.getId());
         File dir = new File(typeDir, strippedId);
         writeDescription(dir, description);
+        writeCMDComponentSpec(dir, strippedId + ".xml", spec);
         updateCache(spec, description);
     }
 

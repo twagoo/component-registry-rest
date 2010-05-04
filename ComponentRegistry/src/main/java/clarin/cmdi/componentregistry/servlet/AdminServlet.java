@@ -10,16 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.tools.MigrateData;
 
 public class AdminServlet extends HttpServlet {
-
-    private static final String CONFIGURATION_BEAN = "configuration";
 
     private static final long serialVersionUID = 1L;
 
@@ -28,8 +23,7 @@ public class AdminServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        WebApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-        configuration = (Configuration) applicationContext.getBean(CONFIGURATION_BEAN);
+        configuration = Configuration.getInstance();
     }
 
     @Override
@@ -46,10 +40,10 @@ public class AdminServlet extends HttpServlet {
             migrateData.migrateDescriptions(ComponentRegistryImpl.getInstance(), req.getUserPrincipal());
             PrintWriter writer = resp.getWriter();
             if (migrateData.hasErrors()) {
-                writer.write("Migrated dates finished some error occured (check server log).");    
+                writer.write("Migrated dates finished some error occured (check server log).");
             } else {
-                writer.write("Migrated all dates finished successfully.");    
-            }            
+                writer.write("Migrated all dates finished successfully.");
+            }
             resp.flushBuffer();
         }
     }

@@ -63,7 +63,7 @@ public interface ComponentRegistry {
      */
     void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException;
 
-    void updateDescription(AbstractDescription desc, Principal principal) throws IOException, JAXBException,
+    void update(AbstractDescription desc, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
     UserUnauthorizedException;
 
     //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's
