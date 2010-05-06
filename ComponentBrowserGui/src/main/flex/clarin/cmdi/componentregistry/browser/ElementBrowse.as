@@ -38,14 +38,10 @@ package clarin.cmdi.componentregistry.browser {
 			var name:Label = new Label();
 			name.text = _element.name;
 			name.styleName = StyleConstants.XMLBROWSER_HEADER;
-			var dash:Label = new Label();
-			dash.text = "-";
-			dash.styleName = StyleConstants.XMLBROWSER_FIELD_VALUE;
 			var value:UIComponent = XMLBrowserValueSchemeLine.createValueScheme(_element.valueSchemeSimple, _element.valueSchemePattern, _element.valueSchemeEnumeration);
 			value.styleName = StyleConstants.XMLBROWSER_FIELD_VALUE;
 			line.addChild(heading);
 			line.addChild(name);
-			line.addChild(dash);
 			line.addChild(value);
 			addChild(line, false);
 		}
