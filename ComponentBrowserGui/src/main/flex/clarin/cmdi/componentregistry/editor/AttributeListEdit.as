@@ -1,5 +1,5 @@
 package clarin.cmdi.componentregistry.editor {
-	import clarin.cmdi.componentregistry.browser.XMLBrowser;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
@@ -68,7 +68,7 @@ package clarin.cmdi.componentregistry.editor {
 		 * Public utility method to create ValueScheme Component. By lack of better placed put in this class
 		 **/
 		public static function createAndAddValueScheme(valueScheme:ValueSchemeInterface):UIComponent {
-			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput("Type");
+			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput(LabelConstants.VALUESCHEME);
 			if (valueScheme.valueSchemeEnumeration == null) {
 				if (valueScheme.valueSchemePattern) {
 					valueSchemeInput.valueSchemePattern = valueScheme.valueSchemePattern;
@@ -97,7 +97,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {
-			var name:FormItemInputLine = new FormItemInputLine(XMLBrowser.NAME, attribute.name, function(val:String):void {
+			var name:FormItemInputLine = new FormItemInputLine(LabelConstants.NAME, attribute.name, function(val:String):void {
 					attribute.name = val;
 				});
 			name.direction = FormItemDirection.HORIZONTAL
@@ -129,8 +129,8 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function createHeading():FormItem {
 			var heading:FormItem = new FormItem();
-			heading.label = "AttributeList";
-			heading.styleName = StyleConstants.XMLBROWSER_HEADER_SMALL;
+			heading.label = LabelConstants.ATTRIBUTELIST;
+			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
 			heading.addChild(noAttributesLabel);
 			return heading;
 		}

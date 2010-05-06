@@ -1,10 +1,9 @@
 package clarin.cmdi.componentregistry.editor {
-	import clarin.cmdi.componentregistry.browser.XMLBrowser;
-	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.browser.XMLBrowserValueSchemeLine;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-
+	
 	import flash.events.MouseEvent;
-
+	
 	import mx.collections.XMLListCollection;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
@@ -89,7 +88,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createEnumeration():ComboBox {
-			return XMLBrowser.createValueSchemeComboBox();
+			return XMLBrowserValueSchemeLine.createValueSchemeComboBox();
 		}
 
 		private function createValueSchemeButton():void {

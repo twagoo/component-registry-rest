@@ -13,7 +13,6 @@ package clarin.cmdi.componentregistry.common.components {
 	import flash.events.MouseEvent;
 	
 	import mx.containers.VBox;
-	import mx.controls.Alert;
 	import mx.controls.Label;
 
 	public class ExpandingComponentLabel extends VBox {
@@ -23,24 +22,31 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private var expanded:DisplayObject;
 		private var componentId:String;
+		private var item:ItemDescription;
 		private var componentSrv:ComponentInfoService = new ComponentInfoService();
 
 		private var editable:Boolean;
 
-		public function ExpandingComponentLabel(componentId:String, editable:Boolean = false) {
+		public function ExpandingComponentLabel(componentId:String, name:String, editable:Boolean = false) {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;
+			this.item = ComponentListService.instance.lookUpDescription(componentId);
 			styleName = StyleConstants.EXPANDING_COMPONENT;
 		}
 
 		protected override function createChildren():void {
 			super.createChildren();
 			var id:Label = new Label();
-			id.text = componentId;
-			id.addEventListener(MouseEvent.CLICK, handleClick);
-			id.addEventListener(MouseEvent.MOUSE_OVER, mouseOver);
-			id.addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+			if (item) {
+				id.text = item.name;
+				id.styleName = StyleConstants.XMLBROWSER_HEADER;
+				id.addEventListener(MouseEvent.CLICK, handleClick);
+				id.addEventListener(MouseEvent.MOUSE_OVER, mouseOver);
+				id.addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
+			} else {
+				id.text = "Component cannot be found.";
+			}
 			addChild(id);
 		}
 
@@ -61,13 +67,8 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		private function expand():void {
-			var item:ItemDescription = ComponentListService.instance.lookUpDescription(componentId);
-			if (item != null) {
-				componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, handleComponentLoaded);
-				componentSrv.load(item);
-			} else {
-				Alert.show("Error: component cannot be found");
-			}
+			componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, handleComponentLoaded);
+			componentSrv.load(item);
 		}
 
 		private function handleComponentLoaded(event:Event):void {

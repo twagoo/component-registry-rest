@@ -25,22 +25,11 @@ ToggleButtonBar {
    indicatorGap: 1;
 }
 
-
-.xmlBrowserField {
-    fontWeight: bold;
-}
-
 .xmlBrowserHeader {
     fontWeight: bold;
-    fontSize: 12;
 }
 
-.xmlBrowserHeaderSmall {
-    fontWeight: bold;
-}
-
-.xmlEditorFieldEditField {
-    borderStyle: none;
+.xmlBrowserField {
     fontWeight: normal;
 }
 
@@ -48,6 +37,10 @@ ToggleButtonBar {
     fontWeight: normal;
 }
 
+.xmlEditorFieldEditField {
+    borderStyle: none;
+    fontWeight: normal;
+}
 
 .xmlTextArea {
    borderStyle: solid;

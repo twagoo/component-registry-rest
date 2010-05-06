@@ -29,8 +29,10 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.componentId = xml.@ComponentId;
 			result.conceptLink = xml.@ConceptLink;
 			result.filename = xml.@filename;
-			result.cardinalityMin = xml.@CardinalityMin;
-			result.cardinalityMax = xml.@CardinalityMax;
+			if (xml.hasOwnProperty("@CardinalityMin"))
+				result.cardinalityMin = xml.@CardinalityMin;
+			if (xml.hasOwnProperty("@CardinalityMax"))	
+				result.cardinalityMax = xml.@CardinalityMax;
 			result.attributeList = createAttributeList(xml);
 			var elements:XMLList = xml.elements(ComponentMD.CMD_ELEMENT);
 			for each (var element:XML in elements) {
@@ -52,8 +54,10 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.documentation = xml.@Documentation;
 			result.displayPriority = xml.@DisplayPriority;
 			result.valueSchemeSimple = xml.@ValueScheme;
-			result.cardinalityMin = xml.@CardinalityMin;
-			result.cardinalityMax = xml.@CardinalityMax;
+			if (xml.hasOwnProperty("@CardinalityMin"))
+				result.cardinalityMin = xml.@CardinalityMin;
+			if (xml.hasOwnProperty("@CardinalityMax"))	
+				result.cardinalityMax = xml.@CardinalityMax;
 			result.attributeList = createAttributeList(xml);
 			if (xml.hasOwnProperty(ComponentMD.VALUE_SCHEME)) {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {

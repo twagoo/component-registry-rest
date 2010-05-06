@@ -1,5 +1,5 @@
 package clarin.cmdi.componentregistry.editor {
-	import clarin.cmdi.componentregistry.browser.XMLBrowser;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	
@@ -34,22 +34,22 @@ package clarin.cmdi.componentregistry.editor {
 			super.createChildren();
 
 			addChild(createEditBar());
-			addChild(new FormItemInputLine(XMLBrowser.NAME, _element.name, function(val:String):void {
+			addChild(new FormItemInputLine(LabelConstants.NAME, _element.name, function(val:String):void {
 					_element.name = val;
 				}));
-			addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _element.conceptLink, function(val:String):void {
+			addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
 				}));
-			addChild(new FormItemInputLine(XMLBrowser.DOCUMENTATION, _element.documentation, function(val:String):void {
+			addChild(new FormItemInputLine(LabelConstants.DOCUMENTATION, _element.documentation, function(val:String):void {
 					_element.documentation = val;
 				}));
-			addChild(new NumericStepperInputLine(XMLBrowser.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
+			addChild(new NumericStepperInputLine(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
 					_element.displayPriority = val;
 				}));
-			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
+			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
 					_element.cardinalityMin = val;
 				}));
-			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
+			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
 					_element.cardinalityMax = val;
 				}));				
 			addChild(AttributeListEdit.createAndAddValueScheme(_element));
@@ -87,7 +87,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function createHeading():FormItem {
 			var heading:FormItem = new FormItem();
-			heading.label = "Element";
+			heading.label = LabelConstants.ELEMENT;
 			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
 			return heading;
 		}

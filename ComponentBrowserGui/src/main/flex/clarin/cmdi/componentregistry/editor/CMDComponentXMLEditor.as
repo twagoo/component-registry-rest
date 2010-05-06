@@ -1,5 +1,5 @@
 package clarin.cmdi.componentregistry.editor {
-	import clarin.cmdi.componentregistry.browser.XMLBrowser;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
@@ -116,7 +116,7 @@ package clarin.cmdi.componentregistry.editor {
 		 */
 		private function checkFirstDefiningComponent(components:ArrayCollection):void {
 			if (components.length != 1) {
-				throw new Error("A profile/component must have 1 component defined.");
+				throw new Error("A profile/component must have 1 component defined at root level.");
 			} else {
 				_firstComponent = components.getItemAt(0) as CMDComponent;
 			}
@@ -125,19 +125,19 @@ package clarin.cmdi.componentregistry.editor {
 		private function handleHeader(spec:CMDSpec):void {
 			addChild(new SelectTypeRadioButtons(spec));
 			addChild(createOptionalGroupNameInput(spec));
-			addChild(new FormItemInputText(XMLBrowser.DESCRIPTION, spec.headerDescription, function(val:String):void {
+			addChild(new FormItemInputText(LabelConstants.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
 				}));
-			addChild(new FormItemInputLine(XMLBrowser.NAME, _firstComponent.name, function(val:String):void {
+			addChild(new FormItemInputLine(LabelConstants.NAME, _firstComponent.name, function(val:String):void {
 					_firstComponent.name = val;
 					_spec.headerName = val;
 				}));
-			var idInput:FormItemInputLine = new FormItemInputLine("Id", spec.headerId, function(val:String):void {
-					spec.headerId = val;
-				}, false);
-			idInput.toolTip = "Id will be generated";
-			addChild(idInput);
-			var link:ConceptLinkInput = new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _firstComponent.conceptLink, function(val:String):void {
+//			var idInput:FormItemInputLine = new FormItemInputLine(XMLBrowser:"Id", spec.headerId, function(val:String):void {
+//					spec.headerId = val;
+//				}, false);
+//			idInput.toolTip = "Id will be generated";
+//			addChild(idInput);
+			var link:ConceptLinkInput = new ConceptLinkInput(LabelConstants.CONCEPTLINK, _firstComponent.conceptLink, function(val:String):void {
 					_firstComponent.conceptLink = val;
 				});
 			link.enabled = false;
@@ -145,7 +145,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
-			var result:FormItem = new FormItemInputLine("Group Name", spec.groupName, function(val:String):void {
+			var result:FormItem = new FormItemInputLine("Group Name:", spec.groupName, function(val:String):void {
 					spec.groupName = val;
 				})
 			BindingUtils.bindSetter(function(val:Boolean):void {

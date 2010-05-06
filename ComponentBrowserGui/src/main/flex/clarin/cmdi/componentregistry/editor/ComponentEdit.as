@@ -1,15 +1,15 @@
 package clarin.cmdi.componentregistry.editor {
-	import clarin.cmdi.componentregistry.browser.XMLBrowser;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -110,7 +110,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function addConceptLink():void {
-			addChild(new ConceptLinkInput(XMLBrowser.CONCEPTLINK, _component.conceptLink, function(val:String):void {
+			addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _component.conceptLink, function(val:String):void {
 					_component.conceptLink = val;
 				}));
 		}
@@ -122,16 +122,16 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function addNameInput():void {
-			addChild(new FormItemInputLine(XMLBrowser.NAME, _component.name, function(val:String):void {
+			addChild(new FormItemInputLine(LabelConstants.NAME, _component.name, function(val:String):void {
 					_component.name = val;
 				}));
 		}
 
 		private function addCardinalityInput():void {
-			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MIN, _component.cardinalityMin, function(val:String):void {
+			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _component.cardinalityMin, function(val:String):void {
 					_component.cardinalityMin = val;
 				}));
-			addChild(new CardinalityInput(XMLBrowser.CARDINALITY_MAX, _component.cardinalityMax, function(val:String):void {
+			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _component.cardinalityMax, function(val:String):void {
 					_component.cardinalityMax = val;
 				}));
 		}
@@ -158,8 +158,8 @@ package clarin.cmdi.componentregistry.editor {
 			if (component.componentId != "" && component.componentId != null) {
 				var result:FormItem = new FormItem();
 				result.styleName = StyleConstants.XMLBROWSER_FIELD;
-				result.label = XMLBrowser.COMPONENT_ID;
-				result.addChild(new ExpandingComponentLabel(component.componentId, false));
+				result.label = LabelConstants.COMPONENT_ID;
+				result.addChild(new ExpandingComponentLabel(component.componentId, component.name, false));
 				return result;
 			}
 			return null;
@@ -220,7 +220,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function createHeading():FormItem {
 			var heading:FormItem = new FormItem();
-			heading.label = XMLBrowser.COMPONENT;
+			heading.label = LabelConstants.COMPONENT;
 			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
 			return heading;
 		}
