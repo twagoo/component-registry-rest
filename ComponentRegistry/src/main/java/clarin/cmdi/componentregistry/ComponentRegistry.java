@@ -27,8 +27,6 @@ public interface ComponentRegistry {
 
     CMDComponentSpec getMDComponent(String id);
 
-    List<MDProfile> searchMDProfiles(String searchPattern);
-
     /**
      * 
      * @return -1 if profile could not be registered

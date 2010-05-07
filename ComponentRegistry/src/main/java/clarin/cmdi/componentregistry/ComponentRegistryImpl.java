@@ -325,10 +325,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         LOG.info("Saving profile/component is successful " + file);
     }
 
-    public List<MDProfile> searchMDProfiles(String searchPattern) {
-        return Collections.emptyList();
-    }
-
     public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException {
         ProfileDescription desc = profileDescriptions.get(profileId);
         if (desc != null) {
