@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +21,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
@@ -328,14 +330,14 @@ public class ComponentRegistryImplTest {
         description.setName("Aap");
         description.setCreatorName(PRINCIPAL.getName());
         description.setDescription("MyDescription");
-        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
-        registry.registerMDComponent(description, testProfile);
+        CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
+        registry.registerMDComponent(description, testComponent);
 
         assertEquals(1, registry.getComponentDescriptions().size());
         ComponentDescription desc = registry.getComponentDescription(description.getId());
         assertEquals("MyDescription", desc.getDescription());
         desc.setDescription("NewDesc");
-        registry.update(desc, PRINCIPAL, testProfile);
+        registry.update(desc, PRINCIPAL, testComponent);
 
         registry = getTestRegistry(getRegistryDir());
         assertEquals(1, registry.getComponentDescriptions().size());
@@ -344,6 +346,59 @@ public class ComponentRegistryImplTest {
         assertEquals("Aap", result.getName());
     }
 
+    @Test
+    public void testGetUsageInProfiles() throws Exception {
+        ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
+        ComponentDescription cd = ComponentDescription.createNewDescription();
+        cd.setName("Y");
+        CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
+        registry.registerMDComponent(cd, testComponent);
+
+        List<ProfileDescription> result = registry.getUsageInProfiles(cd.getId());
+        assertEquals(0, result.size());
+
+        ProfileDescription pd = ProfileDescription.createNewDescription();
+        pd.setName("X");
+        CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
+        CMDComponentType reference = new CMDComponentType();
+        reference.setComponentId(cd.getId());
+        testProfile.getCMDComponent().get(0).getCMDComponent().add(reference);
+        registry.registerMDProfile(pd, testProfile);
+        
+        result = registry.getUsageInProfiles(cd.getId());
+        assertEquals(1, result.size());
+    }
+    
+    @Test
+    public void testGetUsageInComponents() throws Exception {
+        ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
+        ComponentDescription cd = ComponentDescription.createNewDescription();
+        cd.setName("Y");
+        registry.registerMDComponent(cd, RegistryTestHelper.getTestComponent());
+
+        List<ComponentDescription> result = registry.getUsageInComponents(cd.getId());
+        assertEquals(0, result.size());
+
+        ComponentDescription cd2 = ComponentDescription.createNewDescription();
+        cd2.setName("X");
+        CMDComponentSpec testComponent = RegistryTestHelper.getTestProfile();
+        CMDComponentType reference = new CMDComponentType();
+        reference.setComponentId(cd.getId());
+        testComponent.getCMDComponent().get(0).getCMDComponent().add(reference);
+        registry.registerMDComponent(cd2, testComponent);
+
+        ComponentDescription cd3 = ComponentDescription.createNewDescription();
+        cd3.setName("X2");
+        testComponent = RegistryTestHelper.getTestProfile();
+        reference = new CMDComponentType();
+        reference.setComponentId(cd.getId());
+        testComponent.getCMDComponent().get(0).getCMDComponent().add(reference);
+        registry.registerMDComponent(cd3, testComponent);
+
+        result = registry.getUsageInComponents(cd.getId());
+        assertEquals(2, result.size());
+    }
+    
     private File getRegistryDir() {
         if (tmpRegistryDir == null)
             tmpRegistryDir = createTempRegistryDir();

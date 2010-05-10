@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -375,6 +376,41 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         writeDescription(dir, description);
         writeCMDComponentSpec(dir, strippedId + ".xml", spec);
         updateCache(spec, description);
+    }
+
+    public List<ComponentDescription> getUsageInComponents(String componentId) {
+        List<ComponentDescription> result = new ArrayList<ComponentDescription>();
+        List<ComponentDescription> descs = getComponentDescriptions();
+        for (ComponentDescription desc : descs) {
+            CMDComponentSpec spec = getMDComponent(desc.getId());
+            if (findComponentId(componentId, spec.getCMDComponent())) {
+                result.add(desc);
+            }
+        }
+        return result;
+    }
+
+    public List<ProfileDescription> getUsageInProfiles(String componentId) {
+        List<ProfileDescription> result = new ArrayList<ProfileDescription>();
+        List<ProfileDescription> profileDescriptions = getProfileDescriptions();
+        for (ProfileDescription profileDescription : profileDescriptions) {
+            CMDComponentSpec profile = getMDProfile(profileDescription.getId());
+            if (findComponentId(componentId, profile.getCMDComponent())) {
+                result.add(profileDescription);
+            }
+        }
+        return result;
+    }
+
+    private boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
+        for (CMDComponentType cmdComponent : componentReferences) {
+            if (componentId.equals(cmdComponent.getComponentId())) {
+                return true;
+            } else if (findComponentId(componentId, cmdComponent.getCMDComponent())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

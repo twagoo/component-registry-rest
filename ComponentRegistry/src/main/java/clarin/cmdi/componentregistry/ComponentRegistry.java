@@ -64,5 +64,20 @@ public interface ComponentRegistry {
     void update(AbstractDescription desc, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
     UserUnauthorizedException;
 
+    /**
+     * 
+     * @param componentId
+     * @return List of ComponentDescriptions of Components that use the given Component.
+     */
+    List<ComponentDescription> getUsageInComponents(String componentId) ;
+
+    /**
+     * 
+     * @param componentId
+     * @return List of ProfileDescriptions of Profiles that use the given Component.
+     */
+    List<ProfileDescription> getUsageInProfiles(String componentId) ;
+        
+    
     //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's
 }

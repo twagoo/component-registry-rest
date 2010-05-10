@@ -95,7 +95,13 @@ public class ComponentRegistryRestService {
         }
         LOG.info("Component with id: " + componentId + " set for deletion.");
         try {
-            registry.deleteMDComponent(componentId, principal);
+            List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
+            List<ComponentDescription> components = registry.getUsageInComponents(componentId);
+            if (profiles.isEmpty() && components.isEmpty()) {
+                registry.deleteMDComponent(componentId, principal);
+            } else {
+                return Response.status(Status.FORBIDDEN).entity(createStillInUseMessage(profiles, components)).build();
+            }
         } catch (IOException e) {
             LOG.info("Component with id: " + componentId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -105,6 +111,24 @@ public class ComponentRegistryRestService {
         }
         LOG.info("Component with id: " + componentId + " deleted.");
         return Response.ok().build();
+    }
+
+    private String createStillInUseMessage(List<ProfileDescription> profiles, List<ComponentDescription> components) {
+        StringBuilder result = new StringBuilder();
+        if (!profiles.isEmpty()) {
+            result.append("Still used by the following profiles: \n");
+            for (ProfileDescription profileDescription : profiles) {
+                result.append(" - " + profileDescription.getName()+"\n");
+            }
+        }
+        if (!components.isEmpty()) {
+            result.append("Still used by the following components: \n");
+            for (ComponentDescription componentDescription : components) {
+                result.append(" - " + componentDescription.getName()+"\n");
+            }
+        }
+        result.append("Try to change above mentioned references first.");
+        return result.toString();
     }
 
     @GET

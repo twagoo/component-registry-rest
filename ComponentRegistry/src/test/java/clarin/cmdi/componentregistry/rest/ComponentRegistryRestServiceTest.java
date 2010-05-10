@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.JAXBException;
 
 import org.junit.After;
@@ -70,7 +71,8 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     }
 
     private Builder getAuthenticatedResource(String path) {
-        return getResource().path(path).header(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encode(DummyPrincipal.DUMMY_PRINCIPAL.getName()+":dummy")));
+        return getResource().path(path).header(HttpHeaders.AUTHORIZATION,
+                "Basic " + new String(Base64.encode(DummyPrincipal.DUMMY_PRINCIPAL.getName() + ":dummy")));
     }
 
     @Test
@@ -103,7 +105,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         assertEquals("Access", component.getCMDComponent().get(0).getName());
 
         assertEquals("clarin.eu:cr1:component2", component.getHeader().getID());
-        assertEquals("testComponent", component.getHeader().getName());
+        assertEquals("component2", component.getHeader().getName());
         assertEquals("Test Description", component.getHeader().getDescription());
     }
 
@@ -130,6 +132,62 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     }
 
     @Test
+    public void testDeleteRegisteredComponentStillUsed() throws Exception {
+        String content = "";
+        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    <Header/>\n";
+        content += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+        content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+        content += "    </CMD_Component>\n";
+        content += "</CMD_ComponentSpec>\n";
+        ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content);
+
+        content = "";
+        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    <Header/>\n";
+        content += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        content += "        <CMD_Component ComponentId=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
+        content += "        </CMD_Component>\n";
+        content += "    </CMD_Component>\n";
+        content += "</CMD_ComponentSpec>\n";
+        ComponentDescription compDesc2 = RegistryTestHelper.addComponent(testRegistry, "YYY1", content);
+
+        content = "";
+        content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    <Header/>\n";
+        content += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        content += "        <CMD_Component ComponentId=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
+        content += "        </CMD_Component>\n";
+        content += "    </CMD_Component>\n";
+        content += "</CMD_ComponentSpec>\n";
+        ProfileDescription profile = RegistryTestHelper.addProfile(testRegistry, "TestProfile3", content);
+
+        List<ComponentDescription> components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(4, components.size()); //4, 2 added in this test and two are in by default see @Before setUpTestRegistry
+
+        ClientResponse response = getAuthenticatedResource("/registry/components/" + compDesc1.getId()).delete(ClientResponse.class);
+        assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
+        assertEquals(
+                "Still used by the following profiles: \n - TestProfile3\nStill used by the following components: \n - YYY1\nTry to change above mentioned references first.",
+                response.getEntity(String.class));
+
+        components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(4, components.size());
+
+        response = getAuthenticatedResource("/registry/profiles/" + profile.getId()).delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        response = getAuthenticatedResource("/registry/components/" + compDesc2.getId()).delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        response = getAuthenticatedResource("/registry/components/" + compDesc1.getId()).delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, components.size());
+    }
+
+    @Test
     public void testGetRegisteredProfile() throws Exception {
         CMDComponentSpec profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1").accept(MediaType.APPLICATION_JSON).get(
                 CMDComponentSpec.class);
@@ -141,7 +199,7 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
         assertEquals("Actor", profile.getCMDComponent().get(0).getName());
 
         assertEquals("clarin.eu:cr1:profile2", profile.getHeader().getID());
-        assertEquals("testProfile", profile.getHeader().getName());
+        assertEquals("profile2", profile.getHeader().getName());
         assertEquals("Test Description", profile.getHeader().getDescription());
 
         try {
@@ -319,10 +377,10 @@ public class ComponentRegistryRestServiceTest extends JerseyTest {
     public void setUpTestRegistry() throws ParseException, JAXBException {
         registryDir = ComponentRegistryImplTest.createTempRegistryDir();
         testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
-        RegistryTestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile1");
-        RegistryTestHelper.addProfile(testRegistry, ComponentRegistry.REGISTRY_ID + "profile2");
-        RegistryTestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component1");
-        RegistryTestHelper.addComponent(testRegistry, ComponentRegistry.REGISTRY_ID + "component2");
+        RegistryTestHelper.addProfile(testRegistry, "profile1");
+        RegistryTestHelper.addProfile(testRegistry, "profile2");
+        RegistryTestHelper.addComponent(testRegistry, "component1");
+        RegistryTestHelper.addComponent(testRegistry, "component2");
     }
 
     @After

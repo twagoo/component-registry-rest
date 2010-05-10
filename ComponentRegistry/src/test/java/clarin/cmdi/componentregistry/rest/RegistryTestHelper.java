@@ -36,11 +36,11 @@ public final class RegistryTestHelper {
             JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
         desc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
-        desc.setName("testComponent");
+        desc.setName(id);
         desc.setRegistrationDate("" + SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse("1/1/2009"));
         desc.setDescription("Test Description");
-        desc.setId(id);
-        desc.setHref("link:" + id);
+        desc.setId(ComponentRegistry.REGISTRY_ID + id);
+        desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
         CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
         testRegistry.registerMDComponent(desc, spec);
         return desc;
@@ -82,11 +82,11 @@ public final class RegistryTestHelper {
             JAXBException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
-        desc.setName("testProfile");
+        desc.setName(id);
         desc.setRegistrationDate("" + SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse("1/1/2009"));
         desc.setDescription("Test Description");
-        desc.setId(id);
-        desc.setHref("link:" + id);
+        desc.setId(ComponentRegistry.REGISTRY_ID + id);
+        desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
         CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
         testRegistry.registerMDProfile(desc, spec);
         return desc;
