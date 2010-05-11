@@ -2,16 +2,18 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-	
+
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
-	
+
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
 	import mx.controls.Button;
 	import mx.core.Container;
 	import mx.core.UIComponent;
+	import mx.validators.RegExpValidator;
 
 	[Event(name="removeElement", type="flash.events.Event")]
 	public class ElementEdit extends Form {
@@ -34,9 +36,7 @@ package clarin.cmdi.componentregistry.editor {
 			super.createChildren();
 
 			addChild(createEditBar());
-			addChild(new FormItemInputLine(LabelConstants.NAME, _element.name, function(val:String):void {
-					_element.name = val;
-				}));
+			addNameInput();
 			addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
 				}));
@@ -51,7 +51,7 @@ package clarin.cmdi.componentregistry.editor {
 				}));
 			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
 					_element.cardinalityMax = val;
-				}));				
+				}));
 			addChild(AttributeListEdit.createAndAddValueScheme(_element));
 			handleCMDAttributeList();
 		}
@@ -90,6 +90,13 @@ package clarin.cmdi.componentregistry.editor {
 			heading.label = LabelConstants.ELEMENT;
 			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
 			return heading;
+		}
+
+		private function addNameInput():void {
+			var nameInput:NameInputLine = new NameInputLine(_element.name, function(val:String):void {
+					_element.name = val;
+				})
+			addChild(nameInput);
 		}
 
 	}

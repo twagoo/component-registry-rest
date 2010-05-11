@@ -23,7 +23,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			return result;
 		}
 
-		public static function createComponent(xml:XML):CMDComponent {
+		private static function createComponent(xml:XML):CMDComponent {
 			var result:CMDComponent = new CMDComponent();
 			result.name = xml.@name;
 			result.componentId = xml.@ComponentId;
@@ -31,7 +31,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.filename = xml.@filename;
 			if (xml.hasOwnProperty("@CardinalityMin"))
 				result.cardinalityMin = xml.@CardinalityMin;
-			if (xml.hasOwnProperty("@CardinalityMax"))	
+			if (xml.hasOwnProperty("@CardinalityMax"))
 				result.cardinalityMax = xml.@CardinalityMax;
 			result.attributeList = createAttributeList(xml);
 			var elements:XMLList = xml.elements(ComponentMD.CMD_ELEMENT);
@@ -47,16 +47,15 @@ package clarin.cmdi.componentregistry.editor.model {
 			return result;
 		}
 
-		public static function createComponentElement(xml:XML):CMDComponentElement {
+		private static function createComponentElement(xml:XML):CMDComponentElement {
 			var result:CMDComponentElement = new CMDComponentElement();
 			result.name = xml.@name;
 			result.conceptLink = xml.@ConceptLink;
 			result.documentation = xml.@Documentation;
 			result.displayPriority = xml.@DisplayPriority;
-			result.valueSchemeSimple = xml.@ValueScheme;
 			if (xml.hasOwnProperty("@CardinalityMin"))
 				result.cardinalityMin = xml.@CardinalityMin;
-			if (xml.hasOwnProperty("@CardinalityMax"))	
+			if (xml.hasOwnProperty("@CardinalityMax"))
 				result.cardinalityMax = xml.@CardinalityMax;
 			result.attributeList = createAttributeList(xml);
 			if (xml.hasOwnProperty(ComponentMD.VALUE_SCHEME)) {
@@ -65,11 +64,15 @@ package clarin.cmdi.componentregistry.editor.model {
 				} else if (xml.ValueScheme.hasOwnProperty(ComponentMD.ENUMERATION)) {
 					result.valueSchemeEnumeration = new XMLListCollection(xml.ValueScheme.enumeration.*);
 				}
+			} else if (xml.hasOwnProperty("@ValueScheme")) {
+				result.valueSchemeSimple = xml.@ValueScheme;
+			} else {
+				result.valueSchemeSimple = "";
 			}
 			return result;
 		}
 
-		public static function createAttributeList(xml:XML):ArrayCollection {
+		private static function createAttributeList(xml:XML):ArrayCollection {
 			var result:ArrayCollection = new ArrayCollection();
 			if (xml.hasOwnProperty(ComponentMD.ATTRIBUTE_LIST)) {
 				var attributes:XMLList = xml.AttributeList.descendants(ComponentMD.ATTRIBUTE);
@@ -81,7 +84,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			return result;
 		}
 
-		public static function createAttribute(xml:XML):CMDAttribute {
+		private static function createAttribute(xml:XML):CMDAttribute {
 			var result:CMDAttribute = new CMDAttribute();
 			result.name = xml.Name;
 			if (xml.hasOwnProperty(ComponentMD.TYPE)) {

@@ -19,6 +19,7 @@ import mx.core.DragSource;
 import mx.core.UIComponent;
 import mx.managers.CursorManager;
 import mx.managers.DragManager;
+import mx.validators.Validator;
 
 
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
@@ -74,38 +75,40 @@ public function setDescription(itemDescription:ItemDescription):void {
 
 public function clearEditor():void {
 	if (cmdSpec && !cmdSpec.isProfile) {
-	    this.cmdSpec = createEmptyComponent();
+		this.cmdSpec = createEmptyComponent();
 	} else {
 		this.cmdSpec = createEmptyProfile();
 	}
 }
 
 private function createEmptyComponent():CMDSpec {
-		var result:CMDSpec = new CMDSpec(false);
-		result.cmdComponents.addItem(new CMDComponent());
-        return result
+	var result:CMDSpec = new CMDSpec(false);
+	result.cmdComponents.addItem(new CMDComponent());
+	return result
 }
 
 private function createEmptyProfile():CMDSpec {
-		var result:CMDSpec = new CMDSpec(true);
-		var c:CMDComponent = new CMDComponent();
-		result.cmdComponents.addItem(c);
-		c.cmdElements.addItem(new CMDComponentElement());		
-        return result
+	var result:CMDSpec = new CMDSpec(true);
+	var c:CMDComponent = new CMDComponent();
+	result.cmdComponents.addItem(c);
+	c.cmdElements.addItem(new CMDComponentElement());
+	return result
 }
 
 private function saveSpec():void {
 //	Alert.show(xmlEditor.cmdSpec.toXml()); 
-	var item:ItemDescription = new ItemDescription();
-	item.description = xmlEditor.cmdSpec.headerDescription;
-	item.name = xmlEditor.cmdSpec.headerName;
-	item.isProfile = xmlEditor.cmdSpec.isProfile;
-	item.groupName = xmlEditor.cmdSpec.groupName;
-	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
-	if (item.isProfile) {
-		uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
-	} else {
-		uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
+	if (xmlEditor.validate()) {
+		var item:ItemDescription = new ItemDescription();
+		item.description = xmlEditor.cmdSpec.headerDescription;
+		item.name = xmlEditor.cmdSpec.headerName;
+		item.isProfile = xmlEditor.cmdSpec.isProfile;
+		item.groupName = xmlEditor.cmdSpec.groupName;
+		uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
+		if (item.isProfile) {
+			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
+		} else {
+			uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
+		}
 	}
 }
 

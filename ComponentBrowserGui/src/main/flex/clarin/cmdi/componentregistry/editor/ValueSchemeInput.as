@@ -10,9 +10,11 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
 	import mx.controls.TextInput;
+	import mx.events.ValidationResultEvent;
 	import mx.managers.PopUpManager;
+	import mx.validators.Validator;
 
-	public class ValueSchemeInput extends FormItem {
+	public class ValueSchemeInput extends FormItem implements CMDValidator {
 
 		private var textField:TextInput = new TextInput();
 		private var enumeration:ComboBox;
@@ -20,8 +22,9 @@ package clarin.cmdi.componentregistry.editor {
 		private var _valueSchemeEnumeration:XMLListCollection;
 		private var _valueSchemePattern:String = "";
 		private var _valueSchemeSimple:String = "";
+		private var _validator:Validator = InputValidators.getIsRequiredValidator();
 
-		public function ValueSchemeInput(name:String) {
+		public function ValueSchemeInput(name:String, required:Boolean = true) {
 			super();
 			direction = FormItemDirection.HORIZONTAL;
 			label = name;
@@ -32,6 +35,8 @@ package clarin.cmdi.componentregistry.editor {
 			textField.editable = false;
 			enumeration = createEnumeration();
 			enumeration.width = 300;
+
+			CMDComponentXMLEditor.validators.addItem(this);
 		}
 
 		protected override function createChildren():void {
@@ -53,6 +58,7 @@ package clarin.cmdi.componentregistry.editor {
 				removeChildAt(0);
 			}
 			addChildAt(textField, 0);
+ 			_validator.listener = this.textField;
 		}
 
 		[Bindable]
@@ -61,7 +67,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function set valueSchemePattern(valueSchemePattern:String):void {
-			_valueSchemeEnumeration = null;
+		    _valueSchemeEnumeration = null;
 			_valueSchemeSimple = "";
 			_valueSchemePattern = valueSchemePattern
 			textField.text = valueSchemePattern;
@@ -69,6 +75,7 @@ package clarin.cmdi.componentregistry.editor {
 				removeChildAt(0);
 			}
 			addChildAt(textField, 0);
+			_validator.listener = this.textField;
 		}
 
 		[Bindable]
@@ -85,6 +92,7 @@ package clarin.cmdi.componentregistry.editor {
 				removeChildAt(0);
 			}
 			addChildAt(enumeration, 0);
+			_validator.listener = this.enumeration;
 		}
 
 		private function createEnumeration():ComboBox {
@@ -102,5 +110,14 @@ package clarin.cmdi.componentregistry.editor {
 			PopUpManager.addPopUp(popup, this, false);
 		}
 
+		public function validate():Boolean {
+			var result:ValidationResultEvent;
+			if (_valueSchemeEnumeration == null) {
+				result = _validator.validate(this.textField.text);
+			} else {
+				result = _validator.validate(this.enumeration.dataProvider);
+			}
+			return result.type == ValidationResultEvent.VALID;
+		} 
 	}
 }

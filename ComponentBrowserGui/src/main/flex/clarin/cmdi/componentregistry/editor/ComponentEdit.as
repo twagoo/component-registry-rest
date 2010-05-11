@@ -5,11 +5,11 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -122,9 +122,10 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function addNameInput():void {
-			addChild(new FormItemInputLine(LabelConstants.NAME, _component.name, function(val:String):void {
+			var nameInput:FormItemInputLine = new NameInputLine(_component.name, function(val:String):void {
 					_component.name = val;
-				}));
+				});
+			addChild(nameInput);
 		}
 
 		private function addCardinalityInput():void {

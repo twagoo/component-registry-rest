@@ -30,6 +30,7 @@ package clarin.cmdi.componentregistry.editor {
 		private var noAttributesLabel:Label = new Label();
 		[Bindable]
 		public var hasNoAttributes:Boolean = true;
+		
 
 		public function AttributeListEdit(attributes:ArrayCollection, parent:UIComponent) {
 			super();
@@ -97,7 +98,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {
-			var name:FormItemInputLine = new FormItemInputLine(LabelConstants.NAME, attribute.name, function(val:String):void {
+			var name:NameInputLine = new NameInputLine(attribute.name, function(val:String):void {
 					attribute.name = val;
 				});
 			name.direction = FormItemDirection.HORIZONTAL

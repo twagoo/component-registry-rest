@@ -22,7 +22,7 @@ ToggleButtonBar {
    cornerRadius: 8;
    dropShadowEnabled: true;
    verticalGap: 1;
-   indicatorGap: 1;
+   indicatorGap: 8;
 }
 
 .xmlBrowserHeader {
@@ -38,7 +38,10 @@ ToggleButtonBar {
 }
 
 .xmlEditorFieldEditField {
-    borderStyle: none;
+    borderStyle: solid;
+    borderColor: #ffffff;
+    borderThickness: 1;
+    cornerRadius: 3;
     fontWeight: normal;
 }
 

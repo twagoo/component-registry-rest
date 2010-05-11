@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.editor {
-	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.CMDSpecRenderer;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
@@ -31,9 +31,13 @@ package clarin.cmdi.componentregistry.editor {
 		private static const DRAG_ITEMS:String = "items";
 
 		public static const EDITOR_CHANGE_EVENT:String = "editorChange";
+
+		[ArrayElementType("CMDValidator")]
+		public static var validators:ArrayCollection = new ArrayCollection();
 		private var _spec:CMDSpec;
 		private var _firstComponent:CMDComponent;
 		private var currentElementIndex:int = -1;
+
 
 		public function CMDComponentXMLEditor() {
 			super();
@@ -45,6 +49,14 @@ package clarin.cmdi.componentregistry.editor {
 			addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
 			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, dispatchEditorChangeEvent);
 			addEventListener(ChildExistenceChangedEvent.CHILD_REMOVE, dispatchEditorChangeEvent);
+		}
+
+		public function validate():Boolean {
+			var result:Boolean = true;
+			for each (var validator:CMDValidator in validators) {
+				result = validator.validate() && result;
+			}
+			return result;
 		}
 
 		private function dragEnterHandler(event:DragEvent):void {
@@ -102,6 +114,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function createNewEditor():void {
 			var start:int = getTimer();
+			validators = new ArrayCollection();
 			this.currentElementIndex = -1;
 			removeAllChildren()
 			checkFirstDefiningComponent(_spec.cmdComponents);
@@ -125,13 +138,15 @@ package clarin.cmdi.componentregistry.editor {
 		private function handleHeader(spec:CMDSpec):void {
 			addChild(new SelectTypeRadioButtons(spec));
 			addChild(createOptionalGroupNameInput(spec));
-			addChild(new FormItemInputText(LabelConstants.DESCRIPTION, spec.headerDescription, function(val:String):void {
+			var descriptionInput:FormItemInputText = new FormItemInputText(LabelConstants.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
-				}));
-			addChild(new FormItemInputLine(LabelConstants.NAME, _firstComponent.name, function(val:String):void {
+				}, InputValidators.getIsRequiredValidator());
+			addChild(descriptionInput);
+			var nameInput:NameInputLine = new NameInputLine(_firstComponent.name, function(val:String):void {
 					_firstComponent.name = val;
 					_spec.headerName = val;
-				}));
+				})
+			addChild(nameInput);
 //			var idInput:FormItemInputLine = new FormItemInputLine(XMLBrowser:"Id", spec.headerId, function(val:String):void {
 //					spec.headerId = val;
 //				}, false);
@@ -145,9 +160,9 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
-			var result:FormItem = new FormItemInputLine("Group Name:", spec.groupName, function(val:String):void {
+			var result:FormItemInputLine = new FormItemInputLine("Group Name:", spec.groupName, function(val:String):void {
 					spec.groupName = val;
-				})
+				}, true, InputValidators.getIsRequiredValidator());
 			BindingUtils.bindSetter(function(val:Boolean):void {
 					result.visible = !val;
 				}, spec, "isProfile");
