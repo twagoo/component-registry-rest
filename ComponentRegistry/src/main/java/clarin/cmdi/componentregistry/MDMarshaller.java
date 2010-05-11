@@ -43,7 +43,6 @@ public class MDMarshaller {
 
     private static Schema generalComponentSchema;
 
-    private static Templates componentToSchemaTemplates;
 
     private MDMarshaller() {
     }
@@ -115,15 +114,15 @@ public class MDMarshaller {
     }
 
     public static void generateXsd(CMDComponentSpec spec, final Writer outputWriter) {
-        if (componentToSchemaTemplates == null) {
+        Templates componentToSchemaTemplates;
             try {
                 System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
                 componentToSchemaTemplates = TransformerFactory.newInstance().newTemplates(
                         new StreamSource(Configuration.getInstance().getComponent2SchemaXsl()));
             } catch (TransformerConfigurationException e) {
                 LOG.error("Cannot create Template", e);
+                return;
             }
-        }
         try {
             Transformer transformer = componentToSchemaTemplates.newTransformer();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
