@@ -77,16 +77,16 @@ public class MDValidatorTest {
 
     @Test
     public void testValidateComponentIdNotRegistered() throws Exception {
-        String id1 = ComponentRegistry.REGISTRY_ID + "component1";
-        String id2 = ComponentRegistry.REGISTRY_ID + "component2";
+        String id1 = "component1";
+        String id2 = "component2";
 
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
         profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component ComponentId=\"" + id1 + "\"/>\n"; //id not registered
-        profileContent += "    <CMD_Component ComponentId=\"" + id2 + "\"/>\n"; //id not registered
+        profileContent += "    <CMD_Component ComponentId=\"" +ComponentRegistry.REGISTRY_ID +  id1 + "\"/>\n"; //id not registered
+        profileContent += "    <CMD_Component ComponentId=\"" +ComponentRegistry.REGISTRY_ID +  id2 + "\"/>\n"; //id not registered
         profileContent += "</CMD_ComponentSpec>\n";
 
         ProfileDescription desc = ProfileDescription.createNewDescription();
@@ -110,7 +110,7 @@ public class MDValidatorTest {
 
     @Test
     public void testValidateNestedComponents() throws Exception {
-        String id1 = ComponentRegistry.REGISTRY_ID + "component1";
+        String id1 = "component1";
 
         String content = "";
         content += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -119,7 +119,7 @@ public class MDValidatorTest {
         content += "    <Header />\n";
         content += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         content += "        <CMD_Element name=\"Name\" ValueScheme=\"string\" />\n";
-        content += "      <CMD_Component ComponentId=\"" + id1 + "\"/>\n"; //id not registered
+        content += "      <CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id1 + "\"/>\n"; //id not registered
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
 
