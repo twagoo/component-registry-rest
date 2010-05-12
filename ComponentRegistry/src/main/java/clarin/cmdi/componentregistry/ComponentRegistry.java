@@ -77,6 +77,11 @@ public interface ComponentRegistry {
      * @return List of ProfileDescriptions of Profiles that use the given Component.
      */
     List<ProfileDescription> getUsageInProfiles(String componentId) ;
+
+    /**
+     * Return true if this registry is the public registry as opposed to a registry used for the user privately.
+     **/
+    boolean isPublic();
         
     
     //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's

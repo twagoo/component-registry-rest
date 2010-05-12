@@ -93,38 +93,88 @@ public class ComponentRegistryImplTest {
 
     @Test
     public void testCache() throws JAXBException {
-        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
-        Configuration config = Configuration.getInstance();
-        config.setRegistryRoot(getRegistryDir());
+        ResourceConfig config = new ResourceConfig();
+        config.setResourceRoot(getRegistryDir());
         config.init();
-        register.setConfiguration(config);
+        ComponentRegistryImpl register = new ComponentRegistryImpl(false);
+        register.setResourceConfig(config);
 
-        ProfileDescription description = new ProfileDescription();
+        ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
-        String id = "Aap" + System.currentTimeMillis();
-        description.setId(id);
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
         register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
-        assertNull(register.getMDComponent(id));
-        assertNotNull(register.getMDProfile(id));
+        assertNull(register.getMDComponent(description.getId()));
+        assertNotNull(register.getMDProfile(description.getId()));
 
-        register.setConfiguration(config); //triggers cache
+        register.setResourceConfig(config); //triggers cache
         assertEquals(1, register.getProfileDescriptions().size());
         assertEquals(0, register.getComponentDescriptions().size());
-        assertNotNull(register.getMDProfile(id));
+        assertNotNull(register.getMDProfile(description.getId()));
+    }
+
+    @Test
+    public void testCacheLoadCorrect() throws Exception {
+        ComponentRegistryImpl publicReg = getTestRegistry(getRegistryDir());
+        ComponentRegistryImpl userReg = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getComponentRegistry(true,
+                DummyPrincipal.DUMMY_PRINCIPAL);
+
+        ProfileDescription pDesc = ProfileDescription.createNewDescription();
+        pDesc.setName("Aap1");
+        pDesc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+        ComponentDescription cDesc = ComponentDescription.createNewDescription();
+        cDesc.setName("Aap2");
+        cDesc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+
+        assertEquals(0, userReg.getComponentDescriptions().size());
+        assertEquals(0, userReg.getProfileDescriptions().size());
+        assertEquals(0, publicReg.getComponentDescriptions().size());
+        assertEquals(0, publicReg.getProfileDescriptions().size());
+        userReg.registerMDComponent(cDesc, RegistryTestHelper.getTestComponent());
+        publicReg.registerMDComponent(cDesc, RegistryTestHelper.getTestComponent());
+        publicReg.registerMDProfile(pDesc, RegistryTestHelper.getTestProfile());
+        userReg.registerMDProfile(pDesc, RegistryTestHelper.getTestProfile());
+        assertEquals(1, userReg.getComponentDescriptions().size());
+        assertEquals(1, userReg.getProfileDescriptions().size());
+        assertEquals(1, publicReg.getComponentDescriptions().size());
+        assertEquals(1, publicReg.getProfileDescriptions().size());
+
+        publicReg.deleteMDProfile(pDesc.getId(), PRINCIPAL);
+        userReg.initCache();
+        publicReg.initCache();
+        assertEquals(1, userReg.getComponentDescriptions().size());
+        assertEquals(1, userReg.getProfileDescriptions().size());
+        assertEquals(1, publicReg.getComponentDescriptions().size());
+        assertEquals(0, publicReg.getProfileDescriptions().size());
+
+        userReg.deleteMDComponent(cDesc.getId(), PRINCIPAL);
+        userReg.initCache();
+        publicReg.initCache();
+        assertEquals(0, userReg.getComponentDescriptions().size());
+        assertEquals(1, userReg.getProfileDescriptions().size());
+        assertEquals(1, publicReg.getComponentDescriptions().size());
+        assertEquals(0, publicReg.getProfileDescriptions().size());
+
+        publicReg.deleteMDComponent(cDesc.getId(), PRINCIPAL);
+        userReg.deleteMDProfile(pDesc.getId(), PRINCIPAL);
+        userReg.initCache();
+        publicReg.initCache();
+        assertEquals(0, userReg.getComponentDescriptions().size());
+        assertEquals(0, userReg.getProfileDescriptions().size());
+        assertEquals(0, publicReg.getComponentDescriptions().size());
+        assertEquals(0, publicReg.getProfileDescriptions().size());
     }
 
     @Test
     public void testCacheCorruptFile() throws JAXBException {
-        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
-        Configuration config = Configuration.getInstance();
-        config.setRegistryRoot(getRegistryDir());
+        ResourceConfig config = new ResourceConfig();
+        config.setResourceRoot(getRegistryDir());
         config.init();
-        register.setConfiguration(config);
+        ComponentRegistryImpl register = new ComponentRegistryImpl(false);
+        register.setResourceConfig(config);
 
         ProfileDescription description = new ProfileDescription();
         description.setName("Aap");
@@ -151,7 +201,7 @@ public class ComponentRegistryImplTest {
         assertTrue(profileFile.delete()); //profile file deleted so file system corrupt file should no longer be loaded in cache
         assertFalse(profileFile.exists());
 
-        register.setConfiguration(config); //triggers cache
+        register.setResourceConfig(config); //triggers cache
         assertEquals(1, register.getProfileDescriptions().size());
         assertEquals(0, register.getComponentDescriptions().size());
         assertNull(register.getMDProfile(id));
@@ -300,27 +350,27 @@ public class ComponentRegistryImplTest {
 
     @Test
     public void testDeleteComponent() throws Exception {
-        ComponentRegistry register = getTestRegistry(getRegistryDir());
+        ComponentRegistry registry = getTestRegistry(getRegistryDir());
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
         description.setCreatorName(PRINCIPAL.getName());
         description.setDescription("MyDescription");
         CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
-        register.registerMDComponent(description, testComp);
+        registry.registerMDComponent(description, testComp);
         try {
-            register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
+            registry.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
             fail("Should have thrown exception");
         } catch (UserUnauthorizedException e) {
         }
 
-        assertEquals(1, register.getComponentDescriptions().size());
-        assertNotNull(register.getMDComponent(description.getId()));
+        assertEquals(1, registry.getComponentDescriptions().size());
+        assertNotNull(registry.getMDComponent(description.getId()));
 
-        register.deleteMDComponent(description.getId(), PRINCIPAL);
+        registry.deleteMDComponent(description.getId(), PRINCIPAL);
 
-        assertEquals(0, register.getComponentDescriptions().size());
-        assertNull(register.getMDProfile(description.getId()));
+        assertEquals(0, registry.getComponentDescriptions().size());
+        assertNull(registry.getMDProfile(description.getId()));
     }
 
     @Test
@@ -364,11 +414,11 @@ public class ComponentRegistryImplTest {
         reference.setComponentId(cd.getId());
         testProfile.getCMDComponent().get(0).getCMDComponent().add(reference);
         registry.registerMDProfile(pd, testProfile);
-        
+
         result = registry.getUsageInProfiles(cd.getId());
         assertEquals(1, result.size());
     }
-    
+
     @Test
     public void testGetUsageInComponents() throws Exception {
         ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
@@ -398,7 +448,7 @@ public class ComponentRegistryImplTest {
         result = registry.getUsageInComponents(cd.getId());
         assertEquals(2, result.size());
     }
-    
+
     private File getRegistryDir() {
         if (tmpRegistryDir == null)
             tmpRegistryDir = createTempRegistryDir();
@@ -407,19 +457,21 @@ public class ComponentRegistryImplTest {
 
     @After
     public void cleanupRegistryDir() {
+        ComponentRegistryFactory.getInstance().reset();
         cleanUpRegistryDir(tmpRegistryDir);
         tmpRegistryDir = null;
     }
 
     public static ComponentRegistryImpl getTestRegistry(File registryRoot) {
-        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
         Configuration config = Configuration.getInstance();
         config.setRegistryRoot(registryRoot);
         Set<String> adminUsers = new HashSet<String>();
         adminUsers.add(PRINCIPAL.getName());
         config.setAdminUsers(adminUsers);
         config.init();
-        register.setConfiguration(config);
+        ComponentRegistryFactory.getInstance().reset();
+        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry();
+        register.setResourceConfig(config.getPublicResourceConfig());
         return register;
     }
 

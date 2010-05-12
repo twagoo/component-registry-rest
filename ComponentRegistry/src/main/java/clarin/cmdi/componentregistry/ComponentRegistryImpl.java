@@ -41,8 +41,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
 
-    //bean will be injected
-    private Configuration configuration;
+    private ResourceConfig resourceConfig;
 
     //cache fields
     private Map<String, ComponentDescription> componentDescriptions;
@@ -50,21 +49,25 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     private Map<String, CMDComponentSpec> componentsCache;
     private Map<String, CMDComponentSpec> profilesCache;
 
-    private final static ComponentRegistry INSTANCE = new ComponentRegistryImpl();
+    private final boolean isPublic;
 
-    private ComponentRegistryImpl() {
+    /*
+     * Use the ComponentRegistryFactory
+     */
+    ComponentRegistryImpl(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
-    public static ComponentRegistry getInstance() {
-        return INSTANCE;
+    public static ComponentRegistry getInstance() { //TODO PD rename to use the factory everywhere
+        return ComponentRegistryFactory.getInstance().getPublicRegistry();
     }
 
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
+    public void setResourceConfig(ResourceConfig resourceConfig) {
+        this.resourceConfig = resourceConfig;
         initCache();
     }
 
-    private void initCache() {
+    void initCache() {
         LOG.info("Initializing cache..");
         LOG.info("CACHE: Reading and parsing all component descriptions.");
         this.componentDescriptions = loadComponentDescriptions();
@@ -96,7 +99,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     CMDComponentSpec getUncachedProfile(String id) {
         File file = getProfileFile(id);
-        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, MDMarshaller.getCMDComponentSchema());
+        CMDComponentSpec spec = null;
+        if (file.exists()) {
+            spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, MDMarshaller.getCMDComponentSchema());
+        }
         return spec;
     }
 
@@ -116,7 +122,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     CMDComponentSpec getUncachedComponent(String id) {
         File file = getComponentFile(id);
-        CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, MDMarshaller.getCMDComponentSchema());
+        CMDComponentSpec spec = null;
+        if (file.exists()) {
+            spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, MDMarshaller.getCMDComponentSchema());
+        }
         return spec;
     }
 
@@ -132,7 +141,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
-    private final static IOFileFilter DIRS_WITH_DESCRIPTIONS = new NotFileFilter(new NameFileFilter(Configuration.DELETED_DIR_NAME));
+    private final static IOFileFilter DIRS_WITH_DESCRIPTIONS = new NotFileFilter(new NameFileFilter(ResourceConfig.DELETED_DIR_NAME));
 
     private Map<String, ComponentDescription> loadComponentDescriptions() {
         Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), DIRS_WITH_DESCRIPTIONS);
@@ -157,11 +166,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private File getComponentDir() {
-        return configuration.getComponentDir();
+        return resourceConfig.getComponentDir();
     }
 
     private File getProfileDir() {
-        return configuration.getProfileDir();
+        return resourceConfig.getProfileDir();
     }
 
     public List<ComponentDescription> getComponentDescriptions() {
@@ -205,7 +214,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public File getProfileFile(String profileId) {
         String id = stripRegistryId(profileId);
-        File file = new File(configuration.getProfileDir(), id + File.separator + id + ".xml");
+        File file = new File(resourceConfig.getProfileDir(), id + File.separator + id + ".xml");
         return file;
     }
 
@@ -234,7 +243,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public File getComponentFile(String componentId) {
         String id = stripRegistryId(componentId);
-        File file = new File(configuration.getComponentDir(), id + File.separator + id + ".xml");
+        File file = new File(resourceConfig.getComponentDir(), id + File.separator + id + ".xml");
         return file;
     }
 
@@ -257,7 +266,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
      */
     public int registerMDComponent(ComponentDescription description, CMDComponentSpec spec) {
         LOG.info("Attempt to register component: " + description);
-        return register(configuration.getComponentDir(), description, spec, "component");
+        return register(resourceConfig.getComponentDir(), description, spec, "component");
     }
 
     /**
@@ -265,7 +274,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
      */
     public int registerMDProfile(ProfileDescription profileDescription, CMDComponentSpec spec) {
         LOG.info("Attempt to register profile: " + profileDescription);
-        return register(configuration.getProfileDir(), profileDescription, spec, "profile");
+        return register(resourceConfig.getProfileDir(), profileDescription, spec, "profile");
     }
 
     private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
@@ -332,7 +341,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             checkAuthorisation(desc, principal);
             File profileFile = getProfileFile(profileId);
             if (profileFile.exists()) {
-                FileUtils.moveDirectoryToDirectory(profileFile.getParentFile(), configuration.getProfileDeletionDir(), true);
+                FileUtils.moveDirectoryToDirectory(profileFile.getParentFile(), resourceConfig.getProfileDeletionDir(), true);
                 profileDescriptions.remove(profileId);
                 profilesCache.remove(profileId);
             } // else no profile so nothing to delete
@@ -352,7 +361,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             checkAuthorisation(desc, principal);
             File componentFile = getComponentFile(componentId);
             if (componentFile.exists()) {
-                FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), configuration.getComponentDeletionDir(), true);
+                FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), resourceConfig.getComponentDeletionDir(), true);
                 componentDescriptions.remove(componentId);
                 componentsCache.remove(componentId);
             } // else no component so nothing to delete
@@ -361,7 +370,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public void update(AbstractDescription description, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
             UserUnauthorizedException {
-        if (!configuration.isAdminUser(principal)) {
+        if (!Configuration.getInstance().isAdminUser(principal)) {
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
                     + "' cannot update this description (" + description + ").");
         }
@@ -411,6 +420,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             }
         }
         return false;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
     }
 
 }

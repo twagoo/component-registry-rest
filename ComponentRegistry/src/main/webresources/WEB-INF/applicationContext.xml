@@ -6,15 +6,16 @@
   <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" init-method="init" factory-method="getInstance">
     <property name="registryRoot" value="${registryRoot}" />
     <property name="adminUsers">
-      <set></set>
+      <set>
+        <value>Patrick Duin</value>
+      </set>
     </property>
     <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
     <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/comp2schema.xsl" />
     <property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd http://www.clarin.eu/cmd/general-component-schema.xsd" />
   </bean>
 
-  <bean id="componentRegistry" class="clarin.cmdi.componentregistry.ComponentRegistryImpl" factory-method="getInstance">
-    <property name="configuration" ref="configuration" />
+  <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.ComponentRegistryFactory" factory-method="getInstance">
   </bean>
 
 </beans>

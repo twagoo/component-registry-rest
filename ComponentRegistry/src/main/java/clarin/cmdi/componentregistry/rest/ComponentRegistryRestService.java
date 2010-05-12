@@ -10,12 +10,14 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -29,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryImpl;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -53,15 +55,18 @@ public class ComponentRegistryRestService {
     public static final String NAME_FORM_FIELD = "name";
     public static final String DESCRIPTION_FORM_FIELD = "description";
     public static final String GROUP_FORM_FIELD = "group";
+    public static final String USERSPACE_PARAM = "userspace";
 
-    private ComponentRegistry registry = ComponentRegistryImpl.getInstance();
+    private ComponentRegistry getRegistry(boolean userspace) {
+        return ComponentRegistryFactory.getInstance().getComponentRegistry(userspace, security.getUserPrincipal());
+    }
 
     @GET
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public List<ComponentDescription> getRegisteredComponents() {
+    public List<ComponentDescription> getRegisteredComponents(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         long start = System.currentTimeMillis();
-        List<ComponentDescription> components = registry.getComponentDescriptions();
+        List<ComponentDescription> components = getRegistry(userspace).getComponentDescriptions();
         LOG.info("Releasing " + components.size() + " registered components into the world (" + (System.currentTimeMillis() - start)
                 + " millisecs)");
         return components;
@@ -70,9 +75,9 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public List<ProfileDescription> getRegisteredProfiles() {
+    public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         long start = System.currentTimeMillis();
-        List<ProfileDescription> profiles = registry.getProfileDescriptions();
+        List<ProfileDescription> profiles = getRegistry(userspace).getProfileDescriptions();
         LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
                 + " millisecs)");
         return profiles;
@@ -81,18 +86,21 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/{componentId}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public CMDComponentSpec getRegisteredComponent(@PathParam("componentId") String componentId) {
+    public CMDComponentSpec getRegisteredComponent(@PathParam("componentId") String componentId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Component with id: " + componentId + " is requested.");
-        return registry.getMDComponent(componentId);
+        return getRegistry(userspace).getMDComponent(componentId);
     }
 
     @DELETE
     @Path("/components/{componentId}")
-    public Response deleteRegisteredComponent(@PathParam("componentId") String componentId) {
+    public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
             throw new IllegalArgumentException("no user principal found.");
         }
+        ComponentRegistry registry = getRegistry(userspace);
         LOG.info("Component with id: " + componentId + " set for deletion.");
         try {
             List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
@@ -118,13 +126,13 @@ public class ComponentRegistryRestService {
         if (!profiles.isEmpty()) {
             result.append("Still used by the following profiles: \n");
             for (ProfileDescription profileDescription : profiles) {
-                result.append(" - " + profileDescription.getName()+"\n");
+                result.append(" - " + profileDescription.getName() + "\n");
             }
         }
         if (!components.isEmpty()) {
             result.append("Still used by the following components: \n");
             for (ComponentDescription componentDescription : components) {
-                result.append(" - " + componentDescription.getName()+"\n");
+                result.append(" - " + componentDescription.getName() + "\n");
             }
         }
         result.append("Try to change above mentioned references first.");
@@ -134,12 +142,14 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public Response getRegisteredComponentRawType(@PathParam("componentId") String componentId, @PathParam("rawType") String rawType) {
+    public Response getRegisteredComponentRawType(@PathParam("componentId") String componentId, @PathParam("rawType") String rawType,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
         String result = "";
+        ComponentRegistry registry = getRegistry(userspace);
         ComponentDescription desc = registry.getComponentDescription(componentId);
         if (desc == null) {
-            throw new WebApplicationException(Response.serverError().entity("Requested component does not exist").build());
+            return null;
         }
         String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
@@ -156,9 +166,10 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public CMDComponentSpec getRegisteredProfile(@PathParam("profileId") String profileId) {
+    public CMDComponentSpec getRegisteredProfile(@PathParam("profileId") String profileId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Profile with id: " + profileId + " is requested.");
-        return registry.getMDProfile(profileId);
+        return getRegistry(userspace).getMDProfile(profileId);
     }
 
     /**
@@ -171,9 +182,10 @@ public class ComponentRegistryRestService {
      */
     @POST
     @Path("/profiles/{profileId}")
-    public Response manipulateRegisteredProfile(@PathParam("profileId") String profileId, @FormParam("method") String method) {
+    public Response manipulateRegisteredProfile(@PathParam("profileId") String profileId, @FormParam("method") String method,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         if ("delete".equalsIgnoreCase(method)) {
-            return deleteRegisteredProfile(profileId);
+            return deleteRegisteredProfile(profileId, userspace);
         } else {
             return Response.ok().build();
         }
@@ -189,9 +201,10 @@ public class ComponentRegistryRestService {
      */
     @POST
     @Path("/components/{componentId}")
-    public Response manipulateRegisteredComponent(@PathParam("componentId") String componentId, @FormParam("method") String method) {
+    public Response manipulateRegisteredComponent(@PathParam("componentId") String componentId, @FormParam("method") String method,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         if ("delete".equalsIgnoreCase(method)) {
-            return deleteRegisteredComponent(componentId);
+            return deleteRegisteredComponent(componentId, userspace);
         } else {
             return Response.ok().build();
         }
@@ -199,14 +212,15 @@ public class ComponentRegistryRestService {
 
     @DELETE
     @Path("/profiles/{profileId}")
-    public Response deleteRegisteredProfile(@PathParam("profileId") String profileId) {
+    public Response deleteRegisteredProfile(@PathParam("profileId") String profileId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
             throw new IllegalArgumentException("no user principal found.");
         }
         LOG.info("Profile with id: " + profileId + " set for deletion.");
         try {
-            registry.deleteMDProfile(profileId, principal);
+            getRegistry(userspace).deleteMDProfile(profileId, principal);
         } catch (IOException e) {
             LOG.info("Profile with id: " + profileId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -221,12 +235,14 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public Response getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType) {
+    public Response getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
         String result = "";
+        ComponentRegistry registry = getRegistry(userspace);
         ProfileDescription desc = registry.getProfileDescription(profileId);
         if (desc == null) {
-            throw new WebApplicationException(Response.serverError().entity("Requested component does not exist").build());
+            return null;
         }
         String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
@@ -254,7 +270,7 @@ public class ComponentRegistryRestService {
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
     public RegisterResponse registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description) {
+            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
             throw new IllegalArgumentException("no user principal found.");
@@ -264,9 +280,8 @@ public class ComponentRegistryRestService {
         desc.setName(name);
         desc.setDescription(description);
         desc.setRegistrationDate(createNewDate());
-        //        desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
         LOG.info("Trying to register Profile: " + desc);
-        return register(input, desc, principal);
+        return register(input, desc, principal, getRegistry(userspace));
     }
 
     @POST
@@ -275,7 +290,7 @@ public class ComponentRegistryRestService {
     @Consumes("multipart/form-data")
     public RegisterResponse registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input,
             @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group) {
+            @FormDataParam(GROUP_FORM_FIELD) String group, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
             throw new IllegalArgumentException("no user principal found.");
@@ -286,16 +301,15 @@ public class ComponentRegistryRestService {
         desc.setDescription(description);
         desc.setGroupName(group);
         desc.setRegistrationDate(createNewDate());
-        //desc.setRegistrationDate(AbstractDescription.DATE_FORMAT.format(new Date()));
         LOG.info("Trying to register Component: " + desc);
-        return register(input, desc, principal);
+        return register(input, desc, principal, getRegistry(userspace));
     }
 
     private String createNewDate() {
         return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
-    private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal) {
+    private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal, ComponentRegistry registry) {
         try {
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
             MDValidator validator = new MDValidator(input, desc, registry);

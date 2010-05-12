@@ -7,6 +7,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
@@ -16,8 +17,9 @@ public class MDValidator implements Validator {
 
     static final String ISPROFILE_NOT_SET_ERROR = "'isProfile' attribute is obligated for this registry please specify it in the xml.";
     static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
-    static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId : ";
+    static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
     static final String PARSE_ERROR = "Error in validation input file. Error is: ";
+    static final String COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR = "referenced component cannot be found in the published components: ";
 
     private List<String> errorMessages = new ArrayList<String>();
     private CMDComponentSpec spec = null;
@@ -67,9 +69,21 @@ public class MDValidator implements Validator {
     private void validateDescribedComponents(CMDComponentType cmdComponentType) {
         if (isDefinedInSeparateFile(cmdComponentType)) {
             String id = cmdComponentType.getComponentId();
-            CMDComponentSpec registeredComponent = registry.getMDComponent(id);
-            if (registeredComponent == null) {
-                errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
+            CMDComponentSpec registeredComponent = null;
+            if (registry.isPublic()) { // public registry requires only published components
+                registeredComponent = registry.getMDComponent(id);
+                if (registeredComponent == null) {
+                    errorMessages.add(COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR + cmdComponentType.getComponentId());
+                }
+            } else { //User registry, can link to components from public registry and the user's registry
+                registeredComponent = registry.getMDComponent(id);
+                if (registeredComponent == null) {
+                    registeredComponent = ComponentRegistryFactory.getInstance().getPublicRegistry().getMDComponent(id);
+                    if (registeredComponent == null) {
+                        errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
+                    }
+                }
+
             }
         }
     }

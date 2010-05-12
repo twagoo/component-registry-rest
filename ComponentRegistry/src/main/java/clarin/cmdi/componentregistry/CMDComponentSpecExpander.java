@@ -60,7 +60,7 @@ public class CMDComponentSpecExpander {
             String componentId = cmdComponentType.getComponentId();
             if (componentId != null) {
                 // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
-                CMDComponentSpec spec = registry.getUncachedComponent(componentId);
+                CMDComponentSpec spec = getUncachedComponent(componentId);
                 CMDComponentType nested = getComponentTypeOfAComponent(spec);
                 expandNestedComponent(nested.getCMDComponent());
                 overwriteAttributes(cmdComponentType, nested);
@@ -72,6 +72,18 @@ public class CMDComponentSpecExpander {
         }
         cmdComponents.clear();
         cmdComponents.addAll(expanded);
+    }
+
+    /**
+     * Get uncached component from "this" registry and possibly from public registry. Note: "this" registry can be an user registry.
+     * @param componentId
+     */
+    private CMDComponentSpec getUncachedComponent(String componentId) {
+        CMDComponentSpec result = registry.getUncachedComponent(componentId); //TODO PD fix this uncached stuff or put it in interface or make sure getComponent return a mutable object.
+        if (result == null && !registry.isPublic()) {
+            result = ((ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry()).getUncachedComponent(componentId);
+        }
+        return result;
     }
 
     /**
