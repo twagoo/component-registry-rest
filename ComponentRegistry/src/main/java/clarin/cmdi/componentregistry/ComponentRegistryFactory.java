@@ -39,7 +39,7 @@ public class ComponentRegistryFactory {
     }
 
     public ComponentRegistry getComponentRegistry(boolean userspace, Principal principal) {
-        ComponentRegistry result = getPublicRegistry();
+        ComponentRegistry result = null;
         if (userspace) {
             if (principal != null) {
                 String name = principal.getName();//anonymous
@@ -50,7 +50,11 @@ public class ComponentRegistryFactory {
                     result = createNewUserRegistry(user);
                     registryMap.put(user, result);
                 }
+            } else {
+                throw new IllegalArgumentException("No user credentials available cannot create userspace.");
             }
+        } else {
+            result = getPublicRegistry();
         }
         return result;
     }
@@ -58,7 +62,8 @@ public class ComponentRegistryFactory {
     private ComponentRegistry createNewUserRegistry(String user) {
         ComponentRegistryImpl result = new ComponentRegistryImpl(false);
         ResourceConfig config = new ResourceConfig();
-        File userResourceDir = new File(Configuration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator + user);
+        File userResourceDir = new File(Configuration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator
+                + user);
         config.setResourceRoot(userResourceDir);
         config.init();
         result.setResourceConfig(config);
