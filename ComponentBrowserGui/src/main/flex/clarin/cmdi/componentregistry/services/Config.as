@@ -1,7 +1,11 @@
 package clarin.cmdi.componentregistry.services {
-	import mx.core.Application;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 
-	public final class Config {
+	[Event(name="userSpaceToggle", type="flash.events.Event")]
+	public final class Config extends EventDispatcher {
+		public static const USER_SPACE_TOGGLE_EVENT:String = "userSpaceToggle";
+
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
 		private static const UPLOAD_PROFILE_SERVICE_URL:String = "/rest/registry/profiles";
@@ -16,21 +20,23 @@ package clarin.cmdi.componentregistry.services {
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
 
+		private var _userSpace:Boolean = false;
+
 		public function Config() {
 			if (_instance != null) {
 				throw new Error("Config can only be accessed through Config.instance");
 			}
 		}
-		
+
 		private function init(applicationParameters:Object):void {
 			var serviceRootUrl:String = applicationParameters.serviceRootUrl;
 			if (serviceRootUrl != null) {
 				_serviceRootUrl = serviceRootUrl;
 			}
 		}
-		
+
 		public static function create(applicationParameters:Object):void {
-		    _instance.init(applicationParameters);
+			_instance.init(applicationParameters);
 		}
 
 		public function get profileListUrl():String {
@@ -65,10 +71,18 @@ package clarin.cmdi.componentregistry.services {
 			return _serviceRootUrl;
 		}
 
+		public function set userSpace(userSpace:Boolean):void {
+			_userSpace = userSpace;
+			dispatchEvent(new Event(USER_SPACE_TOGGLE_EVENT));
+		}
+		
+		public function get userSpace():Boolean {
+			return _userSpace;
+		}
 
 		public static function get instance():Config {
 			return _instance;
 		}
-		
+
 	}
 }

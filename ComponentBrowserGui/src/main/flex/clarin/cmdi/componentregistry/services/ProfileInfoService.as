@@ -3,6 +3,8 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Profile;
 	
+	import com.adobe.net.URI;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
@@ -35,7 +37,11 @@ package clarin.cmdi.componentregistry.services {
 		public function load(item:ItemDescription):void {
 			profile = new Profile();
 			profile.description = item;
-			this.service.url = item.dataUrl;
+			var url:URI = new URI(item.dataUrl);
+			if (Config.instance.userSpace) {
+				url.setQueryValue("userspace", "true");
+			}
+			service.url = url.toString();
 			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}

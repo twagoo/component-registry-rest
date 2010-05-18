@@ -93,6 +93,7 @@ package clarin.cmdi.componentregistry.services {
 					ml.addVariable("name", description.name);
 					ml.addVariable("group", description.groupName);
 					ml.addFile(data, description.name + ".xml", "data");
+					uri.setQueryValue("userspace", "true");
 					ml.load(uri.toString());
 				} else {
 					// Cannot sent data that is not a file with FileReference.upload so just load the data and then submit through HttpClient.

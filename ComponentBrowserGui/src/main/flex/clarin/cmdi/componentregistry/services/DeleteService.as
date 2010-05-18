@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
+	import com.adobe.net.URI;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
@@ -33,7 +35,11 @@ package clarin.cmdi.componentregistry.services {
 
 		public function deleteItem(item:ItemDescription):void {
 			CursorManager.setBusyCursor();
-			service.url = item.dataUrl;
+			var url:URI = new URI(item.dataUrl);
+			if (Config.instance.userSpace) {
+				url.setQueryValue("userspace", "true");
+			}
+			service.url = url.toString();
 			service.send(DELETE_METHOD);
 		}
 

@@ -4,6 +4,8 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
+	import com.adobe.net.URI;
+	
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -32,7 +34,11 @@ package clarin.cmdi.componentregistry.services {
 		public function load(item:ItemDescription):void {
 			this.component = new Component();
 			component.description = item;
-			this.service.url = item.dataUrl;
+			var url:URI = new URI(item.dataUrl);
+			if (Config.instance.userSpace) {
+				url.setQueryValue("userspace", "true");
+			}
+			service.url = url.toString();
 			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}

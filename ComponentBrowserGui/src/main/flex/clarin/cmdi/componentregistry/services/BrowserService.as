@@ -1,7 +1,10 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-
+	
+	import flash.events.Event;
+	
 	import mx.collections.ArrayCollection;
+	import mx.containers.TitleWindow;
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -27,20 +30,27 @@ package clarin.cmdi.componentregistry.services {
 		// Not bindable needed for lookups over the whole collections of itemDescriptions
 		protected var unFilteredItemDescriptions:ArrayCollection;
 
-
 		public function BrowserService(restUrl:String) {
 			this.serviceUrl = restUrl;
 			service = new HTTPService();
 			service.method = HTTPRequestMessage.GET_METHOD;
 			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
+			Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 		}
 
-		private function initService():void {
-			service.url = serviceUrl + "?" + new Date().getTime();// +";JSESSIONID="+Config.instance.sessionId;
+		private function toggleUserSpace(event:Event):void {
+			load(Config.instance.userSpace);
 		}
 
-		public function load():void {
-			initService();
+		private function initService(userSpace:Boolean):void {
+			service.url = serviceUrl + "?" + new Date().getTime();
+			if (userSpace) {
+				service.url += "&userspace=true";
+			}
+		}
+
+		public function load(userSpace:Boolean = false):void {
+			initService(userSpace);
 			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}
