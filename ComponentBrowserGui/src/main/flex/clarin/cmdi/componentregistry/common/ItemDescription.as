@@ -15,12 +15,13 @@ package clarin.cmdi.componentregistry.common {
 		public var isProfile:Boolean;
 		public var registrationDate:String;
 		public var registrationDateValue:Date;
+		public var isInUserSpace:Boolean;
 
 		public function ItemDescription() {
 
 		}
 
-		private function create(itemDescription:XML, infoUrl:String, isProfileValue:Boolean):void {
+		private function create(itemDescription:XML, infoUrl:String, isProfileValue:Boolean, isInUserSpace:Boolean):void {
 			this.id = itemDescription.id;
 			this.name = itemDescription.name;
 			this.registrationDate = convertDate(itemDescription.registrationDate);
@@ -29,6 +30,7 @@ package clarin.cmdi.componentregistry.common {
 			this.groupName = itemDescription.groupName;
 			this.dataUrl = infoUrl + itemDescription.id
 			this.isProfile = isProfileValue;
+			this.isInUserSpace = isInUserSpace;
 		}
 
 		/**
@@ -58,12 +60,12 @@ package clarin.cmdi.componentregistry.common {
 			return dateStr;
 		}
 
-		public function createProfile(itemDescription:XML):void {
-			create(itemDescription, Config.instance.profileInfoUrl, true);
+		public function createProfile(itemDescription:XML, isInUserSpace:Boolean):void {
+			create(itemDescription, Config.instance.profileInfoUrl, true, isInUserSpace);
 		}
 
-		public function createComponent(itemDescription:XML):void {
-			create(itemDescription, Config.instance.componentInfoUrl, false);
+		public function createComponent(itemDescription:XML, isInUserSpace:Boolean):void {
+			create(itemDescription, Config.instance.componentInfoUrl, false, isInUserSpace);
 		}
 
 	}

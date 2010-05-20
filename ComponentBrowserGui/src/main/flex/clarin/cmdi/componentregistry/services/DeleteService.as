@@ -1,11 +1,11 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-	
+
 	import com.adobe.net.URI;
-	
+
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	
+
 	import mx.controls.Alert;
 	import mx.managers.CursorManager;
 	import mx.messaging.messages.HTTPRequestMessage;
@@ -18,9 +18,9 @@ package clarin.cmdi.componentregistry.services {
 
 	public class DeleteService extends EventDispatcher {
 		public static const ITEM_DELETED:String = "itemDeleted";
-        private var service:HTTPService;
-        private static const DELETE_METHOD:Object = {"method": "delete"};
-        
+		private var service:HTTPService;
+		private static const DELETE_METHOD:Object = {"method": "delete"};
+
 		private static var _instance:DeleteService = new DeleteService();
 
 		public function DeleteService() {
@@ -36,8 +36,8 @@ package clarin.cmdi.componentregistry.services {
 		public function deleteItem(item:ItemDescription):void {
 			CursorManager.setBusyCursor();
 			var url:URI = new URI(item.dataUrl);
-			if (Config.instance.userSpace) {
-				url.setQueryValue("userspace", "true");
+			if (item.isInUserSpace) {
+				url.setQueryValue(Config.USERSPACE_PARAM, "true");
 			}
 			service.url = url.toString();
 			service.send(DELETE_METHOD);
@@ -57,7 +57,7 @@ package clarin.cmdi.componentregistry.services {
 			if (faultEvent.statusCode == 401) {
 				Alert.show("Unauthorized to delete item, you are not the creator.");
 			} else if (faultEvent.statusCode == 403) {
-				Alert.show("Item not deleted:"+faultEvent.message.body);
+				Alert.show("Item not deleted:" + faultEvent.message.body);
 			} else {
 				var errorMessage:String = StringUtil.substitute("Error in {0} status {1}: {2}", this, faultEvent.statusCode, faultEvent.fault.faultString);
 				Alert.show(errorMessage);

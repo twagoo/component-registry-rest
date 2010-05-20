@@ -1,6 +1,7 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
 import clarin.cmdi.componentregistry.common.ItemDescription;
+import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
 import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
@@ -9,24 +10,25 @@ import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
 import clarin.cmdi.componentregistry.services.ComponentInfoService;
 import clarin.cmdi.componentregistry.services.ComponentListService;
-import clarin.cmdi.componentregistry.services.DeleteService;
+import clarin.cmdi.componentregistry.services.Config;
 import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
 
+import mx.controls.Alert;
 import mx.core.DragSource;
 import mx.core.UIComponent;
+import mx.events.CloseEvent;
 import mx.managers.CursorManager;
 import mx.managers.DragManager;
-import mx.validators.Validator;
 
 
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
 private var componentSrv:ComponentInfoService = new ComponentInfoService();
 
 [Bindable]
-private var componentsSrv:ComponentListService = new ComponentListService(); //Don't create an instance we need a new one
+private var componentsSrv:ComponentListService = ComponentListService.getInstance(Config.instance.userSpace);
 
 [Bindable]
 public var cmdComponent:XML;
@@ -44,9 +46,12 @@ private var uploadService:UploadService = new UploadService();
 public function init():void {
 	profileSrv.addEventListener(ProfileInfoService.PROFILE_LOADED, profileLoaded);
 	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
-	componentsSrv.load();
 	uploadService.init(uploadProgress);
-	DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, refreshComponentList);
+	Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
+}
+
+private function toggleUserSpace(event:Event):void {
+	componentsSrv = ComponentListService.getInstance(Config.instance.userSpace);
 }
 
 private function profileLoaded(event:Event):void {
@@ -91,11 +96,23 @@ private function createEmptyProfile():CMDSpec {
 	var result:CMDSpec = new CMDSpec(true);
 	var c:CMDComponent = new CMDComponent();
 	result.cmdComponents.addItem(c);
-	c.cmdElements.addItem(new CMDComponentElement());
+	var el:CMDComponentElement = new CMDComponentElement();
+	el.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+	c.cmdElements.addItem(el);
 	return result
 }
 
-private function saveSpec():void {
+private function publishSpec():void {
+	Alert.show("If your profile/component is ready to be used by other people press ok, otherwise press cancel and save it in your workspace or continue editing.", "Publish", Alert.OK | Alert.CANCEL, null, handlePublishAlert);
+}
+
+private function handlePublishAlert(event:CloseEvent):void {
+	if (event.detail == Alert.OK) {
+		saveSpec(false);
+	}
+}
+
+private function saveSpec(inUserSpace:Boolean):void {
 //	Alert.show(xmlEditor.cmdSpec.toXml()); 
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
@@ -103,6 +120,7 @@ private function saveSpec():void {
 		item.name = xmlEditor.cmdSpec.headerName;
 		item.isProfile = xmlEditor.cmdSpec.isProfile;
 		item.groupName = xmlEditor.cmdSpec.groupName;
+		item.isInUserSpace = inUserSpace;
 		uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 		if (item.isProfile) {
 			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
@@ -114,12 +132,8 @@ private function saveSpec():void {
 
 private function handleSaveComplete(event:UploadCompleteEvent):void {
 	parentApplication.viewStack.switchToBrowse(event.itemDescription);
-	refreshComponentList();
 }
 
-private function refreshComponentList(event:* = null):void {
-	componentsSrv.load();
-}
 
 private function handleEditorChange(event:Event):void {
 	errorMessageField.text = "";
@@ -139,7 +153,9 @@ private function enableComponentDrag(event:MouseEvent):void {
 private function enableElementDrag(event:MouseEvent):void {
 	var ds:DragSource = new DragSource();
 	ds.addHandler(function():CMDComponentElement {
-			return new CMDComponentElement();
+			var result:CMDComponentElement = new CMDComponentElement();
+			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+			return result;
 		}, CMDComponentXMLEditor.DRAG_NEW_ELEMENT);
 	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
 }
@@ -147,7 +163,9 @@ private function enableElementDrag(event:MouseEvent):void {
 private function enableAttributeDrag(event:MouseEvent):void {
 	var ds:DragSource = new DragSource();
 	ds.addHandler(function():CMDAttribute {
-			return new CMDAttribute();
+			var result:CMDAttribute = new CMDAttribute();
+			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+			return result;
 		}, CMDComponentXMLEditor.DRAG_NEW_ATTRIBUTE);
 	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
 }

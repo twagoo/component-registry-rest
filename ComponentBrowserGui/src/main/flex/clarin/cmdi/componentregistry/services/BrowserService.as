@@ -1,10 +1,9 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-	
-	import flash.events.Event;
-	
+
+	import com.adobe.net.URI;
+
 	import mx.collections.ArrayCollection;
-	import mx.containers.TitleWindow;
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -29,28 +28,33 @@ package clarin.cmdi.componentregistry.services {
 
 		// Not bindable needed for lookups over the whole collections of itemDescriptions
 		protected var unFilteredItemDescriptions:ArrayCollection;
+		protected var userSpace:Boolean;
 
-		public function BrowserService(restUrl:String) {
+		public function BrowserService(restUrl:String, userSpace:Boolean) {
 			this.serviceUrl = restUrl;
 			service = new HTTPService();
 			service.method = HTTPRequestMessage.GET_METHOD;
 			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
-			Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
+			this.userSpace = userSpace;
 		}
 
-		private function toggleUserSpace(event:Event):void {
-			load(Config.instance.userSpace);
-		}
-
-		private function initService(userSpace:Boolean):void {
-			service.url = serviceUrl + "?" + new Date().getTime();
+		private function initService():void {
+			var url:URI = new URI(serviceUrl);
+			url.setQueryValue("unique", new Date().getTime().toString());
 			if (userSpace) {
-				service.url += "&userspace=true";
+				url.setQueryValue(Config.USERSPACE_PARAM, "true");
 			}
+			service.url = url.toString();
+
+		/* 			service.url = serviceUrl + "?" + new Date().getTime();
+		   if (userSpace) {
+		   service.url += "&"+Config.USERSPACE_PARAM+"=true";
+		   }
+		 */
 		}
 
-		public function load(userSpace:Boolean = false):void {
-			initService(userSpace);
+		public function load():void {
+			initService();
 			var token:AsyncToken = this.service.send();
 			token.addResponder(new Responder(result, fault));
 		}

@@ -18,6 +18,7 @@
 			[Bindable]
 			public var valueSchemeInput:ValueSchemeInput;
 
+			public static const DEFAULT_VALUE:String = "string";
 			//Taken from http://www.clarin.eu/cmd/general-component-schema.xsd (allowed_attributetypes_type)
 			[Bindable]
 			private var simpleValueSchemeDataProvider:ArrayCollection = new ArrayCollection([{label: "boolean", data: "boolean"},
@@ -89,7 +90,7 @@
 				   click="setPattern()"/>
 	</mx:HBox>
 
-	<!-- PD TODO how should we implement open vocabularies?? -->
+	<!-- PD  TODO how should we implement open vocabularies?? -->
 	<mx:Label text="Or create controlled vocabularies:"/>
 	<mx:HBox width="100%">
 		<editor:ValueSchemeEnumerationGrid id="enumerationGrid"

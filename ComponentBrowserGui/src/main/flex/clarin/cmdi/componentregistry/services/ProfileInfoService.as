@@ -2,12 +2,12 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Profile;
-	
+
 	import com.adobe.net.URI;
-	
+
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
@@ -19,7 +19,7 @@ package clarin.cmdi.componentregistry.services {
 	import mx.utils.StringUtil;
 
 	[Event(name="ProfileLoaded", type="flash.events.Event")]
-	public class ProfileInfoService  extends EventDispatcher {
+	public class ProfileInfoService extends EventDispatcher {
 		public static const PROFILE_LOADED:String = "ProfileLoaded";
 
 		private var service:HTTPService;
@@ -38,8 +38,8 @@ package clarin.cmdi.componentregistry.services {
 			profile = new Profile();
 			profile.description = item;
 			var url:URI = new URI(item.dataUrl);
-			if (Config.instance.userSpace) {
-				url.setQueryValue("userspace", "true");
+			if (item.isInUserSpace) {
+				url.setQueryValue(Config.USERSPACE_PARAM, "true");
 			}
 			service.url = url.toString();
 			var token:AsyncToken = this.service.send();
@@ -65,7 +65,7 @@ package clarin.cmdi.componentregistry.services {
 
 		public function fault(faultEvent:FaultEvent):void {
 			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-		    Alert.show(errorMessage);
+			Alert.show(errorMessage);
 		}
 	}
 }

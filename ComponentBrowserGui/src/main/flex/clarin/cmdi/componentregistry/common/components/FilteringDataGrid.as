@@ -45,9 +45,10 @@ package clarin.cmdi.componentregistry.common.components {
             return _searchText;
         }
         
-		private function doFiltering(changeEvent:Event):void {
+		public function doFiltering(changeEvent:Event=null):void {
 			_searchText = _searchInput.text;
-			dataProvider.refresh();
+			if (columns.length > 0) //Sometimes columns are not set yet resulting in empty list, so do not refresh in this case (only happens on startup).
+			    dataProvider.refresh();
 			validateNow();
 		}
 

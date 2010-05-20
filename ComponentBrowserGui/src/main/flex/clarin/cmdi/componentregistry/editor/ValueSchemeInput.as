@@ -10,6 +10,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
 	import mx.controls.TextInput;
+	import mx.events.FlexEvent;
 	import mx.events.ValidationResultEvent;
 	import mx.managers.PopUpManager;
 	import mx.validators.Validator;
@@ -37,7 +38,15 @@ package clarin.cmdi.componentregistry.editor {
 			enumeration.width = 300;
 
 			CMDComponentXMLEditor.validators.addItem(this);
+			addEventListener(FlexEvent.REMOVE, removeFromValidator);
 		}
+
+        private function removeFromValidator(event:FlexEvent):void {
+            var index:int = CMDComponentXMLEditor.validators.getItemIndex(this);
+            if (index != -1) {
+                CMDComponentXMLEditor.validators.removeItemAt(index);
+            }
+        }
 
 		protected override function createChildren():void {
 			super.createChildren();

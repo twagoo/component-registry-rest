@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-
+	
 	import com.adobe.net.URI;
-
+	
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
@@ -13,10 +13,10 @@ package clarin.cmdi.componentregistry.services {
 	import flash.net.FileReference;
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
-
+	
 	import mx.controls.ProgressBar;
 	import mx.managers.CursorManager;
-
+	
 	import ru.inspirit.net.MultipartURLLoader;
 
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]
@@ -93,7 +93,8 @@ package clarin.cmdi.componentregistry.services {
 					ml.addVariable("name", description.name);
 					ml.addVariable("group", description.groupName);
 					ml.addFile(data, description.name + ".xml", "data");
-					uri.setQueryValue("userspace", "true");
+					if (description.isInUserSpace)
+						uri.setQueryValue(Config.USERSPACE_PARAM, "true");
 					ml.load(uri.toString());
 				} else {
 					// Cannot sent data that is not a file with FileReference.upload so just load the data and then submit through HttpClient.
@@ -166,10 +167,11 @@ package clarin.cmdi.componentregistry.services {
 		private function handleResponse(response:XML):void {
 			if (response.@registered == true) {
 				var item:ItemDescription = new ItemDescription();
+				var isInUserSpace:Boolean = response.@isInUserSpace == true;
 				if (response.@isProfile == true) {
-					item.createProfile(response.description[0]);
+					item.createProfile(response.description[0], isInUserSpace);
 				} else {
-					item.createComponent(response.description[0]);
+					item.createComponent(response.description[0], isInUserSpace);
 				}
 				dispatchEvent(new UploadCompleteEvent(item));
 			} else {

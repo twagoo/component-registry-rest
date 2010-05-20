@@ -8,5 +8,8 @@ package clarin.cmdi.componentregistry.common {
 		public static const XMLBROWSER_HEADER:String = "xmlBrowserHeader";
 		public static const XMLEDITOR_EDIT_FIELD:String = "xmlEditorFieldEditField";
 		public static const EXPANDING_COMPONENT:String = "borderStyles";
+		
+		//		
+		public static const USER_BORDER_COLOR:String = "#F07048";
 	}
 }

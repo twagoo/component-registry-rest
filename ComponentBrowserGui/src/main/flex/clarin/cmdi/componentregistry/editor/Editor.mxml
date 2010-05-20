@@ -19,8 +19,11 @@
 					   label="clear"
 					   click="clearEditor()"/>
 			<mx:Button id="saveBtn"
-					   label="save"
-					   click="saveSpec()"/>
+					   label="save in workspace"
+					   click="saveSpec(true)"/>
+			<mx:Button id="publishBtn"
+					   label="publish in public space"
+					   click="publishSpec()"/>
 		</mx:HBox>
 		<mx:Text id="errorMessageField"
 				 text="{uploadService.message}"

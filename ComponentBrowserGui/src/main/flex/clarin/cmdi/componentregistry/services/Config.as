@@ -6,6 +6,8 @@ package clarin.cmdi.componentregistry.services {
 	public final class Config extends EventDispatcher {
 		public static const USER_SPACE_TOGGLE_EVENT:String = "userSpaceToggle";
 
+		public static const USERSPACE_PARAM:String = "userspace";
+
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
 		private static const UPLOAD_PROFILE_SERVICE_URL:String = "/rest/registry/profiles";
@@ -72,10 +74,12 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		public function set userSpace(userSpace:Boolean):void {
-			_userSpace = userSpace;
-			dispatchEvent(new Event(USER_SPACE_TOGGLE_EVENT));
+			if (_userSpace != userSpace) {
+				_userSpace = userSpace;
+				dispatchEvent(new Event(USER_SPACE_TOGGLE_EVENT));
+			}
 		}
-		
+
 		public function get userSpace():Boolean {
 			return _userSpace;
 		}

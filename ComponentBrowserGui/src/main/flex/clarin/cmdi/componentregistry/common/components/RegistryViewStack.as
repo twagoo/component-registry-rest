@@ -4,10 +4,11 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.Login;
 	import clarin.cmdi.componentregistry.editor.Editor;
 	import clarin.cmdi.componentregistry.importer.Importer;
-	
+	import clarin.cmdi.componentregistry.services.Config;
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	
+
 	import mx.containers.ViewStack;
 
 	public class RegistryViewStack extends ViewStack {
@@ -32,7 +33,11 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		public function switchToBrowse(itemDescription:ItemDescription):void {
-			browse.refresh();
+			if (Config.instance.userSpace == itemDescription.isInUserSpace) {
+				browse.refresh();
+			} else {
+				Config.instance.userSpace = itemDescription.isInUserSpace;
+			}
 			browse.setSelectedDescription(itemDescription);
 			this.selectedChild = browse;
 		}

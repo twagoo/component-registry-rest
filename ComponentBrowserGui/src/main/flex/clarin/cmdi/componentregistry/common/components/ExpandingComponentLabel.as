@@ -31,8 +31,11 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;
-			this.item = ComponentListService.instance.lookUpDescription(componentId);
+			this.item = ComponentListService.findDescription(componentId);
 			styleName = StyleConstants.EXPANDING_COMPONENT;
+			if (item.isInUserSpace) {
+			    this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
+			}
 		}
 
 		protected override function createChildren():void {

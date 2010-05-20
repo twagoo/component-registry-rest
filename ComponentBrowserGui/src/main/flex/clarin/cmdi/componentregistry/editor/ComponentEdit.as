@@ -86,6 +86,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function fireRemoveComponent(mouseEvent:MouseEvent):void {
 			drawFocus(false);
+			removeAllChildren(); //need to remove all children so validator are removed correctly
 			var event:Event = new Event(REMOVE_COMPONENT_EVENT);
 			dispatchEvent(event);
 		}

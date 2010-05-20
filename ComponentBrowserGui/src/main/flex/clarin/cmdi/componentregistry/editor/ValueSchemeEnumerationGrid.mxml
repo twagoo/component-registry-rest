@@ -20,7 +20,7 @@
 			public var valueSchemeEnumeration:ArrayCollection = new ArrayCollection();
 			[Bindable]
 			public var conceptLinkEdit:Boolean = false;
-			private var currentEditPosition:Object; //This object is: dataGrid.editItemPostition {columnIndex:2, rowIndex:3}
+			private var currentEditPosition:Object;
 
 			public function initEnumeration(valueSchemeData:XMLListCollection):void {
 				if (valueSchemeData) {

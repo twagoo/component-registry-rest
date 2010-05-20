@@ -1,9 +1,12 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-
+	
+	import flash.events.Event;
+	
 	import mx.binding.utils.BindingUtils;
 	import mx.containers.FormItem;
 	import mx.controls.TextInput;
+	import mx.events.FlexEvent;
 	import mx.events.ValidationResultEvent;
 	import mx.validators.Validator;
 
@@ -27,7 +30,15 @@ package clarin.cmdi.componentregistry.editor {
 				_validator.listener = this.editField;
 				CMDComponentXMLEditor.validators.addItem(this);
 			}
+			addEventListener(FlexEvent.REMOVE, removeFromValidator);
 		}
+
+        private function removeFromValidator(event:FlexEvent):void {
+            var index:int = CMDComponentXMLEditor.validators.getItemIndex(this);
+            if (index != -1) {
+                CMDComponentXMLEditor.validators.removeItemAt(index);
+            }
+        }
 
 		public function validate():Boolean {
 			if (this.visible) {

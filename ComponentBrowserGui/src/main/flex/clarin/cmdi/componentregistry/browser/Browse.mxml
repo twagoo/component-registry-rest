@@ -9,10 +9,11 @@
 
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.services.ComponentInfoService;
-		    import clarin.cmdi.componentregistry.services.ProfileInfoService;
-		    import clarin.cmdi.componentregistry.services.ProfileListService;
-		    import mx.events.CollectionEvent;
+			import clarin.cmdi.componentregistry.services.Config;
+			import clarin.cmdi.componentregistry.services.ComponentInfoService;
+			import clarin.cmdi.componentregistry.services.ProfileInfoService;
+			import clarin.cmdi.componentregistry.services.ProfileListService;
+			import mx.events.CollectionEvent;
 			import mx.collections.ArrayCollection;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
@@ -23,17 +24,17 @@
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.Profile;
 
-            [Bindable]
-			private var componentsSrv:ComponentListService = ComponentListService.instance;
 			[Bindable]
-			private var profilesSrv:ProfileListService = new ProfileListService();
+			private var componentsSrv:ComponentListService = ComponentListService.getInstance(Config.instance.userSpace);
+			[Bindable]
+			private var profilesSrv:ProfileListService = ProfileListService.getInstance(Config.instance.userSpace);
 			[Bindable]
 			private var profileSrv:ProfileInfoService = new ProfileInfoService();
 			[Bindable]
 			private var componentSrv:ComponentInfoService = new ComponentInfoService();
-			
+
 			private var deleteSrv:DeleteService = DeleteService.instance;
-			
+
 			[Bindable]
 			private var profilesMenu:BrowseContextMenu;
 			[Bindable]
@@ -51,11 +52,19 @@
 				componentsMenu.viewStack = this.parent as RegistryViewStack;
 				componentsMenu.deleteService = deleteSrv;
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
+				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
+			}
+
+			private function toggleUserSpace(event:Event):void {
+				var userSpace:Boolean = Config.instance.userSpace;
+				componentsSrv = ComponentListService.getInstance(userSpace);
+				profilesSrv = ProfileListService.getInstance(userSpace);
+				refresh();
 			}
 
 			public function refresh():void {
-				profilesSrv.load();
 				componentsSrv.load();
+				profilesSrv.load();
 			}
 
 			private function loadProfileInfoPage(event:BrowserSelectionEvent):void {
@@ -100,9 +109,9 @@
 			<mx:VDividedBox label="Profiles"
 							width="100%">
 				<browser:BrowserOverviewList id="profilesOverview"
+											 browserColumns="{browserColumns.getProfileColumns()}"
 											 browserDataProvider="{profilesSrv.itemDescriptions}"
 											 browserItemSelected="{loadProfileInfoPage(event)}"
-											 browserColumns="{browserColumns.getProfileColumns()}"
 											 itemToScrollTo="{selectedProfileItem}"
 											 width="100%"
 											 height="70%"
@@ -117,9 +126,9 @@
 			<mx:VDividedBox label="Components"
 							width="100%">
 				<browser:BrowserOverviewList id="componentsOverview"
+											 browserColumns="{browserColumns.getComponentColumns()}"
 											 browserDataProvider="{componentsSrv.itemDescriptions}"
 											 browserItemSelected="{loadComponentInfoPage(event)}"
-											 browserColumns="{browserColumns.getComponentColumns()}"
 											 itemToScrollTo="{selectedComponentItem}"
 											 width="100%"
 											 height="50%"

@@ -3,21 +3,19 @@
 				xmlns:common="clarin.cmdi.componentregistry.common.components.*"
 				layout="absolute"
 				preinitialize="initializeInstances();"
-				applicationComplete="init();">
+				applicationComplete="init();"
+				backgroundColor="#DDE3EF">
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
+		    import mx.controls.Alert;
+			import clarin.cmdi.componentregistry.common.StyleConstants;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import flash.net.navigateToURL;
 			import mx.managers.PopUpManager;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 
-			private static const DEFAULT_COLOR:String = "#DDE3EF";
-			private static const USER_COLOR:String = "#FFFF00";
-			private static const USERSPACE_LABEL:String = "Browse user space";
-			private static const PUBLICSPACE_LABEL:String = "Browse public space";
-			private var userSpaceOn:Boolean = false;
 
 			private function initializeInstances():void {
 				Config.create(Application.application.parameters);
@@ -25,20 +23,7 @@
 			}
 
 			private function init():void {
-				this.setStyle("backgroundColor", DEFAULT_COLOR);
 				ExternalMouseWheelSupport.getInstance(stage);
-			}
-
-			private function toggleUserSpace(event:MouseEvent):void {
-				userSpaceOn = !userSpaceOn;
-				if (userSpaceOn) {
-					this.setStyle("backgroundColor", USER_COLOR);
-					userSpaceButton.label = PUBLICSPACE_LABEL;
-				} else {
-					this.setStyle("backgroundColor", DEFAULT_COLOR);
-					userSpaceButton.label = USERSPACE_LABEL;
-				}
-				Config.instance.userSpace = userSpaceOn;
 			}
 
 //			private function handleLogin(event:MouseEvent):void {
@@ -63,10 +48,6 @@
 				<mx:ToggleButtonBar id="toggleBar"
 									dataProvider="{viewStack}"/>
 				<mx:Spacer width="90%"/>
-				<mx:Button id="userSpaceButton"
-						   toggle="true"
-						   label="{USERSPACE_LABEL}"
-						   click="toggleUserSpace(event)"/>
 				<mx:Label text="User: {Credentials.instance.userName}"/>
 				<!--				<mx:Button id="login"
 					 label="login {userName}"

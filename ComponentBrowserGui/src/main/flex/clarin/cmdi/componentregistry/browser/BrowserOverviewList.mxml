@@ -3,7 +3,8 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
-		 xmlns:rictus="com.rictus.controls.*">
+		 xmlns:rictus="com.rictus.controls.*"
+		 initialize="init();">
 
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
@@ -14,27 +15,31 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.ArrayList;
+			import com.adobe.utils.ArrayUtil;
+			import clarin.cmdi.componentregistry.common.StyleConstants;
+			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import mx.collections.ArrayCollection;
 			import mx.events.CollectionEvent;
 			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 
+			private static const USERSPACE_LABEL:String = "Work space";
+			private static const PUBLICSPACE_LABEL:String = "Public space";
+
+			private var defaultColor:Object;
 			private var currentSelectedItem:ItemDescription;
 			[Bindable]
 			private var menu:BrowseContextMenu;
 
-			private var _browserDataProvider:ArrayCollection;
 			private var _itemToScrollTo:ItemDescription;
-
 			[Bindable]
-			public function get browserDataProvider():ArrayCollection {
-				return _browserDataProvider;
-			}
+			public var spaces:ArrayCollection = new ArrayCollection([{label: PUBLICSPACE_LABEL, data: 1}, {label: USERSPACE_LABEL, data: 2}]);
 
 			public function set browserDataProvider(dataProvider:ArrayCollection):void {
-				_browserDataProvider = dataProvider;
-				this.dataGrid.dataProvider = _browserDataProvider;
+				this.dataGrid.dataProvider = new ArrayCollection(dataProvider.toArray().slice());
+			    dataGrid.doFiltering();
 				scrollToSelected();
 			}
 
@@ -55,8 +60,8 @@
 
 			private function scrollToSelected():void {
 				if (_itemToScrollTo) {
-					for (var i:int; i < browserDataProvider.length; i++) {
-						var item:ItemDescription = browserDataProvider.getItemAt(i) as ItemDescription;
+					for (var i:int; i < dataGrid.dataProvider.length; i++) {
+						var item:ItemDescription = dataGrid.dataProvider.getItemAt(i) as ItemDescription;
 						if (item.id == _itemToScrollTo.id) {
 							dataGrid.selectedItem = item;
 							dispatchBrowserSelectionEvent();
@@ -79,15 +84,40 @@
 					menu.deleteSelectedItems();
 				}
 			}
+
+			private function init():void {
+				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setUserSpace);
+				setUserSpace();
+			}
+
+			private function setUserSpace(event:Event = null):void {
+				if (Config.instance.userSpace) {
+					userSpaceCB.selectedIndex = 1;
+				} else {
+					userSpaceCB.selectedIndex = 0;
+				}
+			}
+
+			private function userSpaceCloseHandler(event:Event):void {
+				Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
+			}
 		]]>
 	</mx:Script>
 
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">
+
+
+		<mx:ComboBox id="userSpaceCB"
+					 dataProvider="{spaces}"
+					 width="110"
+					 close="userSpaceCloseHandler(event);"/>
+
+
 		<rictus:SearchBox id="searchBox"
 						  label="filter..."/>
-		<mx:Label text="Showing {browserDataProvider.length} of {dataGrid.unfilteredLength}"/>
+		<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
 	</mx:HBox>
 
 	<comp:FilteringDataGrid id="dataGrid"
