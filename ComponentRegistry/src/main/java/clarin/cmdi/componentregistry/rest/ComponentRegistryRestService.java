@@ -281,7 +281,7 @@ public class ComponentRegistryRestService {
         desc.setDescription(description);
         desc.setRegistrationDate(createNewDate());
         LOG.info("Trying to register Profile: " + desc);
-        return register(input, desc, principal, getRegistry(userspace));
+        return register(input, desc, principal, userspace);
     }
 
     @POST
@@ -302,18 +302,20 @@ public class ComponentRegistryRestService {
         desc.setGroupName(group);
         desc.setRegistrationDate(createNewDate());
         LOG.info("Trying to register Component: " + desc);
-        return register(input, desc, principal, getRegistry(userspace));
+        return register(input, desc, principal, userspace);
     }
 
     private String createNewDate() {
         return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
-    private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal, ComponentRegistry registry) {
+    private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal, boolean userspace) {
         try {
+            ComponentRegistry registry =getRegistry(userspace);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
             MDValidator validator = new MDValidator(input, desc, registry);
             RegisterResponse response = new RegisterResponse();
+            response.setIsInUserSpace(userspace);
             validate(response, descriptionValidator, validator);
             if (response.getErrors().isEmpty()) {
                 CMDComponentSpec spec = validator.getCMDComponentSpec();

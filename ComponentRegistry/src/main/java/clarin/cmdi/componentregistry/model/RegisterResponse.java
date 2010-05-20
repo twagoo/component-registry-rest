@@ -17,10 +17,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RegisterResponse {
 
     @XmlAttribute(required = true)
+    private Boolean isInUserSpace;
+
+    @XmlAttribute(required = true)
     private Boolean isProfile;
 
     @XmlAttribute(required = true)
     private Boolean registered;
+
 
     @XmlElementWrapper(name = "errors", required = false)
     @XmlElements(@XmlElement(name = "error", type = String.class))
@@ -64,6 +68,14 @@ public class RegisterResponse {
 
     public void setIsProfile(boolean isProfile) {
         this.isProfile = isProfile;
+    }
+
+    public void setIsInUserSpace(Boolean isInUserSpace) {
+        this.isInUserSpace = isInUserSpace;
+    }
+
+    public Boolean isInUserSpace() {
+        return isInUserSpace;
     }
     
 }

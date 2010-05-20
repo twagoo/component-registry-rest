@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.Principal;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -10,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import clarin.cmdi.componentregistry.ComponentRegistryImpl;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.tools.MigrateData;
 
@@ -37,7 +38,10 @@ public class AdminServlet extends HttpServlet {
         String parameter = req.getParameter("submit");
         if (parameter.equals("MigrateDates")) {
             MigrateData migrateData = new MigrateData();
-            migrateData.migrateDescriptions(ComponentRegistryImpl.getInstance(), req.getUserPrincipal());
+            Principal userPrincipal = req.getUserPrincipal();
+            migrateData.migrateDescriptions(ComponentRegistryFactory.getInstance().getPublicRegistry(), userPrincipal);
+            migrateData
+                    .migrateDescriptions(ComponentRegistryFactory.getInstance().getComponentRegistry(true, userPrincipal), userPrincipal);
             PrintWriter writer = resp.getWriter();
             if (migrateData.hasErrors()) {
                 writer.write("Migrated dates finished some error occured (check server log).");

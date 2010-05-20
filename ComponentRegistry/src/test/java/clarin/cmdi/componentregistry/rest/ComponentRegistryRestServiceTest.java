@@ -257,6 +257,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(response.isProfile());
+        assertFalse(response.isInUserSpace());
         ProfileDescription profileDesc = (ProfileDescription) response.getDescription();
         assertNotNull(profileDesc);
         assertEquals("ProfileTest1", profileDesc.getName());
@@ -283,6 +284,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertTrue(response.isProfile());
+        assertTrue(response.isInUserSpace());
         ProfileDescription profileDesc = (ProfileDescription) response.getDescription();
         assertNotNull(profileDesc);
         assertEquals("ProfileTest1", profileDesc.getName());
@@ -406,6 +408,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
+        assertTrue(response.isInUserSpace());
         ComponentDescription desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
         assertEquals("ComponentTest1", desc.getName());
@@ -464,6 +467,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 RegisterResponse.class, form);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
+        assertFalse(response.isInUserSpace());
         ComponentDescription desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
         assertEquals("ComponentTest1", desc.getName());

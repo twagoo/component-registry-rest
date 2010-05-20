@@ -83,4 +83,8 @@ public class Configuration {
         return component2SchemaXsl;
     }
 
+    public File getUserDirMappingFile() {
+        return new File(registryRoot, "userMapping.xml");
+    }
+
 }

@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -86,7 +87,7 @@ public class MigrateData {
         }
         new ClassPathXmlApplicationContext(new String[] { "applicationContext.xml" }); //loads and instantiates the beans
         final String adminUser = args[0];
-        ComponentRegistryImpl registry = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
+        ComponentRegistryImpl registry = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry();
         Principal principal = new Principal() {
             public String getName() {
                 return adminUser;
@@ -94,6 +95,7 @@ public class MigrateData {
         };
         MigrateData migrate = new MigrateData();
         migrate.migrateDescriptions(registry, principal);
+        migrate.migrateDescriptions(ComponentRegistryFactory.getInstance().getComponentRegistry(true, principal), principal);
     }
 
 }

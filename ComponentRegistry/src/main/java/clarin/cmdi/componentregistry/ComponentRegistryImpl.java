@@ -58,10 +58,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         this.isPublic = isPublic;
     }
 
-    public static ComponentRegistry getInstance() { //TODO PD rename to use the factory everywhere
-        return ComponentRegistryFactory.getInstance().getPublicRegistry();
-    }
-
     public void setResourceConfig(ResourceConfig resourceConfig) {
         this.resourceConfig = resourceConfig;
         initCache();

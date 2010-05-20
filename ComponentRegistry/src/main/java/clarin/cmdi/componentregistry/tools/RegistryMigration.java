@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -23,7 +24,7 @@ public class RegistryMigration {
     private ComponentRegistryImpl registry;
 
     public RegistryMigration(String sourceDir) {
-        registry = (ComponentRegistryImpl) ComponentRegistryImpl.getInstance();
+        registry = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry(); //TODO PD not using userRegistry here so won't work correctly anymore, I should do this in the admin page
     }
 
     private void migrate() throws IOException {

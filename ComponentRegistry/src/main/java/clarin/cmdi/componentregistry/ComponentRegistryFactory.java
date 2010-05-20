@@ -1,33 +1,56 @@
 package clarin.cmdi.componentregistry;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import clarin.cmdi.componentregistry.model.UserMapping;
 
 public class ComponentRegistryFactory {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactory.class);
     private static final ComponentRegistryFactory INSTANCE = new ComponentRegistryFactory();
 
-    private Map<String, String> userMap = new HashMap<String, String>();
+    private UserMapping userMap = null;
 
     private ComponentRegistryImpl publicRegistry = new ComponentRegistryImpl(true);
     private Map<String, ComponentRegistry> registryMap = new HashMap<String, ComponentRegistry>();
 
     private ComponentRegistryFactory() {
         init();
+        try {
+            loadUserMap();
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot load userMap", e);
+        } catch (JAXBException e) {
+            throw new RuntimeException("Cannot load userMap", e);
+        }
     }
 
     private void init() {
         publicRegistry.setResourceConfig(Configuration.getInstance().getPublicResourceConfig());
     }
 
+    private void loadUserMap() throws IOException, JAXBException {
+        File userDirMappingFile = Configuration.getInstance().getUserDirMappingFile();
+        if (userDirMappingFile.exists()) {
+            userMap = MDMarshaller.unmarshal(UserMapping.class, userDirMappingFile, null);
+        } else {
+            userMap = new UserMapping();
+        }
+    }
+
     public void reset() {
-        registryMap = new HashMap<String, ComponentRegistry>();
+        registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
     }
 
     public static ComponentRegistryFactory getInstance() {
@@ -43,7 +66,7 @@ public class ComponentRegistryFactory {
         if (userspace) {
             if (principal != null) {
                 String name = principal.getName();//anonymous
-                String user = getUser(name);
+                String user = getUserDir(name);
                 result = registryMap.get(user);
                 if (result == null) {
                     LOG.info("Creating workspace for user: " + name + " workspace name: " + user);
@@ -70,12 +93,26 @@ public class ComponentRegistryFactory {
         return result;
     }
 
-    private String getUser(String name) {
-        String result = userMap.get(name);
-        if (result == null) {
-            result = "user1";
+    private synchronized String getUserDir(String name) {
+        UserMapping.User user = userMap.findUser(name);
+        if (user == null) {
+            user = new UserMapping.User();
+            user.setName(name);
+            user.setUserDir("user" + userMap.getUsers().size());
+            userMap.addUsers(user);
+            saveUserMap();
         }
-        return result;
+        return user.getUserDir();
+    }
+
+    private void saveUserMap() {
+        try {
+            MDMarshaller.marshal(userMap, new FileOutputStream(Configuration.getInstance().getUserDirMappingFile()));
+        } catch (IOException e) {//Manual intervention is probably needed so just throwing RuntimeExceptions if we cannot save the mapping we cannot do a lot so that needs to be addressed asap.
+            throw new RuntimeException("Cannot save userMapping.", e);
+        } catch (JAXBException e) {
+            throw new RuntimeException("Cannot save userMapping.", e);
+        }
     }
 
 }

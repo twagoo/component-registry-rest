@@ -20,4 +20,7 @@ public class ObjectFactory {
         return new RegisterResponse();
     }
 
+    public UserMapping createUserMapping() {
+        return new UserMapping();
+    }
 }
