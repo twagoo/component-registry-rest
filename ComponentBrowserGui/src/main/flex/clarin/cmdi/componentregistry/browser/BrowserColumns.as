@@ -9,6 +9,7 @@ package clarin.cmdi.componentregistry.browser {
 		public function getProfileColumns():Array {
 			var columns:Array = new Array();
 			columns.push(createColumn("name", "Name"));
+			columns.push(createColumn("domainName", "Domain Name"));
 			columns.push(createColumn("creatorName", "Creator"));
 			columns.push(createColumn("description", "Description"));
 			columns.push(createDateColumn());
@@ -19,6 +20,7 @@ package clarin.cmdi.componentregistry.browser {
 			var columns:Array = new Array();
 			columns.push(createColumn("name", "Name"));
 			columns.push(createColumn("groupName", "Group Name"));
+			columns.push(createColumn("domainName", "Domain Name"));
 			columns.push(createColumn("creatorName", "Creator Name"));
 			columns.push(createColumn("description", "Description"));
 			columns.push(createDateColumn());

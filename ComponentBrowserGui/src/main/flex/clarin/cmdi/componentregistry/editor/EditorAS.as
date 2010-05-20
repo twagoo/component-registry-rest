@@ -120,6 +120,7 @@ private function saveSpec(inUserSpace:Boolean):void {
 		item.name = xmlEditor.cmdSpec.headerName;
 		item.isProfile = xmlEditor.cmdSpec.isProfile;
 		item.groupName = xmlEditor.cmdSpec.groupName;
+		item.domainName = xmlEditor.cmdSpec.domainName;
 		item.isInUserSpace = inUserSpace;
 		uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 		if (item.isProfile) {

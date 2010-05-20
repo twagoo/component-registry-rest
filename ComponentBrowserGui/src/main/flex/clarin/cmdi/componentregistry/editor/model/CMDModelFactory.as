@@ -15,6 +15,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.headerId = xml.Header.ID;
 			result.headerDescription = xml.Header.Description;
 			result.groupName = description.groupName;
+			result.domainName = description.domainName;
 			var components:XMLList = xml.elements(ComponentMD.CMD_COMPONENT);
 			for each (var component:XML in components) {
 				var cmdComp:CMDComponent = createComponent(component);

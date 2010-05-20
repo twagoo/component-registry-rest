@@ -147,6 +147,12 @@ package clarin.cmdi.componentregistry.editor {
 					_spec.headerName = val;
 				})
 			addChild(nameInput);
+			addChild(new ComboBoxInputLine(LabelConstants.DOMAIN_NAME, _spec.domainName, LabelConstants.DOMAIN_NAME_DATA, function(val:Object):void {
+					if (val) {
+						_spec.domainName = val.data;
+					}
+				}));
+
 //			var idInput:FormItemInputLine = new FormItemInputLine(XMLBrowser:"Id", spec.headerId, function(val:String):void {
 //					spec.headerId = val;
 //				}, false);
@@ -160,7 +166,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
-			var result:FormItemInputLine = new FormItemInputLine("Group Name:", spec.groupName, function(val:String):void {
+			var result:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
 					spec.groupName = val;
 				}, true, InputValidators.getIsRequiredValidator());
 			BindingUtils.bindSetter(function(val:Boolean):void {

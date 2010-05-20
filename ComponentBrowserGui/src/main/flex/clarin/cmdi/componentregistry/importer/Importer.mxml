@@ -7,6 +7,7 @@
 
 	<mx:Script>
 		<![CDATA[
+		    import clarin.cmdi.componentregistry.common.LabelConstants;
 		    import clarin.cmdi.componentregistry.common.Credentials;
 		    import mx.core.Application;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
@@ -24,7 +25,9 @@
 				item.description = description.text;
 				item.name = nameInput.text;
 				item.groupName = groupName.text;
+				item.domainName = domainName.selectedItem.data;
 				item.isProfile = isProfile;
+				item.isInUserSpace = true; //We only allow import into workspace it can be published from there.
 				if (isProfile) {
 					uploadSrv.submitProfile(item);
 				} else {
@@ -79,6 +82,9 @@
 			</mx:FormItem>
 			<mx:FormItem label="Creator Name">
 				<mx:Text id="creatorName" text="{Credentials.instance.userName}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Domain Name">
+				<mx:ComboBox id="domainName" dataProvider="{LabelConstants.DOMAIN_NAME_DATA}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Group Name"
 						 visible="{!isProfile}"

@@ -91,6 +91,7 @@ package clarin.cmdi.componentregistry.services {
 					var params:URLVariables = new URLVariables();
 					ml.addVariable("description", description.description);
 					ml.addVariable("name", description.name);
+					ml.addVariable("domainName", description.domainName);
 					ml.addVariable("group", description.groupName);
 					ml.addFile(data, description.name + ".xml", "data");
 					if (description.isInUserSpace)

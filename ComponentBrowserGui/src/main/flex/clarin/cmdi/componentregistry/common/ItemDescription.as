@@ -11,6 +11,7 @@ package clarin.cmdi.componentregistry.common {
 		public var description:String;
 		public var creatorName:String;
 		public var groupName:String;
+		public var domainName:String;
 		public var dataUrl:String;
 		public var isProfile:Boolean;
 		public var registrationDate:String;
@@ -28,6 +29,7 @@ package clarin.cmdi.componentregistry.common {
 			this.description = itemDescription.description;
 			this.creatorName = itemDescription.creatorName;
 			this.groupName = itemDescription.groupName;
+			this.domainName = itemDescription.domainName;
 			this.dataUrl = infoUrl + itemDescription.id
 			this.isProfile = isProfileValue;
 			this.isInUserSpace = isInUserSpace;

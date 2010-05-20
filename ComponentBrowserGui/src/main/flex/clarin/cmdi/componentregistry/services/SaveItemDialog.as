@@ -1,13 +1,10 @@
-package clarin.cmdi.componentregistry.common.components {
+package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 
-	import flash.events.ErrorEvent;
-	import flash.events.Event;
-	import flash.net.FileReference;
+	import com.adobe.net.URI;
+
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
-
-	import mx.controls.Alert;
 
 	public class SaveItemDialog {
 
@@ -25,7 +22,11 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private function save(item:ItemDescription, extension:String, urlVariable:String = null):void {
 			var req:URLRequest = new URLRequest();
-			req.url = item.dataUrl + "/" + extension;
+			var url:URI = new URI(item.dataUrl + "/" + extension);
+			if (item.isInUserSpace) {
+				url.setQueryValue(Config.USERSPACE_PARAM, "true");
+			}
+			req.url = url.toString();
 			navigateToURL(req, "_top");
 		}
 

@@ -1,4 +1,6 @@
 package clarin.cmdi.componentregistry.common {
+    import mx.collections.ArrayCollection;
+    
 
 	public class LabelConstants {
 
@@ -16,5 +18,13 @@ package clarin.cmdi.componentregistry.common {
 		public static const ATTRIBUTELIST:String = "AttributeList:"
 		public static const ELEMENT:String = "Element:";
 		public static const VALUESCHEME:String = "Type:";
+		public static const GROUP_NAME:String = "Group Name:";
+		public static const DOMAIN_NAME:String = "Domain Name:";
+
+
+		//Data
+		public static const DOMAIN_NAME_DATA:ArrayCollection = new ArrayCollection([{label: "Linguistics", data: "Linguistics"},
+			{label: "Other", data: "Other"},
+			{label: "Unknown", data: "Unknown"}]);
 	}
 }
