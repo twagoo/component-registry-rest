@@ -22,6 +22,7 @@ public class ProfileDescriptionTest {
         desc.setCreatorName("myC");
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
+        desc.setDomainName("Linguistics");
         desc.setHref("linkToMyProfile");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -34,6 +35,7 @@ public class ProfileDescriptionTest {
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
+        expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "</profileDescription>\n";
         assertEquals(expected, out.toString());

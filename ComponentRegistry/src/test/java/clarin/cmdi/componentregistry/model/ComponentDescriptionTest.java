@@ -24,6 +24,7 @@ public class ComponentDescriptionTest {
         desc.setRegistrationDate("myDate");
         desc.setHref("linkToMyComponent");
         desc.setGroupName("MyGroup");
+        desc.setDomainName("Linguistics");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(desc, out);
@@ -35,6 +36,7 @@ public class ComponentDescriptionTest {
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
+        expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyComponent</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
         expected += "</componentDescription>\n";

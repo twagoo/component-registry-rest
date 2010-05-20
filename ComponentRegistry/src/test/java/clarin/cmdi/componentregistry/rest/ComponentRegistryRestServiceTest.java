@@ -58,8 +58,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getAuthenticatedResource(getResource().path("/registry/components")).accept(MediaType.APPLICATION_JSON).get(
                 COMPONENT_LIST_GENERICTYPE);
         assertEquals("Get public components", 2, response.size());
-        ClientResponse cResponse = getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true").accept(MediaType.APPLICATION_JSON).get(
-                ClientResponse.class);
+        ClientResponse cResponse = getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true").accept(
+                MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals("Trying to get userspace without credentials", 500, cResponse.getStatus());
     }
 
@@ -253,6 +253,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getTestProfileContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
@@ -262,6 +263,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(profileDesc);
         assertEquals("ProfileTest1", profileDesc.getName());
         assertEquals("My Test Profile", profileDesc.getDescription());
+        assertEquals("TestDomain", profileDesc.getDomainName());
         assertEquals("J.Unit", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
@@ -276,19 +278,15 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("user registered profiles", 0, profiles.size());
         assertEquals("public registered profiles", 0, getAuthenticatedResource("/registry/profiles").accept(MediaType.APPLICATION_XML).get(
                 PROFILE_LIST_GENERICTYPE).size());
-        FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getTestProfileContent(),
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        FormDataMultiPart form = createFormData(RegistryTestHelper.getTestProfileContent());
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertTrue(response.isProfile());
         assertTrue(response.isInUserSpace());
         ProfileDescription profileDesc = (ProfileDescription) response.getDescription();
         assertNotNull(profileDesc);
-        assertEquals("ProfileTest1", profileDesc.getName());
-        assertEquals("My Test Profile", profileDesc.getDescription());
+        assertEquals("Test1", profileDesc.getName());
+        assertEquals("My Test", profileDesc.getDescription());
         assertEquals("J.Unit", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
@@ -319,13 +317,25 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 getResource().path("/registry/profiles/" + profileDesc.getId() + "/xml").queryParam(USERSPACE_PARAM, "true")).accept(
                 MediaType.TEXT_XML).get(String.class);
         assertTrue(profile.length() > 0);
-        
-        cResponse = getAuthenticatedResource(getResource().path("/registry/profiles/"+profileDesc.getId()).queryParam(USERSPACE_PARAM, "true")).delete(ClientResponse.class);
+
+        cResponse = getAuthenticatedResource(
+                getResource().path("/registry/profiles/" + profileDesc.getId()).queryParam(USERSPACE_PARAM, "true")).delete(
+                ClientResponse.class);
         assertEquals(200, cResponse.getStatus());
 
         profiles = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true")).accept(
                 MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
         assertEquals(0, profiles.size());
+    }
+
+    private FormDataMultiPart createFormData(Object content) {
+        FormDataMultiPart form = new FormDataMultiPart();
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        return form;
     }
 
     @Test
@@ -350,10 +360,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        </CMD_Component>\n";
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
-        FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
+        FormDataMultiPart form = createFormData(content);
         RegisterResponse response = getAuthenticatedResource("/registry/components").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertFalse(response.isRegistered());
@@ -375,10 +382,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
 
-        form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form = createFormData(content);
         response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertFalse(response.isRegistered());
         assertEquals(1, response.getErrors().size());
@@ -397,12 +401,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("user registered components", 0, components.size());
         assertEquals("public registered components", 0, getAuthenticatedResource("/registry/components").accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE).size());
-        FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        FormDataMultiPart form = createFormData(RegistryTestHelper.getComponentTestContent());
 
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
@@ -411,8 +410,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(response.isInUserSpace());
         ComponentDescription desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
-        assertEquals("ComponentTest1", desc.getName());
-        assertEquals("My Test Component", desc.getDescription());
+        assertEquals("Test1", desc.getName());
+        assertEquals("My Test", desc.getDescription());
         assertEquals("J.Unit", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
         assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
@@ -447,7 +446,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 MediaType.TEXT_XML).get(String.class);
         assertTrue(result.length() > 0);
 
-        cResponse = getAuthenticatedResource(getResource().path("/registry/components/"+desc.getId()).queryParam(USERSPACE_PARAM, "true")).delete(ClientResponse.class);
+        cResponse = getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId()).queryParam(USERSPACE_PARAM, "true"))
+                .delete(ClientResponse.class);
         assertEquals(200, cResponse.getStatus());
 
         components = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true")).accept(
@@ -462,6 +462,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
         form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
         RegisterResponse response = getAuthenticatedResource("/registry/components").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
@@ -474,6 +475,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("My Test Component", desc.getDescription());
         assertEquals("J.Unit", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
+        assertEquals("TestDomain", desc.getDomainName());
         assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
         assertNotNull(desc.getRegistrationDate());
         String url = getResource().getUriBuilder().build().toString();
@@ -487,6 +489,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.DATA_FORM_FIELD, new ByteArrayInputStream(notAValidProfile.getBytes()),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "Domain");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
         RegisterResponse postResponse = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
@@ -529,6 +532,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "t");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "domain");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);

@@ -14,6 +14,7 @@ public abstract class AbstractDescription {
     private String name;
     private String registrationDate;
     private String creatorName;
+    private String domainName; 
     @XmlElement(namespace = "http://www.w3.org/1999/xlink")
     private String href;
 
@@ -55,6 +56,14 @@ public abstract class AbstractDescription {
 
     public String getCreatorName() {
         return creatorName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
+    }
+
+    public String getDomainName() {
+        return domainName;
     }
 
     public void setHref(String href) {

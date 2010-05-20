@@ -55,6 +55,7 @@ public class ComponentRegistryRestService {
     public static final String NAME_FORM_FIELD = "name";
     public static final String DESCRIPTION_FORM_FIELD = "description";
     public static final String GROUP_FORM_FIELD = "group";
+    public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String USERSPACE_PARAM = "userspace";
 
     private ComponentRegistry getRegistry(boolean userspace) {
@@ -174,8 +175,8 @@ public class ComponentRegistryRestService {
 
     /**
      * 
-     * Purely helper method for my front-end (FLEX) which only does post/get requests. The query param is checked and the "proper" method
-     * is called.
+     * Purely helper method for my front-end (FLEX) which only does post/get requests. The query param is checked and the "proper" method is
+     * called.
      * @param profileId
      * @param method
      * @return
@@ -270,7 +271,8 @@ public class ComponentRegistryRestService {
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
     public RegisterResponse registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
             throw new IllegalArgumentException("no user principal found.");
@@ -279,6 +281,7 @@ public class ComponentRegistryRestService {
         desc.setCreatorName(principal.getName());
         desc.setName(name);
         desc.setDescription(description);
+        desc.setDomainName(domainName);
         desc.setRegistrationDate(createNewDate());
         LOG.info("Trying to register Profile: " + desc);
         return register(input, desc, principal, userspace);
@@ -290,7 +293,8 @@ public class ComponentRegistryRestService {
     @Consumes("multipart/form-data")
     public RegisterResponse registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input,
             @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
             throw new IllegalArgumentException("no user principal found.");
@@ -300,6 +304,7 @@ public class ComponentRegistryRestService {
         desc.setName(name);
         desc.setDescription(description);
         desc.setGroupName(group);
+        desc.setDomainName(domainName);
         desc.setRegistrationDate(createNewDate());
         LOG.info("Trying to register Component: " + desc);
         return register(input, desc, principal, userspace);
@@ -311,7 +316,7 @@ public class ComponentRegistryRestService {
 
     private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal, boolean userspace) {
         try {
-            ComponentRegistry registry =getRegistry(userspace);
+            ComponentRegistry registry = getRegistry(userspace);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
             MDValidator validator = new MDValidator(input, desc, registry);
             RegisterResponse response = new RegisterResponse();
