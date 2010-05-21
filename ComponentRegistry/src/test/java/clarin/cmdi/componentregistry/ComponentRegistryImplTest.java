@@ -198,12 +198,13 @@ public class ComponentRegistryImplTest {
 
         File profileFile = new File(config.getProfileDir(), id + File.separator + id + ".xml");
         assertTrue(profileFile.exists());
-        assertTrue(profileFile.delete()); //profile file deleted so file system corrupt file should no longer be loaded in cache
+        assertTrue(profileFile.delete()); 
         assertFalse(profileFile.exists());
 
         register.setResourceConfig(config); //triggers cache
-        assertEquals(1, register.getProfileDescriptions().size());
+        assertEquals(2, register.getProfileDescriptions().size()); //Description will still be shown, CMDSpec will be null though
         assertEquals(0, register.getComponentDescriptions().size());
+        assertNull(register.getMDProfile(id));
         assertNull(register.getMDProfile(id));
         assertNotNull(register.getMDProfile(id2));
     }

@@ -49,8 +49,9 @@ public class ComponentRegistryFactory {
         }
     }
 
-    public void reset() {
+    void reset() {
         registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
+        publicRegistry = new ComponentRegistryImpl(true);
     }
 
     public static ComponentRegistryFactory getInstance() {

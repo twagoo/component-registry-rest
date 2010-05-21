@@ -139,7 +139,7 @@ public class MDValidatorTest {
         assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
         validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, userRegistry);
-        assertTrue("component is registered should be valid now", validator.validate());
+        assertTrue(validator.validate());
         assertEquals(0, validator.getErrorMessages().size());
     }
 

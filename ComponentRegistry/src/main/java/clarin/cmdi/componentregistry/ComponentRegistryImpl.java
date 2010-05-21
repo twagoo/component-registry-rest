@@ -11,13 +11,14 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -69,29 +70,36 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         this.componentDescriptions = loadComponentDescriptions();
         LOG.info("CACHE: Reading and parsing all profile descriptions.");
         this.profileDescriptions = loadProfileDescriptions();
-        LOG.info("CACHE: Reading and parsing all components.");
-        this.componentsCache = loadComponents();
-        LOG.info("CACHE: Reading and parsing all profiles.");
-        this.profilesCache = loadProfiles();
-        LOG.info("CACHE: Loaded " + profileDescriptions.size() + " profile descriptions, " + profilesCache.size() + " profiles.");
-        LOG.info("CACHE: Loaded " + componentDescriptions.size() + " components descriptions, " + componentsCache.size() + " components.");
+        LOG.info("CACHE: Loaded " + profileDescriptions.size() + " profile descriptions.");
+        LOG.info("CACHE: Loaded " + componentDescriptions.size() + " components descriptions.");
         LOG.info("CACHE initialized. Any occured errors should be adressed, files could be corrupt."
                 + " Components and Profiles with errors will not be shown to users.");
+        componentsCache = Collections.synchronizedMap(new LRUMap(100));
+        profilesCache = Collections.synchronizedMap(new LRUMap(100));
     }
 
-    private Map<String, CMDComponentSpec> loadProfiles() {
-        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
-        for (Iterator<String> iter = profileDescriptions.keySet().iterator(); iter.hasNext();) {
-            String id = iter.next();
-            CMDComponentSpec spec = getUncachedProfile(id);
-            if (spec != null) {
-                result.put(id, spec);
-            } else {
-                iter.remove(); // cannot load actual profile so remove description from cache.
-            }
-        }
-        return result;
-    }
+    //    public void test() {
+    //        LOG.info("CACHE: Reading and parsing all components.");
+    //        this.componentsCache = loadComponents();
+    //        LOG.info("CACHE: Reading and parsing all profiles.");
+    //        this.profilesCache = loadProfiles();
+    //        LOG.info("CACHE: Loaded " + profilesCache.size() + " profiles.");
+    //        LOG.info("CACHE: Loaded " + componentsCache.size() + " components.");
+    //    }
+
+    //    private Map<String, CMDComponentSpec> loadProfiles() {
+    //        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
+    //        for (Iterator<String> iter = profileDescriptions.keySet().iterator(); iter.hasNext();) {
+    //            String id = iter.next();
+    //            CMDComponentSpec spec = getUncachedProfile(id);
+    //            if (spec != null) {
+    //                result.put(id, spec);
+    //            } else {
+    //                iter.remove(); // cannot load actual profile so remove description from cache.
+    //            }
+    //        }
+    //        return result;
+    //    }
 
     CMDComponentSpec getUncachedProfile(String id) {
         File file = getProfileFile(id);
@@ -102,19 +110,19 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return spec;
     }
 
-    private Map<String, CMDComponentSpec> loadComponents() {
-        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
-        for (Iterator<String> iter = componentDescriptions.keySet().iterator(); iter.hasNext();) {
-            String id = iter.next();
-            CMDComponentSpec spec = getUncachedComponent(id);
-            if (spec != null) {
-                result.put(id, spec);
-            } else {
-                iter.remove(); // cannot load actual component so remove description from cache.
-            }
-        }
-        return result;
-    }
+    //    private Map<String, CMDComponentSpec> loadComponents() {
+    //        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
+    //        for (Iterator<String> iter = componentDescriptions.keySet().iterator(); iter.hasNext();) {
+    //            String id = iter.next();
+    //            CMDComponentSpec spec = getUncachedComponent(id);
+    //            if (spec != null) {
+    //                result.put(id, spec);
+    //            } else {
+    //                iter.remove(); // cannot load actual component so remove description from cache.
+    //            }
+    //        }
+    //        return result;
+    //    }
 
     CMDComponentSpec getUncachedComponent(String id) {
         File file = getComponentFile(id);
@@ -127,7 +135,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private Map<String, ProfileDescription> loadProfileDescriptions() {
         Collection files = FileUtils.listFiles(getProfileDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), DIRS_WITH_DESCRIPTIONS);
-        Map<String, ProfileDescription> result = new HashMap<String, ProfileDescription>();
+        Map<String, ProfileDescription> result = new ConcurrentHashMap<String, ProfileDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file, null);
@@ -141,7 +149,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     private Map<String, ComponentDescription> loadComponentDescriptions() {
         Collection files = FileUtils.listFiles(getComponentDir(), new WildcardFileFilter(DESCRIPTION_FILE_NAME), DIRS_WITH_DESCRIPTIONS);
-        Map<String, ComponentDescription> result = new HashMap<String, ComponentDescription>();
+        Map<String, ComponentDescription> result = new ConcurrentHashMap<String, ComponentDescription>();
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file, null);
@@ -151,13 +159,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
-    private void updateCache(CMDComponentSpec spec, AbstractDescription description) {
+    private void updateCache(CMDComponentSpec spec, AbstractDescription description) { //TODO PD remove spec
         if (description.isProfile()) {
             profileDescriptions.put(description.getId(), (ProfileDescription) description);
-            profilesCache.put(description.getId(), spec);
+            profilesCache.remove(description.getId());
         } else {
             componentDescriptions.put(description.getId(), (ComponentDescription) description);
-            componentsCache.put(description.getId(), spec);
+            componentsCache.remove(description.getId());
         }
     }
 
@@ -181,6 +189,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public CMDComponentSpec getMDProfile(String profileId) {
         CMDComponentSpec result = profilesCache.get(profileId);
+        if (result == null && !profilesCache.containsKey(profileId)) {
+            result = getUncachedProfile(profileId);
+            profilesCache.put(profileId, result);
+        }
         return result;
     }
 
@@ -216,6 +228,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public CMDComponentSpec getMDComponent(String componentId) {
         CMDComponentSpec result = componentsCache.get(componentId);
+        if (result == null && !componentsCache.containsKey(componentId)) {
+            result = getUncachedComponent(componentId);
+            componentsCache.put(componentId, result);
+        }
         return result;
     }
 
