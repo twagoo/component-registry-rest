@@ -147,7 +147,7 @@ package clarin.cmdi.componentregistry.editor {
 					_spec.headerName = val;
 				})
 			addChild(nameInput);
-			addChild(new ComboBoxInputLine(LabelConstants.DOMAIN_NAME, _spec.domainName, LabelConstants.DOMAIN_NAME_DATA, function(val:Object):void {
+			addChild(new ComboBoxInputLine(LabelConstants.DOMAIN_NAME, _spec.domainName, LabelConstants.DOMAIN_NAME_DATA, LabelConstants.DOMAIN_NAME_PROMPT, function(val:Object):void {
 					if (val) {
 						_spec.domainName = val.data;
 					}

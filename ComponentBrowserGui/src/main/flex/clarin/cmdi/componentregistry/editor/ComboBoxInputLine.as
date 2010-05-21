@@ -11,7 +11,7 @@ package clarin.cmdi.componentregistry.editor {
 		public var box:ComboBox = new ComboBox();
 
 
-		public function ComboBoxInputLine(name:String, value:String, dataProvider:ArrayCollection, bindingFunction:Function) {
+		public function ComboBoxInputLine(name:String, value:String, dataProvider:ArrayCollection, prompt:String, bindingFunction:Function) {
 			super();
 			label = name;
 			styleName = StyleConstants.XMLBROWSER_FIELD;
@@ -19,7 +19,7 @@ package clarin.cmdi.componentregistry.editor {
 			box.dataProvider = dataProvider;
 			box.selectedIndex = -1;
 			if (!value) {
-			    box.prompt = "Select a domain...";
+			    box.prompt = prompt;
 			} else {
 			    box.prompt = value;
 			}

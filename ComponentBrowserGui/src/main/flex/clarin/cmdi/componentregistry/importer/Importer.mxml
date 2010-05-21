@@ -7,13 +7,19 @@
 
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.common.LabelConstants;
-		    import clarin.cmdi.componentregistry.common.Credentials;
-		    import mx.core.Application;
+			import mx.events.ValidationResultEvent;
+			import mx.collections.ArrayCollection;
+			import mx.validators.Validator;
+			import clarin.cmdi.componentregistry.editor.InputValidators;
+			import clarin.cmdi.componentregistry.common.LabelConstants;
+			import clarin.cmdi.componentregistry.common.Credentials;
+			import mx.core.Application;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 
 			private static const BTN_PROFILE_LABEL:String = "Select profile xml...";
 			private static const BTN_COMPONENT_LABEL:String = "Select component xml...";
+
+			private var validators:ArrayCollection = new ArrayCollection();
 
 			[Bindable]
 			private var isProfile:Boolean = true;
@@ -21,18 +27,35 @@
 			private var btnLabel:String = BTN_PROFILE_LABEL;
 
 			private function submit(event:Event):void {
-				var item:ItemDescription = new ItemDescription();
-				item.description = description.text;
-				item.name = nameInput.text;
-				item.groupName = groupName.text;
-				item.domainName = domainName.selectedItem.data;
-				item.isProfile = isProfile;
-				item.isInUserSpace = true; //We only allow import into workspace it can be published from there.
-				if (isProfile) {
-					uploadSrv.submitProfile(item);
-				} else {
-					uploadSrv.submitComponent(item);
+				if (validate()) {
+					var item:ItemDescription = new ItemDescription();
+					item.description = description.text;
+					item.name = nameInput.text;
+					item.groupName = groupName.text;
+					if (domainName.selectedIndex != -1)
+						item.domainName = domainName.selectedItem.data;
+					item.isProfile = isProfile;
+					item.isInUserSpace = true; //We only allow import into workspace it can be published from there.
+					if (isProfile) {
+						uploadSrv.submitProfile(item);
+					} else {
+						uploadSrv.submitComponent(item);
+					}
 				}
+			}
+
+			private function validate():Boolean {
+				var result:Boolean = true;
+				for (var i:int; i < validators.length; i++) {
+					var val:Validator = validators.getItemAt(i) as Validator;
+					if (val.listener.visible) {
+						var event:ValidationResultEvent = val.validate();
+						if (event.type != ValidationResultEvent.VALID) {
+							result = false;
+						}
+					}
+				}
+				return result;
 			}
 
 			private function setIsProfile(isProfileValue:Boolean):void {
@@ -46,6 +69,26 @@
 
 			private function registryChange(event:UploadCompleteEvent):void {
 				parentApplication.viewStack.switchToBrowse(event.itemDescription);
+			}
+
+			private function registerNameValidator(event:Event):void {
+				var validator:Validator = InputValidators.getNameValidator();
+				validator.listener = event.currentTarget;
+				validator.source = event.currentTarget;
+				validator.property = "text";
+				validators.addItem(validator);
+			}
+
+			private function registerIsRequiredValidator(event:Event, source:Object = null):void {
+				var validator:Validator = InputValidators.getIsRequiredValidator();
+				validator.listener = event.currentTarget;
+				if (!source) {
+					validator.source = event.currentTarget;
+				} else {
+					validator.source = source;
+				}
+				validator.property = "text";
+				validators.addItem(validator);
 			}
 		]]>
 	</mx:Script>
@@ -69,27 +112,36 @@
 			<mx:HBox>
 				<mx:Button label="{btnLabel}"
 						   id="btnSelect"
-						   click="uploadSrv.selectXmlFile(event)"/>
+						   click="uploadSrv.selectXmlFile(event)"
+						   creationComplete="registerIsRequiredValidator(event, txtSelectedFile)"/>
 				<mx:Text id="txtSelectedFile"
 						 text="{uploadSrv.selectedFile}"/>
 			</mx:HBox>
 
 			<mx:FormItem label="Name">
-				<mx:TextInput id="nameInput"/>
+				<mx:TextInput id="nameInput"
+							  creationComplete="registerNameValidator(event)"/>
 			</mx:FormItem>
 			<mx:FormItem label="Description">
-				<mx:TextInput id="description"/>
+				<mx:TextInput id="description"
+							  creationComplete="registerIsRequiredValidator(event)"/>
 			</mx:FormItem>
 			<mx:FormItem label="Creator Name">
-				<mx:Text id="creatorName" text="{Credentials.instance.userName}"/>
+				<mx:Text id="creatorName"
+						 text="{Credentials.instance.userName}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Domain Name">
-				<mx:ComboBox id="domainName" dataProvider="{LabelConstants.DOMAIN_NAME_DATA}"/>
+				<mx:ComboBox id="domainName"
+							 selectedIndex="-1"
+							 prompt="{LabelConstants.DOMAIN_NAME_PROMPT}"
+							 dataProvider="{LabelConstants.DOMAIN_NAME_DATA}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Group Name"
 						 visible="{!isProfile}"
 						 includeInLayout="{!isProfile}">
-				<mx:TextInput id="groupName"/>
+				<mx:TextInput id="groupName"
+							  visible="{!isProfile}"
+							  creationComplete="registerIsRequiredValidator(event)"/>
 			</mx:FormItem>
 			<mx:Button label="Submit"
 					   click="submit(event)"/>

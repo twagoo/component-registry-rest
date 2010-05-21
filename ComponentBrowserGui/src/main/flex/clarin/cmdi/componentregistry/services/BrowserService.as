@@ -3,6 +3,9 @@ package clarin.cmdi.componentregistry.services {
 
 	import com.adobe.net.URI;
 
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
+
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
@@ -45,12 +48,6 @@ package clarin.cmdi.componentregistry.services {
 				url.setQueryValue(Config.USERSPACE_PARAM, "true");
 			}
 			service.url = url.toString();
-
-		/* 			service.url = serviceUrl + "?" + new Date().getTime();
-		   if (userSpace) {
-		   service.url += "&"+Config.USERSPACE_PARAM+"=true";
-		   }
-		 */
 		}
 
 		public function load():void {
@@ -66,8 +63,9 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		public function fault(faultEvent:FaultEvent):void {
-			var errorMessage:String = StringUtil.substitute("Error in {0}: Message: {1} \n Fault: {2} - {3}", this, faultEvent.message, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			Alert.show(errorMessage);
+			var errorMessage:String = StringUtil.substitute("Error in {0}: \n Fault: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
+			trace(errorMessage);
+			Alert.show("Internal Server error cannot process the data, try reloading the application.");
 		}
 
 		protected function setItemDescriptions(items:ArrayCollection):void {

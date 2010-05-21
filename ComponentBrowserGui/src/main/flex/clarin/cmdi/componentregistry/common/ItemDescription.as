@@ -11,7 +11,7 @@ package clarin.cmdi.componentregistry.common {
 		public var description:String;
 		public var creatorName:String;
 		public var groupName:String;
-		public var domainName:String;
+		public var domainName:String = "";
 		public var dataUrl:String;
 		public var isProfile:Boolean;
 		public var registrationDate:String;

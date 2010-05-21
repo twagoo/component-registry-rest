@@ -20,11 +20,43 @@ package clarin.cmdi.componentregistry.common {
 		public static const VALUESCHEME:String = "Type:";
 		public static const GROUP_NAME:String = "Group Name:";
 		public static const DOMAIN_NAME:String = "Domain Name:";
-
+        public static const DOMAIN_NAME_PROMPT:String = "Select a domain...";
+        
 
 		//Data
-		public static const DOMAIN_NAME_DATA:ArrayCollection = new ArrayCollection([{label: "Linguistics", data: "Linguistics"},
+		public static const DOMAIN_NAME_DATA:ArrayCollection = new ArrayCollection([{label: "Applied Linguistics", data: "applied_linguistics"},
 			{label: "Other", data: "Other"},
-			{label: "Unknown", data: "Unknown"}]);
-	}
+			{label: "Unknown", data: "Unknown"}]); //TODO PD, Dieter knows what to fill in here!
+			
+/* <item>anthropological_linguistics</item>
+<item>applied_linguistics</item>
+<item>cognitive_science</item>
+<item>computational_linguistics</item>
+<item>discourse_analysis</item>
+<item>forensic_linguistics</item>
+<item>general_linguistics</item>
+<item>historical_linguistics</item>
+<item>history_of_linguistics</item>
+<item>language_acquisition</item>
+<item>language_documentation</item>
+<item>lexicography</item>
+<item>linguistics_and_literature</item>
+<item>linguistic_theories</item>
+<item>mathematical_linguistics</item>
+<item>morphology</item>
+<item>neurolinguistics</item>
+<item>philosophy_of_language</item>
+<item>phonetics</item>
+<item>phonology</item>
+<item>pragmatics</item>
+<item>psycholinguistics</item>
+<item>semantics</item>
+<item>sociolinguistics</item>
+<item>syntax</item>
+<item>text_and_corpus_linguistics</item>
+<item>translating_and_interpreting</item>
+<item>typology</item>
+<item>writing_systems</item>
+ */	
+ }
 }
