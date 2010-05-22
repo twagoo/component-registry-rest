@@ -27,13 +27,13 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private var editable:Boolean;
 
-		public function ExpandingComponentLabel(componentId:String, name:String, editable:Boolean = false) {
+		public function ExpandingComponentLabel(componentId:String, editable:Boolean = false) {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;
 			this.item = ComponentListService.findDescription(componentId);
 			styleName = StyleConstants.EXPANDING_COMPONENT;
-			if (item.isInUserSpace) {
+			if (item && item.isInUserSpace) {
 			    this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
 		}
@@ -48,7 +48,7 @@ package clarin.cmdi.componentregistry.common.components {
 				id.addEventListener(MouseEvent.MOUSE_OVER, mouseOver);
 				id.addEventListener(MouseEvent.MOUSE_OUT, mouseOut);
 			} else {
-				id.text = "Component cannot be found.";
+				id.text = "Component cannot be found (might not exist anymore).";
 			}
 			addChild(id);
 		}

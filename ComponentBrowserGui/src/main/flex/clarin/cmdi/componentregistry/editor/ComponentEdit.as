@@ -161,7 +161,7 @@ package clarin.cmdi.componentregistry.editor {
 				var result:FormItem = new FormItem();
 				result.styleName = StyleConstants.XMLBROWSER_FIELD;
 				result.label = LabelConstants.COMPONENT_ID;
-				result.addChild(new ExpandingComponentLabel(component.componentId, component.name, false));
+				result.addChild(new ExpandingComponentLabel(component.componentId, false));
 				return result;
 			}
 			return null;

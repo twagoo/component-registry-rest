@@ -134,7 +134,7 @@ package clarin.cmdi.componentregistry.browser {
 				labelName.styleName = StyleConstants.XMLBROWSER_HEADER;
 				labelName.text = LabelConstants.COMPONENT;
 				result.addChild(labelName);
-				result.addChild(new ExpandingComponentLabel(component.componentId, component.name, false));
+				result.addChild(new ExpandingComponentLabel(component.componentId, false));
 				return result;
 			}
 			return null;
