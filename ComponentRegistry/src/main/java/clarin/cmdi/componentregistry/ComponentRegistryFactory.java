@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,7 +22,7 @@ public class ComponentRegistryFactory {
     private UserMapping userMap = null;
 
     private ComponentRegistryImpl publicRegistry = new ComponentRegistryImpl(true);
-    private Map<String, ComponentRegistry> registryMap = new HashMap<String, ComponentRegistry>();
+    private Map<String, ComponentRegistry> registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
 
     private ComponentRegistryFactory() {
         init();
@@ -62,7 +61,7 @@ public class ComponentRegistryFactory {
         return publicRegistry;
     }
 
-    public ComponentRegistry getComponentRegistry(boolean userspace, Principal principal) {
+    public synchronized ComponentRegistry getComponentRegistry(boolean userspace, Principal principal) {
         ComponentRegistry result = null;
         if (userspace) {
             if (principal != null) {
@@ -94,7 +93,7 @@ public class ComponentRegistryFactory {
         return result;
     }
 
-    private synchronized String getUserDir(String name) {
+    private String getUserDir(String name) {
         UserMapping.User user = userMap.findUser(name);
         if (user == null) {
             user = new UserMapping.User();

@@ -472,7 +472,7 @@ public class ComponentRegistryImplTest {
         config.init();
         ComponentRegistryFactory.getInstance().reset();
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry();
-        register.setResourceConfig(config.getPublicResourceConfig());
+        register.setResourceConfig(config.getPublicResourceConfig()); //LOADS cache again but is necessary for tests normally we wouldn't have this
         return register;
     }
 

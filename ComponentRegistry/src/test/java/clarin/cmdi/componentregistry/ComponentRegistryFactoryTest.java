@@ -26,16 +26,20 @@ public class ComponentRegistryFactoryTest {
     @Test
     public void testGetUserDir() throws Exception {
         registryDir = ComponentRegistryImplTest.createTempRegistryDir();
-        assertFalse(Configuration.getInstance().getUserDirMappingFile().exists());
         Configuration.getInstance().setRegistryRoot(registryDir);
         Configuration.getInstance().init();
-        ComponentRegistryFactory instance = ComponentRegistryFactory.getInstance();
-        ComponentRegistry componentRegistry = instance.getComponentRegistry(true, new DummyPrincipal("noot"));
 
+        ComponentRegistryFactory instance = ComponentRegistryFactory.getInstance();
+        assertFalse(Configuration.getInstance().getUserDirMappingFile().exists());
+        ComponentRegistry componentRegistry = instance.getComponentRegistry(true, new DummyPrincipal("noot"));
+        
         assertTrue(Configuration.getInstance().getUserDirMappingFile().exists());
+        UserMapping mapping = getUserMapping();
+        assertEquals(1, mapping.getUsers().size());
+        
         ComponentRegistry componentRegistry2 = instance.getComponentRegistry(true, new DummyPrincipal("noot"));
         assertSame(componentRegistry, componentRegistry2);
-        UserMapping mapping = getUserMapping();
+        mapping = getUserMapping();
         assertEquals(1, mapping.getUsers().size());
 
         ComponentRegistry componentRegistry3 = instance.getComponentRegistry(true, new DummyPrincipal("aap"));

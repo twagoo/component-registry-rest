@@ -159,7 +159,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
-    private void updateCache(CMDComponentSpec spec, AbstractDescription description) { //TODO PD remove spec
+    private void updateCache(AbstractDescription description) {
         if (description.isProfile()) {
             profileDescriptions.put(description.getId(), (ProfileDescription) description);
             profilesCache.remove(description.getId());
@@ -317,7 +317,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             }
         }
         LOG.info("Succesfully registered a " + type + " in " + dir + " " + type + "= " + description);
-        updateCache(spec, description);
+        updateCache(description);
         return 0;
     }
 
@@ -354,9 +354,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             File profileFile = getProfileFile(profileId);
             if (profileFile.exists()) {
                 FileUtils.moveDirectoryToDirectory(profileFile.getParentFile(), resourceConfig.getProfileDeletionDir(), true);
-                profileDescriptions.remove(profileId);
-                profilesCache.remove(profileId);
             } // else no profile so nothing to delete
+            profileDescriptions.remove(profileId);
+            profilesCache.remove(profileId);
         }
     }
 
@@ -374,9 +374,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             File componentFile = getComponentFile(componentId);
             if (componentFile.exists()) {
                 FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), resourceConfig.getComponentDeletionDir(), true);
-                componentDescriptions.remove(componentId);
-                componentsCache.remove(componentId);
             } // else no component so nothing to delete
+            componentDescriptions.remove(componentId);
+            componentsCache.remove(componentId);
         }
     }
 
@@ -396,7 +396,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         File dir = new File(typeDir, strippedId);
         writeDescription(dir, description);
         writeCMDComponentSpec(dir, strippedId + ".xml", spec);
-        updateCache(spec, description);
+        updateCache(description);
     }
 
     public List<ComponentDescription> getUsageInComponents(String componentId) {
@@ -404,7 +404,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         List<ComponentDescription> descs = getComponentDescriptions();
         for (ComponentDescription desc : descs) {
             CMDComponentSpec spec = getMDComponent(desc.getId());
-            if (findComponentId(componentId, spec.getCMDComponent())) {
+            if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
                 result.add(desc);
             }
         }
@@ -416,7 +416,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         List<ProfileDescription> profileDescriptions = getProfileDescriptions();
         for (ProfileDescription profileDescription : profileDescriptions) {
             CMDComponentSpec profile = getMDProfile(profileDescription.getId());
-            if (findComponentId(componentId, profile.getCMDComponent())) {
+            if (profile != null && findComponentId(componentId, profile.getCMDComponent())) {
                 result.add(profileDescription);
             }
         }
