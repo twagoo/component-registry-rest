@@ -365,7 +365,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 RegisterResponse.class, form);
         assertFalse(response.isRegistered());
         assertEquals(1, response.getErrors().size());
-        assertEquals("referenced component cannot be found in the published components: " + compDesc1.getId(), response.getErrors().get(0));
+        assertEquals("referenced component cannot be found in the published components: "+ compDesc1.getName()+" ("+ compDesc1.getId()+")", response.getErrors().get(0));
 
         response = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
@@ -386,7 +386,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertFalse(response.isRegistered());
         assertEquals(1, response.getErrors().size());
-        assertEquals("referenced component cannot be found in the published components: " + comp2.getId(), response.getErrors().get(0));
+        assertEquals("referenced component cannot be found in the published components: " + comp2.getName()+" ("+ comp2.getId()+")", response.getErrors().get(0));
 
         response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
