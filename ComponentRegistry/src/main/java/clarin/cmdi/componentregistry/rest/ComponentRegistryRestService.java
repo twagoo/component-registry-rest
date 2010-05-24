@@ -318,7 +318,7 @@ public class ComponentRegistryRestService {
         try {
             ComponentRegistry registry = getRegistry(userspace);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-            MDValidator validator = new MDValidator(input, desc, registry);
+            MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true));
             RegisterResponse response = new RegisterResponse();
             response.setIsInUserSpace(userspace);
             validate(response, descriptionValidator, validator);

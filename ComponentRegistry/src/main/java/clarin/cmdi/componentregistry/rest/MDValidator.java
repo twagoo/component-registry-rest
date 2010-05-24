@@ -12,6 +12,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
 
 public class MDValidator implements Validator {
 
@@ -26,16 +27,20 @@ public class MDValidator implements Validator {
     private final InputStream input;
     private final AbstractDescription description;
     private final ComponentRegistry registry;
+    private final ComponentRegistry userRegistry;
 
     /**
      * 
      * @param input In order to validate the input is consumed. So use @see getCMDComponentSpec to get the parsed CMDComponentSpec.
      * @param desc
+     * @param registry (registry you currently used) 
+     * @param userRegistry can be null, We get user registry as well so we can give nice error messages if needed. Can be the same as @param registry
      */
-    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry) {
+    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry) {
         this.input = input;
         this.description = description;
         this.registry = registry;
+        this.userRegistry = userRegistry;
     }
 
     public List<String> getErrorMessages() {
@@ -73,7 +78,13 @@ public class MDValidator implements Validator {
             if (registry.isPublic()) { // public registry requires only published components
                 registeredComponent = registry.getMDComponent(id);
                 if (registeredComponent == null) {
-                    errorMessages.add(COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR + cmdComponentType.getComponentId());
+                    String error =  cmdComponentType.getComponentId();
+                    if (userRegistry != null) {
+                         ComponentDescription desc = userRegistry.getComponentDescription(id);
+                         if (desc != null)
+                             error = desc.getName()+" ("+cmdComponentType.getComponentId()+")";
+                    }
+                    errorMessages.add(COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR + error);
                 }
             } else { //User registry, can link to components from public registry and the user's registry
                 registeredComponent = registry.getMDComponent(id);
