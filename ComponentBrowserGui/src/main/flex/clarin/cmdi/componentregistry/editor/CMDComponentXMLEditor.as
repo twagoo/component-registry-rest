@@ -57,10 +57,6 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function validate():Boolean {
-//			var result:Boolean = true;
-//			for each (var validator:CMDValidator in validators) {
-//				result = validator.validate() && result;
-//			}
 			return validateChildren(getChildren());
 		}
 
