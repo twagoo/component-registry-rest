@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-
+	
 	import flash.display.DisplayObject;
-
+	
 	import mx.collections.XMLListCollection;
 	import mx.containers.HBox;
 	import mx.controls.ComboBox;
@@ -15,9 +15,11 @@ package clarin.cmdi.componentregistry.browser {
 	public class XMLBrowserValueSchemeLine extends HBox {
 		private var nameLabel:Label = new Label();
 		private var valueObject:DisplayObject;
-
-		public function XMLBrowserValueSchemeLine(name:String, value:String = null, valuePattern:String = null, valueList:XMLListCollection = null) {
+        private var _indent:int = 0;
+        
+		public function XMLBrowserValueSchemeLine(name:String, indent:int, value:String = null, valuePattern:String = null, valueList:XMLListCollection = null) {
 			super();
+			_indent = indent;
 			nameLabel.text = name;
 			nameLabel.styleName = StyleConstants.XMLBROWSER_FIELD;
 			valueObject = createValueScheme(value, valuePattern, valueList);
@@ -25,7 +27,8 @@ package clarin.cmdi.componentregistry.browser {
 
 		protected override function createChildren():void {
 			super.createChildren();
-			addChild(CMDComponentXMLBrowser.getIndentSpacer());
+			if (_indent > 0)
+			    addChild(CMDComponentXMLBrowser.getIndentSpacer(_indent));
 			addChild(nameLabel);
 			addChild(valueObject);
 		}

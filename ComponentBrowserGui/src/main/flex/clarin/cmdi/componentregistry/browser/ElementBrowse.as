@@ -11,23 +11,26 @@ package clarin.cmdi.componentregistry.browser {
 	public class ElementBrowse {
 		private var _element:CMDComponentElement;
 		private var container:Container;
+				private var _indent:int = 0;
+		
 
 		public function ElementBrowse(element:CMDComponentElement) {
 			super();
 			_element = element;
 		}
 
-		public function createAndAddChildren(container:Container):void {
+		public function createAndAddChildren(container:Container, indent:int = 0):void {
 			this.container = container;
+			this._indent = indent;
 			addHeading();
 			if (_element.conceptLink)
-				addChild(new XMLBrowserConceptLinkLine(LabelConstants.CONCEPTLINK, _element.conceptLink));
+				addChild(new XMLBrowserConceptLinkLine(LabelConstants.CONCEPTLINK, _element.conceptLink), _indent);
 			addLine(LabelConstants.DOCUMENTATION, _element.documentation);
 			addLine(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority);
 			if (_element.cardinalityMin != "" || _element.cardinalityMax != "") {
 				addLine(LabelConstants.CARDINALITY, _element.cardinalityMin + " - " + _element.cardinalityMax);
 			}
-			CMDComponentXMLBrowser.handleCMDAttributeList(container, _element.attributeList);
+			CMDComponentXMLBrowser.handleCMDAttributeList(container, _element.attributeList, _indent - 1);
 		}
 
 		private function addHeading():void {
@@ -43,18 +46,18 @@ package clarin.cmdi.componentregistry.browser {
 			line.addChild(heading);
 			line.addChild(name);
 			line.addChild(value);
-			addChild(line, false);
+			addChild(line, _indent - 1);
 		}
 
 		private function addLine(name:String, value:String):void {
 			if (value) {
-				addChild(new XMLBrowserLine(name, value));
+				addChild(new XMLBrowserLine(name, value), _indent);
 			}
 		}
 
-		private function addChild(child:HBox, indent:Boolean = true):void {
-			if (indent) {
-				child.addChildAt(CMDComponentXMLBrowser.getIndentSpacer(), 0);
+		private function addChild(child:HBox, indent:int):void {
+			if(indent > 0) {
+				child.addChildAt(CMDComponentXMLBrowser.getIndentSpacer(indent), 0);
 			}
 			this.container.addChild(child);
 		}

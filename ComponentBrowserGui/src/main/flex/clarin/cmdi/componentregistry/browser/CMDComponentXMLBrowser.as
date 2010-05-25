@@ -7,9 +7,9 @@ package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-	
+
 	import flash.utils.getTimer;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.containers.VBox;
@@ -59,13 +59,13 @@ package clarin.cmdi.componentregistry.browser {
 					addChild(new XMLBrowserLine(LabelConstants.CARDINALITY, _firstComponent.cardinalityMin + " - " + _firstComponent.cardinalityMax));
 				}
 			}
-			handleCMDAttributeList(this, _firstComponent.attributeList);
+			handleCMDAttributeList(this, _firstComponent.attributeList, 0);
 			handleElements(_firstComponent.cmdElements);
 			handleComponents(_firstComponent.cmdComponents);
 			trace("Created browser view in " + (getTimer() - start) + " ms.");
 		}
 
-		public static function handleCMDAttributeList(parent:Container, attributes:ArrayCollection):void {
+		public static function handleCMDAttributeList(parent:Container, attributes:ArrayCollection, indent:int):void {
 			if (attributes.length > 0) {
 				var heading:HBox = new HBox();
 				var label:Label = new Label();
@@ -73,23 +73,23 @@ package clarin.cmdi.componentregistry.browser {
 				label.styleName = StyleConstants.XMLBROWSER_FIELD;
 				var smallIndent:Spacer = new Spacer();
 				smallIndent.width = 5;
+				if (indent > 0)
+					heading.addChild(getIndentSpacer(indent));
 				heading.addChild(smallIndent);
 				heading.addChild(label);
 				parent.addChild(heading);
 				for each (var attribute:CMDAttribute in attributes) {
-					var child:XMLBrowserValueSchemeLine = new XMLBrowserValueSchemeLine(attribute.name, attribute.valueSchemeSimple, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
+					var child:XMLBrowserValueSchemeLine = new XMLBrowserValueSchemeLine(attribute.name, indent+1, attribute.valueSchemeSimple, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
 					parent.addChild(child);
 				}
 			}
 		}
 
-
-		public static function getIndentSpacer():Spacer {
+		public static function getIndentSpacer(indent:int):Spacer {
 			var result:Spacer = new Spacer();
-			result.width = 56;
+			result.width = 56 * indent;
 			return result;
 		}
-
 
 		/**
 		 * The xml model allows more component to be defined but we force only one component at the "root" level.
@@ -116,7 +116,7 @@ package clarin.cmdi.componentregistry.browser {
 		private function handleElements(elements:ArrayCollection):void {
 			for each (var element:CMDComponentElement in elements) {
 				var elementBrowse:ElementBrowse = new ElementBrowse(element);
-				elementBrowse.createAndAddChildren(this);
+				elementBrowse.createAndAddChildren(this, 1);
 			}
 		}
 
