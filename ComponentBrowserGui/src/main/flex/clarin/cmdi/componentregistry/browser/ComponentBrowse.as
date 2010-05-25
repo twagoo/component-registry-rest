@@ -3,7 +3,7 @@ package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
 	import mx.controls.HRule;
@@ -22,9 +22,11 @@ package clarin.cmdi.componentregistry.browser {
 		public function createAndAddChildren(container:Container, indent:int = 0):void {
 			this.container = container;
 			this.indent = indent;
-			var ruler:HRule = new HRule();
-			ruler.percentWidth = 80;
-			container.addChild(ruler);
+			if (indent == 0) {
+				var ruler:HRule = new HRule();
+				ruler.percentWidth = 80;
+				container.addChild(ruler);
+			}
 			var componentLink:HBox = CMDComponentXMLBrowser.createComponentLink(_component);
 			if (componentLink != null) {
 				addChild(componentLink);
@@ -44,14 +46,14 @@ package clarin.cmdi.componentregistry.browser {
 		private function handleElements(elements:ArrayCollection):void {
 			for each (var element:CMDComponentElement in elements) {
 				var elementBrowse:ElementBrowse = new ElementBrowse(element);
-				elementBrowse.createAndAddChildren(container, indent+1);
+				elementBrowse.createAndAddChildren(container, indent + 1);
 			}
 		}
 
 		private function handleComponents(components:ArrayCollection):void {
 			for each (var component:CMDComponent in components) {
 				var componentBrowse:ComponentBrowse = new ComponentBrowse(component);
-				componentBrowse.createAndAddChildren(container, indent+1);
+				componentBrowse.createAndAddChildren(container, indent + 1);
 			}
 		}
 
