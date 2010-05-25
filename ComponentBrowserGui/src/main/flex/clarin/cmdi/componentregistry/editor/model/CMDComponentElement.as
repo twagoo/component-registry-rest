@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
+	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
 	
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
@@ -23,6 +24,13 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function CMDComponentElement() {
 		}
+		
+		public static function createEmptyElement():CMDComponentElement {
+            var result:CMDComponentElement = new CMDComponentElement();
+			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+			return result;
+		}
+		
 
 		public function get valueSchemeSimple():String {
 			return this._valueSchemeSimple

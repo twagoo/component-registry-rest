@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
-
+	
 	import mx.collections.ArrayCollection;
 
 	public class CMDComponent implements XmlAble {
@@ -20,6 +20,11 @@ package clarin.cmdi.componentregistry.editor.model {
 
 
 		public function CMDComponent() {
+		}
+
+		public static function createEmptyComponent():CMDComponent {
+			var result:CMDComponent = new CMDComponent();
+			return result;
 		}
 
 		public function removeComponent(component:CMDComponent):void {

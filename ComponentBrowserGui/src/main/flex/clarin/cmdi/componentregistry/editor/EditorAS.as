@@ -88,17 +88,15 @@ public function clearEditor():void {
 
 private function createEmptyComponent():CMDSpec {
 	var result:CMDSpec = new CMDSpec(false);
-	result.cmdComponents.addItem(new CMDComponent());
+	result.cmdComponents.addItem(CMDComponent.createEmptyComponent());
 	return result
 }
 
 private function createEmptyProfile():CMDSpec {
 	var result:CMDSpec = new CMDSpec(true);
-	var c:CMDComponent = new CMDComponent();
+	var c:CMDComponent = CMDComponent.createEmptyComponent();
 	result.cmdComponents.addItem(c);
-	var el:CMDComponentElement = new CMDComponentElement();
-	el.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
-	c.cmdElements.addItem(el);
+	c.cmdElements.addItem(CMDComponentElement.createEmptyElement());
 	return result
 }
 
@@ -113,7 +111,7 @@ private function handlePublishAlert(event:CloseEvent):void {
 }
 
 private function saveSpec(inUserSpace:Boolean):void {
-//	Alert.show(xmlEditor.cmdSpec.toXml()); 
+//	Alert.show(xmlEditor.cmdSpec.toXml());
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
 		item.description = xmlEditor.cmdSpec.headerDescription;
@@ -140,35 +138,6 @@ private function handleEditorChange(event:Event):void {
 	errorMessageField.text = "";
 	uploadProgress.visible = false;
 	uploadProgress.includeInLayout = false;
-}
-
-
-private function enableComponentDrag(event:MouseEvent):void {
-	var ds:DragSource = new DragSource();
-	ds.addHandler(function():CMDComponent {
-			return new CMDComponent();
-		}, CMDComponentXMLEditor.DRAG_NEW_COMPONENT);
-	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
-}
-
-private function enableElementDrag(event:MouseEvent):void {
-	var ds:DragSource = new DragSource();
-	ds.addHandler(function():CMDComponentElement {
-			var result:CMDComponentElement = new CMDComponentElement();
-			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
-			return result;
-		}, CMDComponentXMLEditor.DRAG_NEW_ELEMENT);
-	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
-}
-
-private function enableAttributeDrag(event:MouseEvent):void {
-	var ds:DragSource = new DragSource();
-	ds.addHandler(function():CMDAttribute {
-			var result:CMDAttribute = new CMDAttribute();
-			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
-			return result;
-		}, CMDComponentXMLEditor.DRAG_NEW_ATTRIBUTE);
-	DragManager.doDrag(UIComponent(event.currentTarget), ds, event);
 }
 
 private function initPaletteOverview():void {

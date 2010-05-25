@@ -28,7 +28,7 @@ package clarin.cmdi.componentregistry.editor {
 			if (validator) {
 				_validator = validator;
 				_validator.listener = this.editField;
-				CMDComponentXMLEditor.validators.addItem(this);
+				//CMDComponentXMLEditor.validators.addItem(this);
 			}
 			addEventListener(FlexEvent.REMOVE, removeFromValidator);
 		}
@@ -36,12 +36,12 @@ package clarin.cmdi.componentregistry.editor {
         private function removeFromValidator(event:FlexEvent):void {
             var index:int = CMDComponentXMLEditor.validators.getItemIndex(this);
             if (index != -1) {
-                CMDComponentXMLEditor.validators.removeItemAt(index);
+              //  CMDComponentXMLEditor.validators.removeItemAt(index);
             }
         }
 
 		public function validate():Boolean {
-			if (this.visible) {
+			if (_validator && this.visible) {
 				var result:ValidationResultEvent = _validator.validate(this.editField.text);
 				return result.type == ValidationResultEvent.VALID;
 			}

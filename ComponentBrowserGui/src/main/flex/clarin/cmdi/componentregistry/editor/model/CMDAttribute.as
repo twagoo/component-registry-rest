@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
+	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
 
 	import mx.collections.XMLListCollection;
 
@@ -13,6 +14,12 @@ package clarin.cmdi.componentregistry.editor.model {
 		private var _valueSchemeEnumeration:XMLListCollection; // enumeration 
 
 		public function CMDAttribute() {
+		}
+
+		public static function createEmptyAttribute():CMDAttribute {
+			var result:CMDAttribute = new CMDAttribute();
+			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+			return result;
 		}
 
 		public function get valueSchemeSimple():String {
