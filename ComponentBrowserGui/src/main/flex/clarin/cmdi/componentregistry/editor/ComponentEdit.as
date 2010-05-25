@@ -5,17 +5,17 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
-	import mx.controls.Button;
 	import mx.controls.HRule;
+	import mx.controls.Label;
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.DragEvent;
@@ -106,8 +106,31 @@ package clarin.cmdi.componentregistry.editor {
 				addCardinalityInput();
 				handleCMDAttributeList();
 				handleElements(_component.cmdElements);
+				addAddButton();
 				handleComponents(_component.cmdComponents); //recursion
 			}
+		}
+		
+		private function addAddButton():void { //TODO Let button stay on bottom.
+			var addLabel:Label = new Label();
+			addLabel.text = "+element";
+			addLabel.toolTip = "click to add Element";
+			addLabel.setStyle("color", "green");
+			addLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+				var element:CMDComponentElement = new CMDComponentElement();
+				_component.cmdElements.addItem(element);
+				addElement(element, currentElementIndex);
+
+			});
+			addLabel.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+					drawFocus(true);
+					event.currentTarget.setStyle("textDecoration", "underline");
+				});
+			addLabel.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+					drawFocus(false);
+					event.currentTarget.setStyle("textDecoration", "none");
+				});
+			addChild(addLabel);
 		}
 
 		private function addConceptLink():void {
@@ -141,15 +164,21 @@ package clarin.cmdi.componentregistry.editor {
 		private function createComponentEditBar():void {
 			var editBar:HBox = new HBox();
 			editBar.addChild(createHeading());
-			var removeButton:Button = new Button();
-			removeButton.height = 20;
-			removeButton.label = "X";
+
+//			var removeButton:Button = new Button();
+			//removeButton.height = 20;
+			var removeButton:Label = new Label();
+			removeButton.text = "X";
+			removeButton.setStyle("color", "red");
 			removeButton.addEventListener(MouseEvent.CLICK, fireRemoveComponent);
 			removeButton.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
 					drawFocus(true);
+					event.currentTarget.setStyle("textDecoration", "underline");
+
 				});
 			removeButton.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 					drawFocus(false);
+					event.currentTarget.setStyle("textDecoration", "none");
 				});
 
 			editBar.addChild(removeButton);

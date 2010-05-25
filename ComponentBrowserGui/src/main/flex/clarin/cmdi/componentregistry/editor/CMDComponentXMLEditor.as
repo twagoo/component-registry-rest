@@ -9,12 +9,14 @@ package clarin.cmdi.componentregistry.editor {
 
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.utils.getTimer;
 
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
+	import mx.controls.Label;
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.ChildExistenceChangedEvent;
@@ -121,6 +123,7 @@ package clarin.cmdi.componentregistry.editor {
 			handleHeader(_spec);
 			handleElements(_firstComponent.cmdElements);
 			handleComponents(_firstComponent.cmdComponents);
+			addAddButtons();
 			trace("Created editor view in " + (getTimer() - start) + " ms.");
 		}
 
@@ -163,6 +166,28 @@ package clarin.cmdi.componentregistry.editor {
 				});
 			link.enabled = false;
 			addChild(link);
+		}
+
+		private function addAddButtons():void {
+			var addLabel:Label = new Label();
+			addLabel.text = "+component";
+			addLabel.toolTip = "click to add Component";
+			addLabel.setStyle("color", "green");
+			addLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
+					var comp:CMDComponent = new CMDComponent();
+					_spec.cmdComponents.addItem(comp);
+					addComponent(comp, currentElementIndex);
+
+				});
+			addLabel.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+					drawFocus(true);
+					event.currentTarget.setStyle("textDecoration", "underline");
+				});
+			addLabel.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+					drawFocus(false);
+					event.currentTarget.setStyle("textDecoration", "none");
+				});
+			addChild(addLabel);
 		}
 
 		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {

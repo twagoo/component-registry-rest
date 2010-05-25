@@ -4,16 +4,14 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 
 	import flash.events.Event;
-	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
-	import mx.controls.Button;
+	import mx.controls.Label;
 	import mx.core.Container;
 	import mx.core.UIComponent;
-	import mx.validators.RegExpValidator;
 
 	[Event(name="removeElement", type="flash.events.Event")]
 	public class ElementEdit extends Form {
@@ -59,15 +57,21 @@ package clarin.cmdi.componentregistry.editor {
 		private function createEditBar():HBox {
 			var editBar:HBox = new HBox();
 			editBar.addChild(createHeading());
-			var removeButton:Button = new Button();
-			removeButton.height = 20;
-			removeButton.label = "X";
+//			var removeButton:Button = new Button();
+//			removeButton.height = 20;
+//			removeButton.label = "X";
+			var removeButton:Label = new Label();
+			removeButton.text = "X";
+			removeButton.toolTip = "click to remove";
+			removeButton.setStyle("color", "red");
 			removeButton.addEventListener(MouseEvent.CLICK, fireRemoveComponent);
 			removeButton.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
 					drawFocus(true);
+					event.currentTarget.setStyle("textDecoration", "underline");
 				});
 			removeButton.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 					drawFocus(false);
+					event.currentTarget.setStyle("textDecoration", "none");
 				});
 
 			editBar.addChild(removeButton);
