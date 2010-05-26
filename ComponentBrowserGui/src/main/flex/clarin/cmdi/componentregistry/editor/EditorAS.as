@@ -1,8 +1,6 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
 import clarin.cmdi.componentregistry.common.ItemDescription;
-import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
-import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
@@ -17,11 +15,8 @@ import clarin.cmdi.componentregistry.services.UploadService;
 import flash.events.Event;
 
 import mx.controls.Alert;
-import mx.core.DragSource;
-import mx.core.UIComponent;
 import mx.events.CloseEvent;
 import mx.managers.CursorManager;
-import mx.managers.DragManager;
 
 
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
@@ -126,6 +121,8 @@ private function saveSpec(inUserSpace:Boolean):void {
 		} else {
 			uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
 		}
+	} else {
+		errorMessageField.text = "Validation errors: red colored fields are invalid.";
 	}
 }
 

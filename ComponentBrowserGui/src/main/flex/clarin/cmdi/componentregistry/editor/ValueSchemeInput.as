@@ -36,17 +36,7 @@ package clarin.cmdi.componentregistry.editor {
 			textField.editable = false;
 			enumeration = createEnumeration();
 			enumeration.width = 300;
-
-			//CMDComponentXMLEditor.validators.addItem(this);
-			addEventListener(FlexEvent.REMOVE, removeFromValidator);
 		}
-
-        private function removeFromValidator(event:FlexEvent):void {
-            var index:int = CMDComponentXMLEditor.validators.getItemIndex(this);
-            if (index != -1) {
-            //    CMDComponentXMLEditor.validators.removeItemAt(index);
-            }
-        }
 
 		protected override function createChildren():void {
 			super.createChildren();

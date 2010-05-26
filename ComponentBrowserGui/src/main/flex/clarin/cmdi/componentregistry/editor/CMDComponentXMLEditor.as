@@ -12,6 +12,7 @@ package clarin.cmdi.componentregistry.editor {
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 
 	import mx.binding.utils.BindingUtils;
@@ -36,8 +37,6 @@ package clarin.cmdi.componentregistry.editor {
 
 		public static const EDITOR_CHANGE_EVENT:String = "editorChange";
 
-		[ArrayElementType("CMDValidator")]
-		public static var validators:ArrayCollection = new ArrayCollection();
 		private var _spec:CMDSpec;
 		private var _firstComponent:CMDComponent;
 		private var addComponentLabel:Label
@@ -57,19 +56,52 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function validate():Boolean {
-			return validateChildren(getChildren());
+			var componentDisplayPrioMap:Dictionary = new Dictionary(true);
+			componentDisplayPrioMap[this] = new ArrayCollection();
+			var result:Boolean = validateChildren(getChildren(), componentDisplayPrioMap, this);
+			result = validateDisplayPriorityFields(componentDisplayPrioMap) && result;
+			return result;
 		}
 
-		private function validateChildren(children:Array):Boolean {
+		private function validateChildren(children:Array, componentDisplayPrioMap:Dictionary, key:Object):Boolean {
 			var result:Boolean = true;
 			for each (var o:Object in children) {
 				if (o is CMDValidator) {
 					result = CMDValidator(o).validate() && result;
 				}
 				if (o is Container) {
-				    result = validateChildren(Container(o).getChildren()) && result;
+					var newKey:Object = key;
+					if (o is ComponentEdit) {
+						componentDisplayPrioMap[o] = new ArrayCollection();
+						newKey = o;
+					}
+					result = validateChildren(Container(o).getChildren(), componentDisplayPrioMap, newKey) && result;
+					if (o is DisplayPriorityInput) {
+						componentDisplayPrioMap[newKey].addItem(o);
+					}
 				}
-				
+			}
+			return result;
+		}
+
+		private function validateDisplayPriorityFields(componentDisplayPrioMap:Dictionary):Boolean {
+			var result:Boolean = true;
+			for (var key:Object in componentDisplayPrioMap) {
+				var displayPrioritySet:Boolean = false;
+				var displayPriorityFields:ArrayCollection = componentDisplayPrioMap[key];
+				for each (var input:DisplayPriorityInput in displayPriorityFields) { // get values
+					if (input.getValue() > 0) {
+						displayPrioritySet = true;
+						break;
+					}
+				}
+				for each (var inputF:DisplayPriorityInput in displayPriorityFields) { // set results
+					if (displayPrioritySet) {
+						result = inputF.validate(input.getValue()) && result;
+					} else {
+						result = inputF.validate(null) && result;
+					}
+				}
 			}
 			return result;
 		}
@@ -119,8 +151,6 @@ package clarin.cmdi.componentregistry.editor {
 			var start:int = getTimer();
 			addComponentLabel = null
 			addElementLabel = null
-			validators = new ArrayCollection();
-			removeAllChildren();
 			checkFirstDefiningComponent(_spec.cmdComponents);
 			handleHeader(_spec);
 			handleElements(_firstComponent.cmdElements);

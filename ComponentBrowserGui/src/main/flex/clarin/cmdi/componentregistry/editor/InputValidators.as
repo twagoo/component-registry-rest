@@ -9,7 +9,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		public static function getNameValidator():RegExpValidator {
 			var result:RegExpValidator = new RegExpValidator();
-			result.expression = "^\\w+$";
+			result.expression = "^[A-Za-z0-9_\-]+$";
 			result.required = true;
 			result.noMatchError = "Name can only contain A-Z, a-z, 0-9, or _";
 			return result;
@@ -20,5 +20,6 @@ package clarin.cmdi.componentregistry.editor {
 			result.required = true;
 			return result;
 		}
+		
 	}
 }

@@ -3,10 +3,10 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-	
+
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	
+
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
@@ -33,7 +33,6 @@ package clarin.cmdi.componentregistry.editor {
 
 		protected override function createChildren():void {
 			super.createChildren();
-
 			addChild(createEditBar());
 			addNameInput();
 			addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _element.conceptLink, function(val:String):void {
@@ -42,7 +41,7 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(new FormItemInputLine(LabelConstants.DOCUMENTATION, _element.documentation, function(val:String):void {
 					_element.documentation = val;
 				}));
-			addChild(new NumericStepperInputLine(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
+			addChild(new DisplayPriorityInput(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
 					_element.displayPriority = val;
 				}));
 			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
@@ -73,7 +72,6 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function fireRemoveComponent(mouseEvent:MouseEvent):void {
 			drawFocus(false);
-			removeAllChildren(); //need to remove all children so validator are removed correctly
 			var event:Event = new Event(REMOVE_ELEMENT_EVENT);
 			dispatchEvent(event);
 		}

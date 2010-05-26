@@ -129,7 +129,6 @@ package clarin.cmdi.componentregistry.editor {
 			var removeButton:Label = new RemoveLabelButton();
 			removeButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
 					attributeBox.drawFocus(false);
-					attributeBox.removeAllChildren(); //need to remove all children so validator are removed correctly
 					removeAttribute(attribute);
 					removeChild(attributeBox);
 				});

@@ -6,9 +6,10 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.controls.NumericStepper;
 
 	public class NumericStepperInputLine extends FormItem {
-		private var editField:NumericStepper = new NumericStepper();
+		protected var editField:NumericStepper = new NumericStepper();
 
-		public function NumericStepperInputLine(name:String, value:String, bindingFunction:Function, editable:Boolean=true) {
+
+		public function NumericStepperInputLine(name:String, value:String, bindingFunction:Function) {
 			super();
 			label = name;
 			styleName = StyleConstants.XMLBROWSER_FIELD;

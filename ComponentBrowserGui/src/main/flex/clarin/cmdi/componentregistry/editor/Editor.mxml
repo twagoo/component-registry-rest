@@ -27,8 +27,8 @@
 		</mx:HBox>
 		<mx:Text id="errorMessageField"
 				 text="{uploadService.message}"
-				 visible='{uploadService.message != ""}'
-				 includeInLayout='{uploadService.message != ""}'/>
+				 visible='{errorMessageField.text != ""}'
+				 includeInLayout='{errorMessageField.text != ""}'/>
 		<mx:ProgressBar id="uploadProgress"
 						label=""
 						mode="manual"
