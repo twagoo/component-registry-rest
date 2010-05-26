@@ -19,7 +19,7 @@
 					   label="clear"
 					   click="clearEditor()"/>
 			<mx:Button id="saveBtn"
-					   label="save in workspace"
+					   label="save in work space"
 					   click="saveSpec(true)"/>
 			<mx:Button id="publishBtn"
 					   label="publish in public space"
