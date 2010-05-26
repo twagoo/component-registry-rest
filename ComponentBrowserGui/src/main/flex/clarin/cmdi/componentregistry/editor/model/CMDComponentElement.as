@@ -64,7 +64,7 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.@ConceptLink = conceptLink;
 			if (documentation)
 				result.@Documentation = documentation;
-			if (displayPriority)
+			if (displayPriority && displayPriority != "0")
 				result.@DisplayPriority = displayPriority;
 			if (valueSchemeSimple)
 				result.@ValueScheme = valueSchemeSimple;

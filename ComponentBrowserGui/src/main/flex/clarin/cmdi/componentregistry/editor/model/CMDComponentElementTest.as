@@ -20,12 +20,33 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.name = "aap";
 			result.valueSchemeSimple = "string";
 			result.documentation = "Docu";
+			result.displayPriority = "1";
+			var att:CMDAttribute = new CMDAttribute();
+			att.name = "test";
+			att.valueSchemeSimple = "string";
+			result.attributeList.addItem(att);
+			var expected:XML = <CMD_Element name="aap" Documentation="Docu" DisplayPriority="1" ValueScheme="string" CardinalityMin="1" CardinalityMax="1">
+					<AttributeList>
+						<Attribute>
+							<Name>test</Name>
+							<Type>string</Type>
+						</Attribute>  
+					</AttributeList>
+				</CMD_Element>;
+			assertEquals(expected.toXMLString(), result.toXml().toXMLString());
+		}
+
+		public function testToXmlDisplayPriorityZeroMeansDoNotSetIt():void {
+			var result:CMDComponentElement = new CMDComponentElement();
+			result.name = "aap";
+			result.valueSchemeSimple = "string";
+			result.documentation = "Docu";
 			result.displayPriority = "0";
 			var att:CMDAttribute = new CMDAttribute();
 			att.name = "test";
 			att.valueSchemeSimple = "string";
 			result.attributeList.addItem(att);
-			var expected:XML = <CMD_Element name="aap" Documentation="Docu" DisplayPriority="0" ValueScheme="string" CardinalityMin="1" CardinalityMax="1">
+			var expected:XML = <CMD_Element name="aap" Documentation="Docu" ValueScheme="string" CardinalityMin="1" CardinalityMax="1">
 					<AttributeList>
 						<Attribute>
 							<Name>test</Name>
