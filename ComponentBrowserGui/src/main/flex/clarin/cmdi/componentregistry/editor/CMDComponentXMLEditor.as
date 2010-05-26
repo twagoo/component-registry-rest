@@ -151,6 +151,7 @@ package clarin.cmdi.componentregistry.editor {
 			var start:int = getTimer();
 			addComponentLabel = null
 			addElementLabel = null
+			removeAllChildren();
 			checkFirstDefiningComponent(_spec.cmdComponents);
 			handleHeader(_spec);
 			handleElements(_firstComponent.cmdElements);
