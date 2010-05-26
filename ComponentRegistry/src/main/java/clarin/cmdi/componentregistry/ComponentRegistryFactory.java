@@ -64,8 +64,8 @@ public class ComponentRegistryFactory {
     public synchronized ComponentRegistry getComponentRegistry(boolean userspace, Principal principal) {
         ComponentRegistry result = null;
         if (userspace) {
-            if (principal != null) {
-                String name = principal.getName();//anonymous
+            if (principal != null && !"anonymous".equals(principal.getName())) {
+                String name = principal.getName();
                 String user = getUserDir(name);
                 result = registryMap.get(user);
                 if (result == null) {
