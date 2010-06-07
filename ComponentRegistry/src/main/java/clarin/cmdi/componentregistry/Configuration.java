@@ -15,6 +15,8 @@ public class Configuration {
     //NOTE: Default values, can be overwritten in applicationContext.xml
     private String generalComponentSchema = "http://www.clarin.eu/cmd/general-component-schema.xsd";
     private String component2SchemaXsl = "http://www.clarin.eu/cmd/comp2schema.xsl";
+    private String isocatRestUrl = "http://www.isocat.org/rest/";
+    
     private Set<String> adminUsers;
     private ResourceConfig publicResourceConfig;
 
@@ -85,6 +87,14 @@ public class Configuration {
 
     public File getUserDirMappingFile() {
         return new File(registryRoot, "userMapping.xml");
+    }
+
+    public void setIsocatRestUrl(String isocatRestUrl) {
+        this.isocatRestUrl = isocatRestUrl;
+    }
+
+    public String getIsocatRestUrl() {
+        return isocatRestUrl;
     }
 
 }
