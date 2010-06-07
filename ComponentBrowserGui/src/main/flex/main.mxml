@@ -8,13 +8,16 @@
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
-		    import mx.controls.Alert;
+		    import clarin.cmdi.componentregistry.services.PingSessionService;
+			import mx.controls.Alert;
 			import clarin.cmdi.componentregistry.common.StyleConstants;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import flash.net.navigateToURL;
 			import mx.managers.PopUpManager;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
+
+			private var sessionPinger:PingSessionService = PingSessionService.INSTANCE;
 
 
 			private function initializeInstances():void {
@@ -24,8 +27,9 @@
 
 			private function init():void {
 				ExternalMouseWheelSupport.getInstance(stage);
+				sessionPinger.startPinging();
 			}
-
+			
 //			private function handleLogin(event:MouseEvent):void {
 //				var req:URLRequest = new URLRequest();
 //				req.url = Config.instance.serviceRootUrl + "?shhaaDo=lI";

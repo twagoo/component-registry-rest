@@ -32,6 +32,9 @@ package clarin.cmdi.componentregistry.browser {
 			c.dataField = dataField;
 			c.headerText = headerText;
 			c.dataTipField = dataField;
+			c.sortCompareFunction = function(itemA:Object, itemB:Object):int { //Sort all string fields case insensitive
+				return ObjectUtil.stringCompare(itemA[dataField], itemB[dataField], true);
+			}
 			return c;
 		}
 

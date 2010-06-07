@@ -55,7 +55,7 @@ package clarin.cmdi.componentregistry.services {
 		public function handleError(faultEvent:FaultEvent):void {
 			CursorManager.removeBusyCursor();
 			if (faultEvent.statusCode == 401) {
-				Alert.show("Unauthorized to delete item, you are not the creator.");
+				Alert.show("Item not deleted:" + faultEvent.message.body);
 			} else if (faultEvent.statusCode == 403) {
 				Alert.show("Item not deleted:" + faultEvent.message.body);
 			} else {

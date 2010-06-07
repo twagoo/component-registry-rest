@@ -25,10 +25,10 @@
 			public function initEnumeration(valueSchemeData:XMLListCollection):void {
 				if (valueSchemeData) {
 					for each (var item:XML in valueSchemeData) {
-						valueSchemeEnumeration.addItem({item: item.text(), conceptLink: item.@ConceptLink, appInfo: item.@AppInfo});
+						valueSchemeEnumeration.addItem({item: item.text(), appInfo: item.@AppInfo, conceptLink: item.@ConceptLink});
 					}
 				}
-				valueSchemeEnumeration.addItem({item: ADD_ROW, conceptLink: "", appInfo: ""});
+				valueSchemeEnumeration.addItem({item: ADD_ROW, appInfo: "", conceptLink: ""});
 			}
 
 			private function editEnd(e:DataGridEvent):void {
@@ -36,7 +36,7 @@
 					var row:Object = valueSchemeEnumeration.getItemAt(valueSchemeEnumeration.length - 1);
 					var input:Object = TextInput(e.currentTarget.itemEditorInstance);
 					if (row.item == ADD_ROW && input.text != ADD_ROW) {
-						valueSchemeEnumeration.addItem({item: ADD_ROW, conceptLink: "", appInfo: ""});
+						valueSchemeEnumeration.addItem({item: ADD_ROW, appInfo: "", conceptLink: ""});
 						//scroll down
 						dataGrid.validateNow();
 						dataGrid.selectedIndex = valueSchemeEnumeration.length - 1;
@@ -67,7 +67,6 @@
 				}
 			}
 
-// TODO  PD Validate input!
 // TODO  show tooltip for isocat somewhere
 			private function handleKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.DELETE) {
@@ -111,8 +110,8 @@
 				 keyUp="handleKeyUp(event)"
 				 contextMenu="{createContextMenu()}">
 		<mx:columns>
-			<mx:DataGridColumn dataField="appInfo"/>
 			<mx:DataGridColumn dataField="item"/>
+			<mx:DataGridColumn dataField="appInfo"/>
 			<mx:DataGridColumn dataField="conceptLink"/>
 		</mx:columns>
 	</mx:DataGrid>

@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	
+
 	import flash.display.DisplayObject;
-	
+
 	import mx.collections.XMLListCollection;
 	import mx.containers.HBox;
 	import mx.controls.ComboBox;
@@ -15,8 +15,8 @@ package clarin.cmdi.componentregistry.browser {
 	public class XMLBrowserValueSchemeLine extends HBox {
 		private var nameLabel:Label = new Label();
 		private var valueObject:DisplayObject;
-        private var _indent:int = 0;
-        
+		private var _indent:int = 0;
+
 		public function XMLBrowserValueSchemeLine(name:String, indent:int, value:String = null, valuePattern:String = null, valueList:XMLListCollection = null) {
 			super();
 			_indent = indent;
@@ -28,7 +28,7 @@ package clarin.cmdi.componentregistry.browser {
 		protected override function createChildren():void {
 			super.createChildren();
 			if (_indent > 0)
-			    addChild(CMDComponentXMLBrowser.getIndentSpacer(_indent));
+				addChild(CMDComponentXMLBrowser.getIndentSpacer(_indent));
 			addChild(nameLabel);
 			addChild(valueObject);
 		}
@@ -62,8 +62,8 @@ package clarin.cmdi.componentregistry.browser {
 			result.itemRenderer = new ClassFactory(Label);
 			result.labelFunction = function(item:Object):String {
 				var xmlItem:XML = item as XML;
-				if (item.hasOwnProperty("@" + ComponentMD.APP_INFO) && xmlItem.attribute(ComponentMD.APP_INFO) != "") { //TODO PD what about conceptlinks? also not shown in Browser.
-					return xmlItem.attribute(ComponentMD.APP_INFO) + " - " + xmlItem.text();
+				if (item.hasOwnProperty("@" + ComponentMD.APP_INFO) && xmlItem.attribute(ComponentMD.APP_INFO) != "") {
+					return xmlItem.text() + " - " + xmlItem.attribute(ComponentMD.APP_INFO);
 				} else {
 					return xmlItem.text();
 				}
