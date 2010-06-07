@@ -26,6 +26,10 @@ public class ComponentRegistryFactory {
 
     private ComponentRegistryFactory() {
         init();
+    }
+
+    private void init() {
+        publicRegistry.setResourceConfig(Configuration.getInstance().getPublicResourceConfig());
         try {
             loadUserMap();
         } catch (IOException e) {
@@ -33,10 +37,6 @@ public class ComponentRegistryFactory {
         } catch (JAXBException e) {
             throw new RuntimeException("Cannot load userMap", e);
         }
-    }
-
-    private void init() {
-        publicRegistry.setResourceConfig(Configuration.getInstance().getPublicResourceConfig());
     }
 
     private void loadUserMap() throws IOException, JAXBException {
@@ -50,6 +50,7 @@ public class ComponentRegistryFactory {
 
     void reset() {
         registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
+        userMap = new UserMapping();
         publicRegistry = new ComponentRegistryImpl(true);
     }
 

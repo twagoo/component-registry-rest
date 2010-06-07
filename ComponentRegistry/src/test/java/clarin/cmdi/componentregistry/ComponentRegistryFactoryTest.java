@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import javax.xml.bind.JAXBException;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.model.UserMapping;
@@ -59,6 +60,11 @@ public class ComponentRegistryFactoryTest {
         return MDMarshaller.unmarshal(UserMapping.class, new FileInputStream(Configuration.getInstance().getUserDirMappingFile()), null);
     }
 
+    @Before
+    public void startClean() {
+        ComponentRegistryFactory.getInstance().reset();
+    }
+    
     @After
     public void cleanup() {
         ComponentRegistryImplTest.cleanUpRegistryDir(registryDir);
