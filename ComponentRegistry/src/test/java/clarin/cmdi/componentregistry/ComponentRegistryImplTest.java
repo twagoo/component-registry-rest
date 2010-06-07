@@ -7,7 +7,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
 import java.security.Principal;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -232,7 +234,9 @@ public class ComponentRegistryImplTest {
         String id = "profile1";
         ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
 
-        String xsd = register.getMDProfileAsXsd(description.getId());
+        OutputStream output = new ByteArrayOutputStream();
+        register.getMDProfileAsXsd(description.getId(), output);
+        String xsd = output.toString();
         assertTrue(xsd.endsWith("</xs:schema>"));
 
         assertTrue(hasComponent(xsd, "Actor", "0", "unbounded"));
@@ -266,7 +270,9 @@ public class ComponentRegistryImplTest {
         String id = "profile1";
         ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
 
-        String xsd = register.getMDProfileAsXsd(description.getId());
+        OutputStream output = new ByteArrayOutputStream();
+        register.getMDProfileAsXsd(description.getId(), output);
+        String xsd = output.toString();
 
         assertTrue(xsd.endsWith("</xs:schema>"));
         assertTrue(hasComponent(xsd, "Actor", "0", "5"));
@@ -302,7 +308,7 @@ public class ComponentRegistryImplTest {
         compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         compContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
         compContent += "    <Header/>\n";
-        compContent += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        compContent += "    <CMD_Component name=\"ZZZ\u00e9\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
         compContent += "        <CMD_Component ComponentId=\"" + compDesc2.getId()
                 + "\" filename=\"component-test-file\" CardinalityMin=\"0\" CardinalityMax=\"2\">\n";
         compContent += "        </CMD_Component>\n";
@@ -313,11 +319,14 @@ public class ComponentRegistryImplTest {
         compContent += "</CMD_ComponentSpec>\n";
         ComponentDescription compDesc3 = RegistryTestHelper.addComponent(register, "component3", compContent);
 
-        String xsd = register.getMDComponentAsXsd(compDesc3.getId());
-        assertTrue(xsd.endsWith("</xs:schema>"));
-        System.out.println(xsd);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        register.getMDComponentAsXsd(compDesc3.getId(), output);
+        String xsd = output.toString("UTF-8");
 
-        assertTrue(hasComponent(xsd, "ZZZ", "1", "unbounded"));
+        assertTrue(xsd.endsWith("</xs:schema>"));
+        // System.out.println(xsd);
+
+        assertTrue(hasComponent(xsd, "ZZZ\u00e9", "1", "unbounded"));
         assertTrue(hasComponent(xsd, "YYY", "0", "2"));
         assertTrue(hasComponent(xsd, "XXX", "1", "10"));
         assertTrue(hasComponent(xsd, "XXX", "0", "99"));

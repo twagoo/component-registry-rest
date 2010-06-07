@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
@@ -98,20 +100,28 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public Response getRegisteredComponentRawType(@PathParam("componentId") String componentId, @PathParam("rawType") String rawType,
+    public Response getRegisteredComponentRawType(@PathParam("componentId") final String componentId, @PathParam("rawType") String rawType,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
-        String result = "";
-        ComponentRegistry registry = getRegistry(userspace);
+        StreamingOutput result = null;
+        final ComponentRegistry registry = getRegistry(userspace);
         ComponentDescription desc = registry.getComponentDescription(componentId);
         if (desc == null) {
             return null;
         }
         String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
-            result = registry.getMDComponentAsXml(componentId);
+            result = new StreamingOutput() {
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    registry.getMDComponentAsXml(componentId, output);
+                }
+            };
         } else if ("xsd".equalsIgnoreCase(rawType)) {
-            result = registry.getMDComponentAsXsd(componentId);
+            result = new StreamingOutput() {
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    registry.getMDComponentAsXsd(componentId, output);
+                }
+            };
         } else {
             throw new WebApplicationException(Response.serverError().entity(
                     "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
@@ -219,20 +229,29 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public Response getRegisteredProfileRawType(@PathParam("profileId") String profileId, @PathParam("rawType") String rawType,
+    public Response getRegisteredProfileRawType(@PathParam("profileId") final String profileId, @PathParam("rawType") String rawType,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
-        String result = "";
-        ComponentRegistry registry = getRegistry(userspace);
+        StreamingOutput result = null;
+        final ComponentRegistry registry = getRegistry(userspace);
         ProfileDescription desc = registry.getProfileDescription(profileId);
         if (desc == null) {
             return null;
         }
         String fileName = desc.getName() + "." + rawType;
+
         if ("xml".equalsIgnoreCase(rawType)) {
-            result = registry.getMDProfileAsXml(profileId);
+            result = new StreamingOutput() {
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    registry.getMDProfileAsXml(profileId, output);
+                }
+            };
         } else if ("xsd".equalsIgnoreCase(rawType)) {
-            result = registry.getMDProfileAsXsd(profileId);
+            result = new StreamingOutput() {
+                public void write(OutputStream output) throws IOException, WebApplicationException {
+                    registry.getMDProfileAsXsd(profileId, output);
+                }
+            };
         } else {
             throw new WebApplicationException(Response.serverError().entity(
                     "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
@@ -241,7 +260,7 @@ public class ComponentRegistryRestService {
 
     }
 
-    private Response createDownloadResponse(String result, String fileName) {
+    private Response createDownloadResponse(StreamingOutput result, String fileName) {
         //Making response so it triggers browsers native save as dialog.
         Response response = Response.ok().type("application/x-download").header("Content-Disposition",
                 "attachment; filename=\"" + fileName + "\"").entity(result).build();

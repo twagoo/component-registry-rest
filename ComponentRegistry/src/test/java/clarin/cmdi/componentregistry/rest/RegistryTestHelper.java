@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,8 +29,8 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content) throws ParseException,
-            JAXBException {
-        return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
+            JAXBException, UnsupportedEncodingException {
+        return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")));
     }
 
     private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,

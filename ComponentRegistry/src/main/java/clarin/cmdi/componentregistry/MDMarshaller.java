@@ -115,7 +115,7 @@ public class MDMarshaller {
         return generalComponentSchema;
     }
 
-    public static void generateXsd(CMDComponentSpec spec, final Writer outputWriter) {
+    public static void generateXsd(CMDComponentSpec spec, OutputStream outputStream) {
         Templates componentToSchemaTemplates;
         try {
             System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
@@ -132,7 +132,7 @@ public class MDMarshaller {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             MDMarshaller.marshal(spec, out);
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
-            transformer.transform(new StreamSource(input), new StreamResult(outputWriter));
+            transformer.transform(new StreamSource(input), new StreamResult(outputStream));
         } catch (TransformerConfigurationException e) {
             LOG.error("Cannot create Transformer", e);
         } catch (TransformerException e) {

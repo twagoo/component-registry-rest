@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.Principal;
 import java.util.List;
 
@@ -35,13 +36,13 @@ public interface ComponentRegistry {
 
     int registerMDComponent(ComponentDescription description, CMDComponentSpec spec);
 
-    String getMDProfileAsXml(String profileId);
+    void getMDProfileAsXml(String profileId, OutputStream output);
 
-    String getMDProfileAsXsd(String profileId);
+    void getMDProfileAsXsd(String profileId, OutputStream outputStream);
 
-    String getMDComponentAsXml(String componentId);
+    void getMDComponentAsXml(String componentId, OutputStream output);
 
-    String getMDComponentAsXsd(String componentId);
+    void getMDComponentAsXsd(String componentId, OutputStream outputStream);
 
     /**
      * 
@@ -49,7 +50,7 @@ public interface ComponentRegistry {
      * @param principal
      * @throws IOException
      * @throws UserUnauthorizedException thrown when principal does not match creator of profile
-     * @throws DeleteFailedException 
+     * @throws DeleteFailedException
      */
     void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException;
 
@@ -59,32 +60,31 @@ public interface ComponentRegistry {
      * @param principal
      * @throws IOException
      * @throws UserUnauthorizedException thrown when principal does not match creator of component
-     * @throws DeleteFailedException 
+     * @throws DeleteFailedException
      */
     void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException;
 
     void update(AbstractDescription desc, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
-    UserUnauthorizedException;
+            UserUnauthorizedException;
 
     /**
      * 
      * @param componentId
      * @return List of ComponentDescriptions of Components that use the given Component.
      */
-    List<ComponentDescription> getUsageInComponents(String componentId) ;
+    List<ComponentDescription> getUsageInComponents(String componentId);
 
     /**
      * 
      * @param componentId
      * @return List of ProfileDescriptions of Profiles that use the given Component.
      */
-    List<ProfileDescription> getUsageInProfiles(String componentId) ;
+    List<ProfileDescription> getUsageInProfiles(String componentId);
 
     /**
      * Return true if this registry is the public registry as opposed to a registry used for the user privately.
      **/
     boolean isPublic();
-        
-    
+
     //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's
 }

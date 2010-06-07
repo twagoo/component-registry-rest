@@ -5,8 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.OutputStream;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -201,28 +200,18 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
-    public String getMDProfileAsXml(String profileId) {
-        String result = null;
+    public void getMDProfileAsXml(String profileId, OutputStream output) {
         File file = getProfileFile(profileId);
-        try {
-            result = IOUtils.toString(new FileInputStream(file));
-        } catch (FileNotFoundException e) {
-            LOG.error("Cannot retrieve file: " + file, e);
-        } catch (IOException e) {
-            LOG.error("Cannot retrieve content from file: " + file, e);
-        }
-        return result;
+        copyStream(file, output);
     }
 
-    public String getMDProfileAsXsd(String profileId) {
+    public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
-        return getXsd(expandedSpec);
+        writeXsd(expandedSpec, outputStream);
     }
 
-    private String getXsd(CMDComponentSpec expandedSpec) {
-        Writer writer = new StringWriter();
-        MDMarshaller.generateXsd(expandedSpec, writer);
-        return writer.toString();
+    private void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
+        MDMarshaller.generateXsd(expandedSpec, outputStream);
     }
 
     public File getProfileFile(String profileId) {
@@ -240,22 +229,24 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
-    public String getMDComponentAsXml(String componentId) {
-        String result = null;
+    public void getMDComponentAsXml(String componentId, OutputStream output) {
         File file = getComponentFile(componentId);
+        copyStream(file, output);
+    }
+
+    private void copyStream(File file, OutputStream output) {
         try {
-            result = IOUtils.toString(new FileInputStream(file), "UTF-8");
+            IOUtils.copy(new FileInputStream(file), output);
         } catch (FileNotFoundException e) {
             LOG.error("Cannot retrieve file: " + file, e);
         } catch (IOException e) {
             LOG.error("Cannot retrieve content from file: " + file, e);
         }
-        return result;
     }
 
-    public String getMDComponentAsXsd(String componentId) {
+    public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
-        return getXsd(expandedSpec);
+        writeXsd(expandedSpec, outputStream);
     }
 
     public File getComponentFile(String componentId) {
@@ -398,8 +389,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
                 if (regDate.before(calendar.getTime())) { //More then month old
-                    throw new DeleteFailedException("The "+
-                            (desc.isProfile() ? "Profile" : "Component")
+                    throw new DeleteFailedException(
+                            "The "
+                                    + (desc.isProfile() ? "Profile" : "Component")
                                     + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
                 }
             } catch (ParseException e) {
