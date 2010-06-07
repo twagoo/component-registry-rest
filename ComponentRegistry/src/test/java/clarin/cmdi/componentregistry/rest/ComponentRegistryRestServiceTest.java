@@ -188,7 +188,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     public void testGetRegisteredProfileRawData() throws Exception {
         fillUp();
         String profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xsd").accept(MediaType.TEXT_XML).get(String.class);
-        assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+        assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
         assertTrue(profile.endsWith("</xs:schema>"));
 
         profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class);
@@ -232,7 +232,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUp();
         String component = getResource().path("/registry/components/clarin.eu:cr1:component1/xsd").accept(MediaType.TEXT_XML).get(
                 String.class);
-        assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+        assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
         assertTrue(component.endsWith("</xs:schema>"));
 
         component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class);
@@ -540,6 +540,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(response.isProfile());
         assertEquals(1, response.getErrors().size());
         assertEquals(MDValidator.MISMATCH_ERROR, response.getErrors().get(0));
+    }
+    
+    @Test
+    public void testPingSession() throws Exception {
+         ClientResponse clientResponse = getAuthenticatedResource("/registry/pingSession").get(ClientResponse.class);
+         assertEquals(200, clientResponse.getStatus());
+         assertEquals("<session stillActive=\"true\"/>", clientResponse.getEntity(String.class));
     }
 
 }

@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.security.Principal;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +29,8 @@ import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -347,10 +352,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         LOG.info("Saving profile/component is successful " + file);
     }
 
-    public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException {
+    public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException {
         ProfileDescription desc = profileDescriptions.get(profileId);
         if (desc != null) {
             checkAuthorisation(desc, principal);
+            checkAge(desc, principal);
             File profileFile = getProfileFile(profileId);
             if (profileFile.exists()) {
                 FileUtils.moveDirectoryToDirectory(profileFile.getParentFile(), resourceConfig.getProfileDeletionDir(), true);
@@ -361,16 +367,20 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-        if (!principal.getName().equals(desc.getCreatorName())) {
+        if (!principal.getName().equals(desc.getCreatorName()) && !Configuration.getInstance().isAdminUser(principal)) {
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
-                    + "' was not the creator of profile/component (" + desc + ").");
+                    + "' is not the creator (nor an administrator) of the " + (desc.isProfile() ? "profile" : "component") + "(" + desc
+                    + ").");
         }
     }
 
-    public void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException {
+    public void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException,
+            DeleteFailedException {
         ComponentDescription desc = componentDescriptions.get(componentId);
         if (desc != null) {
             checkAuthorisation(desc, principal);
+            checkAge(desc, principal);
+            checkStillUsed(componentId);
             File componentFile = getComponentFile(componentId);
             if (componentFile.exists()) {
                 FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), resourceConfig.getComponentDeletionDir(), true);
@@ -378,6 +388,50 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             componentDescriptions.remove(componentId);
             componentsCache.remove(componentId);
         }
+    }
+
+    private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
+        if (isPublic() && !Configuration.getInstance().isAdminUser(principal)) {
+            try {
+                Date regDate = DateUtils.parseDate(desc.getRegistrationDate(), new String[] { DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
+                        .getPattern() });
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
+                if (regDate.before(calendar.getTime())) { //More then month old
+                    throw new DeleteFailedException("The "+
+                            (desc.isProfile() ? "Profile" : "Component")
+                                    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+                }
+            } catch (ParseException e) {
+                LOG.error("Cannot parse date of " + desc + " Error:" + e);
+            }
+        }
+    }
+
+    private void checkStillUsed(String componentId) throws DeleteFailedException {
+        List<ProfileDescription> profiles = getUsageInProfiles(componentId);
+        List<ComponentDescription> components = getUsageInComponents(componentId);
+        if (!profiles.isEmpty() || !components.isEmpty()) {
+            throw new DeleteFailedException(createStillInUseMessage(profiles, components));
+        }
+    }
+
+    private String createStillInUseMessage(List<ProfileDescription> profiles, List<ComponentDescription> components) {
+        StringBuilder result = new StringBuilder();
+        if (!profiles.isEmpty()) {
+            result.append("Still used by the following profiles: \n");
+            for (ProfileDescription profileDescription : profiles) {
+                result.append(" - " + profileDescription.getName() + "\n");
+            }
+        }
+        if (!components.isEmpty()) {
+            result.append("Still used by the following components: \n");
+            for (ComponentDescription componentDescription : components) {
+                result.append(" - " + componentDescription.getName() + "\n");
+            }
+        }
+        result.append("Try to change above mentioned references first.");
+        return result.toString();
     }
 
     public void update(AbstractDescription description, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,

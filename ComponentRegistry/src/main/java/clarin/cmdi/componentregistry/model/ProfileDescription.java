@@ -26,6 +26,7 @@ public class ProfileDescription extends AbstractDescription {
         String id = ComponentRegistry.REGISTRY_ID + "p_" + IdSequence.get();
         ProfileDescription desc = new ProfileDescription();
         desc.setId(id);
+        desc.setRegistrationDate(createNewDate());
         return desc;
     }
 

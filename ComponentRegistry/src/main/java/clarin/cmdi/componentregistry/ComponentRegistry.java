@@ -49,8 +49,9 @@ public interface ComponentRegistry {
      * @param principal
      * @throws IOException
      * @throws UserUnauthorizedException thrown when principal does not match creator of profile
+     * @throws DeleteFailedException 
      */
-    void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException;
+    void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException;
 
     /**
      * 
@@ -58,8 +59,9 @@ public interface ComponentRegistry {
      * @param principal
      * @throws IOException
      * @throws UserUnauthorizedException thrown when principal does not match creator of component
+     * @throws DeleteFailedException 
      */
-    void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException;
+    void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException;
 
     void update(AbstractDescription desc, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
     UserUnauthorizedException;

@@ -17,6 +17,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -42,7 +43,6 @@ public class MDMarshaller {
     private static final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
 
     private static Schema generalComponentSchema;
-
 
     private MDMarshaller() {
     }
@@ -115,16 +115,17 @@ public class MDMarshaller {
 
     public static void generateXsd(CMDComponentSpec spec, final Writer outputWriter) {
         Templates componentToSchemaTemplates;
-            try {
-                System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
-                componentToSchemaTemplates = TransformerFactory.newInstance().newTemplates(
-                        new StreamSource(Configuration.getInstance().getComponent2SchemaXsl()));
-            } catch (TransformerConfigurationException e) {
-                LOG.error("Cannot create Template", e);
-                return;
-            }
+        try {
+            System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
+            componentToSchemaTemplates = TransformerFactory.newInstance().newTemplates(
+                    new StreamSource(Configuration.getInstance().getComponent2SchemaXsl()));
+        } catch (TransformerConfigurationException e) {
+            LOG.error("Cannot create Template", e);
+            return;
+        }
         try {
             Transformer transformer = componentToSchemaTemplates.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "no"); //Keeps the downloads a lot smaller.
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             MDMarshaller.marshal(spec, out);
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());

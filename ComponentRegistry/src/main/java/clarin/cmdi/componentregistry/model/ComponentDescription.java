@@ -40,6 +40,7 @@ public class ComponentDescription extends AbstractDescription {
         String id = ComponentRegistry.REGISTRY_ID+"c_" + IdSequence.get();
         ComponentDescription desc = new ComponentDescription();
         desc.setId(id);
+        desc.setRegistrationDate(createNewDate());
         return desc;
     }
 

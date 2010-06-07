@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -26,12 +26,12 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -45,9 +45,11 @@ import com.sun.jersey.multipart.FormDataParam;
 public class ComponentRegistryRestService {
 
     @Context
-    UriInfo uriInfo;
+    private UriInfo uriInfo;
     @Context
-    SecurityContext security;
+    private SecurityContext security;
+    @Context
+    private HttpServletRequest request;
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryRestService.class);
 
@@ -91,53 +93,6 @@ public class ComponentRegistryRestService {
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Component with id: " + componentId + " is requested.");
         return getRegistry(userspace).getMDComponent(componentId);
-    }
-
-    @DELETE
-    @Path("/components/{componentId}")
-    public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new IllegalArgumentException("no user principal found.");
-        }
-        ComponentRegistry registry = getRegistry(userspace);
-        LOG.info("Component with id: " + componentId + " set for deletion.");
-        try {
-            List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
-            List<ComponentDescription> components = registry.getUsageInComponents(componentId);
-            if (profiles.isEmpty() && components.isEmpty()) {
-                registry.deleteMDComponent(componentId, principal);
-            } else {
-                return Response.status(Status.FORBIDDEN).entity(createStillInUseMessage(profiles, components)).build();
-            }
-        } catch (IOException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed.", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed: " + e.getMessage());
-            return Response.serverError().status(Status.UNAUTHORIZED).build();
-        }
-        LOG.info("Component with id: " + componentId + " deleted.");
-        return Response.ok().build();
-    }
-
-    private String createStillInUseMessage(List<ProfileDescription> profiles, List<ComponentDescription> components) {
-        StringBuilder result = new StringBuilder();
-        if (!profiles.isEmpty()) {
-            result.append("Still used by the following profiles: \n");
-            for (ProfileDescription profileDescription : profiles) {
-                result.append(" - " + profileDescription.getName() + "\n");
-            }
-        }
-        if (!components.isEmpty()) {
-            result.append("Still used by the following components: \n");
-            for (ComponentDescription componentDescription : components) {
-                result.append(" - " + componentDescription.getName() + "\n");
-            }
-        }
-        result.append("Try to change above mentioned references first.");
-        return result.toString();
     }
 
     @GET
@@ -212,6 +167,31 @@ public class ComponentRegistryRestService {
     }
 
     @DELETE
+    @Path("/components/{componentId}")
+    public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        Principal principal = security.getUserPrincipal();
+        if (principal == null) {
+            throw new IllegalArgumentException("no user principal found.");
+        }
+        ComponentRegistry registry = getRegistry(userspace);
+        LOG.info("Component with id: " + componentId + " set for deletion.");
+        try {
+            registry.deleteMDComponent(componentId, principal);
+        } catch (DeleteFailedException e) {
+            return Response.status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
+        } catch (IOException e) {
+            LOG.info("Component with id: " + componentId + " deletion failed.", e);
+            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserUnauthorizedException e) {
+            LOG.info("Component with id: " + componentId + " deletion failed: " + e.getMessage());
+            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
+        }
+        LOG.info("Component with id: " + componentId + " deleted.");
+        return Response.ok().build();
+    }
+
+    @DELETE
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
@@ -222,12 +202,15 @@ public class ComponentRegistryRestService {
         LOG.info("Profile with id: " + profileId + " set for deletion.");
         try {
             getRegistry(userspace).deleteMDProfile(profileId, principal);
+        } catch (DeleteFailedException e) {
+            LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
+            return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
         } catch (IOException e) {
             LOG.info("Profile with id: " + profileId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
         } catch (UserUnauthorizedException e) {
             LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
-            return Response.serverError().status(Status.UNAUTHORIZED).build();
+            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
         }
         LOG.info("Profile with id: " + profileId + " deleted.");
         return Response.ok().build();
@@ -282,7 +265,6 @@ public class ComponentRegistryRestService {
         desc.setName(name);
         desc.setDescription(description);
         desc.setDomainName(domainName);
-        desc.setRegistrationDate(createNewDate());
         LOG.info("Trying to register Profile: " + desc);
         return register(input, desc, principal, userspace);
     }
@@ -305,13 +287,21 @@ public class ComponentRegistryRestService {
         desc.setDescription(description);
         desc.setGroupName(group);
         desc.setDomainName(domainName);
-        desc.setRegistrationDate(createNewDate());
         LOG.info("Trying to register Component: " + desc);
         return register(input, desc, principal, userspace);
     }
 
-    private String createNewDate() {
-        return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
+    @GET
+    @Path("/pingSession")
+    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response pingSession() {
+        boolean stillActive = true;
+        Principal userPrincipal = security.getUserPrincipal();
+        LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
+        if (request != null) {
+            stillActive = !((HttpServletRequest) request).getSession().isNew();
+        }
+        return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
     }
 
     private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal, boolean userspace) {

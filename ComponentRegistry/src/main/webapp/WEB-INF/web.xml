@@ -60,9 +60,6 @@
     <url-pattern>/Admin</url-pattern>
   </servlet-mapping>
 
-  <session-config>
-    <session-timeout>1440</session-timeout> <!-- 24 hours -->
-  </session-config>
 <!--  <security-constraint>-->
 <!--    <display-name>ComponentRegistry web service</display-name>-->
 <!--    <web-resource-collection>-->

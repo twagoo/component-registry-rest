@@ -1,9 +1,13 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+
+import org.apache.commons.lang.time.DateFormatUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
@@ -14,7 +18,7 @@ public abstract class AbstractDescription {
     private String name;
     private String registrationDate;
     private String creatorName;
-    private String domainName; 
+    private String domainName;
     @XmlElement(namespace = "http://www.w3.org/1999/xlink")
     private String href;
 
@@ -81,6 +85,10 @@ public abstract class AbstractDescription {
 
     public boolean isProfile() {
         return this instanceof ProfileDescription;
+    }
+
+    public static String createNewDate() {
+        return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
 }
