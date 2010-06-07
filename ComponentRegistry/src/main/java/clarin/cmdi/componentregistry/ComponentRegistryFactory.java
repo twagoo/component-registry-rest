@@ -70,7 +70,7 @@ public class ComponentRegistryFactory {
                 String user = getUserDir(name);
                 result = registryMap.get(user);
                 if (result == null) {
-                    LOG.info("Creating workspace for user: " + name + " workspace name: " + user);
+                    LOG.info("Loading workspace for user: " + name + " workspace name: " + user);
                     result = createNewUserRegistry(user);
                     registryMap.put(user, result);
                 }

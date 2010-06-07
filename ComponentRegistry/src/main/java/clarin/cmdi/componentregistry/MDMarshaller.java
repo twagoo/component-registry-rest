@@ -28,6 +28,8 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import net.sf.saxon.event.SaxonOutputKeys;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -125,7 +127,8 @@ public class MDMarshaller {
         }
         try {
             Transformer transformer = componentToSchemaTemplates.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "no"); //Keeps the downloads a lot smaller.
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes"); 
+            transformer.setOutputProperty(SaxonOutputKeys.INDENT_SPACES, "1"); //Keeps the downloads a lot smaller.
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             MDMarshaller.marshal(spec, out);
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
