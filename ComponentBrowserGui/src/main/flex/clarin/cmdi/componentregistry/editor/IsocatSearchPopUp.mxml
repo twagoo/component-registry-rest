@@ -2,9 +2,10 @@
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
 				xmlns:rictus="com.rictus.controls.*"
 				showCloseButton="true"
-				close="cleanUp();"
 				creationComplete="PopUpManager.centerPopUp(this)"
-				title="Search in Isocat.org">
+				close="cleanUp();"
+				title="Search in Isocat.org"
+				>
 
 	<mx:Metadata>
 		[Event(name="OK", type="flash.events.Event")]
@@ -19,6 +20,8 @@
 			
 			[Bindable]
 			public var searchService:IsocatService = null;
+			
+			public var isocatSearchType:String = null;
 
 			//To store the result
 			public var editField:TextInput;
@@ -47,7 +50,7 @@
 
 			private function handleSearch(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.ENTER) {
-					searchService.load(searchBox.text);
+					searchService.load(searchBox.text, isocatSearchType);
 				}
 			}
 		]]>

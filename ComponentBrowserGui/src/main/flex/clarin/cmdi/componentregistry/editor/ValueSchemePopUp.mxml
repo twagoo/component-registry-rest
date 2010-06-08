@@ -8,6 +8,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.services.IsocatService;
 			import clarin.cmdi.componentregistry.common.ComponentMD;
 			import mx.collections.XMLListCollection;
 			import mx.controls.TextInput;
@@ -32,6 +33,7 @@
 				{label: "string", data: "string"},
 				{label: "time", data: "time"},]);
 
+			private var isocatPopup:IsocatSearchPopUp;
 
 			private function setType():void {
 				valueSchemeInput.valueSchemeSimple = simpleValueSchemeBox.selectedItem.data;
@@ -57,12 +59,18 @@
 				PopUpManager.removePopUp(this);
 			}
 
+			private function getIsocatPopup():IsocatSearchPopUp {
+				if (!isocatPopup) {
+					isocatPopup = EditorManager.getIsocatSearchPopUp(IsocatService.TYPE_SIMPLE);
+					isocatPopup.addEventListener(IsocatSearchPopUp.OK_EVENT, function(e:Event):void {
+							enumerationGrid.setConceptLink(isocatPopup.editField);
+						});
+				}
+				return isocatPopup;
+			}
+
 			private function handleIsocatButtonClick(event:MouseEvent):void {
-				var popup:IsocatSearchPopUp = EditorManager.getIsocatSearchPopUp();
-				popup.addEventListener(IsocatSearchPopUp.OK_EVENT, function(e:Event):void {
-						enumerationGrid.setConceptLink(popup.editField);
-					});
-				PopUpManager.addPopUp(popup, this, false);
+				PopUpManager.addPopUp(getIsocatPopup(), this, false);
 			}
 		]]>
 	</mx:Script>

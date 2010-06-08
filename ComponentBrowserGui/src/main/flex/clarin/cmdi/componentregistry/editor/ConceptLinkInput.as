@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.services.IsocatService;
 
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -15,6 +16,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private var editField:TextInput = new TextInput();
 		private var searchConceptLink:Button = new Button();
+		private var isocatPopup:IsocatSearchPopUp;
 
 		public function ConceptLinkInput(name:String, value:String, bindingFunction:Function) {
 			super();
@@ -42,13 +44,19 @@ package clarin.cmdi.componentregistry.editor {
 			searchConceptLink.addEventListener(MouseEvent.CLICK, handleButtonClick);
 		}
 
+		private function getIsocatPopup():IsocatSearchPopUp {
+			if (!isocatPopup) {
+				isocatPopup = EditorManager.getIsocatSearchPopUp();
+				isocatPopup.addEventListener(IsocatSearchPopUp.OK_EVENT, function(e:Event):void {
+						editField.text = isocatPopup.editField.text;
+						editField.toolTip = isocatPopup.editField.toolTip;
+					});
+			}
+			return isocatPopup;
+		}
+
 		private function handleButtonClick(event:MouseEvent):void {
-			var popup:IsocatSearchPopUp = EditorManager.getIsocatSearchPopUp();
-			popup.addEventListener(IsocatSearchPopUp.OK_EVENT, function(e:Event):void {
-					editField.text = popup.editField.text;
-					editField.toolTip = popup.editField.toolTip;
-				});
-			PopUpManager.addPopUp(popup, this, false);
+			PopUpManager.addPopUp(getIsocatPopup(), this, false);
 		}
 
 	}

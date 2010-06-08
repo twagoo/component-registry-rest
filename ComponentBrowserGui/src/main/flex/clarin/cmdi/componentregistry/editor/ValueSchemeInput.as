@@ -106,7 +106,7 @@ package clarin.cmdi.componentregistry.editor {
 		private function handleButtonClick(event:MouseEvent):void {
 			var popup:ValueSchemePopUp = new ValueSchemePopUp();
 			popup.valueSchemeInput = this;
-			PopUpManager.addPopUp(popup, this, false);
+			PopUpManager.addPopUp(popup, this.parent, false);
 		}
 
 		public function validate():Boolean {

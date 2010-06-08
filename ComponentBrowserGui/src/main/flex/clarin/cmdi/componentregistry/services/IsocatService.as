@@ -13,6 +13,9 @@ package clarin.cmdi.componentregistry.services {
 
 	public class IsocatService extends EventDispatcher {
 		public static const PROFILE_LOADED:String = "ProfileLoaded";
+		public static const TYPE_SIMPLE:String = "simple";
+		public static const TYPE_COMPLEX:String = "complex";
+		
 		namespace dcif = "http://www.isocat.org/ns/dcif";
 
 
@@ -24,12 +27,18 @@ package clarin.cmdi.componentregistry.services {
 		public function IsocatService() {
 		}
 
-		public function load(keyword:String):void {
+        /**
+         * keyword to search for
+         * type can be one of IsocatService.TYPE_SIMPLE or IsocatService.TYPE_COMPLEX or null for all types
+         **/ 
+		public function load(keyword:String, type:String):void {
 			if (keyword) {
 				createClient();
 				CursorManager.setBusyCursor();
 				var uri:URI = new URI(Config.instance.isocatSearchUrl);
 				uri.setQueryValue("keywords", keyword);
+				if (type)
+				    uri.setQueryValue("type", type);
 				service.url = uri.toString();
 				service.send();
 			}

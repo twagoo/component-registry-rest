@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.editor {
-    import clarin.cmdi.componentregistry.services.IsocatService;
-    
+	import clarin.cmdi.componentregistry.services.IsocatService;
+
 
 	/**
 	 * Manages static Editor components
@@ -8,11 +8,13 @@ package clarin.cmdi.componentregistry.editor {
 	 **/
 	public final class EditorManager {
 
-		private static var searchService:IsocatService = new IsocatService();
-
-		public static function getIsocatSearchPopUp():IsocatSearchPopUp {
+		/**
+		 * Specify isocatSearchType see IsocatService. default is null which means search in all types
+		 **/
+		public static function getIsocatSearchPopUp(isocatSearchType:String = null):IsocatSearchPopUp {
 			var isocatSearchPopUp:IsocatSearchPopUp = new IsocatSearchPopUp();
-			isocatSearchPopUp.searchService = searchService;
+			isocatSearchPopUp.searchService = new IsocatService();
+			isocatSearchPopUp.isocatSearchType = isocatSearchType;
 			return isocatSearchPopUp;
 		}
 
