@@ -56,7 +56,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function handleButtonClick(event:MouseEvent):void {
-			PopUpManager.addPopUp(getIsocatPopup(), this, false);
+			PopUpManager.addPopUp(getIsocatPopup(), this.parent, false);
 		}
 
 	}
