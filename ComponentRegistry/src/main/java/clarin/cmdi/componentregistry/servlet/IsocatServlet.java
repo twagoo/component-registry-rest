@@ -50,7 +50,6 @@ public class IsocatServlet extends HttpServlet {
         }
         queryParams.add("profile", "Metadata"); //always search in metadata profile
         resp.setContentType(MediaType.TEXT_XML);
-        //&type=simple&profile=Metadata
         String result = service.path("/user/guest/search").queryParams(queryParams).accept(DCIF_XML).get(String.class);
         resp.getWriter().write(result);
         resp.flushBuffer();
