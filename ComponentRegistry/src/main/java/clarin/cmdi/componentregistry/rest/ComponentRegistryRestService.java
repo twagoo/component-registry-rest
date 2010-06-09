@@ -189,6 +189,7 @@ public class ComponentRegistryRestService {
         try {
             registry.deleteMDComponent(componentId, principal);
         } catch (DeleteFailedException e) {
+            LOG.info("Component with id: " + componentId + " deletion failed.", e);
             return Response.status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
         } catch (IOException e) {
             LOG.info("Component with id: " + componentId + " deletion failed.", e);

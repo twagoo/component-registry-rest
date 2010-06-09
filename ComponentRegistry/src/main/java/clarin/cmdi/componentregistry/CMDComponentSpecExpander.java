@@ -100,6 +100,7 @@ public class CMDComponentSpecExpander {
             cardinalityMin.clear();
             cardinalityMin.addAll(referenceDeclaration.getCardinalityMin());
         }
+        nested.setComponentId(referenceDeclaration.getComponentId()); // Setting componentId for better xsd generation.
     }
 
 }

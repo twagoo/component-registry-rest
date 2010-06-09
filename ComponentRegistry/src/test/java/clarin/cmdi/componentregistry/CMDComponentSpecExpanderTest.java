@@ -2,9 +2,11 @@ package clarin.cmdi.componentregistry;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
 
@@ -60,6 +62,8 @@ public class CMDComponentSpecExpanderTest {
 
         CMDComponentSpec expandedProfile = CMDComponentSpecExpander.expandProfile(profileDesc3.getId(), registry);
 
+        printToFile(expandedProfile);
+
         List<CMDComponentType> cmdComponents = expandedProfile.getCMDComponent();
         assertEquals(1, cmdComponents.size());
         CMDComponentType cmdComponent = cmdComponents.get(0);
@@ -68,14 +72,17 @@ public class CMDComponentSpecExpanderTest {
 
         cmdComponent = cmdComponents.get(0);
         assertEquals("YYY", cmdComponent.getName());
+        assertEquals("clarin.eu:cr1:component2", cmdComponent.getComponentId());
         assertEquals(1, cmdComponent.getCMDComponent().size());
         assertEquals("XXX", cmdComponent.getCMDComponent().get(0).getName());
+        assertEquals("clarin.eu:cr1:component1", cmdComponent.getCMDComponent().get(0).getComponentId());
         assertEquals(0, cmdComponent.getCMDComponent().get(0).getCMDComponent().size());
         cmdComponent = cmdComponents.get(1);
         assertEquals("XXX", cmdComponent.getName());
+        assertEquals("clarin.eu:cr1:component1", cmdComponent.getComponentId());
         assertEquals(0, cmdComponent.getCMDComponent().size());
     }
-    
+
     @Test
     public void testExpandProfileWithNestedComponentsFromUserRegistry() throws Exception {
         ComponentRegistryImpl registry = ComponentRegistryImplTest.getTestRegistry(getRegistryDir());
@@ -115,8 +122,8 @@ public class CMDComponentSpecExpanderTest {
         content += "        </CMD_Component>\n";
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
-      //register in userRegistry registering in public registry is not possible through the services if one component is not public
-        ProfileDescription profileDesc3 = RegistryTestHelper.addProfile(userRegistry, "profile3", content); 
+        //register in userRegistry registering in public registry is not possible through the services if one component is not public
+        ProfileDescription profileDesc3 = RegistryTestHelper.addProfile(userRegistry, "profile3", content);
 
         CMDComponentSpec expandedProfile = CMDComponentSpecExpander.expandProfile(profileDesc3.getId(), userRegistry);
 
@@ -135,11 +142,11 @@ public class CMDComponentSpecExpanderTest {
         assertEquals("XXX", cmdComponent.getName());
         assertEquals(0, cmdComponent.getCMDComponent().size());
     }
-    
+
     @Test
     public void testExpandEmbeddedWithNested() throws Exception {
         ComponentRegistryImpl registry = ComponentRegistryImplTest.getTestRegistry(getRegistryDir());
-        
+
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
@@ -186,7 +193,14 @@ public class CMDComponentSpecExpanderTest {
         assertEquals("YYY", cmdComponent.getName());
         assertEquals(0, cmdComponent.getCMDComponent().size());
     }
-    
+
+    private void printToFile(CMDComponentSpec spec) throws Exception {
+        File file = new File("/tmp/test.xml");
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MDMarshaller.marshal(spec, out);
+        FileUtils.writeStringToFile(file, out.toString("UTF-8"), "UTF-8");
+    }
+
     private File getRegistryDir() {
         if (tmpRegistryDir == null)
             tmpRegistryDir = ComponentRegistryImplTest.createTempRegistryDir();

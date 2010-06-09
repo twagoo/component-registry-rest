@@ -127,7 +127,7 @@ public class MDMarshaller {
         }
         try {
             Transformer transformer = componentToSchemaTemplates.newTransformer();
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes"); 
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(SaxonOutputKeys.INDENT_SPACES, "1"); //Keeps the downloads a lot smaller.
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             MDMarshaller.marshal(spec, out);
@@ -144,4 +144,50 @@ public class MDMarshaller {
         }
     }
 
+    //    public static void generateXsd(CMDComponentSpec spec, OutputStream outputStream) {
+    //        List<String> xsls = new ArrayList<String>();
+    //        xsls.addAll(Configuration.getInstance().getComponent2SchemaXslUris());
+    //        List<Templates> componentToSchemaTemplates = new ArrayList<Templates>();
+    //        try {
+    //            System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
+    //            for (String xslUri : xsls) {
+    //                componentToSchemaTemplates.add(TransformerFactory.newInstance().newTemplates(
+    //                        new StreamSource(xslUri)));
+    //            }
+    //        } catch (TransformerConfigurationException e) {
+    //            LOG.error("Cannot create Template", e);
+    //            return;
+    //        }
+    //        try {
+    //            ByteArrayOutputStream out = new ByteArrayOutputStream();
+    //            MDMarshaller.marshal(spec, out);
+    //            ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
+    //            StreamSource source = new StreamSource(input);
+    //            StreamResult streamResult;
+    //            for (Iterator iter = componentToSchemaTemplates.iterator(); iter.hasNext();) {
+    //                Templates templates = (Templates) iter.next();
+    //                Transformer transformer = templates.newTransformer();
+    //                if (iter.hasNext()) {
+    //                    transformer.setOutputProperty(OutputKeys.INDENT, "no"); 
+    //                    streamResult = new StreamResult(new StringWriter());
+    //                } else {
+    //                    transformer.setOutputProperty(OutputKeys.INDENT, "yes"); 
+    //                    transformer.setOutputProperty(SaxonOutputKeys.INDENT_SPACES, "1"); //Keeps the downloads a lot smaller.
+    //                    streamResult = new StreamResult(outputStream);
+    //                }
+    //                transformer.transform(source, streamResult);
+    //                if (iter.hasNext()) {
+    //                    source = new StreamSource(new StringReader(streamResult.getWriter().toString()));
+    //                }
+    //            }
+    //        } catch (TransformerConfigurationException e) {
+    //            LOG.error("Cannot create Transformer", e);
+    //        } catch (TransformerException e) {
+    //            LOG.error("Cannot transform xml file: " + spec, e);
+    //        } catch (UnsupportedEncodingException e) {
+    //            LOG.error("Error in encoding: ", e);
+    //        } catch (JAXBException e) {
+    //            LOG.error("Cannot marshall spec: " + spec, e);
+    //        }
+    //    }
 }
