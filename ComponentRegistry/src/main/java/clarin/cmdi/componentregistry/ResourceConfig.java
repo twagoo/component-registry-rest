@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 public class ResourceConfig {
 
-    private static final String PROFILES_DIR_NAME = "profiles";
-    private static final String COMPONENTS_DIR_NAME = "components";
-    static final String DELETED_DIR_NAME = "deleted";
+    public static final String PROFILES_DIR_NAME = "profiles";
+    public static final String COMPONENTS_DIR_NAME = "components";
+    public static final String DELETED_DIR_NAME = "deleted";
     static final String USERS_DIR_NAME = "users";
 
 

@@ -149,6 +149,11 @@
       <artifactId>mpgaai-shhaa</artifactId>
       <version>1.0.2</version>
     </dependency>
+  <dependency>
+    <groupId>org.apache.wicket</groupId>
+    <artifactId>wicket</artifactId>
+    <version>1.4.8</version>
+  </dependency>    
   </dependencies>
 
   <properties>
@@ -173,6 +178,13 @@
       <resource>
         <filtering>true</filtering>
         <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <filtering>false</filtering>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.html</include>
+        </includes>
       </resource>
     </resources>
     <testResources>

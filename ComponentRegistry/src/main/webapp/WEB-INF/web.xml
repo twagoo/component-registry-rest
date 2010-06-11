@@ -15,16 +15,34 @@
   </listener>
 
   <filter>
-    <filter-name>AAIFilter</filter-name>
-    <filter-class>de.mpg.aai.shhaa.AuthFilter</filter-class>
+    <filter-name>wicket.componentregistry</filter-name>
+    <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
+    <init-param>
+      <param-name>applicationClassName</param-name>
+      <param-value>clarin.cmdi.componentregistry.frontend.AdminApp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>configuration</param-name>
+      <param-value>deployment</param-value> <!-- you can override with -Dwicket.configuration=development -->
+    </init-param>
   </filter>
+
   <filter-mapping>
-    <filter-name>AAIFilter</filter-name>
-    <url-pattern>/*</url-pattern>
+    <filter-name>wicket.componentregistry</filter-name>
+    <url-pattern>/admin2/*</url-pattern>
   </filter-mapping>
-  <listener>
-    <listener-class>de.mpg.aai.shhaa.config.ConfigContextListener</listener-class>
-  </listener>
+ 
+<!--  <filter>-->
+<!--    <filter-name>AAIFilter</filter-name>-->
+<!--    <filter-class>de.mpg.aai.shhaa.AuthFilter</filter-class>-->
+<!--  </filter>-->
+<!--  <filter-mapping>-->
+<!--    <filter-name>AAIFilter</filter-name>-->
+<!--    <url-pattern>/*</url-pattern>-->
+<!--  </filter-mapping>-->
+<!--  <listener>-->
+<!--    <listener-class>de.mpg.aai.shhaa.config.ConfigContextListener</listener-class>-->
+<!--  </listener>-->
 
   <servlet>
     <servlet-name>ComponentRegistry Web Application</servlet-name>
@@ -60,38 +78,38 @@
     <url-pattern>/Admin</url-pattern>
   </servlet-mapping>
 
-<!--  <security-constraint>-->
-<!--    <display-name>ComponentRegistry web service</display-name>-->
-<!--    <web-resource-collection>-->
-<!--      <web-resource-name>ComponentRegistry edit</web-resource-name>-->
-<!--      <description></description>-->
-<!--      <url-pattern>/rest/*</url-pattern>-->
-<!--      <http-method>DELETE</http-method>-->
-<!--      <http-method>PUT</http-method>-->
-<!--      <http-method>POST</http-method>-->
-<!--    </web-resource-collection>-->
-<!--    <auth-constraint>-->
-<!--      <role-name>tomcat</role-name>-->
-<!--    </auth-constraint>-->
-<!--  </security-constraint>-->
-<!--  <security-constraint>-->
-<!--    <display-name>ComponentRegistry SWF GET</display-name>-->
-<!--    <web-resource-collection>-->
-<!--      <web-resource-name>ComponentRegistry access</web-resource-name>-->
-<!--      <description></description>-->
-<!--      <url-pattern>/*</url-pattern>-->
-<!--      <http-method>GET</http-method>-->
-<!--    </web-resource-collection>-->
-<!--    <auth-constraint>-->
-<!--      <role-name>tomcat</role-name>-->
-<!--    </auth-constraint>-->
-<!--  </security-constraint>-->
-<!--  <login-config>-->
-<!--    <auth-method>BASIC</auth-method>-->
-<!--  </login-config>-->
-<!--  <security-role>-->
-<!--    <description> The role that is required to log in to the Application </description>-->
-<!--    <role-name>tomcat</role-name>-->
-<!--  </security-role>-->
+  <security-constraint>
+    <display-name>ComponentRegistry web service</display-name>
+    <web-resource-collection>
+      <web-resource-name>ComponentRegistry edit</web-resource-name>
+      <description></description>
+      <url-pattern>/rest/*</url-pattern>
+      <http-method>DELETE</http-method>
+      <http-method>PUT</http-method>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tomcat</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <security-constraint>
+    <display-name>ComponentRegistry SWF GET</display-name>
+    <web-resource-collection>
+      <web-resource-name>ComponentRegistry access</web-resource-name>
+      <description></description>
+      <url-pattern>/*</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tomcat</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>BASIC</auth-method>
+  </login-config>
+  <security-role>
+    <description> The role that is required to log in to the Application </description>
+    <role-name>tomcat</role-name>
+  </security-role>
 
 </web-app>

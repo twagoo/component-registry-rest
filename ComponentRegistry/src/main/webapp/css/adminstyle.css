@@ -1,0 +1,17 @@
+div.container {
+	width: 100%;
+}
+
+div.treeView {
+    float: left;
+    width: 300px;
+}
+
+div.infoView {
+    margin: 20px 0px 0px 300px;
+}
+
+textArea.infoTextArea {
+	   width: 100%;
+	   height: 500px;
+}

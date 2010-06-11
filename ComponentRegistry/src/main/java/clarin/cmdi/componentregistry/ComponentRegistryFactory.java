@@ -68,14 +68,34 @@ public class ComponentRegistryFactory {
             if (principal != null && !"anonymous".equals(principal.getName())) {
                 String name = principal.getName();
                 String user = getUserDir(name);
-                result = registryMap.get(user);
-                if (result == null) {
-                    LOG.info("Loading workspace for user: " + name + " workspace name: " + user);
-                    result = createNewUserRegistry(user);
-                    registryMap.put(user, result);
-                }
+                result = loadWorkspace(name, user);
             } else {
-                throw new IllegalArgumentException("No user credentials available cannot create userspace.");
+                throw new IllegalArgumentException("No user credentials available cannot load userspace.");
+            }
+        } else {
+            result = getPublicRegistry();
+        }
+        return result;
+    }
+
+    private synchronized ComponentRegistry loadWorkspace(String name, String userDir) {
+        ComponentRegistry result;
+        result = registryMap.get(userDir);
+        if (result == null) {
+            LOG.info("Loading workspace for user: " + name + " workspace name: " + userDir);
+            result = createNewUserRegistry(userDir);
+            registryMap.put(userDir, result);
+        }
+        return result;
+    }
+    
+    public synchronized ComponentRegistry getComponentRegistry(boolean userspace, Principal adminPrincipal, String userDir) {
+        ComponentRegistry result = null;
+        if (userspace) {
+            if (Configuration.getInstance().isAdminUser(adminPrincipal)) {
+                loadWorkspace(adminPrincipal.getName(), userDir);
+            } else {
+                throw new IllegalArgumentException("User is not admin user cannot load userspace.");
             }
         } else {
             result = getPublicRegistry();

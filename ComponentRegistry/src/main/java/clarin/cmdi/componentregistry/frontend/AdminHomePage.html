@@ -1,0 +1,42 @@
+<html
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+<head>
+<title>Wicket Quickstart Archetype Homepage</title>
+<link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
+</head>
+<body>
+<span wicket:id="message"></span>
+<br />
+<br />
+<!--<table width="100%" border="0" cellspacing="0" cellpadding="0" >-->
+<!--    <tr>-->
+<!--        <td  class="treeView">-->
+<!--            <a wicket:id="expandAll">[expand all]</a>-->
+<!--            <a wicket:id="collapseAll">[collapse all]</a>-->
+<!--            <span wicket:id="tree">tree</span>-->
+<!--        </td>-->
+<!--        <td class="infoView">-->
+<!--            <span wicket:id="info">info</span>-->
+<!--        </td>-->
+<!--    </tr>-->
+<!--</table>-->
+<div class="container">
+<div class="treeView">
+	<a wicket:id="expandAll">[expand all]</a>
+	<a wicket:id="collapseAll">[collapse all]</a>
+	<span wicket:id="tree">tree</span>
+</div>
+<div class="infoView">
+<form wicket:id="form">
+	<textarea  class="infoTextArea" wicket:id="info" >info</textarea>
+	<button wicket:id="submit">submit</button>
+	<button wicket:id="delete">delete</button>
+	<button wicket:id="undelete">undelete</button>
+</form>
+    <div id="feedbackPanel">
+        <span wicket:id="feedback">></span>
+    </div>  
+</div>
+</div>
+</body>
+</html>
