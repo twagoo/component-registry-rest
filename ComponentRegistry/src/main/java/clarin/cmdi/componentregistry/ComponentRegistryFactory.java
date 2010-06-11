@@ -93,7 +93,7 @@ public class ComponentRegistryFactory {
         ComponentRegistry result = null;
         if (userspace) {
             if (Configuration.getInstance().isAdminUser(adminPrincipal)) {
-                loadWorkspace(adminPrincipal.getName(), userDir);
+                result = loadWorkspace(adminPrincipal.getName(), userDir);
             } else {
                 throw new IllegalArgumentException("User is not admin user cannot load userspace.");
             }
@@ -114,7 +114,7 @@ public class ComponentRegistryFactory {
         return result;
     }
 
-    private String getUserDir(String name) {
+    String getUserDir(String name) {
         UserMapping.User user = userMap.findUser(name);
         if (user == null) {
             user = new UserMapping.User();

@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry;
 import java.io.File;
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +18,7 @@ public class Configuration {
     private String component2SchemaXsl = "http://www.clarin.eu/cmd/comp2schema.xsl";
     private String isocatRestUrl = "http://www.isocat.org/rest/";
     
-    private Set<String> adminUsers;
+    private Set<String> adminUsers = new HashSet<String>();
     private ResourceConfig publicResourceConfig;
 
     private Map<String, String> schemaLocations = new HashMap<String, String>();
