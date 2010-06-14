@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.Principal;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -20,9 +22,11 @@ import org.apache.wicket.markup.html.tree.ITreeState;
 import org.apache.wicket.markup.html.tree.LinkTree;
 import org.apache.wicket.model.PropertyModel;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.ResourceConfig;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 
 public class AdminHomePage extends WebPage {
 
@@ -38,30 +42,39 @@ public class AdminHomePage extends WebPage {
             add(new Button("submit") {
                 @Override
                 public void onSubmit() {
-                      info("submitting:"+fileInfo.getName());
+                    info("submitting:" + fileInfo.getName());
 
                 }
             }.setDefaultFormProcessing(false));
             add(new Button("delete") {
                 @Override
                 public void onSubmit() {
-                      info("deleting:"+fileInfo.getName());
-//                      String dir = fileInfo.getFile().getParentFile().getName();
-//                      if (ResourceConfig.DELETED_DIR_NAME.equals(dir)) {
-//                          fileInfo.setText("Press undelete button to put this item back in the registry");
-//                      } else if (ResourceConfig.COMPONENTS_DIR_NAME.equals(dir) || ResourceConfig.PROFILES_DIR_NAME.equals(dir)) {
-//                          fileInfo.setText("Press delete button to delete this item");
-//                      } else {
-//                          fileInfo.setText("");
-//                      }
-                      //TODO PD load correct regisrty!! ComponentRegistryFactory.getInstance().getPublicRegistry().deleteMDComponent(componentId, principal);
-
+                    info("deleting:" + fileInfo.getName());
+                    Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                    String id =  fileInfo.getName();
+                    String userDir = fileInfo.getUserDir();
+                    //TODO Patrick Tree is not updated and you need to scroll way too much, also undelete and update don't work yet.
+                    ComponentRegistry registry = ComponentRegistryFactory.getInstance().getComponentRegistry(userPrincipal, userDir);
+                    try {
+                        if (id.startsWith("c_")) {
+                            registry.deleteMDComponent(ComponentRegistry.REGISTRY_ID +id, userPrincipal);
+                        } else {
+                            registry.deleteMDProfile(ComponentRegistry.REGISTRY_ID +id, userPrincipal);
+                        }
+                        info("Item deleted.");
+                    } catch (IOException e) {
+                        error("Failed:" + e);
+                    } catch (UserUnauthorizedException e) {
+                        error("Failed:" + e);
+                    } catch (DeleteFailedException e) {
+                        error("Failed:" + e);
+                    }
                 }
             }.setDefaultFormProcessing(false));
             add(new Button("undelete") {
                 @Override
                 public void onSubmit() {
-                      info("undeleting:"+fileInfo.getName());
+                    info("undeleting:" + fileInfo.getName());
 
                 }
             }.setDefaultFormProcessing(false));
@@ -71,7 +84,6 @@ public class AdminHomePage extends WebPage {
     @SuppressWarnings("serial")
     public AdminHomePage(final PageParameters parameters) {
         add(new Label("message", "Component Registry Admin Page."));
-
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
         add(feedback);
         Form form = new ItemEditForm("form");
@@ -109,18 +121,7 @@ public class AdminHomePage extends WebPage {
                     treeState.expandNode(node);
                 }
                 FileNode fn = (FileNode) ((DefaultMutableTreeNode) node).getUserObject();
-                if (fn.getFile().isFile()) {
-                    fileInfo.setText(fn.getFileContent());
-                } else {
-                    String dir = fn.getFile().getParentFile().getName();
-                    if (ResourceConfig.DELETED_DIR_NAME.equals(dir)) {
-                        fileInfo.setText("Press undelete button to put this item back in the registry");
-                    } else if (ResourceConfig.COMPONENTS_DIR_NAME.equals(dir) || ResourceConfig.PROFILES_DIR_NAME.equals(dir)) {
-                        fileInfo.setText("Press delete button to delete this item");
-                    } else {
-                        fileInfo.setText("");
-                    }
-                }
+                fileInfo.setFileNode(fn);
                 if (target != null) {
                     target.addComponent(form);
                 }

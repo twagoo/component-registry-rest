@@ -89,9 +89,9 @@ public class ComponentRegistryFactory {
         return result;
     }
     
-    public synchronized ComponentRegistry getComponentRegistry(boolean userspace, Principal adminPrincipal, String userDir) {
+    public synchronized ComponentRegistry getComponentRegistry(Principal adminPrincipal, String userDir) {
         ComponentRegistry result = null;
-        if (userspace) {
+        if (userDir != null) {
             if (Configuration.getInstance().isAdminUser(adminPrincipal)) {
                 result = loadWorkspace(adminPrincipal.getName(), userDir);
             } else {

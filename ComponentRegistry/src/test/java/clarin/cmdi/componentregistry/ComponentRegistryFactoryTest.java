@@ -67,14 +67,18 @@ public class ComponentRegistryFactoryTest {
         assertEquals("user1", userDir);
         Principal admin = new DummyPrincipal("noot");
         try {
-            instance.getComponentRegistry(true, admin, "user1");
+            instance.getComponentRegistry(admin, "user1");
             fail("Should have failed because 'noot' is not an admin user");
         } catch (IllegalArgumentException e) {
         }
         Configuration.getInstance().setAdminUsers(Collections.singleton("noot"));
-        ComponentRegistry reg = instance.getComponentRegistry(true, admin, "user1");
+        ComponentRegistry reg = instance.getComponentRegistry(admin, "user1");
         assertNotNull(reg);
         assertSame(reg2, reg);
+        reg = instance.getComponentRegistry(admin, null);
+        assertNotNull(reg);
+        assertNotSame(reg2, reg);
+        assertTrue(reg.isPublic());
     }
 
     private UserMapping getUserMapping() throws JAXBException, FileNotFoundException {

@@ -23,7 +23,8 @@
     </init-param>
     <init-param>
       <param-name>configuration</param-name>
-      <param-value>deployment</param-value> <!-- you can override with -Dwicket.configuration=development -->
+      <param-value>development</param-value>
+      <!-- <param-value>deployment</param-value> --> <!-- you can override with -Dwicket.configuration=development -->
     </init-param>
   </filter>
 
