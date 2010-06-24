@@ -164,6 +164,7 @@
     <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
     <ComponentBrowserGuiVersion>1.3-SNAPSHOT</ComponentBrowserGuiVersion>
+    <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGuiVersion}</ComponentRegistrySwfName>
   </properties>
 
   <build>
@@ -259,7 +260,7 @@
                   <type>swf</type>
                   <overWrite>true</overWrite>
                   <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
-                  <destFileName>${pom.artifactId}.swf</destFileName>
+                  <destFileName>${ComponentRegistrySwfName}.swf</destFileName>
                 </artifactItem>
               </artifactItems>
             </configuration>

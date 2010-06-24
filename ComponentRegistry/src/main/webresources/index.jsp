@@ -78,7 +78,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// if we've detected an acceptable version
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
-			"src", "${swf}",
+			"src", "${ComponentRegistrySwfName}",
 			"width", "${width}",
 			"height", "${height}",
 			"align", "middle",
@@ -103,11 +103,11 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 	id="${application}" width="${width}" height="${height}"
 	codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-	<param name="movie" value="${swf}.swf" />
+	<param name="movie" value="${ComponentRegistrySwfName}.swf" />
 	<param name="quality" value="high" />
 	<param name="bgcolor" value="${bgcolor}" />
 	<param name="allowScriptAccess" value="sameDomain" />
-	<embed src="${swf}.swf" quality="high" bgcolor="${bgcolor}"
+	<embed src="${ComponentRegistrySwfName}.swf" quality="high" bgcolor="${bgcolor}"
 		width="${width}" height="${height}" name="${application}"
 		align="middle" play="true" loop="false" quality="high"
 		allowScriptAccess="sameDomain" type="application/x-shockwave-flash"
