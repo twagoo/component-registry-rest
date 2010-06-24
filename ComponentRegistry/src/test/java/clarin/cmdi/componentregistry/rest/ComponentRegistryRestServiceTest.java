@@ -523,7 +523,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertFalse(response.isRegistered());
         assertEquals(2, response.getErrors().size());
         assertNotNull(response.getErrors().get(0));
-        assertEquals(MDValidator.ISPROFILE_NOT_SET_ERROR, response.getErrors().get(1));
+        assertEquals(MDValidator.PARSE_ERROR, response.getErrors().get(1).substring(0, MDValidator.PARSE_ERROR.length()));
     }
 
     @Test

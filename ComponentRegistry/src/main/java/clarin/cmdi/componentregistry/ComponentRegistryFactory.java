@@ -16,6 +16,7 @@ import clarin.cmdi.componentregistry.model.UserMapping;
 
 public class ComponentRegistryFactory {
 
+    private static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactory.class);
     private static final ComponentRegistryFactory INSTANCE = new ComponentRegistryFactory();
 
@@ -65,7 +66,7 @@ public class ComponentRegistryFactory {
     public synchronized ComponentRegistry getComponentRegistry(boolean userspace, Principal principal) {
         ComponentRegistry result = null;
         if (userspace) {
-            if (principal != null && !"anonymous".equals(principal.getName())) {
+            if (principal != null && !ANONYMOUS_USER.equals(principal.getName())) {
                 String name = principal.getName();
                 String user = getUserDir(name);
                 result = loadWorkspace(name, user);
@@ -88,8 +89,9 @@ public class ComponentRegistryFactory {
         }
         return result;
     }
-    
-    public synchronized ComponentRegistry getComponentRegistry(Principal adminPrincipal, String userDir) {
+
+    public synchronized ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userName) {
+        String userDir = getUserDir(userName);
         ComponentRegistry result = null;
         if (userDir != null) {
             if (Configuration.getInstance().isAdminUser(adminPrincipal)) {
@@ -115,11 +117,14 @@ public class ComponentRegistryFactory {
     }
 
     String getUserDir(String name) {
+        if (name == null) {
+            return null;
+        }
         UserMapping.User user = userMap.findUser(name);
         if (user == null) {
             user = new UserMapping.User();
             user.setName(name);
-            user.setUserDir("user" + userMap.getUsers().size());
+            user.setUserDir(ResourceConfig.USER_DIR_PREFIX + userMap.getUsers().size());
             userMap.addUsers(user);
             saveUserMap();
         }

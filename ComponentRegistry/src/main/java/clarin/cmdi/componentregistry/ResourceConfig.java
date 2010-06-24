@@ -10,7 +10,8 @@ public class ResourceConfig {
     public static final String PROFILES_DIR_NAME = "profiles";
     public static final String COMPONENTS_DIR_NAME = "components";
     public static final String DELETED_DIR_NAME = "deleted";
-    static final String USERS_DIR_NAME = "users";
+    public static final String USERS_DIR_NAME = "users";
+    public static final String USER_DIR_PREFIX = "user";
 
 
     private final static Logger LOG = LoggerFactory.getLogger(ResourceConfig.class);

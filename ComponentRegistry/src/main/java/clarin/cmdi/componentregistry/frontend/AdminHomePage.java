@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.Principal;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -10,8 +9,9 @@ import javax.swing.tree.TreeModel;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -20,76 +20,118 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.tree.BaseTree;
 import org.apache.wicket.markup.html.tree.ITreeState;
 import org.apache.wicket.markup.html.tree.LinkTree;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.CompoundPropertyModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.AdminRegistry;
 import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.ResourceConfig;
 
 public class AdminHomePage extends WebPage {
+    private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
 
     private final FileInfo fileInfo = new FileInfo();
+    private final LinkTree tree;
 
-    @SuppressWarnings("serial")
-    private class ItemEditForm extends Form<FileInfo> {
-        public ItemEditForm(String name) {
-            super(name);
-            TextArea textArea = new TextArea("info", new PropertyModel<String>(fileInfo, "text"));
-            textArea.setOutputMarkupId(true);
-            add(textArea);
-            add(new Button("submit") {
-                @Override
-                public void onSubmit() {
-                    info("submitting:" + fileInfo.getName());
-
-                }
-            }.setDefaultFormProcessing(false));
-            add(new Button("delete") {
-                @Override
-                public void onSubmit() {
-                    info("deleting:" + fileInfo.getName());
-                    Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
-                    String id =  fileInfo.getName();
-                    String userDir = fileInfo.getUserDir();
-                    //TODO Patrick Tree is not updated and you need to scroll way too much, also undelete and update don't work yet.
-                    ComponentRegistry registry = ComponentRegistryFactory.getInstance().getComponentRegistry(userPrincipal, userDir);
-                    try {
-                        if (id.startsWith("c_")) {
-                            registry.deleteMDComponent(ComponentRegistry.REGISTRY_ID +id, userPrincipal);
-                        } else {
-                            registry.deleteMDProfile(ComponentRegistry.REGISTRY_ID +id, userPrincipal);
-                        }
-                        info("Item deleted.");
-                    } catch (IOException e) {
-                        error("Failed:" + e);
-                    } catch (UserUnauthorizedException e) {
-                        error("Failed:" + e);
-                    } catch (DeleteFailedException e) {
-                        error("Failed:" + e);
-                    }
-                }
-            }.setDefaultFormProcessing(false));
-            add(new Button("undelete") {
-                @Override
-                public void onSubmit() {
-                    info("undeleting:" + fileInfo.getName());
-
-                }
-            }.setDefaultFormProcessing(false));
-        }
-    }
+    private transient AdminRegistry adminRegistry = new AdminRegistry();
 
     @SuppressWarnings("serial")
     public AdminHomePage(final PageParameters parameters) {
-        add(new Label("message", "Component Registry Admin Page."));
+        Principal userPrincipal = getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
+        if (!Configuration.getInstance().isAdminUser(userPrincipal)) {
+            setResponsePage(new AccessDeniedPage());
+        }
+        add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName()
+                + ".\nRegistry is located in: " + Configuration.getInstance().getRegistryRoot()));
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
+        feedback.setOutputMarkupId(true);
         add(feedback);
         Form form = new ItemEditForm("form");
         add(form);
 
-        final LinkTree tree = createTree(form);
+        Button deleteButton = new AjaxFallbackButton("delete", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                FileInfo fileInfo = (FileInfo) form.getModelObject();
+                info("deleting:" + fileInfo.getName());
+                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                try {
+                    adminRegistry.delete(fileInfo, userPrincipal);
+                    tree.setModelObject(createTreeModel());
+                    info("Item deleted.");
+                } catch (SubmitFailedException e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot undelete: " + fileInfo.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                    target.addComponent(tree);
+                    target.addComponent(feedback);
+                }
+            }
+
+            public boolean isEnabled() {
+                return fileInfo.isDeletable();
+            };
+        };
+        form.add(deleteButton);
+
+        Button undeleteButton = new AjaxFallbackButton("undelete", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                FileInfo fileInfo = (FileInfo) form.getModelObject();
+                info("undeleting:" + fileInfo.getName());
+                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                try {
+                    adminRegistry.undelete(fileInfo, userPrincipal);
+                    info("Item put back.");
+                    tree.setModelObject(createTreeModel());
+                } catch (SubmitFailedException e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot undelete: " + fileInfo.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                    target.addComponent(tree);
+                    target.addComponent(feedback);
+                }
+            }
+
+            public boolean isEnabled() {
+                return fileInfo.isUndeletable();
+            }
+
+        };
+        form.add(undeleteButton);
+
+        Button submitButton = new AjaxFallbackButton("submit", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                FileInfo fileInfo = (FileInfo) form.getModelObject();
+                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                info("submitting:" + fileInfo.getName() + " id=(" + fileInfo.getFileNode().getFile().getParentFile().getName() + ")");
+                try {
+                    adminRegistry.submitFile(fileInfo, userPrincipal);
+                    info("submitting done.");
+                } catch (SubmitFailedException e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot submit: " + fileInfo.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                    target.addComponent(feedback);
+                }
+            }
+
+            public boolean isEnabled() {
+                return fileInfo.isEditable();
+            }
+
+        };
+        form.add(submitButton);
+
+        tree = createTree(form);
         add(tree);
         add(new Link("expandAll") {
             @Override
@@ -133,24 +175,39 @@ public class AdminHomePage extends WebPage {
     private TreeModel createTreeModel() {
         File registryRoot = Configuration.getInstance().getRegistryRoot();
         TreeModel model = null;
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new FileNode(registryRoot));
-        add(rootNode, registryRoot.listFiles());
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new FileNode(registryRoot, false));
+        add(rootNode, registryRoot.listFiles(), false);
         model = new DefaultTreeModel(rootNode);
         return model;
     }
 
     @SuppressWarnings("unchecked")
-    private void add(DefaultMutableTreeNode parent, File[] files) {
+    private void add(DefaultMutableTreeNode parent, File[] files, boolean isDeleted) {
         for (File file : files) {
             if (file.isDirectory()) {
-                DefaultMutableTreeNode child = new DefaultMutableTreeNode(new FileNode(file));
+                boolean deleted = ResourceConfig.DELETED_DIR_NAME.equals(file.getName()) || isDeleted; //once you find a deleted dir mark all child nodes in the tree as deleted.
+                DefaultMutableTreeNode child = new DefaultMutableTreeNode(new FileNode(file, deleted));
                 parent.add(child);
-                add(child, file.listFiles());
+                add(child, file.listFiles(), deleted);
             } else {
-                DefaultMutableTreeNode child = new DefaultMutableTreeNode(new FileNode(file));
+                DefaultMutableTreeNode child = new DefaultMutableTreeNode(new FileNode(file, isDeleted));
                 parent.add(child);
             }
         }
     }
 
+    @SuppressWarnings("serial")
+    private class ItemEditForm extends Form<FileInfo> {
+
+        public ItemEditForm(String name) {
+            super(name);
+            CompoundPropertyModel model = new CompoundPropertyModel(fileInfo);
+            setModel(model);
+
+            TextArea textArea = new TextArea("text");
+            textArea.setOutputMarkupId(true);
+            add(textArea);
+        }
+
+    }
 }

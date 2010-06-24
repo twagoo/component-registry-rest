@@ -17,7 +17,7 @@ public class Configuration {
     private String generalComponentSchema = "http://www.clarin.eu/cmd/general-component-schema.xsd";
     private String component2SchemaXsl = "http://www.clarin.eu/cmd/comp2schema.xsl";
     private String isocatRestUrl = "http://www.isocat.org/rest/";
-    
+
     private Set<String> adminUsers = new HashSet<String>();
     private ResourceConfig publicResourceConfig;
 
@@ -59,7 +59,10 @@ public class Configuration {
     }
 
     public boolean isAdminUser(Principal principal) {
-        return adminUsers.contains(principal.getName());
+        if (principal != null) {
+            return adminUsers.contains(principal.getName());
+        }
+        return false;
     }
 
     public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {

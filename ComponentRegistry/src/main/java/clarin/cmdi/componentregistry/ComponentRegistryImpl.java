@@ -42,7 +42,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class ComponentRegistryImpl implements ComponentRegistry {
 
-    private static final String DESCRIPTION_FILE_NAME = "description.xml";
+    public static final String DESCRIPTION_FILE_NAME = "description.xml";
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
 
@@ -482,6 +482,19 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public boolean isPublic() {
         return isPublic;
+    }
+
+    //'packaged' visibility does not belong in the api but I need to do this as admin.
+    void emptyFromTrashcan(AbstractDescription description) throws IOException {
+        File file = null;
+        if (description.isProfile()) {
+            file = new File(resourceConfig.getProfileDeletionDir(), stripRegistryId(description.getId()));
+        } else {
+            file = new File(resourceConfig.getComponentDeletionDir(), stripRegistryId(description.getId()));
+        }
+        if (file.exists()) {
+            FileUtils.deleteDirectory(file);
+        }
     }
 
 }

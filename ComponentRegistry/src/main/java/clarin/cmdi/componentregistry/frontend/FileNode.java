@@ -10,9 +10,11 @@ public class FileNode implements Serializable{
 
     private static final long serialVersionUID = 1L;
     private final File file;
+    private final boolean deleted;
 
-    public FileNode(File file) {
+    public FileNode(File file, boolean deleted) {
         this.file = file;
+        this.deleted = deleted;
     }
     
     public String getFileContent() {
@@ -30,5 +32,9 @@ public class FileNode implements Serializable{
 
     public File getFile() {
         return file;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 }

@@ -56,7 +56,7 @@ public class ComponentRegistryFactoryTest {
     }
 
     @Test
-    public void testGetComponentRegistry() throws Exception {
+    public void testGetOtherUserComponentRegistry() throws Exception {
         ComponentRegistryFactory instance = ComponentRegistryFactory.getInstance();
         ComponentRegistry reg1 = instance.getComponentRegistry(true, new DummyPrincipal("noot"));
         assertNotNull(reg1);
@@ -67,15 +67,15 @@ public class ComponentRegistryFactoryTest {
         assertEquals("user1", userDir);
         Principal admin = new DummyPrincipal("noot");
         try {
-            instance.getComponentRegistry(admin, "user1");
+            instance.getOtherUserComponentRegistry(admin, "aap");
             fail("Should have failed because 'noot' is not an admin user");
         } catch (IllegalArgumentException e) {
         }
         Configuration.getInstance().setAdminUsers(Collections.singleton("noot"));
-        ComponentRegistry reg = instance.getComponentRegistry(admin, "user1");
+        ComponentRegistry reg = instance.getOtherUserComponentRegistry(admin, "aap");
         assertNotNull(reg);
         assertSame(reg2, reg);
-        reg = instance.getComponentRegistry(admin, null);
+        reg = instance.getOtherUserComponentRegistry(admin, null);
         assertNotNull(reg);
         assertNotSame(reg2, reg);
         assertTrue(reg.isPublic());
