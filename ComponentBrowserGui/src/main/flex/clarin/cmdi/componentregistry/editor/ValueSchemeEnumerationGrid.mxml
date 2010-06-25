@@ -59,7 +59,7 @@
 			}
 
 			private function handleItemEditBegin(e:DataGridEvent):void {
-				if (e.rowIndex < valueSchemeEnumeration.length - 1 && e.columnIndex == 1) {
+				if (e.rowIndex < valueSchemeEnumeration.length - 1 && e.columnIndex == 2) {
 					conceptLinkEdit = true;
 					currentEditPosition = dataGrid.editedItemPosition;
 				} else {
@@ -67,7 +67,7 @@
 				}
 			}
 
-// TODO  show tooltip for isocat somewhere
+//TODO PD show tooltip for isocat somewhere
 			private function handleKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.DELETE) {
 					deleteRow(event);
@@ -82,7 +82,6 @@
 					}
 				}
 				dataGrid.validateNow();
-
 			}
 
 			private function createContextMenu():ContextMenu {
