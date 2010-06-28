@@ -8,10 +8,12 @@
     <property name="adminUsers">
       <set>
         <value>Patrick Duin</value>
+   <!--     <value>Patrick</value>-->
       </set>
     </property>
     <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
-    <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/comp2schema.xsl" />
+    <!-- <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/comp2schema.xsl" />-->
+    <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
     <property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd http://www.clarin.eu/cmd/general-component-schema.xsd" />
     <property name="isocatRestUrl" value="http://www.isocat.org/rest/" />
   </bean>

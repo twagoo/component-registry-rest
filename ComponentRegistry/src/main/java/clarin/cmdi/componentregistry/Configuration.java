@@ -15,7 +15,7 @@ public class Configuration {
 
     //NOTE: Default values, can be overwritten in applicationContext.xml
     private String generalComponentSchema = "http://www.clarin.eu/cmd/general-component-schema.xsd";
-    private String component2SchemaXsl = "http://www.clarin.eu/cmd/comp2schema.xsl";
+    private String component2SchemaXsl = "http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
     private String isocatRestUrl = "http://www.isocat.org/rest/";
 
     private Set<String> adminUsers = new HashSet<String>();
