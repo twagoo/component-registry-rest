@@ -1,0 +1,22 @@
+Bug Fixes and Features
+
+Release ComponentRegistry-1.3 (28 June 2010):
+- Only admin can delete public items after a month in registry.
+- sort ignore case
+- Add some user logging.
+- Indenting XSD with one space.
+- Timeout thing. Flex client no keeps session alive by pinging the server.
+- Import screen should have bigger description field (like the editor).
+- Switched valueScheme item and appInfo columns and presentation. (Ordering will be better then).
+- Create Admin Page, where you can browse repo and edit all items. 
+- Create public link to private workspace so arbil can query it? as opposed to let people download xsd at the moment? Fix: Use XSD for now.
+- Isocat use complex conceptlinks to elements and simple types to valuescheme enumeration.
+- isocat simple/complex search in isocat metadata 'profile'
+- Stream xsd instead of creating and sending.
+- isocat popup place it in middle of screen.
+- Make swf file have version, so we have no more caching problems.
+- Add message in admin page that you are logged in as admin user. 
+- Conceptlink is selectable from the wrong column in valuescheme edit.
+- Fixed definition of multiple vocabularies in XSD. (XSLT fix).
+- Do not make popups transparant.
+
