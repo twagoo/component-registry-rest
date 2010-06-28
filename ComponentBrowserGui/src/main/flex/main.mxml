@@ -17,7 +17,7 @@
 			import mx.managers.PopUpManager;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 
-			private var sessionPinger:PingSessionService = PingSessionService.INSTANCE;
+			private var sessionPinger:PingSessionService;
 
 
 			private function initializeInstances():void {
@@ -27,6 +27,7 @@
 
 			private function init():void {
 				ExternalMouseWheelSupport.getInstance(stage);
+				sessionPinger = PingSessionService.INSTANCE
 				sessionPinger.startPinging();
 			}
 			

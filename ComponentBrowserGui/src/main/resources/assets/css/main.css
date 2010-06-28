@@ -54,7 +54,9 @@ ToggleButtonBar {
    dropShadowEnabled: true;
 }
 
-
+TitleWindow {
+   borderAlpha: 1;
+}
 
 
 
