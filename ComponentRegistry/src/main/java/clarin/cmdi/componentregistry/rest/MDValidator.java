@@ -16,8 +16,6 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 
 public class MDValidator implements Validator {
 
-    //Kept this error in, but from 24-06-2010 this is also handled by the schema resulting in a parse exception when not specified.
-    static final String ISPROFILE_NOT_SET_ERROR = "'isProfile' attribute is obligated for this registry please specify it in the xml."; 
     static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
     static final String PARSE_ERROR = "Error in validation input file. Error is: ";
@@ -51,9 +49,7 @@ public class MDValidator implements Validator {
     public boolean validate() {
         try {
             spec = MDMarshaller.unmarshal(CMDComponentSpec.class, input, MDMarshaller.getCMDComponentSchema());
-            if (spec.isIsProfile() == null) {
-                errorMessages.add(ISPROFILE_NOT_SET_ERROR);
-            } else if (spec.isIsProfile().booleanValue() != description.isProfile()) {
+            if (spec.isIsProfile() != description.isProfile()) {
                 errorMessages.add(MISMATCH_ERROR);
             }
         } catch (JAXBException e) {
