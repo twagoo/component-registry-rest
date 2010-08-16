@@ -27,6 +27,7 @@ import clarin.cmdi.componentregistry.AdminRegistry;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.ResourceConfig;
 
+
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
@@ -150,6 +151,12 @@ public class AdminHomePage extends SecureAdminWebPage {
             @Override
             public void onClick() {
                 setResponsePage(MassMigratePage.class);
+            }
+        });
+        add(new Link("log") {
+            @Override
+            public void onClick() {
+                setResponsePage(ViewLogPage.class);
             }
         });
     }

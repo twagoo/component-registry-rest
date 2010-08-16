@@ -11,6 +11,7 @@ import clarin.cmdi.componentregistry.Configuration;
 public abstract class SecureAdminWebPage extends WebPage {
 
     public SecureAdminWebPage(final PageParameters parameters) {
+        super(parameters);
         Principal userPrincipal = getUserPrincipal();
         if (!Configuration.getInstance().isAdminUser(userPrincipal)) {
             setResponsePage(new AccessDeniedPage());
