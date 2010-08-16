@@ -35,7 +35,7 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 public class ComponentRegistryImplTest {
 
     private File tmpRegistryDir;
-    private final static DummyPrincipal PRINCIPAL = DummyPrincipal.DUMMY_PRINCIPAL;
+    private final static UserCredentials USER_CREDS = DummyPrincipal.DUMMY_CREDENTIALS;
     private static final Principal PRINCIPAL_ADMIN = new DummyPrincipal("admin");
 
     @Test
@@ -126,14 +126,14 @@ public class ComponentRegistryImplTest {
     public void testCacheLoadCorrect() throws Exception {
         ComponentRegistryImpl publicReg = getTestRegistry(getRegistryDir());
         ComponentRegistryImpl userReg = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getComponentRegistry(true,
-                DummyPrincipal.DUMMY_PRINCIPAL);
+                DummyPrincipal.DUMMY_CREDENTIALS);
 
         ProfileDescription pDesc = ProfileDescription.createNewDescription();
         pDesc.setName("Aap1");
-        pDesc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+        pDesc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalNameMD5Hex());
         ComponentDescription cDesc = ComponentDescription.createNewDescription();
         cDesc.setName("Aap2");
-        cDesc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+        cDesc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalNameMD5Hex());
 
         assertEquals(0, userReg.getComponentDescriptions().size());
         assertEquals(0, userReg.getProfileDescriptions().size());
@@ -148,7 +148,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, publicReg.getComponentDescriptions().size());
         assertEquals(1, publicReg.getProfileDescriptions().size());
 
-        publicReg.deleteMDProfile(pDesc.getId(), PRINCIPAL);
+        publicReg.deleteMDProfile(pDesc.getId(), USER_CREDS.getPrincipal());
         userReg.initCache();
         publicReg.initCache();
         assertEquals(1, userReg.getComponentDescriptions().size());
@@ -156,7 +156,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, publicReg.getComponentDescriptions().size());
         assertEquals(0, publicReg.getProfileDescriptions().size());
 
-        userReg.deleteMDComponent(cDesc.getId(), PRINCIPAL);
+        userReg.deleteMDComponent(cDesc.getId(), USER_CREDS.getPrincipal());
         userReg.initCache();
         publicReg.initCache();
         assertEquals(0, userReg.getComponentDescriptions().size());
@@ -164,8 +164,8 @@ public class ComponentRegistryImplTest {
         assertEquals(1, publicReg.getComponentDescriptions().size());
         assertEquals(0, publicReg.getProfileDescriptions().size());
 
-        publicReg.deleteMDComponent(cDesc.getId(), PRINCIPAL);
-        userReg.deleteMDProfile(pDesc.getId(), PRINCIPAL);
+        publicReg.deleteMDComponent(cDesc.getId(), USER_CREDS.getPrincipal());
+        userReg.deleteMDProfile(pDesc.getId(), USER_CREDS.getPrincipal());
         userReg.initCache();
         publicReg.initCache();
         assertEquals(0, userReg.getComponentDescriptions().size());
@@ -337,7 +337,8 @@ public class ComponentRegistryImplTest {
         ComponentRegistry register = getTestRegistry(getRegistryDir());
         ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
-        description.setCreatorName(PRINCIPAL.getName());
+        description.setCreatorName(USER_CREDS.getDisplayName());
+        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
         description.setDescription("MyDescription");
         CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
 
@@ -356,7 +357,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, register.getProfileDescriptions().size());
         assertNotNull(register.getMDProfile(description.getId()));
 
-        register.deleteMDProfile(description.getId(), PRINCIPAL);
+        register.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal());
 
         assertEquals(0, register.getProfileDescriptions().size());
         assertNull(register.getMDProfile(description.getId()));
@@ -367,7 +368,8 @@ public class ComponentRegistryImplTest {
         ComponentRegistry registry = getTestRegistry(getRegistryDir());
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
-        description.setCreatorName(PRINCIPAL.getName());
+        description.setCreatorName(USER_CREDS.getDisplayName());
+        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
         description.setDescription("MyDescription");
         CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
@@ -381,7 +383,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, registry.getComponentDescriptions().size());
         assertNotNull(registry.getMDComponent(description.getId()));
 
-        registry.deleteMDComponent(description.getId(), PRINCIPAL);
+        registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal());
 
         assertEquals(0, registry.getComponentDescriptions().size());
         assertNull(registry.getMDProfile(description.getId()));
@@ -392,7 +394,8 @@ public class ComponentRegistryImplTest {
         ComponentRegistry registry = getTestRegistry(getRegistryDir());
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
-        description.setCreatorName(PRINCIPAL.getName());
+        description.setCreatorName(USER_CREDS.getDisplayName());
+        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
         description.setDescription("MyDescription");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1999);
@@ -402,7 +405,7 @@ public class ComponentRegistryImplTest {
 
         registry.registerMDComponent(description, testComp);
         try {
-            registry.deleteMDComponent(description.getId(), PRINCIPAL);
+            registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal());
             fail("Should have thrown exception");
         } catch (DeleteFailedException e) {
         }
@@ -410,10 +413,10 @@ public class ComponentRegistryImplTest {
         registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN);
         assertEquals(0, registry.getComponentDescriptions().size());
 
-        registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, PRINCIPAL); //user registry
+        registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.registerMDComponent(description, testComp);
         assertEquals(1, registry.getComponentDescriptions().size());
-        registry.deleteMDComponent(description.getId(), PRINCIPAL); //user workspace can always delete
+        registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
         assertEquals(0, registry.getComponentDescriptions().size());
     }
 
@@ -422,7 +425,8 @@ public class ComponentRegistryImplTest {
         ComponentRegistry registry = getTestRegistry(getRegistryDir());
         ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
-        description.setCreatorName(PRINCIPAL.getName());
+        description.setCreatorName(USER_CREDS.getDisplayName());
+        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
         description.setDescription("MyDescription");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1999);
@@ -432,7 +436,7 @@ public class ComponentRegistryImplTest {
 
         registry.registerMDProfile(description, testComp);
         try {
-            registry.deleteMDProfile(description.getId(), PRINCIPAL);
+            registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal());
             fail("Should have thrown exception");
         } catch (DeleteFailedException e) {
         }
@@ -440,10 +444,10 @@ public class ComponentRegistryImplTest {
         registry.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
         assertEquals(0, registry.getProfileDescriptions().size());
 
-        registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, PRINCIPAL); //user registry
+        registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.registerMDProfile(description, testComp);
         assertEquals(1, registry.getProfileDescriptions().size());
-        registry.deleteMDProfile(description.getId(), PRINCIPAL); //user workspace can always delete
+        registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
         assertEquals(0, registry.getProfileDescriptions().size());
     }
 
@@ -452,7 +456,8 @@ public class ComponentRegistryImplTest {
         ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
-        description.setCreatorName(PRINCIPAL.getName());
+        description.setCreatorName(USER_CREDS.getDisplayName());
+        description.setUserId(USER_CREDS.getPrincipalName());
         description.setDescription("MyDescription");
         CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
         registry.registerMDComponent(description, testComponent);
@@ -462,7 +467,7 @@ public class ComponentRegistryImplTest {
         assertEquals("MyDescription", desc.getDescription());
         desc.setDescription("NewDesc");
         try {
-            registry.update(desc, PRINCIPAL, testComponent);
+            registry.update(desc, USER_CREDS.getPrincipal(), testComponent);
             fail("Should have failed, only admin users are allowed to update");
         } catch (UserUnauthorizedException e) {
         }

@@ -16,6 +16,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentRegistryImpl;
+import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 
@@ -95,7 +96,8 @@ public class MigrateData {
         };
         MigrateData migrate = new MigrateData();
         migrate.migrateDescriptions(registry, principal);
-        migrate.migrateDescriptions(ComponentRegistryFactory.getInstance().getComponentRegistry(true, principal), principal);
+        migrate.migrateDescriptions(ComponentRegistryFactory.getInstance().getComponentRegistry(true,
+                new UserCredentials(principal)), principal);
     }
 
 }

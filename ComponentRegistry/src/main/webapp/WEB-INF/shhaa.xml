@@ -5,7 +5,6 @@
 
 	<authentication>
 		<shibheader>
-			<username>displayName</username>
             <username>eduPersonPrincipalName</username>
 			<session>Shib-Session-ID</session>
 			<idp>Shib-Identity-Provider</idp>
@@ -25,11 +24,8 @@
 	
 	<composition action="rF">
 		<shibheader>
-			<attribute>eduPersonAffiliation</attribute>
-			<attribute>eduPersonEntitlement</attribute>
-			<attribute>email</attribute>
-			<attribute>ou</attribute>
-			<attribute>o</attribute>
+			<attribute>displayName</attribute>
+			<attribute>commonName</attribute>
 		</shibheader>
 	</composition>
 

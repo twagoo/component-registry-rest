@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -20,6 +23,7 @@ public class ProfileDescriptionTest {
         desc.setName("Name");
         desc.setId("myId");
         desc.setCreatorName("myC");
+        desc.setUserId(DigestUtils.md5Hex("user1"));
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
         desc.setDomainName("Linguistics");
@@ -35,6 +39,7 @@ public class ProfileDescriptionTest {
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
+        expected += "    <userId>"+DigestUtils.md5Hex("user1")+"</userId>\n";
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "</profileDescription>\n";
@@ -42,6 +47,8 @@ public class ProfileDescriptionTest {
 
         ProfileDescription pd = MDMarshaller.unmarshal(ProfileDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertEquals(desc.getId(), pd.getId());
+        assertTrue(desc.isThisTheOwner("user1"));
+        assertFalse(desc.isThisTheOwner("aap"));
     }
 
 }

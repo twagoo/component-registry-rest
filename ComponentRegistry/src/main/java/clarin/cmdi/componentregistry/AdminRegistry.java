@@ -143,7 +143,7 @@ public class AdminRegistry {
     private ComponentRegistry getRegistry(Principal userPrincipal, AbstractDescription desc, FileInfo fileInfo) {
         ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
         if (fileInfo.isInUserWorkSpace()) {
-            registry = ComponentRegistryFactory.getInstance().getOtherUserComponentRegistry(userPrincipal, desc.getCreatorName());
+            registry = ComponentRegistryFactory.getInstance().getOtherUserComponentRegistry(userPrincipal, desc.getUserId());
         }
         return registry;
     }

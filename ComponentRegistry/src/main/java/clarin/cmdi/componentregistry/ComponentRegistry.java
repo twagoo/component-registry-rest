@@ -86,5 +86,4 @@ public interface ComponentRegistry {
      **/
     boolean isPublic();
 
-    //List<ConceptLinks> getConceptLinks(String componentId, String xpath); We only need xpath I think it contains the componentId's
 }

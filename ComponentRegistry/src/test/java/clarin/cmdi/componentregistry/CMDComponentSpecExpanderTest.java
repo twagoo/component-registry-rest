@@ -87,7 +87,7 @@ public class CMDComponentSpecExpanderTest {
     public void testExpandProfileWithNestedComponentsFromUserRegistry() throws Exception {
         ComponentRegistryImpl registry = ComponentRegistryImplTest.getTestRegistry(getRegistryDir());
         ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getComponentRegistry(true,
-                DummyPrincipal.DUMMY_PRINCIPAL);
+                DummyPrincipal.DUMMY_CREDENTIALS);
 
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";

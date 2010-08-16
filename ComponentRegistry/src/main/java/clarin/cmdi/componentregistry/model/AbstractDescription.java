@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -18,6 +19,7 @@ public abstract class AbstractDescription {
     private String name;
     private String registrationDate;
     private String creatorName;
+    private String userId;
     private String domainName;
     @XmlElement(namespace = "http://www.w3.org/1999/xlink")
     private String href;
@@ -62,6 +64,18 @@ public abstract class AbstractDescription {
         return creatorName;
     }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * MD5 string representation of the user id. Storing the hash because the userId can be the email address which we don't want to make
+     * public.
+     */
+    public String getUserId() {
+        return userId;
+    }
+
     public void setDomainName(String domainName) {
         this.domainName = domainName;
     }
@@ -80,7 +94,7 @@ public abstract class AbstractDescription {
 
     @Override
     public String toString() {
-        return "Name=" + getName() + ", id=" + getId() + ", creatorName=" + getCreatorName();
+        return "Name=" + getName() + ", id=" + getId() + ", creatorName=" + getCreatorName() + ", userId=" + getUserId();
     }
 
     public boolean isProfile() {
@@ -89,6 +103,15 @@ public abstract class AbstractDescription {
 
     public static String createNewDate() {
         return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
+    }
+
+    /**
+     * Helper method.
+     * @param userId normal string which will be checked to see if it matches the md5 hash of the stored userId
+     */
+    public boolean isThisTheOwner(String userId) {
+        String userHash = DigestUtils.md5Hex(userId);
+        return userHash.equals(getUserId());
     }
 
 }

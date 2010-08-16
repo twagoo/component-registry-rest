@@ -9,6 +9,8 @@ import java.text.SimpleDateFormat;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -36,7 +38,8 @@ public final class RegistryTestHelper {
     private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
             JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
-        desc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+        desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
+        desc.setUserId(DigestUtils.md5Hex(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName()));
         desc.setName(id);
         desc.setRegistrationDate("" + SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse("1/1/2009"));
         desc.setDescription("Test Description");
@@ -82,7 +85,8 @@ public final class RegistryTestHelper {
     private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
             JAXBException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
-        desc.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+        desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
+        desc.setUserId(DigestUtils.md5Hex(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName()));
         desc.setName(id);
         desc.setRegistrationDate("" + SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse("1/1/2009"));
         desc.setDescription("Test Description");

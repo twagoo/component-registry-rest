@@ -358,7 +358,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-        if (!principal.getName().equals(desc.getCreatorName()) && !Configuration.getInstance().isAdminUser(principal)) {
+        if (!desc.isThisTheOwner(principal.getName()) && !Configuration.getInstance().isAdminUser(principal)) { 
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
                     + "' is not the creator (nor an administrator) of the " + (desc.isProfile() ? "profile" : "component") + "(" + desc
                     + ").");
@@ -426,6 +426,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result.toString();
     }
 
+    
+    /**
+     * spec is optional can be null if only the description needs to be updated.
+     */
     public void update(AbstractDescription description, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
             UserUnauthorizedException {
         if (!Configuration.getInstance().isAdminUser(principal)) {
@@ -441,7 +445,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         String strippedId = stripRegistryId(description.getId());
         File dir = new File(typeDir, strippedId);
         writeDescription(dir, description);
-        writeCMDComponentSpec(dir, strippedId + ".xml", spec);
+        if (spec != null)
+            writeCMDComponentSpec(dir, strippedId + ".xml", spec);
         updateCache(description);
     }
 

@@ -13,6 +13,7 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
@@ -264,7 +265,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("ProfileTest1", profileDesc.getName());
         assertEquals("My Test Profile", profileDesc.getDescription());
         assertEquals("TestDomain", profileDesc.getDomainName());
-        assertEquals("J.Unit", profileDesc.getCreatorName());
+        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), profileDesc.getUserId());
+        assertEquals("JUnit@test.com", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
         assertEquals("http://localhost:9998/registry/profiles/" + profileDesc.getId(), profileDesc.getHref());
@@ -287,7 +289,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(profileDesc);
         assertEquals("Test1", profileDesc.getName());
         assertEquals("My Test", profileDesc.getDescription());
-        assertEquals("J.Unit", profileDesc.getCreatorName());
+        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), profileDesc.getUserId());
+        assertEquals("JUnit@test.com", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
         assertEquals("http://localhost:9998/registry/profiles/" + profileDesc.getId() + "?userspace=true", profileDesc.getHref());
@@ -340,7 +343,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testRegisterWithUserComponents() throws Exception {
-        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, DummyPrincipal.DUMMY_PRINCIPAL);
+        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
@@ -412,7 +415,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
         assertEquals("My Test", desc.getDescription());
-        assertEquals("J.Unit", desc.getCreatorName());
+        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), desc.getUserId());
+        assertEquals("JUnit@test.com", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
         assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
         assertNotNull(desc.getRegistrationDate());
@@ -473,7 +477,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("ComponentTest1", desc.getName());
         assertEquals("My Test Component", desc.getDescription());
-        assertEquals("J.Unit", desc.getCreatorName());
+        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), desc.getUserId());
+        assertEquals("JUnit@test.com", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
         assertEquals("TestDomain", desc.getDomainName());
         assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));

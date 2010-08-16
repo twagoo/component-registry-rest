@@ -113,7 +113,7 @@ public class MDValidatorTest {
     public void testValidateUserRegistry() throws Exception {
         String id1 = "component1";
         String id2 = "component2";
-        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, DummyPrincipal.DUMMY_PRINCIPAL);
+        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
 
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";

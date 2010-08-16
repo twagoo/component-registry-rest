@@ -114,7 +114,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 		pluginspage="http://www.adobe.com/go/getflashplayer"
 		FlashVars="serviceRootUrl=${serviceRootUrl}&userName=${pageContext.request.remoteUser}">
 	</embed> 
-	</object>
+</object>
 </noscript>
 </div>
 </body>

@@ -20,6 +20,7 @@ public class ComponentDescriptionTest {
         desc.setName("Name");
         desc.setId("myId");
         desc.setCreatorName("myC");
+        desc.setUserId("user1");
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
         desc.setHref("linkToMyComponent");
@@ -36,6 +37,7 @@ public class ComponentDescriptionTest {
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
+        expected += "    <userId>user1</userId>\n";
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyComponent</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";

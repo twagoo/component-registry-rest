@@ -88,34 +88,35 @@ public class RegistryFiller {
      */
     public static void main(String[] args) throws IOException {
         LOG.info("RegistryFiller started with arguments: " + Arrays.toString(args));
-        if (args.length == 0 || args.length < 3) {
-            printUsage();
-        }
-        RegistryFiller filler = new RegistryFiller(FILLER_URL_PROP);
-        String description = args[0];
-        String group = args[1];
-        int nrOfFailed = 0;
-        for (int i = 2; i < args.length; i++) {
-            File file = new File(args[i]);
-            LOG.info("Adding " + (i - 3) + "/" + (args.length - 4) + ": " + file.getName());
-            try {
-                CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, null);
-                if (spec.isIsProfile()) {
-                    filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), description, group);
-                } else {
-                    filler.addComponent(file, FilenameUtils.getBaseName(file.getName()), description, group);
-                }
-            } catch (Exception e) {
-                nrOfFailed++;
-                LOG.error("Error in file: " + file, e);
-            }
-        }
-        nrOfFailed = filler.register();
-        if (nrOfFailed > 0) {
-            LOG.error("Failed to register " + nrOfFailed + " components/profiles.");
-        } else {
-            LOG.info("Everything registered ok.");
-        }
+        System.out.print("RegistryFiller is not working properly so not doing anything.");
+//        if (args.length == 0 || args.length < 3) {
+//            printUsage();
+//        }
+//        RegistryFiller filler = new RegistryFiller(FILLER_URL_PROP);
+//        String description = args[0];
+//        String group = args[1];
+//        int nrOfFailed = 0;
+//        for (int i = 2; i < args.length; i++) {
+//            File file = new File(args[i]);
+//            LOG.info("Adding " + (i - 3) + "/" + (args.length - 4) + ": " + file.getName());
+//            try {
+//                CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, file, null);
+//                if (spec.isIsProfile()) {
+//                    filler.addProfile(file, FilenameUtils.getBaseName(file.getName()), description, group);
+//                } else {
+//                    filler.addComponent(file, FilenameUtils.getBaseName(file.getName()), description, group);
+//                }
+//            } catch (Exception e) {
+//                nrOfFailed++;
+//                LOG.error("Error in file: " + file, e);
+//            }
+//        }
+//        nrOfFailed = filler.register();
+//        if (nrOfFailed > 0) {
+//            LOG.error("Failed to register " + nrOfFailed + " components/profiles.");
+//        } else {
+//            LOG.info("Everything registered ok.");
+//        }
     }
 
     private static void printUsage() {

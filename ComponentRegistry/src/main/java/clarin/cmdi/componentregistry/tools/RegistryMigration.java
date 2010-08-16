@@ -64,9 +64,10 @@ public class RegistryMigration {
         if (args.length != 1) {
             printUsage();
         }
-        new ClassPathXmlApplicationContext(new String[] { "applicationContext.xml" }); //loads and instantiates the beans
-        RegistryMigration migration = new RegistryMigration(args[0]);
-        migration.migrate();
+        System.out.print("Migration is not working properly so not doing anything.");
+//        new ClassPathXmlApplicationContext(new String[] { "applicationContext.xml" }); //loads and instantiates the beans
+//        RegistryMigration migration = new RegistryMigration(args[0]);
+//        migration.migrate();
     }
 
     private static void printUsage() {

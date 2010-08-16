@@ -18,10 +18,12 @@ public class UserMappingTest {
         User user = new UserMapping.User();
         user.setName("name");
         user.setUserDir("dir");
+        user.setPrincipalName("a@b.com");
         users.addUsers(user);
         User user2 = new UserMapping.User();
         user2.setName("name2");
         user2.setUserDir("dir2");
+        user2.setPrincipalName("a2@b.com");
         users.addUsers(user2);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(users, out);
@@ -31,10 +33,12 @@ public class UserMappingTest {
         expected += "    <user>\n";
         expected += "        <name>name</name>\n";
         expected += "        <userDir>dir</userDir>\n";
+        expected += "        <principalName>a@b.com</principalName>\n";
         expected += "    </user>\n";
         expected += "    <user>\n";
         expected += "        <name>name2</name>\n";
         expected += "        <userDir>dir2</userDir>\n";
+        expected += "        <principalName>a2@b.com</principalName>\n";
         expected += "    </user>\n";
         expected += "</users>\n";
         assertEquals(expected, out.toString());

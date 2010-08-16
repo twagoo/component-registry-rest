@@ -9,14 +9,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.model.UserMapping;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
 
 public class ComponentRegistryFactory {
 
-    private static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
+    public static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactory.class);
     private static final ComponentRegistryFactory INSTANCE = new ComponentRegistryFactory();
 
@@ -63,15 +65,15 @@ public class ComponentRegistryFactory {
         return publicRegistry;
     }
 
-    public synchronized ComponentRegistry getComponentRegistry(boolean userspace, Principal principal) {
+    public synchronized ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials) {
         ComponentRegistry result = null;
         if (userspace) {
-            if (principal != null && !ANONYMOUS_USER.equals(principal.getName())) {
-                String name = principal.getName();
-                String user = getUserDir(name);
-                result = loadWorkspace(name, user);
+            if (credentials != null && !ANONYMOUS_USER.equals(credentials.getPrincipalName())) {
+                String principalName = credentials.getPrincipalName();
+                String userDir = getOrCreateUserDir(principalName, credentials.getDisplayName()); //TODO PD Need to get real displayname here.
+                result = loadWorkspace(principalName, userDir);
             } else {
-                throw new IllegalArgumentException("No user credentials available cannot load userspace.");
+                throw new IllegalArgumentException("No user credentials available cannot load userspace.");//TODO Patrick make better error maybe some 403 or something so user knows a little better what is going on.
             }
         } else {
             result = getPublicRegistry();
@@ -90,12 +92,12 @@ public class ComponentRegistryFactory {
         return result;
     }
 
-    public synchronized ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userName) {
-        String userDir = getUserDir(userName);
+    public synchronized ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String principalNameMD5) {
+        User user = getUserDir(principalNameMD5);
         ComponentRegistry result = null;
-        if (userDir != null) {
+        if (user != null) {
             if (Configuration.getInstance().isAdminUser(adminPrincipal)) {
-                result = loadWorkspace(adminPrincipal.getName(), userDir);
+                result = loadWorkspace(adminPrincipal.getName(), user.getUserDir());
             } else {
                 throw new IllegalArgumentException("User is not admin user cannot load userspace.");
             }
@@ -116,19 +118,30 @@ public class ComponentRegistryFactory {
         return result;
     }
 
-    String getUserDir(String name) {
-        if (name == null) {
+    private User getUserDir(String principalNameMD5) {
+        UserMapping.User user = userMap.findUser(principalNameMD5);
+        return user;
+    }
+
+    String getOrCreateUserDir(String principalName, String displayName) {
+        if (principalName == null) {
             return null;
         }
-        UserMapping.User user = userMap.findUser(name);
+        UserMapping.User user = getUserDir(DigestUtils.md5Hex(principalName));
         if (user == null) {
             user = new UserMapping.User();
-            user.setName(name);
+            user.setPrincipalName(principalName);
+            user.setName(displayName);
             user.setUserDir(ResourceConfig.USER_DIR_PREFIX + userMap.getUsers().size());
             userMap.addUsers(user);
             saveUserMap();
         }
         return user.getUserDir();
+    }
+    
+    @Deprecated
+    public UserMapping getUserMap() {
+        return userMap;
     }
 
     private void saveUserMap() {

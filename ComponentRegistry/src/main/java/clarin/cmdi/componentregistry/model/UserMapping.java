@@ -8,14 +8,18 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "users")
 public class UserMapping {
 
+    @XmlAccessorType(XmlAccessType.FIELD)
     public static class User {
 
         private String name;
         private String userDir;
+        private String principalName;
 
         public void setName(String name) {
             this.name = name;
@@ -31,6 +35,14 @@ public class UserMapping {
 
         public String getUserDir() {
             return userDir;
+        }
+
+        public void setPrincipalName(String principalName) {
+            this.principalName = principalName;
+        }
+
+        public String getPrincipalName() {
+            return principalName;
         }
 
     }
@@ -51,9 +63,9 @@ public class UserMapping {
         return users;
     }
 
-    public User findUser(String name) {
+    public User findUser(String principalNameMD5) {
         for (User user : users) {
-            if (user.getName().equals(name)) {
+            if (DigestUtils.md5Hex(user.getPrincipalName()).equals(principalNameMD5)) {
                 return user;
             }
         }

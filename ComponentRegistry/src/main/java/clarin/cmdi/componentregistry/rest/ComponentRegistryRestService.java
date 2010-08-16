@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -63,7 +64,29 @@ public class ComponentRegistryRestService {
     public static final String USERSPACE_PARAM = "userspace";
 
     private ComponentRegistry getRegistry(boolean userspace) {
-        return ComponentRegistryFactory.getInstance().getComponentRegistry(userspace, security.getUserPrincipal());
+        Principal userPrincipal = security.getUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(userPrincipal);
+        return getRegistry(userspace, userCredentials);
+    }
+
+    private ComponentRegistry getRegistry(boolean userspace, UserCredentials userCredentials) {
+        return ComponentRegistryFactory.getInstance().getComponentRegistry(userspace, userCredentials);
+    }
+
+    private Principal checkAndGetUserPrincipal() {
+        Principal principal = security.getUserPrincipal();
+        if (principal == null) {
+            throw new IllegalArgumentException("no user principal found.");
+        }
+        return principal;
+    }
+
+    private UserCredentials getUserCredentials(Principal userPrincipal) {
+        UserCredentials userCredentials = null;
+        if (userPrincipal != null) {
+            userCredentials = new UserCredentials(userPrincipal);
+        }
+        return userCredentials;
     }
 
     @GET
@@ -180,10 +203,7 @@ public class ComponentRegistryRestService {
     @Path("/components/{componentId}")
     public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new IllegalArgumentException("no user principal found.");
-        }
+        Principal principal = checkAndGetUserPrincipal();
         ComponentRegistry registry = getRegistry(userspace);
         LOG.info("Component with id: " + componentId + " set for deletion.");
         try {
@@ -206,10 +226,7 @@ public class ComponentRegistryRestService {
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new IllegalArgumentException("no user principal found.");
-        }
+        Principal principal = checkAndGetUserPrincipal();
         LOG.info("Profile with id: " + profileId + " set for deletion.");
         try {
             getRegistry(userspace).deleteMDProfile(profileId, principal);
@@ -276,17 +293,16 @@ public class ComponentRegistryRestService {
     public RegisterResponse registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
             @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new IllegalArgumentException("no user principal found.");
-        }
+        Principal principal = checkAndGetUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(principal);
         ProfileDescription desc = createNewProfileDescription();
-        desc.setCreatorName(principal.getName());
+        desc.setCreatorName(userCredentials.getDisplayName());
+        desc.setUserId(userCredentials.getPrincipalNameMD5Hex());
         desc.setName(name);
         desc.setDescription(description);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Profile: " + desc);
-        return register(input, desc, principal, userspace);
+        return register(input, desc, userCredentials, userspace);
     }
 
     @POST
@@ -297,18 +313,17 @@ public class ComponentRegistryRestService {
             @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
             @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new IllegalArgumentException("no user principal found.");
-        }
+        Principal principal = checkAndGetUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(principal);
         ComponentDescription desc = createNewComponentDescription();
-        desc.setCreatorName(principal.getName());
+        desc.setCreatorName(userCredentials.getDisplayName());
+        desc.setUserId(userCredentials.getPrincipalNameMD5Hex());
         desc.setName(name);
         desc.setDescription(description);
         desc.setGroupName(group);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Component: " + desc);
-        return register(input, desc, principal, userspace);
+        return register(input, desc, userCredentials, userspace);
     }
 
     @GET
@@ -319,14 +334,18 @@ public class ComponentRegistryRestService {
         Principal userPrincipal = security.getUserPrincipal();
         LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
         if (request != null) {
-            stillActive = !((HttpServletRequest) request).getSession().isNew();
+            if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) { //TODO Patrick test this.
+                stillActive = false;
+            } else {
+                stillActive = !((HttpServletRequest) request).getSession().isNew();
+            }
         }
         return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
     }
 
-    private RegisterResponse register(InputStream input, AbstractDescription desc, Principal principal, boolean userspace) {
+    private RegisterResponse register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace) {
         try {
-            ComponentRegistry registry = getRegistry(userspace);
+            ComponentRegistry registry = getRegistry(userspace, userCredentials);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
             MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true));
             RegisterResponse response = new RegisterResponse();

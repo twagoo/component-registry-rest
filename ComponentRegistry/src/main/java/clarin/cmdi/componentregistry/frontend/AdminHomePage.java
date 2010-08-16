@@ -10,8 +10,7 @@ import javax.swing.tree.TreeModel;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
-import org.apache.wicket.markup.html.WebPage;
-import org.apache.wicket.markup.html.basic.MultiLineLabel;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
@@ -28,7 +27,8 @@ import clarin.cmdi.componentregistry.AdminRegistry;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.ResourceConfig;
 
-public class AdminHomePage extends WebPage {
+@SuppressWarnings("serial")
+public class AdminHomePage extends SecureAdminWebPage {
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
 
     private final FileInfo fileInfo = new FileInfo();
@@ -36,14 +36,9 @@ public class AdminHomePage extends WebPage {
 
     private transient AdminRegistry adminRegistry = new AdminRegistry();
 
-    @SuppressWarnings("serial")
     public AdminHomePage(final PageParameters parameters) {
-        Principal userPrincipal = getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
-        if (!Configuration.getInstance().isAdminUser(userPrincipal)) {
-            setResponsePage(new AccessDeniedPage());
-        }
-        add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName()
-                + ".\nRegistry is located in: " + Configuration.getInstance().getRegistryRoot()));
+        super(parameters);
+        addLinks();
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
         feedback.setOutputMarkupId(true);
         add(feedback);
@@ -62,7 +57,7 @@ public class AdminHomePage extends WebPage {
                     info("Item deleted.");
                 } catch (SubmitFailedException e) {
                     LOG.error("Admin: ", e);
-                    error("Cannot undelete: " + fileInfo.getName() + "\n error=" + e);
+                    error("Cannot delete: " + fileInfo.getName() + "\n error=" + e);
                 }
                 if (target != null) {
                     target.addComponent(form);
@@ -149,7 +144,16 @@ public class AdminHomePage extends WebPage {
 
     }
 
-    @SuppressWarnings("serial")
+    private void addLinks() {
+        add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
+        add(new Link("massMigrate") {
+            @Override
+            public void onClick() {
+                setResponsePage(MassMigratePage.class);
+            }
+        });
+    }
+
     private LinkTree createTree(final Form form) {
         TreeModel treeModel = createTreeModel();
         final LinkTree tree = new LinkTree("tree", treeModel) {
@@ -196,7 +200,6 @@ public class AdminHomePage extends WebPage {
         }
     }
 
-    @SuppressWarnings("serial")
     private class ItemEditForm extends Form<FileInfo> {
 
         public ItemEditForm(String name) {

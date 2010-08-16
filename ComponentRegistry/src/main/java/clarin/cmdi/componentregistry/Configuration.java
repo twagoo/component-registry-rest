@@ -2,8 +2,10 @@ package clarin.cmdi.componentregistry;
 
 import java.io.File;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,11 +24,16 @@ public class Configuration {
     private ResourceConfig publicResourceConfig;
 
     private Map<String, String> schemaLocations = new HashMap<String, String>();
-    {
+    {//Default values
         schemaLocations.put(CMDComponentSpec.class.getName(),
                 "http://www.clarin.eu/cmd http://www.clarin.eu/cmd/general-component-schema.xsd");
     }
 
+    private List<String> displayNameShibbolethKeys = new ArrayList<String>();
+    {//Default values
+        displayNameShibbolethKeys.add("displayName");
+        displayNameShibbolethKeys.add("commonName");
+    }
     private final static Configuration INSTANCE = new Configuration();
 
     private Configuration() {
@@ -99,6 +106,14 @@ public class Configuration {
 
     public String getIsocatRestUrl() {
         return isocatRestUrl;
+    }
+
+    public List<String> getDisplayNameShibbolethKeys() {
+        return displayNameShibbolethKeys;
+    }
+
+    public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {
+        this.displayNameShibbolethKeys = displayNameShibbolethKeys;
     }
 
 }
