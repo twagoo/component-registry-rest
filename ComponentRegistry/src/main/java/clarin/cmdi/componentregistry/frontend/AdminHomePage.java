@@ -159,6 +159,12 @@ public class AdminHomePage extends SecureAdminWebPage {
                 setResponsePage(ViewLogPage.class);
             }
         });
+        add(new Link("statistics") {
+            @Override
+            public void onClick() {
+                setResponsePage(StatisticsPage.class);
+            }
+        });
     }
 
     private LinkTree createTree(final Form form) {

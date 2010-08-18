@@ -1,34 +1,35 @@
 <html
-	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
-<head>
-<title>CMDI ComponentRegistry Admin Page</title>
-<link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
-</head>
-<body>
-<span wicket:id="message"></span>
+    xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+    <head>
+        <title>CMDI ComponentRegistry Admin Page</title>
+        <link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
+    </head>
+    <body>
+        <span wicket:id="message"></span>
 
-<div class="links">
-    <span wicket:id="linksMessage"></span>
-    <a wicket:id="massMigrate">MassMigrate</a>
-    <a wicket:id="log">View Log</a>
-</div>
-<div class="container">
-<div class="treeView">
-	<a wicket:id="expandAll">[expand all]</a>
-	<a wicket:id="collapseAll">[collapse all]</a>
-	<span wicket:id="tree">tree</span>
-</div>
-<div class="infoView">
-<form wicket:id="form">
-	<button wicket:id="delete">delete</button>
-	<button wicket:id="undelete">undelete</button>
-    <textarea  class="infoTextArea" wicket:id="text" >text</textarea>
-    <button wicket:id="submit">submit</button>
-</form>
-    <div id="feedbackPanel">
-        <span wicket:id="feedback"></span>
-    </div>  
-</div>
-</div>
-</body>
+        <div class="links">
+            <span wicket:id="linksMessage"></span>
+            <a wicket:id="massMigrate">MassMigrate</a>
+            <a wicket:id="log">View Log</a>
+            <a wicket:id="statistics">View Statistics</a>
+        </div>
+        <div class="container">
+            <div class="treeView">
+                <a wicket:id="expandAll">[expand all]</a>
+                <a wicket:id="collapseAll">[collapse all]</a>
+                <span wicket:id="tree">tree</span>
+            </div>
+            <div class="infoView">
+                <form wicket:id="form">
+                    <button wicket:id="delete">delete</button>
+                    <button wicket:id="undelete">undelete</button>
+                    <textarea  class="infoTextArea" wicket:id="text" >text</textarea>
+                    <button wicket:id="submit">submit</button>
+                </form>
+                <div id="feedbackPanel">
+                    <span wicket:id="feedback"></span>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

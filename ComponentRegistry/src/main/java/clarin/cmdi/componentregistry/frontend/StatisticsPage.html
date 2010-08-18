@@ -1,0 +1,37 @@
+<html
+    xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+    <head>
+        <title>CMDI ComponentRegistry Statistics Page</title>
+        <link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
+    </head>
+    <body>
+        <span wicket:id="message"></span>
+        <div class="links">
+            <a wicket:id="home">AdminHome</a>
+        </div>
+        <br><br><br>
+        <span wicket:id="profilenumbermessage"></span>
+        <table cellspacing="5" class="dataview">
+            <tr>
+                <th align="left">Profile ID</th>
+                <th align="left">Number of components in profile</th>
+            </tr>
+            <tr wicket:id="repeating">
+                <td><span wicket:id="ID">[ID]</span> </td>
+                <td><span wicket:id="nrcomp">[Number of components]</span> </td>
+            </tr>
+        </table>
+        <br><br><br>
+        <span wicket:id="componentnumbermessage"></span>
+        <table cellspacing="5" class="dataview">
+            <tr>
+                <th align="left">Component ID</th>
+                <th align="left">Number of components in component</th>
+            </tr>
+            <tr wicket:id="repeatingcomp">
+                <td><span wicket:id="ID">[ID]</span> </td>
+                <td><span wicket:id="nrcomp">[Number of components]</span> </td>
+            </tr>
+        </table>
+    </body>
+</html>
