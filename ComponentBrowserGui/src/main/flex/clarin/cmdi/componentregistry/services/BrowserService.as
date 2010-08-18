@@ -16,8 +16,9 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
 
+	[Event(name="itemsLoaded", type="flash.events.Event")]
 	public class BrowserService {
-
+        public static const ITEMS_LOADED:String = "itemsLoaded";
 		private var service:HTTPService;
 
 		/**
@@ -60,6 +61,7 @@ package clarin.cmdi.componentregistry.services {
 		 * Override in concrete subclasses
 		 */
 		protected function result(resultEvent:ResultEvent):void {
+		    dispatchEvent(new Event(ITEMS_LOADED));
 		}
 
 		public function fault(faultEvent:FaultEvent):void {
@@ -74,6 +76,18 @@ package clarin.cmdi.componentregistry.services {
 			for each (var item:Object in items) {
 				unFilteredItemDescriptions.addItem(item);
 			}
+		}
+
+		/**
+		 * Looks up itemDescription, returns null if not found.
+		 */
+		public function lookUpDescription(componentId:String):ItemDescription {
+			for each (var item:ItemDescription in unFilteredItemDescriptions) {
+				if (item.id == componentId) {
+					return item;
+				}
+			}
+			return null;
 		}
 	}
 }

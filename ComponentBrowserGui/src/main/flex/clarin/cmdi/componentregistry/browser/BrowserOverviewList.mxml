@@ -4,7 +4,8 @@
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:rictus="com.rictus.controls.*"
-		 initialize="init();">
+		 initialize="init();"
+		 creationComplete="scrollToSelected()">
 
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
@@ -56,6 +57,7 @@
 
 			public function set itemToScrollTo(itemToScrollTo:ItemDescription):void {
 				_itemToScrollTo = itemToScrollTo;
+				scrollToSelected();
 			}
 
 			private function scrollToSelected():void {
@@ -65,9 +67,8 @@
 						if (item.id == _itemToScrollTo.id) {
 							dataGrid.selectedItem = item;
 							dispatchBrowserSelectionEvent();
-							dataGrid.validateNow();
-							dataGrid.scrollToIndex(i);
 							dataGrid.setFocus();
+							dataGrid.scrollToIndex(i);
 							break;
 						}
 					}

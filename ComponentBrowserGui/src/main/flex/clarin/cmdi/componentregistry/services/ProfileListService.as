@@ -23,6 +23,7 @@ package clarin.cmdi.componentregistry.services {
 				tempArray[tempArray.length] = item;
 			}
 			setItemDescriptions(new ArrayCollection(tempArray));
+		    super.result(resultEvent);
 		}
 
 		public static function getInstance(userSpace:Boolean):ProfileListService {
@@ -32,5 +33,14 @@ package clarin.cmdi.componentregistry.services {
 				return _instance;
 			}
 		}
+		
+		public static function findDescription(profileId:String):ItemDescription {
+			var result:ItemDescription = getInstance(true).lookUpDescription(profileId);
+			if (result == null) {
+				result = getInstance(false).lookUpDescription(profileId);
+			}
+			return result
+		}
+
 	}
 }

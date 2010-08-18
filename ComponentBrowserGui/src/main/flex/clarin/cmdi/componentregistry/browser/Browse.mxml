@@ -2,13 +2,14 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 		   xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		   initialize="init()"
-		   creationComplete="refresh()"
+		   creationComplete="creationComplete()"
 		   width="100%"
 		   height="100%"
 		   label="Browse...">
 
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.services.BrowserService;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.ComponentInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
@@ -43,6 +44,7 @@
 			private var selectedProfileItem:ItemDescription;
 			[Bindable]
 			private var selectedComponentItem:ItemDescription;
+			private var startupItemId:String = null;
 
 			public function init():void {
 				profilesMenu = new BrowseContextMenu();
@@ -62,9 +64,34 @@
 				refresh();
 			}
 
+			private function creationComplete():void {
+				startupItemId = Config.instance.startupItem;
+				refresh();
+			}
+
 			public function refresh():void {
+				if (startupItemId) {//only load this once on startup
+					componentsSrv.addEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
+					profilesSrv.addEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
+				}
 				componentsSrv.load();
 				profilesSrv.load();
+			}
+
+			private function profilesLoaded(event:Event):void { 
+				var item:ItemDescription = ProfileListService.findDescription(startupItemId);
+				if (item) {
+					setSelectedDescription(item);
+					startupItemId = null;
+				}
+			}
+
+			private function componentsLoaded(event:Event):void {
+				var item:ItemDescription = ComponentListService.findDescription(startupItemId);
+				if (item) {
+					setSelectedDescription(item);
+					startupItemId = null;
+				}
 			}
 
 			private function loadProfileInfoPage(event:BrowserSelectionEvent):void {

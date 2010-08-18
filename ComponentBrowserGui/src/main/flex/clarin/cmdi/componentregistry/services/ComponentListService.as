@@ -24,6 +24,7 @@ package clarin.cmdi.componentregistry.services {
 				tempArray[tempArray.length] = item;
 			}
 			setItemDescriptions(new ArrayCollection(tempArray));
+		    super.result(resultEvent);
 		}
 
 		public static function getInstance(userSpace:Boolean):ComponentListService {
@@ -32,18 +33,6 @@ package clarin.cmdi.componentregistry.services {
 			} else {
 				return _instance;
 			}
-		}
-
-		/**
-		 * Looks up itemDescription, returns null if not found.
-		 */
-		public function lookUpDescription(componentId:String):ItemDescription {
-			for each (var item:ItemDescription in unFilteredItemDescriptions) {
-				if (item.id == componentId) {
-					return item;
-				}
-			}
-			return null;
 		}
 
 		public static function findDescription(componentId:String):ItemDescription {

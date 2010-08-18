@@ -19,6 +19,7 @@ package clarin.cmdi.componentregistry.services {
 
 		private static var _instance:Config = new Config();
 
+        private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
 		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
@@ -35,6 +36,10 @@ package clarin.cmdi.componentregistry.services {
 			var serviceRootUrl:String = applicationParameters.serviceRootUrl;
 			if (serviceRootUrl != null) {
 				_serviceRootUrl = serviceRootUrl;
+			}
+			var item:String = applicationParameters.item;
+			if (item != null) {
+				_startupItem = item;
 			}
 		}
 
@@ -87,6 +92,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function get userSpace():Boolean {
 			return _userSpace;
+		}
+		
+		public function get startupItem():String {
+		    return _startupItem;
 		}
 
 		public static function get instance():Config {
