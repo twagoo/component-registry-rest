@@ -87,7 +87,8 @@
 				<mx:DataGridColumn dataField="@pid"
 								   dataTipField="@pid"
 								   headerText="Persistent Identifier"
-								   width="130"/>
+								   width="130"
+								   itemRenderer="clarin.cmdi.componentregistry.common.components.ConceptLinkRenderer"/>
 				<mx:DataGridColumn dataField="@type"
 								   dataTipField="@type"
 								   headerText="Type"/>
