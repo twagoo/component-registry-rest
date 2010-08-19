@@ -4,8 +4,7 @@
 				showCloseButton="true"
 				creationComplete="PopUpManager.centerPopUp(this)"
 				close="cleanUp();"
-				title="Search in Isocat.org"
-				>
+				title="Search in Isocat.org">
 
 	<mx:Metadata>
 		[Event(name="OK", type="flash.events.Event")]
@@ -17,10 +16,10 @@
 			import mx.managers.PopUpManager;
 
 			public static const OK_EVENT:String = "OK";
-			
+
 			[Bindable]
 			public var searchService:IsocatService = null;
-			
+
 			public var isocatSearchType:String = null;
 
 			//To store the result
@@ -59,7 +58,7 @@
 	<mx:VBox>
 		<mx:HBox>
 			<rictus:SearchBox id="searchBox"
-							  label="enter keyword to find datacategory"
+							  label="type keyword and press 'enter' to search"
 							  keyDown="handleSearch(event);"
 							  minWidth="300"/>
 			<mx:Label text="{dataGrid.dataProvider.length} results"/>
