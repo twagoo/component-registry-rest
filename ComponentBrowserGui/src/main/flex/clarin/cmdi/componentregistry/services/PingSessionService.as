@@ -48,8 +48,11 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		private function result(resultEvent:ResultEvent):void {
-			var resultXml:XML = resultEvent.result as XML;
-			stillActive = resultXml.session.@stillActive;
+			stillActive = resultEvent.result.@stillActive == "true";
+			if (!stillActive) {
+			    Alert.show("Your session has expired, please reload the application to refresh the session.");
+			    timer.stop(); 
+			}
 		}
 
 		public function fault(faultEvent:FaultEvent):void {
