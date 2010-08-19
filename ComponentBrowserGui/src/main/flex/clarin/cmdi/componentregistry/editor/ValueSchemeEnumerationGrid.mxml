@@ -83,12 +83,20 @@
 				}
 				dataGrid.validateNow();
 			}
+			
+			private function insertRowAbove(event:ContextMenuEvent):void {
+			    var index:int = Math.max(0, dataGrid.selectedIndex);
+			    valueSchemeEnumeration.addItemAt({item: ADD_ROW, appInfo: "", conceptLink: ""}, index);
+			}
 
 			private function createContextMenu():ContextMenu {
 				var cm:ContextMenu = new ContextMenu();
 				cm.hideBuiltInItems();
 				var items:Array = new Array();
-				var cmi:ContextMenuItem = new ContextMenuItem("Delete row...");
+				var cmi:ContextMenuItem = new ContextMenuItem("Insert row above selected row...");
+				cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, insertRowAbove);
+				items.push(cmi);
+				cmi = new ContextMenuItem("Delete row...", true);
 				cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, deleteRow);
 				items.push(cmi);
 				cm.customItems = items;
@@ -107,7 +115,8 @@
 				 itemEditBegin="handleItemEditBegin(event)"
 				 allowMultipleSelection="true"
 				 keyUp="handleKeyUp(event)"
-				 contextMenu="{createContextMenu()}">
+				 contextMenu="{createContextMenu()}"
+				 useRollOver="false">
 		<mx:columns>
 			<mx:DataGridColumn dataField="item"/>
 			<mx:DataGridColumn dataField="appInfo"/>

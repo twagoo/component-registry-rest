@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 width="400"
+		 height="40"
+		 >
+	<mx:Metadata>
+		[Event(name="clearClick", type="flash.events.MouseEvent")]
+		[Event(name="saveClick", type="flash.events.MouseEvent")]
+		[Event(name="publishClick", type="flash.events.MouseEvent")]
+	</mx:Metadata>
+	<mx:Button id="clearBtn"
+			   label="clear changes"
+			   click="dispatchEvent(new MouseEvent('clearClick'))"/>
+	<mx:Button id="saveBtn"
+			   label="save in work space"
+			   click="dispatchEvent(new MouseEvent('saveClick'))"/>
+	<mx:Button id="publishBtn"
+			   label="publish in public space"
+			   click="dispatchEvent(new MouseEvent('publishClick'))"/>
+</mx:HBox>

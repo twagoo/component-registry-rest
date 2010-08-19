@@ -13,18 +13,11 @@
 	<mx:VBox width="100%"
 			 height="100%">
 
-		<mx:HBox width="100%"
-				 height="40">
-			<mx:Button id="clearBtn"
-					   label="clear"
-					   click="clearEditor()"/>
-			<mx:Button id="saveBtn"
-					   label="save in work space"
-					   click="saveSpec(true)"/>
-			<mx:Button id="publishBtn"
-					   label="publish in public space"
-					   click="publishSpec()"/>
-		</mx:HBox>
+		<editor:EditorButtonBar width="100%"
+								height="40"
+								clearClick="clearEditor()"
+								saveClick="saveSpec(true)"
+								publishClick="publishSpec()"/>
 		<mx:Text id="errorMessageField"
 				 text="{uploadService.message}"
 				 visible='{errorMessageField.text != ""}'
@@ -40,6 +33,12 @@
 			<editor:CMDComponentXMLEditor id="xmlEditor"
 										  cmdSpec="{cmdSpec}"
 										  editorChange="handleEditorChange(event)"/>
+			<editor:EditorButtonBar width="100%"
+									height="40"
+									clearClick="clearEditor()"
+									saveClick="saveSpec(true)"
+									publishClick="publishSpec()"/>
+
 			<mx:VBox styleName="borderStyles"
 					 width="100%">
 				<mx:Label text="Drag existing components onto edit canvas"/>
