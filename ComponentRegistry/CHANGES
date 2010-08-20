@@ -1,4 +1,19 @@
 Bug Fixes and Features
+Release ComponentRegistry-1.4 (20 August 2010):
+- Alternatively make the registry open in the browser showing the component/profile (make them bookmarkable). This involves moving the login process to a later stage and having a completely anonymous browsing registry.
+- Fix handling of eduPrincipalName/DisplayName make mapping in registry to keep track of which user has which displayName.
+  MIGRATE: add principalName to userMapping.xml, Migrate all descriptions to add userId element.
+- Import Descriptions is different from profile description, differs from edit.
+- put save button also at the bottom.
+- Make console showing tomcat log in admin page.
+- Make right click 'insert row' in valuescheme edit. So you can add an entry in the middle of an enumeration
+- Ping's don't work and are done through anonymous, it should give a better error handling and the ping should fail on anonymous. People need to be triggered to login again. Probable cause is computer sleeps and ping is not done for more then a while.
+- Make admin statistics page.
+- The description of some components/profiles is very short. The description in the actual cmdi header is longer and should be copied to the description of the description.xml's. Make a migrate plan for that.
+- link to isocat should be searchable on metadata only
+- Make isocat link clickable in isocat search field.
+- Changed tooltip in search isocat.
+
 
 Release ComponentRegistry-1.3 (28 June 2010):
 - Only admin can delete public items after a month in registry.
