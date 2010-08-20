@@ -330,13 +330,11 @@ public class ComponentRegistryRestService {
     @Path("/pingSession")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response pingSession() {
-        boolean stillActive = true;
+        boolean stillActive = false;
         Principal userPrincipal = security.getUserPrincipal();
         LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
         if (request != null) {
             if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) { //TODO Patrick test this.
-                stillActive = false;
-            } else {
                 stillActive = !((HttpServletRequest) request).getSession().isNew();
             }
         }

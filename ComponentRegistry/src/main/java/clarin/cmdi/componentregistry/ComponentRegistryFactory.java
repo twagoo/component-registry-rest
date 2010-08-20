@@ -70,10 +70,10 @@ public class ComponentRegistryFactory {
         if (userspace) {
             if (credentials != null && !ANONYMOUS_USER.equals(credentials.getPrincipalName())) {
                 String principalName = credentials.getPrincipalName();
-                String userDir = getOrCreateUserDir(principalName, credentials.getDisplayName()); //TODO PD Need to get real displayname here.
+                String userDir = getOrCreateUserDir(principalName, credentials.getDisplayName());
                 result = loadWorkspace(principalName, userDir);
             } else {
-                throw new IllegalArgumentException("No user credentials available cannot load userspace.");//TODO Patrick make better error maybe some 403 or something so user knows a little better what is going on.
+                throw new IllegalArgumentException("No user credentials available cannot load userspace.");
             }
         } else {
             result = getPublicRegistry();

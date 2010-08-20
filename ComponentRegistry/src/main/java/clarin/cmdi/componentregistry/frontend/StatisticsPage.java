@@ -24,7 +24,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
  */
 public class StatisticsPage extends SecureAdminWebPage {
 
-    private ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
+    private transient ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
 
     public StatisticsPage(final PageParameters pageParameters) throws IOException {
         super(pageParameters);

@@ -547,11 +547,25 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(MDValidator.MISMATCH_ERROR, response.getErrors().get(0));
     }
     
-    @Test
-    public void testPingSession() throws Exception {
-         ClientResponse clientResponse = getAuthenticatedResource("/registry/pingSession").get(ClientResponse.class);
-         assertEquals(200, clientResponse.getStatus());
-         assertEquals("<session stillActive=\"true\"/>", clientResponse.getEntity(String.class));
-    }
-
+//    @Test
+//    public void testPingSession() throws Exception {
+//        ClientResponse clientResponse = getAuthenticatedResource("/registry/pingSession").get(ClientResponse.class);
+//        assertEquals(200, clientResponse.getStatus());
+//        assertEquals("<session stillActive=\"true\"/>", clientResponse.getEntity(String.class));
+//        clientResponse = getResource().path("/registry/pingSession").get(ClientResponse.class);
+//        assertEquals(200, clientResponse.getStatus());
+//        assertEquals("<session stillActive=\"false\"/>", clientResponse.getEntity(String.class));
+    // TODO Patrick enable test and client, need to update dependencies first. Add some test with empty session.
+//    }
+//    @Override
+//    public Client client() {
+//      DefaultApacheHttpClientConfig config = new  
+//      DefaultApacheHttpClientConfig();
+//      config
+//      .setProperty("com.sun.jersey.impl.client.httpclient.handleCookies",  
+//      true);
+//      ApacheHttpClient c = ApacheHttpClient.create(config); 
+//      
+//        return ;
+//    }
 }

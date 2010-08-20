@@ -14,18 +14,18 @@
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
 
-<!--  <filter>-->
-<!--    <filter-name>characterEncodingFilter</filter-name>-->
-<!--    <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>-->
-<!--    <init-param>-->
-<!--      <param-name>encoding</param-name>-->
-<!--      <param-value>UTF-8</param-value>-->
-<!--    </init-param>-->
-<!--  </filter>-->
-<!--  <filter-mapping>-->
-<!--    <filter-name>characterEncodingFilter</filter-name>-->
-<!--    <url-pattern>/*</url-pattern>-->
-<!--  </filter-mapping>-->
+  <filter>
+    <filter-name>characterEncodingFilter</filter-name>
+    <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>characterEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
   
 <!-- Make sure this one is declared before the wicket filter, the order matters. Shibboleth should trigger the login, before continuing with the wicket filter.-->
   <filter> 
@@ -83,7 +83,6 @@
     <servlet-name>Isocat Servlet</servlet-name>
     <url-pattern>/isocat/*</url-pattern>
   </servlet-mapping>
-
 
 <!--  <security-constraint>-->
 <!--    <display-name>ComponentRegistry web service</display-name>-->
