@@ -28,7 +28,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
         List<Thread> ts = new ArrayList<Thread>();
         int nrOfProfiles = 10;
         registerProfiles(ts, nrOfProfiles, errors, "false");
-       registerProfiles(ts, nrOfProfiles, errors, "true");
+        registerProfiles(ts, nrOfProfiles, errors, "true");
         int nrOfComponents = 10;
         registerComponents(ts, nrOfComponents, errors, "false");
         registerComponents(ts, nrOfComponents, errors, "true");
@@ -64,7 +64,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
         for (int i = 0; i < nrOfComponents / 2; i++) {
             ComponentDescription desc = cResponse.get(i);
             assertEquals("Test Component" + (i * 2 + 1000), desc.getName());
-            assertEquals("Test Component" + (i * 2 + 1000)+" Description", desc.getDescription());
+            assertEquals("Test Component" + (i * 2 + 1000) + " Description", desc.getDescription());
         }
     }
 
@@ -104,7 +104,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, name + " Description");
         Thread t = new Thread(new Runnable() {
             public void run() {
-//                System.out.println("THREAD STARTED"+Thread.currentThread().getName());
+                //                System.out.println("THREAD STARTED"+Thread.currentThread().getName());
                 RegisterResponse registerResponse = getAuthenticatedResource(
                         getResource().path(path).queryParam(USERSPACE_PARAM, userSpace)).type(MediaType.MULTIPART_FORM_DATA).post(
                         RegisterResponse.class, form);
@@ -119,7 +119,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
                         errors.add("Failed to delete " + registerResponse.getDescription());
                     }
                 }
-//                System.out.println("THREAD FINISHED"+Thread.currentThread().getName());
+                //                System.out.println("THREAD FINISHED"+Thread.currentThread().getName());
             }
         });
         return t;

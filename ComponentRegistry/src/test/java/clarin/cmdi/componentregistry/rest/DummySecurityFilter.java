@@ -1,28 +1,51 @@
 package clarin.cmdi.componentregistry.rest;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.naming.AuthenticationException;
-import javax.ws.rs.core.SecurityContext;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.ws.rs.core.HttpHeaders;
 
 import com.sun.jersey.api.container.MappableContainerException;
 import com.sun.jersey.core.util.Base64;
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
 
 /**
  * Dummy security filter, very handy for unit testing.
  * 
  */
-public class DummySecurityFilter implements ContainerRequestFilter {
+public class DummySecurityFilter implements Filter {
 
     private final List<String> ALLOWED_USERS = Arrays.asList(DummyPrincipal.DUMMY_PRINCIPAL.getName());
 
-    public ContainerRequest filter(ContainerRequest request) {
+    /**
+     * Dummy validation for unit tests
+     * @param username
+     * @param password
+     * @return
+     */
+    private boolean isValid(String username, String password) {
+        return ALLOWED_USERS.contains(username);
+    }
+
+    @Override
+    public void destroy() {
+    }
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         Principal principalResult = null;
-        String authentication = request.getHeaderValue(ContainerRequest.AUTHORIZATION);
+        HttpServletRequest req = (HttpServletRequest) request;
+        String authentication = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (authentication != null) { //if no authentication then do nothing
             if (!authentication.startsWith("Basic ")) {
                 throw new MappableContainerException(new AuthenticationException("Only HTTP Basic authentication is supported"));
@@ -43,9 +66,9 @@ public class DummySecurityFilter implements ContainerRequestFilter {
             }
             principalResult = new DummyPrincipal(username);
         }
-        
+
         final Principal principal = principalResult;
-        request.setSecurityContext(new SecurityContext() {
+        HttpServletRequestWrapper wrapper = new HttpServletRequestWrapper(req) {
 
             public boolean isUserInRole(String role) {
                 return true;
@@ -59,21 +82,17 @@ public class DummySecurityFilter implements ContainerRequestFilter {
                 return principal;
             }
 
-            public String getAuthenticationScheme() {
-                return SecurityContext.BASIC_AUTH;
+            @Override
+            public String getAuthType() {
+                return HttpServletRequest.BASIC_AUTH;
             }
-        });
-        return request;
+        };
+        chain.doFilter(wrapper, response);
     }
 
-    /**
-     * Dummy validation for unit tests
-     * @param username
-     * @param password
-     * @return
-     */
-    private boolean isValid(String username, String password) {
-        return ALLOWED_USERS.contains(username);
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+
     }
 
 }

@@ -16,13 +16,13 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.core.util.Base64;
+import com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider;
+import com.sun.jersey.spi.container.servlet.WebComponent;
 import com.sun.jersey.test.framework.AppDescriptor;
 import com.sun.jersey.test.framework.JerseyTest;
-import com.sun.jersey.test.framework.LowLevelAppDescriptor;
-import com.sun.jersey.test.framework.spi.container.TestContainerFactory;
-import com.sun.jersey.test.framework.spi.container.http.HTTPContainerFactory;
+import com.sun.jersey.test.framework.WebAppDescriptor;
 
 public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     //CommandLine test e.g.:  curl -i -H "Accept:application/json" -X GET  http://localhost:8080/ComponentRegistry/rest/registry/profiles
@@ -36,16 +36,12 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     };
 
     @Override
-    protected TestContainerFactory getTestContainerFactory() {
-        return new HTTPContainerFactory();
-    }
-
-    @Override
     protected AppDescriptor configure() {
-        LowLevelAppDescriptor ad = new LowLevelAppDescriptor.Builder(ComponentRegistryRestService.class.getPackage().getName()).build();
-        ResourceConfig resourceConfig = ad.getResourceConfig();
-        resourceConfig.getProperties().put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, DummySecurityFilter.class.getName());
-        return ad;
+        WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder().initParam(WebComponent.RESOURCE_CONFIG_CLASS,
+                ClassNamesResourceConfig.class.getName()).initParam(ClassNamesResourceConfig.PROPERTY_CLASSNAMES,
+                FormDataMultiPartDispatchProvider.class.getName() + ";" + ComponentRegistryRestService.class.getName()).addFilter(
+                DummySecurityFilter.class, "DummySecurityFilter");
+        return builder.build();
     }
 
     protected WebResource getResource() {
