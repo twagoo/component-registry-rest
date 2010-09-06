@@ -23,7 +23,7 @@ public class CMDComponentSpecExpanderTest {
 
     @Test
     public void testExpandProfileWithNestedComponents() throws Exception {
-        ComponentRegistryImpl registry = ComponentRegistryImplTest.getTestRegistry(getRegistryDir());
+        ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
 
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -85,7 +85,7 @@ public class CMDComponentSpecExpanderTest {
 
     @Test
     public void testExpandProfileWithNestedComponentsFromUserRegistry() throws Exception {
-        ComponentRegistryImpl registry = ComponentRegistryImplTest.getTestRegistry(getRegistryDir());
+        ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
         ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getComponentRegistry(true,
                 DummyPrincipal.DUMMY_CREDENTIALS);
 
@@ -145,7 +145,7 @@ public class CMDComponentSpecExpanderTest {
 
     @Test
     public void testExpandEmbeddedWithNested() throws Exception {
-        ComponentRegistryImpl registry = ComponentRegistryImplTest.getTestRegistry(getRegistryDir());
+        ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
 
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -203,13 +203,13 @@ public class CMDComponentSpecExpanderTest {
 
     private File getRegistryDir() {
         if (tmpRegistryDir == null)
-            tmpRegistryDir = ComponentRegistryImplTest.createTempRegistryDir();
+            tmpRegistryDir = ComponentRegistryTestCase.createTempRegistryDir();
         return tmpRegistryDir;
     }
 
     @After
     public void cleanupRegistryDir() {
-        ComponentRegistryImplTest.cleanUpRegistryDir(tmpRegistryDir);
+        ComponentRegistryTestCase.cleanUpRegistryDir(tmpRegistryDir);
         tmpRegistryDir = null;
     }
 }

@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.ComponentRegistryImplTest;
+import clarin.cmdi.componentregistry.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -28,13 +28,13 @@ public class MDValidatorTest {
 
     @Before
     public void setUpTestRegistry() throws ParseException, JAXBException {
-        registryDir = ComponentRegistryImplTest.createTempRegistryDir();
-        testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
+        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
+        testRegistry = ComponentRegistryTestCase.getTestRegistry(registryDir);
     }
 
     @After
     public void deleteRegistry() {
-        ComponentRegistryImplTest.cleanUpRegistryDir(registryDir);
+        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
     }
 
     @Test
@@ -113,7 +113,8 @@ public class MDValidatorTest {
     public void testValidateUserRegistry() throws Exception {
         String id1 = "component1";
         String id2 = "component2";
-        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
+        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance()
+                .getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
 
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";

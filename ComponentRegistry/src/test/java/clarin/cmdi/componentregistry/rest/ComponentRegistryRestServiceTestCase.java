@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryImplTest;
+import clarin.cmdi.componentregistry.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -59,8 +59,8 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     @Before
     public void setUpTestRegistry() throws Exception {
-        registryDir = ComponentRegistryImplTest.createTempRegistryDir();
-        testRegistry = ComponentRegistryImplTest.getTestRegistry(registryDir);
+        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
+        testRegistry = ComponentRegistryTestCase.getTestRegistry(registryDir);
     }
 
     protected void fillUp() throws Exception {
@@ -72,7 +72,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     @After
     public void deleteAndRecreateEmptyRegistry() {
-        ComponentRegistryImplTest.cleanUpRegistryDir(registryDir);
+        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
     }
 
 }

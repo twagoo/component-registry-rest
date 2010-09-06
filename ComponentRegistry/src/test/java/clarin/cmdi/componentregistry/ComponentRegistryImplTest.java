@@ -10,19 +10,14 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
-import java.security.Principal;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
-import org.junit.After;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -32,11 +27,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
-public class ComponentRegistryImplTest {
-
-    private File tmpRegistryDir;
-    private final static UserCredentials USER_CREDS = DummyPrincipal.DUMMY_CREDENTIALS;
-    private static final Principal PRINCIPAL_ADMIN = new DummyPrincipal("admin");
+public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
     @Test
     public void testRegisterMDProfile() throws JAXBException {
@@ -419,8 +410,6 @@ public class ComponentRegistryImplTest {
         registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
         assertEquals(0, registry.getComponentDescriptions().size());
     }
-    
-    //TODO PD make test for still in use component
 
     @Test
     public void testDoNotDeleteOldPublicProfile() throws Exception {
@@ -533,46 +522,6 @@ public class ComponentRegistryImplTest {
 
         result = registry.getUsageInComponents(cd.getId());
         assertEquals(2, result.size());
-    }
-
-    private File getRegistryDir() {
-        if (tmpRegistryDir == null)
-            tmpRegistryDir = createTempRegistryDir();
-        return tmpRegistryDir;
-    }
-
-    @After
-    public void cleanupRegistryDir() {
-        ComponentRegistryFactory.getInstance().reset();
-        cleanUpRegistryDir(tmpRegistryDir);
-        tmpRegistryDir = null;
-    }
-
-    public static ComponentRegistryImpl getTestRegistry(File registryRoot) {
-        Configuration config = Configuration.getInstance();
-        config.setRegistryRoot(registryRoot);
-        Set<String> adminUsers = new HashSet<String>();
-        adminUsers.add(PRINCIPAL_ADMIN.getName());
-        config.setAdminUsers(adminUsers);
-        config.init();
-        ComponentRegistryFactory.getInstance().reset();
-        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry();
-        register.setResourceConfig(config.getPublicResourceConfig()); //LOADS cache again but is necessary for tests normally we wouldn't have this
-        return register;
-    }
-
-    public static File createTempRegistryDir() {
-        final String baseTempPath = System.getProperty("java.io.tmpdir");
-        File tempDir = new File(baseTempPath + File.separator + "testRegistry_" + System.currentTimeMillis());
-        tempDir.mkdir();
-        tempDir.deleteOnExit();
-        return tempDir;
-    }
-
-    public static void cleanUpRegistryDir(File registryDir) {
-        if (registryDir != null && registryDir.exists()) {
-            assertTrue(FileUtils.deleteQuietly(registryDir));
-        }
     }
 
     /**

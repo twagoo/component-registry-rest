@@ -100,7 +100,7 @@ public class ComponentRegistryFactoryTest {
 
     @Before
     public void startClean() {
-        registryDir = ComponentRegistryImplTest.createTempRegistryDir();
+        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
         Configuration.getInstance().setRegistryRoot(registryDir);
         Configuration.getInstance().init();
         ComponentRegistryFactory.getInstance().reset();
@@ -108,6 +108,6 @@ public class ComponentRegistryFactoryTest {
 
     @After
     public void cleanup() {
-        ComponentRegistryImplTest.cleanUpRegistryDir(registryDir);
+        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
     }
 }
