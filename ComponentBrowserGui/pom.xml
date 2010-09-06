@@ -7,7 +7,7 @@
 
 	<groupId>clarin.cmdi</groupId>
 	<artifactId>ComponentBrowserGui</artifactId>
-	<version>1.5-SNAPSHOT</version>
+	<version>1.5</version>
 	<packaging>swf</packaging>
 	<name>ComponentBrowserGui</name>
 	<properties>

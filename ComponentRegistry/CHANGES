@@ -1,4 +1,11 @@
 Bug Fixes and Features
+
+Release ComponentRegistry-1.5 (6 September 2010):
+- cleanup olds libs dir mpg jars can be taken from clarin maven site.
+- update jersey version
+- Admin page: cannot delete stuff, which is still used. Need to be able to update it at least at admin's risk. 
+
+
 Release ComponentRegistry-1.4 (20 August 2010):
 - Alternatively make the registry open in the browser showing the component/profile (make them bookmarkable). This involves moving the login process to a later stage and having a completely anonymous browsing registry.
 - Fix handling of eduPrincipalName/DisplayName make mapping in registry to keep track of which user has which displayName.
