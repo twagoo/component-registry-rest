@@ -9,6 +9,7 @@
       <set>
         <value>Patrick Duin</value>
         <value>patdui@mpi.nl</value>
+        <value>patrick.duin@mpi.nl</value>
       </set>
     </property>
     <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
