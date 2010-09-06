@@ -136,7 +136,7 @@ public class AdminRegistry {
         if (desc.isProfile()) {
             registry.deleteMDProfile(desc.getId(), userPrincipal);
         } else {
-            registry.deleteMDComponent(desc.getId(), userPrincipal);
+            registry.deleteMDComponent(desc.getId(), userPrincipal, fileInfo.isForceUpdate());
         }
     }
 

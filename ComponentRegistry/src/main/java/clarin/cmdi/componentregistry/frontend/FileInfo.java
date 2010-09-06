@@ -12,6 +12,7 @@ public class FileInfo implements Serializable {
 
     private String text;
     private String name;
+    private boolean forceUpdate = false;
 
     private FileNode fileNode;
 
@@ -102,5 +103,13 @@ public class FileInfo implements Serializable {
         File file = fileNode.getFile();
         return file.getAbsolutePath().startsWith(
                 new File(Configuration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME).getAbsolutePath());
+    }
+
+    public void setForceUpdate(boolean forceUpdate) {
+        this.forceUpdate = forceUpdate;
+    }
+
+    public boolean isForceUpdate() {
+        return forceUpdate;
     }
 }

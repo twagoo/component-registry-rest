@@ -58,11 +58,12 @@ public interface ComponentRegistry {
      * 
      * @param componentId
      * @param principal
+     * @param forceDelete ignores the fact that the component is still in use by other components and just deletes.
      * @throws IOException
      * @throws UserUnauthorizedException thrown when principal does not match creator of component
      * @throws DeleteFailedException
      */
-    void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException;
+    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException;
 
     void update(AbstractDescription desc, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
             UserUnauthorizedException;

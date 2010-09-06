@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.Link;
@@ -100,6 +101,9 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         };
         form.add(undeleteButton);
+        
+        CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
+        form.add(forceUpdateCheck);
 
         Button submitButton = new AjaxFallbackButton("submit", form) {
             @Override

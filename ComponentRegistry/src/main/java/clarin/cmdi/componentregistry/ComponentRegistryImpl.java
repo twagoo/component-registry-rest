@@ -365,13 +365,14 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
-    public void deleteMDComponent(String componentId, Principal principal) throws IOException, UserUnauthorizedException,
+    public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException,
             DeleteFailedException {
         ComponentDescription desc = componentDescriptions.get(componentId);
         if (desc != null) {
             checkAuthorisation(desc, principal);
             checkAge(desc, principal);
-            checkStillUsed(componentId);
+            if (!forceDelete)
+                checkStillUsed(componentId);
             File componentFile = getComponentFile(componentId);
             if (componentFile.exists()) {
                 FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), resourceConfig.getComponentDeletionDir(), true);

@@ -334,7 +334,7 @@ public class ComponentRegistryRestService {
         Principal userPrincipal = security.getUserPrincipal();
         LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
         if (request != null) {
-            if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) { //TODO Patrick test this.
+            if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
                 stillActive = !((HttpServletRequest) request).getSession().isNew();
             }
         }
