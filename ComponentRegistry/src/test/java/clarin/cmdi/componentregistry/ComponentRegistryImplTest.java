@@ -156,7 +156,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, publicReg.getComponentDescriptions().size());
         assertEquals(0, publicReg.getProfileDescriptions().size());
 
-        userReg.deleteMDComponent(cDesc.getId(), USER_CREDS.getPrincipal());
+        userReg.deleteMDComponent(cDesc.getId(), USER_CREDS.getPrincipal(), false);
         userReg.initCache();
         publicReg.initCache();
         assertEquals(0, userReg.getComponentDescriptions().size());
@@ -164,7 +164,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, publicReg.getComponentDescriptions().size());
         assertEquals(0, publicReg.getProfileDescriptions().size());
 
-        publicReg.deleteMDComponent(cDesc.getId(), USER_CREDS.getPrincipal());
+        publicReg.deleteMDComponent(cDesc.getId(), USER_CREDS.getPrincipal(), false);
         userReg.deleteMDProfile(pDesc.getId(), USER_CREDS.getPrincipal());
         userReg.initCache();
         publicReg.initCache();
@@ -352,7 +352,7 @@ public class ComponentRegistryImplTest {
             fail("Should have thrown exception");
         } catch (UserUnauthorizedException e) {
         }
-        register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
+        register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"), false);
 
         assertEquals(1, register.getProfileDescriptions().size());
         assertNotNull(register.getMDProfile(description.getId()));
@@ -375,7 +375,7 @@ public class ComponentRegistryImplTest {
 
         registry.registerMDComponent(description, testComp);
         try {
-            registry.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"));
+            registry.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"), false);
             fail("Should have thrown exception");
         } catch (UserUnauthorizedException e) {
         }
@@ -383,7 +383,7 @@ public class ComponentRegistryImplTest {
         assertEquals(1, registry.getComponentDescriptions().size());
         assertNotNull(registry.getMDComponent(description.getId()));
 
-        registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal());
+        registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
 
         assertEquals(0, registry.getComponentDescriptions().size());
         assertNull(registry.getMDProfile(description.getId()));
@@ -405,20 +405,22 @@ public class ComponentRegistryImplTest {
 
         registry.registerMDComponent(description, testComp);
         try {
-            registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal());
+            registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
             fail("Should have thrown exception");
         } catch (DeleteFailedException e) {
         }
         assertEquals(1, registry.getComponentDescriptions().size());
-        registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN);
+        registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
         assertEquals(0, registry.getComponentDescriptions().size());
 
         registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.registerMDComponent(description, testComp);
         assertEquals(1, registry.getComponentDescriptions().size());
-        registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
+        registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
         assertEquals(0, registry.getComponentDescriptions().size());
     }
+    
+    //TODO PD make test for still in use component
 
     @Test
     public void testDoNotDeleteOldPublicProfile() throws Exception {
