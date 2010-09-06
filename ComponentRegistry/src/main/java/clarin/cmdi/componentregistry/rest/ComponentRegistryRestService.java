@@ -207,7 +207,7 @@ public class ComponentRegistryRestService {
         ComponentRegistry registry = getRegistry(userspace);
         LOG.info("Component with id: " + componentId + " set for deletion.");
         try {
-            registry.deleteMDComponent(componentId, principal);
+            registry.deleteMDComponent(componentId, principal, false);
         } catch (DeleteFailedException e) {
             LOG.info("Component with id: " + componentId + " deletion failed.", e);
             return Response.status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
