@@ -28,10 +28,12 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 public class StatisticsPage extends SecureAdminWebPage {
 
     private transient ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
-    private transient CMDComponentSpecExpander reg = new CMDComponentSpecExpander((ComponentRegistryImpl) registry);
-    private int componentnumber = 0;
-    private int elementcounter = 0;
-    private int conceptlinkcounter = 0;
+
+    private class Statistics {
+        private int componentnumber = 0;
+        private int elementcounter = 0;
+        private int conceptlinkcounter = 0;
+    }
 
     public StatisticsPage(final PageParameters pageParameters) throws IOException {
         super(pageParameters);
@@ -61,14 +63,12 @@ public class StatisticsPage extends SecureAdminWebPage {
         repeatingview.add(item);
         item.add(new Label("ID", pd.getId()));
         item.add(new Label("profname", pd.getName()));
-        CMDComponentSpec profile = reg.expandProfile(pd.getId(), (ComponentRegistryImpl) registry);
-        componentCounter(profile.getCMDComponent());
-        item.add(new Label("nrcomp", "" + componentnumber));
-        componentnumber = 0;
-        item.add(new Label("nrprofelem", "" + elementcounter));
-        elementcounter = 0;
-        item.add(new Label("nrproflinks", "" + conceptlinkcounter));
-        conceptlinkcounter = 0;
+        CMDComponentSpec profile = CMDComponentSpecExpander.expandProfile(pd.getId(), (ComponentRegistryImpl) registry);
+        Statistics stats = new Statistics();
+        componentCounter(profile.getCMDComponent(), stats);
+        item.add(new Label("nrcomp", "" + stats.componentnumber));
+        item.add(new Label("nrprofelem", "" + stats.elementcounter));
+        item.add(new Label("nrproflinks", "" + stats.conceptlinkcounter));
     }
 
     private void displayComponentStatistics(ComponentDescription cd, RepeatingView repeatingview) {
@@ -76,30 +76,28 @@ public class StatisticsPage extends SecureAdminWebPage {
         repeatingview.add(item);
         item.add(new Label("ID", cd.getId()));
         item.add(new Label("compname", cd.getName()));
-        CMDComponentSpec compspec = reg.expandComponent(cd.getId(), (ComponentRegistryImpl) registry);
-        componentCounter(compspec.getCMDComponent());
-        item.add(new Label("nrcomp", "" + componentnumber));
-        componentnumber = 0;
-        item.add(new Label("nrelem", "" + elementcounter));
-        elementcounter = 0;
-        item.add(new Label("nrcomplinks", "" + conceptlinkcounter));
-        conceptlinkcounter = 0;
+        CMDComponentSpec compspec = CMDComponentSpecExpander.expandComponent(cd.getId(), (ComponentRegistryImpl) registry);
+        Statistics stats = new Statistics();
+        componentCounter(compspec.getCMDComponent(), stats);
+        item.add(new Label("nrcomp", "" + stats.componentnumber));
+        item.add(new Label("nrelem", "" + stats.elementcounter));
+        item.add(new Label("nrcomplinks", "" + stats.conceptlinkcounter));
     }
 
-    private void componentCounter(List<CMDComponentType> components) {
+    private void componentCounter(List<CMDComponentType> components, Statistics stats) {
         if (components != null) {
             for (CMDComponentType component : components) {
-                componentnumber++;
+                stats.componentnumber++;
                 List<CMDElementType> elementlist = component.getCMDElement();
                 if (elementlist != null) {
-                    elementcounter = elementcounter + elementlist.size();
+                    stats.elementcounter += elementlist.size();
                     for (CMDElementType elem : elementlist) {
                         if (elem.getConceptLink() != null) {
-                            conceptlinkcounter++;
+                            stats.conceptlinkcounter++;
                         }
                     }
                 }
-                componentCounter(component.getCMDComponent());
+                componentCounter(component.getCMDComponent(), stats);
             }
         }
     }
