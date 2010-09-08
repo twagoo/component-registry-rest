@@ -14,11 +14,19 @@
         <table cellspacing="5" class="dataview">
             <tr>
                 <th align="left">Profile ID</th>
-                <th align="left">Number of components in profile</th>
+                <th align="left">Profile name</th>
+<!--                <th align="left">Number of components</th>-->
+                <th align="left">Number of nested components</th>
+                <th align="left">Number of nested elements</th>
+                <th align="left">Number of nested conceptlinks</th>
             </tr>
             <tr wicket:id="repeating">
                 <td><span wicket:id="ID">[ID]</span> </td>
-                <td><span wicket:id="nrcomp">[Number of components]</span> </td>
+                <td><span wicket:id="profname">[Name]</span> </td>
+<!--                <td><span wicket:id="nrrootcomp">[Number of components]</span> </td>-->
+                <td><span wicket:id="nrcomp">[Number of nested components]</span> </td>
+                <td><span wicket:id="nrprofelem">[Number of nested elements]</span> </td>
+                <td><span wicket:id="nrproflinks">[Number of nested links]</span> </td>
             </tr>
         </table>
         <br><br><br>
@@ -26,11 +34,17 @@
         <table cellspacing="5" class="dataview">
             <tr>
                 <th align="left">Component ID</th>
-                <th align="left">Number of components in component</th>
+                <th align="left">Component name</th>
+                <th align="left">Number of nested components</th>
+                <th align="left">Number of nested elements</th>
+                <th align="left">Number of nested conceptlinks</th>
             </tr>
             <tr wicket:id="repeatingcomp">
                 <td><span wicket:id="ID">[ID]</span> </td>
+                <td><span wicket:id="compname">[Name]</span> </td>
                 <td><span wicket:id="nrcomp">[Number of components]</span> </td>
+                <td><span wicket:id="nrelem">[Number of elements]</span> </td>
+                <td><span wicket:id="nrcomplinks">[Number of nested links]</span> </td>
             </tr>
         </table>
     </body>
