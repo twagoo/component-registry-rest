@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.AddComponentLabelButton;
 	import clarin.cmdi.componentregistry.common.components.AddElementLabelButton;
+	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
@@ -19,6 +20,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
+	import mx.containers.FormItemDirection;
 	import mx.controls.Label;
 	import mx.core.Container;
 	import mx.core.UIComponent;
@@ -161,6 +163,14 @@ package clarin.cmdi.componentregistry.editor {
 			trace("Created editor view in " + (getTimer() - start) + " ms.");
 		}
 
+		private function clearEditor(event:Event):void {
+			if (_spec && !_spec.isProfile) {
+				cmdSpec = CMDSpec.createEmptyComponent();
+			} else {
+				cmdSpec = CMDSpec.createEmptyProfile();
+			}
+		}
+
 		/**
 		 * The xml model allows more component to be defined but we force only one component at the "root" level.
 		 */
@@ -173,7 +183,15 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function handleHeader(spec:CMDSpec):void {
-			addChild(new SelectTypeRadioButtons(spec));
+			var head:FormItem = new FormItem();
+			head.direction = FormItemDirection.HORIZONTAL;
+			var buttons:FormItem = new SelectTypeRadioButtons(spec);
+			head.addChild(buttons);
+			var startOverLabel:Label = createStartOverButton();
+			startOverLabel.setStyle("paddingTop", "2");
+			startOverLabel.height = buttons.height;
+			head.addChild(startOverLabel);
+			addChild(head);
 			addChild(createOptionalGroupNameInput(spec));
 			var descriptionInput:FormItemInputText = new FormItemInputText(LabelConstants.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
@@ -290,6 +308,14 @@ package clarin.cmdi.componentregistry.editor {
 			var elem:CMDComponentElement = ElementEdit(event.currentTarget).element;
 			_firstComponent.removeElement(elem);
 			removeChild(event.currentTarget as DisplayObject);
+		}
+
+		private function createStartOverButton():Label {
+			var startOverButton:Label = new RemoveLabelButton();
+			startOverButton.addEventListener(MouseEvent.CLICK, clearEditor);
+			startOverButton.toolTip = "Clears all input and added components";
+			startOverButton.text = "start over";
+			return startOverButton;
 		}
 
 	}

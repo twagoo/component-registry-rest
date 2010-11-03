@@ -106,9 +106,11 @@
 				if (desc.isProfile) {
 					tabnav.selectedIndex = 0;
 					this.selectedProfileItem = desc;
+					profileSrv.load(desc);
 				} else {
 					tabnav.selectedIndex = 1;
 					this.selectedComponentItem = desc;
+					componentSrv.load(desc);
 				}
 			}
 

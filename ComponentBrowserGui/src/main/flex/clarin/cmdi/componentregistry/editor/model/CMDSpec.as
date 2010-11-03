@@ -55,5 +55,18 @@ package clarin.cmdi.componentregistry.editor.model {
 			}
 		}
 
+		public static function createEmptyComponent():CMDSpec {
+			var result:CMDSpec = new CMDSpec(false);
+			result.cmdComponents.addItem(CMDComponent.createEmptyComponent());
+			return result
+		}
+
+		public static function createEmptyProfile():CMDSpec {
+			var result:CMDSpec = new CMDSpec(true);
+			var c:CMDComponent = CMDComponent.createEmptyComponent();
+			result.cmdComponents.addItem(c);
+			c.cmdElements.addItem(CMDComponentElement.createEmptyElement());
+			return result
+		}
 	}
 }

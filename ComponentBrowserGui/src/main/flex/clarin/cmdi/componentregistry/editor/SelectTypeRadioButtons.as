@@ -2,14 +2,13 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 	
-	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
 	import mx.controls.ButtonLabelPlacement;
+	import mx.controls.Label;
 	import mx.controls.RadioButton;
-	import mx.controls.TextInput;
 
 	public class SelectTypeRadioButtons extends FormItem {
 
@@ -23,7 +22,6 @@ package clarin.cmdi.componentregistry.editor {
 
 		protected override function createChildren():void {
 			super.createChildren();
-
 			var isProfileButton:RadioButton = new RadioButton();
 			isProfileButton.groupName = "selectType";
 			isProfileButton.label = "Profile";

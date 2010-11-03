@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.common.components {
 	import flash.events.MouseEvent;
-
+	
 	import mx.controls.Label;
 
 	public class RemoveLabelButton extends Label {

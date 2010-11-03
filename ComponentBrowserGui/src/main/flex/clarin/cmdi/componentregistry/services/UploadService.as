@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-	
+
 	import com.adobe.net.URI;
-	
+
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
@@ -13,10 +13,10 @@ package clarin.cmdi.componentregistry.services {
 	import flash.net.FileReference;
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
-	
+
 	import mx.controls.ProgressBar;
 	import mx.managers.CursorManager;
-	
+
 	import ru.inspirit.net.MultipartURLLoader;
 
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]
@@ -61,17 +61,29 @@ package clarin.cmdi.componentregistry.services {
 		/**
 		 * submits a profile, data parameter can be null which implies a file was selected using selectXmlFile();
 		 */
-		public function submitProfile(description:ItemDescription, data:String = null):void {
+		public function submitProfile(description:ItemDescription, data:String = null, update:Boolean = false):void {
 			createAndInitRequest();
-			submit(description, createByteArray(data), new URI(Config.instance.uploadProfileUrl));
+			var uri:URI = createUri(Config.instance.uploadProfileUrl, update, description);
+			submit(description, createByteArray(data), uri);
 		}
 
 		/**
 		 * submits a component, data parameter can be null which implies a file was selected using selectXmlFile();
 		 */
-		public function submitComponent(description:ItemDescription, data:String = null):void {
+		public function submitComponent(description:ItemDescription, data:String = null, update:Boolean = false):void {
 			createAndInitRequest();
-			submit(description, createByteArray(data), new URI(Config.instance.uploadComponentUrl));
+			var uri:URI = createUri(Config.instance.uploadComponentUrl, update, description);
+			submit(description, createByteArray(data), uri);
+		}
+
+		private function createUri(uriBase:String, update:Boolean, desc:ItemDescription):URI {
+			var uri:URI = null;
+			if (update && desc.id) {
+				uri = new URI(uriBase + "/" + desc.id + "/update");
+			} else {
+				uri = new URI(uriBase);
+			}
+			return uri;
 		}
 
 		private function createByteArray(data:String):ByteArray {

@@ -21,6 +21,7 @@ import mx.managers.CursorManager;
 
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
 private var componentSrv:ComponentInfoService = new ComponentInfoService();
+private var itemDescription:ItemDescription;
 
 [Bindable]
 private var componentsSrv:ComponentListService = ComponentListService.getInstance(Config.instance.userSpace);
@@ -29,7 +30,7 @@ private var componentsSrv:ComponentListService = ComponentListService.getInstanc
 public var cmdComponent:XML;
 
 [Bindable]
-private var cmdSpec:CMDSpec = createEmptyProfile();
+private var cmdSpec:CMDSpec = CMDSpec.createEmptyProfile();
 
 [Bindable]
 private var browserColumns:BrowserColumns = new BrowserColumns();
@@ -64,6 +65,7 @@ private function componentLoaded(event:Event):void {
 
 public function setDescription(itemDescription:ItemDescription):void {
 	if (itemDescription) {
+	    this.itemDescription = itemDescription;
 		CursorManager.setBusyCursor();
 		if (itemDescription.isProfile) {
 			profileSrv.load(itemDescription);
@@ -71,28 +73,6 @@ public function setDescription(itemDescription:ItemDescription):void {
 			componentSrv.load(itemDescription);
 		}
 	}
-}
-
-public function clearEditor():void {
-	if (cmdSpec && !cmdSpec.isProfile) {
-		this.cmdSpec = createEmptyComponent();
-	} else {
-		this.cmdSpec = createEmptyProfile();
-	}
-}
-
-private function createEmptyComponent():CMDSpec {
-	var result:CMDSpec = new CMDSpec(false);
-	result.cmdComponents.addItem(CMDComponent.createEmptyComponent());
-	return result
-}
-
-private function createEmptyProfile():CMDSpec {
-	var result:CMDSpec = new CMDSpec(true);
-	var c:CMDComponent = CMDComponent.createEmptyComponent();
-	result.cmdComponents.addItem(c);
-	c.cmdElements.addItem(CMDComponentElement.createEmptyElement());
-	return result
 }
 
 private function publishSpec():void {
@@ -105,7 +85,7 @@ private function handlePublishAlert(event:CloseEvent):void {
 	}
 }
 
-private function saveSpec(inUserSpace:Boolean):void {
+private function saveSpec(inUserSpace:Boolean, update:Boolean = false):void {
 //	Alert.show(xmlEditor.cmdSpec.toXml());
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
@@ -115,11 +95,15 @@ private function saveSpec(inUserSpace:Boolean):void {
 		item.groupName = xmlEditor.cmdSpec.groupName;
 		item.domainName = xmlEditor.cmdSpec.domainName;
 		item.isInUserSpace = inUserSpace;
+		var doUpdate:Boolean = update && itemDescription && itemDescription.isInUserSpace; 
+		if (doUpdate) {
+		    item.id = xmlEditor.cmdSpec.headerId;
+		} 
 		uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 		if (item.isProfile) {
-			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml());
+			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml(), doUpdate);
 		} else {
-			uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml());
+			uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml(), doUpdate);
 		}
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
