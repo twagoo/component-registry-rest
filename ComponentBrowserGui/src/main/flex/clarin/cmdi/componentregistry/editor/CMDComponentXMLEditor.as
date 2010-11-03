@@ -313,7 +313,7 @@ package clarin.cmdi.componentregistry.editor {
 		private function createStartOverButton():Label {
 			var startOverButton:Label = new RemoveLabelButton();
 			startOverButton.addEventListener(MouseEvent.CLICK, clearEditor);
-			startOverButton.toolTip = "Clears all input and added components";
+			startOverButton.toolTip = "Clears all input and removes added components";
 			startOverButton.text = "start over";
 			return startOverButton;
 		}
