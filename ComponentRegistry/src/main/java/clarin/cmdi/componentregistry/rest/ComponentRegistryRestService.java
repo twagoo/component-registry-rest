@@ -180,6 +180,28 @@ public class ComponentRegistryRestService {
         }
     }
 
+    @POST
+    @Path("/profiles/{profileId}/update")
+    @Consumes("multipart/form-data")
+    public Response updateRegisteredProfile(@PathParam("profileId") String profileId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
+            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+        Principal principal = checkAndGetUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(principal);
+        ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
+        if (desc != null) {
+            desc.setName(name);
+            desc.setDescription(description);
+            desc.setDomainName(domainName);
+            desc.setRegistrationDate(AbstractDescription.createNewDate());
+            return register(input, desc, userCredentials, userspace, true);
+        } else {
+            LOG.error("Update of nonexistent id (" + profileId + ") failed.");
+            return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
+        }
+    }
+
     /**
      * 
      * Purely helper method for my front-end (FLEX) which van only do post/get requests. The query param is checked and the "proper" method
@@ -196,6 +218,29 @@ public class ComponentRegistryRestService {
             return deleteRegisteredComponent(componentId, userspace);
         } else {
             return Response.ok().build();
+        }
+    }
+
+    @POST
+    @Path("/components/{componentId}/update")
+    @Consumes("multipart/form-data")
+    public Response updateRegisteredComponent(@PathParam("componentId") String componentId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
+            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+        Principal principal = checkAndGetUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(principal);
+        ComponentDescription desc = getRegistry(userspace).getComponentDescription(componentId);
+        if (desc != null) {
+            desc.setName(name);
+            desc.setDescription(description);
+            desc.setGroupName(group);
+            desc.setDomainName(domainName);
+            desc.setRegistrationDate(AbstractDescription.createNewDate());
+            return register(input, desc, userCredentials, userspace, true);
+        } else {
+            LOG.error("Update of nonexistent id (" + componentId + ") failed.");
+            return Response.serverError().entity("Invalid id, cannot update nonexistent component").build();
         }
     }
 
@@ -290,7 +335,7 @@ public class ComponentRegistryRestService {
     @Path("/profiles")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public RegisterResponse registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
+    public Response registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
             @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = checkAndGetUserPrincipal();
@@ -302,17 +347,16 @@ public class ComponentRegistryRestService {
         desc.setDescription(description);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Profile: " + desc);
-        return register(input, desc, userCredentials, userspace);
+        return register(input, desc, userCredentials, userspace, false);
     }
 
     @POST
     @Path("/components")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
-    public RegisterResponse registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+    public Response registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
+            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
+            @FormDataParam(DOMAIN_FORM_FIELD) String domainName, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = checkAndGetUserPrincipal();
         UserCredentials userCredentials = getUserCredentials(principal);
         ComponentDescription desc = createNewComponentDescription();
@@ -323,7 +367,7 @@ public class ComponentRegistryRestService {
         desc.setGroupName(group);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Component: " + desc);
-        return register(input, desc, userCredentials, userspace);
+        return register(input, desc, userCredentials, userspace, false);
     }
 
     @GET
@@ -341,7 +385,8 @@ public class ComponentRegistryRestService {
         return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
     }
 
-    private RegisterResponse register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace) {
+    private Response register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace,
+            boolean update) {
         try {
             ComponentRegistry registry = getRegistry(userspace, userCredentials);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
@@ -351,8 +396,12 @@ public class ComponentRegistryRestService {
             validate(response, descriptionValidator, validator);
             if (response.getErrors().isEmpty()) {
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
-                int returnCode = spec.isIsProfile() ? registry.registerMDProfile((ProfileDescription) desc, spec) : registry
-                        .registerMDComponent((ComponentDescription) desc, spec);
+                int returnCode;
+                if (update) {
+                    returnCode = registry.update(desc, spec);
+                } else {
+                    returnCode = registry.register(desc, spec);
+                }
                 if (returnCode == 0) {
                     response.setRegistered(true);
                     response.setDescription(desc);
@@ -365,7 +414,7 @@ public class ComponentRegistryRestService {
                 response.setRegistered(false);
             }
             response.setIsProfile(desc.isProfile());
-            return response;
+            return Response.ok(response).build();
         } finally {
             try {
                 input.close();//either we read the input or there was an exception, we need to close it.

@@ -37,8 +37,8 @@
       <groupId>javax.xml</groupId>
       <artifactId>jaxb-impl</artifactId>
       <version>2.1</version>
+      <scope>provided</scope>
     </dependency>
-
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -155,7 +155,7 @@
     <!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
     <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-    <registryRoot>/tmp/ComponentRegistry</registryRoot> <!-- /Users/patdui/Workspace/Clarin/MyRegistry -->
+    <registryRoot>/tmp/ComponentRegistry</registryRoot>
     <ComponentBrowserGuiVersion>1.6-SNAPSHOT</ComponentBrowserGuiVersion>
     <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGuiVersion}</ComponentRegistrySwfName>
     <cmdiSchemaDir>../../metadata/toolkit/</cmdiSchemaDir>

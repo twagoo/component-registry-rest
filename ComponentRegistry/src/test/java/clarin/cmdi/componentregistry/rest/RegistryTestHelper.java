@@ -46,17 +46,21 @@ public final class RegistryTestHelper {
         desc.setId(ComponentRegistry.REGISTRY_ID + id);
         desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
         CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
-        testRegistry.registerMDComponent(desc, spec);
+        testRegistry.register(desc, spec);
         return desc;
     }
 
     public static InputStream getTestProfileContent() {
+        return getTestProfileContent("Actor");
+    }
+    
+    public static InputStream getTestProfileContent(String name) {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
         profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+        profileContent += "    <CMD_Component name=\""+name+"\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "        <AttributeList>\n";
         profileContent += "            <Attribute>\n";
         profileContent += "                <Name>Name</Name>\n";
@@ -93,7 +97,7 @@ public final class RegistryTestHelper {
         desc.setId(ComponentRegistry.REGISTRY_ID + id);
         desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
         CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
-        testRegistry.registerMDProfile(desc, spec);
+        testRegistry.register(desc, spec);
         return desc;
     }
 
@@ -102,6 +106,10 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getComponentTestContent() {
+        return getComponentTestContent("Access");
+    }
+
+    public static InputStream getComponentTestContent(String componentName) {
         String compContent = "";
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
@@ -110,7 +118,7 @@ public final class RegistryTestHelper {
         compContent += "    \n";
         compContent += "    <Header/>\n";
         compContent += "    \n";
-        compContent += "    <CMD_Component name=\"Access\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+        compContent += "    <CMD_Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
         compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
         compContent += "        <CMD_Element name=\"Date\">\n";
         compContent += "            <ValueScheme>\n";

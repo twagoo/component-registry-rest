@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -28,8 +29,6 @@ import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,7 +215,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public File getProfileFile(String profileId) {
         String id = stripRegistryId(profileId);
-        File file = new File(resourceConfig.getProfileDir(), id + File.separator + id + ".xml");
+        File file = new File(getProfileDir(), id + File.separator + id + ".xml");
         return file;
     }
 
@@ -251,7 +250,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public File getComponentFile(String componentId) {
         String id = stripRegistryId(componentId);
-        File file = new File(resourceConfig.getComponentDir(), id + File.separator + id + ".xml");
+        File file = new File(getComponentDir(), id + File.separator + id + ".xml");
         return file;
     }
 
@@ -272,29 +271,32 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     /**
      * CMDComponentSpec and description are assumed to be valid.
      */
-    public int registerMDComponent(ComponentDescription description, CMDComponentSpec spec) {
-        LOG.info("Attempt to register component: " + description);
-        return register(resourceConfig.getComponentDir(), description, spec, "component");
+    public int register(AbstractDescription desc, CMDComponentSpec spec) {
+        LOG.info("Attempt to register " + desc.getType() + ": " + desc);
+        return register(getDir(desc), desc, spec, new RegisterClosureOnFail(desc));
     }
 
-    /**
-     * CMDComponentSpec and description are assumed to be valid.
-     */
-    public int registerMDProfile(ProfileDescription profileDescription, CMDComponentSpec spec) {
-        LOG.info("Attempt to register profile: " + profileDescription);
-        return register(resourceConfig.getProfileDir(), profileDescription, spec, "profile");
+    public int update(AbstractDescription desc, CMDComponentSpec spec) {
+        LOG.info("Attempt to update " + desc.getType() + ": " + desc);
+        return register(getDir(desc), desc, spec, new UpdateClosureOnFail(desc));
     }
 
-    private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, String type) {
+    private File getDir(AbstractDescription desc) {
+        return desc.isProfile() ? getProfileDir() : getComponentDir();
+    }
+
+    private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, Closure onFail) {
         String strippedId = stripRegistryId(description.getId());
         File dir = new File(storageDir, strippedId);
         boolean success = false;
         try {
             boolean dirCreated = dir.mkdir();
-            if (dirCreated) {
+            if (dirCreated || dir.exists()) {
                 writeDescription(dir, description);
-                enrichSpecHeader(spec, description);
-                writeCMDComponentSpec(dir, strippedId + ".xml", spec);
+                if (spec != null) {
+                    enrichSpecHeader(spec, description);
+                    writeCMDComponentSpec(dir, strippedId + ".xml", spec);
+                }
                 success = true;
             }
         } catch (IOException e) {
@@ -303,16 +305,12 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             LOG.error("Register failed:", e);
         } finally {
             if (!success) {
-                LOG.info("Registration of " + type + " " + description + " unsuccessful. Cleaning up created folders.");
-                try {
-                    FileUtils.deleteDirectory(dir);
-                } catch (IOException e) {
-                    LOG.error("Error in registration. Cleaning up " + type + " failed: " + dir + " :", e);
-                }
+                onFail.execute(dir);
                 return -1;
             }
         }
-        LOG.info("Succesfully registered a " + type + " in " + dir + " " + type + "= " + description);
+        LOG.info("Succesfully registered/updated a " + description.getType() + " in " + dir + " " + description.getType() + "= "
+                + description);
         updateCache(description);
         return 0;
     }
@@ -326,7 +324,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         if (StringUtils.isEmpty(header.getDescription())) {
             header.setDescription(description.getDescription());
         }
-
     }
 
     private void writeDescription(File dir, AbstractDescription description) throws IOException, JAXBException {
@@ -358,15 +355,15 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-        if (!desc.isThisTheOwner(principal.getName()) && !Configuration.getInstance().isAdminUser(principal)) { 
+        if (!desc.isThisTheOwner(principal.getName()) && !Configuration.getInstance().isAdminUser(principal)) {
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
                     + "' is not the creator (nor an administrator) of the " + (desc.isProfile() ? "profile" : "component") + "(" + desc
                     + ").");
         }
     }
 
-    public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException,
-            DeleteFailedException {
+    public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,
+            UserUnauthorizedException, DeleteFailedException {
         ComponentDescription desc = componentDescriptions.get(componentId);
         if (desc != null) {
             checkAuthorisation(desc, principal);
@@ -385,8 +382,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
         if (isPublic() && !Configuration.getInstance().isAdminUser(principal)) {
             try {
-                Date regDate = DateUtils.parseDate(desc.getRegistrationDate(), new String[] { DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
-                        .getPattern() });
+                Date regDate = AbstractDescription.getDate(desc.getRegistrationDate());
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
                 if (regDate.before(calendar.getTime())) { //More then month old
@@ -425,30 +421,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
         result.append("Try to change above mentioned references first.");
         return result.toString();
-    }
-
-    
-    /**
-     * spec is optional can be null if only the description needs to be updated.
-     */
-    public void update(AbstractDescription description, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
-            UserUnauthorizedException {
-        if (!Configuration.getInstance().isAdminUser(principal)) {
-            throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
-                    + "' cannot update this description (" + description + ").");
-        }
-        File typeDir;
-        if (description.isProfile()) {
-            typeDir = getProfileDir();
-        } else {
-            typeDir = getComponentDir();
-        }
-        String strippedId = stripRegistryId(description.getId());
-        File dir = new File(typeDir, strippedId);
-        writeDescription(dir, description);
-        if (spec != null)
-            writeCMDComponentSpec(dir, strippedId + ".xml", spec);
-        updateCache(description);
     }
 
     public List<ComponentDescription> getUsageInComponents(String componentId) {
@@ -503,4 +475,39 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
+    private class RegisterClosureOnFail implements Closure {
+
+        private final AbstractDescription desc;
+
+        RegisterClosureOnFail(AbstractDescription desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public void execute(Object input) {
+            File dir = (File) input;
+            LOG.info("Registration of " + desc + " unsuccessful. Cleaning up created folders.");
+            try {
+                FileUtils.deleteDirectory(dir);
+            } catch (IOException e) {
+                LOG.error("Error in registration. Cleaning up " + desc.getId() + " failed: " + dir + " :", e);
+            }
+
+        }
+    }
+
+    private class UpdateClosureOnFail implements Closure {
+
+        private final AbstractDescription desc;
+
+        UpdateClosureOnFail(AbstractDescription desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public void execute(Object input) {
+            LOG.info("Update of " + desc + " unsuccessful.");
+        }
+
+    }
 }

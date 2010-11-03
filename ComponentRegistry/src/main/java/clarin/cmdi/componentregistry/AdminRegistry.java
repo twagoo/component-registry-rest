@@ -26,7 +26,7 @@ public class AdminRegistry {
     public void submitFile(FileInfo fileInfo, Principal userPrincipal) throws SubmitFailedException {
         try {
             File file = fileInfo.getFileNode().getFile();
-            if ( fileInfo.getFileNode().isDeleted()) {
+            if (fileInfo.getFileNode().isDeleted()) {
                 //already deleted file
                 FileUtils.writeStringToFile(file, fileInfo.getText(), "UTF-8");
             } else {
@@ -120,18 +120,18 @@ public class AdminRegistry {
     }
 
     private int submitToRegistry(AbstractDescription description, CMDComponentSpec spec, Principal userPrincipal, FileInfo fileInfo) {
-        ComponentRegistry registry = getRegistry(userPrincipal, description, fileInfo); 
+        ComponentRegistry registry = getRegistry(userPrincipal, description, fileInfo);
         if (spec.isIsProfile()) {
-            return registry.registerMDProfile((ProfileDescription) description, spec);
+            return registry.register((ProfileDescription) description, spec);
         } else {
-            return registry.registerMDComponent((ComponentDescription) description, spec);
+            return registry.register((ComponentDescription) description, spec);
         }
 
     }
 
-    private void deleteFromRegistry(Principal userPrincipal, AbstractDescription desc, FileInfo fileInfo) throws IOException, UserUnauthorizedException,
-            DeleteFailedException {
-        ComponentRegistry registry = getRegistry(userPrincipal, desc, fileInfo); 
+    private void deleteFromRegistry(Principal userPrincipal, AbstractDescription desc, FileInfo fileInfo) throws IOException,
+            UserUnauthorizedException, DeleteFailedException {
+        ComponentRegistry registry = getRegistry(userPrincipal, desc, fileInfo);
         LOG.info("Deleting item: " + desc);
         if (desc.isProfile()) {
             registry.deleteMDProfile(desc.getId(), userPrincipal);

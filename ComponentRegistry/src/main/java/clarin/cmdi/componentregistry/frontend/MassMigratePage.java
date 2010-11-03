@@ -112,7 +112,7 @@ public class MassMigratePage extends SecureAdminWebPage {
             if (userId != null) {
                 desc.setUserId(userId);
                 try {
-                    registry.update(desc, getUserPrincipal(), null);
+                    registry.update(desc, null);
                     info("Updated: " + desc);
                 } catch (Exception e) {
                     error("Error during update of:" + desc + "\nException" + e);
@@ -130,7 +130,7 @@ public class MassMigratePage extends SecureAdminWebPage {
             info("override description: " + desc.getDescription() + " \nwith: " + specDescription);
             desc.setDescription(specDescription);
             try {
-                registry.update(desc, getUserPrincipal(), null);
+                registry.update(desc, null);
                 info("Updated: " + desc);
             } catch (Exception e) {
                 error("Error during update of:" + desc + "\nException" + e);

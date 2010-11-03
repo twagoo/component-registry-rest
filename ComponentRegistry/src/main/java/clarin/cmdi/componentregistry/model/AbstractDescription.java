@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.text.ParseException;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.DateUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
@@ -101,6 +103,10 @@ public abstract class AbstractDescription {
         return this instanceof ProfileDescription;
     }
 
+    public String getType() {
+        return isProfile() ? "profile" : "component";
+    }
+
     public static String createNewDate() {
         return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
@@ -112,6 +118,10 @@ public abstract class AbstractDescription {
     public boolean isThisTheOwner(String userId) {
         String userHash = DigestUtils.md5Hex(userId);
         return userHash.equals(getUserId());
+    }
+
+    public static Date getDate(String registrationDate) throws ParseException {
+        return DateUtils.parseDate(registrationDate, new String[] { DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern() });
     }
 
 }

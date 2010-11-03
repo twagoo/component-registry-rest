@@ -10,7 +10,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
 
-import clarin.cmdi.componentregistry.ComponentRegistryImplTest;
 import clarin.cmdi.componentregistry.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.Configuration;
 

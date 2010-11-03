@@ -5,8 +5,6 @@ import java.io.OutputStream;
 import java.security.Principal;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -32,9 +30,13 @@ public interface ComponentRegistry {
      * 
      * @return -1 if profile could not be registered
      */
-    int registerMDProfile(ProfileDescription description, CMDComponentSpec spec);
+    int register(AbstractDescription desc, CMDComponentSpec spec);
 
-    int registerMDComponent(ComponentDescription description, CMDComponentSpec spec);
+    /**
+     * 
+     * @return -1 if component could not be updated
+     */
+    int update(AbstractDescription description, CMDComponentSpec spec);
 
     void getMDProfileAsXml(String profileId, OutputStream output);
 
@@ -63,10 +65,8 @@ public interface ComponentRegistry {
      * @throws UserUnauthorizedException thrown when principal does not match creator of component
      * @throws DeleteFailedException
      */
-    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException;
-
-    void update(AbstractDescription desc, Principal principal, CMDComponentSpec spec) throws IOException, JAXBException,
-            UserUnauthorizedException;
+    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException,
+            DeleteFailedException;
 
     /**
      * 

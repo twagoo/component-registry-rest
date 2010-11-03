@@ -30,7 +30,7 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
     @Test
-    public void testRegisterMDProfile() throws JAXBException {
+    public void testRegisterProfile() throws JAXBException {
         ComponentRegistry register = getTestRegistry(getRegistryDir());
         ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
@@ -44,7 +44,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         assertNull(testProfile.getHeader().getName());
         assertNull(testProfile.getHeader().getDescription());
 
-        register.registerMDProfile(description, testProfile);
+        register.register(description, testProfile);
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
@@ -59,7 +59,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
     }
 
     @Test
-    public void testRegisterMDComponent() throws JAXBException {
+    public void testRegisterComponent() throws JAXBException {
         ComponentRegistry register = getTestRegistry(getRegistryDir());
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
@@ -74,7 +74,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         assertNull(testComponent.getHeader().getDescription());
         testComponent.getHeader().setDescription("Will not be overwritten");
 
-        register.registerMDComponent(description, testComponent);
+        register.register(description, testComponent);
 
         assertEquals(1, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
@@ -101,7 +101,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
+        register.register(description, RegistryTestHelper.getTestProfile());
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(1, register.getProfileDescriptions().size());
         assertNull(register.getMDComponent(description.getId()));
@@ -130,10 +130,10 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         assertEquals(0, userReg.getProfileDescriptions().size());
         assertEquals(0, publicReg.getComponentDescriptions().size());
         assertEquals(0, publicReg.getProfileDescriptions().size());
-        userReg.registerMDComponent(cDesc, RegistryTestHelper.getTestComponent());
-        publicReg.registerMDComponent(cDesc, RegistryTestHelper.getTestComponent());
-        publicReg.registerMDProfile(pDesc, RegistryTestHelper.getTestProfile());
-        userReg.registerMDProfile(pDesc, RegistryTestHelper.getTestProfile());
+        userReg.register(cDesc, RegistryTestHelper.getTestComponent());
+        publicReg.register(cDesc, RegistryTestHelper.getTestComponent());
+        publicReg.register(pDesc, RegistryTestHelper.getTestProfile());
+        userReg.register(pDesc, RegistryTestHelper.getTestProfile());
         assertEquals(1, userReg.getComponentDescriptions().size());
         assertEquals(1, userReg.getProfileDescriptions().size());
         assertEquals(1, publicReg.getComponentDescriptions().size());
@@ -180,12 +180,12 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
+        register.register(description, RegistryTestHelper.getTestProfile());
         description = new ProfileDescription();
         description.setName("Aap2");
         String id2 = "Aap2" + System.currentTimeMillis();
         description.setId(id2);
-        register.registerMDProfile(description, RegistryTestHelper.getTestProfile());
+        register.register(description, RegistryTestHelper.getTestProfile());
 
         assertEquals(0, register.getComponentDescriptions().size());
         assertEquals(2, register.getProfileDescriptions().size());
@@ -333,7 +333,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         description.setDescription("MyDescription");
         CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
 
-        register.registerMDProfile(description, testProfile);
+        register.register(description, testProfile);
 
         assertEquals(1, register.getProfileDescriptions().size());
         assertNotNull(register.getMDProfile(description.getId()));
@@ -364,7 +364,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         description.setDescription("MyDescription");
         CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
-        registry.registerMDComponent(description, testComp);
+        registry.register(description, testComp);
         try {
             registry.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"), false);
             fail("Should have thrown exception");
@@ -394,7 +394,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
                 .getPattern()));
         CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
-        registry.registerMDComponent(description, testComp);
+        registry.register(description, testComp);
         try {
             registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
             fail("Should have thrown exception");
@@ -405,7 +405,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         assertEquals(0, registry.getComponentDescriptions().size());
 
         registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
-        registry.registerMDComponent(description, testComp);
+        registry.register(description, testComp);
         assertEquals(1, registry.getComponentDescriptions().size());
         registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
         assertEquals(0, registry.getComponentDescriptions().size());
@@ -425,7 +425,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
                 .getPattern()));
         CMDComponentSpec testComp = RegistryTestHelper.getTestProfile();
 
-        registry.registerMDProfile(description, testComp);
+        registry.register(description, testComp);
         try {
             registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal());
             fail("Should have thrown exception");
@@ -436,7 +436,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         assertEquals(0, registry.getProfileDescriptions().size());
 
         registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
-        registry.registerMDProfile(description, testComp);
+        registry.register(description, testComp);
         assertEquals(1, registry.getProfileDescriptions().size());
         registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
         assertEquals(0, registry.getProfileDescriptions().size());
@@ -451,18 +451,13 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         description.setUserId(USER_CREDS.getPrincipalName());
         description.setDescription("MyDescription");
         CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
-        registry.registerMDComponent(description, testComponent);
+        registry.register(description, testComponent);
 
         assertEquals(1, registry.getComponentDescriptions().size());
         ComponentDescription desc = registry.getComponentDescription(description.getId());
         assertEquals("MyDescription", desc.getDescription());
         desc.setDescription("NewDesc");
-        try {
-            registry.update(desc, USER_CREDS.getPrincipal(), testComponent);
-            fail("Should have failed, only admin users are allowed to update");
-        } catch (UserUnauthorizedException e) {
-        }
-        registry.update(desc, PRINCIPAL_ADMIN, testComponent);
+        registry.update(desc, testComponent);
 
         registry = getTestRegistry(getRegistryDir());
         assertEquals(1, registry.getComponentDescriptions().size());
@@ -477,7 +472,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         ComponentDescription cd = ComponentDescription.createNewDescription();
         cd.setName("Y");
         CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
-        registry.registerMDComponent(cd, testComponent);
+        registry.register(cd, testComponent);
 
         List<ProfileDescription> result = registry.getUsageInProfiles(cd.getId());
         assertEquals(0, result.size());
@@ -488,7 +483,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         CMDComponentType reference = new CMDComponentType();
         reference.setComponentId(cd.getId());
         testProfile.getCMDComponent().get(0).getCMDComponent().add(reference);
-        registry.registerMDProfile(pd, testProfile);
+        registry.register(pd, testProfile);
 
         result = registry.getUsageInProfiles(cd.getId());
         assertEquals(1, result.size());
@@ -499,7 +494,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
         ComponentDescription cd = ComponentDescription.createNewDescription();
         cd.setName("Y");
-        registry.registerMDComponent(cd, RegistryTestHelper.getTestComponent());
+        registry.register(cd, RegistryTestHelper.getTestComponent());
 
         List<ComponentDescription> result = registry.getUsageInComponents(cd.getId());
         assertEquals(0, result.size());
@@ -510,7 +505,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         CMDComponentType reference = new CMDComponentType();
         reference.setComponentId(cd.getId());
         testComponent.getCMDComponent().get(0).getCMDComponent().add(reference);
-        registry.registerMDComponent(cd2, testComponent);
+        registry.register(cd2, testComponent);
 
         ComponentDescription cd3 = ComponentDescription.createNewDescription();
         cd3.setName("X2");
@@ -518,7 +513,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         reference = new CMDComponentType();
         reference.setComponentId(cd.getId());
         testComponent.getCMDComponent().get(0).getCMDComponent().add(reference);
-        registry.registerMDComponent(cd3, testComponent);
+        registry.register(cd3, testComponent);
 
         result = registry.getUsageInComponents(cd.getId());
         assertEquals(2, result.size());
