@@ -30,6 +30,9 @@ package clarin.cmdi.componentregistry.browser {
 			if (_element.cardinalityMin != "" || _element.cardinalityMax != "") {
 				addLine(LabelConstants.CARDINALITY, _element.cardinalityMin + " - " + _element.cardinalityMax);
 			}
+			if (_element.valueSchemeSimple && _element.valueSchemeSimple == "string") {
+			    addLine(LabelConstants.MULTILINGUAL, _element.multilingual);
+			}
 			CMDComponentXMLBrowser.handleCMDAttributeList(container, _element.attributeList, _indent - 1);
 		}
 

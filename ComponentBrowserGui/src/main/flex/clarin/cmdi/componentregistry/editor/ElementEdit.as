@@ -3,10 +3,11 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
+	import mx.binding.utils.BindingUtils;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
@@ -51,6 +52,19 @@ package clarin.cmdi.componentregistry.editor {
 					_element.cardinalityMax = val;
 				}));
 			addChild(AttributeListEdit.createAndAddValueScheme(_element));
+			var multiLingualCheck:CheckboxInput = new CheckboxInput(LabelConstants.MULTILINGUAL, _element.multilingual == "true", function(val:Boolean):void {
+					_element.multilingual = String(val);
+				});
+			BindingUtils.bindSetter(function(val:String):void {
+					var show:Boolean = "string" == val;
+					multiLingualCheck.visible = show;
+					multiLingualCheck.includeInLayout = show;
+					if (!show) {
+					    _element.multilingual = null;
+					}
+				}, _element, "valueSchemeSimple");
+
+			addChild(multiLingualCheck);
 			handleCMDAttributeList();
 		}
 

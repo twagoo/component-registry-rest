@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 
+    [Bindable]
 	public class CMDComponentElement implements XmlAble, ValueSchemeInterface {
 
 		//Attributes
@@ -12,6 +13,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var conceptLink:String;
 		public var documentation:String;
 		public var displayPriority:String;
+		public var multilingual:String;
 		private var _valueSchemeSimple:String;
 		public var cardinalityMin:String = "1";
 		public var cardinalityMax:String = "1";
@@ -72,6 +74,8 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.@CardinalityMin = cardinalityMin;
 			if (cardinalityMax)
 				result.@CardinalityMax = cardinalityMax;
+            if (multilingual != null)
+                result.@Multilingual = multilingual;				
 			if (attributeList.length > 0) {
 				var attributeListTag:XML = <AttributeList></AttributeList>;
 				for each (var attribute:CMDAttribute in attributeList) {

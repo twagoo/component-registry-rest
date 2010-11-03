@@ -21,11 +21,12 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.valueSchemeSimple = "string";
 			result.documentation = "Docu";
 			result.displayPriority = "1";
+			result.multilingual = "false";
 			var att:CMDAttribute = new CMDAttribute();
 			att.name = "test";
 			att.valueSchemeSimple = "string";
 			result.attributeList.addItem(att);
-			var expected:XML = <CMD_Element name="aap" Documentation="Docu" DisplayPriority="1" ValueScheme="string" CardinalityMin="1" CardinalityMax="1">
+			var expected:XML = <CMD_Element name="aap" Documentation="Docu" DisplayPriority="1" ValueScheme="string" CardinalityMin="1" CardinalityMax="1"  Multilingual="false">
 					<AttributeList>
 						<Attribute>
 							<Name>test</Name>

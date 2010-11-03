@@ -58,6 +58,8 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.cardinalityMin = xml.@CardinalityMin;
 			if (xml.hasOwnProperty("@CardinalityMax"))
 				result.cardinalityMax = xml.@CardinalityMax;
+            if (xml.hasOwnProperty("@Multilingual")) 
+                result.multilingual = xml.@Multilingual;				
 			result.attributeList = createAttributeList(xml);
 			if (xml.hasOwnProperty(ComponentMD.VALUE_SCHEME)) {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
