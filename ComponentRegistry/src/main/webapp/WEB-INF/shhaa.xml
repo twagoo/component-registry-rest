@@ -13,7 +13,7 @@
 		<fallback>
 			<username>anonymous</username>
 		</fallback>
-    	<sso action="lI">http://lux16.mpi.nl/Shibboleth.sso/Login</sso> 
+    	<sso action="lI">http://lux16.mpi.nl/Shibboleth.sso/Login</sso>
 		<slo action="lO">http://lux16.mpi.nl/Shibboleth.sso/Logout</slo>
     
 <!--    <sso action="lI">https://catalog.clarin.eu/Shibboleth.sso/Login</sso> -->
@@ -31,8 +31,6 @@
 
 	
 	<authorization>
-        <location  target="/index.jsp" />
-        <location  target="/ComponentRegistry.swf" />
         <location  target="/admin/*" />
 	</authorization>
 	
