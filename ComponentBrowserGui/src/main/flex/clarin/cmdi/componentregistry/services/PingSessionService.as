@@ -1,5 +1,7 @@
 package clarin.cmdi.componentregistry.services {
 
+	import clarin.cmdi.componentregistry.common.Credentials;
+	
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	
@@ -42,9 +44,11 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		private function pingSession():void {
-			service.url = Config.instance.pingSessionUrl;
-			var token:AsyncToken = service.send();
-			token.addResponder(new Responder(result, fault));
+		    if (Credentials.instance.isLoggedIn()) {
+    			service.url = Config.instance.pingSessionUrl;
+    			var token:AsyncToken = service.send();
+    			token.addResponder(new Responder(result, fault));
+		    }
 		}
 
 		private function result(resultEvent:ResultEvent):void {

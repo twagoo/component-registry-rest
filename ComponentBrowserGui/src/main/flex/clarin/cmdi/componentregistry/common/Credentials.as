@@ -12,6 +12,10 @@ package clarin.cmdi.componentregistry.common {
 				throw new Error("Config can only be accessed through Credentials.instance");
 			}
 		}
+        
+        public function isLoggedIn():Boolean {
+            return userName && userName != "anonymous";
+        }
 
 		private function init(applicationParameters:Object):void {
 			if (applicationParameters.hasOwnProperty("userName")) {

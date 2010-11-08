@@ -65,7 +65,7 @@ private function componentLoaded(event:Event):void {
 
 public function setDescription(itemDescription:ItemDescription):void {
 	if (itemDescription) {
-	    this.itemDescription = itemDescription;
+		this.itemDescription = itemDescription;
 		CursorManager.setBusyCursor();
 		if (itemDescription.isProfile) {
 			profileSrv.load(itemDescription);
@@ -95,10 +95,10 @@ private function saveSpec(inUserSpace:Boolean, update:Boolean = false):void {
 		item.groupName = xmlEditor.cmdSpec.groupName;
 		item.domainName = xmlEditor.cmdSpec.domainName;
 		item.isInUserSpace = inUserSpace;
-		var doUpdate:Boolean = update && itemDescription && itemDescription.isInUserSpace; 
+		var doUpdate:Boolean = update && itemDescription && itemDescription.isInUserSpace;
 		if (doUpdate) {
-		    item.id = xmlEditor.cmdSpec.headerId;
-		} 
+			item.id = xmlEditor.cmdSpec.headerId;
+		}
 		uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 		if (item.isProfile) {
 			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml(), doUpdate);
@@ -125,5 +125,9 @@ private function initPaletteOverview():void {
 	componentsPaletteOverview.dataGrid.dragEnabled = true;
 	componentsPaletteOverview.dataGrid.allowMultipleSelection = true;
 	componentsPaletteOverview.dataGrid.resizableColumns = true;
+}
+
+public function getType():String {
+	return Config.VIEW_EDIT;
 }
 

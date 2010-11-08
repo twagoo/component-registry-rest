@@ -6,7 +6,17 @@ package clarin.cmdi.componentregistry.services {
 	public final class Config extends EventDispatcher {
 		public static const USER_SPACE_TOGGLE_EVENT:String = "userSpaceToggle";
 
-		public static const USERSPACE_PARAM:String = "userspace";
+		public static const CLARIN_REGISTER_URL:String = "http://www.clarin.eu/user/register";
+		public static const PARAM_USERSPACE:String = "userspace";
+		public static const PARAM_VIEW:String = "view";
+		
+		//Possible views to start with.
+		public static const VIEW_BROWSE:String = "browse";
+		public static const VIEW_EDIT:String = "edit";
+		public static const VIEW_IMPORT:String = "import";
+		//Possible space to start with.
+		public static const SPACE_USER:String = "user";
+		public static const SPACE_PUBLIC:String = "public";
 
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
@@ -16,6 +26,7 @@ package clarin.cmdi.componentregistry.services {
 		private static const COMPONENT_INFO_URL:String = "/rest/registry/components/";
 		private static const PING_SESSION_URL:String = "/rest/registry/pingSession";
 		private static const ISOCAT_SERVLET:String = "/isocat";
+		
 
 		private static var _instance:Config = new Config();
 
@@ -24,6 +35,8 @@ package clarin.cmdi.componentregistry.services {
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
 
+        private var _view:String = VIEW_BROWSE;
+        private var _space:String = SPACE_PUBLIC;
 		private var _userSpace:Boolean = false;
 
 		public function Config() {
@@ -41,6 +54,14 @@ package clarin.cmdi.componentregistry.services {
 			if (item != null) {
 				_startupItem = item;
 			}
+			var view:String = applicationParameters.view;
+			if (view != null) {
+				_view = view;
+			}			
+			var space:String = applicationParameters.space;
+			if (space != null) {
+				_space = space;
+			}			
 		}
 
 		public static function create(applicationParameters:Object):void {
@@ -98,6 +119,14 @@ package clarin.cmdi.componentregistry.services {
 		    return _startupItem;
 		}
 
+        public function get view():String {
+            return _view;
+        }
+        
+        public function get space():String {
+            return _space;
+        }
+        
 		public static function get instance():Config {
 			return _instance;
 		}

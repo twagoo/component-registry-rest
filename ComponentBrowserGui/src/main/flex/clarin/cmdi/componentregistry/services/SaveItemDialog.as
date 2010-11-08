@@ -24,7 +24,7 @@ package clarin.cmdi.componentregistry.services {
 			var req:URLRequest = new URLRequest();
 			var url:URI = new URI(item.dataUrl + "/" + extension);
 			if (item.isInUserSpace) {
-				url.setQueryValue(Config.USERSPACE_PARAM, "true");
+				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 			req.url = url.toString();
 			navigateToURL(req, "_top");

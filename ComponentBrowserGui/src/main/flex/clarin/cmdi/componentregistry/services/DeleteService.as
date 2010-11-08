@@ -37,7 +37,7 @@ package clarin.cmdi.componentregistry.services {
 			CursorManager.setBusyCursor();
 			var url:URI = new URI(item.dataUrl);
 			if (item.isInUserSpace) {
-				url.setQueryValue(Config.USERSPACE_PARAM, "true");
+				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 			service.url = url.toString();
 			service.send(DELETE_METHOD);

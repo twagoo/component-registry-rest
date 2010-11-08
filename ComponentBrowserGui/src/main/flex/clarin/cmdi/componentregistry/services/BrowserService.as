@@ -46,7 +46,7 @@ package clarin.cmdi.componentregistry.services {
 			var url:URI = new URI(serviceUrl);
 			url.setQueryValue("unique", new Date().getTime().toString());
 			if (userSpace) {
-				url.setQueryValue(Config.USERSPACE_PARAM, "true");
+				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 			service.url = url.toString();
 		}

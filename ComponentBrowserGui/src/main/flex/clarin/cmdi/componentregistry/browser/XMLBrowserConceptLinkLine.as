@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.components.ConceptLinkRenderer;
+	import clarin.cmdi.componentregistry.common.components.LinkRenderer;
 	
 	import mx.containers.HBox;
 	import mx.controls.Label;
@@ -8,7 +8,7 @@ package clarin.cmdi.componentregistry.browser {
 	public class XMLBrowserConceptLinkLine extends HBox {
 
 		private var nameLabel:Label = new Label();
-		private var fieldValue:ConceptLinkRenderer = new ConceptLinkRenderer();
+		private var fieldValue:LinkRenderer = new LinkRenderer();
 
 		public function XMLBrowserConceptLinkLine(name:String, value:String) {
 			super();

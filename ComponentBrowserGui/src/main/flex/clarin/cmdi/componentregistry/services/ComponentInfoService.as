@@ -36,7 +36,7 @@ package clarin.cmdi.componentregistry.services {
 			component.description = item;
 			var url:URI = new URI(item.dataUrl);
 			if (item.isInUserSpace) {
-				url.setQueryValue(Config.USERSPACE_PARAM, "true");
+				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 			service.url = url.toString();
 			var token:AsyncToken = this.service.send();

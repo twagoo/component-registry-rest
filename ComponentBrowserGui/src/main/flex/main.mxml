@@ -3,39 +3,34 @@
 				xmlns:common="clarin.cmdi.componentregistry.common.components.*"
 				layout="absolute"
 				preinitialize="initializeInstances();"
-				applicationComplete="init();"
+				applicationComplete="appComplete();"
 				backgroundColor="#DDE3EF">
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.services.PingSessionService;
+			import clarin.cmdi.componentregistry.services.PingSessionService;
 			import mx.controls.Alert;
-			import clarin.cmdi.componentregistry.common.StyleConstants;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.common.Credentials;
-			import flash.net.navigateToURL;
 			import mx.managers.PopUpManager;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 
 			private var sessionPinger:PingSessionService;
 
-
 			private function initializeInstances():void {
-				Config.create(Application.application.parameters);
 				Credentials.create(Application.application.parameters);
+				Config.create(Application.application.parameters);
 			}
 
-			private function init():void {
+			private function appComplete():void {
 				ExternalMouseWheelSupport.getInstance(stage);
 				sessionPinger = PingSessionService.INSTANCE
 				sessionPinger.startPinging();
+				if (Credentials.instance.isLoggedIn() && (Config.instance.space == Config.SPACE_USER)) {
+					Config.instance.userSpace = true;
+				}
+				viewStack.switchView(Config.instance.view);
 			}
-			
-//			private function handleLogin(event:MouseEvent):void {
-//				var req:URLRequest = new URLRequest();
-//				req.url = Config.instance.serviceRootUrl + "?shhaaDo=lI";
-//				navigateToURL(req, "_top");
-//			}
 		]]>
 	</mx:Script>
 
@@ -54,9 +49,7 @@
 									dataProvider="{viewStack}"/>
 				<mx:Spacer width="90%"/>
 				<mx:Label text="User: {Credentials.instance.userName}"/>
-				<!--				<mx:Button id="login"
-					 label="login {userName}"
-					 click="handleLogin(event)"/>-->
+				<common:LoginLabelButton id="login"/>
 			</mx:HBox>
 			<common:RegistryViewStack id="viewStack"
 									  borderStyle="none"

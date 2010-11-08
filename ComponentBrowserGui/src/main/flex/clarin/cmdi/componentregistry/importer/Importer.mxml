@@ -3,10 +3,12 @@
 		   xmlns:local="clarin.cmdi.componentregistry.services.*"
 		   width="100%"
 		   height="100%"
-		   label="Import...">
+		   label="Import..."
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView">
 
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.services.Config;
 			import mx.events.ValidationResultEvent;
 			import mx.collections.ArrayCollection;
 			import mx.validators.Validator;
@@ -90,6 +92,10 @@
 				validator.property = "text";
 				validators.addItem(validator);
 			}
+
+			public function getType():String {
+				return Config.VIEW_IMPORT;
+			}
 		]]>
 	</mx:Script>
 
@@ -124,7 +130,7 @@
 			</mx:FormItem>
 			<mx:FormItem label="Description">
 				<mx:TextArea id="description"
-							  creationComplete="registerIsRequiredValidator(event)"/>
+							 creationComplete="registerIsRequiredValidator(event)"/>
 			</mx:FormItem>
 			<mx:FormItem label="Creator Name">
 				<mx:Text id="creatorName"

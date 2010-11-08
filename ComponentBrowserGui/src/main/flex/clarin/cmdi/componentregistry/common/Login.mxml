@@ -1,56 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml"
+		  xmlns:common="clarin.cmdi.componentregistry.common.components.*"
 		  title="Login"
 		  horizontalScrollPolicy="off"
 		  verticalScrollPolicy="off">
 
 	<mx:Metadata>
-		[Event(name="success",type="flash.events.Event")]
 		[Event(name="failed",type="flash.events.Event")]
 	</mx:Metadata>
-	
+
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.services.Config;
 			import mx.managers.PopUpManager;
-			import clarin.cmdi.componentregistry.common.Login;
-			
-			public static const SUCCESS:String = "success";
+
 			public static const FAILED:String = "failed";
-
-
-			private function handleOk(event:MouseEvent):void {
-				PopUpManager.removePopUp(this);
-				dispatchEvent(new Event(FAILED));
-			}
+			[Bindable]
+			private var _viewType:String;
+			[Bindable]
+			private var _spaceType:String;
+			[Bindable]
+			private var _itemId:String;
 
 			private function handleCancel(event:MouseEvent):void {
 				PopUpManager.removePopUp(this);
 				dispatchEvent(new Event(FAILED));
 			}
 
-			public function show(parent:DisplayObject):void {
+			/**
+			 * viewType or spaceType can be null the will just be ignored then.
+			 *
+			 * */
+			public function show(parent:DisplayObject, viewType:String, spaceType:String, itemDescription:ItemDescription = null):void {
+				_viewType = viewType;
+				_spaceType = spaceType;
+				if (itemDescription) {
+				    _itemId = itemDescription.id;
+				}
 				PopUpManager.addPopUp(this, parent, true);
 				PopUpManager.centerPopUp(this);
 			}
 		]]>
 	</mx:Script>
 
-	<mx:Form id="loginForm">
-	    <mx:Label text="Login is not supported so browsing is the only allowed feature at the moment..."/>
-		<mx:FormItem label="Username:" >
-			<mx:TextInput/>
-		</mx:FormItem>
-		<mx:FormItem label="Password:">
-			<mx:TextInput displayAsPassword="true"/>
-		</mx:FormItem>
-		<mx:HBox>
-			<mx:Button id="okBtn"
-					   label="Ok"
-					   click="{handleOk(event);}"/>
-			<mx:Button id="cancelBtn"
-					   label="Cancel"
-					   click="{handleCancel(event);}"/>
-		</mx:HBox>
-	</mx:Form>
+	<mx:VBox horizontalAlign="center">
+		<mx:Label text="You need to be logged in to do that, click the link to login."/>
+		<common:LoginLabelButton id="login"
+								 scaleX="1.5"
+								 scaleY="1.5"
+								 viewType="{_viewType}"
+								 spaceType="{_spaceType}"
+								 itemId="{_itemId}"/>
+		<mx:Label text="If you do not have an account please go here to register:"/>
+		<common:LinkRenderer text="{Config.CLARIN_REGISTER_URL}"/>
+		<mx:Button id="cancelBtn"
+				   label="Cancel"
+				   click="{handleCancel(event);}"/>
+	</mx:VBox>
 
 </mx:Panel>
