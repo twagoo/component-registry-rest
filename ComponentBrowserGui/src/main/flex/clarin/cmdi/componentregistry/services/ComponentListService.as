@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.services {
+	import clarin.cmdi.componentregistry.browser.BrowserColumns;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.rpc.events.ResultEvent;
 
@@ -17,13 +18,15 @@ package clarin.cmdi.componentregistry.services {
 			var resultXml:XML = resultEvent.result as XML;
 			var nodes:XMLList = resultXml.componentDescription;
 
-			var tempArray:Array = new Array();
+			var tempArray:ArrayCollection = new ArrayCollection();
 			for each (var node:XML in nodes) {
 				var item:ItemDescription = new ItemDescription();
 				item.createComponent(node, userSpace);
-				tempArray[tempArray.length] = item;
+				tempArray.addItem(item);
 			}
-			setItemDescriptions(new ArrayCollection(tempArray));
+			tempArray.sort = BrowserColumns.getInitialSortForComponents();
+			tempArray.refresh();
+            setItemDescriptions(new ArrayCollection(tempArray.toArray()));
 		    super.result(resultEvent);
 		}
 

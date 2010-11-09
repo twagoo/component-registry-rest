@@ -16,8 +16,8 @@
 
 	<mx:Script>
 		<![CDATA[
-		    import clarin.cmdi.componentregistry.common.Credentials;
-		    import clarin.cmdi.componentregistry.common.Login;
+			import clarin.cmdi.componentregistry.common.Credentials;
+			import clarin.cmdi.componentregistry.common.Login;
 			import mx.collections.ArrayList;
 			import com.adobe.utils.ArrayUtil;
 			import clarin.cmdi.componentregistry.common.StyleConstants;
@@ -41,9 +41,12 @@
 			public var spaces:ArrayCollection = new ArrayCollection([{label: PUBLICSPACE_LABEL, data: 1}, {label: USERSPACE_LABEL, data: 2}]);
 
 			public function set browserDataProvider(dataProvider:ArrayCollection):void {
-				this.dataGrid.dataProvider = new ArrayCollection(dataProvider.toArray().slice());
-			    dataGrid.doFiltering();
-				scrollToSelected();
+				if (dataProvider) {
+					var data:ArrayCollection = new ArrayCollection(dataProvider.toArray().slice());
+					this.dataGrid.dataProvider = data
+					dataGrid.doFiltering();
+					scrollToSelected();
+				}
 			}
 
 			private function dispatchBrowserSelectionEvent():void {
@@ -102,13 +105,13 @@
 			}
 
 			private function userSpaceCloseHandler(event:Event):void {
-			    if (Credentials.instance.isLoggedIn()) {
-				    Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
+				if (Credentials.instance.isLoggedIn()) {
+					Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
 				} else if (userSpaceCB.selectedIndex != 0) {
-				    userSpaceCB.selectedIndex = 0;
-				    new Login().show(this, Config.VIEW_BROWSE, Config.SPACE_USER);
+					userSpaceCB.selectedIndex = 0;
+					new Login().show(this, Config.VIEW_BROWSE, Config.SPACE_USER);
 				}
-				   
+
 			}
 		]]>
 	</mx:Script>
@@ -121,8 +124,7 @@
 		<mx:ComboBox id="userSpaceCB"
 					 dataProvider="{spaces}"
 					 width="110"
-					 close="userSpaceCloseHandler(event);"
-					 />
+					 close="userSpaceCloseHandler(event);"/>
 
 
 		<rictus:SearchBox id="searchBox"

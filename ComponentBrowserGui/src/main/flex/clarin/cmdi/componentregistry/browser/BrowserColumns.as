@@ -1,4 +1,6 @@
 package clarin.cmdi.componentregistry.browser {
+	import mx.collections.Sort;
+	import mx.collections.SortField;
 	import mx.controls.dataGridClasses.DataGridColumn;
 	import mx.utils.ObjectUtil;
 
@@ -38,6 +40,25 @@ package clarin.cmdi.componentregistry.browser {
 			return c;
 		}
 
+		public static function getInitialSortForProfiles():Sort {
+			var sort:Sort = new Sort();
+			var sortByName:SortField = new SortField("name", true);
+			var sortByDate:SortField = new SortField("registrationDate", true, true);
+			sortByDate.compareFunction = compareRegistrationDate;
+			sort.fields = [sortByDate, sortByName];
+			return sort
+		}
+		
+		public static function getInitialSortForComponents():Sort {
+			var sort:Sort = new Sort();
+			var sortByGroup:SortField = new SortField("groupName", true);
+			var sortByName:SortField = new SortField("name", true);
+			var sortByDate:SortField = new SortField("registrationDate", true, true);
+			sortByDate.compareFunction = compareRegistrationDate;
+			sort.fields = [sortByGroup, sortByDate, sortByName];
+			return sort
+		}
+
 		private function createDateColumn():DataGridColumn {
 			var c:DataGridColumn = createColumn("registrationDate", "Registration Date");
 			c.sortCompareFunction = compareRegistrationDate;
@@ -45,7 +66,7 @@ package clarin.cmdi.componentregistry.browser {
 
 		}
 
-		private function compareRegistrationDate(itemA:Object, itemB:Object):int {
+		private static function compareRegistrationDate(itemA:Object, itemB:Object):int {
 			return ObjectUtil.dateCompare(itemA.registrationDateValue, itemB.registrationDateValue);
 		}
 
