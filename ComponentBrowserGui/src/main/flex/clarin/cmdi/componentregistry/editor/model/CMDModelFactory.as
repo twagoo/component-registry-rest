@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
@@ -58,14 +59,19 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.cardinalityMin = xml.@CardinalityMin;
 			if (xml.hasOwnProperty("@CardinalityMax"))
 				result.cardinalityMax = xml.@CardinalityMax;
-            if (xml.hasOwnProperty("@Multilingual")) 
-                result.multilingual = xml.@Multilingual;				
+			if (xml.hasOwnProperty("@Multilingual"))
+				result.multilingual = xml.@Multilingual;
 			result.attributeList = createAttributeList(xml);
 			if (xml.hasOwnProperty(ComponentMD.VALUE_SCHEME)) {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
 					result.valueSchemePattern = xml.ValueScheme.pattern;
 				} else if (xml.ValueScheme.hasOwnProperty(ComponentMD.ENUMERATION)) {
-					result.valueSchemeEnumeration = new XMLListCollection(xml.ValueScheme.enumeration.*);
+					var xmlList:XMLListCollection = new XMLListCollection(xml.ValueScheme.enumeration.*);
+					var valueSchemeItems:ArrayCollection = new ArrayCollection();
+					for each (var xml:XML in xmlList) {
+						valueSchemeItems.addItem(new ValueSchemeItem(String(xml.text()), String(xml.@AppInfo), String(xml.@ConceptLink)));
+					}
+					result.valueSchemeEnumeration = valueSchemeItems;
 				}
 			} else if (xml.hasOwnProperty("@ValueScheme")) {
 				result.valueSchemeSimple = xml.@ValueScheme;
@@ -96,7 +102,12 @@ package clarin.cmdi.componentregistry.editor.model {
 				if (xml.ValueScheme.hasOwnProperty(ComponentMD.PATTERN)) {
 					result.valueSchemePattern = xml.ValueScheme.pattern;
 				} else if (xml.ValueScheme.hasOwnProperty(ComponentMD.ENUMERATION)) {
-					result.valueSchemeEnumeration = new XMLListCollection(xml.ValueScheme.enumeration.*);
+					var xmlList:XMLListCollection = new XMLListCollection(xml.ValueScheme.enumeration.*);
+					var valueSchemeItems:ArrayCollection = new ArrayCollection();
+					for each (var xml:XML in xmlList) {
+						valueSchemeItems.addItem(new ValueSchemeItem(String(xml.text()), String(xml.@AppInfo), String(xml.@ConceptLink)));
+					}
+					result.valueSchemeEnumeration = valueSchemeItems;
 				}
 			}
 			return result;

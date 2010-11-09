@@ -5,14 +5,13 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
-
+	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
 	import mx.binding.utils.BindingUtils;
 	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
-	import mx.collections.XMLListCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
@@ -114,7 +113,7 @@ package clarin.cmdi.componentregistry.editor {
 					valueScheme.valueSchemeSimple = "";
 				});
 			ChangeWatcher.watch(valueSchemeInput, "valueSchemeEnumeration", function(e:PropertyChangeEvent):void {
-					valueScheme.valueSchemeEnumeration = e.newValue as XMLListCollection;
+					valueScheme.valueSchemeEnumeration = e.newValue as ArrayCollection;
 					valueScheme.valueSchemeSimple = "";
 					valueScheme.valueSchemePattern = "";
 				});

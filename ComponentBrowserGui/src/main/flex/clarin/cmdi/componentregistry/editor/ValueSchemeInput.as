@@ -4,13 +4,12 @@ package clarin.cmdi.componentregistry.editor {
 	
 	import flash.events.MouseEvent;
 	
-	import mx.collections.XMLListCollection;
+	import mx.collections.ArrayCollection;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
 	import mx.controls.TextInput;
-	import mx.events.FlexEvent;
 	import mx.events.ValidationResultEvent;
 	import mx.managers.PopUpManager;
 	import mx.validators.Validator;
@@ -20,7 +19,7 @@ package clarin.cmdi.componentregistry.editor {
 		private var textField:TextInput = new TextInput();
 		private var enumeration:ComboBox;
 		private var valueSchemeButton:Button = new Button();
-		private var _valueSchemeEnumeration:XMLListCollection;
+		private var _valueSchemeEnumeration:ArrayCollection;
 		private var _valueSchemePattern:String = "";
 		private var _valueSchemeSimple:String = "";
 		private var _validator:Validator = InputValidators.getIsRequiredValidator();
@@ -57,7 +56,7 @@ package clarin.cmdi.componentregistry.editor {
 				removeChildAt(0);
 			}
 			addChildAt(textField, 0);
- 			_validator.listener = this.textField;
+			_validator.listener = this.textField;
 		}
 
 		[Bindable]
@@ -66,7 +65,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function set valueSchemePattern(valueSchemePattern:String):void {
-		    _valueSchemeEnumeration = null;
+			_valueSchemeEnumeration = null;
 			_valueSchemeSimple = "";
 			_valueSchemePattern = valueSchemePattern
 			textField.text = valueSchemePattern;
@@ -78,11 +77,11 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		[Bindable]
-		public function get valueSchemeEnumeration():XMLListCollection {
+		public function get valueSchemeEnumeration():ArrayCollection {
 			return _valueSchemeEnumeration;
 		}
 
-		public function set valueSchemeEnumeration(valueScheme:XMLListCollection):void {
+		public function set valueSchemeEnumeration(valueScheme:ArrayCollection):void {
 			_valueSchemeEnumeration = valueScheme;
 			_valueSchemeSimple = "";
 			_valueSchemePattern = "";
@@ -117,6 +116,6 @@ package clarin.cmdi.componentregistry.editor {
 				result = _validator.validate(this.enumeration.dataProvider);
 			}
 			return result.type == ValidationResultEvent.VALID;
-		} 
+		}
 	}
 }

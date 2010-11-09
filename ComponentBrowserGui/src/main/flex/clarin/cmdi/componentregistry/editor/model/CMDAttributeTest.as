@@ -1,10 +1,11 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	
 	import flexunit.framework.TestCase;
 	import flexunit.framework.TestSuite;
 	
-	import mx.collections.XMLListCollection;
+	import mx.collections.ArrayCollection;
 
 	public class CMDAttributeTest extends TestCase {
 		public function CMDAttributeTest() {
@@ -42,13 +43,13 @@ package clarin.cmdi.componentregistry.editor.model {
 		public function testToXmlValueSchemeEnumeration():void {
 			var result:CMDAttribute = new CMDAttribute();
 			result.name = "aap";
-			result.valueSchemeEnumeration = new XMLListCollection();
-			result.valueSchemeEnumeration.addItem(<item {ComponentMD.APP_INFO}="" {ComponentMD.CONCEPTLINK}="">Male</item>);
+			result.valueSchemeEnumeration = new ArrayCollection();
+			result.valueSchemeEnumeration.addItem(new ValueSchemeItem("Male", "test", "test2"));
 			var expected:XML = <Attribute>
 					<Name>aap</Name>
 					<ValueScheme>
 						<enumeration>
-							<item AppInfo="" ConceptLink="">Male</item>
+							<item AppInfo="test1" ConceptLink="test2">Male</item>
 						</enumeration>
 					</ValueScheme>
 				</Attribute>;

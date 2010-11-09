@@ -1,11 +1,12 @@
 package clarin.cmdi.componentregistry.editor.model {
+	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
+	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
-	
-	import mx.collections.ArrayCollection;
-	import mx.collections.XMLListCollection;
 
-    [Bindable]
+	import mx.collections.ArrayCollection;
+
+	[Bindable]
 	public class CMDComponentElement implements XmlAble, ValueSchemeInterface {
 
 		//Attributes
@@ -21,18 +22,18 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		//elements
 		public var attributeList:ArrayCollection = new ArrayCollection();
-		private var _valueSchemeEnumeration:XMLListCollection;
+		private var _valueSchemeEnumeration:ArrayCollection;
 		private var _valueSchemePattern:String;
 
 		public function CMDComponentElement() {
 		}
-		
+
 		public static function createEmptyElement():CMDComponentElement {
-            var result:CMDComponentElement = new CMDComponentElement();
+			var result:CMDComponentElement = new CMDComponentElement();
 			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
 			return result;
 		}
-		
+
 
 		public function get valueSchemeSimple():String {
 			return this._valueSchemeSimple
@@ -42,11 +43,11 @@ package clarin.cmdi.componentregistry.editor.model {
 			this._valueSchemeSimple = valueSchemeSimple;
 		}
 
-		public function get valueSchemeEnumeration():XMLListCollection {
+		public function get valueSchemeEnumeration():ArrayCollection {
 			return this._valueSchemeEnumeration
 		}
 
-		public function set valueSchemeEnumeration(valueSchemeEnumeration:XMLListCollection):void {
+		public function set valueSchemeEnumeration(valueSchemeEnumeration:ArrayCollection):void {
 			this._valueSchemeEnumeration = valueSchemeEnumeration;
 		}
 
@@ -74,8 +75,8 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.@CardinalityMin = cardinalityMin;
 			if (cardinalityMax)
 				result.@CardinalityMax = cardinalityMax;
-            if (multilingual != null)
-                result.@Multilingual = multilingual;				
+			if (multilingual != null)
+				result.@Multilingual = multilingual;
 			if (attributeList.length > 0) {
 				var attributeListTag:XML = <AttributeList></AttributeList>;
 				for each (var attribute:CMDAttribute in attributeList) {
@@ -88,8 +89,8 @@ package clarin.cmdi.componentregistry.editor.model {
 			}
 			if (valueSchemeEnumeration != null) {
 				var enumerationScheme:XML = <enumeration></enumeration>;
-				for each (var item:XML in valueSchemeEnumeration) {
-					enumerationScheme.appendChild(item);
+				for each (var item:ValueSchemeItem in valueSchemeEnumeration) {
+					enumerationScheme.appendChild(<item {ComponentMD.APP_INFO}={item.appInfo} {ComponentMD.CONCEPTLINK}={item.conceptLink}>{item.item}</item>);
 				}
 				result.appendChild(<ValueScheme>{enumerationScheme}</ValueScheme>);
 			}

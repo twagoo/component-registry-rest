@@ -22,13 +22,13 @@
 			public var conceptLinkEdit:Boolean = false;
 			private var currentEditPosition:Object;
 
-			public function initEnumeration(valueSchemeData:XMLListCollection):void {
+			public function initEnumeration(valueSchemeData:ArrayCollection):void {
 				if (valueSchemeData) {
-					for each (var item:XML in valueSchemeData) {
-						valueSchemeEnumeration.addItem({item: item.text(), appInfo: item.@AppInfo, conceptLink: item.@ConceptLink});
+					for each (var item:ValueSchemeItem in valueSchemeData) {
+						valueSchemeEnumeration.addItem(new ValueSchemeItem(item.item, item.appInfo, item.conceptLink));
 					}
 				}
-				valueSchemeEnumeration.addItem({item: ADD_ROW, appInfo: "", conceptLink: ""});
+				valueSchemeEnumeration.addItem(new ValueSchemeItem(ADD_ROW, "", ""));
 			}
 
 			private function editEnd(e:DataGridEvent):void {
@@ -36,7 +36,7 @@
 					var row:Object = valueSchemeEnumeration.getItemAt(valueSchemeEnumeration.length - 1);
 					var input:Object = TextInput(e.currentTarget.itemEditorInstance);
 					if (row.item == ADD_ROW && input.text != ADD_ROW) {
-						valueSchemeEnumeration.addItem({item: ADD_ROW, appInfo: "", conceptLink: ""});
+						valueSchemeEnumeration.addItem(new ValueSchemeItem(ADD_ROW, "", ""));
 						//scroll down
 						dataGrid.validateNow();
 						dataGrid.selectedIndex = valueSchemeEnumeration.length - 1;
@@ -67,7 +67,6 @@
 				}
 			}
 
-//TODO PD show tooltip for isocat somewhere
 			private function handleKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.DELETE) {
 					deleteRow(event);
@@ -83,10 +82,10 @@
 				}
 				dataGrid.validateNow();
 			}
-			
+
 			private function insertRowAbove(event:ContextMenuEvent):void {
-			    var index:int = Math.max(0, dataGrid.selectedIndex);
-			    valueSchemeEnumeration.addItemAt({item: ADD_ROW, appInfo: "", conceptLink: ""}, index);
+				var index:int = Math.max(0, dataGrid.selectedIndex);
+				valueSchemeEnumeration.addItemAt(new ValueSchemeItem(ADD_ROW, "", ""), index);
 			}
 
 			private function createContextMenu():ContextMenu {

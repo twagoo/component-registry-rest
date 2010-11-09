@@ -1,8 +1,10 @@
 package clarin.cmdi.componentregistry.editor.model {
+	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
+	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
-
-	import mx.collections.XMLListCollection;
+	
+	import mx.collections.ArrayCollection;
 
 	public class CMDAttribute implements XmlAble, ValueSchemeInterface {
 		//No Attributes
@@ -11,7 +13,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var name:String;
 		private var type:String;
 		private var _valueSchemePattern:String; //pattern
-		private var _valueSchemeEnumeration:XMLListCollection; // enumeration 
+		private var _valueSchemeEnumeration:ArrayCollection; // enumeration 
 
 		public function CMDAttribute() {
 		}
@@ -30,11 +32,11 @@ package clarin.cmdi.componentregistry.editor.model {
 			this.type = valueSchemeSimple;
 		}
 
-		public function get valueSchemeEnumeration():XMLListCollection {
+		public function get valueSchemeEnumeration():ArrayCollection {
 			return this._valueSchemeEnumeration
 		}
 
-		public function set valueSchemeEnumeration(valueSchemeEnumeration:XMLListCollection):void {
+		public function set valueSchemeEnumeration(valueSchemeEnumeration:ArrayCollection):void {
 			this._valueSchemeEnumeration = valueSchemeEnumeration;
 		}
 
@@ -53,8 +55,8 @@ package clarin.cmdi.componentregistry.editor.model {
 				result.appendChild(<ValueScheme><pattern>{valueSchemePattern}</pattern></ValueScheme>);
 			} else if (valueSchemeEnumeration) {
 				var enumerationScheme:XML = <enumeration></enumeration>;
-				for each (var item:XML in valueSchemeEnumeration) {
-					enumerationScheme.appendChild(item);
+				for each (var item:ValueSchemeItem in valueSchemeEnumeration) {
+					enumerationScheme.appendChild(<item {ComponentMD.APP_INFO}={item.appInfo} {ComponentMD.CONCEPTLINK}={item.conceptLink}>{item.item}</item>);
 				}
 				result.appendChild(<ValueScheme>{enumerationScheme}</ValueScheme>);
 			} else {

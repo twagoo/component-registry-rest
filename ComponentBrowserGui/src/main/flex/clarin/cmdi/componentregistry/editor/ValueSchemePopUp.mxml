@@ -46,10 +46,10 @@
 			}
 
 			private function setControlledVocabulary():void {
-				var enumeration:XMLListCollection = new XMLListCollection();
-				for (var i:int; i < enumerationGrid.valueSchemeEnumeration.length - 1; i++) {
-					var item:Object = enumerationGrid.valueSchemeEnumeration.getItemAt(i);
-					enumeration.addItem(<item {ComponentMD.APP_INFO}={item.appInfo} {ComponentMD.CONCEPTLINK}={item.conceptLink}>{item.item}</item>);
+				var enumeration:ArrayCollection = new ArrayCollection();
+				for (var i:int = 0; i < enumerationGrid.valueSchemeEnumeration.length - 1; i++) { //copy except the "Add new"
+					var item:ValueSchemeItem = enumerationGrid.valueSchemeEnumeration.getItemAt(i) as ValueSchemeItem;
+					enumeration.addItem(item);
 				}
 				valueSchemeInput.valueSchemeEnumeration = enumeration;
 				cleanUp();

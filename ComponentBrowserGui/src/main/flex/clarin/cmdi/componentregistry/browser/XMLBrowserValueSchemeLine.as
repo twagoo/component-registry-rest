@@ -1,9 +1,10 @@
 package clarin.cmdi.componentregistry.browser {
-	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-
+	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
+	
 	import flash.display.DisplayObject;
-
+	
+	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 	import mx.containers.HBox;
 	import mx.controls.ComboBox;
@@ -17,7 +18,7 @@ package clarin.cmdi.componentregistry.browser {
 		private var valueObject:DisplayObject;
 		private var _indent:int = 0;
 
-		public function XMLBrowserValueSchemeLine(name:String, indent:int, value:String = null, valuePattern:String = null, valueList:XMLListCollection = null) {
+		public function XMLBrowserValueSchemeLine(name:String, indent:int, value:String = null, valuePattern:String = null, valueList:ArrayCollection = null) {
 			super();
 			_indent = indent;
 			nameLabel.text = name;
@@ -33,7 +34,7 @@ package clarin.cmdi.componentregistry.browser {
 			addChild(valueObject);
 		}
 
-		public static function createValueScheme(value:String = null, valuePattern:String = null, valueList:XMLListCollection = null):UIComponent {
+		public static function createValueScheme(value:String = null, valuePattern:String = null, valueList:ArrayCollection = null):UIComponent {
 			if (valueList) {
 				return createEnumeration(valueList);
 			} else if (valuePattern) {
@@ -51,7 +52,7 @@ package clarin.cmdi.componentregistry.browser {
 			return result;
 		}
 
-		private static function createEnumeration(enumeration:XMLListCollection):UIComponent {
+		private static function createEnumeration(enumeration:ArrayCollection):UIComponent {
 			var result:ComboBox = createValueSchemeComboBox();
 			result.dataProvider = enumeration;
 			return result;
@@ -61,12 +62,12 @@ package clarin.cmdi.componentregistry.browser {
 			var result:ComboBox = new ComboBox();
 			result.itemRenderer = new ClassFactory(Label);
 			result.labelFunction = function(item:Object):String {
-				var xmlItem:XML = item as XML;
-				if (item.hasOwnProperty("@" + ComponentMD.APP_INFO) && xmlItem.attribute(ComponentMD.APP_INFO) != "") {
-					return xmlItem.text() + " - " + xmlItem.attribute(ComponentMD.APP_INFO);
-				} else {
-					return xmlItem.text();
-				}
+			    var valueSchemeItem:ValueSchemeItem = item as ValueSchemeItem;
+			    if (item.appInfo != "") {
+			        return item.item + "-" + item.appInfo;
+			    } else {
+			        return item.item;
+			    }
 			};
 			return result;
 		}
