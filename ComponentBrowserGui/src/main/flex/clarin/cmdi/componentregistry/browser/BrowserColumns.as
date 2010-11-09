@@ -45,7 +45,7 @@ package clarin.cmdi.componentregistry.browser {
 			var sortByName:SortField = new SortField("name", true);
 			var sortByDate:SortField = new SortField("registrationDate", true, true);
 			sortByDate.compareFunction = compareRegistrationDate;
-			sort.fields = [sortByDate, sortByName];
+			sort.fields = [sortByName, sortByDate];
 			return sort
 		}
 		
@@ -55,7 +55,7 @@ package clarin.cmdi.componentregistry.browser {
 			var sortByName:SortField = new SortField("name", true);
 			var sortByDate:SortField = new SortField("registrationDate", true, true);
 			sortByDate.compareFunction = compareRegistrationDate;
-			sort.fields = [sortByGroup, sortByDate, sortByName];
+			sort.fields = [sortByGroup, sortByName, sortByDate];
 			return sort
 		}
 
