@@ -9,19 +9,20 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-
+	
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
 	import mx.controls.Label;
+	import mx.controls.Spacer;
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.ChildExistenceChangedEvent;
@@ -190,6 +191,9 @@ package clarin.cmdi.componentregistry.editor {
 			var startOverLabel:Label = createStartOverButton();
 			startOverLabel.setStyle("paddingTop", "2");
 			startOverLabel.height = buttons.height;
+			var space:Spacer = new Spacer();
+			space.width = 55;
+			head.addChild(space);
 			head.addChild(startOverLabel);
 			addChild(head);
 			addChild(createOptionalGroupNameInput(spec));
