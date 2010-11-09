@@ -49,7 +49,7 @@ package clarin.cmdi.componentregistry.editor.model {
 					<Name>aap</Name>
 					<ValueScheme>
 						<enumeration>
-							<item AppInfo="test1" ConceptLink="test2">Male</item>
+							<item AppInfo="test" ConceptLink="test2">Male</item>
 						</enumeration>
 					</ValueScheme>
 				</Attribute>;
