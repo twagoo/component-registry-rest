@@ -25,7 +25,7 @@
 			public function initEnumeration(valueSchemeData:ArrayCollection):void {
 				if (valueSchemeData) {
 					for each (var item:ValueSchemeItem in valueSchemeData) {
-						valueSchemeEnumeration.addItem(new ValueSchemeItem(item.item, item.appInfo, item.conceptLink));
+						valueSchemeEnumeration.addItem(item);
 					}
 				}
 				valueSchemeEnumeration.addItem(new ValueSchemeItem(ADD_ROW, "", ""));

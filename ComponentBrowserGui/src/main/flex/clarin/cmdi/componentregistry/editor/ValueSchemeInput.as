@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.browser.XMLBrowserValueSchemeLine;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-	
+
 	import flash.events.MouseEvent;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
@@ -34,7 +34,6 @@ package clarin.cmdi.componentregistry.editor {
 			textField.width = 300;
 			textField.editable = false;
 			enumeration = createEnumeration();
-			enumeration.width = 300;
 		}
 
 		protected override function createChildren():void {
@@ -85,16 +84,20 @@ package clarin.cmdi.componentregistry.editor {
 			_valueSchemeEnumeration = valueScheme;
 			_valueSchemeSimple = "";
 			_valueSchemePattern = "";
-			enumeration.dataProvider = valueScheme;
 			if (getChildren().length > 1) {
 				removeChildAt(0);
 			}
+			enumeration = createEnumeration();
+			enumeration.dataProvider = valueScheme;
 			addChildAt(enumeration, 0);
 			_validator.listener = this.enumeration;
 		}
 
 		private function createEnumeration():ComboBox {
-			return XMLBrowserValueSchemeLine.createValueSchemeComboBox();
+			var result:ComboBox = XMLBrowserValueSchemeLine.createValueSchemeComboBox();
+			result.width = 300;
+			return result;
+
 		}
 
 		private function createValueSchemeButton():void {
