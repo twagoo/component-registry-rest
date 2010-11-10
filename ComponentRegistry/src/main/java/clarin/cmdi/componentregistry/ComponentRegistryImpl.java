@@ -1,11 +1,10 @@
 package clarin.cmdi.componentregistry;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.map.LRUMap;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
@@ -200,8 +198,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public void getMDProfileAsXml(String profileId, OutputStream output) {
-        File file = getProfileFile(profileId);
-        copyStream(file, output);
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
+        writeXml(expandedSpec, output);
     }
 
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
@@ -213,7 +211,17 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         MDMarshaller.generateXsd(expandedSpec, outputStream);
     }
 
-    public File getProfileFile(String profileId) {
+    private void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
+        try {
+            MDMarshaller.marshal(spec, outputStream);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Error in encoding: ", e);
+        } catch (JAXBException e) {
+            LOG.error("Cannot marshall spec: " + spec, e);
+        }
+    }
+
+    private File getProfileFile(String profileId) {
         String id = stripRegistryId(profileId);
         File file = new File(getProfileDir(), id + File.separator + id + ".xml");
         return file;
@@ -229,18 +237,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     public void getMDComponentAsXml(String componentId, OutputStream output) {
-        File file = getComponentFile(componentId);
-        copyStream(file, output);
-    }
-
-    private void copyStream(File file, OutputStream output) {
-        try {
-            IOUtils.copy(new FileInputStream(file), output);
-        } catch (FileNotFoundException e) {
-            LOG.error("Cannot retrieve file: " + file, e);
-        } catch (IOException e) {
-            LOG.error("Cannot retrieve content from file: " + file, e);
-        }
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
+        writeXml(expandedSpec, output);
     }
 
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
@@ -248,7 +246,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         writeXsd(expandedSpec, outputStream);
     }
 
-    public File getComponentFile(String componentId) {
+    private File getComponentFile(String componentId) {
         String id = stripRegistryId(componentId);
         File file = new File(getComponentDir(), id + File.separator + id + ".xml");
         return file;
