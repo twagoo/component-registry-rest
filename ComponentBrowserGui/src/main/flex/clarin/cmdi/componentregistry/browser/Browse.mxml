@@ -57,7 +57,7 @@
 				profilesMenu = new BrowseContextMenu();
 				profilesMenu.viewStack = this.parent as RegistryViewStack;
 				profilesMenu.deleteService = deleteSrv;
-				componentsMenu = new BrowseContextMenu();
+				componentsMenu = new BrowseContextMenu(true);
 				componentsMenu.viewStack = this.parent as RegistryViewStack;
 				componentsMenu.deleteService = deleteSrv;
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);

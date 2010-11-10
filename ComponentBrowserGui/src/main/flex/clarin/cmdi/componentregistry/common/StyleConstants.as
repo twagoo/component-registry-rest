@@ -12,9 +12,9 @@ package clarin.cmdi.componentregistry.common {
 		//		
 		public static const USER_BORDER_COLOR:String = "#F07048";
 
-		[Embed(source='assets/images/layer-lower-3.png')]
+		[Embed(source='/assets/images/layer-lower-3.png')]
 		public static const downIcon:Class;
-		[Embed(source='assets/images/layer-raise-3.png')]
+		[Embed(source='/assets/images/layer-raise-3.png')]
 		public static const upIcon:Class;
 	}
 }

@@ -2,11 +2,11 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.services.DeleteService;
 	import clarin.cmdi.componentregistry.services.SaveItemDialog;
-	
+
 	import flash.events.ContextMenuEvent;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
-	
+
 	import mx.controls.Alert;
 	import mx.controls.DataGrid;
 	import mx.events.CloseEvent;
@@ -26,8 +26,10 @@ package clarin.cmdi.componentregistry.common.components {
 		private var _dataGrid:DataGrid;
 
 		private var saveItemDialog:SaveItemDialog = new SaveItemDialog();
+		private var isComponent:Boolean = false;
 
-		public function BrowseContextMenu() {
+		public function BrowseContextMenu(isComponent:Boolean = false) {
+			this.isComponent = isComponent
 			cm = new ContextMenu();
 			cm.hideBuiltInItems();
 			cm.customItems = createMenuItems();
@@ -38,9 +40,11 @@ package clarin.cmdi.componentregistry.common.components {
 			var cmi:ContextMenuItem = new ContextMenuItem("Download as XML...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXml);
 			result.push(cmi);
-			cmi = new ContextMenuItem("Download as XSD...");
-			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXsd);
-			result.push(cmi);
+			if (!isComponent) {
+				cmi = new ContextMenuItem("Download as XSD...");
+				cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXsd);
+				result.push(cmi);
+			}
 			cmi = new ContextMenuItem("Edit Item...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editItem);
 			result.push(cmi);
