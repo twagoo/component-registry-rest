@@ -1,7 +1,10 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.common.components.DownIconButton;
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
+	import clarin.cmdi.componentregistry.common.components.UpIconButton;
+	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	
 	import flash.events.Event;
@@ -11,6 +14,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
+	import mx.controls.Button;
 	import mx.controls.Label;
 	import mx.core.Container;
 	import mx.core.UIComponent;
@@ -19,17 +23,23 @@ package clarin.cmdi.componentregistry.editor {
 	public class ElementEdit extends Form {
 		public static const REMOVE_ELEMENT_EVENT:String = "removeElement";
 		private var _element:CMDComponentElement;
+		private var _parentComponent:CMDComponent;
 		private var _parent:UIComponent;
 
-		public function ElementEdit(element:CMDComponentElement, parent:UIComponent) {
+		public function ElementEdit(element:CMDComponentElement, parent:UIComponent, parentComponent:CMDComponent) {
 			super();
 			this._element = element;
+			this._parentComponent = parentComponent;
 			this._parent = parent;
 			styleName = StyleConstants.XMLBROWSER;
 		}
 
 		public function get element():CMDComponentElement {
 			return _element;
+		}
+
+		public function get parentComponent():CMDComponent {
+			return _parentComponent;
 		}
 
 		protected override function createChildren():void {
@@ -60,7 +70,7 @@ package clarin.cmdi.componentregistry.editor {
 					multiLingualCheck.visible = show;
 					multiLingualCheck.includeInLayout = show;
 					if (!show) {
-					    _element.multilingual = null;
+						_element.multilingual = null;
 					}
 				}, _element, "valueSchemeSimple");
 
@@ -72,16 +82,49 @@ package clarin.cmdi.componentregistry.editor {
 			var editBar:HBox = new HBox();
 			editBar.addChild(createHeading());
 			var removeButton:Label = new RemoveLabelButton();
-			removeButton.addEventListener(MouseEvent.CLICK, fireRemoveComponent);
-			removeButton.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+			addFocusListeners(removeButton).addEventListener(MouseEvent.CLICK, fireRemoveComponent);
+			editBar.addChild(removeButton);
+
+			var downButton:Button = new DownIconButton();
+			addFocusListeners(downButton).addEventListener(MouseEvent.CLICK, moveDownElement);
+			editBar.addChild(downButton);
+
+			var upButton:Button = new UpIconButton();
+			addFocusListeners(upButton).addEventListener(MouseEvent.CLICK, moveUpElement);
+			editBar.addChild(upButton);
+			return editBar;
+		}
+
+		private function moveDownElement(event:Event):void {
+			var elem:CMDComponentElement = element;
+			if (parentComponent.moveDownElement(elem)) {
+				var index:int = _parent.getChildIndex(this);
+				if (index != numChildren - 1) {
+					_parent.removeChild(this);
+					_parent.addChildAt(this, index + 1);
+				}
+			}
+		}
+
+		private function moveUpElement(event:Event):void {
+			var elem:CMDComponentElement = element;
+			if (parentComponent.moveUpElement(elem)) {
+				var index:int = _parent.getChildIndex(this);
+				if (index != 0) {
+					_parent.removeChild(this);
+					_parent.addChildAt(this, index - 1);
+				}
+			}
+		}
+
+		private function addFocusListeners(comp:UIComponent):UIComponent {
+			comp.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
 					drawFocus(true);
 				});
-			removeButton.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+			comp.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 					drawFocus(false);
 				});
-
-			editBar.addChild(removeButton);
-			return editBar;
+			return comp;
 		}
 
 		private function fireRemoveComponent(mouseEvent:MouseEvent):void {

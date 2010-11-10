@@ -4,8 +4,10 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.AddComponentLabelButton;
 	import clarin.cmdi.componentregistry.common.components.AddElementLabelButton;
+	import clarin.cmdi.componentregistry.common.components.DownIconButton;
 	import clarin.cmdi.componentregistry.common.components.ExpandingComponentLabel;
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
+	import clarin.cmdi.componentregistry.common.components.UpIconButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	
@@ -17,6 +19,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.HBox;
+	import mx.controls.Button;
 	import mx.controls.HRule;
 	import mx.controls.Label;
 	import mx.core.Container;
@@ -31,13 +34,15 @@ package clarin.cmdi.componentregistry.editor {
 
 		private var _parent:UIComponent;
 		private var _component:CMDComponent;
+		private var _parentComponent:CMDComponent;
 		private var addComponentLabel:Label
 		private var addElementLabel:Label
 
 
-		public function ComponentEdit(component:CMDComponent, parent:UIComponent) {
+		public function ComponentEdit(component:CMDComponent, parent:UIComponent, parentComponent:CMDComponent) {
 			super();
 			_component = component;
+			_parentComponent = parentComponent;
 			_parent = parent;
 			styleName = StyleConstants.XMLBROWSER;
 			if (!component.componentId) { // new empty component, otherwise it would be an already existed component which cannot be edited.
@@ -50,7 +55,11 @@ package clarin.cmdi.componentregistry.editor {
 		public function get component():CMDComponent {
 			return _component;
 		}
-
+		
+		public function get parentComponent():CMDComponent {
+		    return _parentComponent;
+		}
+		
 		private function dragEnterHandler(event:DragEvent):void {
 			DragManager.acceptDragDrop(event.currentTarget as UIComponent);
 			UIComponent(event.currentTarget).drawFocus(true);
@@ -74,7 +83,7 @@ package clarin.cmdi.componentregistry.editor {
 					_component.cmdComponents.addItem(comp);
 					addComponent(comp);
 				}
-			} 
+			}
 		}
 
 		private function fireRemoveComponent(mouseEvent:MouseEvent):void {
@@ -169,17 +178,49 @@ package clarin.cmdi.componentregistry.editor {
 			var editBar:HBox = new HBox();
 			editBar.addChild(createHeading());
 			var removeButton:Label = new RemoveLabelButton();
-			removeButton.addEventListener(MouseEvent.CLICK, fireRemoveComponent);
-			removeButton.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
-					drawFocus(true);
+			addFocusListeners(removeButton).addEventListener(MouseEvent.CLICK, fireRemoveComponent);
+			editBar.addChild(removeButton);
 
+			var downButton:Button = new DownIconButton();
+			addFocusListeners(downButton).addEventListener(MouseEvent.CLICK, moveDownComponent);
+			editBar.addChild(downButton);
+
+			var upButton:Button = new UpIconButton();
+			addFocusListeners(upButton).addEventListener(MouseEvent.CLICK, moveUpComponent);
+			editBar.addChild(upButton);
+			addChild(editBar);
+		}
+		
+		private function moveDownComponent(event:Event):void {
+			var comp:CMDComponent = component;
+			if (parentComponent.moveDownComponent(comp)) {
+				var index:int = _parent.getChildIndex(this);
+				if (index != _parent.numChildren - 1) {
+					_parent.removeChild(this);
+					_parent.addChildAt(this, index + 1);
+				}
+			}
+		}
+
+		private function moveUpComponent(event:Event):void {
+			var comp:CMDComponent = component;
+			if (parentComponent.moveUpComponent(comp)) {
+				var index:int = _parent.getChildIndex(this);
+				if (index != 0) {
+					_parent.removeChild(this);
+					_parent.addChildAt(this, index - 1);
+				}
+			}
+		}
+
+		private function addFocusListeners(comp:UIComponent):UIComponent {
+			comp.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
+					drawFocus(true);
 				});
-			removeButton.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
+			comp.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 					drawFocus(false);
 				});
-
-			editBar.addChild(removeButton);
-			addChild(editBar);
+			return comp;
 		}
 
 		private function createComponentLink(component:CMDComponent):FormItem {
@@ -205,7 +246,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function addComponent(component:CMDComponent):void {
-			var comp:Container = new ComponentEdit(component, this);
+			var comp:Container = new ComponentEdit(component, this, _component);
 			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
 			comp.setStyle("paddingLeft", "50");
 			if (!addComponentLabel) {
@@ -228,7 +269,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function addElement(element:CMDComponentElement):void {
-			var elem:Container = new ElementEdit(element, this);
+			var elem:Container = new ElementEdit(element, this, _component);
 			elem.setStyle("paddingLeft", "50");
 			elem.addEventListener(ElementEdit.REMOVE_ELEMENT_EVENT, removeElement);
 			if (!addElementLabel) {

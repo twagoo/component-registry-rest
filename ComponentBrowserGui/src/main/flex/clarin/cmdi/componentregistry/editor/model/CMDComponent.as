@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
-	
+
 	import mx.collections.ArrayCollection;
 
 	public class CMDComponent implements XmlAble {
@@ -41,6 +41,45 @@ package clarin.cmdi.componentregistry.editor.model {
 			}
 		}
 
+		public function moveDownElement(element:CMDComponentElement):Boolean {
+			var index:int = cmdElements.getItemIndex(element);
+			if (index < cmdElements.length - 1) {
+				cmdElements.removeItemAt(index);
+    			cmdElements.addItemAt(element, index + 1);
+    			return true;
+			}
+			return false;
+		}
+		
+		public function moveUpElement(element:CMDComponentElement):Boolean {
+			var index:int = cmdElements.getItemIndex(element);
+			if (index > 0) {
+				cmdElements.removeItemAt(index);
+    			cmdElements.addItemAt(element, index - 1);
+    			return true;
+			}
+			return false;
+		}
+		
+		public function moveDownComponent(comp:CMDComponent):Boolean {
+			var index:int = cmdComponents.getItemIndex(comp);
+			if (index < cmdComponents.length - 1) {
+				cmdComponents.removeItemAt(index);
+    			cmdComponents.addItemAt(comp, index + 1);
+    			return true;
+			}
+			return false;
+		}
+		
+		public function moveUpComponent(comp:CMDComponent):Boolean {
+			var index:int = cmdComponents.getItemIndex(comp);
+			if (index > 0) {
+				cmdComponents.removeItemAt(index);
+    			cmdComponents.addItemAt(comp, index - 1);
+    			return true;
+			}
+			return false;
+		}
 
 		public function toXml():XML {
 			var result:XML = <CMD_Component></CMD_Component>;

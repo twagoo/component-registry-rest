@@ -275,7 +275,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function addComponent(component:CMDComponent):void {
-			var comp:Container = new ComponentEdit(component, this);
+			var comp:Container = new ComponentEdit(component, this, _firstComponent);
 			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
 			if (!addComponentLabel) {
 				addChild(comp);
@@ -298,7 +298,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		public function addElement(element:CMDComponentElement):void {
-			var elem:Container = new ElementEdit(element, this);
+			var elem:Container = new ElementEdit(element, this, _firstComponent);
 			elem.setStyle("paddingLeft", "50");
 			elem.addEventListener(ElementEdit.REMOVE_ELEMENT_EVENT, removeElement);
 			if (!addElementLabel) {

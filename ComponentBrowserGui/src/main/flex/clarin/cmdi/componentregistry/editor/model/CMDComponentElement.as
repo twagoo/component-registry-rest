@@ -3,7 +3,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
-
+	
 	import mx.collections.ArrayCollection;
 
 	[Bindable]
@@ -18,7 +18,6 @@ package clarin.cmdi.componentregistry.editor.model {
 		private var _valueSchemeSimple:String;
 		public var cardinalityMin:String = "1";
 		public var cardinalityMax:String = "1";
-
 
 		//elements
 		public var attributeList:ArrayCollection = new ArrayCollection();
