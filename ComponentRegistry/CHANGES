@@ -1,5 +1,16 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.6 (12 November 2010):
+- No more dependency on jaxb, use default implementation in java6.
+- xml:lang in profiles/components, http://trac.clarin.eu/ticket/10
+- Add a save and a save as new button, http://trac.clarin.eu/ticket/11
+- Move clear changes button and make behaviour more clear, http://trac.clarin.eu/ticket/12 
+- Make browsing open for anyone (lazy login), http://trac.clarin.eu/ticket/14
+- "Adding ""null"" to ValueScheme (controlled vocabulary) doesn't show the item in the editor", http://trac.clarin.eu/ticket/15
+- "Make download xml, expanded", http://trac.clarin.eu/ticket/16
+- Allow reorder of elements/components in editor, http://trac.clarin.eu/ticket/17
+
+
 Release ComponentRegistry-1.5 (6 September 2010):
 - cleanup olds libs dir mpg jars can be taken from clarin maven site.
 - update jersey version
