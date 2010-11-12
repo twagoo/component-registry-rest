@@ -12,7 +12,7 @@ import org.junit.After;
 
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 
-public class ComponentRegistryTestCase {
+public abstract class ComponentRegistryTestCase {
 
     protected File tmpRegistryDir;
     protected final static UserCredentials USER_CREDS = DummyPrincipal.DUMMY_CREDENTIALS;
