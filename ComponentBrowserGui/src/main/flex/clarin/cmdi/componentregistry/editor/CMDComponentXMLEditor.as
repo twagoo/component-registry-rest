@@ -180,6 +180,13 @@ package clarin.cmdi.componentregistry.editor {
 				throw new Error("A profile/component must have 1 component defined at root level.");
 			} else {
 				_firstComponent = components.getItemAt(0) as CMDComponent;
+				if (_firstComponent.componentId != "" && _firstComponent.componentId != null) {
+				    _firstComponent = new CMDComponent();
+				    _firstComponent.name = _spec.headerName;
+				    _firstComponent.cmdComponents = _spec.cmdComponents;
+				    _spec.cmdComponents = new ArrayCollection();
+				    _spec.cmdComponents.addItem(_firstComponent);
+				}
 			}
 		}
 
