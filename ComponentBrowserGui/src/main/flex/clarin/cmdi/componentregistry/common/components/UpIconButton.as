@@ -8,6 +8,7 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			setStyle("icon", StyleConstants.upIcon);
 			setStyle("paddingTop", 15);
+			setStyle("paddingLeft", 18);
 			width = 5;
 			height = 0;
 			toolTip = "move up";

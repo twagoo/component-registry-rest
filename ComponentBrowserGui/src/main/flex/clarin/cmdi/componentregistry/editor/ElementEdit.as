@@ -65,6 +65,7 @@ package clarin.cmdi.componentregistry.editor {
 			var multiLingualCheck:CheckboxInput = new CheckboxInput(LabelConstants.MULTILINGUAL, _element.multilingual == "true", function(val:Boolean):void {
 					_element.multilingual = String(val);
 				});
+			multiLingualCheck.toolTip = "Can the value of this element be in multiple languages?";
 			BindingUtils.bindSetter(function(val:String):void {
 					var show:Boolean = "string" == val;
 					multiLingualCheck.visible = show;

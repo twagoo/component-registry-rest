@@ -88,11 +88,13 @@
 			private function profilesLoaded(event:Event):void {
 				var item:ItemDescription = ProfileListService.findDescription(startupItemId);
 				loadStartupItem(item);
+				profilesSrv.removeEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
 			}
 
 			private function componentsLoaded(event:Event):void {
 				var item:ItemDescription = ComponentListService.findDescription(startupItemId);
 				loadStartupItem(item);
+				componentsSrv.removeEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
 			}
 			
 			private function loadStartupItem(item:ItemDescription):void {
