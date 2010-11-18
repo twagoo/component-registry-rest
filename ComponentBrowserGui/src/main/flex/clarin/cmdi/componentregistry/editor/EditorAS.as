@@ -42,6 +42,7 @@ private var uploadService:UploadService = new UploadService();
 public function init():void {
 	profileSrv.addEventListener(ProfileInfoService.PROFILE_LOADED, profileLoaded);
 	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
+	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 	uploadService.init(uploadProgress);
 	Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 }
@@ -99,7 +100,6 @@ private function saveSpec(inUserSpace:Boolean, update:Boolean = false):void {
 		if (doUpdate) {
 			item.id = xmlEditor.cmdSpec.headerId;
 		}
-		uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 		if (item.isProfile) {
 			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml(), doUpdate);
 		} else {
