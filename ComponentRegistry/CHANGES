@@ -1,5 +1,11 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.6.1 (19 November 2010):
+- fixed bug where registry jumps to the editor screen upon a delete
+- added tooltip to MultiLingual
+- added some whitespace to up/down icons
+- fixed issue where profiles with no "defining" component could not be edited. A "defining" component is now always added. For example see imdi-profile-instance
+
 Release ComponentRegistry-1.6 (12 November 2010):
 - No more dependency on jaxb, use default implementation in java6.
 - xml:lang in profiles/components, http://trac.clarin.eu/ticket/10

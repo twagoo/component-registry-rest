@@ -36,6 +36,7 @@
     <filter-name>AAIFilter</filter-name>
     <url-pattern>/*</url-pattern>
   </filter-mapping>
+  
   <listener>
     <listener-class>de.mpg.aai.shhaa.config.ConfigContextListener</listener-class>
   </listener>
