@@ -205,6 +205,32 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
+    public void testPrivateProfileXsd() throws Exception {
+        FormDataMultiPart form = createFormData(RegistryTestHelper.getTestProfileContent());
+        RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true"))
+                .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        assertTrue(response.isProfile());
+        assertEquals(1, getUserProfiles().size());
+        AbstractDescription desc = response.getDescription();
+        String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class);
+        assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+        assertTrue(profile.endsWith("</xs:schema>"));
+    }
+
+    @Test
+    public void testPrivateComponentXsd() throws Exception {
+        FormDataMultiPart form = createFormData(RegistryTestHelper.getComponentTestContent());
+        RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true"))
+                .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        assertFalse(response.isProfile());
+        assertEquals(1, getUserComponents().size());
+        AbstractDescription desc = response.getDescription();
+        String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class);
+        assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+        assertTrue(profile.endsWith("</xs:schema>"));
+    }
+
+    @Test
     public void testDeleteRegisteredProfile() throws Exception {
         fillUp();
         List<ProfileDescription> profiles = getResource().path("/registry/profiles").get(PROFILE_LIST_GENERICTYPE);
@@ -287,7 +313,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form = createFormData(RegistryTestHelper.getTestProfileContent("publishedName"), "Published");
         response = getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId() + "/publish")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
-        
+
         assertEquals(0, getUserProfiles().size());
         List<ProfileDescription> profiles = getPublicProfiles();
         assertEquals(1, profiles.size());
@@ -369,14 +395,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         cResponse = getResource().path("/registry/profiles/" + profileDesc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(
                 ClientResponse.class);
-        assertEquals(204, cResponse.getStatus());
-        String profile = getAuthenticatedResource(
-                getResource().path("/registry/profiles/" + profileDesc.getId() + "/xsd").queryParam(USERSPACE_PARAM, "true")).accept(
-                MediaType.TEXT_XML).get(String.class);
+        assertEquals(200, cResponse.getStatus());
+        String profile = cResponse.getEntity(String.class);
         assertTrue(profile.length() > 0);
 
-        profile = getAuthenticatedResource(
-                getResource().path("/registry/profiles/" + profileDesc.getId() + "/xml").queryParam(USERSPACE_PARAM, "true")).accept(
+        profile = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId() + "/xml")).accept(
                 MediaType.TEXT_XML).get(String.class);
         assertTrue(profile.length() > 0);
 
@@ -506,15 +529,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         cResponse = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML)
                 .get(ClientResponse.class);
-        assertEquals(204, cResponse.getStatus());
-        String result = getAuthenticatedResource(
-                getResource().path("/registry/components/" + desc.getId() + "/xsd").queryParam(USERSPACE_PARAM, "true")).accept(
-                MediaType.TEXT_XML).get(String.class);
+        assertEquals(200, cResponse.getStatus());
+        String result = cResponse.getEntity(String.class);
         assertTrue(result.length() > 0);
 
-        result = getAuthenticatedResource(
-                getResource().path("/registry/components/" + desc.getId() + "/xml").queryParam(USERSPACE_PARAM, "true")).accept(
-                MediaType.TEXT_XML).get(String.class);
+        result = getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId() + "/xml")).accept(MediaType.TEXT_XML)
+                .get(String.class);
         assertTrue(result.length() > 0);
 
         cResponse = getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId()).queryParam(USERSPACE_PARAM, "true"))

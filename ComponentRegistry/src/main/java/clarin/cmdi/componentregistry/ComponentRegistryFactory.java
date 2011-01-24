@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -138,7 +140,7 @@ public class ComponentRegistryFactory {
         }
         return user.getUserDir();
     }
-    
+
     @Deprecated
     public UserMapping getUserMap() {
         return userMap;
@@ -152,6 +154,16 @@ public class ComponentRegistryFactory {
         } catch (JAXBException e) {
             throw new RuntimeException("Cannot save userMapping.", e);
         }
+    }
+
+    public synchronized List<ComponentRegistry> getAllUserRegistries() {
+        List<ComponentRegistry> result = new ArrayList<ComponentRegistry>();
+        List<User> users = userMap.getUsers();
+        for (User user : users) {
+            ComponentRegistry registry = loadWorkspace("internal use", user.getUserDir());
+            result.add(registry);
+        }
+        return result;
     }
 
 }

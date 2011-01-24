@@ -123,15 +123,14 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public Response getRegisteredComponentRawType(@PathParam("componentId") final String componentId, @PathParam("rawType") String rawType,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+    public Response getRegisteredComponentRawType(@PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) {
         LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
         StreamingOutput result = null;
-        final ComponentRegistry registry = getRegistry(userspace);
-        ComponentDescription desc = registry.getComponentDescription(componentId);
-        if (desc == null) {
-            return null;
+        final ComponentRegistry registry = findRegistry(componentId, new ComponentClosure());
+        if (registry == null) {
+            return Response.status(Status.NOT_FOUND).entity("Id: " + componentId + " is not registered, cannot create data.").build();
         }
+        ComponentDescription desc = registry.getComponentDescription(componentId);
         String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
             result = new StreamingOutput() {
@@ -150,6 +149,23 @@ public class ComponentRegistryRestService {
                     "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
         }
         return createDownloadResponse(result, fileName);
+    }
+
+    public ComponentRegistry findRegistry(String id, RegistryClosure<? extends AbstractDescription> clos) {
+        AbstractDescription desc = null;
+        ComponentRegistry result = getRegistry(false);
+        desc = clos.getDescription(result, id);
+        if (desc == null) {
+            List<ComponentRegistry> userRegs = ComponentRegistryFactory.getInstance().getAllUserRegistries();
+            for (ComponentRegistry reg : userRegs) {
+                desc = clos.getDescription(reg, id);
+                if (desc != null) {
+                    result = reg;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     @GET
@@ -327,15 +343,14 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
-    public Response getRegisteredProfileRawType(@PathParam("profileId") final String profileId, @PathParam("rawType") String rawType,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+    public Response getRegisteredProfileRawType(@PathParam("profileId") final String profileId, @PathParam("rawType") String rawType) {
         LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
         StreamingOutput result = null;
-        final ComponentRegistry registry = getRegistry(userspace);
-        ProfileDescription desc = registry.getProfileDescription(profileId);
-        if (desc == null) {
-            return null;
+        final ComponentRegistry registry = findRegistry(profileId, new ProfileClosure());
+        if (registry == null) {
+            return Response.status(Status.NOT_FOUND).entity("Id: " + profileId + " is not registered, cannot create data.").build();
         }
+        ProfileDescription desc = registry.getProfileDescription(profileId);
         String fileName = desc.getName() + "." + rawType;
 
         if ("xml".equalsIgnoreCase(rawType)) {
