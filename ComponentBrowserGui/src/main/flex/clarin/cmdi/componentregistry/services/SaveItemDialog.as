@@ -23,9 +23,6 @@ package clarin.cmdi.componentregistry.services {
 		private function save(item:ItemDescription, extension:String, urlVariable:String = null):void {
 			var req:URLRequest = new URLRequest();
 			var url:URI = new URI(item.dataUrl + "/" + extension);
-			if (item.isInUserSpace) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
-			}
 			req.url = url.toString();
 			navigateToURL(req, "_top");
 		}
