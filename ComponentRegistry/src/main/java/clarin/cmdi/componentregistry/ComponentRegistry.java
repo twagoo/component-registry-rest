@@ -38,6 +38,12 @@ public interface ComponentRegistry {
      */
     int update(AbstractDescription description, CMDComponentSpec spec);
 
+    /**
+     * 
+     * @return -1 if component could not be published. Published means move from current (private) workspace to public workspace.
+     */
+    int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal);
+    
     void getMDProfileAsXml(String profileId, OutputStream output);
 
     void getMDProfileAsXsd(String profileId, OutputStream outputStream);

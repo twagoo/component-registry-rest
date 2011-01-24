@@ -25,6 +25,7 @@ public abstract class AbstractDescription {
     private String domainName;
     @XmlElement(namespace = "http://www.w3.org/1999/xlink")
     private String href;
+    private String groupName;
 
     public void setId(String id) {
         this.id = id;
@@ -93,6 +94,14 @@ public abstract class AbstractDescription {
     public String getHref() {
         return href;
     }
+    
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
 
     @Override
     public String toString() {
@@ -122,6 +131,17 @@ public abstract class AbstractDescription {
 
     public static Date getDate(String registrationDate) throws ParseException {
         return DateUtils.parseDate(registrationDate, new String[] { DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern() });
+    }
+
+    public static String createPublicHref(String href) {
+        String result = href;
+        if (href != null) {
+            int index = href.indexOf("?");
+            if (index != -1) { //strip off query params the rest should be the public href.
+                result = href.substring(0, index);
+            }
+        }
+        return result;
     }
 
 }

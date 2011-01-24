@@ -79,29 +79,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         profilesCache = Collections.synchronizedMap(new LRUMap(100));
     }
 
-    //    public void test() {
-    //        LOG.info("CACHE: Reading and parsing all components.");
-    //        this.componentsCache = loadComponents();
-    //        LOG.info("CACHE: Reading and parsing all profiles.");
-    //        this.profilesCache = loadProfiles();
-    //        LOG.info("CACHE: Loaded " + profilesCache.size() + " profiles.");
-    //        LOG.info("CACHE: Loaded " + componentsCache.size() + " components.");
-    //    }
-
-    //    private Map<String, CMDComponentSpec> loadProfiles() {
-    //        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
-    //        for (Iterator<String> iter = profileDescriptions.keySet().iterator(); iter.hasNext();) {
-    //            String id = iter.next();
-    //            CMDComponentSpec spec = getUncachedProfile(id);
-    //            if (spec != null) {
-    //                result.put(id, spec);
-    //            } else {
-    //                iter.remove(); // cannot load actual profile so remove description from cache.
-    //            }
-    //        }
-    //        return result;
-    //    }
-
     CMDComponentSpec getUncachedProfile(String id) {
         File file = getProfileFile(id);
         CMDComponentSpec spec = null;
@@ -110,20 +87,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
         return spec;
     }
-
-    //    private Map<String, CMDComponentSpec> loadComponents() {
-    //        Map<String, CMDComponentSpec> result = new HashMap<String, CMDComponentSpec>();
-    //        for (Iterator<String> iter = componentDescriptions.keySet().iterator(); iter.hasNext();) {
-    //            String id = iter.next();
-    //            CMDComponentSpec spec = getUncachedComponent(id);
-    //            if (spec != null) {
-    //                result.put(id, spec);
-    //            } else {
-    //                iter.remove(); // cannot load actual component so remove description from cache.
-    //            }
-    //        }
-    //        return result;
-    //    }
 
     CMDComponentSpec getUncachedComponent(String id) {
         File file = getComponentFile(id);
@@ -264,6 +227,28 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     public ProfileDescription getProfileDescription(String id) {
         return profileDescriptions.get(id);
+    }
+
+    public int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal) {
+        int result = 0;
+        if (!isPublic()) { //if already in public workspace there is nothing todo
+            try {
+                if (desc.isProfile()) {
+                    deleteMDProfile(desc.getId(), principal);
+                } else {
+                    deleteMDComponent(desc.getId(), principal, true);
+                }
+                desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
+                result = ComponentRegistryFactory.getInstance().getPublicRegistry().register(desc, spec);
+                //This is not nice this leaves us in a state where the spec can be deleted but not registered in public space.
+                //NOTE deleted means it is moved to deleted directory, so an admin can still reach it. 
+                //In practice this will probably also not be so much of an issue. Nonetheless this screams for transactions and a database.
+            } catch (Exception e) {
+                LOG.error("Delete failed:", e);
+                result = -1;
+            }
+        }
+        return result;
     }
 
     /**

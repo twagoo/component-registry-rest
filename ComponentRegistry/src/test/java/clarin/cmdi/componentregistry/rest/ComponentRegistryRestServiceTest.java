@@ -273,6 +273,70 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
+    public void testPublishProfile() throws Exception {
+        assertEquals("user registered profiles", 0, getUserProfiles().size());
+        assertEquals("public registered profiles", 0, getPublicProfiles().size());
+        FormDataMultiPart form = createFormData(RegistryTestHelper.getTestProfileContent(), "Unpublished");
+        RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true"))
+                .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        assertTrue(response.isProfile());
+        AbstractDescription desc = response.getDescription();
+        assertEquals("Unpublished", desc.getDescription());
+        assertEquals(1, getUserProfiles().size());
+        assertEquals(0, getPublicProfiles().size());
+        form = createFormData(RegistryTestHelper.getTestProfileContent("publishedName"), "Published");
+        response = getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId() + "/publish")).type(
+                MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        
+        assertEquals(0, getUserProfiles().size());
+        List<ProfileDescription> profiles = getPublicProfiles();
+        assertEquals(1, profiles.size());
+        ProfileDescription profileDescription = profiles.get(0);
+        assertNotNull(profileDescription.getId());
+        assertEquals(desc.getId(), profileDescription.getId());
+        assertEquals("http://localhost:9998/registry/profiles/" + desc.getId(), profileDescription.getHref());
+        assertEquals("Published", profileDescription.getDescription());
+        CMDComponentSpec spec = getPublicSpec(profileDescription);
+        assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
+    }
+
+    private CMDComponentSpec getPublicSpec(AbstractDescription desc) {
+        if (desc.isProfile()) {
+            return getResource().path("/registry/profiles/" + desc.getId()).get(CMDComponentSpec.class);
+        } else {
+            return getResource().path("/registry/components/" + desc.getId()).get(CMDComponentSpec.class);
+        }
+    }
+
+    @Test
+    public void testPublishComponent() throws Exception {
+        assertEquals(0, getUserComponents().size());
+        assertEquals(0, getPublicComponents().size());
+        FormDataMultiPart form = createFormData(RegistryTestHelper.getComponentTestContent(), "Unpublished");
+        RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true"))
+                .type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        assertFalse(response.isProfile());
+        AbstractDescription desc = response.getDescription();
+        assertEquals("Unpublished", desc.getDescription());
+        assertEquals(1, getUserComponents().size());
+        assertEquals(0, getPublicComponents().size());
+        form = createFormData(RegistryTestHelper.getComponentTestContent("publishedName"), "Published");
+        response = getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId() + "/publish")).type(
+                MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+
+        assertEquals(0, getUserComponents().size());
+        List<ComponentDescription> components = getPublicComponents();
+        assertEquals(1, components.size());
+        ComponentDescription componentDescription = components.get(0);
+        assertNotNull(componentDescription.getId());
+        assertEquals(desc.getId(), componentDescription.getId());
+        assertEquals("http://localhost:9998/registry/components/" + desc.getId(), componentDescription.getHref());
+        assertEquals("Published", componentDescription.getDescription());
+        CMDComponentSpec spec = getPublicSpec(componentDescription);
+        assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
+    }
+
+    @Test
     public void testRegisterUserspaceProfile() throws Exception {
         List<ProfileDescription> profiles = getUserProfiles();
         assertEquals("user registered profiles", 0, profiles.size());

@@ -181,6 +181,23 @@ public class ComponentRegistryRestService {
     }
 
     @POST
+    @Path("/profiles/{profileId}/publish")
+    @Consumes("multipart/form-data")
+    public Response publishRegisteredProfile(@PathParam("profileId") String profileId, @FormDataParam(DATA_FORM_FIELD) InputStream input,
+            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+        Principal principal = checkAndGetUserPrincipal();
+        ProfileDescription desc = getRegistry(true).getProfileDescription(profileId);
+        if (desc != null) {
+            updateDescription(desc, name, description, domainName, null);
+            return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
+        } else {
+            LOG.error("Update of nonexistent id (" + profileId + ") failed.");
+            return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
+        }
+    }
+
+    @POST
     @Path("/profiles/{profileId}/update")
     @Consumes("multipart/form-data")
     public Response updateRegisteredProfile(@PathParam("profileId") String profileId,
@@ -191,11 +208,8 @@ public class ComponentRegistryRestService {
         UserCredentials userCredentials = getUserCredentials(principal);
         ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
         if (desc != null) {
-            desc.setName(name);
-            desc.setDescription(description);
-            desc.setDomainName(domainName);
-            desc.setRegistrationDate(AbstractDescription.createNewDate());
-            return register(input, desc, userCredentials, userspace, true);
+            updateDescription(desc, name, description, domainName, null);
+            return register(input, desc, userCredentials, userspace, new UpdateAction());
         } else {
             LOG.error("Update of nonexistent id (" + profileId + ") failed.");
             return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
@@ -222,6 +236,24 @@ public class ComponentRegistryRestService {
     }
 
     @POST
+    @Path("/components/{componentId}/publish")
+    @Consumes("multipart/form-data")
+    public Response publishRegisteredComponent(@PathParam("componentId") String componentId,
+            @FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
+            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
+            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+        Principal principal = checkAndGetUserPrincipal();
+        ComponentDescription desc = getRegistry(true).getComponentDescription(componentId);
+        if (desc != null) {
+            updateDescription(desc, name, description, domainName, group);
+            return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
+        } else {
+            LOG.error("Update of nonexistent id (" + componentId + ") failed.");
+            return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
+        }
+    }
+
+    @POST
     @Path("/components/{componentId}/update")
     @Consumes("multipart/form-data")
     public Response updateRegisteredComponent(@PathParam("componentId") String componentId,
@@ -229,19 +261,22 @@ public class ComponentRegistryRestService {
             @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
             @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
         Principal principal = checkAndGetUserPrincipal();
-        UserCredentials userCredentials = getUserCredentials(principal);
         ComponentDescription desc = getRegistry(userspace).getComponentDescription(componentId);
         if (desc != null) {
-            desc.setName(name);
-            desc.setDescription(description);
-            desc.setGroupName(group);
-            desc.setDomainName(domainName);
-            desc.setRegistrationDate(AbstractDescription.createNewDate());
-            return register(input, desc, userCredentials, userspace, true);
+            updateDescription(desc, name, description, domainName, group);
+            return register(input, desc, getUserCredentials(principal), userspace, new UpdateAction());
         } else {
             LOG.error("Update of nonexistent id (" + componentId + ") failed.");
             return Response.serverError().entity("Invalid id, cannot update nonexistent component").build();
         }
+    }
+
+    private void updateDescription(AbstractDescription desc, String name, String description, String domainName, String group) {
+        desc.setName(name);
+        desc.setDescription(description);
+        desc.setDomainName(domainName);
+        desc.setGroupName(group);
+        desc.setRegistrationDate(AbstractDescription.createNewDate());
     }
 
     @DELETE
@@ -347,7 +382,7 @@ public class ComponentRegistryRestService {
         desc.setDescription(description);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Profile: " + desc);
-        return register(input, desc, userCredentials, userspace, false);
+        return register(input, desc, userCredentials, userspace, new NewAction());
     }
 
     @POST
@@ -367,7 +402,7 @@ public class ComponentRegistryRestService {
         desc.setGroupName(group);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Component: " + desc);
-        return register(input, desc, userCredentials, userspace, false);
+        return register(input, desc, userCredentials, userspace, new NewAction());
     }
 
     @GET
@@ -386,7 +421,7 @@ public class ComponentRegistryRestService {
     }
 
     private Response register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace,
-            boolean update) {
+            RegisterAction action) {
         try {
             ComponentRegistry registry = getRegistry(userspace, userCredentials);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
@@ -396,12 +431,12 @@ public class ComponentRegistryRestService {
             validate(response, descriptionValidator, validator);
             if (response.getErrors().isEmpty()) {
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
-                int returnCode;
-                if (update) {
-                    returnCode = registry.update(desc, spec);
-                } else {
-                    returnCode = registry.register(desc, spec);
-                }
+                int returnCode = action.execute(desc, spec, response, registry);
+                //                if (update) {
+                //                    returnCode = registry.update(desc, spec);
+                //                } else {
+                //                    returnCode = registry.register(desc, spec);
+                //                }
                 if (returnCode == 0) {
                     response.setRegistered(true);
                     response.setDescription(desc);

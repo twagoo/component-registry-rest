@@ -37,13 +37,12 @@ import org.xml.sax.SAXException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 
 public class MDMarshaller {
-    private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
 
+    private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
     /**
      * I define W3C_XML_SCHEMA_NS_URI here cannot get it from @see XMLConstants there is a conflict between stax-api and java5.
      */
     private static final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
-
     private static Schema generalComponentSchema;
 
     private MDMarshaller() {
@@ -143,5 +142,4 @@ public class MDMarshaller {
             LOG.error("Cannot marshall spec: " + spec, e);
         }
     }
-
 }
