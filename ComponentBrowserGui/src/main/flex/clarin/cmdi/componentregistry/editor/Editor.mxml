@@ -16,8 +16,8 @@
 
 		<editor:EditorButtonBar width="100%"
 								height="40"
-								saveClick="saveSpec(true, true)"
-    							saveAsNewClick="saveSpec(true, false)"
+								saveClick="saveSpec(true, UploadService.UPDATE)"
+    							saveAsNewClick="saveSpec(true, UploadService.NEW)"
 								publishClick="publishSpec()"/>
 		<mx:Text id="errorMessageField"
 				 text="{uploadService.message}"
@@ -36,8 +36,8 @@
 										  editorChange="handleEditorChange(event)"/>
 			<editor:EditorButtonBar width="100%"
 									height="40"
-									saveClick="saveSpec(true, true)"
-									saveAsNewClick="saveSpec(true, false)"
+    								saveClick="saveSpec(true, UploadService.UPDATE)"
+        							saveAsNewClick="saveSpec(true, UploadService.NEW)"
 									publishClick="publishSpec()"/>
 
 			<mx:VBox styleName="borderStyles"

@@ -82,11 +82,11 @@ private function publishSpec():void {
 
 private function handlePublishAlert(event:CloseEvent):void {
 	if (event.detail == Alert.OK) {
-		saveSpec(false);
+		saveSpec(false, UploadService.PUBLISH);
 	}
 }
 
-private function saveSpec(inUserSpace:Boolean, update:Boolean = false):void {
+private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 //	Alert.show(xmlEditor.cmdSpec.toXml());
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
@@ -96,21 +96,17 @@ private function saveSpec(inUserSpace:Boolean, update:Boolean = false):void {
 		item.groupName = xmlEditor.cmdSpec.groupName;
 		item.domainName = xmlEditor.cmdSpec.domainName;
 		item.isInUserSpace = inUserSpace;
-		var doUpdate:Boolean = update && itemDescription && itemDescription.isInUserSpace;
-		if (doUpdate) {
+		if (itemDescription && itemDescription.isInUserSpace) {
 			item.id = xmlEditor.cmdSpec.headerId;
 		}
-		if (item.isProfile) {
-			uploadService.submitProfile(item, xmlEditor.cmdSpec.toXml(), doUpdate);
-		} else {
-			uploadService.submitComponent(item, xmlEditor.cmdSpec.toXml(), doUpdate);
-		}
+		uploadService.upload(uploadAction, item, xmlEditor.cmdSpec.toXml());
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
 	}
 }
 
 private function handleSaveComplete(event:UploadCompleteEvent):void {
+	setDescription(event.itemDescription);
 	parentApplication.viewStack.switchToBrowse(event.itemDescription);
 }
 

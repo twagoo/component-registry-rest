@@ -38,11 +38,7 @@
 						item.domainName = domainName.selectedItem.data;
 					item.isProfile = isProfile;
 					item.isInUserSpace = true; //We only allow import into workspace it can be published from there.
-					if (isProfile) {
-						uploadSrv.submitProfile(item);
-					} else {
-						uploadSrv.submitComponent(item);
-					}
+					uploadSrv.upload(UploadService.NEW, item);
 				}
 			}
 

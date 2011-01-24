@@ -22,6 +22,19 @@ package clarin.cmdi.componentregistry.services {
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]
 	public class UploadService {
 
+		/**
+		 * Tries to Update the existing data (only valid for updating in private workspace)
+		 **/
+		public static const UPDATE:int = 0;
+		/**
+		 * Tries to create new data
+		 **/
+		public static const NEW:int = 1;
+		/**
+		 * Tries to publish existing private data to public workspace
+		 **/
+		public static const PUBLISH:int = 2;
+
 		public function UploadService() {
 		}
 
@@ -59,29 +72,44 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		/**
-		 * submits a profile, data parameter can be null which implies a file was selected using selectXmlFile();
+		 * submits a profile/component, data parameter can be null which implies a file was selected using selectXmlFile();
+		 * An valid uploadAction must be one of UploadEvent.UPDATE, UploadEvent.NEW or UploadEvent.PUBLISH
 		 */
-		public function submitProfile(description:ItemDescription, data:String = null, update:Boolean = false):void {
+		public function upload(uploadAction:int, description:ItemDescription, data:String = null):void {
 			createAndInitRequest();
-			var uri:URI = createUri(Config.instance.uploadProfileUrl, update, description);
+			var uri:URI = createUri(uploadAction, description);
 			submit(description, createByteArray(data), uri);
 		}
 
-		/**
-		 * submits a component, data parameter can be null which implies a file was selected using selectXmlFile();
-		 */
-		public function submitComponent(description:ItemDescription, data:String = null, update:Boolean = false):void {
-			createAndInitRequest();
-			var uri:URI = createUri(Config.instance.uploadComponentUrl, update, description);
-			submit(description, createByteArray(data), uri);
-		}
-
-		private function createUri(uriBase:String, update:Boolean, desc:ItemDescription):URI {
+		private function createUri(uploadAction:int, desc:ItemDescription):URI {
 			var uri:URI = null;
-			if (update && desc.id) {
-				uri = new URI(uriBase + "/" + desc.id + "/update");
-			} else {
-				uri = new URI(uriBase);
+			var uriBase:String = Config.instance.uploadComponentUrl;
+			if (desc.isProfile) {
+				uriBase = Config.instance.uploadProfileUrl;
+			}
+			var action:int = uploadAction;
+			if (!desc.id) {
+				action = NEW;
+			}
+			switch (action) {
+				case UPDATE:
+					uri = new URI(uriBase + "/" + desc.id + "/update");
+					if (desc.isInUserSpace) {
+						uri.setQueryValue(Config.PARAM_USERSPACE, "true");
+					}
+					break;
+				case NEW:
+					uri = new URI(uriBase);
+					if (desc.isInUserSpace) {
+						uri.setQueryValue(Config.PARAM_USERSPACE, "true");
+					}
+					break;
+				case PUBLISH:
+					uri = new URI(uriBase + "/" + desc.id + "/publish");
+					//never a user param for publish 
+					break;
+				default:
+					throw new Error("Invalid upload action " + uploadAction + ", upload cancelled.");
 			}
 			return uri;
 		}
@@ -106,8 +134,6 @@ package clarin.cmdi.componentregistry.services {
 					ml.addVariable("domainName", description.domainName);
 					ml.addVariable("group", description.groupName);
 					ml.addFile(data, description.name + ".xml", "data");
-					if (description.isInUserSpace)
-						uri.setQueryValue(Config.PARAM_USERSPACE, "true");
 					ml.load(uri.toString());
 				} else {
 					// Cannot sent data that is not a file with FileReference.upload so just load the data and then submit through HttpClient.
