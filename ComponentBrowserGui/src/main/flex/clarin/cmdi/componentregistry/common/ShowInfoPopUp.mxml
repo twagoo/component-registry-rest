@@ -51,7 +51,7 @@
 			<mx:Spacer width="100%"/>
 			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url you clipboard" click="copyBookmarkLink();" />
 		</mx:HBox>
-		<mx:HBox width="100%">
+		<mx:HBox width="100%" visible="{item.isProfile}" includeInLayout="{item.isProfile}">
 			<mx:Label text="Link to xsd: " styleName="{StyleConstants.SHOW_INFO_PAGE_LABEL}"/>
 			<common:LinkRenderer id="xsdLink" text="{Config.getXsdLink(item)}"/>
 			<mx:Spacer width="100%"/>
