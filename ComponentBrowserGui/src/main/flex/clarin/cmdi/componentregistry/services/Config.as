@@ -1,4 +1,8 @@
 package clarin.cmdi.componentregistry.services {
+	import clarin.cmdi.componentregistry.common.ItemDescription;
+	
+	import com.adobe.net.URI;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 
@@ -8,8 +12,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public static const CLARIN_REGISTER_URL:String = "http://www.clarin.eu/user/register";
 		public static const PARAM_USERSPACE:String = "userspace";
-		public static const PARAM_VIEW:String = "view";
-		
+		public static const REGISTRY_PARAM_VIEW:String = "view";
+		public static const REGISTRY_PARAM_ITEM:String = "item";
+		public static const REGISTRY_PARAM_SPACE:String = "space";
+
 		//Possible views to start with.
 		public static const VIEW_BROWSE:String = "browse";
 		public static const VIEW_EDIT:String = "edit";
@@ -26,17 +32,17 @@ package clarin.cmdi.componentregistry.services {
 		private static const COMPONENT_INFO_URL:String = "/rest/registry/components/";
 		private static const PING_SESSION_URL:String = "/rest/registry/pingSession";
 		private static const ISOCAT_SERVLET:String = "/isocat";
-		
+
 
 		private static var _instance:Config = new Config();
 
-        private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
+		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
 		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
 
-        private var _view:String = VIEW_BROWSE;
-        private var _space:String = SPACE_PUBLIC;
+		private var _view:String = VIEW_BROWSE;
+		private var _space:String = SPACE_PUBLIC;
 		private var _userSpace:Boolean = false;
 
 		public function Config() {
@@ -57,11 +63,12 @@ package clarin.cmdi.componentregistry.services {
 			var view:String = applicationParameters.view;
 			if (view != null) {
 				_view = view;
-			}			
+			}
 			var space:String = applicationParameters.space;
 			if (space != null) {
 				_space = space;
-			}			
+			    _userSpace = _space == SPACE_USER;
+			}
 		}
 
 		public static function create(applicationParameters:Object):void {
@@ -99,9 +106,9 @@ package clarin.cmdi.componentregistry.services {
 		public function get serviceRootUrl():String {
 			return _serviceRootUrl;
 		}
-		
+
 		public function get pingSessionUrl():String {
-			return _serviceRootUrl+ PING_SESSION_URL;
+			return _serviceRootUrl + PING_SESSION_URL;
 		}
 
 		public function set userSpace(userSpace:Boolean):void {
@@ -114,19 +121,33 @@ package clarin.cmdi.componentregistry.services {
 		public function get userSpace():Boolean {
 			return _userSpace;
 		}
-		
+
 		public function get startupItem():String {
-		    return _startupItem;
+			return _startupItem;
 		}
 
-        public function get view():String {
-            return _view;
-        }
-        
-        public function get space():String {
-            return _space;
-        }
-        
+		public function get view():String {
+			return _view;
+		}
+
+		public function get space():String {
+			return _space;
+		}
+
+		public static function getBookmarkUrl(item:ItemDescription):String {
+			var uri:URI = new URI(Config.instance.serviceRootUrl);
+		    uri.setQueryValue(REGISTRY_PARAM_ITEM, item.id);
+			if (item.isInUserSpace) {
+				uri.setQueryValue(REGISTRY_PARAM_SPACE, SPACE_USER);
+			}
+			return uri.toString();
+		}
+		
+		public static function getXsdLink(item:ItemDescription):String {
+			var uri:URI = new URI(item.dataUrl+"/xsd");
+			return uri.toString();
+		}
+
 		public static function get instance():Config {
 			return _instance;
 		}

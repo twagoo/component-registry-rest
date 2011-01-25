@@ -33,13 +33,13 @@ package clarin.cmdi.componentregistry.common.components {
 			var uri:URI = new URI(Config.instance.serviceRootUrl);
 			uri.setQueryValue("shhaaDo", "lI");
 			if (viewType) {
-				uri.setQueryValue("view", viewType);
+				uri.setQueryValue(Config.REGISTRY_PARAM_VIEW, viewType);
 			}
 			if (spaceType) {
-				uri.setQueryValue("space", spaceType);
+				uri.setQueryValue(Config.REGISTRY_PARAM_SPACE, spaceType);
 			}
 			if (itemId) {
-				uri.setQueryValue("item", itemId);
+				uri.setQueryValue(Config.REGISTRY_PARAM_ITEM, itemId);
 			}
 			req.url = uri.toString();
 			navigateToURL(req, "_top");

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:common="clarin.cmdi.componentregistry.common.components.*"
+				showCloseButton="true"
+				close="cleanUp();"
+				backgroundColor="#DDE3EF"
+				show="checkItem();">
+
+	<mx:Script>
+		<![CDATA[
+		    import clarin.cmdi.componentregistry.services.Config;
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var item:ItemDescription;
+			[Bindable]
+			private var statusText:String;
+			
+			private function cleanUp():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function checkItem():void {
+			    if (item == null) {
+			        title = "select item first";
+			    } 
+			}
+			
+			public function setItem(item:ItemDescription):void {
+			    this.item = item;
+			    title = "Info for: "+item.name;
+			}
+			
+			private function copyXsdLink():void {
+			    System.setClipboard(xsdLink.text);
+			    status = "copied link";
+			}
+			
+			private function copyBookmarkLink():void {
+			    System.setClipboard(bookmarkLink.text);
+			    status = "copied bookmark";
+			}
+
+		]]>
+	</mx:Script>
+
+	<mx:VBox width="100%">
+		<mx:HBox width="100%">
+			<mx:Label text="Bookmark to registry: " styleName="{StyleConstants.SHOW_INFO_PAGE_LABEL}"/>
+			<common:LinkRenderer id="bookmarkLink" text="{Config.getBookmarkUrl(item)}"/>
+			<mx:Spacer width="100%"/>
+			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url you clipboard" click="copyBookmarkLink();" />
+		</mx:HBox>
+		<mx:HBox width="100%">
+			<mx:Label text="Link to xsd: " styleName="{StyleConstants.SHOW_INFO_PAGE_LABEL}"/>
+			<common:LinkRenderer id="xsdLink" text="{Config.getXsdLink(item)}"/>
+			<mx:Spacer width="100%"/>
+			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url you clipboard" click="copyXsdLink();"/>
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>
+
+

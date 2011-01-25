@@ -1,15 +1,18 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.ShowInfoPopUp;
 	import clarin.cmdi.componentregistry.services.DeleteService;
 	import clarin.cmdi.componentregistry.services.SaveItemDialog;
 
 	import flash.events.ContextMenuEvent;
+	import flash.geom.Point;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 
 	import mx.controls.Alert;
 	import mx.controls.DataGrid;
 	import mx.events.CloseEvent;
+	import mx.managers.PopUpManager;
 
 
 	public class BrowseContextMenu {
@@ -37,7 +40,10 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private function createMenuItems():Array {
 			var result:Array = new Array();
-			var cmi:ContextMenuItem = new ContextMenuItem("Download as XML...");
+			var cmi:ContextMenuItem = new ContextMenuItem("Show info");
+			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
+			result.push(cmi);
+			cmi = new ContextMenuItem("Download as XML...");
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXml);
 			result.push(cmi);
 			if (!isComponent) {
@@ -59,22 +65,61 @@ package clarin.cmdi.componentregistry.common.components {
 			_dataGrid = dataGrid;
 		}
 
+
+
+		private function showInfo(event:ContextMenuEvent):void {
+			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
+			if (!item) {
+				showSelectAlert();
+				return;
+			}
+			var showInfoPanel:ShowInfoPopUp = new ShowInfoPopUp();
+			showInfoPanel.setItem(item);
+			var point:Point = new Point();
+			point.x = event.mouseTarget.mouseX;
+			point.y = event.mouseTarget.mouseY;
+			point = event.mouseTarget.localToGlobal(point);
+			showInfoPanel.x = point.x;
+			showInfoPanel.y = point.y;
+			PopUpManager.addPopUp(showInfoPanel, event.mouseTarget);
+		}
+
 		private function saveAsXml(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
+			if (!item) {
+				showSelectAlert();
+				return;
+			}
 			saveItemDialog.saveAsXML(item);
 		}
 
 		private function saveAsXsd(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
+			if (!item) {
+				showSelectAlert();
+				return;
+			}
 			saveItemDialog.saveAsXSD(item);
 		}
 
 		private function editItem(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;
+			if (!item) {
+			    showSelectAlert();
+			    return;
+			}
 			viewStack.switchToEditor(item);
 		}
 
+		private function showSelectAlert():void {
+			Alert.show("First select a profile or component");
+		}
+
 		private function handleDelete(event:ContextMenuEvent):void {
+   			if (!_dataGrid.selectedItem) {
+			    showSelectAlert();
+			    return;
+			}
 			deleteSelectedItems();
 		}
 

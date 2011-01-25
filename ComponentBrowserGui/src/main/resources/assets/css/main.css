@@ -58,6 +58,9 @@ TitleWindow {
    borderAlpha: 1;
 }
 
+.showInfoPageLabel {
+    fontWeight: bold;
+}
 
 
 
