@@ -53,21 +53,20 @@ package clarin.cmdi.componentregistry.services {
 
 		private function init(applicationParameters:Object):void {
 			var serviceRootUrl:String = applicationParameters.serviceRootUrl;
-			if (serviceRootUrl != null) {
+			if (serviceRootUrl) {
 				_serviceRootUrl = serviceRootUrl;
 			}
 			var item:String = applicationParameters.item;
-			if (item != null) {
+			if (item) {
 				_startupItem = item;
 			}
 			var view:String = applicationParameters.view;
-			if (view != null) {
+			if (view) {
 				_view = view;
 			}
 			var space:String = applicationParameters.space;
-			if (space != null) {
+			if (space) {
 				_space = space;
-			    _userSpace = _space == SPACE_USER;
 			}
 		}
 

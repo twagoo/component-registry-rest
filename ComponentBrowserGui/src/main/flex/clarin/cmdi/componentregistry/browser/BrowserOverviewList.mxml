@@ -109,7 +109,7 @@
 					Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
 				} else if (userSpaceCB.selectedIndex != 0) {
 					userSpaceCB.selectedIndex = 0;
-					new Login().show(this, Config.VIEW_BROWSE, Config.SPACE_USER);
+					new Login().show(this, Config.VIEW_BROWSE, Config.SPACE_USER, null);
 				}
 
 			}

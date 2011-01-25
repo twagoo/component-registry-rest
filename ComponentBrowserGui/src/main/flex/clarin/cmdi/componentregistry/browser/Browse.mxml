@@ -72,17 +72,17 @@
 			}
 
 			private function creationComplete():void { 
+				refresh();
+			}
+
+            public function loadStartup():void {
 				startupItemId = Config.instance.startupItem;
 				if (startupItemId) { //only load this once on startup
 					componentsSrv.addEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
 					profilesSrv.addEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
 				}
-				//Load all data
-				ComponentListService.getInstance(false).load();
-				ComponentListService.getInstance(true).load();
-				ProfileListService.getInstance(false).load();
-				ProfileListService.getInstance(true).load();
-			}
+				refresh();
+            }
 
 			public function refresh():void {
 				componentsSrv.load();

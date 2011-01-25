@@ -40,22 +40,30 @@
 			    System.setClipboard(bookmarkLink.text);
 			    status = "copied bookmark";
 			}
+			
+			private function getBookmarkText():String {
+			    if (item.isInUserSpace) {
+			        return "Bookmark link (requires login):";
+			    } else {
+			        return "Bookmark link:";
+			    }
+			}
 
 		]]>
 	</mx:Script>
 
 	<mx:VBox width="100%">
 		<mx:HBox width="100%">
-			<mx:Label text="Bookmark to registry: " styleName="{StyleConstants.SHOW_INFO_PAGE_LABEL}"/>
+			<mx:Label text="{getBookmarkText()}" styleName="{StyleConstants.SHOW_INFO_PAGE_LABEL}"/>
 			<common:LinkRenderer id="bookmarkLink" text="{Config.getBookmarkUrl(item)}"/>
 			<mx:Spacer width="100%"/>
-			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url you clipboard" click="copyBookmarkLink();" />
+			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url to your clipboard" click="copyBookmarkLink();" />
 		</mx:HBox>
 		<mx:HBox width="100%" visible="{item.isProfile}" includeInLayout="{item.isProfile}">
 			<mx:Label text="Link to xsd: " styleName="{StyleConstants.SHOW_INFO_PAGE_LABEL}"/>
 			<common:LinkRenderer id="xsdLink" text="{Config.getXsdLink(item)}"/>
 			<mx:Spacer width="100%"/>
-			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url you clipboard" click="copyXsdLink();"/>
+			<mx:Button label="copy to clipboard" toolTip="Click here to copy the url to your clipboard" click="copyXsdLink();"/>
 		</mx:HBox>
 	</mx:VBox>
 </mx:TitleWindow>

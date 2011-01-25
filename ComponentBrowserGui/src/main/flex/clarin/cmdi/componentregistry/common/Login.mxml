@@ -28,15 +28,13 @@
 			}
 
 			/**
-			 * viewType or spaceType can be null the will just be ignored then.
+			 * viewType or spaceType can be null they will then be ignored.
 			 *
 			 * */
-			public function show(parent:DisplayObject, viewType:String, spaceType:String, itemDescription:ItemDescription = null):void {
+			public function show(parent:DisplayObject, viewType:String, spaceType:String, itemId:String):void {
 				_viewType = viewType;
 				_spaceType = spaceType;
-				if (itemDescription) {
-				    _itemId = itemDescription.id;
-				}
+			    _itemId = itemId;
 				PopUpManager.addPopUp(this, parent, true);
 				PopUpManager.centerPopUp(this);
 			}

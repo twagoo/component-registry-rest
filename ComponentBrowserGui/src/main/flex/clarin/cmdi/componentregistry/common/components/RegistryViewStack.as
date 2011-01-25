@@ -37,7 +37,19 @@ package clarin.cmdi.componentregistry.common.components {
 			switchView(Config.instance.view, item);
 		}
 
-		public function switchView(view:String, item:ItemDescription = null):void {
+        public function loadStartup():void {
+            if (Config.instance.space == Config.SPACE_USER && !Credentials.instance.isLoggedIn()) {
+                checkLogin();
+            } else {
+                if (Config.instance.startupItem) {
+                    browse.loadStartup();
+                } else {
+                    switchView(Config.instance.view);
+                }
+            }
+        }
+
+		private function switchView(view:String, item:ItemDescription = null):void {
 			if (view == Config.VIEW_BROWSE) {
 				switchToBrowse(item);
 			} else if (view == Config.VIEW_EDIT) {
@@ -70,9 +82,14 @@ package clarin.cmdi.componentregistry.common.components {
 			this.selectedChild = importer;
 		}
 
-		private function checkLogin(event:Event):void {
-			if (!Credentials.instance.isLoggedIn())
-				loginPanel.show(this, RegistryView(this.selectedChild).getType(), null, selectedItem);
+		private function checkLogin(event:Event=null):void {
+			if (!Credentials.instance.isLoggedIn()) {
+			    var itemId:String = Config.instance.startupItem;
+			    if (selectedItem) {
+			        itemId = selectedItem.id;
+			    }
+				loginPanel.show(this, RegistryView(this.selectedChild).getType(), Config.instance.space, itemId);
+			}
 		}
 
 		private function loginFailed(event:Event):void {

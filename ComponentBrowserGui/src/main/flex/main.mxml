@@ -29,7 +29,7 @@
 				if (Credentials.instance.isLoggedIn() && (Config.instance.space == Config.SPACE_USER)) {
 					Config.instance.userSpace = true;
 				}
-				viewStack.switchView(Config.instance.view);
+				viewStack.loadStartup();
 			}
 		]]>
 	</mx:Script>
