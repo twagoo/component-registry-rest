@@ -7,9 +7,11 @@
     <property name="registryRoot" value="${registryRoot}" />
     <property name="adminUsers">
       <set>
-        <value>Patrick Duin</value>
-        <value>patdui@mpi.nl</value>
+        <value>patdui@mpi.nl</value> <!-- short names are for shibbolet on lux16 -->
         <value>patrick.duin@mpi.nl</value>
+        <value>guisil@mpi.nl</value>
+        <value>guilherme.silva@mpi.nl</value>
+        <value>daan.broeder@mpi.nl</value>
       </set>
     </property>
     <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
