@@ -1,5 +1,11 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.7 (26 Januari 2011):
+- Publishing means moving the private component/profile to public space. http://trac.clarin.eu/ticket/57
+- Edit pane is reloaded with saved component/profile. http://trac.clarin.eu/ticket/91
+- Created "show info" menu item that gives the xsd link and a bookmarkable link to open registry on selected item. http://trac.clarin.eu/ticket/59
+- Profiles in private workspace can have a public xsd. http://trac.clarin.eu/ticket/52
+
 Release ComponentRegistry-1.6.1 (19 November 2010):
 - fixed bug where registry jumps to the editor screen upon a delete
 - added tooltip to MultiLingual
