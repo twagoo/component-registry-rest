@@ -8,17 +8,19 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
-	
+
 	import mx.containers.VBox;
 	import mx.controls.Label;
+	import mx.managers.CursorManager;
 
 	public class ExpandingComponentLabel extends VBox {
 
 		[Bindable]
 		public var isExpanded:Boolean = false;
+		private var expandBusy:Boolean = false;
 
 		private var expanded:DisplayObject;
 		private var componentId:String;
@@ -34,7 +36,7 @@ package clarin.cmdi.componentregistry.common.components {
 			this.item = ComponentListService.findDescription(componentId);
 			styleName = StyleConstants.EXPANDING_COMPONENT;
 			if (item && item.isInUserSpace) {
-			    this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
+				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
 		}
 
@@ -54,19 +56,40 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		private function handleClick(event:MouseEvent):void {
-			if (isExpanded) {
-				unexpand();
-				isExpanded = false;
-			} else {
-				expand();
+			if (!expandBusy) {
+				expandStart();
+				try {
+					if (isExpanded) {
+						isExpanded = false;
+						unexpand();
+					} else {
+						isExpanded = true;
+						expand();
+					}
+				} catch (err:Error) {
+					trace(err);
+					CursorManager.removeBusyCursor();
+				}
 			}
+		}
+
+		private function expandStart():void {
+			expandBusy = true;
+			CursorManager.setBusyCursor();
+		}
+
+		private function expandFinished():void {
+			expandBusy = false;
+			CursorManager.removeBusyCursor();
 		}
 
 
 		private function unexpand():void {
 			if (expanded != null) {
 				removeChild(expanded);
+				expanded = null;
 			}
+			expandFinished();
 		}
 
 		private function expand():void {
@@ -83,7 +106,7 @@ package clarin.cmdi.componentregistry.common.components {
 			}
 			(expanded as CMDSpecRenderer).cmdSpec = CMDModelFactory.createModel(comp.componentMD.xml, comp.description);
 			addChild(expanded);
-			isExpanded = true;
+			expandFinished();
 		}
 
 
