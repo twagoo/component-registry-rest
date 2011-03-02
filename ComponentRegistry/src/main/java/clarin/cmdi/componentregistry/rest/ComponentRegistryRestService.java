@@ -131,6 +131,7 @@ public class ComponentRegistryRestService {
             return Response.status(Status.NOT_FOUND).entity("Id: " + componentId + " is not registered, cannot create data.").build();
         }
         ComponentDescription desc = registry.getComponentDescription(componentId);
+        checkAndThrowDescription(desc, componentId);
         String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
             result = new StreamingOutput() {
@@ -351,6 +352,7 @@ public class ComponentRegistryRestService {
             return Response.status(Status.NOT_FOUND).entity("Id: " + profileId + " is not registered, cannot create data.").build();
         }
         ProfileDescription desc = registry.getProfileDescription(profileId);
+        checkAndThrowDescription(desc, profileId);
         String fileName = desc.getName() + "." + rawType;
 
         if ("xml".equalsIgnoreCase(rawType)) {
@@ -370,7 +372,12 @@ public class ComponentRegistryRestService {
                     "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
         }
         return createDownloadResponse(result, fileName);
+    }
 
+    private void checkAndThrowDescription(AbstractDescription desc, String id) {
+        if (desc == null) {
+            throw new WebApplicationException(Response.serverError().entity("Incorrect id:" + id + "cannot handle request").build());
+        }
     }
 
     private Response createDownloadResponse(StreamingOutput result, String fileName) {
@@ -447,11 +454,6 @@ public class ComponentRegistryRestService {
             if (response.getErrors().isEmpty()) {
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
                 int returnCode = action.execute(desc, spec, response, registry);
-                //                if (update) {
-                //                    returnCode = registry.update(desc, spec);
-                //                } else {
-                //                    returnCode = registry.register(desc, spec);
-                //                }
                 if (returnCode == 0) {
                     response.setRegistered(true);
                     response.setDescription(desc);
