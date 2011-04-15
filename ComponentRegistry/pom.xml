@@ -151,8 +151,6 @@
     <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot>
     <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
-    <cmdiSchemaDir>../../metadata/toolkit/</cmdiSchemaDir>
-    <cmdiSchemaName>general-component-schema.xsd</cmdiSchemaName>
   </properties>
 
   <build>
@@ -219,9 +217,9 @@
         </executions>
         <configuration>
           <!-- assuming claring metadata project is checked out in same folder as this project -->
-          <schemaDirectory>${cmdiSchemaDir}</schemaDirectory>
+          <schemaDirectory>src/main/binding</schemaDirectory>
           <schemaIncludes>
-            <include>${cmdiSchemaName}</include>
+            <include>general-component-schema.xsd</include>
           </schemaIncludes>
           <bindingDirectory>src/main/binding</bindingDirectory>
           <extension>true</extension>
