@@ -59,13 +59,14 @@
 			<plugin>
 				<groupId>org.sonatype.flexmojos</groupId>
 				<artifactId>flexmojos-maven-plugin</artifactId>
-				<version>3.5.0</version>
+				<version>3.9</version>
 				<extensions>true</extensions>
 				<configuration>
 					<debug>true</debug>
 					<generateHtmlWrapper>true</generateHtmlWrapper>
 					<targetPlayer>10.0.0</targetPlayer>
 					<headlessServer>true</headlessServer>
+					<allowHeadlessMode>false</allowHeadlessMode> 
 				</configuration>
 				<dependencies>
 					<dependency>
