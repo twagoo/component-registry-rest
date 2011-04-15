@@ -12,12 +12,9 @@ Creating war artifact for deployment:
 
 
 NOTE on generating java classes from general-component-schema.xsd.
-The ComponentRegistry needs the general-component-schema.xsd, which can be found at:
-1) http://www.clarin.eu/cmd/general-component-schema.xsd
-2) or checkout from svn: svn co http://svn.clarin.eu/metadata/trunk metadata
-If you have it, the pom.xml of ComponentRegistry must point to the directory were the schema is located.
-Look for maven-jaxb2-plugin configuration and change the location accordingly e.g.:
-<schemaDirectory>../../metadata/toolkit/</schemaDirectory>
+The ComponentRegistry needs the general-component-schema.xsd, which should be found at:
+1) ComponentRegistry/src/main/binding/ -> that directory has a svn:externals property pointing to the schema.
+Do a 'svn propget svn:externals' to see the property. Results in: 'http://svn.clarin.eu/metadata/trunk/toolkit/general-component-schema.xsd general-component-schema.xsd'
 
 Missing some artifacts for Maven?:
 The ComponentBrowserGui project needs some swf files which are not in any maven repository I could find. 
