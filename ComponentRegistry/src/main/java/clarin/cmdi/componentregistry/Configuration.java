@@ -26,7 +26,7 @@ public class Configuration {
     private Map<String, String> schemaLocations = new HashMap<String, String>();
     {//Default values
         schemaLocations.put(CMDComponentSpec.class.getName(),
-                "http://www.clarin.eu/cmd http://www.clarin.eu/cmd/general-component-schema.xsd");
+                "http://www.clarin.eu/cmd/ http://www.clarin.eu/cmd/general-component-schema.xsd");
     }
 
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();

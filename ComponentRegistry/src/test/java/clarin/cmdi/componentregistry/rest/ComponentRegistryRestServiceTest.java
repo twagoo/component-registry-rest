@@ -179,7 +179,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         try {
             profile = getResource().path("/registry/profiles/clarin.eu:cr1:profileXXXX").accept(MediaType.APPLICATION_XML).get(
                     CMDComponentSpec.class);
-            fail("Exception should have been thrown resouce does not exist, HttpStatusCode 204");
+            fail("Exception should have been thrown resource does not exist, HttpStatusCode 204");
         } catch (UniformInterfaceException e) {
             assertEquals(204, e.getResponse().getStatus());
         }
