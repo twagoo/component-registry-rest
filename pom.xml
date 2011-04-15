@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>clarin.cmdi</groupId>
+  <artifactId>componentRegistry.parent</artifactId>
+  <name>componentRegistry_parent</name>
+  <packaging>pom</packaging>
+  <version>1.0</version>
+  <description>Parent pom for ComponentRegistry, see www.clarin.eu/cmdi.</description>
+  <modules>
+    <module>ComponentBrowserGui</module>
+    <module>ComponentRegistry</module>
+  </modules>
+
+  <scm>
+     <developerConnection>scm:svn:http://svn.clarin.eu/ComponentRegistry/trunk</developerConnection>
+  </scm>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <ComponentBrowserGui.version>1.8-SNAPSHOT</ComponentBrowserGui.version>
+    <ComponentRegistry.version>1.8-SNAPSHOT</ComponentRegistry.version>
+  </properties>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.7.2</version>
+        <configuration>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <configuration>
+          <threshold>Normal</threshold>
+          <effort>Min</effort>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>javancss-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>
+

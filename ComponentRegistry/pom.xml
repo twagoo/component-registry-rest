@@ -1,10 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>clarin.cmdi</groupId>
+    <artifactId>componentRegistry.parent</artifactId>
+    <version>1.0</version>
+  </parent>
   <groupId>clarin.cmdi</groupId>
   <artifactId>ComponentRegistry</artifactId>
   <packaging>${packaging}</packaging>
-  <version>1.8-SNAPSHOT</version>
+  <version>${ComponentRegistry.version}</version>
   <name>ComponentRegistry</name>
   <description>
         ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
@@ -145,8 +150,7 @@
     <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
     <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot>
-    <ComponentBrowserGuiVersion>1.8-SNAPSHOT</ComponentBrowserGuiVersion>
-    <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGuiVersion}</ComponentRegistrySwfName>
+    <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
     <cmdiSchemaDir>../../metadata/toolkit/</cmdiSchemaDir>
     <cmdiSchemaName>general-component-schema.xsd</cmdiSchemaName>
   </properties>
@@ -240,7 +244,7 @@
                 <artifactItem>
                   <groupId>clarin.cmdi</groupId>
                   <artifactId>ComponentBrowserGui</artifactId>
-                  <version>${ComponentBrowserGuiVersion}</version>
+                  <version>${ComponentBrowserGui.version}</version>
                   <type>swf</type>
                   <overWrite>true</overWrite>
                   <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
