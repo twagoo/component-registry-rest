@@ -66,6 +66,8 @@
 					<generateHtmlWrapper>true</generateHtmlWrapper>
 					<targetPlayer>10.0.0</targetPlayer>
 					<headlessServer>true</headlessServer>
+					<allowHeadlessMode>true</allowHeadlessMode>
+					<skipTest>true</skipTest>
 				</configuration>
 				<dependencies>
 					<dependency>
