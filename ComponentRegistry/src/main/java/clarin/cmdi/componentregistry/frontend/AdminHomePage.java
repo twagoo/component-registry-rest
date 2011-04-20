@@ -31,6 +31,7 @@ import clarin.cmdi.componentregistry.ResourceConfig;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
+    private static final long serialVersionUID = 1L;
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
 
     private final FileInfo fileInfo = new FileInfo();

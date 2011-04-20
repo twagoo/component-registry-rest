@@ -300,7 +300,7 @@ public class RegistryFiller {
     //        return input;
     //    }
 
-    private class RegObject {
+    private static class RegObject {
 
         private final File file;
         private final String name;

@@ -27,7 +27,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class IsocatServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private WebResource service;
+    private transient WebResource service;
     private final static String DCIF_XML = "application/dcif+xml";
 
     @Override

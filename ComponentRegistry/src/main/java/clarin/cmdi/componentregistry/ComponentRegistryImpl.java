@@ -458,7 +458,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
-    private class RegisterClosureOnFail implements Closure {
+    private static class RegisterClosureOnFail implements Closure {
 
         private final AbstractDescription desc;
 
@@ -479,7 +479,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
-    private class UpdateClosureOnFail implements Closure {
+    private static class UpdateClosureOnFail implements Closure {
 
         private final AbstractDescription desc;
 

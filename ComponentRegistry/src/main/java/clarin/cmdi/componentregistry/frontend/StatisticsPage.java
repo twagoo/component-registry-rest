@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
@@ -27,9 +23,10 @@ import org.apache.wicket.markup.repeater.RepeatingView;
  */
 public class StatisticsPage extends SecureAdminWebPage {
 
+    private static final long serialVersionUID = 1L;
     private transient ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
 
-    private class Statistics {
+    private static class Statistics {
         private int componentnumber = 0;
         private int elementcounter = 0;
         private int conceptlinkcounter = 0;
@@ -102,6 +99,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         }
     }
 
+    @SuppressWarnings("serial")
     private void addLinks() {
         add(new Link("home") {
 

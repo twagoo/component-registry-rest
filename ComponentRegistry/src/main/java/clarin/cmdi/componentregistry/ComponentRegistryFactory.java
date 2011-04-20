@@ -44,7 +44,7 @@ public class ComponentRegistryFactory {
         }
     }
 
-    private void loadUserMap() throws IOException, JAXBException {
+    private synchronized void loadUserMap() throws IOException, JAXBException {
         File userDirMappingFile = Configuration.getInstance().getUserDirMappingFile();
         if (userDirMappingFile.exists()) {
             userMap = MDMarshaller.unmarshal(UserMapping.class, userDirMappingFile, null);
@@ -53,7 +53,7 @@ public class ComponentRegistryFactory {
         }
     }
 
-    void reset() {
+    synchronized void reset() {
         registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
         userMap = new UserMapping();
         publicRegistry = new ComponentRegistryImpl(true);
