@@ -10,16 +10,18 @@
 		<![CDATA[
 			import clarin.cmdi.componentregistry.services.PingSessionService;
 			import mx.controls.Alert;
+			import mx.controls.Button;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import mx.managers.PopUpManager;
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
+	        import com.flexspy.FlexSpy;
 
 			private var sessionPinger:PingSessionService;
 
 			private function initializeInstances():void {
 				Credentials.create(Application.application.parameters);
-				Config.create(Application.application.parameters);
+				Config.create(Application.application.parameters);				
 			}
 
 			private function appComplete():void {
@@ -30,6 +32,17 @@
 					Config.instance.userSpace = true;
 				}
 				viewStack.loadStartup();
+				
+				if(Config.instance.debug){
+					var flexSpyButton:Button = new Button();
+					flexSpyButton.label="FlexSpy";
+					flexSpyButton.addEventListener(MouseEvent.CLICK,showFlexSpy);
+					topBar.addChild(flexSpyButton);
+				}
+			}
+			
+			private function showFlexSpy(event:Event):void{
+				FlexSpy.show();
 			}
 		]]>
 	</mx:Script>
@@ -39,11 +52,11 @@
 			  layout="absolute"
 			  title="Clarin Component Browser"
 			  x="0"
-			  y="0">
+			  y="0">			  
 
 		<mx:VBox height="100%"
 				 width="100%">
-			<mx:HBox borderStyle="none"
+			<mx:HBox borderStyle="none" id="topBar"
 					 width="100%">
 				<mx:ToggleButtonBar id="toggleBar"
 									dataProvider="{viewStack}"/>
@@ -57,4 +70,5 @@
 									  width="100%"/>
 		</mx:VBox>
 	</mx:Panel>
+		
 </mx:Application>

@@ -15,6 +15,7 @@ package clarin.cmdi.componentregistry.services {
 		public static const REGISTRY_PARAM_VIEW:String = "view";
 		public static const REGISTRY_PARAM_ITEM:String = "item";
 		public static const REGISTRY_PARAM_SPACE:String = "space";
+		public static const REGISTRY_PARAM_DEBUG:String = "debug";
 
 		//Possible views to start with.
 		public static const VIEW_BROWSE:String = "browse";
@@ -44,6 +45,7 @@ package clarin.cmdi.componentregistry.services {
 		private var _view:String = VIEW_BROWSE;
 		private var _space:String = SPACE_PUBLIC;
 		private var _userSpace:Boolean = false;
+		private var _debug:Boolean = false;
 
 		public function Config() {
 			if (_instance != null) {
@@ -67,6 +69,10 @@ package clarin.cmdi.componentregistry.services {
 			var space:String = applicationParameters.space;
 			if (space) {
 				_space = space;
+			}
+			var debug:int = applicationParameters.debug;
+			if(debug) {
+				_debug = Boolean(debug);
 			}
 		}
 
@@ -131,6 +137,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function get space():String {
 			return _space;
+		}
+		
+		public function get debug():Boolean {
+			return _debug;
 		}
 
 		public static function getBookmarkUrl(item:ItemDescription):String {

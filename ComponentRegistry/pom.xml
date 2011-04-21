@@ -151,6 +151,8 @@
     <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
     <registryRoot>/tmp/ComponentRegistry</registryRoot>
     <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
+    <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+    <flexDebug>0</flexDebug>
   </properties>
 
   <build>
