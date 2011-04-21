@@ -11,6 +11,7 @@ package clarin.cmdi.componentregistry.browser {
 		public function getProfileColumns():Array {
 			var columns:Array = new Array();
 			columns.push(createColumn("name", "Name"));
+			columns.push(createColumn("groupName", "Group Name"));
 			columns.push(createColumn("domainName", "Domain Name"));
 			columns.push(createColumn("creatorName", "Creator"));
 			columns.push(createColumn("description", "Description"));
@@ -42,10 +43,11 @@ package clarin.cmdi.componentregistry.browser {
 
 		public static function getInitialSortForProfiles():Sort {
 			var sort:Sort = new Sort();
+			var sortByGroup:SortField = new SortField("groupName", true);
 			var sortByName:SortField = new SortField("name", true);
 			var sortByDate:SortField = new SortField("registrationDate", true, true);
 			sortByDate.compareFunction = compareRegistrationDate;
-			sort.fields = [sortByName, sortByDate];
+			sort.fields = [sortByGroup, sortByName, sortByDate];
 			return sort
 		}
 		
