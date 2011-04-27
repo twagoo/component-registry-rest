@@ -9,14 +9,13 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-	
-	import mx.binding.utils.BindingUtils;
+
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -181,11 +180,11 @@ package clarin.cmdi.componentregistry.editor {
 			} else {
 				_firstComponent = components.getItemAt(0) as CMDComponent;
 				if (_firstComponent.componentId != "" && _firstComponent.componentId != null) {
-				    _firstComponent = new CMDComponent();
-				    _firstComponent.name = _spec.headerName;
-				    _firstComponent.cmdComponents = _spec.cmdComponents;
-				    _spec.cmdComponents = new ArrayCollection();
-				    _spec.cmdComponents.addItem(_firstComponent);
+					_firstComponent = new CMDComponent();
+					_firstComponent.name = _spec.headerName;
+					_firstComponent.cmdComponents = _spec.cmdComponents;
+					_spec.cmdComponents = new ArrayCollection();
+					_spec.cmdComponents.addItem(_firstComponent);
 				}
 			}
 		}
@@ -203,24 +202,29 @@ package clarin.cmdi.componentregistry.editor {
 			head.addChild(space);
 			head.addChild(startOverLabel);
 			addChild(head);
+			
 			var groupNameInput:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
 					spec.groupName = val;
-				}, true, InputValidators.getIsRequiredValidator());
+				}); // editable, not required
 			addChild(groupNameInput);
+			
 			var descriptionInput:FormItemInputText = new FormItemInputText(LabelConstants.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
-				}, InputValidators.getIsRequiredValidator());
+				}, InputValidators.getIsRequiredValidator()); //editable, required
 			addChild(descriptionInput);
+			
 			var nameInput:NameInputLine = new NameInputLine(_firstComponent.name, function(val:String):void {
 					_firstComponent.name = val;
 					_spec.headerName = val;
-				})
+				}); // editable, not required
 			addChild(nameInput);
-			addChild(new ComboBoxInputLine(LabelConstants.DOMAIN_NAME, _spec.domainName, LabelConstants.DOMAIN_NAME_DATA, LabelConstants.DOMAIN_NAME_PROMPT, function(val:Object):void {
+			
+			var domainInput:ComboBoxInputLine = new ComboBoxInputLine(LabelConstants.DOMAIN_NAME, _spec.domainName, LabelConstants.DOMAIN_NAME_DATA, LabelConstants.DOMAIN_NAME_PROMPT, function(val:Object):void {
 					if (val) {
 						_spec.domainName = val.data;
 					}
-				}));
+				}); // editable, not required
+			addChild(domainInput);
 
 //			var idInput:FormItemInputLine = new FormItemInputLine(XMLBrowser:"Id", spec.headerId, function(val:String):void {
 //					spec.headerId = val;
@@ -268,15 +272,15 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(addElementLabel);
 		}
 
-		 /* private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
-			var result:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
-					spec.groupName = val;
-				}, true, InputValidators.getIsRequiredValidator());
-			BindingUtils.bindSetter(function(val:Boolean):void {
-					result.visible = !val;
-				}, spec, "isProfile");
-			return result;
-		}  */
+		/* private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
+		   var result:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
+		   spec.groupName = val;
+		   }, true, InputValidators.getIsRequiredValidator());
+		   BindingUtils.bindSetter(function(val:Boolean):void {
+		   result.visible = !val;
+		   }, spec, "isProfile");
+		   return result;
+		 }  */
 
 		private function handleComponents(components:ArrayCollection):void {
 			for each (var component:CMDComponent in components) {
