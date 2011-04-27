@@ -616,6 +616,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
         assertEquals("My Test", desc.getDescription());
+        assertEquals("TestGroup", desc.getGroupName());
         Date firstDate = AbstractDescription.getDate(desc.getRegistrationDate());
         CMDComponentSpec spec = getUserProfile(desc);
         assertNotNull(spec);

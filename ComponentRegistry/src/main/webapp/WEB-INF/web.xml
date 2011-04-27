@@ -28,14 +28,14 @@
   </filter-mapping>
   
 <!-- Make sure this one is declared before the wicket filter, the order matters. Shibboleth should trigger the login, before continuing with the wicket filter.-->
-<!--  <filter>
+  <filter>
     <filter-name>AAIFilter</filter-name>
     <filter-class>de.mpg.aai.shhaa.AuthFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>AAIFilter</filter-name>
     <url-pattern>/*</url-pattern>
-  </filter-mapping>-->
+  </filter-mapping>
   
   <listener>
     <listener-class>de.mpg.aai.shhaa.config.ConfigContextListener</listener-class>
@@ -94,7 +94,7 @@
     <url-pattern>/isocat/*</url-pattern>
   </servlet-mapping>
 
-  <security-constraint>
+<!--  <security-constraint>
     <display-name>ComponentRegistry web service</display-name>
     <web-resource-collection>
       <web-resource-name>ComponentRegistry edit</web-resource-name>
@@ -126,6 +126,6 @@
   <security-role>
     <description> The role that is required to log in to the Application </description>
     <role-name>tomcat</role-name>
-  </security-role>
+  </security-role>-->
 
 </web-app>
