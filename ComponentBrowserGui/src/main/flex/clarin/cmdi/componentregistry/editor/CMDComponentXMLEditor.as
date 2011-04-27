@@ -203,7 +203,10 @@ package clarin.cmdi.componentregistry.editor {
 			head.addChild(space);
 			head.addChild(startOverLabel);
 			addChild(head);
-			addChild(createOptionalGroupNameInput(spec));
+			var groupNameInput:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
+					spec.groupName = val;
+				}, true, InputValidators.getIsRequiredValidator());
+			addChild(groupNameInput);
 			var descriptionInput:FormItemInputText = new FormItemInputText(LabelConstants.DESCRIPTION, spec.headerDescription, function(val:String):void {
 					spec.headerDescription = val;
 				}, InputValidators.getIsRequiredValidator());
@@ -265,7 +268,7 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(addElementLabel);
 		}
 
-		private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
+		 /* private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
 			var result:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
 					spec.groupName = val;
 				}, true, InputValidators.getIsRequiredValidator());
@@ -273,7 +276,7 @@ package clarin.cmdi.componentregistry.editor {
 					result.visible = !val;
 				}, spec, "isProfile");
 			return result;
-		}
+		}  */
 
 		private function handleComponents(components:ArrayCollection):void {
 			for each (var component:CMDComponent in components) {
