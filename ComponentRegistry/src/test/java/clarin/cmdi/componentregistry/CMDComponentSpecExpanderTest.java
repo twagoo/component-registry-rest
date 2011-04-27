@@ -62,7 +62,7 @@ public class CMDComponentSpecExpanderTest {
 
         CMDComponentSpec expandedProfile = CMDComponentSpecExpander.expandProfile(profileDesc3.getId(), registry);
 
-        printToFile(expandedProfile);
+        //printToFile(expandedProfile);
 
         List<CMDComponentType> cmdComponents = expandedProfile.getCMDComponent();
         assertEquals(1, cmdComponents.size());
@@ -194,12 +194,12 @@ public class CMDComponentSpecExpanderTest {
         assertEquals(0, cmdComponent.getCMDComponent().size());
     }
 
-    private void printToFile(CMDComponentSpec spec) throws Exception {
-        File file = new File("/tmp/test.xml");
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        MDMarshaller.marshal(spec, out);
-        FileUtils.writeStringToFile(file, out.toString("UTF-8"), "UTF-8");
-    }
+//    private void printToFile(CMDComponentSpec spec) throws Exception {
+//        File file = new File("/tmp/test.xml");
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        MDMarshaller.marshal(spec, out);
+//        FileUtils.writeStringToFile(file, out.toString("UTF-8"), "UTF-8");
+//    }
 
     private File getRegistryDir() {
         if (tmpRegistryDir == null)
