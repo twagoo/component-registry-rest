@@ -53,9 +53,7 @@ public class ComponentRegistryRestService {
     private SecurityContext security;
     @Context
     private HttpServletRequest request;
-
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryRestService.class);
-
     public static final String DATA_FORM_FIELD = "data";
     public static final String NAME_FORM_FIELD = "name";
     public static final String DESCRIPTION_FORM_FIELD = "description";
@@ -91,7 +89,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/components")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<ComponentDescription> getRegisteredComponents(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         long start = System.currentTimeMillis();
         List<ComponentDescription> components = getRegistry(userspace).getComponentDescriptions();
@@ -102,7 +100,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/profiles")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         long start = System.currentTimeMillis();
         List<ProfileDescription> profiles = getRegistry(userspace).getProfileDescriptions();
@@ -113,7 +111,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/components/{componentId}")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public CMDComponentSpec getRegisteredComponent(@PathParam("componentId") String componentId,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Component with id: " + componentId + " is requested.");
@@ -122,7 +120,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/components/{componentId}/{rawType}")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public Response getRegisteredComponentRawType(@PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) {
         LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
         StreamingOutput result = null;
@@ -135,12 +133,14 @@ public class ComponentRegistryRestService {
         String fileName = desc.getName() + "." + rawType;
         if ("xml".equalsIgnoreCase(rawType)) {
             result = new StreamingOutput() {
+
                 public void write(OutputStream output) throws IOException, WebApplicationException {
                     registry.getMDComponentAsXml(componentId, output);
                 }
             };
         } else if ("xsd".equalsIgnoreCase(rawType)) {
             result = new StreamingOutput() {
+
                 public void write(OutputStream output) throws IOException, WebApplicationException {
                     registry.getMDComponentAsXsd(componentId, output);
                 }
@@ -171,7 +171,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/profiles/{profileId}")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public CMDComponentSpec getRegisteredProfile(@PathParam("profileId") String profileId,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         LOG.info("Profile with id: " + profileId + " is requested.");
@@ -202,11 +202,11 @@ public class ComponentRegistryRestService {
     @Consumes("multipart/form-data")
     public Response publishRegisteredProfile(@PathParam("profileId") String profileId, @FormDataParam(DATA_FORM_FIELD) InputStream input,
             @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
         Principal principal = checkAndGetUserPrincipal();
         ProfileDescription desc = getRegistry(true).getProfileDescription(profileId);
         if (desc != null) {
-            updateDescription(desc, name, description, domainName, null);
+            updateDescription(desc, name, description, domainName, group);
             return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
         } else {
             LOG.error("Update of nonexistent id (" + profileId + ") failed.");
@@ -220,12 +220,12 @@ public class ComponentRegistryRestService {
     public Response updateRegisteredProfile(@PathParam("profileId") String profileId,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
             @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
         Principal principal = checkAndGetUserPrincipal();
         UserCredentials userCredentials = getUserCredentials(principal);
         ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
         if (desc != null) {
-            updateDescription(desc, name, description, domainName, null);
+            updateDescription(desc, name, description, domainName, group);
             return register(input, desc, userCredentials, userspace, new UpdateAction());
         } else {
             LOG.error("Update of nonexistent id (" + profileId + ") failed.");
@@ -343,7 +343,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/profiles/{profileId}/{rawType}")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public Response getRegisteredProfileRawType(@PathParam("profileId") final String profileId, @PathParam("rawType") String rawType) {
         LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
         StreamingOutput result = null;
@@ -357,12 +357,14 @@ public class ComponentRegistryRestService {
 
         if ("xml".equalsIgnoreCase(rawType)) {
             result = new StreamingOutput() {
+
                 public void write(OutputStream output) throws IOException, WebApplicationException {
                     registry.getMDProfileAsXml(profileId, output);
                 }
             };
         } else if ("xsd".equalsIgnoreCase(rawType)) {
             result = new StreamingOutput() {
+
                 public void write(OutputStream output) throws IOException, WebApplicationException {
                     registry.getMDProfileAsXsd(profileId, output);
                 }
@@ -390,7 +392,7 @@ public class ComponentRegistryRestService {
 
     @POST
     @Path("/profiles")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
     public Response registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
             @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
@@ -410,7 +412,7 @@ public class ComponentRegistryRestService {
 
     @POST
     @Path("/components")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
     public Response registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
             @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
@@ -430,7 +432,7 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/pingSession")
-    @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response pingSession() {
         boolean stillActive = false;
         Principal userPrincipal = security.getUserPrincipal();
