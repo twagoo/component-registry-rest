@@ -393,7 +393,7 @@ public class ComponentRegistryRestService {
     @Produces( { MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Consumes("multipart/form-data")
     public Response registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
+            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
             @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
         Principal principal = checkAndGetUserPrincipal();
         UserCredentials userCredentials = getUserCredentials(principal);
@@ -402,6 +402,7 @@ public class ComponentRegistryRestService {
         desc.setUserId(userCredentials.getPrincipalNameMD5Hex());
         desc.setName(name);
         desc.setDescription(description);
+        desc.setGroupName(group);
         desc.setDomainName(domainName);
         LOG.info("Trying to register Profile: " + desc);
         return register(input, desc, userCredentials, userspace, new NewAction());
