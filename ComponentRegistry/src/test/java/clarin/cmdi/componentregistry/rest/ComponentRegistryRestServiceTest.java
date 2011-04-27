@@ -282,6 +282,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
         form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(response.isProfile());
@@ -291,6 +292,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("ProfileTest1", profileDesc.getName());
         assertEquals("My Test Profile", profileDesc.getDescription());
         assertEquals("TestDomain", profileDesc.getDomainName());
+        assertEquals("My Test Group", profileDesc.getGroupName());
         assertEquals(DigestUtils.md5Hex("JUnit@test.com"), profileDesc.getUserId());
         assertEquals("JUnit@test.com", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
@@ -702,6 +704,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
         form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "Domain");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "Group");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
         RegisterResponse postResponse = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
@@ -746,6 +749,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "t");
         form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "domain");
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Group");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertFalse(response.isRegistered());

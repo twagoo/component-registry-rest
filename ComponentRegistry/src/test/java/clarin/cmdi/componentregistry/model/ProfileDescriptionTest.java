@@ -28,6 +28,7 @@ public class ProfileDescriptionTest {
         desc.setRegistrationDate("myDate");
         desc.setDomainName("Linguistics");
         desc.setHref("linkToMyProfile");
+        desc.setGroupName("MyGroup");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(desc, out);
@@ -42,6 +43,7 @@ public class ProfileDescriptionTest {
         expected += "    <userId>"+DigestUtils.md5Hex("user1")+"</userId>\n";
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
+        expected += "    <groupName>MyGroup</groupName>\n";
         expected += "</profileDescription>\n";
         assertEquals(expected, out.toString());
 
