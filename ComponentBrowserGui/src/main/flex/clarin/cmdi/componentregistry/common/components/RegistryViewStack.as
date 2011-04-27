@@ -6,9 +6,9 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.editor.Editor;
 	import clarin.cmdi.componentregistry.importer.Importer;
 	import clarin.cmdi.componentregistry.services.Config;
-	
+
 	import flash.events.Event;
-	
+
 	import mx.containers.ViewStack;
 	import mx.events.FlexEvent;
 
@@ -16,7 +16,7 @@ package clarin.cmdi.componentregistry.common.components {
 		public var browse:Browse = new Browse();
 		private var editor:Editor = new Editor();
 		private var importer:Importer = new Importer();
-    
+
 		private var loginPanel:Login;
 		private var selectedItem:ItemDescription;
 
@@ -26,9 +26,11 @@ package clarin.cmdi.componentregistry.common.components {
 			browse.addEventListener(Browse.START_ITEM_LOADED, switchWithStartupItem);
 			addChild(browse); //everyone can browse
 
-			editor.addEventListener(FlexEvent.SHOW, checkLogin);
+			if (!Config.instance.debug) {
+				editor.addEventListener(FlexEvent.SHOW, checkLogin);
+				importer.addEventListener(FlexEvent.SHOW, checkLogin);
+			}
 			addChild(editor);
-			importer.addEventListener(FlexEvent.SHOW, checkLogin);
 			addChild(importer);
 		}
 
@@ -37,17 +39,17 @@ package clarin.cmdi.componentregistry.common.components {
 			switchView(Config.instance.view, item);
 		}
 
-        public function loadStartup():void {
-            if (Config.instance.space == Config.SPACE_USER && !Credentials.instance.isLoggedIn()) {
-                checkLogin();
-            } else {
-                if (Config.instance.startupItem) {
-                    browse.loadStartup();
-                } else {
-                    switchView(Config.instance.view);
-                }
-            }
-        }
+		public function loadStartup():void {
+			if (Config.instance.space == Config.SPACE_USER && !Credentials.instance.isLoggedIn()) {
+				checkLogin();
+			} else {
+				if (Config.instance.startupItem) {
+					browse.loadStartup();
+				} else {
+					switchView(Config.instance.view);
+				}
+			}
+		}
 
 		private function switchView(view:String, item:ItemDescription = null):void {
 			if (view == Config.VIEW_BROWSE) {
@@ -82,12 +84,12 @@ package clarin.cmdi.componentregistry.common.components {
 			this.selectedChild = importer;
 		}
 
-		private function checkLogin(event:Event=null):void {
+		private function checkLogin(event:Event = null):void {
 			if (!Credentials.instance.isLoggedIn()) {
-			    var itemId:String = Config.instance.startupItem;
-			    if (selectedItem) {
-			        itemId = selectedItem.id;
-			    }
+				var itemId:String = Config.instance.startupItem;
+				if (selectedItem) {
+					itemId = selectedItem.id;
+				}
 				loginPanel.show(this, RegistryView(this.selectedChild).getType(), Config.instance.space, itemId);
 			}
 		}
