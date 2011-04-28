@@ -66,6 +66,10 @@
 			}
 
 			private function registryChange(event:UploadCompleteEvent):void {
+				// Upload completed. Reset upload services and form
+				uploadSrv.reset();
+				clearForm();
+				// Browse to uploaded item
 				parentApplication.viewStack.switchToBrowse(event.itemDescription);
 			}
 

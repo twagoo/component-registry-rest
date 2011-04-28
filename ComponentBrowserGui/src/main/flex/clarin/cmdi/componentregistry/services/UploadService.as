@@ -166,6 +166,15 @@ package clarin.cmdi.componentregistry.services {
 				throw error;
 			}
 		}
+		
+		/**
+		 * Resets upload service, removes any remaining file reference, unsets selected file, and makes progress invisible  
+		 **/
+		public function reset():void{
+			createAndInitFileReference();
+			selectedFile = "";
+			pb.visible = false;
+		}
 
 		public function selectXmlFile(event:Event):void {
 			createAndInitFileReference();
