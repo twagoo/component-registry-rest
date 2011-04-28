@@ -122,7 +122,7 @@
 				description.text = "";
 				groupName.text = "";
 				domainName.selectedItem = null;
-				
+
 				// Reset all error strings on components with validators, so previous validation error message don't show anymore
 				for (var i:int; i < validators.length; i++) {
 					var val:Validator = validators.getItemAt(i) as Validator;
@@ -175,18 +175,23 @@
 
 			<mx:FormItem label="Type">
 				<mx:Label id="importType"
+						  width="300"
 						  text="{importTypeString}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Name">
 				<mx:TextInput id="nameInput"
+							  width="300"
 							  creationComplete="registerNameValidator(event)"/>
 			</mx:FormItem>
 			<mx:FormItem label="Description">
 				<mx:TextArea id="description"
+							 width="300"
+							 height="120"
 							 creationComplete="registerIsRequiredValidator(event)"/>
 			</mx:FormItem>
 			<mx:FormItem label="Creator Name">
 				<mx:Text id="creatorName"
+						 width="300"
 						 text="{Credentials.instance.userName}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Domain Name">
@@ -196,7 +201,8 @@
 							 dataProvider="{LabelConstants.DOMAIN_NAME_DATA}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Group Name">
-				<mx:TextInput id="groupName"/>
+				<mx:TextInput id="groupName"
+							  width="300"/>
 			</mx:FormItem>
 			<mx:Button label="Submit"
 					   click="submit(event)"/>
