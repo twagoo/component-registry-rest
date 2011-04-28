@@ -8,6 +8,8 @@
 
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.common.ComponentMD;
+			import clarin.cmdi.componentregistry.common.Profile;
 			import clarin.cmdi.componentregistry.services.Config;
 			import mx.events.ValidationResultEvent;
 			import mx.collections.ArrayCollection;
@@ -17,16 +19,14 @@
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import mx.core.Application;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
-
-			private static const BTN_PROFILE_LABEL:String = "Select profile xml...";
-			private static const BTN_COMPONENT_LABEL:String = "Select component xml...";
+			import mx.controls.Alert;
 
 			private var validators:ArrayCollection = new ArrayCollection();
 
 			[Bindable]
 			private var isProfile:Boolean = true;
 			[Bindable]
-			private var btnLabel:String = BTN_PROFILE_LABEL;
+			private var importTypeString:String = "";
 
 			private function submit(event:Event):void {
 				if (validate()) {
@@ -59,14 +59,64 @@
 			private function setIsProfile(isProfileValue:Boolean):void {
 				isProfile = isProfileValue;
 				if (isProfile) {
-					btnLabel = BTN_PROFILE_LABEL;
+					importTypeString = "Profile";
 				} else {
-					btnLabel = BTN_COMPONENT_LABEL;
+					importTypeString = "Component";
 				}
 			}
 
 			private function registryChange(event:UploadCompleteEvent):void {
 				parentApplication.viewStack.switchToBrowse(event.itemDescription);
+			}
+
+			private function fileLoaded(event:FileLoadedEvent):void {
+				var data:ByteArray = event.fileReference.data;
+				if (data && data.bytesAvailable) {
+					try {
+						var utfBytes:String = data.readUTFBytes(data.length);
+						var resultXml:XML = new XML(utfBytes);
+
+						// New file selected, clear all previous entries
+						clearForm();
+						// Set import type (profile or component) from attribute in XML
+						setImportTypeFromFile(resultXml);
+						// Set name, description from values in XML
+						setFormFieldsFromFile(resultXml);
+					} catch (error:Error) {
+						Alert.show("Could not read the selected file. Not a valid XML file?", "Error");
+						importTypeString = "Error";
+						trace("Error while reading loaded file " + event.fileReference.name);
+						return;
+					}
+				}
+			}
+
+			private function setImportTypeFromFile(resultXml:XML):void {
+				if (resultXml.hasOwnProperty("@isProfile")) {
+					setIsProfile(("true" == resultXml.@isProfile));
+				} else {
+					Alert.show("Unable to determine import type. Selected file may not be a valid component specification!", "Warning");
+					importTypeString = "Unknown";
+				}
+			}
+
+			private function setFormFieldsFromFile(resultXml:XML):void {
+				if (resultXml.hasOwnProperty("Header")) {
+					var nodes:XMLList = resultXml.Header;
+					if (nodes && nodes.length() > 0) {
+						var header:XML = nodes[0];
+						nameInput.text = header.Name;
+						description.text = header.Description;
+					}
+				}
+			}
+
+			private function clearForm():void {
+				importTypeString = "";
+				nameInput.text = "";
+				description.text = "";
+				groupName.text = "";
+				domainName.selectedItem = null;
 			}
 
 			private function registerNameValidator(event:Event):void {
@@ -96,23 +146,13 @@
 	</mx:Script>
 
 	<local:UploadService id="uploadSrv"
+						 loadBeforeUploading="true"
+						 fileLoaded="fileLoaded(event)"
 						 uploadComplete="registryChange(event)"/>
 	<mx:VBox>
 		<mx:Form>
 			<mx:HBox>
-				<mx:FormHeading label="Import"/>
-				<mx:RadioButton groupName="importType"
-								id="profileType"
-								label="Profile"
-								click="setIsProfile(true)"
-								selected="true"/>
-				<mx:RadioButton groupName="importType"
-								id="componentType"
-								label="Component"
-								click="setIsProfile(false)"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:Button label="{btnLabel}"
+				<mx:Button label="Select xml..."
 						   id="btnSelect"
 						   click="uploadSrv.selectXmlFile(event)"
 						   creationComplete="registerIsRequiredValidator(event, txtSelectedFile)"/>
@@ -120,6 +160,10 @@
 						 text="{uploadSrv.selectedFile}"/>
 			</mx:HBox>
 
+			<mx:FormItem label="Type">
+				<mx:Label id="importType"
+						  text="{importTypeString}"/>
+			</mx:FormItem>
 			<mx:FormItem label="Name">
 				<mx:TextInput id="nameInput"
 							  creationComplete="registerNameValidator(event)"/>
@@ -139,8 +183,7 @@
 							 dataProvider="{LabelConstants.DOMAIN_NAME_DATA}"/>
 			</mx:FormItem>
 			<mx:FormItem label="Group Name">
-				<mx:TextInput id="groupName"
-							  creationComplete="registerIsRequiredValidator(event)"/>
+				<mx:TextInput id="groupName"/>
 			</mx:FormItem>
 			<mx:Button label="Submit"
 					   click="submit(event)"/>

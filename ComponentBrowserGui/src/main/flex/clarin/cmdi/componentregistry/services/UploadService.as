@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.importer.FileLoadedEvent;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
 
 	import com.adobe.net.URI;
@@ -20,6 +21,7 @@ package clarin.cmdi.componentregistry.services {
 	import ru.inspirit.net.MultipartURLLoader;
 
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]
+	[Event(name="fileLoaded", type="clarin.cmdi.componentregistry.importer.FileLoadedEvent")]
 	public class UploadService {
 
 		/**
@@ -46,6 +48,11 @@ package clarin.cmdi.componentregistry.services {
 		private var fileRef:FileReference;
 		private var pb:ProgressBar;
 		private var ml:MultipartURLLoader;
+		private var _loadBeforeUploading:Boolean = false;
+
+		public function set loadBeforeUploading(lbu:Boolean):void {
+			_loadBeforeUploading = lbu;
+		}
 
 		public function init(progressBar:ProgressBar):void {
 			pb = progressBar;
@@ -64,11 +71,15 @@ package clarin.cmdi.componentregistry.services {
 		private function createAndInitFileReference():void {
 			fileRef = new FileReference();
 			fileRef.addEventListener(Event.SELECT, selectHandler);
-			//no uploads are done through FileRef only loads so this UPLOAD_COMPLETE_DATA event will not be thrown
-			//fileRef.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, responseHandler);
+
 			fileRef.addEventListener(ProgressEvent.PROGRESS, progressHandler);
 			fileRef.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 			fileRef.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+
+			// If loading is enabled, register handler that will dispatch loadFile event
+			if (_loadBeforeUploading) {
+				fileRef.addEventListener(Event.COMPLETE, fileLoadedHandler);
+			}
 		}
 
 		/**
@@ -166,6 +177,13 @@ package clarin.cmdi.componentregistry.services {
 			selectedFile = fileRef.name;
 			message = "";
 			pb.visible = false;
+			if (_loadBeforeUploading) {
+				fileRef.load();
+			}
+		}
+
+		private function fileLoadedHandler(event:Event):void {
+			dispatchEvent(new FileLoadedEvent(fileRef));
 		}
 
 		private function completeHandler(event:Event):void {
