@@ -1,8 +1,8 @@
-LUX16:
-mvn clean package -Dmaven.test.skip=true -DserviceRootUrl="http://lux16.mpi.nl/ds/ComponentRegistry" 
-
 LOCAL:
 mvn clean package -Dmaven.test.skip=true -DregistryRoot="/Users/patdui/Workspace/Clarin/MyRegistry"
 
+LUX16:
+mvn clean package -Dmaven.test.skip=true -Plux16 
+
 CATALOG.CLARIN:
-mvn clean package -Dmaven.test.skip=true -DregistryRoot="/lat/ComponentRegistry" -DserviceRootUrl="http://catalog.clarin.eu/ds/ComponentRegistry"  
+mvn clean package -Dmaven.test.skip=true -Pclarin
