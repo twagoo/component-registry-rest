@@ -151,7 +151,7 @@
         <serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
         <webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-        <registryRoot>ComponentRegistry</registryRoot>
+        <registryRoot>${user.home}/ComponentRegistry</registryRoot>
         <ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
         <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
         <flexDebug>0</flexDebug>
@@ -162,7 +162,7 @@
             <id>lux16</id>
             <properties>
                 <serviceRootUrl>http://lux16.mpi.nl/ds/ComponentRegistry</serviceRootUrl>
-                <registryRoot>"/tmp/ComponentRegistry</registryRoot>
+                <registryRoot>/tmp/ComponentRegistry</registryRoot>
                 <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
             </properties>
         </profile>
@@ -170,7 +170,7 @@
             <id>clarin</id>
             <properties>
                 <serviceRootUrl>http://catalog.clarin.eu/ds/ComponentRegistry</serviceRootUrl>
-                <registryRoot>"/lat/ComponentRegistry</registryRoot>
+                <registryRoot>/lat/ComponentRegistry</registryRoot>
                 <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
             </properties>
         </profile>
