@@ -8,6 +8,7 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.core.UIComponent;
 			import clarin.cmdi.componentregistry.common.ComponentMD;
 			import clarin.cmdi.componentregistry.common.Profile;
 			import clarin.cmdi.componentregistry.services.Config;
@@ -121,6 +122,14 @@
 				description.text = "";
 				groupName.text = "";
 				domainName.selectedItem = null;
+				
+				// Reset all error strings on components with validators, so previous validation error message don't show anymore
+				for (var i:int; i < validators.length; i++) {
+					var val:Validator = validators.getItemAt(i) as Validator;
+					if (val.listener.visible) {
+						(val.source as UIComponent).errorString = "";
+					}
+				}
 			}
 
 			private function registerNameValidator(event:Event):void {
