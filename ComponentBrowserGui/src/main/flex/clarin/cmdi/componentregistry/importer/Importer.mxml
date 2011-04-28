@@ -138,11 +138,8 @@
 							 prompt="{LabelConstants.DOMAIN_NAME_PROMPT}"
 							 dataProvider="{LabelConstants.DOMAIN_NAME_DATA}"/>
 			</mx:FormItem>
-			<mx:FormItem label="Group Name"
-						 visible="{!isProfile}"
-						 includeInLayout="{!isProfile}">
+			<mx:FormItem label="Group Name">
 				<mx:TextInput id="groupName"
-							  visible="{!isProfile}"
 							  creationComplete="registerIsRequiredValidator(event)"/>
 			</mx:FormItem>
 			<mx:Button label="Submit"
