@@ -115,23 +115,40 @@
 
 			private function setFormFieldsFromFile(resultXml:XML):void {
 				var header:XML = getHeaderXML(resultXml);
+				var component:XML = getComponentXML(resultXml);
 				if (header) {
-					nameInput.text = header.Name;
 					description.text = header.Description;
+				}
+				if(component){
+					nameInput.text = component.@name;
 				}
 			}
 
 			private function updateXMLFromFormFields(xml:XML):void {
 				var header:XML = getHeaderXML(xml);
+				var component:XML = getComponentXML(xml);
 				if (header) {
 					header.Name = nameInput.text;
 					header.Description = description.text;
+				}
+				if(component){
+					component.@name = nameInput.text;
 				}
 			}
 
 			private function getHeaderXML(xml:XML):XML {
 				if (xml.hasOwnProperty("Header")) {
 					var nodes:XMLList = xml.Header;
+					if (nodes && nodes.length() > 0) {
+						return nodes[0];
+					}
+				}
+				return null;
+			}
+			
+			private function getComponentXML(xml:XML):XML {
+				if (xml.hasOwnProperty("CMD_Component")) {
+					var nodes:XMLList = xml.CMD_Component;
 					if (nodes && nodes.length() > 0) {
 						return nodes[0];
 					}
