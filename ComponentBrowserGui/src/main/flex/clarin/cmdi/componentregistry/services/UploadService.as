@@ -2,9 +2,9 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.importer.FileLoadedEvent;
 	import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
-
+	
 	import com.adobe.net.URI;
-
+	
 	import flash.events.Event;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
@@ -14,10 +14,10 @@ package clarin.cmdi.componentregistry.services {
 	import flash.net.FileReference;
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
-
+	
 	import mx.controls.ProgressBar;
 	import mx.managers.CursorManager;
-
+	
 	import ru.inspirit.net.MultipartURLLoader;
 
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]

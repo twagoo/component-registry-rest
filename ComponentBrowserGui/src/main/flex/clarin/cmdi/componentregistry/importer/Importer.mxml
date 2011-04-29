@@ -29,6 +29,8 @@
 			[Bindable]
 			private var importTypeString:String = "";
 
+			private var loadedXML:XML;
+
 			private function submit(event:Event):void {
 				if (validate()) {
 					var item:ItemDescription = new ItemDescription();
@@ -39,7 +41,13 @@
 						item.domainName = domainName.selectedItem.data;
 					item.isProfile = isProfile;
 					item.isInUserSpace = true; //We only allow import into workspace it can be published from there.
-					uploadSrv.upload(UploadService.NEW, item);
+					if (loadedXML) {
+						updateXMLFromFormFields(loadedXML);
+						uploadSrv.upload(UploadService.NEW, item, loadedXML.toXMLString());
+					} else {
+						// No loaded XML. Let the upload service try with file reference
+						uploadSrv.upload(UploadService.NEW, item);
+					}
 				}
 			}
 
@@ -79,14 +87,14 @@
 				if (data && data.bytesAvailable) {
 					try {
 						var utfBytes:String = data.readUTFBytes(data.length);
-						var resultXml:XML = new XML(utfBytes);
+						loadedXML = new XML(utfBytes);
 
 						// New file selected, clear all previous entries
 						clearForm();
 						// Set import type (profile or component) from attribute in XML
-						setImportTypeFromFile(resultXml);
+						setImportTypeFromFile(loadedXML);
 						// Set name, description from values in XML
-						setFormFieldsFromFile(resultXml);
+						setFormFieldsFromFile(loadedXML);
 					} catch (error:Error) {
 						Alert.show("Could not read the selected file. Not a valid XML file?", "Error");
 						importTypeString = "Error";
@@ -106,14 +114,29 @@
 			}
 
 			private function setFormFieldsFromFile(resultXml:XML):void {
-				if (resultXml.hasOwnProperty("Header")) {
-					var nodes:XMLList = resultXml.Header;
+				var header:XML = getHeaderXML(resultXml);
+				if (header) {
+					nameInput.text = header.Name;
+					description.text = header.Description;
+				}
+			}
+
+			private function updateXMLFromFormFields(xml:XML):void {
+				var header:XML = getHeaderXML(xml);
+				if (header) {
+					header.Name = nameInput.text;
+					header.Description = description.text;
+				}
+			}
+
+			private function getHeaderXML(xml:XML):XML {
+				if (xml.hasOwnProperty("Header")) {
+					var nodes:XMLList = xml.Header;
 					if (nodes && nodes.length() > 0) {
-						var header:XML = nodes[0];
-						nameInput.text = header.Name;
-						description.text = header.Description;
+						return nodes[0];
 					}
 				}
+				return null;
 			}
 
 			private function clearForm():void {
