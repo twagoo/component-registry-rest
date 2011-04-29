@@ -66,7 +66,7 @@
 			}
 
 			private function scrollToSelected():void {
-				if (_itemToScrollTo) {
+				if (_itemToScrollTo && dataGrid.dataProvider) {
 					for (var i:int; i < dataGrid.dataProvider.length; i++) {
 						var item:ItemDescription = dataGrid.dataProvider.getItemAt(i) as ItemDescription;
 						if (item.id == _itemToScrollTo.id) {
