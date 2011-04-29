@@ -141,16 +141,19 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return resourceConfig.getProfileDir();
     }
 
+    @Override
     public List<ComponentDescription> getComponentDescriptions() {
         List<ComponentDescription> result = new ArrayList<ComponentDescription>(componentDescriptions.values());
         Collections.sort(result, ComponentDescription.COMPARE_ON_GROUP_AND_NAME);
         return result;
     }
 
+    @Override
     public ComponentDescription getComponentDescription(String id) {
         return componentDescriptions.get(id);
     }
 
+    @Override
     public CMDComponentSpec getMDProfile(String profileId) {
         CMDComponentSpec result = profilesCache.get(profileId);
         if (result == null && !profilesCache.containsKey(profileId)) {
@@ -160,11 +163,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
+    @Override
     public void getMDProfileAsXml(String profileId, OutputStream output) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
         writeXml(expandedSpec, output);
     }
 
+    @Override
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
         writeXsd(expandedSpec, outputStream);
@@ -190,6 +195,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return file;
     }
 
+    @Override
     public CMDComponentSpec getMDComponent(String componentId) {
         CMDComponentSpec result = componentsCache.get(componentId);
         if (result == null && !componentsCache.containsKey(componentId)) {
@@ -199,11 +205,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
+    @Override
     public void getMDComponentAsXml(String componentId, OutputStream output) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
         writeXml(expandedSpec, output);
     }
 
+    @Override
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
         writeXsd(expandedSpec, outputStream);
@@ -219,16 +227,19 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return StringUtils.removeStart(id, REGISTRY_ID);
     }
 
+    @Override
     public List<ProfileDescription> getProfileDescriptions() {
         List<ProfileDescription> result = new ArrayList<ProfileDescription>(profileDescriptions.values());
         Collections.sort(result, ProfileDescription.COMPARE_ON_NAME);
         return result;
     }
 
+    @Override
     public ProfileDescription getProfileDescription(String id) {
         return profileDescriptions.get(id);
     }
 
+    @Override
     public int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal) {
         int result = 0;
         if (!isPublic()) { //if already in public workspace there is nothing todo
@@ -254,11 +265,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     /**
      * CMDComponentSpec and description are assumed to be valid.
      */
+    @Override
     public int register(AbstractDescription desc, CMDComponentSpec spec) {
         LOG.info("Attempt to register " + desc.getType() + ": " + desc);
         return register(getDir(desc), desc, spec, new RegisterClosureOnFail(desc));
     }
 
+    @Override
     public int update(AbstractDescription desc, CMDComponentSpec spec) {
         LOG.info("Attempt to update " + desc.getType() + ": " + desc);
         return register(getDir(desc), desc, spec, new UpdateClosureOnFail(desc));
@@ -323,6 +336,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         LOG.info("Saving profile/component is successful " + file);
     }
 
+    @Override
     public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException {
         ProfileDescription desc = profileDescriptions.get(profileId);
         if (desc != null) {
@@ -345,6 +359,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
     }
 
+    @Override
     public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,
             UserUnauthorizedException, DeleteFailedException {
         ComponentDescription desc = componentDescriptions.get(componentId);
@@ -393,19 +408,20 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         if (!profiles.isEmpty()) {
             result.append("Still used by the following profiles: \n");
             for (ProfileDescription profileDescription : profiles) {
-                result.append(" - " + profileDescription.getName() + "\n");
+                result.append(" - ").append(profileDescription.getName()).append("\n");
             }
         }
         if (!components.isEmpty()) {
             result.append("Still used by the following components: \n");
             for (ComponentDescription componentDescription : components) {
-                result.append(" - " + componentDescription.getName() + "\n");
+                result.append(" - ").append(componentDescription.getName()).append("\n");
             }
         }
         result.append("Try to change above mentioned references first.");
         return result.toString();
     }
 
+    @Override
     public List<ComponentDescription> getUsageInComponents(String componentId) {
         List<ComponentDescription> result = new ArrayList<ComponentDescription>();
         List<ComponentDescription> descs = getComponentDescriptions();
@@ -418,10 +434,10 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return result;
     }
 
+    @Override
     public List<ProfileDescription> getUsageInProfiles(String componentId) {
         List<ProfileDescription> result = new ArrayList<ProfileDescription>();
-        List<ProfileDescription> profileDescriptions = getProfileDescriptions();
-        for (ProfileDescription profileDescription : profileDescriptions) {
+        for (ProfileDescription profileDescription : getProfileDescriptions()) {
             CMDComponentSpec profile = getMDProfile(profileDescription.getId());
             if (profile != null && findComponentId(componentId, profile.getCMDComponent())) {
                 result.add(profileDescription);
@@ -441,6 +457,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         return false;
     }
 
+    @Override
     public boolean isPublic() {
         return isPublic;
     }
