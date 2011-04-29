@@ -203,6 +203,12 @@ package clarin.cmdi.componentregistry.editor {
 			head.addChild(startOverLabel);
 			addChild(head);
 			
+			var nameInput:NameInputLine = new NameInputLine(_firstComponent.name, function(val:String):void {
+					_firstComponent.name = val;
+					_spec.headerName = val;
+				}); // editable, not required
+			addChild(nameInput);
+			
 			var groupNameInput:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
 					spec.groupName = val;
 				}); // editable, not required
@@ -212,12 +218,6 @@ package clarin.cmdi.componentregistry.editor {
 					spec.headerDescription = val;
 				}, InputValidators.getIsRequiredValidator()); //editable, required
 			addChild(descriptionInput);
-			
-			var nameInput:NameInputLine = new NameInputLine(_firstComponent.name, function(val:String):void {
-					_firstComponent.name = val;
-					_spec.headerName = val;
-				}); // editable, not required
-			addChild(nameInput);
 			
 			var domainInput:ComboBoxInputLine = new ComboBoxInputLine(LabelConstants.DOMAIN_NAME, _spec.domainName, LabelConstants.DOMAIN_NAME_DATA, LabelConstants.DOMAIN_NAME_PROMPT, function(val:Object):void {
 					if (val) {
