@@ -28,7 +28,12 @@ import org.junit.Test;
 import clarin.cmdi.componentregistry.model.UserMapping;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"/applicationContext-filesystem-impl.xml"})
 public class ComponentRegistryFactoryTest {
 
     private File registryDir;
@@ -108,7 +113,6 @@ public class ComponentRegistryFactoryTest {
         Configuration.getInstance().setRegistryRoot(registryDir);
         Configuration.getInstance().init();
         ComponentRegistryFactoryImpl.getInstance().reset();
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
     }
 
     @After

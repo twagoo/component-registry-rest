@@ -16,13 +16,21 @@ import org.junit.Before;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"/applicationContext.xml"})
 
 public class MDValidatorTest {
+    @Autowired
+    protected ComponentRegistryFactory componentRegistryFactory;
 
     private static File registryDir;
     private static ComponentRegistry testRegistry;
@@ -33,17 +41,11 @@ public class MDValidatorTest {
         registryDir = ComponentRegistryTestCase.createTempRegistryDir();
         testRegistry = ComponentRegistryTestCase.getTestRegistry(registryDir);
         publicRegistry = testRegistry;
-
-        Configuration.getInstance().setRegistryRoot(registryDir);
-        Configuration.getInstance().init();
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
     }
 
     @After
     public void deleteRegistry() {
         ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(null);
-        registryDir = null;
     }
 
     @Test
@@ -122,7 +124,7 @@ public class MDValidatorTest {
     public void testValidateUserRegistry() throws Exception {
         String id1 = "component1";
         String id2 = "component2";
-        ComponentRegistry userRegistry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
+        ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
 
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";

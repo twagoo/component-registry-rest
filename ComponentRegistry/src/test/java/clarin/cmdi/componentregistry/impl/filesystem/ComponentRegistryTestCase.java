@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import static org.junit.Assert.assertTrue;
@@ -13,8 +14,17 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"/applicationContext-filesystem-impl.xml"})
 public abstract class ComponentRegistryTestCase {
+
+    @Autowired
+    protected ComponentRegistryFactory componentRegistryFactory;
 
     protected File tmpRegistryDir;
     protected final static UserCredentials USER_CREDS = DummyPrincipal.DUMMY_CREDENTIALS;

@@ -34,7 +34,6 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private Configuration configuration;
 
     private ComponentRegistryFactoryImpl() {
-        //init();
     }
 
     private void init() {
@@ -135,7 +134,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         return user;
     }
 
-    String getOrCreateUserDir(String principalName, String displayName) {
+    synchronized String getOrCreateUserDir(String principalName, String displayName) {
         if (principalName == null) {
             return null;
         }
@@ -156,7 +155,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         return userMap;
     }
 
-    private void saveUserMap() {
+    private synchronized void saveUserMap() {
         try {
             MDMarshaller.marshal(userMap, new FileOutputStream(configuration.getUserDirMappingFile()));
         } catch (IOException e) {//Manual intervention is probably needed so just throwing RuntimeExceptions if we cannot save the mapping we cannot do a lot so that needs to be addressed asap.

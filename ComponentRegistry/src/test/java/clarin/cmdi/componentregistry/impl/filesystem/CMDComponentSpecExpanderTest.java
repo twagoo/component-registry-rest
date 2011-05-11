@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -8,6 +8,10 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
@@ -15,33 +19,14 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
-import org.junit.Before;
 
-public class CMDComponentSpecExpanderTest {
+public class CMDComponentSpecExpanderTest extends ComponentRegistryTestCase{
 
     private File tmpRegistryDir;
-    private File registryDir;
-
-    @Before
-    public void startClean() {
-        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
-        Configuration.getInstance().setRegistryRoot(registryDir);
-        Configuration.getInstance().init();
-        ComponentRegistryFactoryImpl.getInstance().reset();
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
-    }
-
-    @After
-    public void cleanUp() {
-        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
-        ComponentRegistryFactoryImpl.getInstance().reset();
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(null);
-        registryDir = null;
-    }
 
     @Test
     public void testExpandProfileWithNestedComponents() throws Exception {
-        ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
+        ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
 
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -103,8 +88,9 @@ public class CMDComponentSpecExpanderTest {
 
     @Test
     public void testExpandProfileWithNestedComponentsFromUserRegistry() throws Exception {
-        ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
-        ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true,
+        ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
+//        ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true,
+        ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) componentRegistryFactory.getComponentRegistry(true,
                 DummyPrincipal.DUMMY_CREDENTIALS);
 
         String content = "";
@@ -163,7 +149,7 @@ public class CMDComponentSpecExpanderTest {
 
     @Test
     public void testExpandEmbeddedWithNested() throws Exception {
-        ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
+        ComponentRegistryImpl registry = getTestRegistry(getRegistryDir());
 
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -210,24 +196,5 @@ public class CMDComponentSpecExpanderTest {
         cmdComponent = cmdComponents.get(1);
         assertEquals("YYY", cmdComponent.getName());
         assertEquals(0, cmdComponent.getCMDComponent().size());
-    }
-
-//    private void printToFile(CMDComponentSpec spec) throws Exception {
-//        File file = new File("/tmp/test.xml");
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        MDMarshaller.marshal(spec, out);
-//        FileUtils.writeStringToFile(file, out.toString("UTF-8"), "UTF-8");
-//    }
-
-    private File getRegistryDir() {
-        if (tmpRegistryDir == null)
-            tmpRegistryDir = ComponentRegistryTestCase.createTempRegistryDir();
-        return tmpRegistryDir;
-    }
-
-    @After
-    public void cleanupRegistryDir() {
-        ComponentRegistryTestCase.cleanUpRegistryDir(tmpRegistryDir);
-        tmpRegistryDir = null;
     }
 }

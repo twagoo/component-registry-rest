@@ -1,12 +1,9 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.ResourceConfig;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +23,10 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
@@ -33,29 +34,8 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
-import org.junit.After;
-import org.junit.Before;
 
 public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
-
-    private File registryDir;
-
-    @Before
-    public void startClean() {
-        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
-        Configuration.getInstance().setRegistryRoot(registryDir);
-        Configuration.getInstance().init();
-        ComponentRegistryFactoryImpl.getInstance().reset();
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
-    }
-
-    @After
-    public void cleanUp() {
-        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
-        ComponentRegistryFactoryImpl.getInstance().reset();
-        ComponentRegistryFactoryImpl.getInstance().setConfiguration(null);
-        registryDir = null;
-    }
 
     @Test
     public void testRegisterProfile() throws JAXBException {
@@ -418,8 +398,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         description.setDescription("MyDescription");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1999);
-        description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
-                .getPattern()));
+        description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()));
         CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
         registry.register(description, testComp);
@@ -449,8 +428,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         description.setDescription("MyDescription");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1999);
-        description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
-                .getPattern()));
+        description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()));
         CMDComponentSpec testComp = RegistryTestHelper.getTestProfile();
 
         registry.register(description, testComp);
