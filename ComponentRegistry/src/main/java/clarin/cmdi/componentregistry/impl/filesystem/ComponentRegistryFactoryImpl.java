@@ -26,21 +26,19 @@ import clarin.cmdi.componentregistry.model.UserMapping.User;
 
 public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
 
-    public static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactoryImpl.class);
-    private static final ComponentRegistryFactoryImpl INSTANCE = new ComponentRegistryFactoryImpl();
-
+    private static ComponentRegistryFactoryImpl INSTANCE = null;
     private UserMapping userMap = null;
-
     private ComponentRegistryImpl publicRegistry = new ComponentRegistryImpl(true);
     private Map<String, ComponentRegistry> registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
+    private Configuration configuration;
 
     private ComponentRegistryFactoryImpl() {
-        init();
+        //init();
     }
 
     private void init() {
-        publicRegistry.setResourceConfig(Configuration.getInstance().getPublicResourceConfig());
+        publicRegistry.setResourceConfig(configuration.getPublicResourceConfig());
         try {
             loadUserMap();
         } catch (IOException e) {
@@ -51,7 +49,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     }
 
     private synchronized void loadUserMap() throws IOException, JAXBException {
-        File userDirMappingFile = Configuration.getInstance().getUserDirMappingFile();
+        File userDirMappingFile = configuration.getUserDirMappingFile();
         if (userDirMappingFile.exists()) {
             userMap = MDMarshaller.unmarshal(UserMapping.class, userDirMappingFile, null);
         } else {
@@ -65,7 +63,10 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         publicRegistry = new ComponentRegistryImpl(true);
     }
 
-    public static ComponentRegistryFactoryImpl getInstance() {
+    public static synchronized ComponentRegistryFactoryImpl getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ComponentRegistryFactoryImpl();
+        }
         return INSTANCE;
     }
 
@@ -107,7 +108,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         User user = getUserDir(principalNameMD5);
         ComponentRegistry result = null;
         if (user != null) {
-            if (Configuration.getInstance().isAdminUser(adminPrincipal)) {
+            if (configuration.isAdminUser(adminPrincipal)) {
                 result = loadWorkspace(adminPrincipal.getName(), user.getUserDir());
             } else {
                 throw new IllegalArgumentException("User is not admin user cannot load userspace.");
@@ -121,7 +122,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private ComponentRegistry createNewUserRegistry(String user) {
         ComponentRegistryImpl result = new ComponentRegistryImpl(false);
         ResourceConfig config = new ResourceConfig();
-        File userResourceDir = new File(Configuration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator
+        File userResourceDir = new File(configuration.getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator
                 + user);
         config.setResourceRoot(userResourceDir);
         config.init();
@@ -157,7 +158,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
 
     private void saveUserMap() {
         try {
-            MDMarshaller.marshal(userMap, new FileOutputStream(Configuration.getInstance().getUserDirMappingFile()));
+            MDMarshaller.marshal(userMap, new FileOutputStream(configuration.getUserDirMappingFile()));
         } catch (IOException e) {//Manual intervention is probably needed so just throwing RuntimeExceptions if we cannot save the mapping we cannot do a lot so that needs to be addressed asap.
             throw new RuntimeException("Cannot save userMapping.", e);
         } catch (JAXBException e) {
@@ -176,4 +177,10 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         return result;
     }
 
+    /**
+     * @param configuration the configuration to set
+     */
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 }

@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -40,9 +41,9 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 
 import com.sun.jersey.multipart.FormDataParam;
+import com.sun.jersey.spi.inject.Inject;
 
 @Path("/registry")
 public class ComponentRegistryRestService {
@@ -61,6 +62,10 @@ public class ComponentRegistryRestService {
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String USERSPACE_PARAM = "userspace";
 
+
+    @Inject
+    private ComponentRegistryFactory componentRegistryFactory;
+
     private ComponentRegistry getRegistry(boolean userspace) {
         Principal userPrincipal = security.getUserPrincipal();
         UserCredentials userCredentials = getUserCredentials(userPrincipal);
@@ -68,7 +73,7 @@ public class ComponentRegistryRestService {
     }
 
     private ComponentRegistry getRegistry(boolean userspace, UserCredentials userCredentials) {
-        return ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(userspace, userCredentials);
+        return componentRegistryFactory.getComponentRegistry(userspace, userCredentials);
     }
 
     private Principal checkAndGetUserPrincipal() {
@@ -157,7 +162,7 @@ public class ComponentRegistryRestService {
         ComponentRegistry result = getRegistry(false);
         desc = clos.getDescription(result, id);
         if (desc == null) {
-            List<ComponentRegistry> userRegs = ComponentRegistryFactoryImpl.getInstance().getAllUserRegistries();
+            List<ComponentRegistry> userRegs = componentRegistryFactory.getAllUserRegistries();
             for (ComponentRegistry reg : userRegs) {
                 desc = clos.getDescription(reg, id);
                 if (desc != null) {
@@ -438,7 +443,7 @@ public class ComponentRegistryRestService {
         Principal userPrincipal = security.getUserPrincipal();
         LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
         if (request != null) {
-            if (userPrincipal != null && !ComponentRegistryFactoryImpl.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+            if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
                 stillActive = !((HttpServletRequest) request).getSession().isNew();
             }
         }

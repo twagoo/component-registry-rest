@@ -13,6 +13,7 @@ import java.util.List;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public interface ComponentRegistryFactory {
+    public static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
 
     List<ComponentRegistry> getAllUserRegistries();
 

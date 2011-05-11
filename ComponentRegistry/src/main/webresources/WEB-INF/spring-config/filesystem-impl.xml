@@ -5,7 +5,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 ">
 
-  <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl" factory-method="getInstance">
-  </bean>
+    <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl" init-method="init" factory-method="getInstance">
+        <property name="configuration" ref="configuration"/>
+    </bean>
 
 </beans>
