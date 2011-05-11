@@ -2,8 +2,6 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;

@@ -20,9 +20,12 @@ import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.core.util.Base64;
 import com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider;
 import com.sun.jersey.spi.container.servlet.WebComponent;
+import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import com.sun.jersey.test.framework.AppDescriptor;
 import com.sun.jersey.test.framework.JerseyTest;
 import com.sun.jersey.test.framework.WebAppDescriptor;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.request.RequestContextListener;
 
 public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     //CommandLine test e.g.:  curl -i -H "Accept:application/json" -X GET  http://localhost:8080/ComponentRegistry/rest/registry/profiles
@@ -37,10 +40,15 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     @Override
     protected AppDescriptor configure() {
-        WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder().initParam(WebComponent.RESOURCE_CONFIG_CLASS,
-                ClassNamesResourceConfig.class.getName()).initParam(ClassNamesResourceConfig.PROPERTY_CLASSNAMES,
-                FormDataMultiPartDispatchProvider.class.getName() + ";" + ComponentRegistryRestService.class.getName()).addFilter(
-                DummySecurityFilter.class, "DummySecurityFilter");
+        WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder()
+                .contextParam("contextConfigLocation", "classpath:applicationContext.xml")
+                .servletClass(SpringServlet.class)
+                .initParam(WebComponent.RESOURCE_CONFIG_CLASS,ClassNamesResourceConfig.class.getName())
+                .initParam(ClassNamesResourceConfig.PROPERTY_CLASSNAMES,FormDataMultiPartDispatchProvider.class.getName() + ";" + ComponentRegistryRestService.class.getName())
+                .addFilter(DummySecurityFilter.class, "DummySecurityFilter")
+                .requestListenerClass(RequestContextListener.class)
+                .contextListenerClass(ContextLoaderListener.class) 
+                ;
         return builder.build();
     }
 

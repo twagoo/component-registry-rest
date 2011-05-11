@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.ResourceConfig;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -32,8 +33,29 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+import org.junit.After;
+import org.junit.Before;
 
 public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
+
+    private File registryDir;
+
+    @Before
+    public void startClean() {
+        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
+        Configuration.getInstance().setRegistryRoot(registryDir);
+        Configuration.getInstance().init();
+        ComponentRegistryFactoryImpl.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
+    }
+
+    @After
+    public void cleanUp() {
+        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
+        ComponentRegistryFactoryImpl.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().setConfiguration(null);
+        registryDir = null;
+    }
 
     @Test
     public void testRegisterProfile() throws JAXBException {

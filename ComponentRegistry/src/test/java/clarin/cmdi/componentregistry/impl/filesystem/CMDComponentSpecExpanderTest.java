@@ -1,15 +1,11 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
-import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpander;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
+import clarin.cmdi.componentregistry.Configuration;
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
 
@@ -19,10 +15,29 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+import org.junit.Before;
 
 public class CMDComponentSpecExpanderTest {
 
     private File tmpRegistryDir;
+    private File registryDir;
+
+    @Before
+    public void startClean() {
+        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
+        Configuration.getInstance().setRegistryRoot(registryDir);
+        Configuration.getInstance().init();
+        ComponentRegistryFactoryImpl.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
+    }
+
+    @After
+    public void cleanUp() {
+        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
+        ComponentRegistryFactoryImpl.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().setConfiguration(null);
+        registryDir = null;
+    }
 
     @Test
     public void testExpandProfileWithNestedComponents() throws Exception {

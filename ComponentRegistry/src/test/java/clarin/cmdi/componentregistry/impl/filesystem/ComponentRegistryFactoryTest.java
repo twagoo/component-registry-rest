@@ -4,7 +4,6 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -109,6 +108,7 @@ public class ComponentRegistryFactoryTest {
         Configuration.getInstance().setRegistryRoot(registryDir);
         Configuration.getInstance().init();
         ComponentRegistryFactoryImpl.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().setConfiguration(Configuration.getInstance());
     }
 
     @After
