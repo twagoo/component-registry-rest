@@ -1,11 +1,11 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.ResourceConfig;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,18 +24,18 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.model.UserMapping;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
 
-public class ComponentRegistryFactory {
+public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
 
     public static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
-    private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactory.class);
-    private static final ComponentRegistryFactory INSTANCE = new ComponentRegistryFactory();
+    private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactoryImpl.class);
+    private static final ComponentRegistryFactoryImpl INSTANCE = new ComponentRegistryFactoryImpl();
 
     private UserMapping userMap = null;
 
     private ComponentRegistryImpl publicRegistry = new ComponentRegistryImpl(true);
     private Map<String, ComponentRegistry> registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
 
-    private ComponentRegistryFactory() {
+    private ComponentRegistryFactoryImpl() {
         init();
     }
 
@@ -65,14 +65,16 @@ public class ComponentRegistryFactory {
         publicRegistry = new ComponentRegistryImpl(true);
     }
 
-    public static ComponentRegistryFactory getInstance() {
+    public static ComponentRegistryFactoryImpl getInstance() {
         return INSTANCE;
     }
 
+    @Override
     public ComponentRegistry getPublicRegistry() {
         return publicRegistry;
     }
 
+    @Override
     public synchronized ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials) {
         ComponentRegistry result = null;
         if (userspace) {
@@ -100,6 +102,7 @@ public class ComponentRegistryFactory {
         return result;
     }
 
+    @Override
     public synchronized ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String principalNameMD5) {
         User user = getUserDir(principalNameMD5);
         ComponentRegistry result = null;
@@ -162,6 +165,7 @@ public class ComponentRegistryFactory {
         }
     }
 
+    @Override
     public synchronized List<ComponentRegistry> getAllUserRegistries() {
         List<ComponentRegistry> result = new ArrayList<ComponentRegistry>();
         List<User> users = userMap.getUsers();

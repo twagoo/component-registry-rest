@@ -256,7 +256,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
                     deleteMDComponent(desc.getId(), principal, true);
                 }
                 desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
-                result = ComponentRegistryFactory.getInstance().getPublicRegistry().register(desc, spec);
+                result = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry().register(desc, spec);
                 //This is not nice this leaves us in a state where the spec can be deleted but not registered in public space.
                 //NOTE deleted means it is moved to deleted directory, so an admin can still reach it. 
                 //In practice this will probably also not be so much of an issue. Nonetheless this screams for transactions and a database.

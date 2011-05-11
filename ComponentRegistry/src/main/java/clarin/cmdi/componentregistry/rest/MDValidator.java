@@ -12,7 +12,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 
 public class MDValidator implements Validator {
 
@@ -86,7 +86,7 @@ public class MDValidator implements Validator {
             } else { //User registry, can link to components from public registry and the user's registry
                 registeredComponent = registry.getMDComponent(id);
                 if (registeredComponent == null) {
-                    registeredComponent = ComponentRegistryFactory.getInstance().getPublicRegistry().getMDComponent(id);
+                    registeredComponent = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry().getMDComponent(id);
                     if (registeredComponent == null) {
                         errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
                     }

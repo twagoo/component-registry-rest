@@ -81,7 +81,7 @@ public class CMDComponentSpecExpander {
     private CMDComponentSpec getUncachedComponent(String componentId) {
         CMDComponentSpec result = registry.getUncachedComponent(componentId); //TODO PD fix this uncached stuff or put it in interface or make sure getComponent return a mutable object.
         if (result == null && !registry.isPublic()) {
-            result = ((ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry()).getUncachedComponent(componentId);
+            result = ((ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getPublicRegistry()).getUncachedComponent(componentId);
         }
         return result;
     }

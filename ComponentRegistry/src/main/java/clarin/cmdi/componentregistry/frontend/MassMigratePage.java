@@ -16,7 +16,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.UserMapping;
@@ -75,13 +75,13 @@ public class MassMigratePage extends SecureAdminWebPage {
 
     private void startMigration() {
         info("Start Migration...");
-        UserMapping userMap = ComponentRegistryFactory.getInstance().getUserMap();
+        UserMapping userMap = ComponentRegistryFactoryImpl.getInstance().getUserMap();
         for (User user : userMap.getUsers()) {
             String userId = DigestUtils.md5Hex(user.getPrincipalName());
-            ComponentRegistry registry = ComponentRegistryFactory.getInstance().getOtherUserComponentRegistry(getUserPrincipal(), userId);
+            ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getOtherUserComponentRegistry(getUserPrincipal(), userId);
             updateDescriptions(registry, userId, userMap);
         }
-        ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
+        ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
         updateDescriptions(registry, null, userMap); // public has different username for every description.
         info("End Migration.");
     }

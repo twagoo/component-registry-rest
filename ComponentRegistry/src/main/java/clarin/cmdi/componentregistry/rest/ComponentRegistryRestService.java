@@ -40,7 +40,7 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 
 import com.sun.jersey.multipart.FormDataParam;
 
@@ -68,7 +68,7 @@ public class ComponentRegistryRestService {
     }
 
     private ComponentRegistry getRegistry(boolean userspace, UserCredentials userCredentials) {
-        return ComponentRegistryFactory.getInstance().getComponentRegistry(userspace, userCredentials);
+        return ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(userspace, userCredentials);
     }
 
     private Principal checkAndGetUserPrincipal() {
@@ -157,7 +157,7 @@ public class ComponentRegistryRestService {
         ComponentRegistry result = getRegistry(false);
         desc = clos.getDescription(result, id);
         if (desc == null) {
-            List<ComponentRegistry> userRegs = ComponentRegistryFactory.getInstance().getAllUserRegistries();
+            List<ComponentRegistry> userRegs = ComponentRegistryFactoryImpl.getInstance().getAllUserRegistries();
             for (ComponentRegistry reg : userRegs) {
                 desc = clos.getDescription(reg, id);
                 if (desc != null) {
@@ -438,7 +438,7 @@ public class ComponentRegistryRestService {
         Principal userPrincipal = security.getUserPrincipal();
         LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
         if (request != null) {
-            if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+            if (userPrincipal != null && !ComponentRegistryFactoryImpl.ANONYMOUS_USER.equals(userPrincipal.getName())) {
                 stillActive = !((HttpServletRequest) request).getSession().isNew();
             }
         }

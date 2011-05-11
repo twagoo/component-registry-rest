@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -24,7 +24,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 public class StatisticsPage extends SecureAdminWebPage {
 
     private static final long serialVersionUID = 1L;
-    private transient ComponentRegistry registry = ComponentRegistryFactory.getInstance().getPublicRegistry();
+    private transient ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
 
     private static class Statistics {
         private int componentnumber = 0;
