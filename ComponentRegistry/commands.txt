@@ -1,5 +1,5 @@
 LOCAL:
-mvn clean package -Dmaven.test.skip=true -DregistryRoot="/Users/patdui/Workspace/Clarin/MyRegistry"
+mvn clean package -Dmaven.test.skip=true
 
 LUX16:
 mvn clean package -Dmaven.test.skip=true -Plux16 
