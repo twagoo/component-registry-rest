@@ -4,7 +4,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -36,7 +36,7 @@ public class ComponentRegistryFactoryTest {
 
     @Test
     public void testGetOrCreateUserDir() throws Exception {
-        ComponentRegistryFactory instance = ComponentRegistryFactory.getInstance();
+        ComponentRegistryFactoryImpl instance = ComponentRegistryFactoryImpl.getInstance();
         assertFalse(Configuration.getInstance().getUserDirMappingFile().exists());
         ComponentRegistry componentRegistry = instance.getComponentRegistry(true, createUserCredentials("noot", "Mr.Noot"));
 
@@ -65,7 +65,7 @@ public class ComponentRegistryFactoryTest {
 
     @Test
     public void testGetOtherUserComponentRegistry() throws Exception {
-        ComponentRegistryFactory instance = ComponentRegistryFactory.getInstance();
+        ComponentRegistryFactoryImpl instance = ComponentRegistryFactoryImpl.getInstance();
         ComponentRegistry reg1 = instance.getComponentRegistry(true, createUserCredentials("noot", "Mr.Noot"));
         assertNotNull(reg1);
         ComponentRegistry reg2 = instance.getComponentRegistry(true, createUserCredentials("aap", "Mr.Aap"));
@@ -108,7 +108,7 @@ public class ComponentRegistryFactoryTest {
         registryDir = ComponentRegistryTestCase.createTempRegistryDir();
         Configuration.getInstance().setRegistryRoot(registryDir);
         Configuration.getInstance().init();
-        ComponentRegistryFactory.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().reset();
     }
 
     @After

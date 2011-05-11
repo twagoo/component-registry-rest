@@ -4,7 +4,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.ResourceConfig;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -122,7 +122,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
     @Test
     public void testCacheLoadCorrect() throws Exception {
         ComponentRegistryImpl publicReg = getTestRegistry(getRegistryDir());
-        ComponentRegistryImpl userReg = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getComponentRegistry(true,
+        ComponentRegistryImpl userReg = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true,
                 DummyPrincipal.DUMMY_CREDENTIALS);
 
         ProfileDescription pDesc = ProfileDescription.createNewDescription();
@@ -410,7 +410,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
         assertEquals(0, registry.getComponentDescriptions().size());
 
-        registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
+        registry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.register(description, testComp);
         assertEquals(1, registry.getComponentDescriptions().size());
         registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
@@ -441,7 +441,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         registry.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
         assertEquals(0, registry.getProfileDescriptions().size());
 
-        registry = ComponentRegistryFactory.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
+        registry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.register(description, testComp);
         assertEquals(1, registry.getProfileDescriptions().size());
         registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete

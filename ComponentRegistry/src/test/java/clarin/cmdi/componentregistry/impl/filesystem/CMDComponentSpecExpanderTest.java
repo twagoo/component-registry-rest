@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpander;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static org.junit.Assert.assertEquals;
@@ -89,7 +89,7 @@ public class CMDComponentSpecExpanderTest {
     @Test
     public void testExpandProfileWithNestedComponentsFromUserRegistry() throws Exception {
         ComponentRegistryImpl registry = ComponentRegistryTestCase.getTestRegistry(getRegistryDir());
-        ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getComponentRegistry(true,
+        ComponentRegistryImpl userRegistry = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true,
                 DummyPrincipal.DUMMY_CREDENTIALS);
 
         String content = "";

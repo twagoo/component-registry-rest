@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -113,7 +113,7 @@ public class MDValidatorTest {
     public void testValidateUserRegistry() throws Exception {
         String id1 = "component1";
         String id2 = "component2";
-        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance()
+        ComponentRegistry userRegistry = ComponentRegistryFactoryImpl.getInstance()
                 .getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
 
         String profileContent = "";

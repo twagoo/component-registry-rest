@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static org.junit.Assert.assertTrue;
 
@@ -30,7 +30,7 @@ public abstract class ComponentRegistryTestCase {
 
     @After
     public void cleanupRegistryDir() {
-        ComponentRegistryFactory.getInstance().reset();
+        ComponentRegistryFactoryImpl.getInstance().reset();
         cleanUpRegistryDir(tmpRegistryDir);
         tmpRegistryDir = null;
     }
@@ -46,8 +46,8 @@ public abstract class ComponentRegistryTestCase {
         adminUsers.add(PRINCIPAL_ADMIN.getName());
         config.setAdminUsers(adminUsers);
         config.init();
-        ComponentRegistryFactory.getInstance().reset();
-        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactory.getInstance().getPublicRegistry();
+        ComponentRegistryFactoryImpl.getInstance().reset();
+        ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
         register.setResourceConfig(config.getPublicResourceConfig()); //LOADS cache again but is necessary for tests normally we wouldn't have this
         return register;
     }

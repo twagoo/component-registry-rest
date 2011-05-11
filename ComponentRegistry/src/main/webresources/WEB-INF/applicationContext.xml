@@ -2,37 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-
-  <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" init-method="init" factory-method="getInstance">
-    <property name="registryRoot" value="${registryRoot}" />
-    <property name="adminUsers">
-      <set>
-        <value>patdui@mpi.nl</value> <!-- short names are for shibbolet on lux16 -->
-        <value>patrick.duin@mpi.nl</value>
-        <value>guisil@mpi.nl</value>
-        <value>guilherme.silva@mpi.nl</value>
-        <value>twagoo@mpi.nl</value>
-        <value>twan.goosen@mpi.nl</value>
-        <value>daan.broeder@mpi.nl</value>
-      </set>
-    </property>
-    <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
-    <!-- <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/comp2schema.xsl" />-->
-    <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
-    <property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd http://www.clarin.eu/cmd/general-component-schema.xsd" />
-    <property name="isocatRestUrl" value="http://www.isocat.org/rest/" />
-    <!-- Extra attribute keys that are passed in a shibboleth authenticated request principal.
-         You need to configure the shhaa.xml file to enable the extra attributes.
-     -->
-    <property name="displayNameShibbolethKeys">
-        <list>
-          <value>displayName</value>
-          <value>commonName</value>
-        </list>
-    </property>
-  </bean>
-
-  <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.ComponentRegistryFactory" factory-method="getInstance">
-  </bean>
+    <import resource="spring-config/component-registry.xml"/>
+    <import resource="spring-config/filesystem-impl.xml"/>
 
 </beans>

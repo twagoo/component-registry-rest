@@ -18,7 +18,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -439,7 +439,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testRegisterWithUserComponents() throws Exception {
-        ComponentRegistry userRegistry = ComponentRegistryFactory.getInstance()
+        ComponentRegistry userRegistry = ComponentRegistryFactoryImpl.getInstance()
                 .getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";

@@ -224,6 +224,7 @@
                             <includes>
                                 <include>index.jsp</include>
                                 <include>WEB-INF/applicationContext.xml</include>
+                                <include>WEB-INF/spring-config/**</include>
                             </includes>
                         </resource>
                     </webResources>
