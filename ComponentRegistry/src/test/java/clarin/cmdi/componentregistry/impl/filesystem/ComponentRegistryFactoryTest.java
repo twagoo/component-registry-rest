@@ -1,5 +1,10 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

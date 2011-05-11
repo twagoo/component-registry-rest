@@ -1,5 +1,11 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.ResourceConfig;
+import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

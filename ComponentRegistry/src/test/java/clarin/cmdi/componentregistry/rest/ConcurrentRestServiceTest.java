@@ -103,6 +103,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
         form.field(ComponentRegistryRestService.NAME_FORM_FIELD, name);
         form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, name + " Description");
         Thread t = new Thread(new Runnable() {
+            @Override
             public void run() {
                 //                System.out.println("THREAD STARTED"+Thread.currentThread().getName());
                 RegisterResponse registerResponse = getAuthenticatedResource(

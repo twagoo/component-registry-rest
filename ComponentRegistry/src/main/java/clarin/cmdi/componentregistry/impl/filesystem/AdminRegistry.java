@@ -1,5 +1,9 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

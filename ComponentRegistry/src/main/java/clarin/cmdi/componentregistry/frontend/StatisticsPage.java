@@ -1,13 +1,13 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
-import clarin.cmdi.componentregistry.ComponentRegistryImpl;
+import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import clarin.cmdi.componentregistry.components.CMDElementType;
 import java.io.IOException;
 import java.util.List;

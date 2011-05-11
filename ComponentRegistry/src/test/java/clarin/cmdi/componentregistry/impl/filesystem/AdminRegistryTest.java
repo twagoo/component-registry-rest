@@ -1,5 +1,8 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.impl.filesystem.AdminRegistry;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;

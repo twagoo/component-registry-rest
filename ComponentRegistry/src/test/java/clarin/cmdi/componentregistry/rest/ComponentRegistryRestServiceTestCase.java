@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryTestCase;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 

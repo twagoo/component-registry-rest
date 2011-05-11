@@ -24,7 +24,7 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import clarin.cmdi.componentregistry.AdminRegistry;
+import clarin.cmdi.componentregistry.impl.filesystem.AdminRegistry;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.ResourceConfig;
 

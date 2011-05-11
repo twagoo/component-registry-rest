@@ -1,5 +1,8 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
