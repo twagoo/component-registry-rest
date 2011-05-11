@@ -455,7 +455,7 @@ public class ComponentRegistryRestService {
         try {
             ComponentRegistry registry = getRegistry(userspace, userCredentials);
             DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-            MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true));
+            MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true), componentRegistryFactory.getPublicRegistry());
             RegisterResponse response = new RegisterResponse();
             response.setIsInUserSpace(userspace);
             validate(response, descriptionValidator, validator);

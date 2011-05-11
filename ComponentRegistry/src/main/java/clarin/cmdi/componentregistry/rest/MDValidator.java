@@ -12,7 +12,6 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 
 public class MDValidator implements Validator {
 
@@ -27,6 +26,7 @@ public class MDValidator implements Validator {
     private final AbstractDescription description;
     private final ComponentRegistry registry;
     private final ComponentRegistry userRegistry;
+    private final ComponentRegistry publicRegistry;
 
     /**
      * 
@@ -35,17 +35,20 @@ public class MDValidator implements Validator {
      * @param registry (registry you currently used) 
      * @param userRegistry can be null, We get user registry as well so we can give nice error messages if needed. Can be the same as @param registry
      */
-    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry) {
+    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry) {
         this.input = input;
         this.description = description;
         this.registry = registry;
         this.userRegistry = userRegistry;
+        this.publicRegistry = publicRegistry;
     }
 
+    @Override
     public List<String> getErrorMessages() {
         return errorMessages;
     }
 
+    @Override
     public boolean validate() {
         try {
             spec = MDMarshaller.unmarshal(CMDComponentSpec.class, input, MDMarshaller.getCMDComponentSchema());
@@ -86,7 +89,7 @@ public class MDValidator implements Validator {
             } else { //User registry, can link to components from public registry and the user's registry
                 registeredComponent = registry.getMDComponent(id);
                 if (registeredComponent == null) {
-                    registeredComponent = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry().getMDComponent(id);
+                    registeredComponent = publicRegistry.getMDComponent(id);
                     if (registeredComponent == null) {
                         errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
                     }
