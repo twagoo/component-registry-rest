@@ -12,7 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -33,7 +33,7 @@ public class IsocatServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        URI uri = UriBuilder.fromUri(Configuration.getInstance().getIsocatRestUrl()).build();
+        URI uri = UriBuilder.fromUri(FileSystemConfiguration.getInstance().getIsocatRestUrl()).build();
         Client client = Client.create();
         service = client.resource(uri);
     }

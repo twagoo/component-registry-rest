@@ -2,9 +2,7 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.ResourceConfig;
 import clarin.cmdi.componentregistry.UserCredentials;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,7 +29,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private UserMapping userMap = null;
     private ComponentRegistryImpl publicRegistry = new ComponentRegistryImpl(true);
     private Map<String, ComponentRegistry> registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
-    private Configuration configuration;
+    private FileSystemConfiguration configuration;
 
     private ComponentRegistryFactoryImpl() {
     }
@@ -179,7 +177,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     /**
      * @param configuration the configuration to set
      */
-    public void setConfiguration(Configuration configuration) {
+    public void setConfiguration(FileSystemConfiguration configuration) {
         this.configuration = configuration;
     }
 }

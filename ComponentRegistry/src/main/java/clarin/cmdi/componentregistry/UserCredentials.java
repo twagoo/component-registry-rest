@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 import java.security.Principal;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class UserCredentials {
     public String getDisplayName() {
         String result = null;
         if (userPrincipal instanceof AuthPrincipal) {
-            List<String> displayNamesAttributes = Configuration.getInstance().getDisplayNameShibbolethKeys();
+            List<String> displayNamesAttributes = FileSystemConfiguration.getInstance().getDisplayNameShibbolethKeys();
             AuthPrincipal authPrincipal = (AuthPrincipal) userPrincipal;
             for (String key : displayNamesAttributes) {
                 result = getValue(authPrincipal, key);

@@ -11,7 +11,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
-import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 
 public class FileInfoTest {
 
@@ -20,7 +20,7 @@ public class FileInfoTest {
     @Test
     public void testGetUserDir() throws Exception {
         rootDir = ComponentRegistryTestCase.createTempRegistryDir();
-        Configuration.getInstance().setRegistryRoot(rootDir);
+        FileSystemConfiguration.getInstance().setRegistryRoot(rootDir);
         FileInfo info = new FileInfo();
         info.setFileNode(new FileNode(createFile("users/user1/components/c_123/description.xml"), false));
         assertFalse(info.isDeletable());

@@ -6,18 +6,18 @@ import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 
-import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 
 public abstract class SecureAdminWebPage extends WebPage {
 
     public SecureAdminWebPage(final PageParameters parameters) {
         super(parameters);
         Principal userPrincipal = getUserPrincipal();
-        if (!Configuration.getInstance().isAdminUser(userPrincipal)) {
+        if (!FileSystemConfiguration.getInstance().isAdminUser(userPrincipal)) {
             setResponsePage(new AccessDeniedPage());
         }
         add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName()
-                + ".\nRegistry is located in: " + Configuration.getInstance().getRegistryRoot()));
+                + ".\nRegistry is located in: " + FileSystemConfiguration.getInstance().getRegistryRoot()));
     }
 
     protected Principal getUserPrincipal() {

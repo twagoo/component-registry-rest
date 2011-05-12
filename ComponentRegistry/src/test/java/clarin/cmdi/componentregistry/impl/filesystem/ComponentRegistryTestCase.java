@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import static org.junit.Assert.assertTrue;
 
@@ -48,7 +47,7 @@ public abstract class ComponentRegistryTestCase {
     }
 
     public static ComponentRegistryImpl getTestRegistry(File registryRoot) {
-        Configuration config = Configuration.getInstance();
+        FileSystemConfiguration config = FileSystemConfiguration.getInstance();
         config.setRegistryRoot(registryRoot);
         Set<String> adminUsers = new HashSet<String>();
         adminUsers.add(PRINCIPAL_ADMIN.getName());

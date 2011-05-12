@@ -3,8 +3,8 @@ package clarin.cmdi.componentregistry.frontend;
 import java.io.File;
 import java.io.Serializable;
 
-import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.ResourceConfig;
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
+import clarin.cmdi.componentregistry.impl.filesystem.ResourceConfig;
 
 public class FileInfo implements Serializable {
 
@@ -53,7 +53,7 @@ public class FileInfo implements Serializable {
             File file = fileNode.getFile();
             if (file.isFile()) {
                 setText(fileNode.getFileContent());
-                setEditable(!file.getParentFile().equals(Configuration.getInstance().getRegistryRoot())); //file in root are not editable like:userMapping.xml
+                setEditable(!file.getParentFile().equals(FileSystemConfiguration.getInstance().getRegistryRoot())); //file in root are not editable like:userMapping.xml
             } else {
                 String dir = fileNode.getFile().getParentFile().getName();
                 if (ResourceConfig.DELETED_DIR_NAME.equals(dir)) {
@@ -102,7 +102,7 @@ public class FileInfo implements Serializable {
     public boolean isInUserWorkSpace() {
         File file = fileNode.getFile();
         return file.getAbsolutePath().startsWith(
-                new File(Configuration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME).getAbsolutePath());
+                new File(FileSystemConfiguration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME).getAbsolutePath());
     }
 
     public void setForceUpdate(boolean forceUpdate) {

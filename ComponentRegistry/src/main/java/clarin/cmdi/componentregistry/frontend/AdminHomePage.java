@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.impl.filesystem.AdminRegistry;
-import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.ResourceConfig;
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
+import clarin.cmdi.componentregistry.impl.filesystem.ResourceConfig;
 
 
 @SuppressWarnings("serial")
@@ -195,7 +195,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private TreeModel createTreeModel() {
-        File registryRoot = Configuration.getInstance().getRegistryRoot();
+        File registryRoot = FileSystemConfiguration.getInstance().getRegistryRoot();
         TreeModel model = null;
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new FileNode(registryRoot, false));
         add(rootNode, registryRoot.listFiles(), false);

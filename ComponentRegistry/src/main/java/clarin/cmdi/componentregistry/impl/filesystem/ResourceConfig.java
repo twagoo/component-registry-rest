@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.impl.filesystem;
 
 import java.io.File;
 

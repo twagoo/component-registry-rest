@@ -2,7 +2,6 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.ResourceConfig;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,10 +22,6 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;

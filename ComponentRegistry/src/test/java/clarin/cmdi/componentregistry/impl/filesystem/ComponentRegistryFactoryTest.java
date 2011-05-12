@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import static org.junit.Assert.assertEquals;
@@ -41,10 +40,10 @@ public class ComponentRegistryFactoryTest {
     @Test
     public void testGetOrCreateUserDir() throws Exception {
         ComponentRegistryFactoryImpl instance = ComponentRegistryFactoryImpl.getInstance();
-        assertFalse(Configuration.getInstance().getUserDirMappingFile().exists());
+        assertFalse(FileSystemConfiguration.getInstance().getUserDirMappingFile().exists());
         ComponentRegistry componentRegistry = instance.getComponentRegistry(true, createUserCredentials("noot", "Mr.Noot"));
 
-        assertTrue(Configuration.getInstance().getUserDirMappingFile().exists());
+        assertTrue(FileSystemConfiguration.getInstance().getUserDirMappingFile().exists());
         UserMapping mapping = getUserMapping();
         assertEquals(1, mapping.getUsers().size());
 
@@ -84,7 +83,7 @@ public class ComponentRegistryFactoryTest {
             fail("Should have failed because 'noot' is not an admin user");
         } catch (IllegalArgumentException e) {
         }
-        Configuration.getInstance().setAdminUsers(Collections.singleton("noot"));
+        FileSystemConfiguration.getInstance().setAdminUsers(Collections.singleton("noot"));
         ComponentRegistry reg = instance.getOtherUserComponentRegistry(admin, principalNameMD5);
         assertNotNull(reg);
         assertSame(reg2, reg);
@@ -104,14 +103,14 @@ public class ComponentRegistryFactoryTest {
     }
 
     private UserMapping getUserMapping() throws JAXBException, FileNotFoundException {
-        return MDMarshaller.unmarshal(UserMapping.class, new FileInputStream(Configuration.getInstance().getUserDirMappingFile()), null);
+        return MDMarshaller.unmarshal(UserMapping.class, new FileInputStream(FileSystemConfiguration.getInstance().getUserDirMappingFile()), null);
     }
 
     @Before
     public void startClean() {
         registryDir = ComponentRegistryTestCase.createTempRegistryDir();
-        Configuration.getInstance().setRegistryRoot(registryDir);
-        Configuration.getInstance().init();
+        FileSystemConfiguration.getInstance().setRegistryRoot(registryDir);
+        FileSystemConfiguration.getInstance().init();
         ComponentRegistryFactoryImpl.getInstance().reset();
     }
 
