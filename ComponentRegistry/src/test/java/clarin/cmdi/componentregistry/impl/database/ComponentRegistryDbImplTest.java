@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -8,6 +9,7 @@ import org.junit.Before;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import org.junit.Ignore;
 
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,6 @@ public class ComponentRegistryDbImplTest {
 
     @Autowired
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -48,7 +49,7 @@ public class ComponentRegistryDbImplTest {
     @Test
     @Ignore
     public void testRegisterComponent() throws Exception {
-        ComponentRegistryDbImpl register = componentRegistryBeanFactory.getNewComponentRegistry();
+        ComponentRegistry register = getComponentRegistryForUser(null);
         ComponentDescription description = ComponentDescription.createNewDescription();
 
         description.setName("Aap");
@@ -75,5 +76,11 @@ public class ComponentRegistryDbImplTest {
         assertEquals("Header id should be set from description id", description.getId(), component.getHeader().getID());
         assertEquals("Aap", component.getHeader().getName());
         assertEquals("Will not be overwritten", component.getHeader().getDescription());
+    }
+
+    private ComponentRegistry getComponentRegistryForUser(String user) {
+        ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
+        componentRegistry.setUser(user);
+        return componentRegistry;
     }
 }
