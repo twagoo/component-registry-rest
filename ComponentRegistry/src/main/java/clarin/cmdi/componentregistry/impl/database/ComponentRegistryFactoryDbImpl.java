@@ -9,14 +9,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * Implementation of ComponentRegistryFactory that uses the
+ * ComponentRegistryDbImpl implementation of ComponentRegistry for accessing the
+ * registry
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory {
 
     @Autowired
     private Configuration configuration;
-    
+    @Autowired
+    ComponentRegistryBeanFactory componentRegistryBeanFactory;
+
     @Override
     public List<ComponentRegistry> getAllUserRegistries() {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -34,7 +38,12 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 
     @Override
     public ComponentRegistry getPublicRegistry() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getComponentRegistryForUser(null);
     }
 
+    private ComponentRegistry getComponentRegistryForUser(String user) {
+        ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
+        componentRegistry.setUser(user);
+        return componentRegistry;
+    }
 }

@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import java.util.List;
 import org.springframework.jdbc.core.simple.ParameterizedBeanPropertyRowMapper;

@@ -2,12 +2,9 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.Before;
-import org.junit.Ignore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +18,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
 public class ComponentRegistryDbImplTest {
+
+    @Autowired
+    private ComponentRegistryBeanFactory componentRegistryBeanFactory;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -48,7 +48,7 @@ public class ComponentRegistryDbImplTest {
     @Test
     @Ignore
     public void testRegisterComponent() throws Exception {
-        ComponentRegistry register = new ComponentRegistryDbImpl(null);
+        ComponentRegistryDbImpl register = componentRegistryBeanFactory.getNewComponentRegistry();
         ComponentDescription description = ComponentDescription.createNewDescription();
 
         description.setName("Aap");

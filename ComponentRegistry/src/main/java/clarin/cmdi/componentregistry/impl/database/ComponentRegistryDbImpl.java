@@ -17,32 +17,37 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * Implementation of ComponentRegistry that uses Database Acces Objects for
+ * accessing the registry (ergo: a database implementation)
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     private String user;
+    
+    @Autowired
     private ProfileDescriptionDao profileDescriptionDao;
+    @Autowired
     private ComponentDescriptionDao componentDescriptionDao;
 
     /**
+     * Default constructor, makes this a (spring) bean. No user is set, so
+     * public registry by default. Use setUser() to make it a user registry.
+     * @see setUser
+     */
+    public ComponentRegistryDbImpl(){
+
+    }
+
+    /**
      * Creates a new ComponentRegistry (either public or not) for the provided user
-     * @param userSpace Whether the registry is public
-     * @param user Username of the user to create registry for
+     * @param user Username of the user to create registry for. Pass null for public
      */
     public ComponentRegistryDbImpl(String user) {
         this.user = user;
-
-        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext-database-impl.xml");
-        componentDescriptionDao = (ComponentDescriptionDao) context.getBean("componentDescriptionDao");
-        profileDescriptionDao = (ProfileDescriptionDao) context.getBean("profileDescriptionDao");
     }
 
     @Override
@@ -154,5 +159,24 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
     @Override
     public boolean isPublic() {
         return null == user;
+    }
+
+    public void setPublic(){
+        this.user = null;
+    }
+
+    /**
+     * @return The user, or null if this is the public registry.
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @param User for which this should be the registry. Pass null for
+     * the public registry
+     */
+    public void setUser(String user) {
+        this.user = user;
     }
 }

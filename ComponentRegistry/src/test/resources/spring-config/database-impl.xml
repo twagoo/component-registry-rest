@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-           
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+">
+    
 <!--    <import resource="datasource-jdbc.xml"/>-->
     <import resource="datasource-hsqldb.xml"/>
     <import resource="persistence.xml"/>
-    
+
+
+    <!-- Prototype bean for component registry (service) -->
+    <bean id="componentRegistry" class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl"  scope="prototype"></bean>
+
+    <!-- Factory that will create component registries for us (and autowire them), to be used by actual ComponentRegistryFactory -->
+    <bean id="componentRegistryBeanFactory"
+            class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
+        <property name="serviceLocatorInterface" value="clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory"/>
+    </bean>
+
+    <!-- Component registry factory that will be used by rest service to get user and public registries -->
     <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryFactoryDbImpl"></bean>
   
 </beans>

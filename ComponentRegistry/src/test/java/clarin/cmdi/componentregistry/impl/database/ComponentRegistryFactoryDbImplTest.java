@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,21 +13,21 @@ import static org.junit.Assert.assertNotNull;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={"/applicationContext-database-impl.xml"})
+@ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
 public class ComponentRegistryFactoryDbImplTest {
 
     @Autowired
     ComponentRegistryFactoryDbImpl componentRegistryFactory;
 
     @Test
-    public void testInjection(){
+    public void testInjection() {
         assertNotNull(componentRegistryFactory);
     }
 
     @Test
-    public void testGetPublicProfileDescriptions(){
-
+    public void testGetPublicRegistry() {
+        ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
+        assertNotNull(registry);
     }
 }
