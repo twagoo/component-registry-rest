@@ -37,7 +37,7 @@ public final class ComponentRegistryDatabase {
                 + "    content_id integer NOT NULL,"
                 + "  is_public boolean NOT NULL,"
                 + "  is_deleted boolean DEFAULT false NOT NULL,"
-                + "  component_id character varying NOT NULL,"
+                + "  profile_id character varying NOT NULL,"
                 + "  name character varying NOT NULL,"
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"

@@ -24,19 +24,6 @@ public class ComponentDescriptionDao extends AbstractDescriptionDao {
     }
 
     public List<ComponentDescription> getPublicComponentDescriptions() {
-        String select = "select name, description from " + TABLE_COMPONENT_DESCRIPTION;
-
-        ParameterizedRowMapper<ComponentDescription> rowMapper = new ParameterizedRowMapper<ComponentDescription>() {
-
-            @Override
-            public ComponentDescription mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                ComponentDescription cd = new ComponentDescription();
-                cd.setName(rs.getString("name"));
-                cd.setDescription(rs.getString("description"));
-                return cd;
-            }
-        };
-
-        return getSimpleJdbcTemplate().query(select, rowMapper);
+        return getPublicDescriptions(ComponentDescription.class);
     }
 }

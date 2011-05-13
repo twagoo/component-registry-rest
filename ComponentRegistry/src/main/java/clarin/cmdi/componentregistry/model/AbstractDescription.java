@@ -94,7 +94,7 @@ public abstract class AbstractDescription {
     public String getHref() {
         return href;
     }
-    
+
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }

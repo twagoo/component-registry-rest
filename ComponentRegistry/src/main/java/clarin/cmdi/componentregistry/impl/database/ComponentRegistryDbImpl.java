@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryUtils;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     private String user;
-    
     @Autowired
     private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
@@ -40,8 +40,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
      * public registry by default. Use setUser() to make it a user registry.
      * @see setUser
      */
-    public ComponentRegistryDbImpl(){
-
+    public ComponentRegistryDbImpl() {
     }
 
     /**
@@ -82,29 +81,36 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public CMDComponentSpec getMDProfile(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getMDComponent(id, profileDescriptionDao);
     }
 
     @Override
     public CMDComponentSpec getMDComponent(String id) {
-        try {
-            String xml = componentDescriptionDao.getContent(id);
-            InputStream is = new ByteArrayInputStream(xml.getBytes());
-            return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.getCMDComponentSchema());
-        } catch (JAXBException ex) {
-            Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+        return getMDComponent(id, componentDescriptionDao);
+    }
+
+    private CMDComponentSpec getMDComponent(String id, AbstractDescriptionDao dao) {
+        String xml = dao.getContent(id);
+        if (xml != null) {
+            try {
+                InputStream is = new ByteArrayInputStream(xml.getBytes());
+                return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.getCMDComponentSchema());
+            } catch (JAXBException ex) {
+                Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return null;
     }
 
     @Override
-    public int register(AbstractDescription desc, CMDComponentSpec spec) {
+    public int register(AbstractDescription description, CMDComponentSpec spec) {
+        ComponentRegistryUtils.enrichSpecHeader(spec, description);
         try {
             OutputStream os = new ByteArrayOutputStream();
             MDMarshaller.marshal(spec, os);
             String xml = os.toString();
-            if (!desc.isProfile()) {
-                componentDescriptionDao.insertComponent(desc, xml);
+            if (!description.isProfile()) {
+                componentDescriptionDao.insertComponent(description, xml);
             }
             return 0;
         } catch (JAXBException ex) {
@@ -170,7 +176,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
         return null == user;
     }
 
-    public void setPublic(){
+    public void setPublic() {
         this.user = null;
     }
 
