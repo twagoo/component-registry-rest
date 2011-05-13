@@ -8,8 +8,10 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
@@ -85,7 +87,14 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public CMDComponentSpec getMDComponent(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            String xml = componentDescriptionDao.getContent(id);
+            InputStream is = new ByteArrayInputStream(xml.getBytes());
+            return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.getCMDComponentSchema());
+        } catch (JAXBException ex) {
+            Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     @Override
