@@ -29,21 +29,9 @@ public class ComponentRegistryDbImplTest {
     @Before
     public void init() {
         //you can use standard SQL statements executed by JdbcTemplate
-        jdbcTemplate.execute("CREATE TABLE component_description ("
-                + "id IDENTITY NOT NULL,"
-                + "user_id integer,"
-                + "    content_id integer NOT NULL,"
-                + "  is_public boolean NOT NULL,"
-                + "  is_deleted boolean DEFAULT false NOT NULL,"
-                + "  component_id character varying NOT NULL,"
-                + "  name character varying NOT NULL,"
-                + "  description character varying NOT NULL,"
-                + "  registration_date timestamp,"
-                + "  creator_name character varying,"
-                + "  domain_name character varying);");
-        jdbcTemplate.execute("CREATE TABLE xml_content ("
-                + "id IDENTITY NOT NULL, content CHARACTER VARYING NOT NULL);");
-        //create other tables and insert data
+        ComponentRegistryDatabase.createTableComponentDescription(jdbcTemplate);
+        ComponentRegistryDatabase.createTableProfileDescription(jdbcTemplate);
+        ComponentRegistryDatabase.createTableXmlContent(jdbcTemplate);
     }
 
     @Test

@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 public class ProfileDescriptionDao extends SimpleJdbcDaoSupport {
 
     List<ProfileDescription> getPublicProfileDescriptions() {
-        String select = "select name, description from component_description";
+        String select = "select name, description from profile_description";
 
         ParameterizedRowMapper<ProfileDescription> rowMapper = new ParameterizedBeanPropertyRowMapper<ProfileDescription>();
 
