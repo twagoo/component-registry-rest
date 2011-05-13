@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryUtils;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -31,13 +32,11 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -45,17 +44,13 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 public class ComponentRegistryImpl implements ComponentRegistry {
 
     public static final String DESCRIPTION_FILE_NAME = "description.xml";
-
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
-
     private ResourceConfig resourceConfig;
-
     //cache fields
     private Map<String, ComponentDescription> componentDescriptions;
     private Map<String, ProfileDescription> profileDescriptions;
     private Map<String, CMDComponentSpec> componentsCache;
     private Map<String, CMDComponentSpec> profilesCache;
-
     private final boolean isPublic;
 
     /*
@@ -108,12 +103,12 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             ProfileDescription desc = MDMarshaller.unmarshal(ProfileDescription.class, file, null);
-            if (desc != null)
+            if (desc != null) {
                 result.put(desc.getId(), desc);
+            }
         }
         return result;
     }
-
     private final static IOFileFilter DIRS_WITH_DESCRIPTIONS = new NotFileFilter(new NameFileFilter(ResourceConfig.DELETED_DIR_NAME));
 
     private Map<String, ComponentDescription> loadComponentDescriptions() {
@@ -122,8 +117,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         for (Iterator iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             ComponentDescription desc = MDMarshaller.unmarshal(ComponentDescription.class, file, null);
-            if (desc != null)
+            if (desc != null) {
                 result.put(desc.getId(), desc);
+            }
         }
         return result;
     }
@@ -195,7 +191,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private File getProfileFile(String profileId) {
-        String id = stripRegistryId(profileId);
+        String id = ComponentRegistryUtils.stripRegistryId(profileId);
         File file = new File(getProfileDir(), id + File.separator + id + ".xml");
         return file;
     }
@@ -223,13 +219,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private File getComponentFile(String componentId) {
-        String id = stripRegistryId(componentId);
+        String id = ComponentRegistryUtils.stripRegistryId(componentId);
         File file = new File(getComponentDir(), id + File.separator + id + ".xml");
         return file;
-    }
-
-    private String stripRegistryId(String id) {
-        return StringUtils.removeStart(id, REGISTRY_ID);
     }
 
     @Override
@@ -287,7 +279,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, Closure onFail) {
-        String strippedId = stripRegistryId(description.getId());
+        String strippedId = ComponentRegistryUtils.stripRegistryId(description.getId());
         File dir = new File(storageDir, strippedId);
         boolean success = false;
         try {
@@ -295,7 +287,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
             if (dirCreated || dir.exists()) {
                 writeDescription(dir, description);
                 if (spec != null) {
-                    enrichSpecHeader(spec, description);
+                    ComponentRegistryUtils.enrichSpecHeader(spec, description);
                     writeCMDComponentSpec(dir, strippedId + ".xml", spec);
                 }
                 success = true;
@@ -314,17 +306,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
                 + description);
         updateCache(description);
         return 0;
-    }
-
-    private void enrichSpecHeader(CMDComponentSpec spec, AbstractDescription description) {
-        Header header = spec.getHeader();
-        header.setID(description.getId());
-        if (StringUtils.isEmpty(header.getName())) {
-            header.setName(description.getName());
-        }
-        if (StringUtils.isEmpty(header.getDescription())) {
-            header.setDescription(description.getDescription());
-        }
     }
 
     private void writeDescription(File dir, AbstractDescription description) throws IOException, JAXBException {
@@ -371,8 +352,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         if (desc != null) {
             checkAuthorisation(desc, principal);
             checkAge(desc, principal);
-            if (!forceDelete)
+            if (!forceDelete) {
                 checkStillUsed(componentId);
+            }
             File componentFile = getComponentFile(componentId);
             if (componentFile.exists()) {
                 FileUtils.moveDirectoryToDirectory(componentFile.getParentFile(), resourceConfig.getComponentDeletionDir(), true);
@@ -391,8 +373,8 @@ public class ComponentRegistryImpl implements ComponentRegistry {
                 if (regDate.before(calendar.getTime())) { //More then month old
                     throw new DeleteFailedException(
                             "The "
-                                    + (desc.isProfile() ? "Profile" : "Component")
-                                    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+                            + (desc.isProfile() ? "Profile" : "Component")
+                            + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
                 }
             } catch (ParseException e) {
                 LOG.error("Cannot parse date of " + desc + " Error:" + e);
@@ -471,9 +453,9 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     void emptyFromTrashcan(AbstractDescription description) throws IOException {
         File file = null;
         if (description.isProfile()) {
-            file = new File(resourceConfig.getProfileDeletionDir(), stripRegistryId(description.getId()));
+            file = new File(resourceConfig.getProfileDeletionDir(), ComponentRegistryUtils.stripRegistryId(description.getId()));
         } else {
-            file = new File(resourceConfig.getComponentDeletionDir(), stripRegistryId(description.getId()));
+            file = new File(resourceConfig.getComponentDeletionDir(), ComponentRegistryUtils.stripRegistryId(description.getId()));
         }
         if (file.exists()) {
             FileUtils.deleteDirectory(file);
@@ -513,6 +495,5 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         public void execute(Object input) {
             LOG.info("Update of " + desc + " unsuccessful.");
         }
-
     }
 }
