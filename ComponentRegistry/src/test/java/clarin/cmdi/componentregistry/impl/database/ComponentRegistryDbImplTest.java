@@ -4,14 +4,16 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
+
 import org.junit.Test;
 import org.junit.Before;
+import org.junit.runner.RunWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Ignore;
 
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,14 +30,13 @@ public class ComponentRegistryDbImplTest {
 
     @Before
     public void init() {
-        //you can use standard SQL statements executed by JdbcTemplate
-        ComponentRegistryDatabase.createTableComponentDescription(jdbcTemplate);
-        ComponentRegistryDatabase.createTableProfileDescription(jdbcTemplate);
-        ComponentRegistryDatabase.createTableXmlContent(jdbcTemplate);
+        resetDatabase(jdbcTemplate);
+        createTableComponentDescription(jdbcTemplate);
+        createTableProfileDescription(jdbcTemplate);
+        createTableXmlContent(jdbcTemplate);
     }
 
     @Test
-    @Ignore
     public void testRegisterComponent() throws Exception {
         ComponentRegistry register = getComponentRegistryForUser(null);
         ComponentDescription description = ComponentDescription.createNewDescription();
@@ -56,11 +57,14 @@ public class ComponentRegistryDbImplTest {
 
         assertEquals(1, register.getComponentDescriptions().size());
         assertEquals(0, register.getProfileDescriptions().size());
-        ComponentDescription desc = register.getComponentDescriptions().get(0);
-        assertNull(register.getMDProfile(desc.getId()));
 
+        ComponentDescription desc = register.getComponentDescriptions().get(0);
+        assertNotNull(desc);
         CMDComponentSpec component = register.getMDComponent(desc.getId());
         assertNotNull(component);
+
+        assertNull(register.getMDProfile(desc.getId()));
+
         assertEquals("Header id should be set from description id", description.getId(), component.getHeader().getID());
         assertEquals("Aap", component.getHeader().getName());
         assertEquals("Will not be overwritten", component.getHeader().getDescription());

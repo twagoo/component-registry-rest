@@ -53,14 +53,14 @@ public final class RegistryTestHelper {
     public static InputStream getTestProfileContent() {
         return getTestProfileContent("Actor");
     }
-    
+
     public static InputStream getTestProfileContent(String name) {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
         profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\""+name+"\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+        profileContent += "    <CMD_Component name=\"" + name + "\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "        <AttributeList>\n";
         profileContent += "            <Attribute>\n";
         profileContent += "                <Name>Name</Name>\n";
@@ -105,11 +105,15 @@ public final class RegistryTestHelper {
         return MDMarshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), MDMarshaller.getCMDComponentSchema());
     }
 
+    public static String getComponentTestContentString() {
+        return getComponentTestContentString("Access");
+    }
+
     public static InputStream getComponentTestContent() {
         return getComponentTestContent("Access");
     }
 
-    public static InputStream getComponentTestContent(String componentName) {
+    public static String getComponentTestContentString(String componentName) {
         String compContent = "";
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
@@ -131,7 +135,11 @@ public final class RegistryTestHelper {
         compContent += "    </CMD_Component>\n";
         compContent += "\n";
         compContent += "</CMD_ComponentSpec>\n";
-        return new ByteArrayInputStream(compContent.getBytes());
+        return compContent;
+    }
+
+    public static InputStream getComponentTestContent(String componentName) {
+        return new ByteArrayInputStream(getComponentTestContentString(componentName).getBytes());
     }
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {

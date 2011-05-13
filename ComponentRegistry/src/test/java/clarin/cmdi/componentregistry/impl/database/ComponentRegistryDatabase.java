@@ -11,7 +11,11 @@ public final class ComponentRegistryDatabase {
     private ComponentRegistryDatabase() {
     }
 
-    public static  void createTableComponentDescription(JdbcTemplate jdbcTemplate) {
+    public static void resetDatabase(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.execute("DROP SCHEMA PUBLIC CASCADE");
+    }
+
+    public static void createTableComponentDescription(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("CREATE TABLE component_description ("
                 + "id IDENTITY NOT NULL,"
                 + "user_id integer,"
@@ -41,7 +45,7 @@ public final class ComponentRegistryDatabase {
                 + "  domain_name character varying);");
     }
 
-    public static  void createTableXmlContent(JdbcTemplate jdbcTemplate) {
+    public static void createTableXmlContent(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("CREATE TABLE xml_content ("
                 + "id IDENTITY NOT NULL, content CHARACTER VARYING NOT NULL);");
     }

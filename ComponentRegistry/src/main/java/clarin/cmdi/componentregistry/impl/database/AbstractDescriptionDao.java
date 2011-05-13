@@ -18,14 +18,24 @@ public abstract class AbstractDescriptionDao extends SimpleJdbcDaoSupport {
 
     protected abstract String getCMDIdColumn();
 
-    public String getContent(String profileId) {
+    /**
+     * 
+     * @param cmdId Profile or component Id (not primary key)
+     * @return String value of XML content for profile or component
+     */
+    public String getContent(String cmdId) {
         String select = "select content from " + TABLE_XML_CONTENT
                 + " join " + getTableName() + " on " + TABLE_XML_CONTENT + "." + COLUMN_ID + " = " + getTableName() + ".content_id"
                 + " where " + getTableName() + "." + getCMDIdColumn() + " = :id";
-        return getSimpleJdbcTemplate().queryForObject(select, String.class, profileId);
+        return getSimpleJdbcTemplate().queryForObject(select, String.class, cmdId);
     }
 
-    public void insertComponent(final AbstractDescription description, final String content) {
+    /**
+     * @param description Description to insert
+     * @param content Content to insert and refer to from description
+     * @return Id of newly inserted description
+     */
+    public Number insertComponent(final AbstractDescription description, final String content) {
         SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(COLUMN_ID);
         Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
 
@@ -34,9 +44,9 @@ public abstract class AbstractDescriptionDao extends SimpleJdbcDaoSupport {
         params.put("content_id", contentId);
         params.put("is_public", Boolean.TRUE);
         params.put("is_deleted", Boolean.FALSE);
-        params.put("component_id", "component_" + contentId);
+        params.put(getCMDIdColumn(), "clarin_" + contentId);
         params.put("name", description.getName());
         params.put("description", description.getDescription());
-        insertDescription.execute(params);
+        return insertDescription.executeAndReturnKey(params);
     }
 }
