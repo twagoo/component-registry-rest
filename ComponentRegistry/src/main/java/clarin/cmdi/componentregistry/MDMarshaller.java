@@ -93,7 +93,7 @@ public class MDMarshaller {
 
         Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        String schemaLocation = FileSystemConfiguration.getInstance().getSchemaLocation(marshallableObject.getClass().getName());
+        String schemaLocation = Configuration.getInstance().getSchemaLocation(marshallableObject.getClass().getName());
         if (schemaLocation != null) {
             m.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, schemaLocation);
         }
@@ -105,7 +105,7 @@ public class MDMarshaller {
         if (generalComponentSchema == null) {
             try {
                 generalComponentSchema = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(
-                        new URL(FileSystemConfiguration.getInstance().getGeneralComponentSchema()));
+                        new URL(Configuration.getInstance().getGeneralComponentSchema()));
             } catch (MalformedURLException e) {
                 LOG.error("Cannot instantiate schema", e);
             } catch (SAXException e) {
@@ -120,7 +120,7 @@ public class MDMarshaller {
         try {
             System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
             componentToSchemaTemplates = TransformerFactory.newInstance().newTemplates(
-                    new StreamSource(FileSystemConfiguration.getInstance().getComponent2SchemaXsl()));
+                    new StreamSource(Configuration.getInstance().getComponent2SchemaXsl()));
         } catch (TransformerConfigurationException e) {
             LOG.error("Cannot create Template", e);
             return;

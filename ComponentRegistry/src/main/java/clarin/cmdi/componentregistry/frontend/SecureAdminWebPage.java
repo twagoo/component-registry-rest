@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.Configuration;
 import java.security.Principal;
 
 import org.apache.wicket.PageParameters;
@@ -13,7 +14,7 @@ public abstract class SecureAdminWebPage extends WebPage {
     public SecureAdminWebPage(final PageParameters parameters) {
         super(parameters);
         Principal userPrincipal = getUserPrincipal();
-        if (!FileSystemConfiguration.getInstance().isAdminUser(userPrincipal)) {
+        if (!Configuration.getInstance().isAdminUser(userPrincipal)) {
             setResponsePage(new AccessDeniedPage());
         }
         add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName()

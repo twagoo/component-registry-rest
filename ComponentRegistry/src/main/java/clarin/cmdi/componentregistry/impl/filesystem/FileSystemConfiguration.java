@@ -1,9 +1,8 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.Configuration;
 import java.io.File;
 
-public class FileSystemConfiguration extends Configuration {
+public class FileSystemConfiguration {
 
     private File registryRoot;
 

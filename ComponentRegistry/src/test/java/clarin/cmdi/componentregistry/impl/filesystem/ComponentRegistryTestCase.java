@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import static org.junit.Assert.assertTrue;
 
@@ -47,15 +48,16 @@ public abstract class ComponentRegistryTestCase {
     }
 
     public static ComponentRegistryImpl getTestRegistry(File registryRoot) {
-        FileSystemConfiguration config = FileSystemConfiguration.getInstance();
-        config.setRegistryRoot(registryRoot);
+        FileSystemConfiguration fsConfig = FileSystemConfiguration.getInstance();
+        Configuration config = Configuration.getInstance();
+        fsConfig.setRegistryRoot(registryRoot);
         Set<String> adminUsers = new HashSet<String>();
+        fsConfig.init();
         adminUsers.add(PRINCIPAL_ADMIN.getName());
         config.setAdminUsers(adminUsers);
-        config.init();
         ComponentRegistryFactoryImpl.getInstance().reset();
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
-        register.setResourceConfig(config.getPublicResourceConfig()); //LOADS cache again but is necessary for tests normally we wouldn't have this
+        register.setResourceConfig(fsConfig.getPublicResourceConfig()); //LOADS cache again but is necessary for tests normally we wouldn't have this
         return register;
     }
 

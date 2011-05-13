@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import static org.junit.Assert.assertEquals;
@@ -83,7 +84,7 @@ public class ComponentRegistryFactoryTest {
             fail("Should have failed because 'noot' is not an admin user");
         } catch (IllegalArgumentException e) {
         }
-        FileSystemConfiguration.getInstance().setAdminUsers(Collections.singleton("noot"));
+        Configuration.getInstance().setAdminUsers(Collections.singleton("noot"));
         ComponentRegistry reg = instance.getOtherUserComponentRegistry(admin, principalNameMD5);
         assertNotNull(reg);
         assertSame(reg2, reg);

@@ -7,7 +7,6 @@
     <import resource="datasource-hsqldb.xml"/>
     <import resource="persistence.xml"/>
     
-    <bean id="configuration" parent="configurationBase" class="clarin.cmdi.componentregistry.Configuration"></bean>
     <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryFactoryDbImpl"></bean>
   
 </beans>

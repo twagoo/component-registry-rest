@@ -33,9 +33,15 @@ public class Configuration {
                 "http://www.clarin.eu/cmd/ http://www.clarin.eu/cmd/general-component-schema.xsd");
     }
 
-    public Configuration() {
+    private final static Configuration INSTANCE = new Configuration();
+
+    private Configuration() {
     }
 
+    public static Configuration getInstance() {
+        return INSTANCE;
+    }
+    
     public String getComponent2SchemaXsl() {
         return component2SchemaXsl;
     }

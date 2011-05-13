@@ -37,7 +37,7 @@ public class UserCredentials {
     public String getDisplayName() {
         String result = null;
         if (userPrincipal instanceof AuthPrincipal) {
-            List<String> displayNamesAttributes = FileSystemConfiguration.getInstance().getDisplayNameShibbolethKeys();
+            List<String> displayNamesAttributes = Configuration.getInstance().getDisplayNameShibbolethKeys();
             AuthPrincipal authPrincipal = (AuthPrincipal) userPrincipal;
             for (String key : displayNamesAttributes) {
                 result = getValue(authPrincipal, key);

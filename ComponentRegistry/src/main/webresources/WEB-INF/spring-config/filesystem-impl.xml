@@ -8,7 +8,7 @@
     </bean>
 
     <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl" init-method="init" factory-method="getInstance">
-        <property name="configuration" ref="configuration"/>
+        <property name="fileSystemConfiguration" ref="configuration"/>
     </bean>
 
 </beans>

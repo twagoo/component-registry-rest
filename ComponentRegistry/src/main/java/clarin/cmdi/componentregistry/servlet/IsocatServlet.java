@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.servlet;
 
+import clarin.cmdi.componentregistry.Configuration;
 import java.io.IOException;
 import java.net.URI;
 
@@ -11,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
-
-import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -33,7 +32,7 @@ public class IsocatServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        URI uri = UriBuilder.fromUri(FileSystemConfiguration.getInstance().getIsocatRestUrl()).build();
+        URI uri = UriBuilder.fromUri(Configuration.getInstance().getIsocatRestUrl()).build();
         Client client = Client.create();
         service = client.resource(uri);
     }

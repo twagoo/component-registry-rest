@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import java.io.File;
@@ -29,13 +30,14 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private UserMapping userMap = null;
     private ComponentRegistryImpl publicRegistry = new ComponentRegistryImpl(true);
     private Map<String, ComponentRegistry> registryMap = new ConcurrentHashMap<String, ComponentRegistry>();
-    private FileSystemConfiguration configuration;
+    private Configuration configuration;
+    private FileSystemConfiguration fsConfiguration;
 
     private ComponentRegistryFactoryImpl() {
     }
 
     private void init() {
-        publicRegistry.setResourceConfig(configuration.getPublicResourceConfig());
+        publicRegistry.setResourceConfig(fsConfiguration.getPublicResourceConfig());
         try {
             loadUserMap();
         } catch (IOException e) {
@@ -46,7 +48,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     }
 
     private synchronized void loadUserMap() throws IOException, JAXBException {
-        File userDirMappingFile = configuration.getUserDirMappingFile();
+        File userDirMappingFile = fsConfiguration.getUserDirMappingFile();
         if (userDirMappingFile.exists()) {
             userMap = MDMarshaller.unmarshal(UserMapping.class, userDirMappingFile, null);
         } else {
@@ -119,7 +121,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private ComponentRegistry createNewUserRegistry(String user) {
         ComponentRegistryImpl result = new ComponentRegistryImpl(false);
         ResourceConfig config = new ResourceConfig();
-        File userResourceDir = new File(configuration.getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator
+        File userResourceDir = new File(fsConfiguration.getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator
                 + user);
         config.setResourceRoot(userResourceDir);
         config.init();
@@ -155,7 +157,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
 
     private synchronized void saveUserMap() {
         try {
-            MDMarshaller.marshal(userMap, new FileOutputStream(configuration.getUserDirMappingFile()));
+            MDMarshaller.marshal(userMap, new FileOutputStream(fsConfiguration.getUserDirMappingFile()));
         } catch (IOException e) {//Manual intervention is probably needed so just throwing RuntimeExceptions if we cannot save the mapping we cannot do a lot so that needs to be addressed asap.
             throw new RuntimeException("Cannot save userMapping.", e);
         } catch (JAXBException e) {
@@ -174,10 +176,14 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         return result;
     }
 
+    public void setConfiguration(Configuration configuration){
+        this.configuration = configuration;
+    }
+
     /**
      * @param configuration the configuration to set
      */
-    public void setConfiguration(FileSystemConfiguration configuration) {
-        this.configuration = configuration;
+    public void setFileSystemConfiguration(FileSystemConfiguration configuration) {
+        this.fsConfiguration = configuration;
     }
 }

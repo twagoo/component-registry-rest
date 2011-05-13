@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -356,7 +357,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-        if (!desc.isThisTheOwner(principal.getName()) && !FileSystemConfiguration.getInstance().isAdminUser(principal)) {
+        if (!desc.isThisTheOwner(principal.getName()) && !Configuration.getInstance().isAdminUser(principal)) {
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
                     + "' is not the creator (nor an administrator) of the " + (desc.isProfile() ? "profile" : "component") + "(" + desc
                     + ").");
@@ -382,7 +383,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     }
 
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
-        if (isPublic() && !FileSystemConfiguration.getInstance().isAdminUser(principal)) {
+        if (isPublic() && !Configuration.getInstance().isAdminUser(principal)) {
             try {
                 Date regDate = AbstractDescription.getDate(desc.getRegistrationDate());
                 Calendar calendar = Calendar.getInstance();
