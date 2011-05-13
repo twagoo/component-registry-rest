@@ -24,4 +24,9 @@ public class ComponentRegistryFactoryDbImplTest {
     public void testInjection(){
         assertNotNull(componentRegistryFactory);
     }
+
+    @Test
+    public void testGetPublicProfileDescriptions(){
+
+    }
 }

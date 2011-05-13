@@ -1,18 +1,26 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.bind.JAXBException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Repository;
 
 /**
  *
@@ -20,12 +28,30 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ComponentRegistryDbImpl implements ComponentRegistry {
 
-    @Autowired
-    private Configuration configuration;
+    private String user;
+    private ProfileDescriptionDao profileDescriptionDao;
+    private ComponentDescriptionDao componentDescriptionDao;
+
+    /**
+     * Creates a new ComponentRegistry (either public or not) for the provided user
+     * @param userSpace Whether the registry is public
+     * @param user Username of the user to create registry for
+     */
+    public ComponentRegistryDbImpl(String user) {
+        this.user = user;
+
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext-database-impl.xml");
+        componentDescriptionDao = (ComponentDescriptionDao) context.getBean("componentDescriptionDao");
+        profileDescriptionDao = (ProfileDescriptionDao) context.getBean("profileDescriptionDao");
+    }
 
     @Override
     public List<ProfileDescription> getProfileDescriptions() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (isPublic()) {
+            return profileDescriptionDao.getPublicProfileDescriptions();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -35,7 +61,11 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public List<ComponentDescription> getComponentDescriptions() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (isPublic()) {
+            return componentDescriptionDao.getPublicComponentDescriptions();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -55,7 +85,20 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public int register(AbstractDescription desc, CMDComponentSpec spec) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            OutputStream os = new ByteArrayOutputStream();
+            MDMarshaller.marshal(spec, os);
+            String xml = os.toString();
+            if (!desc.isProfile()) {
+                componentDescriptionDao.insertComponent(desc, xml);
+            }
+            return 0;
+        } catch (JAXBException ex) {
+            Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -1;
     }
 
     @Override
@@ -110,13 +153,6 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public boolean isPublic() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null == user;
     }
-
-    private ProfileDescriptionDao profileDescriptionDao;
-
-    public void setProfileDescriptionDao(ProfileDescriptionDaoImpl profileDescriptionDao) {
-        this.profileDescriptionDao = profileDescriptionDao;
-    }
-
 }

@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <bean id="configuration" parent="configurationBase" class="clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration" init-method="init" factory-method="getInstance">
-        <property name="registryRoot" value="${registryRoot}" />
+        <property name="registryRoot" value="/tmp/ComponentRegistry" />
     </bean>
 
     <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl" init-method="init" factory-method="getInstance">

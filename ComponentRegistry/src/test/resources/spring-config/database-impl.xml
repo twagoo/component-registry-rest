@@ -3,7 +3,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
            
-    <import resource="datasource-jdbc.xml"/>
+<!--    <import resource="datasource-jdbc.xml"/>-->
+    <import resource="datasource-hsqldb.xml"/>
     <import resource="persistence.xml"/>
     
     <bean id="configuration" parent="configurationBase" class="clarin.cmdi.componentregistry.Configuration"></bean>

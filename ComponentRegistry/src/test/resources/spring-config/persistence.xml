@@ -5,7 +5,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 ">
 
-    <bean id="profileDescriptionDao" class="clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDaoImpl">
+    <bean id="profileDescriptionDao" class="clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="componentDescriptionDao" class="clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao">
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
