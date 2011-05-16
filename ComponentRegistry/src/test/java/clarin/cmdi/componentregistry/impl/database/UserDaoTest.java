@@ -45,9 +45,12 @@ public class UserDaoTest {
 	testUser.setPrincipalName("aap@clarin.eu");
 
 	assertEquals(0, userDao.getAllUsers().size());
-	userDao.insertUser(testUser);
+	Number newId =  userDao.insertUser(testUser);
+	assertNotNull(newId);
+
 	List<User> users = userDao.getAllUsers();
 	assertEquals(1, users.size());
+
 	assertEquals("Aap", users.get(0).getName());
 	assertEquals("aap@clarin.eu", users.get(0).getPrincipalName());
     }

@@ -20,6 +20,7 @@ public class UserMapping {
         private String name;
         private String userDir;
         private String principalName;
+	private Number id;
 
         public void setName(String name) {
             this.name = name;
@@ -44,6 +45,14 @@ public class UserMapping {
         public String getPrincipalName() {
             return principalName;
         }
+
+	public Number getId() {
+	    return id;
+	}
+
+	public void setId(Number id) {
+	    this.id = id;
+	}
 
     }
 

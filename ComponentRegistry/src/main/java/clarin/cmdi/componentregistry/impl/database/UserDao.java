@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
  */
 public class UserDao extends ComponentRegistryDao<User> {
 
-    private final static String SELECT_BASE = "SELECT name, principal_name FROM " + TABLE_REGISTRY_USER;
+    private final static String SELECT_BASE = "SELECT " + COLUMN_ID + ", name, principal_name FROM " + TABLE_REGISTRY_USER;
 
     public List<User> getAllUsers() {
 	return getList(SELECT_BASE);
@@ -41,6 +41,7 @@ public class UserDao extends ComponentRegistryDao<User> {
 	@Override
 	public User mapRow(ResultSet rs, int rowNumber) throws SQLException {
 	    User user = new User();
+	    user.setId(rs.getInt(COLUMN_ID));
 	    user.setName(rs.getString("name"));
 	    user.setPrincipalName(rs.getString("principal_name"));
 	    return user;
