@@ -64,6 +64,9 @@ public class ComponentRegistryDbImplTest {
 
 	assertNull(register.getMDProfile(desc.getId()));
 
+	ComponentDescription componentDescription = register.getComponentDescription(description.getId());
+	assertNotNull(componentDescription);
+
 	assertEquals("Header id should be set from description id", description.
 		getId(), component.getHeader().getID());
 	assertEquals("Aap", component.getHeader().getName());

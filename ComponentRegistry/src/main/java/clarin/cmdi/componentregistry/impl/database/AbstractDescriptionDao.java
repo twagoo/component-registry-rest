@@ -93,6 +93,15 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
     }
 
     /**
+     * Get by ComponentId / ProfileId
+     * @param id Full component id
+     * @return The description, if it exists; null otherwise
+     */
+    protected T getByCmdId(String id) {
+	return getFirstOrNull(getSelectStatement("where " + getCMDIdColumn() + " = :id"), id);
+    }
+
+    /**
      *
      * @return All descriptions in the public space
      */

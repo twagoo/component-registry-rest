@@ -56,13 +56,13 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	if (isPublic()) {
 	    return profileDescriptionDao.getPublicProfileDescriptions();
 	} else {
-	    return null;
+	    return profileDescriptionDao.getUserspaceDescriptions(getUserId());
 	}
     }
 
     @Override
     public ProfileDescription getProfileDescription(String id) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return profileDescriptionDao.getByCmdId(id);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public ComponentDescription getComponentDescription(String id) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	return componentDescriptionDao.getByCmdId(id);
     }
 
     @Override
