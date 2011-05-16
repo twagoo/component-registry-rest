@@ -5,6 +5,7 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -64,7 +65,8 @@ public class ComponentRegistryDbImplTest {
 
 	assertNull(register.getMDProfile(desc.getId()));
 
-	ComponentDescription componentDescription = register.getComponentDescription(description.getId());
+	ComponentDescription componentDescription = register.
+		getComponentDescription(description.getId());
 	assertNotNull(componentDescription);
 
 	assertEquals("Header id should be set from description id", description.
@@ -72,6 +74,40 @@ public class ComponentRegistryDbImplTest {
 	assertEquals("Aap", component.getHeader().getName());
 	assertEquals("Will not be overwritten", component.getHeader().
 		getDescription());
+    }
+
+    @Test
+    public void testRegisterProfile() throws Exception {
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	ProfileDescription description = ProfileDescription.createNewDescription();
+	description.setName("Aap");
+	description.setDescription("MyDescription");
+
+	assertEquals(0, register.getComponentDescriptions().size());
+	assertEquals(0, register.getProfileDescriptions().size());
+
+	CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
+	assertNull(testProfile.getHeader().getID());
+	assertNull(testProfile.getHeader().getName());
+	assertNull(testProfile.getHeader().getDescription());
+
+	register.register(description, testProfile);
+
+	assertEquals(0, register.getComponentDescriptions().size());
+	assertEquals(1, register.getProfileDescriptions().size());
+	ProfileDescription desc = register.getProfileDescriptions().get(0);
+	assertNull(register.getMDComponent(desc.getId()));
+
+	CMDComponentSpec profile = register.getMDProfile(desc.getId());
+
+	ProfileDescription profileDescription = register.getProfileDescription(description.getId());
+	assertNotNull(profileDescription);
+
+	assertNotNull(profile);
+	assertEquals("Header id should be set from description id", description.
+		getId(), profile.getHeader().getID());
+	assertEquals("Aap", profile.getHeader().getName());
+	assertEquals("MyDescription", profile.getHeader().getDescription());
     }
 
     private ComponentRegistry getComponentRegistryForUser(Number userId) {

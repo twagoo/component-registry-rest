@@ -110,7 +110,9 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	    OutputStream os = new ByteArrayOutputStream();
 	    MDMarshaller.marshal(spec, os);
 	    String xml = os.toString();
-	    if (!description.isProfile()) {
+	    if (description.isProfile()) {
+		profileDescriptionDao.insertComponent(description, xml);
+	    } else {
 		componentDescriptionDao.insertComponent(description, xml);
 	    }
 	    return 0;
