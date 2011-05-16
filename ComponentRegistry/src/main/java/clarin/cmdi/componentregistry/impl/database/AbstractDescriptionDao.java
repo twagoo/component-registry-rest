@@ -116,7 +116,6 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
     /*
      * DAO HELPER METHODS (may well be moved to some other place in class hierarchy at a later time)
      */
-    
     private T getFirstOrNull(StringBuilder selectQuery, Object... args) {
 	return getFirstOrNull(selectQuery.toString(), args);
     }
@@ -140,8 +139,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
 
     private StringBuilder getSelectStatement(String... where) {
 	StringBuilder sb = new StringBuilder();
-	sb.append("select ").append(getDescriptionColumnList()).append(" from ").
-		append(getTableName());
+	sb.append("select ").append(getDescriptionColumnList()).
+		append(" from ").append(getTableName());
 	if (where.length > 0) {
 	    sb.append(" ");
 	    for (String str : where) {

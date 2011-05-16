@@ -19,6 +19,7 @@ public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
         resetDatabase(jdbcTemplate);
         createTableProfileDescription(jdbcTemplate);
         createTableXmlContent(jdbcTemplate);
+        createTableRegistryUser(jdbcTemplate);
     }
 
     @Override

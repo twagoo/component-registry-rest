@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,12 +40,20 @@ public abstract class AbstractDescriptionDaoTest {
         description.setDescription("MyDescription");
 
         String testComponent = RegistryTestHelper.getComponentTestContentString();
-        getDao().insertComponent(description, testComponent);
+        Number newId = getDao().insertComponent(description, testComponent);
+        assertNotNull(newId);
+        assertNotNull(getDao().getById(newId));
     }
 
     @Test
     public void testGetPublicComponents() throws Exception {
-        List<AbstractDescription> descriptions =  getDao().getPublicDescriptions();
+        List<AbstractDescription> descriptions = getDao().getPublicDescriptions();
         assertNotNull(descriptions);
+    }
+
+    @Test
+    public void testGetUserspaceDescriptions() throws Exception {
+        List<AbstractDescription> descriptions = getDao().getUserspaceDescriptions(-1);
+        assertEquals(0, descriptions.size());
     }
 }

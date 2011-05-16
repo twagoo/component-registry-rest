@@ -49,4 +49,11 @@ public final class ComponentRegistryDatabase {
         jdbcTemplate.execute("CREATE TABLE xml_content ("
                 + "id IDENTITY NOT NULL, content CHARACTER VARYING NOT NULL);");
     }
+
+    public static void createTableRegistryUser(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.execute("CREATE TABLE registry_user ("
+                + " id IDENTITY NOT NULL,"
+                + " name character varying,"
+                + " principal_name character varying);");
+    }
 }
