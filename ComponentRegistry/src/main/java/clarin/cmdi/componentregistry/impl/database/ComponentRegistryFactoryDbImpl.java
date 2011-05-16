@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory {
 
     @Autowired
-    private Configuration configuration;
-    @Autowired
     ComponentRegistryBeanFactory componentRegistryBeanFactory;
 
     @Override

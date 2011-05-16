@@ -12,15 +12,12 @@ import java.util.HashMap;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
-import static clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDatabase.*;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public abstract class AbstractDescriptionDao<T extends AbstractDescription>
-	extends SimpleJdbcDaoSupport {
+public abstract class AbstractDescriptionDao<T extends AbstractDescription> extends ComponentRegistryDao<T> {
 
     private final static Logger LOG = LoggerFactory.getLogger(
 	    AbstractDescriptionDao.class);
@@ -115,9 +112,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      */
     public List<T> getUserspaceDescriptions(Number userId) {
 	String select = getSelectStatement().
-		append(" JOIN " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER).
-		append("     ON user_id = " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id").
-		append(" WHERE is_deleted = false AND is_public = FALSE and " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + "." + COLUMN_ID + " = :userId").
+		append(" JOIN " + TABLE_REGISTRY_USER).
+		append("     ON user_id = " + TABLE_REGISTRY_USER + ".id").
+		append(" WHERE is_deleted = false AND is_public = FALSE and " + TABLE_REGISTRY_USER + "." + COLUMN_ID + " = :userId").
 		toString();
 	return getList(select, userId);
     }
@@ -139,30 +136,10 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
 
 	getSimpleJdbcTemplate().update(update, Collections.singletonMap("id", id));
     }
+    
     /*
-     * DAO HELPER METHODS (may well be moved to some other place in class hierarchy at a later time)
+     * DAO HELPER METHODS
      */
-
-    private T getFirstOrNull(StringBuilder selectQuery, Object... args) {
-	return getFirstOrNull(selectQuery.toString(), args);
-    }
-
-    private T getFirstOrNull(String selectQuery, Object... args) {
-	List<T> list = getList(selectQuery, args);
-	if (list.size() > 0) {
-	    return list.get(0);
-	} else {
-	    return null;
-	}
-    }
-
-    private List<T> getList(StringBuilder selectQuery, Object... args) {
-	return getList(selectQuery.toString(), args);
-    }
-
-    private List<T> getList(String selectQuery, Object... args) {
-	return getSimpleJdbcTemplate().query(selectQuery, getRowMapper(), args);
-    }
 
     private StringBuilder getSelectStatement(String... where) {
 	StringBuilder sb = new StringBuilder();
@@ -184,6 +161,13 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
     private String getDescriptionColumnList() {
 	return "name, description, " + getCMDIdColumn();
     }
+
+    /**
+     * @return the rowMapper
+     */
+    protected ParameterizedRowMapper<T> getRowMapper() {
+	return rowMapper;
+    }
     
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
@@ -204,11 +188,4 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
 	    return null;
 	}
     };
-
-    /**
-     * @return the rowMapper
-     */
-    protected ParameterizedRowMapper<T> getRowMapper() {
-	return rowMapper;
-    }
 }

@@ -2,7 +2,6 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import java.util.List;
-import static clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDatabase.*;
 
 /**
  *

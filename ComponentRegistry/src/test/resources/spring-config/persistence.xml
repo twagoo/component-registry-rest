@@ -11,5 +11,8 @@
     <bean id="componentDescriptionDao" class="clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao">
         <property name="dataSource" ref="dataSource"/>
     </bean>
+    <bean id="userDao" class="clarin.cmdi.componentregistry.impl.database.UserDao">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
 </beans>
