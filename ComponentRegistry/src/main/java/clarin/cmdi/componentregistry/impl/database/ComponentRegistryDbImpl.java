@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryUtils;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -16,10 +17,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.bind.JAXBException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -29,11 +33,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ComponentRegistryDbImpl implements ComponentRegistry {
 
+    private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryDbImpl.class);
     private Number userId;
     @Autowired
     private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
     private ComponentDescriptionDao componentDescriptionDao;
+    @Autowired
+    Configuration configuration;
 
     /**
      * Default constructor, makes this a (spring) bean. No user is set, so
@@ -97,7 +104,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.
 			getCMDComponentSchema());
 	    } catch (JAXBException ex) {
-		Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+		LOG.error(null, ex);
 	    }
 	}
 	return null;
@@ -117,9 +124,9 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	    }
 	    return 0;
 	} catch (JAXBException ex) {
-	    Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+	    LOG.error(null, ex);
 	} catch (UnsupportedEncodingException ex) {
-	    Logger.getLogger(ComponentRegistryDbImpl.class.getName()).log(Level.SEVERE, null, ex);
+	    LOG.error(null, ex);
 	}
 	return -1;
     }
@@ -156,12 +163,57 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException {
-	throw new UnsupportedOperationException("Not supported yet.");
+	ProfileDescription desc = getProfileDescription(profileId);
+	if (desc != null) {
+	    checkAuthorisation(desc, principal);
+	    checkAge(desc, principal);
+	    profileDescriptionDao.setDeleted(profileId);
+	}
+    }
+
+    private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
+	if (!desc.isThisTheOwner(principal.getName()) && !configuration.
+		isAdminUser(principal)) {
+	    throw new UserUnauthorizedException("Unauthorized operation user '" + principal.
+		    getName()
+		    + "' is not the creator (nor an administrator) of the " + (desc.
+		    isProfile() ? "profile" : "component") + "(" + desc
+		    + ").");
+	}
+    }
+
+    private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
+	if (isPublic() && !configuration.isAdminUser(principal)) {
+	    try {
+		Date regDate = AbstractDescription.getDate(desc.
+			getRegistrationDate());
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
+		if (regDate.before(calendar.getTime())) { //More then month old
+		    throw new DeleteFailedException(
+			    "The "
+			    + (desc.isProfile() ? "Profile" : "Component")
+			    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+		}
+	    } catch (ParseException e) {
+		LOG.error("Cannot parse date of " + desc + " Error:" + e);
+	    }
+	}
     }
 
     @Override
     public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException {
-	throw new UnsupportedOperationException("Not supported yet.");
+	ComponentDescription desc = componentDescriptionDao.getByCmdId(componentId);
+	if (desc != null) {
+	    checkAuthorisation(desc, principal);
+	    checkAge(desc, principal);
+
+	    // TODO : check still used!
+//            if (!forceDelete) {
+//                checkStillUsed(componentId);
+//            }
+	    componentDescriptionDao.setDeleted(componentId);
+	}
     }
 
     @Override

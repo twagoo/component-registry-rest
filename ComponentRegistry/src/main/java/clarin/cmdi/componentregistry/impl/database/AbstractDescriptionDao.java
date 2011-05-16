@@ -88,7 +88,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @param id Description key
      * @return The description, if it exists; null otherwise
      */
-    protected T getById(Number id) {
+    public T getById(Number id) {
 	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND id = :id"), id);
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @param id Full component id
      * @return The description, if it exists; null otherwise
      */
-    protected T getByCmdId(String id) {
+    public T getByCmdId(String id) {
 	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = :id"), id);
     }
 
@@ -105,7 +105,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      *
      * @return All descriptions in the public space
      */
-    protected List<T> getPublicDescriptions() {
+    public List<T> getPublicDescriptions() {
 	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = TRUE"));
     }
 
@@ -113,13 +113,22 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      *
      * @return All the user's descriptions not in the public space
      */
-    protected List<T> getUserspaceDescriptions(Number userId) {
+    public List<T> getUserspaceDescriptions(Number userId) {
 	String select = getSelectStatement().
 		append(" JOIN " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER).
 		append("     ON user_id = " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id").
-		append(" WHERE is_deleted = false AND is_public = FALSE and " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id = :userId").
+		append(" WHERE is_deleted = false AND is_public = FALSE and " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + "." + COLUMN_ID + " = :userId").
 		toString();
 	return getList(select, userId);
+    }
+
+    /**
+     *
+     * @param Full component id
+     */
+    public void setDeleted(String id) {
+	String delete = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + getCMDIdColumn() + " = :id";
+	getSimpleJdbcTemplate().update(delete, Collections.singletonMap("id", id));
     }
 
     /*

@@ -56,4 +56,21 @@ public abstract class AbstractDescriptionDaoTest {
         List<AbstractDescription> descriptions = getDao().getUserspaceDescriptions(-1);
         assertEquals(0, descriptions.size());
     }
+
+    @Test
+    public void testDeleteDescription() throws Exception {
+	ComponentDescription description = ComponentDescription.createNewDescription();
+        description.setName("Aap");
+        description.setDescription("MyDescription");
+        String testComponent = RegistryTestHelper.getComponentTestContentString();
+
+	int count = getDao().getPublicDescriptions().size();
+	// insert
+        getDao().insertComponent(description, testComponent);
+	assertEquals(count+1, getDao().getPublicDescriptions().size());
+
+	// delete
+	getDao().setDeleted(description.getId());
+	assertEquals(count, getDao().getPublicDescriptions().size());
+    }
 }
