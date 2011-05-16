@@ -20,7 +20,7 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE comments (
-    id integer NOT NULL,
+    id SERIAL NOT NULL,
     profile_description_id integer,
     component_description_id integer,
     user_id integer,
@@ -33,7 +33,7 @@ CREATE TABLE comments (
 --
 
 CREATE TABLE component_description (
-    id integer NOT NULL,
+    id SERIAL NOT NULL,
     user_id integer,
     content_id integer NOT NULL,
     is_public boolean NOT NULL,
@@ -90,7 +90,7 @@ ALTER SEQUENCE cr_comments_id_seq OWNED BY comments.id;
 --
 
 CREATE TABLE xml_content (
-    id integer NOT NULL,
+    id SERIAL NOT NULL,
     content xml
 );
 
@@ -119,7 +119,7 @@ ALTER SEQUENCE cr_content_id_seq OWNED BY xml_content.id;
 --
 
 CREATE TABLE profile_description (
-    id integer NOT NULL,
+    id SERIAL NOT NULL,
     user_id integer,
     content_id integer NOT NULL,
     is_public boolean NOT NULL,
@@ -157,7 +157,7 @@ ALTER SEQUENCE profile_description_id_seq OWNED BY profile_description.id;
 --
 
 CREATE TABLE registry_user (
-    id integer NOT NULL,
+    id SERIAL NOT NULL,
     name character varying,
     principal_name character varying
 );
