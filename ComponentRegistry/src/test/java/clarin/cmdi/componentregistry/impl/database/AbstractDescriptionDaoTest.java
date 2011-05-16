@@ -40,7 +40,7 @@ public abstract class AbstractDescriptionDaoTest {
         description.setDescription("MyDescription");
 
         String testComponent = RegistryTestHelper.getComponentTestContentString();
-        Number newId = getDao().insertComponent(description, testComponent);
+        Number newId = getDao().insertDescription(description, testComponent, true, null);
         assertNotNull(newId);
         assertNotNull(getDao().getById(newId));
     }
@@ -66,7 +66,7 @@ public abstract class AbstractDescriptionDaoTest {
 
 	int count = getDao().getPublicDescriptions().size();
 	// insert
-        getDao().insertComponent(description, testComponent);
+        getDao().insertDescription(description, testComponent, true, null);
 	assertEquals(count+1, getDao().getPublicDescriptions().size());
 
 	// delete

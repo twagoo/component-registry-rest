@@ -118,9 +118,9 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	    MDMarshaller.marshal(spec, os);
 	    String xml = os.toString();
 	    if (description.isProfile()) {
-		profileDescriptionDao.insertComponent(description, xml);
+		profileDescriptionDao.insertDescription(description, xml, isPublic(), userId);
 	    } else {
-		componentDescriptionDao.insertComponent(description, xml);
+		componentDescriptionDao.insertDescription(description, xml, isPublic(), userId);
 	    }
 	    return 0;
 	} catch (JAXBException ex) {

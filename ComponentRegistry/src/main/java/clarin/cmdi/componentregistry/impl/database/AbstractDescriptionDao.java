@@ -62,8 +62,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @param content Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-    public Number insertComponent(final AbstractDescription description,
-	    final String content) {
+    public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId) {
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
 		withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
 		COLUMN_ID);
@@ -75,7 +74,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
 		usingGeneratedKeyColumns(COLUMN_ID);
 	Map<String, Object> params = new HashMap<String, Object>();
 	params.put("content_id", contentId);
-	params.put("is_public", Boolean.TRUE);
+	params.put("userId", userId);
+	params.put("is_public", isPublic);
 	params.put("is_deleted", Boolean.FALSE);
 	params.put(getCMDIdColumn(), description.getId());
 	params.put("name", description.getName());
@@ -127,13 +127,22 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @param Full component id
      */
     public void setDeleted(String id) {
-	String delete = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + getCMDIdColumn() + " = :id";
-	getSimpleJdbcTemplate().update(delete, Collections.singletonMap("id", id));
+	String update = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + getCMDIdColumn() + " = :id";
+	getSimpleJdbcTemplate().update(update, Collections.singletonMap("id", id));
     }
 
+    public void setPublished(String id, boolean published) {
+	final String update = "UPDATE " + getTableName() + " SET is_published = :published WHERE " + getCMDIdColumn() + " = :id";
+	final Map<String, Object> args = new HashMap<String, Object>();
+	args.put("id", id);
+	args.put("published", published);
+
+	getSimpleJdbcTemplate().update(update, Collections.singletonMap("id", id));
+    }
     /*
      * DAO HELPER METHODS (may well be moved to some other place in class hierarchy at a later time)
      */
+
     private T getFirstOrNull(StringBuilder selectQuery, Object... args) {
 	return getFirstOrNull(selectQuery.toString(), args);
     }
@@ -152,7 +161,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
     }
 
     private List<T> getList(String selectQuery, Object... args) {
-	return getSimpleJdbcTemplate().query(selectQuery, rowMapper, args);
+	return getSimpleJdbcTemplate().query(selectQuery, getRowMapper(), args);
     }
 
     private StringBuilder getSelectStatement(String... where) {
@@ -175,6 +184,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
     private String getDescriptionColumnList() {
 	return "name, description, " + getCMDIdColumn();
     }
+    
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
@@ -194,4 +204,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
 	    return null;
 	}
     };
+
+    /**
+     * @return the rowMapper
+     */
+    protected ParameterizedRowMapper<T> getRowMapper() {
+	return rowMapper;
+    }
 }
