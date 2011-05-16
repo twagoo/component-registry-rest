@@ -3,12 +3,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
-    <bean id="configuration" parent="configurationBase" class="clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration" init-method="init" factory-method="getInstance">
+    <bean id="fileSystemConfiguration" class="clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration" init-method="init" factory-method="getInstance">
         <property name="registryRoot" value="${registryRoot}" />
     </bean>
 
     <bean id="componentRegistryFactory" class="clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl" init-method="init" factory-method="getInstance">
-        <property name="fileSystemConfiguration" ref="configuration"/>
+        <property name="configuration" ref="configuration"/>
+        <property name="fileSystemConfiguration" ref="fileSystemConfiguration"/>
     </bean>
 
 </beans>
