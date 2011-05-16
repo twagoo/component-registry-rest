@@ -70,7 +70,7 @@ public class ComponentRegistryDbImplTest {
 
     private ComponentRegistry getComponentRegistryForUser(String user) {
         ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-        componentRegistry.setUser(user);
+        componentRegistry.setUserId(user);
         return componentRegistry;
     }
 }
