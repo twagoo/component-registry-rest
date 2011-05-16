@@ -41,9 +41,9 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
         return getComponentRegistryForUser(null);
     }
 
-    private ComponentRegistry getComponentRegistryForUser(String user) {
+    private ComponentRegistry getComponentRegistryForUser(Number userId) {
         ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-        componentRegistry.setUserId(user);
+        componentRegistry.setUserId(userId);
         return componentRegistry;
     }
 }

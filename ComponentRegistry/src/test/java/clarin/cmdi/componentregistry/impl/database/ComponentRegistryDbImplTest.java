@@ -28,49 +28,53 @@ public class ComponentRegistryDbImplTest {
 
     @Before
     public void init() {
-        resetDatabase(jdbcTemplate);
-        createTableComponentDescription(jdbcTemplate);
-        createTableProfileDescription(jdbcTemplate);
-        createTableXmlContent(jdbcTemplate);
+	resetDatabase(jdbcTemplate);
+	createTableComponentDescription(jdbcTemplate);
+	createTableProfileDescription(jdbcTemplate);
+	createTableXmlContent(jdbcTemplate);
     }
 
     @Test
     public void testRegisterComponent() throws Exception {
-        ComponentRegistry register = getComponentRegistryForUser(null);
-        ComponentDescription description = ComponentDescription.createNewDescription();
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
 
-        description.setName("Aap");
-        description.setDescription("MyDescription");
+	description.setName("Aap");
+	description.setDescription("MyDescription");
 
-        assertEquals(0, register.getComponentDescriptions().size());
-        assertEquals(0, register.getProfileDescriptions().size());
+	assertEquals(0, register.getComponentDescriptions().size());
+	assertEquals(0, register.getProfileDescriptions().size());
 
-        CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
-        assertNull(testComponent.getHeader().getID());
-        assertNull(testComponent.getHeader().getName());
-        assertNull(testComponent.getHeader().getDescription());
-        testComponent.getHeader().setDescription("Will not be overwritten");
+	CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent();
+	assertNull(testComponent.getHeader().getID());
+	assertNull(testComponent.getHeader().getName());
+	assertNull(testComponent.getHeader().getDescription());
+	testComponent.getHeader().setDescription("Will not be overwritten");
 
-        register.register(description, testComponent);
+	register.register(description, testComponent);
 
-        assertEquals(1, register.getComponentDescriptions().size());
-        assertEquals(0, register.getProfileDescriptions().size());
+	assertEquals(1, register.getComponentDescriptions().size());
+	assertEquals(0, register.getProfileDescriptions().size());
 
-        ComponentDescription desc = register.getComponentDescriptions().get(0);
-        assertNotNull(desc);
-        CMDComponentSpec component = register.getMDComponent(desc.getId());
-        assertNotNull(component);
+	ComponentDescription desc = register.getComponentDescriptions().get(0);
+	assertNotNull(desc);
+	CMDComponentSpec component = register.getMDComponent(desc.getId());
+	assertNotNull(component);
 
-        assertNull(register.getMDProfile(desc.getId()));
+	assertNull(register.getMDProfile(desc.getId()));
 
-        assertEquals("Header id should be set from description id", description.getId(), component.getHeader().getID());
-        assertEquals("Aap", component.getHeader().getName());
-        assertEquals("Will not be overwritten", component.getHeader().getDescription());
+	assertEquals("Header id should be set from description id", description.
+		getId(), component.getHeader().getID());
+	assertEquals("Aap", component.getHeader().getName());
+	assertEquals("Will not be overwritten", component.getHeader().
+		getDescription());
     }
 
-    private ComponentRegistry getComponentRegistryForUser(String user) {
-        ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-        componentRegistry.setUserId(user);
-        return componentRegistry;
+    private ComponentRegistry getComponentRegistryForUser(Number userId) {
+	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.
+		getNewComponentRegistry();
+	componentRegistry.setUserId(userId);
+	return componentRegistry;
     }
 }

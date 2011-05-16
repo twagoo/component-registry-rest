@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ComponentRegistryDbImpl implements ComponentRegistry {
 
-    private String userId;
+    private Number userId;
     @Autowired
     private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
@@ -47,7 +47,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
      * Creates a new ComponentRegistry (either public or not) for the provided user
      * @param userId User id of the user to create registry for. Pass null for public
      */
-    public ComponentRegistryDbImpl(String userId) {
+    public ComponentRegistryDbImpl(Number userId) {
 	this.userId = userId;
     }
 
@@ -70,7 +70,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	if (isPublic()) {
 	    return componentDescriptionDao.getPublicComponentDescriptions();
 	} else {
-	    return null;
+	    return componentDescriptionDao.getUserspaceDescriptions(getUserId());
 	}
     }
 
@@ -184,7 +184,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
     /**
      * @return The user, or null if this is the public registry.
      */
-    public String getUserId() {
+    public Number getUserId() {
 	return userId;
     }
 
@@ -192,7 +192,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
      * @param User for which this should be the registry. Pass null for
      * the public registry
      */
-    public void setUserId(String user) {
+    public void setUserId(Number user) {
 	this.userId = user;
     }
 }
