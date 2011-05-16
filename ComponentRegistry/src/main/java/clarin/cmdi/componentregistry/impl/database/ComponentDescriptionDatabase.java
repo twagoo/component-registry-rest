@@ -6,9 +6,12 @@ package clarin.cmdi.componentregistry.impl.database;
  */
 public final class ComponentDescriptionDatabase {
     public final static String DATABASE_NAME = "component_registry";
+
     public final static String TABLE_COMPONENT_DESCRIPTION = "component_description";
     public final static String TABLE_PROFILE_DESCRIPTION = "profile_description";
     public final static String TABLE_XML_CONTENT = "xml_content";
+    public final static String TABLE_REGISTRY_USER = "registry_user";
+
 
     public final static String COLUMN_ID = "id";
 }
