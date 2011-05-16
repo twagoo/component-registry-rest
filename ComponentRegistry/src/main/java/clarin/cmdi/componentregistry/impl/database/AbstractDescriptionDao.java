@@ -43,9 +43,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @return String value of XML content for profile or component
      */
     public String getContent(String cmdId) {
-	String select = "select content from " + TABLE_XML_CONTENT
-		+ " join " + getTableName() + " on " + TABLE_XML_CONTENT + "." + COLUMN_ID + " = " + getTableName() + ".content_id"
-		+ " where " + getTableName() + "." + getCMDIdColumn() + " = :id";
+	String select = "SELECT content FROM " + TABLE_XML_CONTENT
+		+ " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "." + COLUMN_ID + " = " + getTableName() + ".content_id"
+		+ " WHERE is_deleted = false AND " + getTableName() + "." + getCMDIdColumn() + " = :id";
 
 
 	List<String> result = getSimpleJdbcTemplate().query(select,
@@ -89,7 +89,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @return The description, if it exists; null otherwise
      */
     protected T getById(Number id) {
-	return getFirstOrNull(getSelectStatement("where id = :id"), id);
+	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND id = :id"), id);
     }
 
     /**
@@ -98,7 +98,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @return The description, if it exists; null otherwise
      */
     protected T getByCmdId(String id) {
-	return getFirstOrNull(getSelectStatement("where " + getCMDIdColumn() + " = :id"), id);
+	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = :id"), id);
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      * @return All descriptions in the public space
      */
     protected List<T> getPublicDescriptions() {
-	return getList(getSelectStatement(" where is_public = TRUE"));
+	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = TRUE"));
     }
 
     /**
@@ -115,9 +115,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      */
     protected List<T> getUserspaceDescriptions(Number userId) {
 	String select = getSelectStatement().
-		append(" join " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER).
-		append("     on user_id = " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id").
-		append(" where is_public = FALSE and " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id = :userId").
+		append(" JOIN " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER).
+		append("     ON user_id = " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id").
+		append(" WHERE is_deleted = false AND is_public = FALSE and " + ComponentDescriptionDatabase.TABLE_REGISTRY_USER + ".id = :userId").
 		toString();
 	return getList(select, userId);
     }
@@ -148,8 +148,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
 
     private StringBuilder getSelectStatement(String... where) {
 	StringBuilder sb = new StringBuilder();
-	sb.append("select ").append(getDescriptionColumnList()).
-		append(" from ").append(getTableName());
+	sb.append("SELECT ").append(getDescriptionColumnList()).
+		append(" FROM ").append(getTableName());
 	if (where.length > 0) {
 	    sb.append(" ");
 	    for (String str : where) {
