@@ -1,8 +1,9 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
@@ -39,5 +40,11 @@ public abstract class AbstractDescriptionDaoTest {
 
         String testComponent = RegistryTestHelper.getComponentTestContentString();
         getDao().insertComponent(description, testComponent);
+    }
+
+    @Test
+    public void testGetPublicComponents() throws Exception {
+        List<AbstractDescription> descriptions =  getDao().getPublicDescriptions();
+        assertNotNull(descriptions);
     }
 }

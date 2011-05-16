@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.HashMap;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 import static clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDatabase.*;
@@ -20,14 +19,21 @@ import static clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDa
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public abstract class AbstractDescriptionDao extends SimpleJdbcDaoSupport {
+public abstract class AbstractDescriptionDao<T extends AbstractDescription> extends SimpleJdbcDaoSupport {
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
 
     protected abstract String getTableName();
-
     protected abstract String getCMDIdColumn();
 
+    /**
+     * Class object required to instantiate new description domain objects
+     */
+    private Class<T> _class;
+
+    protected AbstractDescriptionDao(Class<T> _class) {
+        this._class = _class;
+    }
     /**
      * 
      * @param cmdId Profile or component Id (not primary key)
@@ -67,28 +73,31 @@ public abstract class AbstractDescriptionDao extends SimpleJdbcDaoSupport {
         return insertDescription.executeAndReturnKey(params);
     }
 
-    protected <T extends AbstractDescription> List<T> getPublicDescriptions(final Class<T> _class) {
-        String select = "select name, description, " + getCMDIdColumn()  + " from " + getTableName();
-
-        ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
-
-            @Override
-            public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                try {
-                    AbstractDescription cd = (AbstractDescription) _class.newInstance();
-                    cd.setName(rs.getString("name"));
-                    cd.setDescription(rs.getString("description"));
-                    cd.setId(rs.getString(getCMDIdColumn()));
-                    return (T) cd;
-                } catch (InstantiationException ex) {
-                    LOG.error("Error in row mapping", ex);
-                } catch (IllegalAccessException ex) {
-                    LOG.error("Error in row mapping", ex);
-                }
-                return null;
-            }
-        };
-
-        return getSimpleJdbcTemplate().query(select, rowMapper);
+    /**
+     *
+     * @return All descriptions in the public space
+     */
+    protected List<T> getPublicDescriptions() {
+        String select = "select name, description, " + getCMDIdColumn() + " from " + getTableName() + " where is_public = TRUE";
+        return getSimpleJdbcTemplate().query(select, new AbstractDescriptionRowMapper());
     }
+
+    private class AbstractDescriptionRowMapper<T> implements ParameterizedRowMapper<T> {
+
+        @Override
+        public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
+            try {
+                AbstractDescription newDescription = (AbstractDescription) _class.newInstance();
+                newDescription.setName(rs.getString("name"));
+                newDescription.setDescription(rs.getString("description"));
+                newDescription.setId(rs.getString(getCMDIdColumn()));
+                return (T) newDescription;
+            } catch (InstantiationException ex) {
+                LOG.error("Error in row mapping", ex);
+            } catch (IllegalAccessException ex) {
+                LOG.error("Error in row mapping", ex);
+            }
+            return null;
+        }
+    };
 }

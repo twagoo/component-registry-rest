@@ -8,7 +8,11 @@ import static clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDa
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ProfileDescriptionDao extends AbstractDescriptionDao {
+public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescription> {
+
+    public ProfileDescriptionDao() {
+        super(ProfileDescription.class);
+    }
 
     @Override
     protected String getTableName() {
@@ -21,6 +25,6 @@ public class ProfileDescriptionDao extends AbstractDescriptionDao {
     }
 
     public List<ProfileDescription> getPublicProfileDescriptions() {
-        return getPublicDescriptions(ProfileDescription.class);
+        return getPublicDescriptions();
     }
 }

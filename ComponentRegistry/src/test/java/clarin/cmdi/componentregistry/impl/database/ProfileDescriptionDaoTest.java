@@ -9,20 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ComponentDescriptionDaoTest extends AbstractDescriptionDaoTest {
+public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
 
     @Autowired
-    ComponentDescriptionDao componentDescriptionDao;
+    ProfileDescriptionDao profileDescriptionDao;
 
     @Before
     public void init() {
         resetDatabase(jdbcTemplate);
-        createTableComponentDescription(jdbcTemplate);
+        createTableProfileDescription(jdbcTemplate);
         createTableXmlContent(jdbcTemplate);
     }
 
     @Override
     protected AbstractDescriptionDao getDao() {
-        return componentDescriptionDao;
+        return profileDescriptionDao;
     }
 }
