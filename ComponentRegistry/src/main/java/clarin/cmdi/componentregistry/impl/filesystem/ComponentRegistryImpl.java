@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -414,7 +413,7 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         List<ComponentDescription> descs = getComponentDescriptions();
         for (ComponentDescription desc : descs) {
             CMDComponentSpec spec = getMDComponent(desc.getId());
-            if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
+            if (spec != null && ComponentRegistryUtils.findComponentId(componentId, spec.getCMDComponent())) {
                 result.add(desc);
             }
         }
@@ -426,22 +425,11 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         List<ProfileDescription> result = new ArrayList<ProfileDescription>();
         for (ProfileDescription profileDescription : getProfileDescriptions()) {
             CMDComponentSpec profile = getMDProfile(profileDescription.getId());
-            if (profile != null && findComponentId(componentId, profile.getCMDComponent())) {
+            if (profile != null && ComponentRegistryUtils.findComponentId(componentId, profile.getCMDComponent())) {
                 result.add(profileDescription);
             }
         }
         return result;
-    }
-
-    private boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
-        for (CMDComponentType cmdComponent : componentReferences) {
-            if (componentId.equals(cmdComponent.getComponentId())) {
-                return true;
-            } else if (findComponentId(componentId, cmdComponent.getCMDComponent())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
