@@ -41,11 +41,13 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
+import com.sun.jersey.api.spring.Autowire;
 
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
 
 @Path("/registry")
+@Autowire
 public class ComponentRegistryRestService {
 
     @Context
@@ -509,5 +511,12 @@ public class ComponentRegistryRestService {
                 }
             }
         }
+    }
+
+    /**
+     * @param componentRegistryFactory the componentRegistryFactory to set
+     */
+    public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
+	this.componentRegistryFactory = componentRegistryFactory;
     }
 }
