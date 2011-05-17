@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
@@ -17,15 +18,19 @@ public class UserDao extends ComponentRegistryDao<User> {
 
     private final static String SELECT_BASE = "SELECT " + COLUMN_ID + ", name, principal_name FROM " + TABLE_REGISTRY_USER;
 
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers() throws DataAccessException {
 	return getList(SELECT_BASE);
     }
 
-    public User getByPrincipalName(String principalName) {
+    public User getByPrincipalName(String principalName) throws DataAccessException {
 	return getFirstOrNull(SELECT_BASE + " WHERE principal_name = ?", principalName);
     }
 
-    public Number insertUser(User user) {
+    public User getById(Number id) throws DataAccessException {
+	return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", id);
+    }
+
+    public Number insertUser(User user) throws DataAccessException {
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
 		withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
 		COLUMN_ID);
