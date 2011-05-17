@@ -68,13 +68,13 @@ public class UserDaoTest {
 	assertNull(userDao.getByPrincipalName("NON-EXISTING PRINCIPAL NAME"));
     }
 
-    private User createTestUser(){
+    public static User createTestUser(){
 	User testUser = new User();
 	testUser.setName(TEST_USER_NAME);
 	testUser.setPrincipalName(TEST_USER_PRINCIPAL_NAME);
 	return testUser;
     }
 
-    private final static String TEST_USER_NAME = "Aap";
-    private final static String TEST_USER_PRINCIPAL_NAME = "aap@clarin.eu";
+    public final static String TEST_USER_NAME = "Aap";
+    public final static String TEST_USER_PRINCIPAL_NAME = "aap@clarin.eu";
 }

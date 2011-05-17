@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory {
+
     @Autowired
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
@@ -37,7 +38,21 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 
     @Override
     public ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials) {
-	return getComponentRegistryForUser(null);
+	ComponentRegistry result = null;
+	if (userspace) {
+	    if (credentials != null && !ANONYMOUS_USER.equals(credentials.
+		    getPrincipalName())) {
+		String principalName = credentials.getPrincipalName();
+		User user = getOrCreateUser(principalName, credentials.
+			getDisplayName());
+		result = getComponentRegistryForUser(user.getId());
+	    } else {
+		throw new IllegalArgumentException("No user credentials available cannot load userspace.");
+	    }
+	} else {
+	    result = getPublicRegistry();
+	}
+	return result;
     }
 
     @Override
@@ -55,5 +70,20 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 		getNewComponentRegistry();
 	componentRegistry.setUserId(userId);
 	return componentRegistry;
+    }
+
+    private User getOrCreateUser(String principalName, String displayName) {
+	// Try getting it from db
+	User user = userDao.getByPrincipalName(principalName);
+	if (user == null) {
+	    // Create the new user
+	    user = new User();
+	    user.setPrincipalName(principalName);
+	    user.setName(displayName);
+	    userDao.insertUser(user);
+	    // Retrieve from db
+	    user = userDao.getByPrincipalName(principalName);
+	}
+	return user;
     }
 }
