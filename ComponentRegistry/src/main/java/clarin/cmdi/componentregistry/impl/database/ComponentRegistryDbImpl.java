@@ -127,20 +127,6 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	}
     }
 
-    private CMDComponentSpec getMDComponent(String id, AbstractDescriptionDao dao) {
-	String xml = dao.getContent(id);
-	if (xml != null) {
-	    try {
-		InputStream is = new ByteArrayInputStream(xml.getBytes());
-		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.
-			getCMDComponentSchema());
-	    } catch (JAXBException ex) {
-		LOG.error(null, ex);
-	    }
-	}
-	return null;
-    }
-
     @Override
     public int register(AbstractDescription description, CMDComponentSpec spec) {
 	ComponentRegistryUtils.enrichSpecHeader(spec, description);
@@ -210,36 +196,6 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     }
 
-    private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-	if (!desc.isThisTheOwner(principal.getName()) && !configuration.
-		isAdminUser(principal)) {
-	    throw new UserUnauthorizedException("Unauthorized operation user '" + principal.
-		    getName()
-		    + "' is not the creator (nor an administrator) of the " + (desc.
-		    isProfile() ? "profile" : "component") + "(" + desc
-		    + ").");
-	}
-    }
-
-    private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
-	if (isPublic() && !configuration.isAdminUser(principal)) {
-	    try {
-		Date regDate = AbstractDescription.getDate(desc.
-			getRegistrationDate());
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
-		if (regDate.before(calendar.getTime())) { //More then month old
-		    throw new DeleteFailedException(
-			    "The "
-			    + (desc.isProfile() ? "Profile" : "Component")
-			    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
-		}
-	    } catch (ParseException e) {
-		LOG.error("Cannot parse date of " + desc + " Error:" + e);
-	    }
-	}
-    }
-
     @Override
     public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException {
 	try {
@@ -292,5 +248,49 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
      */
     public void setUserId(Number user) {
 	this.userId = user;
+    }
+
+    private CMDComponentSpec getMDComponent(String id, AbstractDescriptionDao dao) {
+	String xml = dao.getContent(id);
+	if (xml != null) {
+	    try {
+		InputStream is = new ByteArrayInputStream(xml.getBytes());
+		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.
+			getCMDComponentSchema());
+	    } catch (JAXBException ex) {
+		LOG.error(null, ex);
+	    }
+	}
+	return null;
+    }
+
+    private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
+	if (!desc.isThisTheOwner(principal.getName()) && !configuration.
+		isAdminUser(principal)) {
+	    throw new UserUnauthorizedException("Unauthorized operation user '" + principal.
+		    getName()
+		    + "' is not the creator (nor an administrator) of the " + (desc.
+		    isProfile() ? "profile" : "component") + "(" + desc
+		    + ").");
+	}
+    }
+
+    private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
+	if (isPublic() && !configuration.isAdminUser(principal)) {
+	    try {
+		Date regDate = AbstractDescription.getDate(desc.
+			getRegistrationDate());
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
+		if (regDate.before(calendar.getTime())) { //More then month old
+		    throw new DeleteFailedException(
+			    "The "
+			    + (desc.isProfile() ? "Profile" : "Component")
+			    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+		}
+	    } catch (ParseException e) {
+		LOG.error("Cannot parse date of " + desc + " Error:" + e);
+	    }
+	}
     }
 }

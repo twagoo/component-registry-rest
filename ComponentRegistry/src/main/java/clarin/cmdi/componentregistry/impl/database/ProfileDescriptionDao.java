@@ -13,6 +13,10 @@ public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescrip
         super(ProfileDescription.class);
     }
 
+    public List<ProfileDescription> getPublicProfileDescriptions() {
+        return getPublicDescriptions();
+    }
+
     @Override
     protected String getTableName() {
         return TABLE_PROFILE_DESCRIPTION;
@@ -21,9 +25,5 @@ public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescrip
     @Override
     protected String getCMDIdColumn() {
         return "profile_id";
-    }
-
-    public List<ProfileDescription> getPublicProfileDescriptions() {
-        return getPublicDescriptions();
     }
 }
