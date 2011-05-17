@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 
@@ -40,9 +41,7 @@ public class UserDaoTest {
 
     @Test
     public void testInsertUser() {
-	User testUser = new User();
-	testUser.setName("Aap");
-	testUser.setPrincipalName("aap@clarin.eu");
+	User testUser = createTestUser();
 
 	assertEquals(0, userDao.getAllUsers().size());
 	Number newId =  userDao.insertUser(testUser);
@@ -51,12 +50,31 @@ public class UserDaoTest {
 	List<User> users = userDao.getAllUsers();
 	assertEquals(1, users.size());
 
-	assertEquals("Aap", users.get(0).getName());
-	assertEquals("aap@clarin.eu", users.get(0).getPrincipalName());
+	assertEquals(TEST_USER_NAME, users.get(0).getName());
+	assertEquals(TEST_USER_PRINCIPAL_NAME, users.get(0).getPrincipalName());
     }
 
     @Test
     public void testGetAllUsers() {
 	assertEquals(0, userDao.getAllUsers().size());
     }
+
+    @Test
+    public void testGetUserByPrincipalName(){
+	User testUser = createTestUser();
+	userDao.insertUser(testUser);
+
+	assertNotNull(userDao.getByPrincipalName(TEST_USER_PRINCIPAL_NAME));
+	assertNull(userDao.getByPrincipalName("NON-EXISTING PRINCIPAL NAME"));
+    }
+
+    private User createTestUser(){
+	User testUser = new User();
+	testUser.setName(TEST_USER_NAME);
+	testUser.setPrincipalName(TEST_USER_PRINCIPAL_NAME);
+	return testUser;
+    }
+
+    private final static String TEST_USER_NAME = "Aap";
+    private final static String TEST_USER_PRINCIPAL_NAME = "aap@clarin.eu";
 }

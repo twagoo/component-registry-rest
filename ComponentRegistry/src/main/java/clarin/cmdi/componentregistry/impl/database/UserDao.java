@@ -21,6 +21,10 @@ public class UserDao extends ComponentRegistryDao<User> {
 	return getList(SELECT_BASE);
     }
 
+    public User getByPrincipalName(String principalName) {
+	return getFirstOrNull(SELECT_BASE + " WHERE principal_name = ?", principalName);
+    }
+
     public Number insertUser(User user) {
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
 		withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
