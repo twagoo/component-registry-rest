@@ -2,9 +2,10 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,33 +16,44 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory {
-
     @Autowired
-    ComponentRegistryBeanFactory componentRegistryBeanFactory;
+    private ComponentRegistryBeanFactory componentRegistryBeanFactory;
+    @Autowired
+    private UserDao userDao;
 
     @Override
     public List<ComponentRegistry> getAllUserRegistries() {
-        throw new UnsupportedOperationException("Not supported yet.");
+	//TODO: this probably could use some caching
+	List<User> users = userDao.getAllUsers();
+	List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
+	for (User user : users) {
+	    ComponentRegistryDbImpl registry = componentRegistryBeanFactory.
+		    getNewComponentRegistry();
+	    registry.setUserId(user.getId());
+	    registries.add(registry);
+	}
+	return registries;
     }
 
     @Override
     public ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials) {
-        throw new UnsupportedOperationException("Not supported yet.");
+	return getComponentRegistryForUser(null);
     }
 
     @Override
     public ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String principalNameMD5) {
-        throw new UnsupportedOperationException("Not supported yet.");
+	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public ComponentRegistry getPublicRegistry() {
-        return getComponentRegistryForUser(null);
+	return getComponentRegistryForUser(null);
     }
 
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
-        ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-        componentRegistry.setUserId(userId);
-        return componentRegistry;
+	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.
+		getNewComponentRegistry();
+	componentRegistry.setUserId(userId);
+	return componentRegistry;
     }
 }
