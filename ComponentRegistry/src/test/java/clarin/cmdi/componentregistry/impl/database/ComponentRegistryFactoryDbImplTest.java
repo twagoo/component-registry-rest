@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
@@ -50,7 +51,7 @@ public class ComponentRegistryFactoryDbImplTest {
     public void getComponentRegistry() {
 	// Get public
 	assertNotNull(componentRegistryFactory.getComponentRegistry(false, null));
-	
+
 	// Get for non-existing user
 	final User testUser = UserDaoTest.createTestUser();
 	UserCredentials credentials = new DummyPrincipal(testUser.
@@ -72,5 +73,32 @@ public class ComponentRegistryFactoryDbImplTest {
 		getComponentRegistry(true, credentials2);
 	assertNotNull(cr3);
 	assertNotSame(cr1.getUserId(), cr3.getUserId());
+    }
+
+    @Test
+    public void testGetOtherUserComponentRegistry() {
+	UserCredentials userCredentials = DummyPrincipal.DUMMY_PRINCIPAL.
+		getCredentials();
+
+	// Create registry for new user
+	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.
+		getComponentRegistry(true, userCredentials);
+
+	String id = cr1.getUserId().toString();
+
+	// Get it as admin
+	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.
+		getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, id);
+	assertNotNull(cr2);
+	// Should be this user's registry
+	assertEquals(cr1.getUserId(), cr2.getUserId());
+
+	// Try get it as non-admin
+	try {
+	    componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_PRINCIPAL, id);
+	    fail("Non-admin can get other user's component registry");
+	} catch (Exception ex) {
+	    // Exception should occur
+	}
     }
 }

@@ -6,7 +6,7 @@
     <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" factory-method="getInstance">
         <property name="adminUsers">
             <set>
-		<value>JUnit@test.com</value>
+		<value>JUnit.Admin@test.com</value>
                 <value>patdui@mpi.nl</value> <!-- short names are for shibbolet on lux16 -->
                 <value>patrick.duin@mpi.nl</value>
                 <value>guisil@mpi.nl</value>

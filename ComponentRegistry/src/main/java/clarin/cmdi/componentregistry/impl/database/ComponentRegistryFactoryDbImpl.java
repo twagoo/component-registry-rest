@@ -2,12 +2,16 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Implementation of ComponentRegistryFactory that uses the
@@ -17,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory {
 
+    private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryFactoryDbImpl.class);
+    @Autowired
+    private Configuration configuration;
     @Autowired
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
@@ -25,15 +32,21 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     @Override
     public List<ComponentRegistry> getAllUserRegistries() {
 	//TODO: this probably could use some caching
-	List<User> users = userDao.getAllUsers();
-	List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
-	for (User user : users) {
-	    ComponentRegistryDbImpl registry = componentRegistryBeanFactory.
-		    getNewComponentRegistry();
-	    registry.setUserId(user.getId());
-	    registries.add(registry);
+
+	try {
+	    List<User> users = userDao.getAllUsers();
+	    List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
+	    for (User user : users) {
+		ComponentRegistryDbImpl registry = componentRegistryBeanFactory.
+			getNewComponentRegistry();
+		registry.setUserId(user.getId());
+		registries.add(registry);
+	    }
+	    return registries;
+	} catch (DataAccessException ex) {
+	    LOG.error("Could not retrieve users", ex);
+	    throw ex;
 	}
-	return registries;
     }
 
     @Override
@@ -43,9 +56,14 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	    if (credentials != null && !ANONYMOUS_USER.equals(credentials.
 		    getPrincipalName())) {
 		String principalName = credentials.getPrincipalName();
-		User user = getOrCreateUser(principalName, credentials.
-			getDisplayName());
-		result = getComponentRegistryForUser(user.getId());
+		try {
+		    User user = getOrCreateUser(principalName, credentials.
+			    getDisplayName());
+		    result = getComponentRegistryForUser(user.getId());
+		} catch (DataAccessException ex) {
+		    LOG.error("Could not retrieve or create user", ex);
+		    throw ex;
+		}
 	    } else {
 		throw new IllegalArgumentException("No user credentials available cannot load userspace.");
 	    }
@@ -56,8 +74,24 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     }
 
     @Override
-    public ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String principalNameMD5) {
-	throw new UnsupportedOperationException("Not supported yet.");
+    public ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userId) {
+	try {
+	    User user = userDao.getById(Integer.parseInt(userId));
+	    ComponentRegistry result = null;
+	    if (user != null) {
+		if (configuration.isAdminUser(adminPrincipal)) {
+		    result = getComponentRegistryForUser(user.getId());
+		} else {
+		    throw new IllegalArgumentException("User is not admin user cannot load userspace.");
+		}
+	    } else {
+		result = getPublicRegistry();
+	    }
+	    return result;
+	} catch (DataAccessException ex) {
+	    LOG.error("Could not retrieve user by id", ex);
+	    throw ex;
+	}
     }
 
     @Override
