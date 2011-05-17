@@ -82,6 +82,36 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
+     * Updates a description by database id
+     * @param id Id (key) of description record
+     * @param description New values for description (leave null to not change)
+     * @param content New content for description (leave null to not change)
+     */
+    public void updateDescription(Number id, AbstractDescription description, String content) {
+	if (description != null) {
+	    // Update description
+	    StringBuilder updateDescription = new StringBuilder();
+	    updateDescription.append("UPDATE ").append(getTableName());
+	    updateDescription.append(" SET name = ?, description = ?");
+	    updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
+	    getSimpleJdbcTemplate().update(updateDescription.toString(),
+		    description.getName(), description.getDescription(),
+		    id);
+	}
+
+	if (content != null) {
+	    // Update content
+	    StringBuilder updateContent = new StringBuilder();
+	    updateContent.append("UPDATE " + TABLE_XML_CONTENT + " SET content = ? WHERE " + COLUMN_ID + " = ");
+	    updateContent.append("(SELECT content_id FROM ").append(getTableName()).
+		    append("WHERE " + COLUMN_ID + "= ?");
+
+	    getSimpleJdbcTemplate().update(updateContent.toString(),
+		    content, id);
+	}
+    }
+
+    /**
      * Retrieves description by it's primary key Id
      * @param id Description key
      * @return The description, if it exists; null otherwise
@@ -97,6 +127,16 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      */
     public T getByCmdId(String id) throws DataAccessException {
 	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?"), id);
+    }
+
+    /**
+     *
+     * @param cmdId CMD Id of description
+     * @return Database id for description record
+     */
+    public Number getDbId(String cmdId) {
+	String query = "SELECT " + COLUMN_ID + " FROM " + getTableName() + " WHERE " + getCMDIdColumn() + " = ?";
+	return getSimpleJdbcTemplate().queryForInt(query, cmdId);
     }
 
     /**
@@ -122,14 +162,32 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *
      * @param Full component id
      */
-    public void setDeleted(String id) throws DataAccessException {
-	String update = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + getCMDIdColumn() + " = ?";
+    public void setDeleted(Number id) throws DataAccessException {
+	String update = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + COLUMN_ID + " = ?";
 	getSimpleJdbcTemplate().update(update, id);
     }
 
-    public void setPublished(String id, boolean published) {
-	final String update = "UPDATE " + getTableName() + " SET is_published = ? WHERE " + getCMDIdColumn() + " = ?";
+    public void setPublished(Number id, boolean published) {
+	String update = "UPDATE " + getTableName() + " SET is_published = ? WHERE " + COLUMN_ID + " = ?";
 	getSimpleJdbcTemplate().update(update, published, id);
+    }
+
+    /**
+     *
+     * @param id Id of description record
+     * @return Principal name of description's owner, if any. Otherwise, null.
+     */
+    public String getOwnerPrincipalName(Number id) {
+	String select = "SELECT principal_name FROM " + TABLE_REGISTRY_USER
+		+ " JOIN " + getTableName()
+		+ " ON user_id = " + TABLE_REGISTRY_USER + ".id "
+		+ " WHERE " + getTableName() + ".id = ?";
+	List<String> owner = getSimpleJdbcTemplate().query(select, new ParameterizedSingleColumnRowMapper<String>(), id);
+	if (owner.isEmpty()) {
+	    return null;
+	} else {
+	    return owner.get(0);
+	}
     }
 
     /*

@@ -131,9 +131,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
     public int register(AbstractDescription description, CMDComponentSpec spec) {
 	ComponentRegistryUtils.enrichSpecHeader(spec, description);
 	try {
-	    OutputStream os = new ByteArrayOutputStream();
-	    MDMarshaller.marshal(spec, os);
-	    String xml = os.toString();
+	    String xml = componentSpecToString(spec);
 	    if (description.isProfile()) {
 		profileDescriptionDao.insertDescription(description, xml, isPublic(), userId);
 	    } else {
@@ -152,12 +150,42 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public int update(AbstractDescription description, CMDComponentSpec spec) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	try {
+	    AbstractDescriptionDao<?> dao = getDaoForDescription(description);
+	    dao.updateDescription(getIdForDescription(description), description, componentSpecToString(spec));
+	    return 0;
+	} catch (DataAccessException ex) {
+	    LOG.error(null, ex);
+	    return -1;
+	} catch (IllegalArgumentException ex) {
+	    LOG.error(null, ex);
+	    return -2;
+	} catch (JAXBException ex) {
+	    LOG.error(null, ex);
+	    return -3;
+	} catch (UnsupportedEncodingException ex) {
+	    LOG.error(null, ex);
+	    return -4;
+	}
     }
 
     @Override
     public int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	int result = 0;
+	AbstractDescriptionDao<?> dao = getDaoForDescription(desc);
+	if (!isPublic()) { //if already in public workspace there is nothing todo
+	    try {
+		desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
+		dao.setPublished(getIdForDescription(desc), true);
+		//This is not nice this leaves us in a state where the spec can be deleted but not registered in public space.
+		//NOTE deleted means it is moved to deleted directory, so an admin can still reach it.
+		//In practice this will probably also not be so much of an issue. Nonetheless this screams for transactions and a database.
+	    } catch (Exception e) {
+		LOG.error("Delete failed:", e);
+		result = -1;
+	    }
+	}
+	return result;
     }
 
     @Override
@@ -187,7 +215,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	    if (desc != null) {
 		checkAuthorisation(desc, principal);
 		checkAge(desc, principal);
-		profileDescriptionDao.setDeleted(profileId);
+		profileDescriptionDao.setDeleted(getIdForDescription(desc));
 	    }
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to delete profile", ex);
@@ -208,7 +236,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 //            if (!forceDelete) {
 //                checkStillUsed(componentId);
 //            }
-		componentDescriptionDao.setDeleted(componentId);
+		componentDescriptionDao.setDeleted(getIdForDescription(desc));
 	    }
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to delete component", ex);
@@ -250,6 +278,40 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	this.userId = user;
     }
 
+    private AbstractDescriptionDao<?> getDaoForDescription(AbstractDescription description) {
+	return description.isProfile() ? profileDescriptionDao : componentDescriptionDao;
+    }
+
+    /**
+     * Looks up description on basis of CMD Id. This will also check if such a
+     * record even exists.
+     * @param description Description to look up
+     * @return Database id for description
+     * @throws IllegalArgumentException If description with non-existing id is passed
+     */
+    private Number getIdForDescription(AbstractDescription description) throws IllegalArgumentException {
+	Number dbId = null;
+	AbstractDescriptionDao<?> dao = getDaoForDescription(description);
+	try {
+	    dbId = dao.getDbId(description.getId());
+	} catch (DataAccessException ex) {
+	    LOG.error("Error getting dbId for component with id "
+		    + description.getId(), ex);
+	}
+	if (dbId == null) {
+	    throw new IllegalArgumentException("Could not get database Id for description");
+	} else {
+	    return dbId;
+	}
+    }
+
+    private String componentSpecToString(CMDComponentSpec spec) throws UnsupportedEncodingException, JAXBException {
+	OutputStream os = new ByteArrayOutputStream();
+	MDMarshaller.marshal(spec, os);
+	String xml = os.toString();
+	return xml;
+    }
+
     private CMDComponentSpec getMDComponent(String id, AbstractDescriptionDao dao) {
 	String xml = dao.getContent(id);
 	if (xml != null) {
@@ -265,14 +327,20 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-	if (!desc.isThisTheOwner(principal.getName()) && !configuration.
-		isAdminUser(principal)) {
+	if (!isOwnerOfDescription(desc, principal.getName())
+		&& !configuration.isAdminUser(principal)) {
 	    throw new UserUnauthorizedException("Unauthorized operation user '" + principal.
 		    getName()
 		    + "' is not the creator (nor an administrator) of the " + (desc.
 		    isProfile() ? "profile" : "component") + "(" + desc
 		    + ").");
 	}
+    }
+
+    private boolean isOwnerOfDescription(AbstractDescription desc, String principalName) {
+	String owner = getDaoForDescription(desc).getOwnerPrincipalName(getIdForDescription(desc));
+	return owner != null // If owner is null, no one can be owner
+		&& principalName.equals(owner);
     }
 
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {

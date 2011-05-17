@@ -29,48 +29,51 @@ public abstract class AbstractDescriptionDaoTest {
 
     @Test
     public void testInjection() {
-        assertNotNull(jdbcTemplate);
-        assertNotNull(getDao());
+	assertNotNull(jdbcTemplate);
+	assertNotNull(getDao());
     }
 
     @Test
     public void testInsertComponent() throws Exception {
-        ComponentDescription description = ComponentDescription.createNewDescription();
-        description.setName("Aap");
-        description.setDescription("MyDescription");
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
+	description.setName("Aap");
+	description.setDescription("MyDescription");
 
-        String testComponent = RegistryTestHelper.getComponentTestContentString();
-        Number newId = getDao().insertDescription(description, testComponent, true, null);
-        assertNotNull(newId);
-        assertNotNull(getDao().getById(newId));
+	String testComponent = RegistryTestHelper.getComponentTestContentString();
+	Number newId = getDao().insertDescription(description, testComponent, true, null);
+	assertNotNull(newId);
+	assertNotNull(getDao().getById(newId));
     }
 
     @Test
     public void testGetPublicComponents() throws Exception {
-        List<AbstractDescription> descriptions = getDao().getPublicDescriptions();
-        assertNotNull(descriptions);
+	List<AbstractDescription> descriptions = getDao().getPublicDescriptions();
+	assertNotNull(descriptions);
     }
 
     @Test
     public void testGetUserspaceDescriptions() throws Exception {
-        List<AbstractDescription> descriptions = getDao().getUserspaceDescriptions(-1);
-        assertEquals(0, descriptions.size());
+	List<AbstractDescription> descriptions = getDao().
+		getUserspaceDescriptions(-1);
+	assertEquals(0, descriptions.size());
     }
 
     @Test
     public void testDeleteDescription() throws Exception {
-	ComponentDescription description = ComponentDescription.createNewDescription();
-        description.setName("Aap");
-        description.setDescription("MyDescription");
-        String testComponent = RegistryTestHelper.getComponentTestContentString();
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
+	description.setName("Aap");
+	description.setDescription("MyDescription");
+	String testComponent = RegistryTestHelper.getComponentTestContentString();
 
 	int count = getDao().getPublicDescriptions().size();
 	// insert
-        getDao().insertDescription(description, testComponent, true, null);
-	assertEquals(count+1, getDao().getPublicDescriptions().size());
+	Number dbId = getDao().insertDescription(description, testComponent, true, null);
+	assertEquals(count + 1, getDao().getPublicDescriptions().size());
 
 	// delete
-	getDao().setDeleted(description.getId());
+	getDao().setDeleted(dbId);
 	assertEquals(count, getDao().getPublicDescriptions().size());
     }
 }

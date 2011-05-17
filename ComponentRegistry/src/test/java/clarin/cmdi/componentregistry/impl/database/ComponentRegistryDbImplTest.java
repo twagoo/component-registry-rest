@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
@@ -8,8 +9,11 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
+import java.io.IOException;
 import java.security.Principal;
+import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -28,9 +32,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class ComponentRegistryDbImplTest {
 
     protected final static UserCredentials USER_CREDS = DummyPrincipal.DUMMY_CREDENTIALS;
-    protected static final Principal PRINCIPAL_ADMIN = new DummyPrincipal("admin");
+    protected static final DummyPrincipal PRINCIPAL_ADMIN = DummyPrincipal.DUMMY_ADMIN_PRINCIPAL;
     @Autowired
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
+    @Autowired
+    private UserDao userDao;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -40,6 +46,7 @@ public class ComponentRegistryDbImplTest {
 	createTableComponentDescription(jdbcTemplate);
 	createTableProfileDescription(jdbcTemplate);
 	createTableXmlContent(jdbcTemplate);
+	createTableRegistryUser(jdbcTemplate);
     }
 
     @Test
@@ -119,39 +126,89 @@ public class ComponentRegistryDbImplTest {
     }
 
     @Test
-    public void testDeleteProfile() throws Exception {
+    public void testDeletePublicProfile() throws Exception {
 	ComponentRegistry register = getComponentRegistryForUser(null);
-	ProfileDescription description = ProfileDescription.createNewDescription();
-	description.setName("Aap");
-	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
-	description.setDescription("MyDescription");
-	CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
+	ProfileDescription description = createProfile(register);
 
-	register.register(description, testProfile);
-
-	assertEquals(1, register.getProfileDescriptions().size());
-	assertNotNull(register.getMDProfile(description.getId()));
-
-	try {
-	    register.deleteMDProfile(description.getId(), new DummyPrincipal("Fake User"));
-	    fail("Should have thrown exception");
-	} catch (UserUnauthorizedException e) {
-	}
-	register.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"), false);
-
-	assertEquals(1, register.getProfileDescriptions().size());
-	assertNotNull(register.getMDProfile(description.getId()));
-
-	register.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal());
+	// Delete as admin
+	register.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
 
 	assertEquals(0, register.getProfileDescriptions().size());
 	assertNull(register.getMDProfile(description.getId()));
     }
 
     @Test
-    public void testDeleteComponent() throws Exception {
+    public void testDeleteUserProfile() throws Exception {
+	User user = createUser();
+	Number userId = userDao.insertUser(user);
+	ComponentRegistry registry = getComponentRegistryForUser(userId);
+	ProfileDescription description = createProfile(registry);
+	// Delete as user
+	registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal());
+	assertEquals(0, registry.getComponentDescriptions().size());
+	assertNull(registry.getMDProfile(description.getId()));
+	// Delete as admin
+	description = createProfile(registry);
+
+	registry.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
+	assertEquals(0, registry.getProfileDescriptions().size());
+	assertNull(registry.getMDProfile(description.getId()));
+    }
+
+    private ProfileDescription createProfile(ComponentRegistry register) throws IOException, JAXBException, DeleteFailedException {
+	ProfileDescription description = ProfileDescription.createNewDescription();
+	description.setName("Aap");
+	description.setCreatorName(USER_CREDS.getDisplayName());
+	description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+	description.setDescription("MyDescription");
+
+	CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
+	register.register(description, testProfile);
+
+	assertEquals(1, register.getProfileDescriptions().size());
+	assertNotNull(register.getMDProfile(description.getId()));
+	// Non authorized user should never be able to delete
+	try {
+	    register.deleteMDProfile(description.getId(), new DummyPrincipal("Fake User"));
+	    fail("Should have thrown exception");
+	} catch (UserUnauthorizedException e) {
+	}
+	
+	assertEquals(1, register.getProfileDescriptions().size());
+	assertNotNull(register.getMDProfile(description.getId()));
+	return description;
+    }
+
+    @Test
+    public void testDeletePublicComponent() throws Exception {
 	ComponentRegistry registry = getComponentRegistryForUser(null);
+	ComponentDescription description = createComponent(registry);
+	// Delete as admin
+	registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
+	assertEquals(0, registry.getComponentDescriptions().size());
+	assertNull(registry.getMDProfile(description.getId()));
+    }
+
+    @Test
+    public void testDeleteUserComponent() throws Exception {
+	User user = createUser();
+	Number userId = userDao.insertUser(user);
+	ComponentRegistry registry = getComponentRegistryForUser(userId);
+	ComponentDescription description = createComponent(registry);
+	// Delete as user
+	registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
+	assertEquals(0, registry.getComponentDescriptions().size());
+	assertNull(registry.getMDProfile(description.getId()));
+
+	// Delete as admin
+	description = createComponent(registry);
+
+	registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
+	assertEquals(0, registry.getComponentDescriptions().size());
+	assertNull(registry.getMDProfile(description.getId()));
+    }
+
+    private ComponentDescription createComponent(ComponentRegistry registry) throws IOException, DeleteFailedException, JAXBException {
 	ComponentDescription description = ComponentDescription.
 		createNewDescription();
 	description.setName("Aap");
@@ -161,19 +218,17 @@ public class ComponentRegistryDbImplTest {
 	CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
 	registry.register(description, testComp);
+
+	// Non authorized user should never be able to delete
 	try {
 	    registry.deleteMDComponent(description.getId(), new DummyPrincipal("Fake User"), false);
 	    fail("Should have thrown exception");
 	} catch (UserUnauthorizedException e) {
 	}
-
+	
 	assertEquals(1, registry.getComponentDescriptions().size());
 	assertNotNull(registry.getMDComponent(description.getId()));
-
-	registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
-
-	assertEquals(0, registry.getComponentDescriptions().size());
-	assertNull(registry.getMDProfile(description.getId()));
+	return description;
     }
 
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
@@ -181,5 +236,12 @@ public class ComponentRegistryDbImplTest {
 		getNewComponentRegistry();
 	componentRegistry.setUserId(userId);
 	return componentRegistry;
+    }
+
+    private User createUser() {
+	User user = new User();
+	user.setName(USER_CREDS.getDisplayName());
+	user.setPrincipalName(USER_CREDS.getPrincipalName());
+	return user;
     }
 }
