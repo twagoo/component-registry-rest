@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
@@ -60,10 +61,15 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public List<ProfileDescription> getProfileDescriptions() {
-	if (isPublic()) {
-	    return profileDescriptionDao.getPublicProfileDescriptions();
-	} else {
-	    return profileDescriptionDao.getUserspaceDescriptions(getUserId());
+	try {
+	    if (isPublic()) {
+		return profileDescriptionDao.getPublicProfileDescriptions();
+	    } else {
+		return profileDescriptionDao.getUserspaceDescriptions(getUserId());
+	    }
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to get profile descriptions", ex);
+	    throw ex;
 	}
     }
 
@@ -74,10 +80,15 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public List<ComponentDescription> getComponentDescriptions() {
-	if (isPublic()) {
-	    return componentDescriptionDao.getPublicComponentDescriptions();
-	} else {
-	    return componentDescriptionDao.getUserspaceDescriptions(getUserId());
+	try {
+	    if (isPublic()) {
+		return componentDescriptionDao.getPublicComponentDescriptions();
+	    } else {
+		return componentDescriptionDao.getUserspaceDescriptions(getUserId());
+	    }
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to get component descriptions", ex);
+	    throw ex;
 	}
     }
 
@@ -127,6 +138,8 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	    LOG.error(null, ex);
 	} catch (UnsupportedEncodingException ex) {
 	    LOG.error(null, ex);
+	} catch (DataAccessException ex) {
+	    LOG.error("Database error while registering component", ex);
 	}
 	return -1;
     }

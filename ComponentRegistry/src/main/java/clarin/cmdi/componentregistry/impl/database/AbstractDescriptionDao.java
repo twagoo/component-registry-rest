@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.HashMap;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 
 /**
@@ -39,10 +40,10 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @param cmdId Profile or component Id (not primary key)
      * @return String value of XML content for profile or component
      */
-    public String getContent(String cmdId) {
+    public String getContent(String cmdId) throws DataAccessException {
 	String select = "SELECT content FROM " + TABLE_XML_CONTENT
 		+ " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "." + COLUMN_ID + " = " + getTableName() + ".content_id"
-		+ " WHERE is_deleted = false AND " + getTableName() + "." + getCMDIdColumn() + " = :id";
+		+ " WHERE is_deleted = false AND " + getTableName() + "." + getCMDIdColumn() + " = ?";
 
 
 	List<String> result = getSimpleJdbcTemplate().query(select,
@@ -59,7 +60,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @param content Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-    public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId) {
+    public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId) throws DataAccessException {
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
 		withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
 		COLUMN_ID);
@@ -71,7 +72,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		usingGeneratedKeyColumns(COLUMN_ID);
 	Map<String, Object> params = new HashMap<String, Object>();
 	params.put("content_id", contentId);
-	params.put("userId", userId);
+	params.put("user_id", userId);
 	params.put("is_public", isPublic);
 	params.put("is_deleted", Boolean.FALSE);
 	params.put(getCMDIdColumn(), description.getId());
@@ -85,8 +86,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @param id Description key
      * @return The description, if it exists; null otherwise
      */
-    public T getById(Number id) {
-	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND id = :id"), id);
+    public T getById(Number id) throws DataAccessException {
+	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND id = ?"), id);
     }
 
     /**
@@ -94,27 +95,25 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @param id Full component id
      * @return The description, if it exists; null otherwise
      */
-    public T getByCmdId(String id) {
-	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = :id"), id);
+    public T getByCmdId(String id) throws DataAccessException {
+	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?"), id);
     }
 
     /**
      *
      * @return All descriptions in the public space
      */
-    public List<T> getPublicDescriptions() {
-	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = TRUE"));
+    public List<T> getPublicDescriptions() throws DataAccessException {
+	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = true"));
     }
 
     /**
      *
      * @return All the user's descriptions not in the public space
      */
-    public List<T> getUserspaceDescriptions(Number userId) {
+    public List<T> getUserspaceDescriptions(Number userId) throws DataAccessException {
 	String select = getSelectStatement().
-		append(" JOIN " + TABLE_REGISTRY_USER).
-		append("     ON user_id = " + TABLE_REGISTRY_USER + ".id").
-		append(" WHERE is_deleted = false AND is_public = FALSE and " + TABLE_REGISTRY_USER + "." + COLUMN_ID + " = :userId").
+		append(" WHERE is_deleted = false AND is_public = false AND user_id = ?").
 		toString();
 	return getList(select, userId);
     }
@@ -123,25 +122,20 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *
      * @param Full component id
      */
-    public void setDeleted(String id) {
-	String update = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + getCMDIdColumn() + " = :id";
-	getSimpleJdbcTemplate().update(update, Collections.singletonMap("id", id));
+    public void setDeleted(String id) throws DataAccessException {
+	String update = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + getCMDIdColumn() + " = ?";
+	getSimpleJdbcTemplate().update(update, id);
     }
 
     public void setPublished(String id, boolean published) {
-	final String update = "UPDATE " + getTableName() + " SET is_published = :published WHERE " + getCMDIdColumn() + " = :id";
-	final Map<String, Object> args = new HashMap<String, Object>();
-	args.put("id", id);
-	args.put("published", published);
-
-	getSimpleJdbcTemplate().update(update, Collections.singletonMap("id", id));
+	final String update = "UPDATE " + getTableName() + " SET is_published = ? WHERE " + getCMDIdColumn() + " = ?";
+	getSimpleJdbcTemplate().update(update, published, id);
     }
-    
+
     /*
      * DAO HELPER METHODS
      */
-
-    private StringBuilder getSelectStatement(String... where) {
+    private StringBuilder getSelectStatement(String... where) throws DataAccessException {
 	StringBuilder sb = new StringBuilder();
 	sb.append("SELECT ").append(getDescriptionColumnList()).
 		append(" FROM ").append(getTableName());
@@ -158,17 +152,20 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *
      * @return List of all description columns to be used in SELECT queries
      */
-    private String getDescriptionColumnList() {
-	return "name, description, " + getCMDIdColumn();
+    private StringBuilder getDescriptionColumnList() {
+	StringBuilder sb = new StringBuilder();
+	sb.append("name,description,");
+	sb.append(getCMDIdColumn());
+	return sb;
     }
 
     /**
      * @return the rowMapper
      */
+    @Override
     protected ParameterizedRowMapper<T> getRowMapper() {
 	return rowMapper;
     }
-    
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
