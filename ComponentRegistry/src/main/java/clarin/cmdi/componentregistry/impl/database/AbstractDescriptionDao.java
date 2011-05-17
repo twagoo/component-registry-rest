@@ -104,7 +104,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	    StringBuilder updateContent = new StringBuilder();
 	    updateContent.append("UPDATE " + TABLE_XML_CONTENT + " SET content = ? WHERE " + COLUMN_ID + " = ");
 	    updateContent.append("(SELECT content_id FROM ").append(getTableName()).
-		    append("WHERE " + COLUMN_ID + "= ?");
+		    append(" WHERE " + COLUMN_ID + "= ?)");
 
 	    getSimpleJdbcTemplate().update(updateContent.toString(),
 		    content, id);

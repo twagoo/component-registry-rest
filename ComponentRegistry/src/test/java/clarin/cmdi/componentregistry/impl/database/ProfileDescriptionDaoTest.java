@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +18,19 @@ public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
 
     @Before
     public void init() {
-        resetDatabase(jdbcTemplate);
-        createTableProfileDescription(jdbcTemplate);
-        createTableXmlContent(jdbcTemplate);
-        createTableRegistryUser(jdbcTemplate);
+	resetDatabase(jdbcTemplate);
+	createTableProfileDescription(jdbcTemplate);
+	createTableXmlContent(jdbcTemplate);
+	createTableRegistryUser(jdbcTemplate);
     }
 
     @Override
     protected AbstractDescriptionDao getDao() {
-        return profileDescriptionDao;
+	return profileDescriptionDao;
+    }
+
+    @Override
+    protected AbstractDescription createNewDescription() {
+	return ProfileDescription.createNewDescription();
     }
 }

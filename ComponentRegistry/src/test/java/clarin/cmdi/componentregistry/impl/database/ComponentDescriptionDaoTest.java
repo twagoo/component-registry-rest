@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
 
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,5 +27,10 @@ public class ComponentDescriptionDaoTest extends AbstractDescriptionDaoTest {
     @Override
     protected AbstractDescriptionDao getDao() {
         return componentDescriptionDao;
+    }
+
+    @Override
+    protected AbstractDescription createNewDescription() {
+	return ComponentDescription.createNewDescription();
     }
 }

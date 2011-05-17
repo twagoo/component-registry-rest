@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import java.util.List;
 import org.junit.runner.RunWith;
@@ -35,15 +34,18 @@ public abstract class AbstractDescriptionDaoTest {
 
     @Test
     public void testInsertComponent() throws Exception {
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
+	AbstractDescription description = createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
 
 	String testComponent = RegistryTestHelper.getComponentTestContentString();
 	Number newId = getDao().insertDescription(description, testComponent, true, null);
 	assertNotNull(newId);
-	assertNotNull(getDao().getById(newId));
+	AbstractDescription descr = getDao().getById(newId);
+	assertNotNull(descr);
+	assertEquals("Aap", descr.getName());
+	assertEquals("MyDescription", descr.getDescription());
+	assertEquals(testComponent, getDao().getContent(description.getId()));
     }
 
     @Test
@@ -61,8 +63,7 @@ public abstract class AbstractDescriptionDaoTest {
 
     @Test
     public void testDeleteDescription() throws Exception {
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
+	AbstractDescription description = createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
 	String testComponent = RegistryTestHelper.getComponentTestContentString();
@@ -76,4 +77,48 @@ public abstract class AbstractDescriptionDaoTest {
 	getDao().setDeleted(dbId);
 	assertEquals(count, getDao().getPublicDescriptions().size());
     }
+
+    @Test
+    public void testUpdateDescription() {
+	AbstractDescription description = createNewDescription();
+	description.setName("Aap");
+	description.setDescription("MyDescription");
+
+	String testComponent = RegistryTestHelper.getComponentTestContentString();
+	Number newId = getDao().insertDescription(description, testComponent, true, null);
+
+	// Change values
+	description.setName("Noot");
+	description.setDescription("AnotherDescription");
+	// Update in db
+	getDao().updateDescription(newId, description, null);
+	description = getDao().getById(newId);
+	// Test if new values are there
+	assertNotNull(description);
+	assertEquals("Noot", description.getName());
+	assertEquals("AnotherDescription", description.getDescription());
+
+	// Update content
+	String testContent2 = "<test>Test content</test>";
+	getDao().updateDescription(newId, null, testContent2);
+	// Test if new content is there
+	assertEquals(testContent2, getDao().getContent(description.getId()));
+
+	// Update both
+	description.setName("Mies");
+	description.setDescription("YetAnotherDescription");
+	String testContent3 = "<test>More test content</test>";
+
+	// Update in db
+	getDao().updateDescription(newId, description, testContent3);
+	description = getDao().getById(newId);
+	// Test if new values are there
+	assertNotNull(description);
+	assertEquals("Mies", description.getName());
+	assertEquals("YetAnotherDescription", description.getDescription());
+	// Test if new content is there
+	assertEquals(testContent3, getDao().getContent(description.getId()));
+    }
+
+    protected abstract AbstractDescription createNewDescription();
 }
