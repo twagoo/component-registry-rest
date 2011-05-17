@@ -46,73 +46,14 @@ CREATE TABLE component_description (
     domain_name character varying
 );
 
-
---
--- Name: component_description_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE component_description_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
-
-
---
--- Name: component_description_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE component_description_id_seq OWNED BY component_description.id;
-
-
---
--- Name: cr_comments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE cr_comments_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
-
-
---
--- Name: cr_comments_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE cr_comments_id_seq OWNED BY comments.id;
-
-
 --
 -- Name: xml_content; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE xml_content (
     id SERIAL NOT NULL,
-    content xml
+    content text NOT NULL
 );
-
-
---
--- Name: cr_content_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE cr_content_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
-
-
---
--- Name: cr_content_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE cr_content_id_seq OWNED BY xml_content.id;
-
 
 --
 -- Name: profile_description; Type: TABLE; Schema: public; Owner: -; Tablespace: 
@@ -132,26 +73,6 @@ CREATE TABLE profile_description (
     domain_name character varying
 );
 
-
---
--- Name: profile_description_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE profile_description_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
-
-
---
--- Name: profile_description_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE profile_description_id_seq OWNED BY profile_description.id;
-
-
 --
 -- Name: registry_user; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
@@ -162,84 +83,12 @@ CREATE TABLE registry_user (
     principal_name character varying
 );
 
-
---
--- Name: user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE user_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
-
-
---
--- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE user_id_seq OWNED BY registry_user.id;
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE comments ALTER COLUMN id SET DEFAULT nextval('cr_comments_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE component_description ALTER COLUMN id SET DEFAULT nextval('component_description_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE profile_description ALTER COLUMN id SET DEFAULT nextval('profile_description_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE registry_user ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE xml_content ALTER COLUMN id SET DEFAULT nextval('cr_content_id_seq'::regclass);
-
-
 --
 -- Name: component_description_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY component_description
     ADD CONSTRAINT component_description_pkey PRIMARY KEY (id);
-
-
---
--- Name: cr_comments_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY comments
-    ADD CONSTRAINT cr_comments_pkey PRIMARY KEY (id);
-
-
---
--- Name: cr_xml_content_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY xml_content
-    ADD CONSTRAINT cr_xml_content_pkey PRIMARY KEY (id);
-
 
 --
 -- Name: profile_description_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
@@ -361,3 +210,4 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
+grant all on comments, component_description, profile_description, registry_user, xml_content, comments_id_seq, component_description_id_seq, profile_description_id_seq, registry_user_id_seq, xml_content_id_seq  to component_registry;
