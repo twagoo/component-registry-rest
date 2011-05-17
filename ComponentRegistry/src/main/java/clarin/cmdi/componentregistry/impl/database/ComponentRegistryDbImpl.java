@@ -75,7 +75,12 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public ProfileDescription getProfileDescription(String id) {
-	return profileDescriptionDao.getByCmdId(id);
+	try {
+	    return profileDescriptionDao.getByCmdId(id);
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to get profile description", ex);
+	    throw ex;
+	}
     }
 
     @Override
@@ -94,17 +99,32 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public ComponentDescription getComponentDescription(String id) {
-	return componentDescriptionDao.getByCmdId(id);
+	try {
+	    return componentDescriptionDao.getByCmdId(id);
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to get component description", ex);
+	    throw ex;
+	}
     }
 
     @Override
     public CMDComponentSpec getMDProfile(String id) {
-	return getMDComponent(id, profileDescriptionDao);
+	try {
+	    return getMDComponent(id, profileDescriptionDao);
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to get profile", ex);
+	    throw ex;
+	}
     }
 
     @Override
     public CMDComponentSpec getMDComponent(String id) {
-	return getMDComponent(id, componentDescriptionDao);
+	try {
+	    return getMDComponent(id, componentDescriptionDao);
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to get component", ex);
+	    throw ex;
+	}
     }
 
     private CMDComponentSpec getMDComponent(String id, AbstractDescriptionDao dao) {
@@ -176,12 +196,18 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException {
-	ProfileDescription desc = getProfileDescription(profileId);
-	if (desc != null) {
-	    checkAuthorisation(desc, principal);
-	    checkAge(desc, principal);
-	    profileDescriptionDao.setDeleted(profileId);
+	try {
+	    ProfileDescription desc = getProfileDescription(profileId);
+	    if (desc != null) {
+		checkAuthorisation(desc, principal);
+		checkAge(desc, principal);
+		profileDescriptionDao.setDeleted(profileId);
+	    }
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to delete profile", ex);
+	    throw ex;
 	}
+
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
@@ -216,16 +242,21 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException {
-	ComponentDescription desc = componentDescriptionDao.getByCmdId(componentId);
-	if (desc != null) {
-	    checkAuthorisation(desc, principal);
-	    checkAge(desc, principal);
+	try {
+	    ComponentDescription desc = componentDescriptionDao.getByCmdId(componentId);
+	    if (desc != null) {
+		checkAuthorisation(desc, principal);
+		checkAge(desc, principal);
 
-	    // TODO : check still used!
+		// TODO : check still used!
 //            if (!forceDelete) {
 //                checkStillUsed(componentId);
 //            }
-	    componentDescriptionDao.setDeleted(componentId);
+		componentDescriptionDao.setDeleted(componentId);
+	    }
+	} catch (DataAccessException ex) {
+	    LOG.error("Database access error while trying to delete component", ex);
+	    throw ex;
 	}
     }
 
