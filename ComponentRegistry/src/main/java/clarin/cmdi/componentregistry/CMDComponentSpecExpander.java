@@ -27,11 +27,19 @@ public abstract class CMDComponentSpecExpander {
 	    if (componentId != null) {
 		// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 		CMDComponentSpec spec = getUncachedComponent(componentId);
-		CMDComponentType nested = getComponentTypeOfAComponent(spec);
-		expandNestedComponent(nested.getCMDComponent());
-		overwriteAttributes(cmdComponentType, nested);
-		expanded.add(nested);
+		if (spec != null) {
+		    CMDComponentType nested = getComponentTypeOfAComponent(spec);
+		    expandNestedComponent(nested.getCMDComponent());
+		    overwriteAttributes(cmdComponentType, nested);
+		    expanded.add(nested);
+		} else {
+		    // Spec could not be resolved
+		    LOG.warn("Could not resolve referenced component with id " + componentId);
+		    // Add spec itself, without futher expanding
+		    expanded.add(cmdComponentType);
+		}
 	    } else {
+		// No id = embedded component
 		expandNestedComponent(cmdComponentType.getCMDComponent());
 		expanded.add(cmdComponentType);//no attributes overwritten
 	    }
