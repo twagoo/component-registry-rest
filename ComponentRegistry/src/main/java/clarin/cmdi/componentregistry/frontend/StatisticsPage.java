@@ -6,7 +6,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpanderImpl;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
 import clarin.cmdi.componentregistry.components.CMDElementType;
 import java.io.IOException;
@@ -60,7 +60,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         repeatingview.add(item);
         item.add(new Label("ID", pd.getId()));
         item.add(new Label("profname", pd.getName()));
-        CMDComponentSpec profile = CMDComponentSpecExpander.expandProfile(pd.getId(), (ComponentRegistryImpl) registry);
+        CMDComponentSpec profile = CMDComponentSpecExpanderImpl.expandProfile(pd.getId(), (ComponentRegistryImpl) registry);
         Statistics stats = new Statistics();
         componentCounter(profile.getCMDComponent(), stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));
@@ -73,7 +73,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         repeatingview.add(item);
         item.add(new Label("ID", cd.getId()));
         item.add(new Label("compname", cd.getName()));
-        CMDComponentSpec compspec = CMDComponentSpecExpander.expandComponent(cd.getId(), (ComponentRegistryImpl) registry);
+        CMDComponentSpec compspec = CMDComponentSpecExpanderImpl.expandComponent(cd.getId(), (ComponentRegistryImpl) registry);
         Statistics stats = new Statistics();
         componentCounter(compspec.getCMDComponent(), stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));

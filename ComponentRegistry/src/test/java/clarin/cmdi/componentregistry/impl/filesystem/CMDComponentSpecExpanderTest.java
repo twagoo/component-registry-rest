@@ -57,7 +57,7 @@ public class CMDComponentSpecExpanderTest extends ComponentRegistryTestCase{
         content += "</CMD_ComponentSpec>\n";
         ProfileDescription profileDesc3 = RegistryTestHelper.addProfile(registry, "profile3", content);
 
-        CMDComponentSpec expandedProfile = CMDComponentSpecExpander.expandProfile(profileDesc3.getId(), registry);
+        CMDComponentSpec expandedProfile = CMDComponentSpecExpanderImpl.expandProfile(profileDesc3.getId(), registry);
 
         //printToFile(expandedProfile);
 
@@ -123,7 +123,7 @@ public class CMDComponentSpecExpanderTest extends ComponentRegistryTestCase{
         //register in userRegistry registering in public registry is not possible through the services if one component is not public
         ProfileDescription profileDesc3 = RegistryTestHelper.addProfile(userRegistry, "profile3", content);
 
-        CMDComponentSpec expandedProfile = CMDComponentSpecExpander.expandProfile(profileDesc3.getId(), userRegistry);
+        CMDComponentSpec expandedProfile = CMDComponentSpecExpanderImpl.expandProfile(profileDesc3.getId(), userRegistry);
 
         List<CMDComponentType> cmdComponents = expandedProfile.getCMDComponent();
         assertEquals(1, cmdComponents.size());
@@ -171,7 +171,7 @@ public class CMDComponentSpecExpanderTest extends ComponentRegistryTestCase{
         content += "</CMD_ComponentSpec>\n";
         ProfileDescription profileDesc3 = RegistryTestHelper.addProfile(registry, "profile3", content);
 
-        CMDComponentSpec expandedProfile = CMDComponentSpecExpander.expandProfile(profileDesc3.getId(), registry);
+        CMDComponentSpec expandedProfile = CMDComponentSpecExpanderImpl.expandProfile(profileDesc3.getId(), registry);
 
         List<CMDComponentType> cmdComponents = expandedProfile.getCMDComponent();
         assertEquals(1, cmdComponents.size());

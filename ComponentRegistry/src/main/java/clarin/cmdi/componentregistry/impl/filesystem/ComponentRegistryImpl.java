@@ -165,13 +165,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     @Override
     public void getMDProfileAsXml(String profileId, OutputStream output) {
-        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandProfile(profileId, this);
         writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
-        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandProfile(profileId, this);
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandProfile(profileId, this);
         writeXsd(expandedSpec, outputStream);
     }
 
@@ -207,13 +207,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
 
     @Override
     public void getMDComponentAsXml(String componentId, OutputStream output) {
-        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandComponent(componentId, this);
         writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
-        CMDComponentSpec expandedSpec = CMDComponentSpecExpander.expandComponent(componentId, this);
+        CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandComponent(componentId, this);
         writeXsd(expandedSpec, outputStream);
     }
 
