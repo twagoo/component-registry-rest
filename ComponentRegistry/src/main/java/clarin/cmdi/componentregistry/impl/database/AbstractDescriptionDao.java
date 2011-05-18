@@ -168,7 +168,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     public void setPublished(Number id, boolean published) {
-	String update = "UPDATE " + getTableName() + " SET is_published = ? WHERE " + COLUMN_ID + " = ?";
+	String update = "UPDATE " + getTableName() + " SET is_public = ? WHERE " + COLUMN_ID + " = ?";
 	getSimpleJdbcTemplate().update(update, published, id);
     }
 

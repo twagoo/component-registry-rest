@@ -4,8 +4,13 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,6 +18,8 @@ import org.apache.commons.lang.StringUtils;
  */
 public final class ComponentRegistryUtils {
     private ComponentRegistryUtils(){}
+
+    private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryUtils.class);
 
     public static String stripRegistryId(String id) {
         return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
@@ -38,5 +45,19 @@ public final class ComponentRegistryUtils {
             }
         }
         return false;
+    }
+
+    public static void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
+        MDMarshaller.generateXsd(expandedSpec, outputStream);
+    }
+
+    public static void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
+        try {
+            MDMarshaller.marshal(spec, outputStream);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Error in encoding: ", e);
+        } catch (JAXBException e) {
+            LOG.error("Cannot marshall spec: " + spec, e);
+        }
     }
 }

@@ -166,27 +166,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     @Override
     public void getMDProfileAsXml(String profileId, OutputStream output) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandProfile(profileId, this);
-        writeXml(expandedSpec, output);
+        ComponentRegistryUtils.writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandProfile(profileId, this);
-        writeXsd(expandedSpec, outputStream);
-    }
-
-    private void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
-        MDMarshaller.generateXsd(expandedSpec, outputStream);
-    }
-
-    private void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
-        try {
-            MDMarshaller.marshal(spec, outputStream);
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("Error in encoding: ", e);
-        } catch (JAXBException e) {
-            LOG.error("Cannot marshall spec: " + spec, e);
-        }
+        ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
     }
 
     private File getProfileFile(String profileId) {
@@ -208,13 +194,13 @@ public class ComponentRegistryImpl implements ComponentRegistry {
     @Override
     public void getMDComponentAsXml(String componentId, OutputStream output) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandComponent(componentId, this);
-        writeXml(expandedSpec, output);
+        ComponentRegistryUtils.writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandComponent(componentId, this);
-        writeXsd(expandedSpec, outputStream);
+        ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
     }
 
     private File getComponentFile(String componentId) {

@@ -190,22 +190,30 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 
     @Override
     public void getMDProfileAsXml(String profileId, OutputStream output) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
+		expandProfile(profileId, this);
+	ComponentRegistryUtils.writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
+		expandProfile(profileId, this);
+	ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
     }
 
     @Override
     public void getMDComponentAsXml(String componentId, OutputStream output) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
+		expandComponent(componentId, this);
+	ComponentRegistryUtils.writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
-	throw new UnsupportedOperationException("Not supported yet.");
+	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
+		expandComponent(componentId, this);
+	ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
     }
 
     @Override
