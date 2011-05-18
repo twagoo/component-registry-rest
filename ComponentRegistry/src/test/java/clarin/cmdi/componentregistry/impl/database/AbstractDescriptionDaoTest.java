@@ -2,7 +2,11 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
@@ -34,17 +38,28 @@ public abstract class AbstractDescriptionDaoTest {
 
     @Test
     public void testInsertComponent() throws Exception {
+	String regDate = AbstractDescription.createNewDate();
+
 	AbstractDescription description = createNewDescription();
-	description.setName("Aap");
+	description.setName("MyComponent");
 	description.setDescription("MyDescription");
+	description.setCreatorName("Aap");
+	description.setGroupName("MyGroup");
+	description.setDomainName("MyDomain");
+
+	description.setRegistrationDate(regDate);
 
 	String testComponent = RegistryTestHelper.getComponentTestContentString();
 	Number newId = getDao().insertDescription(description, testComponent, true, null);
 	assertNotNull(newId);
 	AbstractDescription descr = getDao().getById(newId);
 	assertNotNull(descr);
-	assertEquals("Aap", descr.getName());
+	assertEquals("MyComponent", descr.getName());
 	assertEquals("MyDescription", descr.getDescription());
+	assertEquals("Aap", descr.getCreatorName());
+	assertEquals("MyGroup", descr.getGroupName());
+	assertEquals("MyDomain", descr.getDomainName());
+	assertEquals(AbstractDescription.getDate(regDate), AbstractDescription.getDate(descr.getRegistrationDate()));
 	assertEquals(testComponent, getDao().getContent(description.getId()));
     }
 

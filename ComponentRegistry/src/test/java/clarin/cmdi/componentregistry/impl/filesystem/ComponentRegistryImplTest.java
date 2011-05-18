@@ -233,7 +233,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         String xsd = output.toString();
         assertTrue(xsd.endsWith("</xs:schema>"));
 
-        assertTrue(hasComponent(xsd, "Actor", "0", "unbounded"));
+        assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "unbounded"));
     }
 
     @Test
@@ -269,7 +269,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         String xsd = output.toString();
 
         assertTrue(xsd.endsWith("</xs:schema>"));
-        assertTrue(hasComponent(xsd, "Actor", "0", "5"));
+        assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "5"));
     }
 
     @Test
@@ -320,10 +320,10 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         assertTrue(xsd.endsWith("</xs:schema>"));
         // System.out.println(xsd);
 
-        assertTrue(hasComponent(xsd, "ZZZ\u00e9", "1", "unbounded"));
-        assertTrue(hasComponent(xsd, "YYY", "0", "2"));
-        assertTrue(hasComponent(xsd, "XXX", "1", "10"));
-        assertTrue(hasComponent(xsd, "XXX", "0", "99"));
+        assertTrue(RegistryTestHelper.hasComponent(xsd, "ZZZ\u00e9", "1", "unbounded"));
+        assertTrue(RegistryTestHelper.hasComponent(xsd, "YYY", "0", "2"));
+        assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "1", "10"));
+        assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "0", "99"));
     }
 
     @Test
@@ -518,15 +518,5 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
         result = registry.getUsageInComponents(cd.getId());
         assertEquals(2, result.size());
-    }
-
-    /**
-     * Testing a big xsd string is a bit hard, so doing a best effort by checking the xs:element which represent the nested components used
-     * in a profile/component
-     */
-    private boolean hasComponent(String xsd, String name, String min, String max) {
-        Pattern pattern = Pattern.compile("<xs:element name=\"" + name + "\" minOccurs=\"" + min + "\" maxOccurs=\"" + max + "\">");
-        Matcher matcher = pattern.matcher(xsd);
-        return matcher.find() && !matcher.find(); //find only one
     }
 }

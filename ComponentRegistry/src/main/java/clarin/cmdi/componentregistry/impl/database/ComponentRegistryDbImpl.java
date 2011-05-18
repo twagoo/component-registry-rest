@@ -354,8 +354,7 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
 	if (isPublic() && !configuration.isAdminUser(principal)) {
 	    try {
-		Date regDate = AbstractDescription.getDate(desc.
-			getRegistrationDate());
+		Date regDate = AbstractDescription.getDate(desc.getRegistrationDate());
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
 		if (regDate.before(calendar.getTime())) { //More then month old

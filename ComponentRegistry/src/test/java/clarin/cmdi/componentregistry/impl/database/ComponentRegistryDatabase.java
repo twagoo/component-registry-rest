@@ -27,7 +27,8 @@ public final class ComponentRegistryDatabase {
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"
                 + "  creator_name character varying,"
-                + "  domain_name character varying);");
+                + "  domain_name character varying,"
+                + "  group_name character varying);");
     }
 
     public static void createTableProfileDescription(JdbcTemplate jdbcTemplate) {
@@ -42,7 +43,8 @@ public final class ComponentRegistryDatabase {
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"
                 + "  creator_name character varying,"
-                + "  domain_name character varying);");
+                + "  domain_name character varying,"
+                + "  group_name character varying);");
     }
 
     public static void createTableXmlContent(JdbcTemplate jdbcTemplate) {

@@ -16,6 +16,8 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Static helper methods to be used in tests
@@ -144,5 +146,17 @@ public final class RegistryTestHelper {
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {
         return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), MDMarshaller.getCMDComponentSchema());
+    }
+
+
+
+    /**
+     * Testing a big xsd string is a bit hard, so doing a best effort by checking the xs:element which represent the nested components used
+     * in a profile/component
+     */
+    public static boolean hasComponent(String xsd, String name, String min, String max) {
+        Pattern pattern = Pattern.compile("<xs:element name=\"" + name + "\" minOccurs=\"" + min + "\" maxOccurs=\"" + max + "\">");
+        Matcher matcher = pattern.matcher(xsd);
+        return matcher.find() && !matcher.find(); //find only one
     }
 }

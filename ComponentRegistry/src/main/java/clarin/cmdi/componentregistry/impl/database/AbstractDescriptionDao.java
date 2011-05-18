@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import java.text.ParseException;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import java.sql.SQLException;
@@ -11,6 +12,10 @@ import java.util.Map;
 import java.util.HashMap;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 
@@ -22,6 +27,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     private final static Logger LOG = LoggerFactory.getLogger(
 	    AbstractDescriptionDao.class);
+    private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 
     protected abstract String getTableName();
 
@@ -78,7 +84,28 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	params.put(getCMDIdColumn(), description.getId());
 	params.put("name", description.getName());
 	params.put("description", description.getDescription());
+	params.put("creator_name", description.getCreatorName());
+	params.put("group_name", description.getGroupName());
+	params.put("domain_name", description.getDomainName());
+	params.put("registration_date", extractTimestamp(description));
 	return insertDescription.executeAndReturnKey(params);
+    }
+
+    private Timestamp extractTimestamp(AbstractDescription description) {
+	if (description.getRegistrationDate() != null) {
+	    try {
+		Date date = AbstractDescription.getDate(description.
+			getRegistrationDate());
+		return new Timestamp(date.getTime());
+	    } catch (ParseException ex) {
+		LOG.warn("Could not convert registration date " + description.
+			getRegistrationDate() + " to date", ex);
+	    } catch (IllegalArgumentException ex) {
+		LOG.warn("Could not convert registration date " + description.
+			getRegistrationDate() + " to timestamp", ex);
+	    }
+	}
+	return null;
     }
 
     /**
@@ -135,7 +162,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return Database id for description record
      */
     public Number getDbId(String cmdId) {
-	String query = "SELECT " + COLUMN_ID + " FROM " + getTableName() + " WHERE " + getCMDIdColumn() + " = ?";
+	// Check for is_deleted is important, because an id only has to be unique
+	// among non-deleted descriptions
+	String query = "SELECT " + COLUMN_ID + " FROM " + getTableName() + " WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?";
 	return getSimpleJdbcTemplate().queryForInt(query, cmdId);
     }
 
@@ -212,7 +241,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      */
     private StringBuilder getDescriptionColumnList() {
 	StringBuilder sb = new StringBuilder();
-	sb.append("name,description,");
+	sb.append("name,description,registration_date,creator_name,domain_name,group_name,");
 	sb.append(getCMDIdColumn());
 	return sb;
     }
@@ -229,11 +258,18 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 	    try {
+		Timestamp registrationDate = rs.getTimestamp("registration_date");
+
 		AbstractDescription newDescription = (AbstractDescription) _class.
 			newInstance();
 		newDescription.setName(rs.getString("name"));
 		newDescription.setDescription(rs.getString("description"));
 		newDescription.setId(rs.getString(getCMDIdColumn()));
+		newDescription.setRegistrationDate(registrationDate == null
+			? null : ISO_DATE_FORMAT.format(registrationDate));
+		newDescription.setCreatorName(rs.getString("creator_name"));
+		newDescription.setDomainName(rs.getString("domain_name"));
+		newDescription.setGroupName(rs.getString("group_name"));
 		return (T) newDescription;
 	    } catch (InstantiationException ex) {
 		LOG.error("Error in row mapping", ex);

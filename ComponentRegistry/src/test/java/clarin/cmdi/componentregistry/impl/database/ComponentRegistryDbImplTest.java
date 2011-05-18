@@ -11,9 +11,12 @@ import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatab
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.Principal;
+import java.io.OutputStream;
+import java.util.Calendar;
 import javax.xml.bind.JAXBException;
+import org.apache.commons.lang.time.DateFormatUtils;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -21,6 +24,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -173,7 +177,7 @@ public class ComponentRegistryDbImplTest {
 	    fail("Should have thrown exception");
 	} catch (UserUnauthorizedException e) {
 	}
-	
+
 	assertEquals(1, register.getProfileDescriptions().size());
 	assertNotNull(register.getMDProfile(description.getId()));
 	return description;
@@ -208,6 +212,89 @@ public class ComponentRegistryDbImplTest {
 	assertNull(registry.getMDProfile(description.getId()));
     }
 
+    @Test
+    public void testDoNotDeleteOldPublicComponent() throws Exception {
+	Number userId = userDao.insertUser(createUser());
+	ComponentRegistry registry = getComponentRegistryForUser(userId);
+
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
+	description.setName("Aap");
+	description.setCreatorName(USER_CREDS.getDisplayName());
+	description.setUserId(userId.toString());
+	description.setDescription("MyDescription");
+	Calendar calendar = Calendar.getInstance();
+	calendar.set(Calendar.YEAR, 1999);
+	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.
+		getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.
+		getPattern()));
+	CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
+
+	registry.register(description, testComp);
+	registry.publish(description, testComp, USER_CREDS.getPrincipal());
+
+	// Switch to public registry
+	registry = getComponentRegistryForUser(null);
+
+	try {
+	    registry.deleteMDComponent(description.getId(), USER_CREDS.
+		    getPrincipal(), false);
+	    fail("Should have thrown exception");
+	} catch (DeleteFailedException e) {
+	}
+	assertEquals(1, registry.getComponentDescriptions().size());
+	registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
+	assertEquals(0, registry.getComponentDescriptions().size());
+
+	//TODO: convert below to dbImpl
+	registry = getComponentRegistryForUser(userId); // ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
+	registry.register(description, testComp);
+	assertEquals(1, registry.getComponentDescriptions().size());
+	registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
+	assertEquals(0, registry.getComponentDescriptions().size());
+    }
+
+    @Test
+    public void testDoNotDeleteOldPublicProfile() throws Exception {
+	Number userId = userDao.insertUser(createUser());
+	ComponentRegistry registry = getComponentRegistryForUser(userId);
+
+	ProfileDescription description = ProfileDescription.createNewDescription();
+	description.setName("Aap");
+	description.setCreatorName(USER_CREDS.getDisplayName());
+	description.setUserId(userId.toString());
+	description.setDescription("MyDescription");
+	Calendar calendar = Calendar.getInstance();
+	calendar.set(Calendar.YEAR, 1999);
+	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.
+		getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.
+		getPattern()));
+	CMDComponentSpec testComp = RegistryTestHelper.getTestProfile();
+
+	registry.register(description, testComp);
+	registry.publish(description, testComp, USER_CREDS.getPrincipal());
+
+	// Switch to public registry
+	registry = getComponentRegistryForUser(null);
+	try {
+	    registry.deleteMDProfile(description.getId(), USER_CREDS.
+		    getPrincipal());
+	    fail("Should have thrown exception");
+	} catch (DeleteFailedException e) {
+	}
+	assertEquals(1, registry.getProfileDescriptions().size());
+	registry.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
+	assertEquals(0, registry.getProfileDescriptions().size());
+
+	//TODO: convert below to dbImpl
+//        registry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
+	registry = getComponentRegistryForUser(userId);
+	registry.register(description, testComp);
+	assertEquals(1, registry.getProfileDescriptions().size());
+	registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
+	assertEquals(0, registry.getProfileDescriptions().size());
+    }
+
     private ComponentDescription createComponent(ComponentRegistry registry) throws IOException, DeleteFailedException, JAXBException {
 	ComponentDescription description = ComponentDescription.
 		createNewDescription();
@@ -225,7 +312,7 @@ public class ComponentRegistryDbImplTest {
 	    fail("Should have thrown exception");
 	} catch (UserUnauthorizedException e) {
 	}
-	
+
 	assertEquals(1, registry.getComponentDescriptions().size());
 	assertNotNull(registry.getMDComponent(description.getId()));
 	return description;
@@ -243,5 +330,122 @@ public class ComponentRegistryDbImplTest {
 	user.setName(USER_CREDS.getDisplayName());
 	user.setPrincipalName(USER_CREDS.getPrincipalName());
 	return user;
+    }
+
+    @Test
+    public void testGetProfileAsXsd() throws Exception {
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	String profileContent = "";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	profileContent += "    <Header />\n";
+	profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+	profileContent += "        <CMD_Element name=\"Age\">\n";
+	profileContent += "            <ValueScheme>\n";
+	profileContent += "                <pattern>[0-9][0-9]</pattern>\n";
+	profileContent += "            </ValueScheme>\n";
+	profileContent += "        </CMD_Element>\n";
+	profileContent += "    </CMD_Component>\n";
+	profileContent += "</CMD_ComponentSpec>\n";
+
+	String id = "profile1";
+	ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
+
+	OutputStream output = new ByteArrayOutputStream();
+	register.getMDProfileAsXsd(description.getId(), output);
+	String xsd = output.toString();
+	assertTrue(xsd.endsWith("</xs:schema>"));
+
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "unbounded"));
+    }
+
+    @Test
+    public void testGetNestedComponentAsXsd() throws Exception {
+	ComponentRegistry register = getComponentRegistryForUser(null);
+
+	String compId = "component1";
+	String compContent = "";
+	compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	compContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	compContent += "    <Header/>\n";
+	compContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	compContent += "    </CMD_Component>\n";
+	compContent += "</CMD_ComponentSpec>\n";
+
+	ComponentDescription compDesc = RegistryTestHelper.addComponent(register, compId, compContent);
+
+	String profileContent = "";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	profileContent += "    <Header />\n";
+	profileContent += "    <CMD_Component ComponentId=\"" + compDesc.getId()
+		+ "\" filename=\"component-test-file\" CardinalityMin=\"0\" CardinalityMax=\"5\">\n";
+	profileContent += "    </CMD_Component>\n";
+	profileContent += "</CMD_ComponentSpec>\n";
+
+	String id = "profile1";
+	ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
+
+	OutputStream output = new ByteArrayOutputStream();
+	register.getMDProfileAsXsd(description.getId(), output);
+	String xsd = output.toString();
+
+	assertTrue(xsd.endsWith("</xs:schema>"));
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "5"));
+    }
+
+    @Test
+    public void testGetNestedComponentAsXsdComplex() throws Exception {
+	ComponentRegistry register = getComponentRegistryForUser(null);
+
+	String compContent = "";
+	compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	compContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	compContent += "    <Header/>\n";
+	compContent += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	compContent += "    </CMD_Component>\n";
+	compContent += "</CMD_ComponentSpec>\n";
+	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(register, "component1", compContent);
+
+	compContent = "";
+	compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	compContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	compContent += "    <Header/>\n";
+	compContent += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+	compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	compContent += "        <CMD_Component ComponentId=\"" + compDesc1.getId() + "\" filename=\"component-test-file\">\n";
+	compContent += "        </CMD_Component>\n";
+	compContent += "    </CMD_Component>\n";
+	compContent += "</CMD_ComponentSpec>\n";
+	ComponentDescription compDesc2 = RegistryTestHelper.addComponent(register, "component2", compContent);
+
+	compContent = "";
+	compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	compContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	compContent += "    <Header/>\n";
+	compContent += "    <CMD_Component name=\"ZZZ\u00e9\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+	compContent += "        <CMD_Component ComponentId=\"" + compDesc2.getId()
+		+ "\" filename=\"component-test-file\" CardinalityMin=\"0\" CardinalityMax=\"2\">\n";
+	compContent += "        </CMD_Component>\n";
+	compContent += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
+		+ "\" filename=\"component-test-file\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
+	compContent += "        </CMD_Component>\n";
+	compContent += "    </CMD_Component>\n";
+	compContent += "</CMD_ComponentSpec>\n";
+	ComponentDescription compDesc3 = RegistryTestHelper.addComponent(register, "component3", compContent);
+
+	ByteArrayOutputStream output = new ByteArrayOutputStream();
+	register.getMDComponentAsXsd(compDesc3.getId(), output);
+	String xsd = output.toString("UTF-8");
+
+	assertTrue(xsd.endsWith("</xs:schema>"));
+	// System.out.println(xsd);
+
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "ZZZ\u00e9", "1", "unbounded"));
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "YYY", "0", "2"));
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "1", "10"));
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "0", "99"));
     }
 }
