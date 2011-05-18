@@ -82,7 +82,10 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 		if (configuration.isAdminUser(adminPrincipal)) {
 		    result = getComponentRegistryForUser(user.getId());
 		} else {
-		    throw new IllegalArgumentException("User is not admin user cannot load userspace.");
+		    LOG.info(adminPrincipal.getName() + " not found in list of " + configuration.
+			    getAdminUsersArray().length);
+		    throw new IllegalArgumentException("User "
+			    + adminPrincipal.getName() + " is not admin user cannot load userspace.");
 		}
 	    } else {
 		result = getPublicRegistry();

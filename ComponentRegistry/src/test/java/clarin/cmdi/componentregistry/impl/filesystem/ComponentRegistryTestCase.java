@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
+import java.util.Arrays;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,9 +52,9 @@ public abstract class ComponentRegistryTestCase {
         FileSystemConfiguration fsConfig = FileSystemConfiguration.getInstance();
         Configuration config = Configuration.getInstance();
         fsConfig.setRegistryRoot(registryRoot);
-        Set<String> adminUsers = new HashSet<String>();
         fsConfig.init();
-        adminUsers.add(PRINCIPAL_ADMIN.getName());
+        Set<String> adminUsers = new HashSet(Arrays.asList(config.getAdminUsersArray()));
+	adminUsers.add(PRINCIPAL_ADMIN.getName());
         config.setAdminUsers(adminUsers);
         ComponentRegistryFactoryImpl.getInstance().reset();
         ComponentRegistryImpl register = (ComponentRegistryImpl) ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();

@@ -78,17 +78,17 @@ public class ComponentRegistryFactoryTest {
         String userDir = instance.getOrCreateUserDir("aap", "Mr.Aap");
         String principalNameMD5 = DigestUtils.md5Hex("aap");
         assertEquals("user1", userDir);
-        Principal admin = new DummyPrincipal("noot");
+//        Principal admin = new DummyPrincipal("noot");
         try {
-            instance.getOtherUserComponentRegistry(admin, principalNameMD5);
+            instance.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_PRINCIPAL, principalNameMD5);
             fail("Should have failed because 'noot' is not an admin user");
         } catch (IllegalArgumentException e) {
         }
-        Configuration.getInstance().setAdminUsers(Collections.singleton("noot"));
-        ComponentRegistry reg = instance.getOtherUserComponentRegistry(admin, principalNameMD5);
+//        Configuration.getInstance().setAdminUsers(Collections.singleton("noot"));
+        ComponentRegistry reg = instance.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, principalNameMD5);
         assertNotNull(reg);
         assertSame(reg2, reg);
-        reg = instance.getOtherUserComponentRegistry(admin, null);
+        reg = instance.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, null);
         assertNotNull(reg);
         assertNotSame(reg2, reg);
         assertTrue(reg.isPublic());
