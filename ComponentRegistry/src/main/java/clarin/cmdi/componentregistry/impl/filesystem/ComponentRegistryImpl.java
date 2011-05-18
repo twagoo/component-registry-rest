@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
+import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryUtils;
 import clarin.cmdi.componentregistry.Configuration;
@@ -10,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
-public class ComponentRegistryImpl implements ComponentRegistry {
+public class ComponentRegistryImpl extends ComponentRegistryImplBase implements ComponentRegistry {
 
     public static final String DESCRIPTION_FILE_NAME = "description.xml";
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImpl.class);
@@ -391,31 +391,6 @@ public class ComponentRegistryImpl implements ComponentRegistry {
         }
         result.append("Try to change above mentioned references first.");
         return result.toString();
-    }
-
-    @Override
-    public List<ComponentDescription> getUsageInComponents(String componentId) {
-        List<ComponentDescription> result = new ArrayList<ComponentDescription>();
-        List<ComponentDescription> descs = getComponentDescriptions();
-        for (ComponentDescription desc : descs) {
-            CMDComponentSpec spec = getMDComponent(desc.getId());
-            if (spec != null && ComponentRegistryUtils.findComponentId(componentId, spec.getCMDComponent())) {
-                result.add(desc);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public List<ProfileDescription> getUsageInProfiles(String componentId) {
-        List<ProfileDescription> result = new ArrayList<ProfileDescription>();
-        for (ProfileDescription profileDescription : getProfileDescriptions()) {
-            CMDComponentSpec profile = getMDProfile(profileDescription.getId());
-            if (profile != null && ComponentRegistryUtils.findComponentId(componentId, profile.getCMDComponent())) {
-                result.add(profileDescription);
-            }
-        }
-        return result;
     }
 
     @Override

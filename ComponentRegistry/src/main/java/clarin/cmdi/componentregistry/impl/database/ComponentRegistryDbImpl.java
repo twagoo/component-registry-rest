@@ -7,6 +7,7 @@ import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -32,7 +33,7 @@ import org.springframework.dao.DataAccessException;
  * accessing the registry (ergo: a database implementation)
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ComponentRegistryDbImpl implements ComponentRegistry {
+public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry  {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryDbImpl.class);
     private Number userId;
@@ -250,16 +251,6 @@ public class ComponentRegistryDbImpl implements ComponentRegistry {
 	    LOG.error("Database access error while trying to delete component", ex);
 	    throw ex;
 	}
-    }
-
-    @Override
-    public List<ComponentDescription> getUsageInComponents(String componentId) {
-	throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public List<ProfileDescription> getUsageInProfiles(String componentId) {
-	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
