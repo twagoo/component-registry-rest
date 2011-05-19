@@ -47,7 +47,7 @@ public class AdminRegistryTest extends ComponentRegistryTestCase {
         AdminRegistry adminReg = new AdminRegistry();
         FileInfo fileInfo = new FileInfo();
         fileInfo.setForceUpdate(false);
-        fileInfo.setFileNode(new FileNode(new File(getRegistryDir(), "components" + File.separator + compDesc1.getName() + File.separator
+        fileInfo.setDisplayNode(new FileNode(new File(getRegistryDir(), "components" + File.separator + compDesc1.getName() + File.separator
                 + compDesc1.getName() + ".xml"), false));
         try {
             adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN);
@@ -73,7 +73,7 @@ public class AdminRegistryTest extends ComponentRegistryTestCase {
 
         assertEquals(1, testRegistry.getProfileDescriptions().size());
         fileInfo.setForceUpdate(false);
-        fileInfo.setFileNode(new FileNode(new File(getRegistryDir(), "profiles" + File.separator + profileDesc.getName() + File.separator
+        fileInfo.setDisplayNode(new FileNode(new File(getRegistryDir(), "profiles" + File.separator + profileDesc.getName() + File.separator
                 + profileDesc.getName() + ".xml"), false));
         adminReg.delete(fileInfo, PRINCIPAL_ADMIN); //Profile do not need to be forced they cannot be used by other profiles
         assertEquals(0, testRegistry.getProfileDescriptions().size());

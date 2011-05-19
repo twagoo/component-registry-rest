@@ -47,7 +47,6 @@ import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
 
 @Path("/registry")
-@Autowire
 public class ComponentRegistryRestService {
 
     @Context
@@ -65,7 +64,7 @@ public class ComponentRegistryRestService {
     public static final String USERSPACE_PARAM = "userspace";
 
 
-    @Inject
+    @Inject(value="componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
 
     private ComponentRegistry getRegistry(boolean userspace) {

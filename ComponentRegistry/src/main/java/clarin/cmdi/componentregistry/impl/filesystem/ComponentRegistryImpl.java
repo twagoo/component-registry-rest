@@ -107,6 +107,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
         }
         return result;
     }
+
     private final static IOFileFilter DIRS_WITH_DESCRIPTIONS = new NotFileFilter(new NameFileFilter(ResourceConfig.DELETED_DIR_NAME));
 
     private Map<String, ComponentDescription> loadComponentDescriptions() {
@@ -357,8 +358,8 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
                 if (regDate.before(calendar.getTime())) { //More then month old
                     throw new DeleteFailedException(
                             "The "
-                            + (desc.isProfile() ? "Profile" : "Component")
-                            + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+                                    + (desc.isProfile() ? "Profile" : "Component")
+                                    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
                 }
             } catch (ParseException e) {
                 LOG.error("Cannot parse date of " + desc + " Error:" + e);
@@ -442,6 +443,15 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
         @Override
         public void execute(Object input) {
             LOG.info("Update of " + desc + " unsuccessful.");
+        }
+    }
+
+    @Override
+    public String getName() {
+        if (isPublic()) {
+            return "Public Registry";
+        } else {
+            return "User " + getComponentDir().getParentFile().getName() + " Registry";
         }
     }
 }

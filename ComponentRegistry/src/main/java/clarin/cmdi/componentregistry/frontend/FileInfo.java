@@ -1,10 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
-import java.io.File;
 import java.io.Serializable;
-
-import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
-import clarin.cmdi.componentregistry.impl.filesystem.ResourceConfig;
 
 public class FileInfo implements Serializable {
 
@@ -14,7 +10,7 @@ public class FileInfo implements Serializable {
     private String name;
     private boolean forceUpdate = false;
 
-    private FileNode fileNode;
+    private DisplayNode displayNode;
 
     private boolean deletable = false;
     private boolean undeletable = false;
@@ -34,33 +30,31 @@ public class FileInfo implements Serializable {
     }
 
     public String getName() {
-        if (fileNode != null) {
-            name = fileNode.toString();
+        if (displayNode != null) {
+            name = displayNode.toString();
         }
         return name;
     }
 
-    public FileNode getFileNode() {
-        return fileNode;
+    public DisplayNode getDisplayNode() {
+        return displayNode;
     }
 
-    public void setFileNode(FileNode fileNode) {
-        this.fileNode = fileNode;
+    public void setDisplayNode(DisplayNode displayNode) {
+        this.displayNode = displayNode;
         setUndeletable(false);
         setDeletable(false);
         setEditable(false);
-        if (fileNode != null) {
-            File file = fileNode.getFile();
-            if (file.isFile()) {
-                setText(fileNode.getFileContent());
-                setEditable(!file.getParentFile().equals(FileSystemConfiguration.getInstance().getRegistryRoot())); //file in root are not editable like:userMapping.xml
+        if (displayNode != null) {
+            if (displayNode.hasContent()) {
+                setText(displayNode.getContent());
+                setEditable(displayNode.isEditable()); //file in root are not editable like:userMapping.xml
             } else {
-                String dir = fileNode.getFile().getParentFile().getName();
-                if (ResourceConfig.DELETED_DIR_NAME.equals(dir)) {
+                //TODO PD have to test this
+                if (displayNode.isDeleted() && !displayNode.isEditable() && (displayNode.toString().startsWith("c_") || displayNode.toString().startsWith("p_"))) {
                     setText("Press undelete button to put this item back in the registry");
                     setUndeletable(true);
-                } else if ((ResourceConfig.COMPONENTS_DIR_NAME.equals(dir) || ResourceConfig.PROFILES_DIR_NAME.equals(dir))
-                        && !fileNode.isDeleted()) {
+                } else if (!displayNode.isDeleted() && !displayNode.isEditable() && (displayNode.toString().startsWith("c_") || displayNode.toString().startsWith("p_"))) {
                     setText("Press delete button to delete this item");
                     setDeletable(true);
                 } else {
@@ -100,9 +94,7 @@ public class FileInfo implements Serializable {
     }
 
     public boolean isInUserWorkSpace() {
-        File file = fileNode.getFile();
-        return file.getAbsolutePath().startsWith(
-                new File(FileSystemConfiguration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME).getAbsolutePath());
+        return displayNode.isUserNode();
     }
 
     public void setForceUpdate(boolean forceUpdate) {
@@ -112,4 +104,5 @@ public class FileInfo implements Serializable {
     public boolean isForceUpdate() {
         return forceUpdate;
     }
+
 }

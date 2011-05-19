@@ -6,7 +6,10 @@ import java.io.Serializable;
 
 import org.apache.commons.io.FileUtils;
 
-public class FileNode implements Serializable{
+import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
+import clarin.cmdi.componentregistry.impl.filesystem.ResourceConfig;
+
+public class FileNode implements Serializable, DisplayNode {
 
     private static final long serialVersionUID = 1L;
     private final File file;
@@ -16,25 +19,48 @@ public class FileNode implements Serializable{
         this.file = file;
         this.deleted = deleted;
     }
-    
-    public String getFileContent() {
+
+    @Override
+    public String getContent() {
         try {
-            return FileUtils.readFileToString(getFile(), "UTF-8");
+            return FileUtils.readFileToString(file, "UTF-8");
         } catch (IOException e) {
             return "Error could not read file: " + e;
         }
     }
 
     @Override
-    public String toString() {
-        return getFile().getName();
+    public boolean hasContent() {
+        return file.isFile();
     }
 
-    public File getFile() {
-        return file;
+    @Override
+    public String toString() {
+        return file.getName();
     }
 
     public boolean isDeleted() {
         return deleted;
     }
+
+    @Override
+    public boolean isEditable() {
+        return hasContent() && !file.getParentFile().equals(FileSystemConfiguration.getInstance().getRegistryRoot());
+    }
+
+    @Override
+    public boolean isUserNode() {
+        return file.getAbsolutePath().startsWith(
+                new File(FileSystemConfiguration.getInstance().getRegistryRoot(), ResourceConfig.USERS_DIR_NAME).getAbsolutePath());
+    }
+
+    @Override
+    public String getId() {
+        return file.getParentFile().getName();
+    }
+
+    public File getFile() {
+        return file;
+    }
+    
 }

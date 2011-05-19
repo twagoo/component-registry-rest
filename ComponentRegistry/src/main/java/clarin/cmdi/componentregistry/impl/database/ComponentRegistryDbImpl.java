@@ -396,4 +396,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	}
     }
+    
+    @Override
+    public String getName() {
+        if (isPublic()) {
+            return "Public Registry";
+        } else {
+            return "User "+getUserId()+" Registry";
+        }
+    }
 }

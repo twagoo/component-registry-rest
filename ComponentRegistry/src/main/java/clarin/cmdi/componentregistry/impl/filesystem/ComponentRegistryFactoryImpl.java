@@ -33,7 +33,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private Configuration configuration;
     private FileSystemConfiguration fsConfiguration;
 
-    private ComponentRegistryFactoryImpl() {
+   public ComponentRegistryFactoryImpl() {
     }
 
     private void init() {
@@ -121,8 +121,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
     private ComponentRegistry createNewUserRegistry(String user) {
         ComponentRegistryImpl result = new ComponentRegistryImpl(false);
         ResourceConfig config = new ResourceConfig();
-        File userResourceDir = new File(fsConfiguration.getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator
-                + user);
+        File userResourceDir = new File(fsConfiguration.getRegistryRoot(), ResourceConfig.USERS_DIR_NAME + File.separator + user);
         config.setResourceRoot(userResourceDir);
         config.init();
         result.setResourceConfig(config);
@@ -176,7 +175,7 @@ public class ComponentRegistryFactoryImpl implements ComponentRegistryFactory {
         return result;
     }
 
-    public void setConfiguration(Configuration configuration){
+    public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
 

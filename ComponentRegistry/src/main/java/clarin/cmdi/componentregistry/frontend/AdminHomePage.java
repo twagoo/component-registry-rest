@@ -2,6 +2,8 @@ package clarin.cmdi.componentregistry.frontend;
 
 import java.io.File;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -21,13 +23,16 @@ import org.apache.wicket.markup.html.tree.BaseTree;
 import org.apache.wicket.markup.html.tree.ITreeState;
 import org.apache.wicket.markup.html.tree.LinkTree;
 import org.apache.wicket.model.CompoundPropertyModel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.impl.filesystem.AdminRegistry;
 import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 import clarin.cmdi.componentregistry.impl.filesystem.ResourceConfig;
-
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -38,6 +43,9 @@ public class AdminHomePage extends SecureAdminWebPage {
     private final LinkTree tree;
 
     private transient AdminRegistry adminRegistry = new AdminRegistry();
+
+    @SpringBean(name="componentRegistryFactory")
+    private ComponentRegistryFactory componentRegistryFactory;
 
     public AdminHomePage(final PageParameters parameters) {
         super(parameters);
@@ -102,7 +110,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         };
         form.add(undeleteButton);
-        
+
         CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
         form.add(forceUpdateCheck);
 
@@ -111,7 +119,7 @@ public class AdminHomePage extends SecureAdminWebPage {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 FileInfo fileInfo = (FileInfo) form.getModelObject();
                 Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
-                info("submitting:" + fileInfo.getName() + " id=(" + fileInfo.getFileNode().getFile().getParentFile().getName() + ")");
+                info("submitting:" + fileInfo.getName() + " id=(" + fileInfo.getDisplayNode().getId() + ")");
                 try {
                     adminRegistry.submitFile(fileInfo, userPrincipal);
                     info("submitting done.");
@@ -132,7 +140,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         };
         form.add(submitButton);
 
-        tree = createTree(form);
+        tree = createTree("tree", form, createTreeModel());
         add(tree);
         add(new Link("expandAll") {
             @Override
@@ -148,6 +156,8 @@ public class AdminHomePage extends SecureAdminWebPage {
             }
         });
 
+        LinkTree dbTree = createTree("tree2", form, createDBTreeModel());
+        add(dbTree);
     }
 
     private void addLinks() {
@@ -172,9 +182,8 @@ public class AdminHomePage extends SecureAdminWebPage {
         });
     }
 
-    private LinkTree createTree(final Form form) {
-        TreeModel treeModel = createTreeModel();
-        final LinkTree tree = new LinkTree("tree", treeModel) {
+    private LinkTree createTree(String id, final Form form, TreeModel treeModel) {
+        final LinkTree tree = new LinkTree(id, treeModel) {
             @Override
             protected void onNodeLinkClicked(Object node, BaseTree tree, AjaxRequestTarget target) {
                 super.onNodeLinkClicked(node, tree, target);
@@ -184,8 +193,8 @@ public class AdminHomePage extends SecureAdminWebPage {
                 } else {
                     treeState.expandNode(node);
                 }
-                FileNode fn = (FileNode) ((DefaultMutableTreeNode) node).getUserObject();
-                fileInfo.setFileNode(fn);
+                DisplayNode dn = (DisplayNode) ((DefaultMutableTreeNode) node).getUserObject();
+                fileInfo.setDisplayNode(dn);
                 if (target != null) {
                     target.addComponent(form);
                 }
@@ -231,4 +240,47 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
 
     }
+
+    private TreeModel createDBTreeModel() {
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new DisplayDataNode("ComponentRegistry", false));
+        DefaultMutableTreeNode publicNode = new DefaultMutableTreeNode(new DisplayDataNode("Public", false));
+        rootNode.add(publicNode);
+        ComponentRegistry publicRegistry = componentRegistryFactory.getPublicRegistry();
+        add(publicNode, publicRegistry);
+        List<ComponentRegistry> userRegistries = componentRegistryFactory.getAllUserRegistries();
+        int i = 0;
+        for (ComponentRegistry registry : userRegistries) {
+            DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(new DisplayDataNode("user" + i++, false)); //TODO PD should have a registry.getName()
+            rootNode.add(userNode);
+            add(userNode, registry);
+        }
+        TreeModel model = new DefaultTreeModel(rootNode);
+        return model;
+    }
+
+    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) {
+        DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
+        parent.add(componentsNode);
+        add(componentsNode, registry.getComponentDescriptions(), false);
+
+        DefaultMutableTreeNode profilesNode = new DefaultMutableTreeNode(new DisplayDataNode("Profiles", false));
+        parent.add(profilesNode);
+        add(profilesNode, registry.getProfileDescriptions(), false);
+
+        DefaultMutableTreeNode deletedCompNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Components", true));
+        parent.add(deletedCompNode);
+        add(deletedCompNode, new ArrayList(), true); //TODO PD implement getDeletedComps/profiles
+
+        DefaultMutableTreeNode deletedProfNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Profiles", true));
+        parent.add(deletedProfNode);
+        add(deletedProfNode, new ArrayList(), true);
+    }
+
+    private void add(DefaultMutableTreeNode parent, List<? extends AbstractDescription> descs, boolean isDeleted) {
+        for (AbstractDescription desc : descs) {
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted));
+            parent.add(child);
+        }
+    }
+
 }

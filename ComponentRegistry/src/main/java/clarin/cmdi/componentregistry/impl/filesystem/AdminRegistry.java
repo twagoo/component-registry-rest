@@ -1,9 +1,5 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,8 +13,13 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.frontend.FileInfo;
+import clarin.cmdi.componentregistry.frontend.FileNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -29,20 +30,20 @@ public class AdminRegistry {
 
     public void submitFile(FileInfo fileInfo, Principal userPrincipal) throws SubmitFailedException {
         try {
-            File file = fileInfo.getFileNode().getFile();
-            if (fileInfo.getFileNode().isDeleted()) {
+            File file = getFile(fileInfo);
+            if (fileInfo.getDisplayNode().isDeleted()) {
                 //already deleted file
                 FileUtils.writeStringToFile(file, fileInfo.getText(), "UTF-8");
             } else {
                 //Description or cmdSpec file.
                 String name = fileInfo.getName();
-                String id = ComponentRegistry.REGISTRY_ID + fileInfo.getFileNode().getFile().getParentFile().getName();
+                String id = ComponentRegistry.REGISTRY_ID + getFile(fileInfo).getParentFile().getName();
                 AbstractDescription originalDescription = getDescription(fileInfo);
                 CMDComponentSpec originalSpec = getSpec(fileInfo);
                 AbstractDescription description = null;
                 CMDComponentSpec spec = null;
                 if (ComponentRegistryImpl.DESCRIPTION_FILE_NAME.equals(name)) {
-                    if (fileInfo.getFileNode().getFile().getParentFile().getName().startsWith("c_")) {
+                    if (getFile(fileInfo).getParentFile().getName().startsWith("c_")) {
                         description = MDMarshaller.unmarshal(ComponentDescription.class,
                                 IOUtils.toInputStream(fileInfo.getText(), "UTF-8"), null);
                     } else {
@@ -94,7 +95,7 @@ public class AdminRegistry {
             CMDComponentSpec spec = getSpec(fileInfo);
             int result = submitToRegistry(desc, spec, userPrincipal, fileInfo);
             if (result == 0) {
-                FileUtils.deleteDirectory(fileInfo.getFileNode().getFile());
+                FileUtils.deleteDirectory(getFile(fileInfo));
                 LOG.info("Undeleted item: " + id);
             } else {
                 throw new SubmitFailedException("Problem occured while registering, please check the tomcat logs for errors.");
@@ -153,7 +154,7 @@ public class AdminRegistry {
     }
 
     private CMDComponentSpec getSpec(FileInfo fileInfo) throws FileNotFoundException, JAXBException {
-        File parent = fileInfo.getFileNode().getFile();
+        File parent = getFile(fileInfo);
         if (!parent.isDirectory()) {
             parent = parent.getParentFile();
         }
@@ -164,7 +165,7 @@ public class AdminRegistry {
     }
 
     private AbstractDescription getDescription(FileInfo fileInfo) {
-        File parent = fileInfo.getFileNode().getFile();
+        File parent = getFile(fileInfo);
         if (!parent.isDirectory()) {
             parent = parent.getParentFile();
         }
@@ -172,6 +173,11 @@ public class AdminRegistry {
         Class<? extends AbstractDescription> clazz = fileInfo.isComponent() ? ComponentDescription.class : ProfileDescription.class;
         AbstractDescription result = MDMarshaller.unmarshal(clazz, descFile, null);
         return result;
+    }
+
+    private File getFile(FileInfo fileInfo) {
+        FileNode fileNode = (FileNode) fileInfo.getDisplayNode();
+        return fileNode.getFile();
     }
 
 }

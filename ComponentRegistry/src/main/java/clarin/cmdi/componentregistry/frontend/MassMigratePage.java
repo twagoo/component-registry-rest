@@ -1,10 +1,13 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import javax.xml.bind.JAXBException;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -14,10 +17,18 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.impl.database.AbstractDescriptionDao;
+import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.impl.database.UserDao;
+import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.UserMapping;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
@@ -29,11 +40,24 @@ import clarin.cmdi.componentregistry.model.UserMapping.User;
  */
 @SuppressWarnings("serial")
 public class MassMigratePage extends SecureAdminWebPage {
+    private final static Logger LOG = LoggerFactory.getLogger(MassMigratePage.class);
 
     private FeedbackPanel feedback;
 
+    @SpringBean(name = "fileRegistryFactory")
+    private ComponentRegistryFactoryImpl fileRegistryFactory;
+    @SpringBean
+    private ComponentDescriptionDao componentDescriptionDao;
+    @SpringBean
+    private ProfileDescriptionDao profileDescriptionDao;
+    @SpringBean
+    private UserDao userDao;
+
+    private transient UserMapping userMap;
+
     public MassMigratePage(final PageParameters pageParameters) {
         super(pageParameters);
+        userMap = fileRegistryFactory.getUserMap();
         addLinks();
         feedback = new FeedbackPanel("feedback") {
             protected Component newMessageDisplayComponent(String id, FeedbackMessage message) {
@@ -58,11 +82,8 @@ public class MassMigratePage extends SecureAdminWebPage {
         });
     }
 
-    //Two migrate commands: 
-    // 1) Put userId hashes in descriptions
-    // 2) Move descriptions from CMD to description.xml
     private void addMigrationOptions() {
-        add(new Label("migrate1Label", "Click here to start the migration of usernames into the descriptions."));
+        add(new Label("migrate1Label", "Click here to start the migration of the file storage into the database."));
         add(new IndicatingAjaxLink("migrate1") {
             public void onClick(final AjaxRequestTarget target) {
                 if (target != null) {
@@ -74,76 +95,48 @@ public class MassMigratePage extends SecureAdminWebPage {
     }
 
     private void startMigration() {
-        info("Start Migration...");
-        UserMapping userMap = ComponentRegistryFactoryImpl.getInstance().getUserMap();
-        for (User user : userMap.getUsers()) {
-            String userId = DigestUtils.md5Hex(user.getPrincipalName());
-            ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getOtherUserComponentRegistry(getUserPrincipal(), userId);
-            updateDescriptions(registry, userId, userMap);
+        info("Start Migration users...");
+        List<User> users = userMap.getUsers();
+        for (User user : users) {
+            userDao.insertUser(user);
         }
-        ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
-        updateDescriptions(registry, null, userMap); // public has different username for every description.
+        info("Start Migration descriptions and content...");
+        List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
+        registries.add(fileRegistryFactory.getPublicRegistry());
+        registries.addAll(fileRegistryFactory.getAllUserRegistries());
+        for (ComponentRegistry registry : registries) {
+            migrateDescriptions(registry.getComponentDescriptions(), registry, componentDescriptionDao);
+            migrateDescriptions(registry.getProfileDescriptions(), registry, profileDescriptionDao);
+        }
         info("End Migration.");
     }
 
-    private void updateDescriptions(ComponentRegistry registry, String userIdMD5, UserMapping userMap) {
-        List<AbstractDescription> descs = new ArrayList<AbstractDescription>();
-        descs.addAll(registry.getComponentDescriptions());
-        descs.addAll(registry.getProfileDescriptions());
-        for (AbstractDescription desc : descs) {
-            setUserId(desc, userIdMD5, userMap, registry);
-            setDescription(desc, registry);
-        }
-    }
-
-    private void setUserId(AbstractDescription desc, String userIdMD5, UserMapping userMap, ComponentRegistry registry) {
-        if (desc.getUserId() == null) {
-            String userId = null;
-            if (userIdMD5 == null) { //Lookup for every description, if not passed as parameter.
-                for (User user : userMap.getUsers()) {
-                    if (user.getName().equals(desc.getCreatorName())) {
-                        userId = DigestUtils.md5Hex(user.getPrincipalName());
-                        break;
-                    }
-                }
-            } else {
-                userId = userIdMD5;
-            }
-            if (userId != null) {
-                desc.setUserId(userId);
-                try {
-                    registry.update(desc, null);
-                    info("Updated: " + desc);
-                } catch (Exception e) {
-                    error("Error during update of:" + desc + "\nException" + e);
-                }
-            } else {
-                error("Cannot get userId for: " + desc);
-            }
-        }
-    }
-
-    private void setDescription(AbstractDescription desc, ComponentRegistry registry) {
-        CMDComponentSpec spec = getSpec(desc, registry);
-        String specDescription = spec.getHeader().getDescription();
-        if (specDescription != null && !specDescription.equals(desc.getDescription())) {
-            info("override description: " + desc.getDescription() + " \nwith: " + specDescription);
-            desc.setDescription(specDescription);
+    private void migrateDescriptions(List<? extends AbstractDescription> descs, ComponentRegistry registry, AbstractDescriptionDao descDao) {
+        int migrateCount = 0;
+        for (AbstractDescription description : descs) {
             try {
-                registry.update(desc, null);
-                info("Updated: " + desc);
+                User user = userDao.getByPrincipalName(userMap.findUser(description.getUserId()).getPrincipalName());
+                descDao.insertDescription(description, getContent(description, registry), registry.isPublic(), user.getId());
             } catch (Exception e) {
-                error("Error during update of:" + desc + "\nException" + e);
+                LOG.error("Error in migration, check the logs!", e);
+                info("Error cannot migrate " + description.getId());
             }
+            migrateCount++;
         }
+        LOG.info(registry.getName() + " migrated: " + migrateCount + " out of " + descs.size() + " descs");
     }
 
-    private CMDComponentSpec getSpec(AbstractDescription desc, ComponentRegistry registry) {
-        if (desc.isProfile()) {
-            return registry.getMDProfile(desc.getId());
+    private String getContent(AbstractDescription description, ComponentRegistry registry) throws UnsupportedEncodingException,
+            JAXBException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        CMDComponentSpec spec = null;
+        if (description.isProfile()) {
+            spec = registry.getMDProfile(description.getId());
         } else {
-            return registry.getMDComponent(desc.getId());
+            spec = registry.getMDComponent(description.getId());
         }
+        MDMarshaller.marshal(spec, out);
+        return out.toString();
     }
 
 }

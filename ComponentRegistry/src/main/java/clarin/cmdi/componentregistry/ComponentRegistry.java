@@ -93,4 +93,6 @@ public interface ComponentRegistry {
      **/
     boolean isPublic();
 
+    String getName();
+
 }
