@@ -248,7 +248,6 @@ public class ComponentRegistryDbImplTest {
 	registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
 	assertEquals(0, registry.getComponentDescriptions().size());
 
-	//TODO: convert below to dbImpl
 	registry = getComponentRegistryForUser(userId); // ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
 	registry.register(description, testComp);
 	assertEquals(1, registry.getComponentDescriptions().size());
@@ -288,8 +287,6 @@ public class ComponentRegistryDbImplTest {
 	registry.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
 	assertEquals(0, registry.getProfileDescriptions().size());
 
-	//TODO: convert below to dbImpl
-//        registry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
 	registry = getComponentRegistryForUser(userId);
 	registry.register(description, testComp);
 	assertEquals(1, registry.getProfileDescriptions().size());

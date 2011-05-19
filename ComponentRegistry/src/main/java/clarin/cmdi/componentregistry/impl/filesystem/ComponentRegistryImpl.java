@@ -367,31 +367,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
         }
     }
 
-    private void checkStillUsed(String componentId) throws DeleteFailedException {
-        List<ProfileDescription> profiles = getUsageInProfiles(componentId);
-        List<ComponentDescription> components = getUsageInComponents(componentId);
-        if (!profiles.isEmpty() || !components.isEmpty()) {
-            throw new DeleteFailedException(createStillInUseMessage(profiles, components));
-        }
-    }
-
-    private String createStillInUseMessage(List<ProfileDescription> profiles, List<ComponentDescription> components) {
-        StringBuilder result = new StringBuilder();
-        if (!profiles.isEmpty()) {
-            result.append("Still used by the following profiles: \n");
-            for (ProfileDescription profileDescription : profiles) {
-                result.append(" - ").append(profileDescription.getName()).append("\n");
-            }
-        }
-        if (!components.isEmpty()) {
-            result.append("Still used by the following components: \n");
-            for (ComponentDescription componentDescription : components) {
-                result.append(" - ").append(componentDescription.getName()).append("\n");
-            }
-        }
-        result.append("Try to change above mentioned references first.");
-        return result.toString();
-    }
+    
 
     @Override
     public boolean isPublic() {

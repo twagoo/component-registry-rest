@@ -268,10 +268,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		checkAuthorisation(desc, principal);
 		checkAge(desc, principal);
 
-		// TODO : check still used!
-//            if (!forceDelete) {
-//                checkStillUsed(componentId);
-//            }
+		if (!forceDelete) {
+		    checkStillUsed(componentId);
+		}
 		componentDescriptionDao.setDeleted(getIdForDescription(desc));
 		invalidateCache(desc);
 	    }
@@ -305,10 +304,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	this.userId = user;
     }
 
-    private void invalidateCache(AbstractDescription description){
-	if(description.isProfile()){
+    private void invalidateCache(AbstractDescription description) {
+	if (description.isProfile()) {
 	    profilesCache.remove(description.getId());
-	} else{
+	} else {
 	    componentsCache.remove(description.getId());
 	}
     }
