@@ -9,8 +9,11 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
  */
 public class CMDComponentSpecExpanderDbImpl extends CMDComponentSpecExpander {
 
+    private ComponentRegistryDbImpl dbImplRegistry;
+
     public CMDComponentSpecExpanderDbImpl(ComponentRegistryDbImpl registry) {
 	super(registry);
+	dbImplRegistry = registry;
     }
 
     public static CMDComponentSpec expandComponent(String componentId, ComponentRegistryDbImpl registry) {
@@ -25,11 +28,11 @@ public class CMDComponentSpecExpanderDbImpl extends CMDComponentSpecExpander {
 
     @Override
     protected CMDComponentSpec getUncachedComponent(String componentId) {
-	return registry.getMDComponent(componentId);
+	return dbImplRegistry.getUncachedMDComponent(componentId);
     }
 
     @Override
     protected CMDComponentSpec getUncachedProfile(String profileId) {
-	return registry.getMDProfile(profileId);
+	return dbImplRegistry.getUncachedMDProfile(profileId);
     }
 }

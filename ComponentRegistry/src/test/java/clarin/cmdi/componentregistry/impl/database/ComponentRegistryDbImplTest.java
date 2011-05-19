@@ -2,12 +2,14 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
@@ -447,5 +449,54 @@ public class ComponentRegistryDbImplTest {
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "YYY", "0", "2"));
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "1", "10"));
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "0", "99"));
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
+	description.setName("Aap");
+	description.setDescription("MyDescription");
+
+	CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent("Test1");
+	register.register(description, testComponent);
+
+	// Change values
+	description.setName("Noot");
+	description.setDescription("AnotherDescription");
+	// Update in db
+	register.update(description, testComponent);
+	description = register.getComponentDescription(description.getId());
+	// Test if new values are there
+	assertNotNull(description);
+	assertEquals("Noot", description.getName());
+	assertEquals("AnotherDescription", description.getDescription());
+
+	// Update content
+	CMDComponentSpec testComponent2 = RegistryTestHelper.getTestComponent("Test2");
+	register.update(description, testComponent2);
+	// Test if new content is there
+	assertEquals(RegistryTestHelper.getXml(testComponent2),
+		RegistryTestHelper.getXml(register.getMDComponent(description.
+		getId())));
+
+
+	// Update both
+	description.setName("Mies");
+	description.setDescription("YetAnotherDescription");
+	CMDComponentSpec testComponent3 = RegistryTestHelper.getTestComponent("Test3");
+
+	// Update in db
+	register.update(description, testComponent3);
+	description = register.getComponentDescription(description.getId());
+	// Test if new values are there
+	assertNotNull(description);
+	assertEquals("Mies", description.getName());
+	assertEquals("YetAnotherDescription", description.getDescription());
+	// Test if new content is there
+	assertEquals(RegistryTestHelper.getXml(testComponent3),
+		RegistryTestHelper.getXml(register.getMDComponent(description.
+		getId())));
     }
 }

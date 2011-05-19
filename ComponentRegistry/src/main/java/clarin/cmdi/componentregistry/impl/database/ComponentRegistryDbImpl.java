@@ -25,6 +25,7 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.dao.DataAccessException;
  * accessing the registry (ergo: a database implementation)
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry  {
+public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryDbImpl.class);
     private Number userId;
@@ -42,6 +43,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private ComponentDescriptionDao componentDescriptionDao;
     @Autowired
     Configuration configuration;
+    @Autowired
+    @Qualifier("componentsCache")
+    CMDComponentSpecCache componentsCache;
+    @Autowired
+    @Qualifier("profilesCache")
+    CMDComponentSpecCache profilesCache;
 
     /**
      * Default constructor, makes this a (spring) bean. No user is set, so
@@ -109,8 +116,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public CMDComponentSpec getMDProfile(String id) {
+	CMDComponentSpec result = profilesCache.get(id);
+	if (result == null && !profilesCache.containsKey(id)) {
+	    result = getUncachedMDProfile(id);
+	    profilesCache.put(id, result);
+	}
+	return result;
+    }
+
+    public CMDComponentSpec getUncachedMDProfile(String id) {
 	try {
-	    return getMDComponent(id, profileDescriptionDao);
+	    return getUncachedMDComponent(id, profileDescriptionDao);
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to get profile", ex);
 	    throw ex;
@@ -119,8 +135,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public CMDComponentSpec getMDComponent(String id) {
+	CMDComponentSpec result = componentsCache.get(id);
+	if (result == null && !componentsCache.containsKey(id)) {
+	    result = getUncachedMDComponent(id);
+	    componentsCache.put(id, result);
+	}
+	return result;
+    }
+
+    public CMDComponentSpec getUncachedMDComponent(String id) {
 	try {
-	    return getMDComponent(id, componentDescriptionDao);
+	    return getUncachedMDComponent(id, componentDescriptionDao);
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to get component", ex);
 	    throw ex;
@@ -137,6 +162,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    } else {
 		componentDescriptionDao.insertDescription(description, xml, isPublic(), userId);
 	    }
+	    invalidateCache(description);
 	    return 0;
 	} catch (JAXBException ex) {
 	    LOG.error(null, ex);
@@ -153,6 +179,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	try {
 	    AbstractDescriptionDao<?> dao = getDaoForDescription(description);
 	    dao.updateDescription(getIdForDescription(description), description, componentSpecToString(spec));
+	    invalidateCache(description);
 	    return 0;
 	} catch (DataAccessException ex) {
 	    LOG.error(null, ex);
@@ -224,6 +251,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		checkAuthorisation(desc, principal);
 		checkAge(desc, principal);
 		profileDescriptionDao.setDeleted(getIdForDescription(desc));
+		invalidateCache(desc);
 	    }
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to delete profile", ex);
@@ -245,6 +273,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 //                checkStillUsed(componentId);
 //            }
 		componentDescriptionDao.setDeleted(getIdForDescription(desc));
+		invalidateCache(desc);
 	    }
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to delete component", ex);
@@ -274,6 +303,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      */
     public void setUserId(Number user) {
 	this.userId = user;
+    }
+
+    private void invalidateCache(AbstractDescription description){
+	if(description.isProfile()){
+	    profilesCache.remove(description.getId());
+	} else{
+	    componentsCache.remove(description.getId());
+	}
     }
 
     private AbstractDescriptionDao<?> getDaoForDescription(AbstractDescription description) {
@@ -310,7 +347,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	return xml;
     }
 
-    private CMDComponentSpec getMDComponent(String id, AbstractDescriptionDao dao) {
+    private CMDComponentSpec getUncachedMDComponent(String id, AbstractDescriptionDao dao) {
 	String xml = dao.getContent(id);
 	if (xml != null) {
 	    try {
@@ -344,7 +381,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
 	if (isPublic() && !configuration.isAdminUser(principal)) {
 	    try {
-		Date regDate = AbstractDescription.getDate(desc.getRegistrationDate());
+		Date regDate = AbstractDescription.getDate(desc.
+			getRegistrationDate());
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
 		if (regDate.before(calendar.getTime())) { //More then month old

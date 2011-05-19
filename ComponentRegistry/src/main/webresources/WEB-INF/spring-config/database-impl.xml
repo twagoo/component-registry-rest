@@ -6,13 +6,16 @@
     <import resource="datasource-jdbc.xml"/>
     <import resource="persistence.xml"/>
 
+    <bean id="componentsCache" class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
+    <bean id="profilesCache" class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
+
     <!-- Prototype bean for component registry (service) -->
-    <bean id="componentRegistry" class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl"  scope="prototype"></bean>
+    <bean id="componentRegistry" class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl" scope="prototype"></bean>
 
     <!-- Factory that will create component registries for us (and autowire them), to be used by actual ComponentRegistryFactory -->
     <bean id="componentRegistryBeanFactory"
             class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
-        <property name="serviceLocatorInterface" value="clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory"/>
+	<property name="serviceLocatorInterface" value="clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory"/>
     </bean>
 
     <!-- Component registry factory that will be used by rest service to get user and public registries -->

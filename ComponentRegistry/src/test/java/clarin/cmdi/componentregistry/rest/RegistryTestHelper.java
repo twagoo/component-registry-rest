@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -16,6 +17,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import java.io.ByteArrayOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,6 +150,20 @@ public final class RegistryTestHelper {
         return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), MDMarshaller.getCMDComponentSchema());
     }
 
+    public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
+        return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), MDMarshaller.getCMDComponentSchema());
+    }
+
+    public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException{
+	ByteArrayOutputStream os = new ByteArrayOutputStream();
+	MDMarshaller.marshal(componentSpec, os);
+	String xml = os.toString();
+	try {
+	    os.close();
+	} catch (IOException ex) {
+	}
+	return xml;
+    }
 
 
     /**

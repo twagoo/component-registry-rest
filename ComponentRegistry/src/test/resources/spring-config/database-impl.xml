@@ -9,6 +9,9 @@
     <import resource="persistence.xml"/>
 
 
+    <bean id="componentsCache" class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
+    <bean id="profilesCache" class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
+
     <!-- Prototype bean for component registry (service) -->
     <bean id="componentRegistry" class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl"  scope="prototype"></bean>
 
