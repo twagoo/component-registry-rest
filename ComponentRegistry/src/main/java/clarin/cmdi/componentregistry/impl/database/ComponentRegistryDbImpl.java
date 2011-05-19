@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryUtils;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -130,7 +129,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public int register(AbstractDescription description, CMDComponentSpec spec) {
-	ComponentRegistryUtils.enrichSpecHeader(spec, description);
+	enrichSpecHeader(spec, description);
 	try {
 	    String xml = componentSpecToString(spec);
 	    if (description.isProfile()) {
@@ -193,28 +192,28 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public void getMDProfileAsXml(String profileId, OutputStream output) {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
 		expandProfile(profileId, this);
-	ComponentRegistryUtils.writeXml(expandedSpec, output);
+	writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
 		expandProfile(profileId, this);
-	ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
+	writeXsd(expandedSpec, outputStream);
     }
 
     @Override
     public void getMDComponentAsXml(String componentId, OutputStream output) {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
 		expandComponent(componentId, this);
-	ComponentRegistryUtils.writeXml(expandedSpec, output);
+	writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.
 		expandComponent(componentId, this);
-	ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
+	writeXsd(expandedSpec, outputStream);
     }
 
     @Override

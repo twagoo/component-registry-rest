@@ -2,7 +2,6 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryUtils;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -166,17 +165,17 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     @Override
     public void getMDProfileAsXml(String profileId, OutputStream output) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandProfile(profileId, this);
-        ComponentRegistryUtils.writeXml(expandedSpec, output);
+        writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandProfile(profileId, this);
-        ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
+        writeXsd(expandedSpec, outputStream);
     }
 
     private File getProfileFile(String profileId) {
-        String id = ComponentRegistryUtils.stripRegistryId(profileId);
+        String id = stripRegistryId(profileId);
         File file = new File(getProfileDir(), id + File.separator + id + ".xml");
         return file;
     }
@@ -194,17 +193,17 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     @Override
     public void getMDComponentAsXml(String componentId, OutputStream output) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandComponent(componentId, this);
-        ComponentRegistryUtils.writeXml(expandedSpec, output);
+        writeXml(expandedSpec, output);
     }
 
     @Override
     public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
         CMDComponentSpec expandedSpec = CMDComponentSpecExpanderImpl.expandComponent(componentId, this);
-        ComponentRegistryUtils.writeXsd(expandedSpec, outputStream);
+        writeXsd(expandedSpec, outputStream);
     }
 
     private File getComponentFile(String componentId) {
-        String id = ComponentRegistryUtils.stripRegistryId(componentId);
+        String id = stripRegistryId(componentId);
         File file = new File(getComponentDir(), id + File.separator + id + ".xml");
         return file;
     }
@@ -264,7 +263,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     }
 
     private int register(File storageDir, AbstractDescription description, CMDComponentSpec spec, Closure onFail) {
-        String strippedId = ComponentRegistryUtils.stripRegistryId(description.getId());
+        String strippedId = stripRegistryId(description.getId());
         File dir = new File(storageDir, strippedId);
         boolean success = false;
         try {
@@ -272,7 +271,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
             if (dirCreated || dir.exists()) {
                 writeDescription(dir, description);
                 if (spec != null) {
-                    ComponentRegistryUtils.enrichSpecHeader(spec, description);
+                    enrichSpecHeader(spec, description);
                     writeCMDComponentSpec(dir, strippedId + ".xml", spec);
                 }
                 success = true;
@@ -402,9 +401,9 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     void emptyFromTrashcan(AbstractDescription description) throws IOException {
         File file = null;
         if (description.isProfile()) {
-            file = new File(resourceConfig.getProfileDeletionDir(), ComponentRegistryUtils.stripRegistryId(description.getId()));
+            file = new File(resourceConfig.getProfileDeletionDir(), stripRegistryId(description.getId()));
         } else {
-            file = new File(resourceConfig.getComponentDeletionDir(), ComponentRegistryUtils.stripRegistryId(description.getId()));
+            file = new File(resourceConfig.getComponentDeletionDir(), stripRegistryId(description.getId()));
         }
         if (file.exists()) {
             FileUtils.deleteDirectory(file);
