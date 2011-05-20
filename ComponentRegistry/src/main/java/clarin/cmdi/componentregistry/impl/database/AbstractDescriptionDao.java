@@ -41,12 +41,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	this._class = _class;
     }
 
-    public boolean isPublic(String cmdId){
+    public boolean isPublic(String cmdId) {
 	String query = "SELECT COUNT(*) FROM " + getTableName() + " WHERE is_public = true AND " + getCMDIdColumn() + " = ?";
 	return (0 < getSimpleJdbcTemplate().queryForInt(query, cmdId));
     }
 
-    public boolean isInUserSpace(String cmdId, Number userId){
+    public boolean isInUserSpace(String cmdId, Number userId) {
 	String query = "SELECT COUNT(*) FROM " + getTableName() + " WHERE is_public = false AND user_id = ? AND " + getCMDIdColumn() + " = ?";
 	return (0 < getSimpleJdbcTemplate().queryForInt(query, userId, cmdId));
     }
@@ -76,8 +76,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return Id of newly inserted description
      */
     public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId) throws DataAccessException {
-	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
-		withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
+	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
 		COLUMN_ID);
 	Number contentId = insert.executeAndReturnKey(Collections.singletonMap(
 		"content", (Object) content));
@@ -96,6 +95,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	params.put("creator_name", description.getCreatorName());
 	params.put("group_name", description.getGroupName());
 	params.put("domain_name", description.getDomainName());
+	params.put("href", description.getHref());
 	params.put("registration_date", extractTimestamp(description));
 	return insertDescription.executeAndReturnKey(params);
     }
@@ -103,15 +103,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     private Timestamp extractTimestamp(AbstractDescription description) {
 	if (description.getRegistrationDate() != null) {
 	    try {
-		Date date = AbstractDescription.getDate(description.
-			getRegistrationDate());
+		Date date = AbstractDescription.getDate(description.getRegistrationDate());
 		return new Timestamp(date.getTime());
 	    } catch (ParseException ex) {
-		LOG.warn("Could not convert registration date " + description.
-			getRegistrationDate() + " to date", ex);
+		LOG.warn("Could not convert registration date " + description.getRegistrationDate() + " to date", ex);
 	    } catch (IllegalArgumentException ex) {
-		LOG.warn("Could not convert registration date " + description.
-			getRegistrationDate() + " to timestamp", ex);
+		LOG.warn("Could not convert registration date " + description.getRegistrationDate() + " to timestamp", ex);
 	    }
 	}
 	return null;
@@ -128,10 +125,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	    // Update description
 	    StringBuilder updateDescription = new StringBuilder();
 	    updateDescription.append("UPDATE ").append(getTableName());
-	    updateDescription.append(" SET name = ?, description = ?");
+	    updateDescription.append(" SET name = ?, description = ? ,registration_date=?,creator_name=?,domain_name=?,group_name=?,href=?");
 	    updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
 	    getSimpleJdbcTemplate().update(updateDescription.toString(),
-		    description.getName(), description.getDescription(),
+		    description.getName(), description.getDescription(), extractTimestamp(description), description.getCreatorName(),
+			description.getDomainName(), description.getGroupName(), description.getHref(),
 		    id);
 	}
 
@@ -175,7 +173,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	String query = "WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?";
 	if (userId == null) {
 	    return getFirstOrNull(getSelectStatement(query + " AND is_public = true"), id);
-	} else{
+	} else {
 	    return getFirstOrNull(getSelectStatement(query + " AND is_public = false AND user_id = ?"), id, userId);
 	}
     }
@@ -265,7 +263,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      */
     private StringBuilder getDescriptionColumnList() {
 	StringBuilder sb = new StringBuilder();
-	sb.append("name,description,registration_date,creator_name,domain_name,group_name,user_id,");
+	sb.append("name,description,registration_date,creator_name,domain_name,group_name,href,user_id,");
 	sb.append(getCMDIdColumn());
 	return sb;
     }
@@ -284,8 +282,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	    try {
 		Timestamp registrationDate = rs.getTimestamp("registration_date");
 
-		AbstractDescription newDescription = (AbstractDescription) _class.
-			newInstance();
+		AbstractDescription newDescription = (AbstractDescription) _class.newInstance();
 		newDescription.setName(rs.getString("name"));
 		newDescription.setDescription(rs.getString("description"));
 		newDescription.setId(rs.getString(getCMDIdColumn()));
@@ -294,6 +291,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		newDescription.setCreatorName(rs.getString("creator_name"));
 		newDescription.setDomainName(rs.getString("domain_name"));
 		newDescription.setGroupName(rs.getString("group_name"));
+		newDescription.setHref(rs.getString("href"));
 
 		Object userId = rs.getObject("user_id");
 		if (!rs.wasNull()) {

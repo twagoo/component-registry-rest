@@ -46,6 +46,7 @@ public abstract class AbstractDescriptionDaoTest {
 	description.setCreatorName("Aap");
 	description.setGroupName("MyGroup");
 	description.setDomainName("MyDomain");
+	description.setHref("http://MyHref");
 
 	description.setRegistrationDate(regDate);
 
@@ -59,6 +60,7 @@ public abstract class AbstractDescriptionDaoTest {
 	assertEquals("Aap", descr.getCreatorName());
 	assertEquals("MyGroup", descr.getGroupName());
 	assertEquals("MyDomain", descr.getDomainName());
+	assertEquals("http://MyHref", descr.getHref());
 	assertEquals(AbstractDescription.getDate(regDate), AbstractDescription.getDate(descr.getRegistrationDate()));
 	assertEquals(testComponent, getDao().getContent(description.getId()));
     }
@@ -98,13 +100,21 @@ public abstract class AbstractDescriptionDaoTest {
 	AbstractDescription description = createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
-
+	description.setCreatorName("Aap");
+	description.setGroupName("MyGroup");
+	description.setDomainName("MyDomain");
+	description.setHref("http://MyHref");
+	
 	String testComponent = RegistryTestHelper.getComponentTestContentString();
 	Number newId = getDao().insertDescription(description, testComponent, true, null);
 
 	// Change values
 	description.setName("Noot");
 	description.setDescription("AnotherDescription");
+		description.setCreatorName("AnotherAap");
+	description.setGroupName("AnotherGroup");
+	description.setDomainName("AnotherDomain");
+	description.setHref("http://AnotherHref");
 	// Update in db
 	getDao().updateDescription(newId, description, null);
 	description = getDao().getById(newId);
@@ -112,6 +122,10 @@ public abstract class AbstractDescriptionDaoTest {
 	assertNotNull(description);
 	assertEquals("Noot", description.getName());
 	assertEquals("AnotherDescription", description.getDescription());
+	assertEquals("AnotherAap", description.getCreatorName());
+	assertEquals("AnotherGroup", description.getGroupName());
+	assertEquals("AnotherDomain", description.getDomainName());
+	assertEquals("http://AnotherHref", description.getHref());
 
 	// Update content
 	String testContent2 = "<test>Test content</test>";

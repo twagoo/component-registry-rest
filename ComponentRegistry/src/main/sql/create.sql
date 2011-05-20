@@ -44,7 +44,8 @@ CREATE TABLE component_description (
     registration_date timestamp with time zone,
     creator_name character varying,
     domain_name character varying,
-    group_name character varying
+    group_name character varying,
+    href character varying
 );
 
 --
@@ -72,7 +73,8 @@ CREATE TABLE profile_description (
     registration_date timestamp with time zone,
     creator_name character varying,
     domain_name character varying,
-    group_name character varying
+    group_name character varying,
+    href character varying
 );
 
 --

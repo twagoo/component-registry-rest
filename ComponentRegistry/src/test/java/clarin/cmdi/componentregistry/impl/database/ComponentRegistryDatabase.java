@@ -26,6 +26,7 @@ public final class ComponentRegistryDatabase {
                 + "  name character varying NOT NULL,"
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"
+		+ "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
                 + "  group_name character varying);");
@@ -42,6 +43,7 @@ public final class ComponentRegistryDatabase {
                 + "  name character varying NOT NULL,"
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"
+		+ "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
                 + "  group_name character varying);");

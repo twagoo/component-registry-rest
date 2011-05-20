@@ -400,8 +400,10 @@ public abstract class ComponentRegistryRestServiceTest extends ComponentRegistry
         profiles = getUserProfiles();
         assertEquals(1, profiles.size());
         assertEquals(0, getPublicProfiles().size());
+	// Try get from public registry
         ClientResponse cResponse = getResource().path("/registry/profiles/" + profileDesc.getId()).accept(MediaType.APPLICATION_XML).get(
                 ClientResponse.class);
+	// Should return 204 = no content
         assertEquals(204, cResponse.getStatus());
         CMDComponentSpec spec = getAuthenticatedResource(
                 getResource().path("/registry/profiles/" + profileDesc.getId()).queryParam(USERSPACE_PARAM, "true")).accept(
@@ -537,8 +539,10 @@ public abstract class ComponentRegistryRestServiceTest extends ComponentRegistry
         assertEquals(1, components.size());
         assertEquals(0, getPublicComponents().size());
 
+	// Try to get from public registry
         ClientResponse cResponse = getResource().path("/registry/components/" + desc.getId()).accept(MediaType.APPLICATION_XML).get(
                 ClientResponse.class);
+	// Should return 204 = no content
         assertEquals(204, cResponse.getStatus());
         CMDComponentSpec spec = getUserComponent(desc);
         assertNotNull(spec);
