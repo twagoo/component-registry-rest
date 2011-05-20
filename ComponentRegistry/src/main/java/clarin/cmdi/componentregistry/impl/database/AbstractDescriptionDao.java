@@ -41,6 +41,16 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	this._class = _class;
     }
 
+    public boolean isPublic(String cmdId){
+	String query = "SELECT COUNT(*) FROM " + getTableName() + " WHERE is_public = true AND " + getCMDIdColumn() + " = ?";
+	return (0 < getSimpleJdbcTemplate().queryForInt(query, cmdId));
+    }
+
+    public boolean isInUserSpace(String cmdId, Number userId){
+	String query = "SELECT COUNT(*) FROM " + getTableName() + " WHERE is_public = false AND user_id = ? AND " + getCMDIdColumn() + " = ?";
+	return (0 < getSimpleJdbcTemplate().queryForInt(query, userId, cmdId));
+    }
+
     /**
      * 
      * @param cmdId Profile or component Id (not primary key)
@@ -50,7 +60,6 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	String select = "SELECT content FROM " + TABLE_XML_CONTENT
 		+ " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "." + COLUMN_ID + " = " + getTableName() + ".content_id"
 		+ " WHERE is_deleted = false AND " + getTableName() + "." + getCMDIdColumn() + " = ?";
-
 
 	List<String> result = getSimpleJdbcTemplate().query(select,
 		new ParameterizedSingleColumnRowMapper<String>(), cmdId);
@@ -148,12 +157,27 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     * Get by ComponentId / ProfileId
+     * Get by ComponentId / ProfileId, whether in userspace or public
      * @param id Full component id
      * @return The description, if it exists; null otherwise
      */
     public T getByCmdId(String id) throws DataAccessException {
 	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?"), id);
+    }
+
+    /**
+     * Get by ComponentId / ProfileId
+     * @param id Full component id
+     * @param userId Db id of user for workspace; null for public space
+     * @return The description, if it exists; null otherwise
+     */
+    public T getByCmdId(String id, Number userId) throws DataAccessException {
+	String query = "WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?";
+	if (userId == null) {
+	    return getFirstOrNull(getSelectStatement(query + " AND is_public = true"), id);
+	} else{
+	    return getFirstOrNull(getSelectStatement(query + " AND is_public = false AND user_id = ?"), id, userId);
+	}
     }
 
     /**

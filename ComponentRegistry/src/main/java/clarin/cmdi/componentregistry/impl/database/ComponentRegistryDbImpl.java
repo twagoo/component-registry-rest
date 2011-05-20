@@ -86,7 +86,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public ProfileDescription getProfileDescription(String id) {
 	try {
-	    return profileDescriptionDao.getByCmdId(id);
+	    return profileDescriptionDao.getByCmdId(id, getUserId());
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to get profile description", ex);
 	    throw ex;
@@ -110,7 +110,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public ComponentDescription getComponentDescription(String id) {
 	try {
-	    return componentDescriptionDao.getByCmdId(id);
+	    return componentDescriptionDao.getByCmdId(id, getUserId());
 	} catch (DataAccessException ex) {
 	    LOG.error("Database access error while trying to get component description", ex);
 	    throw ex;
@@ -119,12 +119,16 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public CMDComponentSpec getMDProfile(String id) {
-	CMDComponentSpec result = profilesCache.get(id);
-	if (result == null && !profilesCache.containsKey(id)) {
-	    result = getUncachedMDProfile(id);
-	    profilesCache.put(id, result);
+	if (inWorkspace(profileDescriptionDao, id)) {
+	    CMDComponentSpec result = profilesCache.get(id);
+	    if (result == null && !profilesCache.containsKey(id)) {
+		result = getUncachedMDProfile(id);
+		profilesCache.put(id, result);
+	    }
+	    return result;
+	} else {
+	    return null;
 	}
-	return result;
     }
 
     public CMDComponentSpec getUncachedMDProfile(String id) {
@@ -138,12 +142,16 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public CMDComponentSpec getMDComponent(String id) {
-	CMDComponentSpec result = componentsCache.get(id);
-	if (result == null && !componentsCache.containsKey(id)) {
-	    result = getUncachedMDComponent(id);
-	    componentsCache.put(id, result);
+	if (inWorkspace(componentDescriptionDao, id)) {
+	    CMDComponentSpec result = componentsCache.get(id);
+	    if (result == null && !componentsCache.containsKey(id)) {
+		result = getUncachedMDComponent(id);
+		componentsCache.put(id, result);
+	    }
+	    return result;
+	} else {
+	    return null;
 	}
-	return result;
     }
 
     public CMDComponentSpec getUncachedMDComponent(String id) {
@@ -228,10 +236,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	if (!isPublic()) { //if already in public workspace there is nothing todo
 	    try {
 		desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
-		dao.setPublished(getIdForDescription(desc), true);
-		//This is not nice this leaves us in a state where the spec can be deleted but not registered in public space.
-		//NOTE deleted means it is moved to deleted directory, so an admin can still reach it.
-		//In practice this will probably also not be so much of an issue. Nonetheless this screams for transactions and a database.
+		Number id = getIdForDescription(desc);
+		// Update description & content
+		dao.updateDescription(id, desc, componentSpecToString(spec));
+		// Set to public
+		dao.setPublished(id, true);
 	    } catch (Exception e) {
 		LOG.error("Delete failed:", e);
 		result = -1;
@@ -418,6 +427,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    } catch (ParseException e) {
 		LOG.error("Cannot parse date of " + desc + " Error:" + e);
 	    }
+	}
+    }
+
+
+    private boolean inWorkspace(AbstractDescriptionDao<?> dao, String cmdId) {
+	if (isPublic()) {
+	    return dao.isPublic(cmdId);
+	} else {
+	    return dao.isInUserSpace(cmdId, getUserId());
 	}
     }
 

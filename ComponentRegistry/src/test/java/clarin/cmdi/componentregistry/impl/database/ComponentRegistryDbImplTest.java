@@ -496,4 +496,47 @@ public class ComponentRegistryDbImplTest {
 		RegistryTestHelper.getXml(register.getMDComponent(description.
 		getId())));
     }
+
+    @Test
+    public void testPublish() throws Exception {
+	Number userId = userDao.insertUser(createUser());
+
+	ComponentRegistry userRegistry = getComponentRegistryForUser(userId);
+	ComponentRegistry publicRegistry = getComponentRegistryForUser(null);
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
+	description.setName("Aap");
+	description.setDescription("MyDescription");
+	description.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
+
+	CMDComponentSpec testComponent = RegistryTestHelper.getTestComponent("Test1");
+	userRegistry.register(description, testComponent);
+	description = userRegistry.getComponentDescription(description.getId());
+	assertNotNull(description);
+	assertEquals("Aap", description.getName());
+	assertEquals("MyDescription", description.getDescription());
+
+	// Change values
+	description.setName("Noot");
+	description.setDescription("AnotherDescription");
+	CMDComponentSpec testComponent2 = RegistryTestHelper.getTestComponent("Test2");
+
+	// Publish
+	int result = userRegistry.publish(description, testComponent2, DummyPrincipal.DUMMY_PRINCIPAL);
+	assertEquals(0, result);
+
+	// Should not be in user registry
+	assertNull(userRegistry.getComponentDescription(description.getId()));
+	// Get from public registry
+	description = publicRegistry.getComponentDescription(description.getId());
+	// Test if new values are there
+	assertNotNull(description);
+	assertEquals("Noot", description.getName());
+	assertEquals("AnotherDescription", description.getDescription());
+	// Test if new content is there
+	assertEquals(RegistryTestHelper.getXml(testComponent2),
+		RegistryTestHelper.getXml(publicRegistry.getMDComponent(description.
+		getId())));
+	assertNull(userRegistry.getMDComponent(description.getId()));
+    }
 }

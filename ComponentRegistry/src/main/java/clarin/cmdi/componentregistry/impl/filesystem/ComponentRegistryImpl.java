@@ -247,6 +247,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
 		    deleteMDComponent(desc.getId(), principal, true);
 		}
 		desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
+		desc.setUserId(principal.getName());
 		result = ComponentRegistryFactoryImpl.getInstance().
 			getPublicRegistry().register(desc, spec);
 		//This is not nice this leaves us in a state where the spec can be deleted but not registered in public space.
