@@ -41,14 +41,29 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	this._class = _class;
     }
 
+    /**
+     *
+     * @param cmdId CMD id
+     * @return Whether the specified item is in the public space, and not deleted or in a user's workspace
+     */
     public boolean isPublic(String cmdId) {
-	String query = "SELECT COUNT(*) FROM " + getTableName() + " WHERE is_public = true AND " + getCMDIdColumn() + " = ?";
-	return (0 < getSimpleJdbcTemplate().queryForInt(query, cmdId));
+	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
+	query.append(getTableName());
+	query.append(" WHERE is_deleted = false AND is_public = true AND ").append(getCMDIdColumn()).append(" = ?");
+	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId));
     }
 
+    /**
+     *
+     * @param cmdId CMD id
+     * @param userId User db id of workspace owner
+     * @return Whether the specified item is in the specified user's workspace, and not deleted or the public space
+     */
     public boolean isInUserSpace(String cmdId, Number userId) {
-	String query = "SELECT COUNT(*) FROM " + getTableName() + " WHERE is_public = false AND user_id = ? AND " + getCMDIdColumn() + " = ?";
-	return (0 < getSimpleJdbcTemplate().queryForInt(query, userId, cmdId));
+	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
+	query.append(getTableName());
+	query.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND ").append(getCMDIdColumn()).append(" = ?");
+	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), userId, cmdId));
     }
 
     /**
@@ -125,11 +140,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	    // Update description
 	    StringBuilder updateDescription = new StringBuilder();
 	    updateDescription.append("UPDATE ").append(getTableName());
-	    updateDescription.append(" SET name = ?, description = ? ,registration_date=?,creator_name=?,domain_name=?,group_name=?,href=?");
+	    updateDescription.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
 	    updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
 	    getSimpleJdbcTemplate().update(updateDescription.toString(),
 		    description.getName(), description.getDescription(), extractTimestamp(description), description.getCreatorName(),
-			description.getDomainName(), description.getGroupName(), description.getHref(),
+		    description.getDomainName(), description.getGroupName(), description.getHref(),
 		    id);
 	}
 
@@ -170,11 +185,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return The description, if it exists; null otherwise
      */
     public T getByCmdId(String id, Number userId) throws DataAccessException {
-	String query = "WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?";
+	StringBuilder query = new StringBuilder("WHERE is_deleted = false AND ").append(getCMDIdColumn()).append(" = ?");
 	if (userId == null) {
-	    return getFirstOrNull(getSelectStatement(query + " AND is_public = true"), id);
+	    return getFirstOrNull(getSelectStatement(query.append(" AND is_public = true").toString()), id);
 	} else {
-	    return getFirstOrNull(getSelectStatement(query + " AND is_public = false AND user_id = ?"), id, userId);
+	    return getFirstOrNull(getSelectStatement(query.append(" AND is_public = false AND user_id = ?").toString()), id, userId);
 	}
     }
 
@@ -186,8 +201,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     public Number getDbId(String cmdId) {
 	// Check for is_deleted is important, because an id only has to be unique
 	// among non-deleted descriptions
-	String query = "SELECT " + COLUMN_ID + " FROM " + getTableName() + " WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?";
-	return getSimpleJdbcTemplate().queryForInt(query, cmdId);
+	StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID + " FROM ").append(getTableName());
+	query.append(" WHERE is_deleted = false AND ").append(getCMDIdColumn()).append(" = ?");
+	return getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId);
     }
 
     /**
@@ -214,13 +230,15 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @param Full component id
      */
     public void setDeleted(Number id) throws DataAccessException {
-	String update = "UPDATE " + getTableName() + " SET is_deleted = true WHERE " + COLUMN_ID + " = ?";
-	getSimpleJdbcTemplate().update(update, id);
+	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
+	update.append(" SET is_deleted = true WHERE " + COLUMN_ID + " = ?");
+	getSimpleJdbcTemplate().update(update.toString(), id);
     }
 
     public void setPublished(Number id, boolean published) {
-	String update = "UPDATE " + getTableName() + " SET is_public = ? WHERE " + COLUMN_ID + " = ?";
-	getSimpleJdbcTemplate().update(update, published, id);
+	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
+	update.append(" SET is_public = ? WHERE " + COLUMN_ID + " = ?");
+	getSimpleJdbcTemplate().update(update.toString(), published, id);
     }
 
     /**
@@ -229,11 +247,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return Principal name of description's owner, if any. Otherwise, null.
      */
     public String getOwnerPrincipalName(Number id) {
-	String select = "SELECT principal_name FROM " + TABLE_REGISTRY_USER
-		+ " JOIN " + getTableName()
-		+ " ON user_id = " + TABLE_REGISTRY_USER + ".id "
-		+ " WHERE " + getTableName() + ".id = ?";
-	List<String> owner = getSimpleJdbcTemplate().query(select, new ParameterizedSingleColumnRowMapper<String>(), id);
+	StringBuilder select = new StringBuilder("SELECT principal_name FROM " + TABLE_REGISTRY_USER);
+	select.append(" JOIN ").append(getTableName());
+	select.append(" ON user_id = " + TABLE_REGISTRY_USER + ".id ");
+	select.append(" WHERE ").append(getTableName()).append(".id = ?");
+	List<String> owner = getSimpleJdbcTemplate().query(select.toString(), new ParameterizedSingleColumnRowMapper<String>(), id);
 	if (owner.isEmpty()) {
 	    return null;
 	} else {
@@ -245,16 +263,15 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * DAO HELPER METHODS
      */
     private StringBuilder getSelectStatement(String... where) throws DataAccessException {
-	StringBuilder sb = new StringBuilder();
-	sb.append("SELECT ").append(getDescriptionColumnList()).
-		append(" FROM ").append(getTableName());
+	StringBuilder select = new StringBuilder("SELECT ").append(getDescriptionColumnList());
+	select.append(" FROM ").append(getTableName());
 	if (where.length > 0) {
-	    sb.append(" ");
+	    select.append(" ");
 	    for (String str : where) {
-		sb.append(" ").append(str);
+		select.append(" ").append(str);
 	    }
 	}
-	return sb;
+	return select;
     }
 
     /**

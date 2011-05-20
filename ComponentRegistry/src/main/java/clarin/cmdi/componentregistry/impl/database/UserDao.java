@@ -22,14 +22,32 @@ public class UserDao extends ComponentRegistryDao<User> {
 	return getList(SELECT_BASE);
     }
 
+    /**
+     *
+     * @param principalName User's principal name
+     * @return User, if it exists
+     * @throws DataAccessException
+     */
     public User getByPrincipalName(String principalName) throws DataAccessException {
 	return getFirstOrNull(SELECT_BASE + " WHERE principal_name = ?", principalName);
     }
 
+    /**
+     *
+     * @param id Database record id (key)
+     * @return User, if it exists
+     * @throws DataAccessException
+     */
     public User getById(Number id) throws DataAccessException {
 	return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", id);
     }
 
+    /**
+     *
+     * @param user
+     * @return Record id of the inserted user
+     * @throws DataAccessException
+     */
     public Number insertUser(User user) throws DataAccessException {
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
 		withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
