@@ -31,7 +31,11 @@ public class UserCredentials {
     }
 
     public String getPrincipalNameMD5Hex() {
-        return DigestUtils.md5Hex(userPrincipal.getName());
+        return getPrincipalNameMD5Hex(userPrincipal.getName());
+    }
+
+    public static String getPrincipalNameMD5Hex(String name){
+	return DigestUtils.md5Hex(name);
     }
 
     public String getDisplayName() {

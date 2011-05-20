@@ -41,7 +41,6 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
-import com.sun.jersey.api.spring.Autowire;
 
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
@@ -407,7 +406,7 @@ public class ComponentRegistryRestService {
         UserCredentials userCredentials = getUserCredentials(principal);
         ProfileDescription desc = createNewProfileDescription();
         desc.setCreatorName(userCredentials.getDisplayName());
-        desc.setUserId(userCredentials.getPrincipalNameMD5Hex());
+	desc.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
         desc.setName(name);
         desc.setDescription(description);
         desc.setGroupName(group);
@@ -427,7 +426,7 @@ public class ComponentRegistryRestService {
         UserCredentials userCredentials = getUserCredentials(principal);
         ComponentDescription desc = createNewComponentDescription();
         desc.setCreatorName(userCredentials.getDisplayName());
-        desc.setUserId(userCredentials.getPrincipalNameMD5Hex());
+        desc.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
         desc.setName(name);
         desc.setDescription(description);
         desc.setGroupName(group);

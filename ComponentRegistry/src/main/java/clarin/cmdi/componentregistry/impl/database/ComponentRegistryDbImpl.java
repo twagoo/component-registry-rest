@@ -10,6 +10,7 @@ import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,6 +42,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
     private ComponentDescriptionDao componentDescriptionDao;
+    @Autowired
+    private UserDao userDao;
     @Autowired
     Configuration configuration;
     @Autowired
@@ -157,11 +160,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	enrichSpecHeader(spec, description);
 	try {
 	    String xml = componentSpecToString(spec);
-	    if (description.isProfile()) {
-		profileDescriptionDao.insertDescription(description, xml, isPublic(), userId);
-	    } else {
-		componentDescriptionDao.insertDescription(description, xml, isPublic(), userId);
-	    }
+	    // Convert principal name to user record id
+	    Number uid = convertUserIdInDescription(description);
+	    getDaoForDescription(description).insertDescription(description, xml, isPublic(), uid);
 	    invalidateCache(description);
 	    return 0;
 	} catch (JAXBException ex) {
@@ -172,6 +173,30 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    LOG.error("Database error while registering component", ex);
 	}
 	return -1;
+    }
+
+    /**
+     * Calling service sets user id to principle. Our task is to convert this to
+     * an id for later reference. If none is set and this is a user's workspace,
+     * set from that user's id.
+     * @param description Description containing principle name as userId
+     * @return Id (from database)
+     * @throws DataAccessException
+     */
+    private Number convertUserIdInDescription(AbstractDescription description) throws DataAccessException {
+	Number uid = null;
+	if (description.getUserId() != null) {
+	    User user = userDao.getByPrincipalName(description.getUserId());
+	    if (user != null) {
+		uid = user.getId();
+	    }
+	} else {
+	    uid = userId;
+	}
+	if (uid != null) {
+	    description.setUserId(uid.toString());
+	}
+	return uid;
     }
 
     @Override
@@ -395,13 +420,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	}
     }
-    
+
     @Override
     public String getName() {
-        if (isPublic()) {
-            return "Public Registry";
-        } else {
-            return "User "+getUserId()+" Registry";
-        }
+	if (isPublic()) {
+	    return "Public Registry";
+	} else {
+	    return "User " + getUserId() + " Registry";
+	}
     }
 }

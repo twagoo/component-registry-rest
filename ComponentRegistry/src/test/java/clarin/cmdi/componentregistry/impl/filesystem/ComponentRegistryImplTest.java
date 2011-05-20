@@ -122,18 +122,20 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
         ProfileDescription pDesc = ProfileDescription.createNewDescription();
         pDesc.setName("Aap1");
-        pDesc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalNameMD5Hex());
+        pDesc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
         ComponentDescription cDesc = ComponentDescription.createNewDescription();
         cDesc.setName("Aap2");
-        cDesc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalNameMD5Hex());
+        cDesc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
 
         assertEquals(0, userReg.getComponentDescriptions().size());
         assertEquals(0, userReg.getProfileDescriptions().size());
         assertEquals(0, publicReg.getComponentDescriptions().size());
         assertEquals(0, publicReg.getProfileDescriptions().size());
         userReg.register(cDesc, RegistryTestHelper.getTestComponent());
+	cDesc.setUserId(USER_CREDS.getPrincipalName()); // Prevent hash^2
         publicReg.register(cDesc, RegistryTestHelper.getTestComponent());
         publicReg.register(pDesc, RegistryTestHelper.getTestProfile());
+	pDesc.setUserId(USER_CREDS.getPrincipalName()); // Prevent hash^2
         userReg.register(pDesc, RegistryTestHelper.getTestProfile());
         assertEquals(1, userReg.getComponentDescriptions().size());
         assertEquals(1, userReg.getProfileDescriptions().size());
@@ -330,7 +332,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
         description.setCreatorName(USER_CREDS.getDisplayName());
-        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+        description.setUserId(USER_CREDS.getPrincipalName());
         description.setDescription("MyDescription");
         CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
 
@@ -361,7 +363,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
         description.setCreatorName(USER_CREDS.getDisplayName());
-        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+        description.setUserId(USER_CREDS.getPrincipalName());
         description.setDescription("MyDescription");
         CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
@@ -387,7 +389,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         ComponentDescription description = ComponentDescription.createNewDescription();
         description.setName("Aap");
         description.setCreatorName(USER_CREDS.getDisplayName());
-        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+        description.setUserId(USER_CREDS.getPrincipalName());
         description.setDescription("MyDescription");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1999);
@@ -404,6 +406,8 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
         assertEquals(0, registry.getComponentDescriptions().size());
 
+	// reset userId otherwise we would get hash^2 twice
+	description.setUserId(USER_CREDS.getPrincipalName());
         registry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.register(description, testComp);
         assertEquals(1, registry.getComponentDescriptions().size());
@@ -417,7 +421,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         ProfileDescription description = ProfileDescription.createNewDescription();
         description.setName("Aap");
         description.setCreatorName(USER_CREDS.getDisplayName());
-        description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+        description.setUserId(USER_CREDS.getPrincipalName());
         description.setDescription("MyDescription");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, 1999);
@@ -434,6 +438,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
         registry.deleteMDProfile(description.getId(), PRINCIPAL_ADMIN);
         assertEquals(0, registry.getProfileDescriptions().size());
 
+	description.setUserId(USER_CREDS.getPrincipalName());
         registry = ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
         registry.register(description, testComp);
         assertEquals(1, registry.getProfileDescriptions().size());

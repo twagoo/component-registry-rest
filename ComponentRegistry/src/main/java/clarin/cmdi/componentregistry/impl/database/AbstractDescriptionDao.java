@@ -241,7 +241,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      */
     private StringBuilder getDescriptionColumnList() {
 	StringBuilder sb = new StringBuilder();
-	sb.append("name,description,registration_date,creator_name,domain_name,group_name,");
+	sb.append("name,description,registration_date,creator_name,domain_name,group_name,user_id,");
 	sb.append(getCMDIdColumn());
 	return sb;
     }
@@ -270,6 +270,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		newDescription.setCreatorName(rs.getString("creator_name"));
 		newDescription.setDomainName(rs.getString("domain_name"));
 		newDescription.setGroupName(rs.getString("group_name"));
+
+		Object userId = rs.getObject("user_id");
+		if (!rs.wasNull()) {
+		    newDescription.setUserId(userId.toString());
+		}
 		return (T) newDescription;
 	    } catch (InstantiationException ex) {
 		LOG.error("Error in row mapping", ex);

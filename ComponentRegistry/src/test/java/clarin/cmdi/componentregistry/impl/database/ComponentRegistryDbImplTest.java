@@ -2,14 +2,12 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
@@ -165,7 +163,7 @@ public class ComponentRegistryDbImplTest {
 	ProfileDescription description = ProfileDescription.createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+	description.setUserId(USER_CREDS.getPrincipalName());
 	description.setDescription("MyDescription");
 
 	CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
@@ -223,7 +221,7 @@ public class ComponentRegistryDbImplTest {
 		createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(userId.toString());
+	description.setUserId(USER_CREDS.getPrincipalName());
 	description.setDescription("MyDescription");
 	Calendar calendar = Calendar.getInstance();
 	calendar.set(Calendar.YEAR, 1999);
@@ -249,6 +247,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getComponentDescriptions().size());
 
 	registry = getComponentRegistryForUser(userId); // ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
+	description.setUserId(USER_CREDS.getPrincipalName()); // Set again to principal name
 	registry.register(description, testComp);
 	assertEquals(1, registry.getComponentDescriptions().size());
 	registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
@@ -263,7 +262,7 @@ public class ComponentRegistryDbImplTest {
 	ProfileDescription description = ProfileDescription.createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(userId.toString());
+	description.setUserId(USER_CREDS.getPrincipalName());
 	description.setDescription("MyDescription");
 	Calendar calendar = Calendar.getInstance();
 	calendar.set(Calendar.YEAR, 1999);
@@ -288,6 +287,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
 
 	registry = getComponentRegistryForUser(userId);
+	description.setUserId(USER_CREDS.getPrincipalName()); // Set again to principal name
 	registry.register(description, testComp);
 	assertEquals(1, registry.getProfileDescriptions().size());
 	registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
@@ -299,7 +299,7 @@ public class ComponentRegistryDbImplTest {
 		createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalNameMD5Hex());
+	description.setUserId(USER_CREDS.getPrincipalName());
 	description.setDescription("MyDescription");
 	CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 

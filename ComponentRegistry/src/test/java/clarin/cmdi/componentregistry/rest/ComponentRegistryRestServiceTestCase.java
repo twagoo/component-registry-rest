@@ -1,15 +1,10 @@
 package clarin.cmdi.componentregistry.rest;
 
-import java.io.File;
 import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 
-import org.junit.After;
-import org.junit.Before;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -30,18 +25,17 @@ import org.springframework.web.context.request.RequestContextListener;
 public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     //CommandLine test e.g.:  curl -i -H "Accept:application/json" -X GET  http://localhost:8080/ComponentRegistry/rest/registry/profiles
 
-    protected static ComponentRegistry testRegistry;
-    private static File registryDir;
-
     protected final static GenericType<List<ProfileDescription>> PROFILE_LIST_GENERICTYPE = new GenericType<List<ProfileDescription>>() {
     };
     protected final static GenericType<List<ComponentDescription>> COMPONENT_LIST_GENERICTYPE = new GenericType<List<ComponentDescription>>() {
     };
 
+    protected abstract String getApplicationContextFile();
+
     @Override
     protected AppDescriptor configure() {
         WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder()
-                .contextParam("contextConfigLocation", "classpath:applicationContext.xml")
+                .contextParam("contextConfigLocation", getApplicationContextFile())
                 .servletClass(SpringServlet.class)
                 .initParam(WebComponent.RESOURCE_CONFIG_CLASS,ClassNamesResourceConfig.class.getName())
                 .initParam(ClassNamesResourceConfig.PROPERTY_CLASSNAMES,FormDataMultiPartDispatchProvider.class.getName() + ";" + ComponentRegistryRestService.class.getName())
@@ -63,24 +57,6 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected Builder getAuthenticatedResource(WebResource resource) {
         return resource.header(HttpHeaders.AUTHORIZATION, "Basic "
                 + new String(Base64.encode(DummyPrincipal.DUMMY_PRINCIPAL.getName() + ":dummy")));
-    }
-
-    @Before
-    public void setUpTestRegistry() throws Exception {
-        registryDir = ComponentRegistryTestCase.createTempRegistryDir();
-        testRegistry = ComponentRegistryTestCase.getTestRegistry(registryDir);
-    }
-
-    protected void fillUp() throws Exception {
-        RegistryTestHelper.addProfile(testRegistry, "profile1");
-        RegistryTestHelper.addProfile(testRegistry, "profile2");
-        RegistryTestHelper.addComponent(testRegistry, "component1");
-        RegistryTestHelper.addComponent(testRegistry, "component2");
-    }
-
-    @After
-    public void deleteAndRecreateEmptyRegistry() {
-        ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
     }
 
 }

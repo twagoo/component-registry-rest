@@ -18,6 +18,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -29,7 +30,17 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
-public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServiceTestCase {
+public abstract class ComponentRegistryRestServiceTest extends ComponentRegistryRestServiceTestCase {
+
+
+    protected abstract ComponentRegistry getTestRegistry();
+
+    private void fillUp() throws Exception {
+        RegistryTestHelper.addProfile(getTestRegistry(), "profile1");
+        RegistryTestHelper.addProfile(getTestRegistry(), "profile2");
+        RegistryTestHelper.addComponent(getTestRegistry(), "component1");
+        RegistryTestHelper.addComponent(getTestRegistry(), "component2");
+    };
 
     @Test
     public void testGetRegisteredProfiles() throws Exception {
@@ -114,7 +125,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
-        ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content);
+        ComponentDescription compDesc1 = RegistryTestHelper.addComponent(getTestRegistry(), "XXX1", content);
 
         content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -125,7 +136,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        </CMD_Component>\n";
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
-        ComponentDescription compDesc2 = RegistryTestHelper.addComponent(testRegistry, "YYY1", content);
+        ComponentDescription compDesc2 = RegistryTestHelper.addComponent(getTestRegistry(), "YYY1", content);
 
         content = "";
         content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -136,7 +147,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        </CMD_Component>\n";
         content += "    </CMD_Component>\n";
         content += "</CMD_ComponentSpec>\n";
-        ProfileDescription profile = RegistryTestHelper.addProfile(testRegistry, "TestProfile3", content);
+        ProfileDescription profile = RegistryTestHelper.addProfile(getTestRegistry(), "TestProfile3", content);
 
         List<ComponentDescription> components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, components.size());
@@ -293,12 +304,14 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("My Test Profile", profileDesc.getDescription());
         assertEquals("TestDomain", profileDesc.getDomainName());
         assertEquals("My Test Group", profileDesc.getGroupName());
-        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), profileDesc.getUserId());
+        assertEquals(expectedUserId("JUnit@test.com"), profileDesc.getUserId());
         assertEquals("JUnit@test.com", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
         assertEquals("http://localhost:9998/registry/profiles/" + profileDesc.getId(), profileDesc.getHref());
     }
+
+    protected abstract String expectedUserId(String principal);
 
     @Test
     public void testPublishProfile() throws Exception {
@@ -378,7 +391,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(profileDesc);
         assertEquals("Test1", profileDesc.getName());
         assertEquals("My Test", profileDesc.getDescription());
-        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), profileDesc.getUserId());
+        assertEquals(expectedUserId("JUnit@test.com"), profileDesc.getUserId());
         assertEquals("JUnit@test.com", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(profileDesc.getRegistrationDate());
@@ -437,10 +450,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         return form;
     }
 
+    protected abstract ComponentRegistryFactory getRegistryFactory();
+
     @Test
     public void testRegisterWithUserComponents() throws Exception {
-        ComponentRegistry userRegistry = ComponentRegistryFactoryImpl.getInstance()
-                .getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
+        ComponentRegistry userRegistry = getRegistryFactory().getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
@@ -511,7 +525,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
         assertEquals("My Test", desc.getDescription());
-        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), desc.getUserId());
+        assertEquals(expectedUserId("JUnit@test.com"), desc.getUserId());
         assertEquals("JUnit@test.com", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
         assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
@@ -687,7 +701,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("ComponentTest1", desc.getName());
         assertEquals("My Test Component", desc.getDescription());
-        assertEquals(DigestUtils.md5Hex("JUnit@test.com"), desc.getUserId());
+        assertEquals(expectedUserId("JUnit@test.com"), desc.getUserId());
         assertEquals("JUnit@test.com", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
         assertEquals("TestDomain", desc.getDomainName());
