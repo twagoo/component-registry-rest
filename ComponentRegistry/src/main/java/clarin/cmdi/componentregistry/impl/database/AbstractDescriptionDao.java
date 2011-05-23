@@ -19,11 +19,12 @@ import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 
 /**
  * 
@@ -34,7 +35,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
     private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
     @Autowired
-    private DataSourceTransactionManager txManager;
+    private PlatformTransactionManager txManager;
     @Autowired
     private TransactionDefinition txDefinition;
 
