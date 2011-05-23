@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 public abstract class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
     private final static Logger LOG = LoggerFactory.getLogger(ConcurrentRestServiceTest.class);
-    private int NR_OF_PROFILES = 10;
-    private int NR_OF_COMPONENTS = 10;
+    private int NR_OF_PROFILES = 50;
+    private int NR_OF_COMPONENTS = 50;
 
     @Test
     public void testConcurrentRegisterProfile() throws Exception {
@@ -91,7 +91,7 @@ public abstract class ConcurrentRestServiceTest extends ComponentRegistryRestSer
     private void runAllThreads(List<Thread> ts) throws InterruptedException {
 	for (Thread thread : ts) {
 	    thread.start();
-	    thread.join(5);
+	    thread.join(10);
 	}
 	for (Thread thread : ts) {
 	    thread.join(); //Wait till all are finished

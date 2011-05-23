@@ -12,10 +12,10 @@
     </bean>-->
     
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="org.postgresql.Driver"/>
-        <property name="url" value="jdbc:postgresql:component_registry"/>
-        <property name="username" value="component_registry"/>
-        <property name="password" value="component_registry"/>
+	<property name="driverClassName" value="org.postgresql.Driver"/>
+	<property name="url" value="jdbc:postgresql:component_registry"/>
+	<property name="username" value="component_registry"/>
+	<property name="password" value="component_registry"/>
     </bean>
 
 </beans>

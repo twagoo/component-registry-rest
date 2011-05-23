@@ -9,7 +9,6 @@
         <property name="url" value="jdbc:hsqldb:mem:component_registry;sql.syntax_pgs=true"/>
         <property name="username" value="sa"/>
         <property name="password" value=""/>
-        <property name="defaultAutoCommit" value="true"/>
     </bean>
 
     <bean id="jdbcTemplate"

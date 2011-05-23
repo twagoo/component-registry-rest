@@ -20,6 +20,10 @@ import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 /**
  * 
@@ -29,11 +33,14 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
     private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+    @Autowired
+    private DataSourceTransactionManager txManager;
+    @Autowired
+    private TransactionDefinition txDefinition;
 
     protected abstract String getTableName();
 
     protected abstract String getCMDIdColumn();
-
     /**
      * Class object required to instantiate new description domain objects
      */
@@ -99,30 +106,37 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-
     public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId)
 	    throws DataAccessException {
-	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT)
-		.usingGeneratedKeyColumns(COLUMN_ID);
-	Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
 
-	SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(
-		COLUMN_ID);
-	Map<String, Object> params = new HashMap<String, Object>();
-	params.put("content_id", contentId);
-	params.put("user_id", userId);
-	params.put("is_public", isPublic);
-	params.put("is_deleted", Boolean.FALSE);
-	params.put(getCMDIdColumn(), description.getId());
-	params.put("name", description.getName());
-	params.put("description", description.getDescription());
-	params.put("creator_name", description.getCreatorName());
-	params.put("group_name", description.getGroupName());
-	params.put("domain_name", description.getDomainName());
-	params.put("href", description.getHref());
-	params.put("registration_date", extractTimestamp(description));
-	return insertDescription.executeAndReturnKey(params);
+	TransactionStatus transaction = getTransaction();
+	try {
+	    SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(COLUMN_ID);
+	    Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
 
+	    SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(
+		    COLUMN_ID);
+	    Map<String, Object> params = new HashMap<String, Object>();
+	    params.put("content_id", contentId);
+	    params.put("user_id", userId);
+	    params.put("is_public", isPublic);
+	    params.put("is_deleted", Boolean.FALSE);
+	    params.put(getCMDIdColumn(), description.getId());
+	    params.put("name", description.getName());
+	    params.put("description", description.getDescription());
+	    params.put("creator_name", description.getCreatorName());
+	    params.put("group_name", description.getGroupName());
+	    params.put("domain_name", description.getDomainName());
+	    params.put("href", description.getHref());
+	    params.put("registration_date", extractTimestamp(description));
+
+	    Number id = insertDescription.executeAndReturnKey(params);
+	    txManager.commit(transaction);
+	    return id;
+	} catch (DataAccessException ex) {
+	    txManager.rollback(transaction);
+	    throw ex;
+	}
     }
 
     private Timestamp extractTimestamp(AbstractDescription description) {
@@ -150,25 +164,31 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            New content for description (leave null to not change)
      */
     public void updateDescription(Number id, AbstractDescription description, String content) {
-	if (description != null) {
-	    // Update description
-	    StringBuilder updateDescription = new StringBuilder();
-	    updateDescription.append("UPDATE ").append(getTableName());
-	    updateDescription
-		    .append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
-	    updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
-	    getSimpleJdbcTemplate().update(updateDescription.toString(), description.getName(), description.getDescription(),
-		    extractTimestamp(description), description.getCreatorName(), description.getDomainName(), description.getGroupName(),
-		    description.getHref(), id);
-	}
+	TransactionStatus transaction = getTransaction();
+	try {
+	    if (description != null) {
+		// Update description
+		StringBuilder updateDescription = new StringBuilder();
+		updateDescription.append("UPDATE ").append(getTableName());
+		updateDescription.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
+		updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
+		getSimpleJdbcTemplate().update(updateDescription.toString(), description.getName(), description.getDescription(),
+			extractTimestamp(description), description.getCreatorName(), description.getDomainName(), description.getGroupName(),
+			description.getHref(), id);
+	    }
 
-	if (content != null) {
-	    // Update content
-	    StringBuilder updateContent = new StringBuilder();
-	    updateContent.append("UPDATE " + TABLE_XML_CONTENT + " SET content = ? WHERE " + COLUMN_ID + " = ");
-	    updateContent.append("(SELECT content_id FROM ").append(getTableName()).append(" WHERE " + COLUMN_ID + "= ?)");
+	    if (content != null) {
+		// Update content
+		StringBuilder updateContent = new StringBuilder();
+		updateContent.append("UPDATE " + TABLE_XML_CONTENT + " SET content = ? WHERE " + COLUMN_ID + " = ");
+		updateContent.append("(SELECT content_id FROM ").append(getTableName()).append(" WHERE " + COLUMN_ID + "= ?)");
 
-	    getSimpleJdbcTemplate().update(updateContent.toString(), content, id);
+		getSimpleJdbcTemplate().update(updateContent.toString(), content, id);
+	    }
+	    txManager.commit(transaction);
+	} catch (DataAccessException ex) {
+	    txManager.rollback(transaction);
+	    throw ex;
 	}
     }
 
@@ -260,16 +280,20 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     public void setDeleted(AbstractDescription desc, boolean isDeleted) throws DataAccessException {
+	TransactionStatus transaction = getTransaction();
 	Number dbId = getDbId(desc.getId());
 	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
 	update.append(" SET is_deleted = ").append(Boolean.toString(isDeleted)).append(" WHERE " + COLUMN_ID + " = ?");
 	getSimpleJdbcTemplate().update(update.toString(), dbId);
+	txManager.commit(transaction);
     }
 
     public void setPublished(Number id, boolean published) {
+	TransactionStatus transaction = getTransaction();
 	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
 	update.append(" SET is_public = ? WHERE " + COLUMN_ID + " = ?");
 	getSimpleJdbcTemplate().update(update.toString(), published, id);
+	txManager.commit(transaction);
     }
 
     /**
@@ -325,7 +349,6 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     protected ParameterizedRowMapper<T> getRowMapper() {
 	return rowMapper;
     }
-
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
@@ -356,4 +379,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	    return null;
 	}
     };
+
+    private TransactionStatus getTransaction() {
+	return txManager.getTransaction(txDefinition);
+    }
 }
