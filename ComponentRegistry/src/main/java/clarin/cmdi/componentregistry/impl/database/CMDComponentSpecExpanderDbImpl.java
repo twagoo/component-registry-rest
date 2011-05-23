@@ -17,23 +17,23 @@ public class CMDComponentSpecExpanderDbImpl extends CMDComponentSpecExpander {
 	dbImplRegistry = registry;
     }
 
-    public static CMDComponentSpec expandComponent(String componentId, ComponentRegistryDbImpl registry) {
+    public static CMDComponentSpec expandComponent(String componentId, ComponentRegistryDbImpl registry) throws ComponentRegistryException {
 	CMDComponentSpecExpanderDbImpl expander = new CMDComponentSpecExpanderDbImpl(registry);
 	return expander.expandComponent(componentId);
     }
 
-    public static CMDComponentSpec expandProfile(String profileId, ComponentRegistryDbImpl registry) {
+    public static CMDComponentSpec expandProfile(String profileId, ComponentRegistryDbImpl registry) throws ComponentRegistryException {
 	CMDComponentSpecExpanderDbImpl expander = new CMDComponentSpecExpanderDbImpl(registry);
 	return expander.expandProfile(profileId);
     }
 
     @Override
-    protected CMDComponentSpec getUncachedComponent(String componentId) {
+    protected CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException {
 	return dbImplRegistry.getUncachedMDComponent(componentId);
     }
 
     @Override
-    protected CMDComponentSpec getUncachedProfile(String profileId) {
+    protected CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException {
 	return dbImplRegistry.getUncachedMDProfile(profileId);
     }
 }

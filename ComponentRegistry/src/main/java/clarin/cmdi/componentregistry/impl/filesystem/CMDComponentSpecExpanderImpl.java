@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 
 public class CMDComponentSpecExpanderImpl extends CMDComponentSpecExpander {
@@ -11,12 +12,12 @@ public class CMDComponentSpecExpanderImpl extends CMDComponentSpecExpander {
 	fsImplRegistry = registry;
     }
 
-    public static CMDComponentSpec expandComponent(String componentId, ComponentRegistryImpl registry) {
+    public static CMDComponentSpec expandComponent(String componentId, ComponentRegistryImpl registry) throws ComponentRegistryException {
 	CMDComponentSpecExpanderImpl expander = new CMDComponentSpecExpanderImpl(registry);
 	return expander.expandComponent(componentId);
     }
 
-    public static CMDComponentSpec expandProfile(String profileId, ComponentRegistryImpl registry) {
+    public static CMDComponentSpec expandProfile(String profileId, ComponentRegistryImpl registry) throws ComponentRegistryException {
 	CMDComponentSpecExpanderImpl expander = new CMDComponentSpecExpanderImpl(registry);
 	return expander.expandProfile(profileId);
     }

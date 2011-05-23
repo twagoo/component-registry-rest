@@ -265,25 +265,25 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void getMDProfileAsXml(String profileId, OutputStream output) {
+    public void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandProfile(profileId, this);
 	writeXml(expandedSpec, output);
     }
 
     @Override
-    public void getMDProfileAsXsd(String profileId, OutputStream outputStream) {
+    public void getMDProfileAsXsd(String profileId, OutputStream outputStream) throws ComponentRegistryException {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandProfile(profileId, this);
 	writeXsd(expandedSpec, outputStream);
     }
 
     @Override
-    public void getMDComponentAsXml(String componentId, OutputStream output) {
+    public void getMDComponentAsXml(String componentId, OutputStream output) throws ComponentRegistryException {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandComponent(componentId, this);
 	writeXml(expandedSpec, output);
     }
 
     @Override
-    public void getMDComponentAsXsd(String componentId, OutputStream outputStream) {
+    public void getMDComponentAsXsd(String componentId, OutputStream outputStream) throws ComponentRegistryException {
 	CMDComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandComponent(componentId, this);
 	writeXsd(expandedSpec, outputStream);
     }

@@ -1,11 +1,11 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
@@ -15,8 +15,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.security.Principal;
-import java.util.Collections;
 
 import javax.xml.bind.JAXBException;
 
@@ -89,9 +87,7 @@ public class ComponentRegistryFactoryTest {
         assertNotNull(reg);
         assertSame(reg2, reg);
         reg = instance.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, null);
-        assertNotNull(reg);
-        assertNotSame(reg2, reg);
-        assertTrue(reg.isPublic());
+        assertNull(reg);
     }
 
     private UserCredentials createUserCredentials(String principalName, final String displayName) {

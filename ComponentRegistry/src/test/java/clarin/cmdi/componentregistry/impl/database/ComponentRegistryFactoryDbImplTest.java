@@ -39,6 +39,7 @@ public class ComponentRegistryFactoryDbImplTest {
     @Test
     public void testInjection() {
 	assertNotNull(componentRegistryFactory);
+	assertNotNull(jdbcTemplate);
     }
 
     @Test

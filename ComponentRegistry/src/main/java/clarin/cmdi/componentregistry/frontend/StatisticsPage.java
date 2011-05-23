@@ -56,7 +56,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         }
     }
 
-    private void displayProfileStatistics(ProfileDescription pd, RepeatingView repeatingview) {
+    private void displayProfileStatistics(ProfileDescription pd, RepeatingView repeatingview) throws ComponentRegistryException {
         WebMarkupContainer item = new WebMarkupContainer(repeatingview.newChildId());
         repeatingview.add(item);
         item.add(new Label("ID", pd.getId()));
@@ -69,7 +69,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         item.add(new Label("nrproflinks", "" + stats.conceptlinkcounter));
     }
 
-    private void displayComponentStatistics(ComponentDescription cd, RepeatingView repeatingview) {
+    private void displayComponentStatistics(ComponentDescription cd, RepeatingView repeatingview) throws ComponentRegistryException {
         WebMarkupContainer item = new WebMarkupContainer(repeatingview.newChildId());
         repeatingview.add(item);
         item.add(new Label("ID", cd.getId()));

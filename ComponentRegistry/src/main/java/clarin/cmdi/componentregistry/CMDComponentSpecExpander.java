@@ -20,7 +20,7 @@ public abstract class CMDComponentSpecExpander {
 	this.registry = registry;
     }
 
-    private void expandNestedComponent(List<CMDComponentType> cmdComponents) {
+    private void expandNestedComponent(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
 	List<CMDComponentType> expanded = new ArrayList<CMDComponentType>();
 	for (CMDComponentType cmdComponentType : cmdComponents) {
 	    String componentId = cmdComponentType.getComponentId();
@@ -75,7 +75,7 @@ public abstract class CMDComponentSpecExpander {
 	nested.setComponentId(referenceDeclaration.getComponentId()); // Setting componentId for better xsd generation.
     }
 
-    protected CMDComponentSpec expandComponent(String componentId) {
+    protected CMDComponentSpec expandComponent(String componentId) throws ComponentRegistryException {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedComponent(componentId);//registry.getUncachedComponent(componentId);
 	CMDComponentType cmdComponentType = getComponentTypeOfAComponent(result);
@@ -83,7 +83,7 @@ public abstract class CMDComponentSpecExpander {
 	return result;
     }
 
-    protected CMDComponentSpec expandProfile(String profileId) {
+    protected CMDComponentSpec expandProfile(String profileId) throws ComponentRegistryException {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedProfile(profileId);//registry.getUncachedProfile(profileId);
 	List<CMDComponentType> cmdComponents = result.getCMDComponent();
@@ -95,7 +95,7 @@ public abstract class CMDComponentSpecExpander {
      * Get uncached component from "this" registry and possibly from public registry. Note: "this" registry can be a user registry.
      * @param componentId
      */
-    protected abstract CMDComponentSpec getUncachedComponent(String componentId);
+    protected abstract CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException;
 
-    protected abstract CMDComponentSpec getUncachedProfile(String profileId);
+    protected abstract CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException;
 }
