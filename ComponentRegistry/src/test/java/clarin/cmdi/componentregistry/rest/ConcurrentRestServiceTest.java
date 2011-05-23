@@ -101,7 +101,7 @@ public abstract class ConcurrentRestServiceTest extends ComponentRegistryRestSer
     private void registerProfiles(List<Thread> ts, int size, final List<String> errors, String userSpace) throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
-	    Thread thread = createThread("/registry/profiles/", userSpace, i, "Test Profile" + (i + 1000), shouldDelete, RegistryTestHelper.getTestProfileContent(), errors);
+	    Thread thread = createThread("/registry/profiles/", userSpace, "Test Profile" + (i + 1000), shouldDelete, RegistryTestHelper.getTestProfileContent(), errors);
 	    ts.add(thread);
 	}
     }
@@ -109,13 +109,13 @@ public abstract class ConcurrentRestServiceTest extends ComponentRegistryRestSer
     private void registerComponents(List<Thread> ts, int size, final List<String> errors, String userSpace) throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
-	    Thread thread = createThread("/registry/components/", userSpace, i, "Test Component" + (i + 1000), shouldDelete,
+	    Thread thread = createThread("/registry/components/", userSpace, "Test Component" + (i + 1000), shouldDelete,
 		    RegistryTestHelper.getComponentTestContent(), errors);
 	    ts.add(thread);
 	}
     }
 
-    private Thread createThread(final String path, final String userSpace, final int nrOfProfiles, final String name, final boolean alsoDelete,
+    private Thread createThread(final String path, final String userSpace, final String name, final boolean alsoDelete,
 	    InputStream content, final List<String> errors) throws InterruptedException {
 	final FormDataMultiPart form = new FormDataMultiPart();
 	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
