@@ -55,13 +55,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * 
      * @param cmdId
      *            CMD id
-     * @return Whether the specified item is in the public space, and not
-     *         deleted or in a user's workspace
+     * @return Whether the specified item is in the public space or in a user's workspace
      */
     public boolean isPublic(String cmdId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
 	query.append(getTableName());
-	query.append(" WHERE is_deleted = false AND is_public = true AND ").append(getCMDIdColumn()).append(" = ?");
+	query.append(" WHERE is_public = true AND ").append(getCMDIdColumn()).append(" = ?");
 	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId));
     }
 
@@ -71,13 +70,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            CMD id
      * @param userId
      *            User db id of workspace owner
-     * @return Whether the specified item is in the specified user's workspace,
-     *         and not deleted or the public space
+     * @return Whether the specified item is in the specified user's workspace or the public space
      */
     public boolean isInUserSpace(String cmdId, Number userId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
 	query.append(getTableName());
-	query.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND ").append(getCMDIdColumn()).append(" = ?");
+	query.append(" WHERE is_public = false AND user_id = ? AND ").append(getCMDIdColumn()).append(" = ?");
 	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), userId, cmdId));
     }
 
@@ -87,12 +85,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Profile or component Id (not primary key)
      * @return String value of XML content for profile or component
      */
-    public String getContent(String cmdId) throws DataAccessException {
+    public String getContent(boolean isDeleted, String cmdId) throws DataAccessException {
 	String select = "SELECT content FROM " + TABLE_XML_CONTENT + " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "."
-		+ COLUMN_ID + " = " + getTableName() + ".content_id" + " WHERE is_deleted = false AND " + getTableName() + "."
+		+ COLUMN_ID + " = " + getTableName() + ".content_id" + " WHERE is_deleted = ? AND " + getTableName() + "."
 		+ getCMDIdColumn() + " = ?";
 
-	List<String> result = getSimpleJdbcTemplate().query(select, new ParameterizedSingleColumnRowMapper<String>(), cmdId);
+	List<String> result = getSimpleJdbcTemplate().query(select, new ParameterizedSingleColumnRowMapper<String>(), isDeleted, cmdId);
 	if (result.size() > 0) {
 	    return result.get(0);
 	} else {
@@ -261,7 +259,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *         userId=null
      * @param userId
      */
-    public List<T> getDeletedDescriptions(Number userId) {//TODO PD make test!
+    public List<T> getDeletedDescriptions(Number userId) {
 	if (userId != null) {
 	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = false AND user_id = ?").toString();
 	    return getList(select, userId);

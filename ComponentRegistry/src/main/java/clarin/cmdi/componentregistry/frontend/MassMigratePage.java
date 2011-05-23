@@ -1,14 +1,8 @@
 package clarin.cmdi.componentregistry.frontend;
 
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-
-import javax.xml.bind.JAXBException;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
@@ -24,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.AbstractDescriptionDao;
@@ -126,25 +121,21 @@ public class MassMigratePage extends SecureAdminWebPage {
 		User user = userDao.getByPrincipalName(userMap.findUser(description.getUserId()).getPrincipalName());
 		descDao.insertDescription(description, getContent(description, registry), registry.isPublic(), user.getId());
 	    } catch (Exception e) {
-		LOG.error("Error in migration, check the logs!", e);
-		info("Error cannot migrate " + description.getId());
+		LOG.error("Error in migration:", e);
+		info("Error cannot migrate, check the logs!" + description.getId());
 	    }
 	    migrateCount++;
 	}
 	LOG.info(registry.getName() + " migrated: " + migrateCount + " out of " + descs.size() + " descs");
     }
 
-    private String getContent(AbstractDescription description, ComponentRegistry registry) throws UnsupportedEncodingException,
-	    JAXBException,
-	    ComponentRegistryException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
+    private String getContent(AbstractDescription description, ComponentRegistry registry) throws ComponentRegistryException {
 	CMDComponentSpec spec = null;
 	if (description.isProfile()) {
 	    spec = registry.getMDProfile(description.getId());
 	} else {
 	    spec = registry.getMDComponent(description.getId());
 	}
-	MDMarshaller.marshal(spec, out);
-	return out.toString();
+	return MDMarshaller.marshalToString(spec);
     }
 }

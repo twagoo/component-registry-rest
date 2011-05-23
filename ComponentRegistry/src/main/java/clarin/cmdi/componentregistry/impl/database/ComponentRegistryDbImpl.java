@@ -216,24 +216,35 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public int update(AbstractDescription description, CMDComponentSpec spec) {
+    public int update(AbstractDescription description, CMDComponentSpec spec, Principal principal, boolean forceUpdate) {
 	try {
+	    checkAuthorisation(description, principal);
+	    checkAge(description, principal);
+	    if (!forceUpdate && !description.isProfile()) {
+		checkStillUsed(description.getId());
+	    }
 	    AbstractDescriptionDao<?> dao = getDaoForDescription(description);
 	    dao.updateDescription(getIdForDescription(description), description, componentSpecToString(spec));
 	    invalidateCache(description);
 	    return 0;
-	} catch (DataAccessException ex) {
-	    LOG.error("Database error while updating component", ex);
-	    return -1;
 	} catch (JAXBException ex) {
 	    LOG.error("Error while updating component", ex);
-	    return -2;
+	    return -1;
 	} catch (UnsupportedEncodingException ex) {
 	    LOG.error("Error while updating component", ex);
-	    return -3;
+	    return -1;
 	} catch (IllegalArgumentException ex) {
 	    LOG.error("Error while updating component", ex);
-	    return -4;
+	    return -1;
+	} catch (UserUnauthorizedException e) {
+	    LOG.error("Error while updating component", e);
+	    return -1;
+	} catch (DeleteFailedException e) {
+	    LOG.error("Error while updating component", e);
+	    return -1;
+	} catch (ComponentRegistryException e) {
+	    LOG.error("Error while updating component", e);
+	    return -1;
 	}
     }
 
@@ -241,8 +252,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal) {
 	int result = 0;
 	AbstractDescriptionDao<?> dao = getDaoForDescription(desc);
-	if (!isPublic()) { // if already in public workspace there is nothing
-	    // todo
+	if (!isPublic()) { // if already in public workspace there is nothing todo
 	    desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
 	    Number id = getIdForDescription(desc);
 	    try {
@@ -394,7 +404,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private CMDComponentSpec getUncachedMDComponent(String id, AbstractDescriptionDao dao) {
-	String xml = dao.getContent(id);
+	String xml = dao.getContent(false, id);
 	if (xml != null) {
 	    try {
 		InputStream is = new ByteArrayInputStream(xml.getBytes());

@@ -20,22 +20,18 @@
                 <span wicket:id="tree">tree</span>
             </div>
             <div class="infoView">
-                <form wicket:id="form">
-                    <button wicket:id="delete">delete</button>
-                    <button wicket:id="undelete">undelete</button>
-                    <input type="checkbox" wicket:id="forceUpdate" />forceUpdate
-                    <textarea  class="infoTextArea" wicket:id="text" >text</textarea>
-                    <button wicket:id="submit">submit</button>
-                </form>
                 <div id="feedbackPanel">
                     <span wicket:id="feedback"></span>
                 </div>
+                <form wicket:id="form">
+                    <button wicket:id="delete" title="Press delete button to delete this item">delete</button>
+                    <button wicket:id="undelete" title="Press undelete button to put this item back in the registry">undelete</button>
+                    <input type="checkbox" wicket:id="forceUpdate" />forceUpdate
+                    <button wicket:id="submit">submit edit changes</button>
+                    <textarea  class="descriptionTextArea" wicket:id="description" >text</textarea>
+                    <textarea  class="contentTextArea" wicket:id="content" >text</textarea>
+                </form>
             </div>
-        </div>
-        <div class="treeView">
-            <a wicket:id="expandAll">[expand all]</a>
-            <a wicket:id="collapseAll">[collapse all]</a>
-            <span wicket:id="tree2">tree2</span>
         </div>
     </body>
 </html>

@@ -274,7 +274,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     }
 
     @Override
-    public int update(AbstractDescription desc, CMDComponentSpec spec) {
+    public int update(AbstractDescription desc, CMDComponentSpec spec, Principal principal, boolean forceUpdate) {
 	LOG.info("Attempt to update " + desc.getType() + ": " + desc);
 	return register(getDir(desc), desc, spec, new UpdateClosureOnFail(desc));
     }
@@ -467,4 +467,5 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     public List<ComponentDescription> getDeletedComponentDescriptions() {
 	throw new NotImplementedException();
     }
+
 }

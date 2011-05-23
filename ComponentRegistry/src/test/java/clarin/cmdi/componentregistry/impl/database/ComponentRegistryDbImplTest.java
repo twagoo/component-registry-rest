@@ -240,7 +240,7 @@ public class ComponentRegistryDbImplTest {
 	// Delete as admin
 	registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
 	assertEquals(0, registry.getComponentDescriptions().size());
-	assertNull(registry.getMDProfile(description.getId()));
+	assertNull(registry.getMDComponent(description.getId()));
     }
 
     @Test
@@ -259,7 +259,7 @@ public class ComponentRegistryDbImplTest {
 
 	registry.deleteMDComponent(description.getId(), PRINCIPAL_ADMIN, false);
 	assertEquals(0, registry.getComponentDescriptions().size());
-	assertNull(registry.getMDProfile(description.getId()));
+	assertNull(registry.getMDComponent(description.getId()));
     }
 
     @Test
@@ -513,7 +513,7 @@ public class ComponentRegistryDbImplTest {
 	description.setName("Noot");
 	description.setDescription("AnotherDescription");
 	// Update in db
-	register.update(description, testComponent);
+	register.update(description, testComponent, PRINCIPAL_ADMIN, false);
 	description = register.getComponentDescription(description.getId());
 	// Test if new values are there
 	assertNotNull(description);
@@ -522,7 +522,7 @@ public class ComponentRegistryDbImplTest {
 
 	// Update content
 	CMDComponentSpec testComponent2 = RegistryTestHelper.getTestComponent("Test2");
-	register.update(description, testComponent2);
+	register.update(description, testComponent2, PRINCIPAL_ADMIN, false);
 	// Test if new content is there
 	assertEquals(RegistryTestHelper.getXml(testComponent2),
 		RegistryTestHelper.getXml(register.getMDComponent(description.
@@ -535,7 +535,7 @@ public class ComponentRegistryDbImplTest {
 	CMDComponentSpec testComponent3 = RegistryTestHelper.getTestComponent("Test3");
 
 	// Update in db
-	register.update(description, testComponent3);
+	register.update(description, testComponent3, PRINCIPAL_ADMIN, false);
 	description = register.getComponentDescription(description.getId());
 	// Test if new values are there
 	assertNotNull(description);

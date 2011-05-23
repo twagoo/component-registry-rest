@@ -2,27 +2,31 @@ package clarin.cmdi.componentregistry.frontend;
 
 import java.io.Serializable;
 
-public class FileInfo implements Serializable {
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+
+public class CMDItemInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String text;
+    private String description;
+    private String content;
     private String name;
     private boolean forceUpdate = false;
 
-    private DisplayNode displayNode;
+    private DisplayDataNode displayNode;
 
     private boolean deletable = false;
     private boolean undeletable = false;
 
     private boolean editable = false;
 
-    public void setText(String text) {
-        this.text = text;
+    public void setDescription(String descriptionText) {
+        this.description = descriptionText;
     }
 
-    public String getText() {
-        return text;
+    public String getDescription() {
+        return description;
     }
 
     public void setName(String name) {
@@ -36,30 +40,28 @@ public class FileInfo implements Serializable {
         return name;
     }
 
-    public DisplayNode getDisplayNode() {
+    public DisplayDataNode getDataNode() {
         return displayNode;
     }
 
-    public void setDisplayNode(DisplayNode displayNode) {
-        this.displayNode = displayNode;
+    public void setDataNode(DisplayDataNode dataNode) {
+        this.displayNode = dataNode;
         setUndeletable(false);
         setDeletable(false);
         setEditable(false);
-        if (displayNode != null) {
-            if (displayNode.hasContent()) {
-                setText(displayNode.getContent());
-                setEditable(displayNode.isEditable()); //file in root are not editable like:userMapping.xml
-            } else {
-                //TODO PD have to test this
-                if (displayNode.isDeleted() && !displayNode.isEditable() && (displayNode.toString().startsWith("c_") || displayNode.toString().startsWith("p_"))) {
-                    setText("Press undelete button to put this item back in the registry");
+        setDescription("");
+        setContent("");
+        if (dataNode != null) {
+            AbstractDescription desc = dataNode.getDescription();
+            if (desc != null) {
+                String content = MDMarshaller.marshalToString(desc);
+                setDescription(content);
+                setEditable(true);
+                if (dataNode.isDeleted()) {
                     setUndeletable(true);
-                } else if (!displayNode.isDeleted() && !displayNode.isEditable() && (displayNode.toString().startsWith("c_") || displayNode.toString().startsWith("p_"))) {
-                    setText("Press delete button to delete this item");
-                    setDeletable(true);
                 } else {
-                    setText("");
-                }
+                    setDeletable(true);
+                } 
             }
         }
 
@@ -89,12 +91,9 @@ public class FileInfo implements Serializable {
         this.editable = editable;
     }
 
-    public boolean isComponent() {
-        return getName().startsWith("c_");
-    }
 
     public boolean isInUserWorkSpace() {
-        return displayNode.isUserNode();
+        return !displayNode.isPublic();
     }
 
     public void setForceUpdate(boolean forceUpdate) {
@@ -103,6 +102,14 @@ public class FileInfo implements Serializable {
 
     public boolean isForceUpdate() {
         return forceUpdate;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getContent() {
+        return content;
     }
 
 }

@@ -2,7 +2,6 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.util.List;
 
 import org.junit.Test;
@@ -16,7 +15,6 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
 public class CMDComponentSpecExpanderTest extends ComponentRegistryTestCase{
 
-    private File tmpRegistryDir;
 
     @Test
     public void testExpandProfileWithNestedComponents() throws Exception {

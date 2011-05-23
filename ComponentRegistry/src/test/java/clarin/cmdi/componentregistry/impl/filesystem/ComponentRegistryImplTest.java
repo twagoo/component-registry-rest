@@ -387,7 +387,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 	registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
 
 	assertEquals(0, registry.getComponentDescriptions().size());
-	assertNull(registry.getMDProfile(description.getId()));
+	assertNull(registry.getMDComponent(description.getId()));
     }
 
     @Test
@@ -479,7 +479,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 		getId());
 	assertEquals("MyDescription", desc.getDescription());
 	desc.setDescription("NewDesc");
-	registry.update(desc, testComponent);
+	registry.update(desc, testComponent, PRINCIPAL_ADMIN, false);
 
 	registry = getTestRegistry(getRegistryDir());
 	assertEquals(1, registry.getComponentDescriptions().size());

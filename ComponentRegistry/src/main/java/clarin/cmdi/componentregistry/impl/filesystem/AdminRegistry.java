@@ -1,88 +1,72 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Principal;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.frontend.FileInfo;
-import clarin.cmdi.componentregistry.frontend.FileNode;
+import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
+import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class AdminRegistry {
-
     private final static Logger LOG = LoggerFactory.getLogger(AdminRegistry.class);
 
-    public void submitFile(FileInfo fileInfo, Principal userPrincipal) throws SubmitFailedException {
+    private ComponentRegistryFactory componentRegistryFactory;
+    private ProfileDescriptionDao profileDescriptionDao;
+    private ComponentDescriptionDao componentDescriptionDao;
+
+    public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
+	this.componentRegistryFactory = componentRegistryFactory;
+    }
+
+    public void setProfileDescriptionDao(ProfileDescriptionDao profileDescriptionDao) {
+	this.profileDescriptionDao = profileDescriptionDao;
+    }
+
+    public void setComponentDescriptionDao(ComponentDescriptionDao componentDescriptionDao) {
+	this.componentDescriptionDao = componentDescriptionDao;
+    }
+
+    public void submitFile(CMDItemInfo info, Principal userPrincipal) throws SubmitFailedException {
 	try {
-	    File file = getFile(fileInfo);
-	    if (fileInfo.getDisplayNode().isDeleted()) {
-		//already deleted file
-		FileUtils.writeStringToFile(file, fileInfo.getText(), "UTF-8");
+	    AbstractDescription originalDescription = info.getDataNode().getDescription();
+	    AbstractDescription description = null;
+	    CMDComponentSpec spec = null;
+	    if (originalDescription.isProfile()) {
+		description = MDMarshaller.unmarshal(ProfileDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"), null);
 	    } else {
-		//Description or cmdSpec file.
-		String name = fileInfo.getName();
-		String id = ComponentRegistry.REGISTRY_ID + getFile(fileInfo).getParentFile().getName();
-		AbstractDescription originalDescription = getDescription(fileInfo);
-		CMDComponentSpec originalSpec = getSpec(fileInfo);
-		AbstractDescription description = null;
-		CMDComponentSpec spec = null;
-		if (ComponentRegistryImpl.DESCRIPTION_FILE_NAME.equals(name)) {
-		    if (getFile(fileInfo).getParentFile().getName().startsWith("c_")) {
-			description = MDMarshaller.unmarshal(ComponentDescription.class,
-				IOUtils.toInputStream(fileInfo.getText(), "UTF-8"), null);
-		    } else {
-			description = MDMarshaller.unmarshal(ProfileDescription.class, IOUtils.toInputStream(fileInfo.getText(), "UTF-8"),
-				null);
-		    }
-		    checkId(id, description.getId());
-		    spec = originalSpec;
-		} else {
-		    spec = MDMarshaller.unmarshal(CMDComponentSpec.class, IOUtils.toInputStream(fileInfo.getText(), "UTF-8"), MDMarshaller.getCMDComponentSchema());
-		    checkId(id, spec.getHeader().getID());
-		    description = originalDescription;
-		}
-		deleteFromRegistry(userPrincipal, originalDescription, fileInfo);
-		int result = submitToRegistry(description, spec, userPrincipal, fileInfo);
-		if (result == 0) {
-		    //submit is successful so now really delete the old one, we cannot have that around anymore.
-		    ComponentRegistryImpl registry = (ComponentRegistryImpl) getRegistry(userPrincipal, originalDescription, fileInfo);
-		    registry.emptyFromTrashcan(originalDescription);
-		} else {
-		    throw new SubmitFailedException("Problem occured while registering, please check the tomcat logs for errors. "
-			    + "Original files are removed already you can find them "
-			    + "in the deleted section of the registry. You have to put that back manually.");
-		}
+		description = MDMarshaller.unmarshal(ComponentDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"),
+			null);
+	    }
+	    spec = MDMarshaller.unmarshal(CMDComponentSpec.class, IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
+	    checkId(originalDescription.getId(), description.getId());
+
+	    int result = getRegistry(userPrincipal, originalDescription, info).update(description, spec, userPrincipal, info.isForceUpdate());
+	    if (result < 0) {
+		throw new SubmitFailedException("Problem occured while registering, please check the tomcat logs for errors.");
 	    }
 	} catch (JAXBException e) {
 	    throw new SubmitFailedException(e);
 	} catch (IOException e) {
 	    throw new SubmitFailedException(e);
-	} catch (UserUnauthorizedException e) {
-	    throw new SubmitFailedException(e);
-	} catch (DeleteFailedException e) {
-	    throw new SubmitFailedException(e);
-	} catch (ComponentRegistryException e) {
-	    throw new SubmitFailedException(e);
 	}
-
     }
 
     private void checkId(String id, String id2) throws SubmitFailedException {
@@ -91,31 +75,24 @@ public class AdminRegistry {
 	}
     }
 
-    public void undelete(FileInfo fileInfo, Principal userPrincipal) throws SubmitFailedException {
-	String id = fileInfo.getName();
-	AbstractDescription desc = getDescription(fileInfo);
+    public void undelete(CMDItemInfo info) throws SubmitFailedException {
+	AbstractDescription desc = info.getDataNode().getDescription();
 	try {
-	    CMDComponentSpec spec = getSpec(fileInfo);
-	    int result = submitToRegistry(desc, spec, userPrincipal, fileInfo);
-	    if (result == 0) {
-		FileUtils.deleteDirectory(getFile(fileInfo));
-		LOG.info("Undeleted item: " + id);
+	    if (desc.isProfile()) {
+		profileDescriptionDao.setDeleted(desc, false);
 	    } else {
-		throw new SubmitFailedException("Problem occured while registering, please check the tomcat logs for errors.");
+		componentDescriptionDao.setDeleted(desc, false);
 	    }
-	} catch (IOException e) {
-	    throw new SubmitFailedException(e);
-	} catch (JAXBException e) {
-	    throw new SubmitFailedException(e);
+	} catch (DataAccessException e) {
+	    throw new SubmitFailedException("Undelete failed", e);
 	}
-
     }
 
-    public void delete(FileInfo fileInfo, Principal userPrincipal) throws SubmitFailedException {
-	String id = fileInfo.getName();
-	AbstractDescription desc = getDescription(fileInfo);
+    public void delete(CMDItemInfo info, Principal userPrincipal) throws SubmitFailedException {
+	String id = info.getName();
+	AbstractDescription desc = info.getDataNode().getDescription();
 	try {
-	    deleteFromRegistry(userPrincipal, desc, fileInfo);
+	    deleteFromRegistry(userPrincipal, desc, info);
 	    LOG.info("Deleted item: " + id);
 	} catch (IOException e) {
 	    throw new SubmitFailedException(e);
@@ -129,58 +106,23 @@ public class AdminRegistry {
 
     }
 
-    private int submitToRegistry(AbstractDescription description, CMDComponentSpec spec, Principal userPrincipal, FileInfo fileInfo) {
-	ComponentRegistry registry = getRegistry(userPrincipal, description, fileInfo);
-	if (spec.isIsProfile()) {
-	    return registry.register((ProfileDescription) description, spec);
-	} else {
-	    return registry.register((ComponentDescription) description, spec);
-	}
-
-    }
-
-    private void deleteFromRegistry(Principal userPrincipal, AbstractDescription desc, FileInfo fileInfo) throws IOException,
-	    UserUnauthorizedException, DeleteFailedException, ComponentRegistryException {
-	ComponentRegistry registry = getRegistry(userPrincipal, desc, fileInfo);
+    private void deleteFromRegistry(Principal userPrincipal, AbstractDescription desc, CMDItemInfo info) throws IOException,
+	    UserUnauthorizedException, ComponentRegistryException {
+	ComponentRegistry registry = getRegistry(userPrincipal, desc, info);
 	LOG.info("Deleting item: " + desc);
 	if (desc.isProfile()) {
 	    registry.deleteMDProfile(desc.getId(), userPrincipal);
 	} else {
-	    registry.deleteMDComponent(desc.getId(), userPrincipal, fileInfo.isForceUpdate());
+	    registry.deleteMDComponent(desc.getId(), userPrincipal, info.isForceUpdate());
 	}
     }
 
-    private ComponentRegistry getRegistry(Principal userPrincipal, AbstractDescription desc, FileInfo fileInfo) {
-	ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
-	if (fileInfo.isInUserWorkSpace()) {
-	    registry = ComponentRegistryFactoryImpl.getInstance().getOtherUserComponentRegistry(userPrincipal, desc.getUserId());
+    private ComponentRegistry getRegistry(Principal userPrincipal, AbstractDescription desc, CMDItemInfo info) {
+	ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
+	if (info.isInUserWorkSpace()) {
+	    registry = componentRegistryFactory.getOtherUserComponentRegistry(userPrincipal, desc.getUserId());
 	}
 	return registry;
     }
 
-    private CMDComponentSpec getSpec(FileInfo fileInfo) throws FileNotFoundException, JAXBException {
-	File parent = getFile(fileInfo);
-	if (!parent.isDirectory()) {
-	    parent = parent.getParentFile();
-	}
-	File file = new File(parent, parent.getName() + ".xml");
-	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, new FileInputStream(file), MDMarshaller.getCMDComponentSchema());
-	return spec;
-    }
-
-    private AbstractDescription getDescription(FileInfo fileInfo) {
-	File parent = getFile(fileInfo);
-	if (!parent.isDirectory()) {
-	    parent = parent.getParentFile();
-	}
-	File descFile = new File(parent, ComponentRegistryImpl.DESCRIPTION_FILE_NAME);
-	Class<? extends AbstractDescription> clazz = fileInfo.isComponent() ? ComponentDescription.class : ProfileDescription.class;
-	AbstractDescription result = MDMarshaller.unmarshal(clazz, descFile, null);
-	return result;
-    }
-
-    private File getFile(FileInfo fileInfo) {
-	FileNode fileNode = (FileNode) fileInfo.getDisplayNode();
-	return fileNode.getFile();
-    }
 }

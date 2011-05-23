@@ -69,4 +69,9 @@ public class ComponentDescriptionDaoTest extends AbstractDescriptionDaoTest {
 	int count = jdbcTemplate.queryForInt(select);
 	assertEquals(0, count);
     }
+
+    @Override
+    protected String getContentString() {
+	return RegistryTestHelper.getComponentTestContentString();
+    }
 }

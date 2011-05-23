@@ -36,7 +36,7 @@ public interface ComponentRegistry {
      * 
      * @return -1 if component could not be updated
      */
-    int update(AbstractDescription description, CMDComponentSpec spec);
+    int update(AbstractDescription description, CMDComponentSpec spec, Principal principal, boolean forceUpdate);
 
     /**
      * 
@@ -106,5 +106,6 @@ public interface ComponentRegistry {
     List<ProfileDescription> getDeletedProfileDescriptions();
 
     List<ComponentDescription> getDeletedComponentDescriptions();
+
 
 }

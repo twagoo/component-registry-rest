@@ -1,29 +1,29 @@
 package clarin.cmdi.componentregistry.impl;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.JAXBException;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
+
 /**
- *
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public abstract class ComponentRegistryImplBase implements ComponentRegistry {
@@ -122,52 +122,4 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	return result.toString();
     }
 
-    /* UNIMPLEMENTED INTERFACE METHODS */
-    @Override
-    public abstract List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException;
-
-    @Override
-    public abstract ComponentDescription getComponentDescription(String id) throws ComponentRegistryException;
-
-    @Override
-    public abstract List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
-
-    @Override
-    public abstract ProfileDescription getProfileDescription(String id) throws ComponentRegistryException;
-
-    @Override
-    public abstract CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException;
-
-    @Override
-    public abstract CMDComponentSpec getMDComponent(String id) throws ComponentRegistryException;
-
-    @Override
-    public abstract int register(AbstractDescription desc, CMDComponentSpec spec);
-
-    @Override
-    public abstract int update(AbstractDescription description, CMDComponentSpec spec);
-
-    @Override
-    public abstract int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal);
-
-    @Override
-    public abstract void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException;
-
-    @Override
-    public abstract void getMDProfileAsXsd(String profileId, OutputStream outputStream) throws ComponentRegistryException;
-
-    @Override
-    public abstract void getMDComponentAsXml(String componentId, OutputStream output) throws ComponentRegistryException;
-
-    @Override
-    public abstract void getMDComponentAsXsd(String componentId, OutputStream outputStream) throws ComponentRegistryException;
-
-    @Override
-    public abstract void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException, ComponentRegistryException;
-
-    @Override
-    public abstract void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException, ComponentRegistryException;
-
-    @Override
-    public abstract boolean isPublic();
 }

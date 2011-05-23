@@ -1,12 +1,15 @@
 package clarin.cmdi.componentregistry.rest;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
@@ -15,9 +18,6 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import java.io.ByteArrayOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Static helper methods to be used in tests
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public final class RegistryTestHelper {
 
-    private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+    private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");//TODO PD this is no longer user but do we still have same dates?
 
     private RegistryTestHelper() {
     }
@@ -36,8 +36,7 @@ public final class RegistryTestHelper {
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content) throws ParseException,
 	    JAXBException, UnsupportedEncodingException {
-	return addComponent(testRegistry, id, new ByteArrayInputStream(content.
-		getBytes("UTF-8")));
+	return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")));
     }
 
     private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
@@ -49,17 +48,16 @@ public final class RegistryTestHelper {
 	desc.setDescription("Test Description");
 	desc.setId(ComponentRegistry.REGISTRY_ID + id);
 	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
-	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.
-		getCMDComponentSchema());
+	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
     }
 
-    public static InputStream getTestProfileContent() {
-	return getTestProfileContent("Actor");
+    public static String getProfileTestContentString() {
+	return getProfileTestContentString("Actor");
     }
 
-    public static InputStream getTestProfileContent(String name) {
+    private static String getProfileTestContentString(String name) {
 	String profileContent = "";
 	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -79,18 +77,24 @@ public final class RegistryTestHelper {
 	profileContent += "        </CMD_Element>\n";
 	profileContent += "    </CMD_Component>\n";
 	profileContent += "</CMD_ComponentSpec>\n";
-	return new ByteArrayInputStream(profileContent.getBytes());
+	return profileContent;
+    }
+
+    public static InputStream getTestProfileContent() {
+	return getTestProfileContent("Actor");
+    }
+
+    public static InputStream getTestProfileContent(String name) {
+	return new ByteArrayInputStream(getProfileTestContentString(name).getBytes());
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
-	return addProfile(testRegistry, id, RegistryTestHelper.
-		getTestProfileContent());
+	return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent());
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content) throws ParseException,
 	    JAXBException {
-	return addProfile(testRegistry, id, new ByteArrayInputStream(content.
-		getBytes()));
+	return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
     }
 
     private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
@@ -102,15 +106,13 @@ public final class RegistryTestHelper {
 	desc.setDescription("Test Description");
 	desc.setId(ComponentRegistry.REGISTRY_ID + id);
 	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
-	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.
-		getCMDComponentSchema());
+	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
     }
 
     public static CMDComponentSpec getTestProfile() throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), MDMarshaller.
-		getCMDComponentSchema());
+	return MDMarshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), MDMarshaller.getCMDComponentSchema());
     }
 
     public static String getComponentTestContentString() {
@@ -147,18 +149,15 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getComponentTestContent(String componentName) {
-	return new ByteArrayInputStream(getComponentTestContentString(componentName).
-		getBytes());
+	return new ByteArrayInputStream(getComponentTestContentString(componentName).getBytes());
     }
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), MDMarshaller.
-		getCMDComponentSchema());
+	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), MDMarshaller.getCMDComponentSchema());
     }
 
     public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), MDMarshaller.
-		getCMDComponentSchema());
+	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), MDMarshaller.getCMDComponentSchema());
     }
 
     public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
@@ -181,4 +180,5 @@ public final class RegistryTestHelper {
 	Matcher matcher = pattern.matcher(xsd);
 	return matcher.find() && !matcher.find(); //find only one
     }
+
 }

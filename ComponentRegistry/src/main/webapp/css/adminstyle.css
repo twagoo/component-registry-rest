@@ -15,7 +15,12 @@ div.infoView {
     margin: 20px 0px 0px 300px;
 }
 
-textArea.infoTextArea {
+textArea.contentTextArea {
 	   width: 100%;
 	   height: 500px;
+}
+
+textArea.descriptionTextArea {
+       width: 100%;
+       height: 200px;
 }

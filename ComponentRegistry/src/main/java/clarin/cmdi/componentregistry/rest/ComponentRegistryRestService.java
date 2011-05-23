@@ -254,7 +254,7 @@ public class ComponentRegistryRestService {
 	    ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
 	    if (desc != null) {
 		updateDescription(desc, name, description, domainName, group);
-		return register(input, desc, userCredentials, userspace, new UpdateAction());
+		return register(input, desc, userCredentials, userspace, new UpdateAction(principal));
 	    } else {
 		LOG.error("Update of nonexistent id (" + profileId + ") failed.");
 		return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
@@ -319,7 +319,7 @@ public class ComponentRegistryRestService {
 	    ComponentDescription desc = getRegistry(userspace).getComponentDescription(componentId);
 	    if (desc != null) {
 		updateDescription(desc, name, description, domainName, group);
-		return register(input, desc, getUserCredentials(principal), userspace, new UpdateAction());
+		return register(input, desc, getUserCredentials(principal), userspace, new UpdateAction(principal));
 	    } else {
 		LOG.error("Update of nonexistent id (" + componentId + ") failed.");
 		return Response.serverError().entity("Invalid id, cannot update nonexistent component").build();
