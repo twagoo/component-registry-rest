@@ -109,6 +109,10 @@ ALTER TABLE ONLY profile_description
 ALTER TABLE ONLY registry_user
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY xml_content
+    ADD CONSTRAINT content_pkey PRIMARY KEY (id);
+
+
 
 --
 -- Name: fki_comments_fk_user; Type: INDEX; Schema: public; Owner: -; Tablespace: 
@@ -204,10 +208,10 @@ ALTER TABLE ONLY profile_description
 -- Name: public; Type: ACL; Schema: -; Owner: -
 --
 
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
+-- REVOKE ALL ON SCHEMA public FROM PUBLIC;
+-- REVOKE ALL ON SCHEMA public FROM postgres;
+-- GRANT ALL ON SCHEMA public TO postgres;
+-- GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
