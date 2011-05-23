@@ -31,18 +31,16 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
     private UserDao userDao;
+    private ComponentRegistry publicComponentRegistry = null;
 
     @Override
     public List<ComponentRegistry> getAllUserRegistries() {
 	// TODO: this probably could use some caching
-
 	try {
 	    List<User> users = userDao.getAllUsers();
 	    List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
 	    for (User user : users) {
-		ComponentRegistryDbImpl registry = componentRegistryBeanFactory.getNewComponentRegistry();
-		registry.setUserId(user.getId());
-		registries.add(registry);
+		registries.add(getNewComponentRegistryForUser(user.getId()));
 	    }
 	    return registries;
 	} catch (DataAccessException ex) {
@@ -59,7 +57,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 		String principalName = credentials.getPrincipalName();
 		try {
 		    User user = getOrCreateUser(principalName, credentials.getDisplayName());
-		    result = getComponentRegistryForUser(user.getId());
+		    result = getNewComponentRegistryForUser(user.getId());
 		} catch (DataAccessException ex) {
 		    LOG.error("Could not retrieve or create user", ex);
 		    throw ex;
@@ -80,7 +78,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	    ComponentRegistry result = null;
 	    if (user != null) {
 		if (configuration.isAdminUser(adminPrincipal)) {
-		    result = getComponentRegistryForUser(user.getId());
+		    result = getNewComponentRegistryForUser(user.getId());
 		} else {
 		    LOG.info(adminPrincipal.getName() + " not found in list of " + configuration.getAdminUsersArray().length);
 		    throw new IllegalArgumentException("User " + adminPrincipal.getName() + " is not admin user cannot load userspace.");
@@ -95,16 +93,19 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 
     @Override
     public ComponentRegistry getPublicRegistry() {
-	return getComponentRegistryForUser(null);
+	if (publicComponentRegistry == null) {
+	    publicComponentRegistry = getNewComponentRegistryForUser(null);
+	}
+	return publicComponentRegistry;
     }
 
-    private ComponentRegistry getComponentRegistryForUser(Number userId) {
+    private ComponentRegistry getNewComponentRegistryForUser(Number userId) {
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
 	componentRegistry.setUserId(userId);
 	return componentRegistry;
     }
 
-    private User getOrCreateUser(String principalName, String displayName) {
+    private synchronized User getOrCreateUser(String principalName, String displayName) {
 	// Try getting it from db
 	User user = userDao.getByPrincipalName(principalName);
 	if (user == null) {
