@@ -19,7 +19,7 @@ public interface ComponentRegistryFactory {
 
     ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials);
 
-    ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String principalNameMD5);
+    ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userId);
 
     ComponentRegistry getPublicRegistry();
 }

@@ -1,37 +1,39 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import java.text.ParseException;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import java.sql.SQLException;
 import java.sql.ResultSet;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import java.util.List;
-import java.util.Collections;
-import java.util.Map;
-import java.util.HashMap;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 
 /**
- *
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public abstract class AbstractDescriptionDao<T extends AbstractDescription> extends ComponentRegistryDao<T> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(
-	    AbstractDescriptionDao.class);
+    private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
     private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 
     protected abstract String getTableName();
 
     protected abstract String getCMDIdColumn();
+
     /**
      * Class object required to instantiate new description domain objects
      */
@@ -42,9 +44,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
-     * @param cmdId CMD id
-     * @return Whether the specified item is in the public space, and not deleted or in a user's workspace
+     * 
+     * @param cmdId
+     *            CMD id
+     * @return Whether the specified item is in the public space, and not
+     *         deleted or in a user's workspace
      */
     public boolean isPublic(String cmdId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
@@ -54,10 +58,13 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
-     * @param cmdId CMD id
-     * @param userId User db id of workspace owner
-     * @return Whether the specified item is in the specified user's workspace, and not deleted or the public space
+     * 
+     * @param cmdId
+     *            CMD id
+     * @param userId
+     *            User db id of workspace owner
+     * @return Whether the specified item is in the specified user's workspace,
+     *         and not deleted or the public space
      */
     public boolean isInUserSpace(String cmdId, Number userId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
@@ -68,16 +75,16 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     /**
      * 
-     * @param cmdId Profile or component Id (not primary key)
+     * @param cmdId
+     *            Profile or component Id (not primary key)
      * @return String value of XML content for profile or component
      */
     public String getContent(String cmdId) throws DataAccessException {
-	String select = "SELECT content FROM " + TABLE_XML_CONTENT
-		+ " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "." + COLUMN_ID + " = " + getTableName() + ".content_id"
-		+ " WHERE is_deleted = false AND " + getTableName() + "." + getCMDIdColumn() + " = ?";
+	String select = "SELECT content FROM " + TABLE_XML_CONTENT + " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "."
+		+ COLUMN_ID + " = " + getTableName() + ".content_id" + " WHERE is_deleted = false AND " + getTableName() + "."
+		+ getCMDIdColumn() + " = ?";
 
-	List<String> result = getSimpleJdbcTemplate().query(select,
-		new ParameterizedSingleColumnRowMapper<String>(), cmdId);
+	List<String> result = getSimpleJdbcTemplate().query(select, new ParameterizedSingleColumnRowMapper<String>(), cmdId);
 	if (result.size() > 0) {
 	    return result.get(0);
 	} else {
@@ -86,19 +93,21 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     * @param description Description to insert
-     * @param content Content to insert and refer to from description
+     * @param description
+     *            Description to insert
+     * @param content
+     *            Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-    public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId) throws DataAccessException {
-	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
-		COLUMN_ID);
-	Number contentId = insert.executeAndReturnKey(Collections.singletonMap(
-		"content", (Object) content));
 
-	SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(
-		getDataSource()).withTableName(getTableName()).
-		usingGeneratedKeyColumns(COLUMN_ID);
+    public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId)
+	    throws DataAccessException {
+	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT)
+		.usingGeneratedKeyColumns(COLUMN_ID);
+	Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
+
+	SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(
+		COLUMN_ID);
 	Map<String, Object> params = new HashMap<String, Object>();
 	params.put("content_id", contentId);
 	params.put("user_id", userId);
@@ -113,6 +122,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	params.put("href", description.getHref());
 	params.put("registration_date", extractTimestamp(description));
 	return insertDescription.executeAndReturnKey(params);
+
     }
 
     private Timestamp extractTimestamp(AbstractDescription description) {
@@ -131,38 +141,42 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     /**
      * Updates a description by database id
-     * @param id Id (key) of description record
-     * @param description New values for description (leave null to not change)
-     * @param content New content for description (leave null to not change)
+     * 
+     * @param id
+     *            Id (key) of description record
+     * @param description
+     *            New values for description (leave null to not change)
+     * @param content
+     *            New content for description (leave null to not change)
      */
     public void updateDescription(Number id, AbstractDescription description, String content) {
 	if (description != null) {
 	    // Update description
 	    StringBuilder updateDescription = new StringBuilder();
 	    updateDescription.append("UPDATE ").append(getTableName());
-	    updateDescription.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
+	    updateDescription
+		    .append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
 	    updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
-	    getSimpleJdbcTemplate().update(updateDescription.toString(),
-		    description.getName(), description.getDescription(), extractTimestamp(description), description.getCreatorName(),
-		    description.getDomainName(), description.getGroupName(), description.getHref(),
-		    id);
+	    getSimpleJdbcTemplate().update(updateDescription.toString(), description.getName(), description.getDescription(),
+		    extractTimestamp(description), description.getCreatorName(), description.getDomainName(), description.getGroupName(),
+		    description.getHref(), id);
 	}
 
 	if (content != null) {
 	    // Update content
 	    StringBuilder updateContent = new StringBuilder();
 	    updateContent.append("UPDATE " + TABLE_XML_CONTENT + " SET content = ? WHERE " + COLUMN_ID + " = ");
-	    updateContent.append("(SELECT content_id FROM ").append(getTableName()).
-		    append(" WHERE " + COLUMN_ID + "= ?)");
+	    updateContent.append("(SELECT content_id FROM ").append(getTableName()).append(" WHERE " + COLUMN_ID + "= ?)");
 
-	    getSimpleJdbcTemplate().update(updateContent.toString(),
-		    content, id);
+	    getSimpleJdbcTemplate().update(updateContent.toString(), content, id);
 	}
     }
 
     /**
      * Retrieves description by it's primary key Id
-     * @param id Description key
+     * 
+     * @param id
+     *            Description key
      * @return The description, if it exists; null otherwise
      */
     public T getById(Number id) throws DataAccessException {
@@ -171,7 +185,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     /**
      * Get by ComponentId / ProfileId, whether in userspace or public
-     * @param id Full component id
+     * 
+     * @param id
+     *            Full component id
      * @return The description, if it exists; null otherwise
      */
     public T getByCmdId(String id) throws DataAccessException {
@@ -180,8 +196,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     /**
      * Get by ComponentId / ProfileId
-     * @param id Full component id
-     * @param userId Db id of user for workspace; null for public space
+     * 
+     * @param id
+     *            Full component id
+     * @param userId
+     *            Db id of user for workspace; null for public space
      * @return The description, if it exists; null otherwise
      */
     public T getByCmdId(String id, Number userId) throws DataAccessException {
@@ -194,12 +213,14 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
-     * @param cmdId CMD Id of description
+     * 
+     * @param cmdId
+     *            CMD Id of description
      * @return Database id for description record
      */
     public Number getDbId(String cmdId) {
-	// Check for is_deleted is important, because an id only has to be unique
+	// Check for is_deleted is important, because an id only has to be
+	// unique
 	// among non-deleted descriptions
 	StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID + " FROM ").append(getTableName());
 	query.append(" WHERE is_deleted = false AND ").append(getCMDIdColumn()).append(" = ?");
@@ -207,7 +228,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
+     * 
      * @return All descriptions in the public space
      */
     public List<T> getPublicDescriptions() throws DataAccessException {
@@ -215,24 +236,34 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
-     * @return All the user's descriptions not in the public space
+     * @return List of deleted descriptions in user space or in public when
+     *         userId=null
+     * @param userId
      */
-    public List<T> getUserspaceDescriptions(Number userId) throws DataAccessException {
-	String select = getSelectStatement().
-		append(" WHERE is_deleted = false AND is_public = false AND user_id = ?").
-		toString();
-	return getList(select, userId);
+    public List<T> getDeletedDescriptions(Number userId) {//TODO PD make test!
+	if (userId != null) {
+	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = false AND user_id = ?").toString();
+	    return getList(select, userId);
+	} else {
+	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = true").toString();
+	    return getList(select);
+	}
     }
 
     /**
-     *
-     * @param Full component id
+     * 
+     * @return All the user's descriptions not in the public space
      */
-    public void setDeleted(Number id) throws DataAccessException {
+    public List<T> getUserspaceDescriptions(Number userId) throws DataAccessException {
+	String select = getSelectStatement().append(" WHERE is_deleted = false AND is_public = false AND user_id = ?").toString();
+	return getList(select, userId);
+    }
+
+    public void setDeleted(AbstractDescription desc, boolean isDeleted) throws DataAccessException {
+	Number dbId = getDbId(desc.getId());
 	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
-	update.append(" SET is_deleted = true WHERE " + COLUMN_ID + " = ?");
-	getSimpleJdbcTemplate().update(update.toString(), id);
+	update.append(" SET is_deleted = ").append(Boolean.toString(isDeleted)).append(" WHERE " + COLUMN_ID + " = ?");
+	getSimpleJdbcTemplate().update(update.toString(), dbId);
     }
 
     public void setPublished(Number id, boolean published) {
@@ -242,8 +273,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
-     * @param id Id of description record
+     * 
+     * @param id
+     *            Id of description record
      * @return Principal name of description's owner, if any. Otherwise, null.
      */
     public String getOwnerPrincipalName(Number id) {
@@ -275,10 +307,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     *
+     * 
      * @return List of all description columns to be used in SELECT queries
      */
     private StringBuilder getDescriptionColumnList() {
+
 	StringBuilder sb = new StringBuilder();
 	sb.append("name,description,registration_date,creator_name,domain_name,group_name,href,user_id,");
 	sb.append(getCMDIdColumn());
@@ -292,6 +325,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     protected ParameterizedRowMapper<T> getRowMapper() {
 	return rowMapper;
     }
+
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
@@ -303,8 +337,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		newDescription.setName(rs.getString("name"));
 		newDescription.setDescription(rs.getString("description"));
 		newDescription.setId(rs.getString(getCMDIdColumn()));
-		newDescription.setRegistrationDate(registrationDate == null
-			? null : ISO_DATE_FORMAT.format(registrationDate));
+		newDescription.setRegistrationDate(registrationDate == null ? null : ISO_DATE_FORMAT.format(registrationDate));
 		newDescription.setCreatorName(rs.getString("creator_name"));
 		newDescription.setDomainName(rs.getString("domain_name"));
 		newDescription.setGroupName(rs.getString("group_name"));

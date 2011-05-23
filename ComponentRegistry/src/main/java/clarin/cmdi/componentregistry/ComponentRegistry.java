@@ -40,10 +40,11 @@ public interface ComponentRegistry {
 
     /**
      * 
-     * @return -1 if component could not be published. Published means move from current (private) workspace to public workspace.
+     * @return -1 if component could not be published. Published means move from
+     *         current (private) workspace to public workspace.
      */
     int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal);
-    
+
     void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException;
 
     void getMDProfileAsXsd(String profileId, OutputStream outputStream) throws ComponentRegistryException;
@@ -57,7 +58,8 @@ public interface ComponentRegistry {
      * @param profileId
      * @param principal
      * @throws IOException
-     * @throws UserUnauthorizedException thrown when principal does not match creator of profile
+     * @throws UserUnauthorizedException
+     *             thrown when principal does not match creator of profile
      * @throws DeleteFailedException
      */
     void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, ComponentRegistryException, DeleteFailedException;
@@ -66,33 +68,43 @@ public interface ComponentRegistry {
      * 
      * @param componentId
      * @param principal
-     * @param forceDelete ignores the fact that the component is still in use by other components and just deletes.
+     * @param forceDelete
+     *            ignores the fact that the component is still in use by other
+     *            components and just deletes.
      * @throws IOException
-     * @throws UserUnauthorizedException thrown when principal does not match creator of component
+     * @throws UserUnauthorizedException
+     *             thrown when principal does not match creator of component
      * @throws DeleteFailedException
      */
     void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,  ComponentRegistryException, UserUnauthorizedException,
-            DeleteFailedException;
+	    DeleteFailedException;
 
     /**
      * 
      * @param componentId
-     * @return List of ComponentDescriptions of Components that use the given Component.
+     * @return List of ComponentDescriptions of Components that use the given
+     *         Component.
      */
     List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException;
 
     /**
      * 
      * @param componentId
-     * @return List of ProfileDescriptions of Profiles that use the given Component.
+     * @return List of ProfileDescriptions of Profiles that use the given
+     *         Component.
      */
     List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException;
 
     /**
-     * Return true if this registry is the public registry as opposed to a registry used for the user privately.
+     * Return true if this registry is the public registry as opposed to a
+     * registry used for the user privately.
      **/
     boolean isPublic();
 
     String getName();
+
+    List<ProfileDescription> getDeletedProfileDescriptions();
+
+    List<ComponentDescription> getDeletedComponentDescriptions();
 
 }

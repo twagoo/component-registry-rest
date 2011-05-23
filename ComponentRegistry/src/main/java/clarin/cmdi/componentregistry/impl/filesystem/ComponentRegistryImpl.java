@@ -1,13 +1,6 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
-import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,14 +26,22 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import com.sun.security.auth.UserPrincipal;
 
 public class ComponentRegistryImpl extends ComponentRegistryImplBase implements ComponentRegistry {
 
@@ -455,5 +456,15 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
 	} else {
 	    return "User " + getComponentDir().getParentFile().getName() + " Registry";
 	}
+    }
+
+    @Override
+    public List<ProfileDescription> getDeletedProfileDescriptions() {
+	throw new NotImplementedException();
+    }
+
+    @Override
+    public List<ComponentDescription> getDeletedComponentDescriptions() {
+	throw new NotImplementedException();
     }
 }

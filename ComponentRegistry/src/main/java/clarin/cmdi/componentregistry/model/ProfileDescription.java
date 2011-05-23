@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -8,7 +9,9 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.IdSequence;
 
 @XmlRootElement(name = "profileDescription")
-public class ProfileDescription extends AbstractDescription {
+public class ProfileDescription extends AbstractDescription implements Serializable{
+
+    private static final long serialVersionUID = 1L;
 
     public static final Comparator<? super ProfileDescription> COMPARE_ON_NAME = new Comparator<ProfileDescription>() {
         public int compare(ProfileDescription o1, ProfileDescription o2) {

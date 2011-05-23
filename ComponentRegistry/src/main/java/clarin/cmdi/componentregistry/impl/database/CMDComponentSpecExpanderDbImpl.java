@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 
 /**

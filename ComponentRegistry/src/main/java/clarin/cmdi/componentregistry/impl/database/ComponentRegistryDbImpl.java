@@ -1,5 +1,24 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.xml.bind.JAXBException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
+
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.Configuration;
@@ -12,27 +31,11 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import javax.xml.bind.JAXBException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
  * accessing the registry (ergo: a database implementation)
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry {
@@ -57,14 +60,19 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Default constructor, makes this a (spring) bean. No user is set, so
      * public registry by default. Use setUser() to make it a user registry.
+     * 
      * @see setUser
      */
     public ComponentRegistryDbImpl() {
     }
 
     /**
-     * Creates a new ComponentRegistry (either public or not) for the provided user
-     * @param userId User id of the user to create registry for. Pass null for public
+     * Creates a new ComponentRegistry (either public or not) for the provided
+     * user
+     * 
+     * @param userId
+     *            User id of the user to create registry for. Pass null for
+     *            public
      */
     public ComponentRegistryDbImpl(Number userId) {
 	this.userId = userId;
@@ -185,7 +193,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * Calling service sets user id to principle. Our task is to convert this to
      * an id for later reference. If none is set and this is a user's workspace,
      * set from that user's id.
-     * @param description Description containing principle name as userId
+     * 
+     * @param description
+     *            Description containing principle name as userId
      * @return Id (from database)
      * @throws DataAccessException
      */
@@ -231,7 +241,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal) {
 	int result = 0;
 	AbstractDescriptionDao<?> dao = getDaoForDescription(desc);
-	if (!isPublic()) { //if already in public workspace there is nothing todo
+	if (!isPublic()) { // if already in public workspace there is nothing
+	    // todo
 	    desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
 	    Number id = getIdForDescription(desc);
 	    try {
@@ -278,13 +289,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException, ComponentRegistryException {
+    public void deleteMDProfile(String profileId, Principal principal) throws UserUnauthorizedException, DeleteFailedException,
+	    ComponentRegistryException {
 	ProfileDescription desc = getProfileDescription(profileId);
 	if (desc != null) {
 	    try {
 		checkAuthorisation(desc, principal);
 		checkAge(desc, principal);
-		profileDescriptionDao.setDeleted(getIdForDescription(desc));
+		profileDescriptionDao.setDeleted(desc, true);
 		invalidateCache(desc);
 	    } catch (DataAccessException ex) {
 		throw new DeleteFailedException("Database access error while trying to delete profile", ex);
@@ -293,7 +305,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException, DeleteFailedException, ComponentRegistryException {
+    public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws UserUnauthorizedException,
+	    DeleteFailedException, ComponentRegistryException {
 	ComponentDescription desc = componentDescriptionDao.getByCmdId(componentId);
 	if (desc != null) {
 	    try {
@@ -303,7 +316,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		if (!forceDelete) {
 		    checkStillUsed(componentId);
 		}
-		componentDescriptionDao.setDeleted(getIdForDescription(desc));
+		componentDescriptionDao.setDeleted(desc, true);
 		invalidateCache(desc);
 	    } catch (DataAccessException ex) {
 		throw new DeleteFailedException("Database access error while trying to delete component", ex);
@@ -328,8 +341,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     /**
-     * @param User for which this should be the registry. Pass null for
-     * the public registry
+     * @param User
+     *            for which this should be the registry. Pass null for the
+     *            public registry
      */
     public void setUserId(Number user) {
 	this.userId = user;
@@ -350,9 +364,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Looks up description on basis of CMD Id. This will also check if such a
      * record even exists.
-     * @param description Description to look up
+     * 
+     * @param description
+     *            Description to look up
      * @return Database id for description
-     * @throws IllegalArgumentException If description with non-existing id is passed
+     * @throws IllegalArgumentException
+     *             If description with non-existing id is passed
      */
     private Number getIdForDescription(AbstractDescription description) throws IllegalArgumentException {
 	Number dbId = null;
@@ -360,8 +377,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	try {
 	    dbId = dao.getDbId(description.getId());
 	} catch (DataAccessException ex) {
-	    LOG.error("Error getting dbId for component with id "
-		    + description.getId(), ex);
+	    LOG.error("Error getting dbId for component with id " + description.getId(), ex);
 	}
 	if (dbId == null) {
 	    throw new IllegalArgumentException("Could not get database Id for description");
@@ -382,7 +398,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	if (xml != null) {
 	    try {
 		InputStream is = new ByteArrayInputStream(xml.getBytes());
-		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, MDMarshaller.getCMDComponentSchema());
+		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, null);
+
 	    } catch (JAXBException ex) {
 		LOG.error(null, ex);
 	    }
@@ -391,8 +408,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
-	if (!isOwnerOfDescription(desc, principal.getName())
-		&& !configuration.isAdminUser(principal)) {
+	if (!isOwnerOfDescription(desc, principal.getName()) && !configuration.isAdminUser(principal)) {
 	    throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
 		    + "' is not the creator (nor an administrator) of the " + (desc.isProfile() ? "profile" : "component") + "(" + desc
 		    + ").");
@@ -411,11 +427,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		Date regDate = AbstractDescription.getDate(desc.getRegistrationDate());
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
-		if (regDate.before(calendar.getTime())) { //More then month old
+		if (regDate.before(calendar.getTime())) { // More then month old
 		    throw new DeleteFailedException(
 			    "The "
-			    + (desc.isProfile() ? "Profile" : "Component")
-			    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+				    + (desc.isProfile() ? "Profile" : "Component")
+				    + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
 		}
 	    } catch (ParseException e) {
 		LOG.error("Cannot parse date of " + desc + " Error:" + e);
@@ -438,5 +454,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	} else {
 	    return "User " + getUserId() + " Registry";
 	}
+    }
+
+    @Override
+    public List<ProfileDescription> getDeletedProfileDescriptions() {
+	return profileDescriptionDao.getDeletedDescriptions(getUserId());
+    }
+
+    @Override
+    public List<ComponentDescription> getDeletedComponentDescriptions() {
+	return componentDescriptionDao.getDeletedDescriptions(getUserId());
     }
 }

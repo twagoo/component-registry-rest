@@ -26,4 +26,5 @@ public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescrip
     protected String getCMDIdColumn() {
         return "profile_id";
     }
+
 }
