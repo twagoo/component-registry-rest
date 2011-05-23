@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 import java.security.Principal;
 import java.util.List;
 
