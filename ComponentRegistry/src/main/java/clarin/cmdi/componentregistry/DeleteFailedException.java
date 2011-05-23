@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-public class DeleteFailedException extends Exception {
+public class DeleteFailedException extends ComponentRegistryException {
 
     public DeleteFailedException(String message) {
         super(message);

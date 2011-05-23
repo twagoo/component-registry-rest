@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserCredentials;
@@ -61,126 +62,142 @@ public class ComponentRegistryRestService {
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String USERSPACE_PARAM = "userspace";
-
-
-    @Inject(value="componentRegistryFactory")
+    @Inject(value = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
 
     private ComponentRegistry getRegistry(boolean userspace) {
-        Principal userPrincipal = security.getUserPrincipal();
-        UserCredentials userCredentials = getUserCredentials(userPrincipal);
-        return getRegistry(userspace, userCredentials);
+	Principal userPrincipal = security.getUserPrincipal();
+	UserCredentials userCredentials = getUserCredentials(userPrincipal);
+	return getRegistry(userspace, userCredentials);
     }
 
     private ComponentRegistry getRegistry(boolean userspace, UserCredentials userCredentials) {
-        return componentRegistryFactory.getComponentRegistry(userspace, userCredentials);
+	return componentRegistryFactory.getComponentRegistry(userspace, userCredentials);
     }
 
     private Principal checkAndGetUserPrincipal() {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new IllegalArgumentException("no user principal found.");
-        }
-        return principal;
+	Principal principal = security.getUserPrincipal();
+	if (principal == null) {
+	    throw new IllegalArgumentException("no user principal found.");
+	}
+	return principal;
     }
 
     private UserCredentials getUserCredentials(Principal userPrincipal) {
-        UserCredentials userCredentials = null;
-        if (userPrincipal != null) {
-            userCredentials = new UserCredentials(userPrincipal);
-        }
-        return userCredentials;
+	UserCredentials userCredentials = null;
+	if (userPrincipal != null) {
+	    userCredentials = new UserCredentials(userPrincipal);
+	}
+	return userCredentials;
     }
 
     @GET
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<ComponentDescription> getRegisteredComponents(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        long start = System.currentTimeMillis();
-        List<ComponentDescription> components = getRegistry(userspace).getComponentDescriptions();
-        LOG.info("Releasing " + components.size() + " registered components into the world (" + (System.currentTimeMillis() - start)
-                + " millisecs)");
-        return components;
+    public List<ComponentDescription> getRegisteredComponents(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	long start = System.currentTimeMillis();
+	List<ComponentDescription> components = getRegistry(userspace).getComponentDescriptions();
+	LOG.info("Releasing " + components.size() + " registered components into the world (" + (System.currentTimeMillis() - start)
+		+ " millisecs)");
+	return components;
     }
 
     @GET
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        long start = System.currentTimeMillis();
-        List<ProfileDescription> profiles = getRegistry(userspace).getProfileDescriptions();
-        LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
-                + " millisecs)");
-        return profiles;
+    public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	long start = System.currentTimeMillis();
+	List<ProfileDescription> profiles = getRegistry(userspace).getProfileDescriptions();
+	LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
+		+ " millisecs)");
+	return profiles;
     }
 
     @GET
     @Path("/components/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public CMDComponentSpec getRegisteredComponent(@PathParam("componentId") String componentId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        LOG.info("Component with id: " + componentId + " is requested.");
-        return getRegistry(userspace).getMDComponent(componentId);
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	LOG.info("Component with id: " + componentId + " is requested.");
+	return getRegistry(userspace).getMDComponent(componentId);
     }
 
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public Response getRegisteredComponentRawType(@PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) {
-        LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
-        StreamingOutput result = null;
-        final ComponentRegistry registry = findRegistry(componentId, new ComponentClosure());
-        if (registry == null) {
-            return Response.status(Status.NOT_FOUND).entity("Id: " + componentId + " is not registered, cannot create data.").build();
-        }
-        ComponentDescription desc = registry.getComponentDescription(componentId);
-        checkAndThrowDescription(desc, componentId);
-        String fileName = desc.getName() + "." + rawType;
-        if ("xml".equalsIgnoreCase(rawType)) {
-            result = new StreamingOutput() {
+	LOG.info("Component with id: " + componentId + " and rawType:" + rawType + " is requested.");
+	StreamingOutput result = null;
+	try {
+	    final ComponentRegistry registry = findRegistry(componentId, new ComponentClosure());
+	    if (registry == null) {
+		return Response.status(Status.NOT_FOUND).entity("Id: " + componentId + " is not registered, cannot create data.").build();
+	    }
+	    ComponentDescription desc = registry.getComponentDescription(componentId);
+	    checkAndThrowDescription(desc, componentId);
+	    String fileName = desc.getName() + "." + rawType;
+	    if ("xml".equalsIgnoreCase(rawType)) {
+		result = new StreamingOutput() {
 
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    registry.getMDComponentAsXml(componentId, output);
-                }
-            };
-        } else if ("xsd".equalsIgnoreCase(rawType)) {
-            result = new StreamingOutput() {
+		    @Override
+		    public void write(OutputStream output) throws IOException, WebApplicationException {
+			try {
+			    registry.getMDComponentAsXml(componentId, output);
+			} catch (ComponentRegistryException e) {
+			    LOG.info("Could not retrieve component", e);
+			    throw new WebApplicationException(e, Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
+			}
+		    }
+		};
+	    } else if ("xsd".equalsIgnoreCase(rawType)) {
+		result = new StreamingOutput() {
 
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    registry.getMDComponentAsXsd(componentId, output);
-                }
-            };
-        } else {
-            throw new WebApplicationException(Response.serverError().entity(
-                    "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
-        }
-        return createDownloadResponse(result, fileName);
+		    @Override
+		    public void write(OutputStream output) throws IOException, WebApplicationException {
+			try {
+			    registry.getMDComponentAsXsd(componentId, output);
+			} catch (ComponentRegistryException e) {
+			    LOG.info("Could not retrieve component", e);
+			    throw new WebApplicationException(e, Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
+			}
+
+		    }
+		};
+	    } else {
+		throw new WebApplicationException(Response.serverError().entity(
+			"unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
+	    }
+	    return createDownloadResponse(result, fileName);
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	}
     }
 
-    public ComponentRegistry findRegistry(String id, RegistryClosure<? extends AbstractDescription> clos) {
-        AbstractDescription desc = null;
-        ComponentRegistry result = getRegistry(false);
-        desc = clos.getDescription(result, id);
-        if (desc == null) {
-            List<ComponentRegistry> userRegs = componentRegistryFactory.getAllUserRegistries();
-            for (ComponentRegistry reg : userRegs) {
-                desc = clos.getDescription(reg, id);
-                if (desc != null) {
-                    result = reg;
-                    break;
-                }
-            }
-        }
-        return result;
+    public ComponentRegistry findRegistry(String id, RegistryClosure<? extends AbstractDescription> clos) throws ComponentRegistryException {
+	AbstractDescription desc = null;
+	ComponentRegistry result = getRegistry(false);
+	desc = clos.getDescription(result, id);
+	if (desc == null) {
+	    List<ComponentRegistry> userRegs = componentRegistryFactory.getAllUserRegistries();
+	    for (ComponentRegistry reg : userRegs) {
+		desc = clos.getDescription(reg, id);
+		if (desc != null) {
+		    result = reg;
+		    break;
+		}
+	    }
+	}
+	return result;
     }
 
     @GET
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public CMDComponentSpec getRegisteredProfile(@PathParam("profileId") String profileId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        LOG.info("Profile with id: " + profileId + " is requested.");
-        return getRegistry(userspace).getMDProfile(profileId);
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	LOG.info("Profile with id: " + profileId + " is requested.");
+	return getRegistry(userspace).getMDProfile(profileId);
     }
 
     /**
@@ -194,48 +211,58 @@ public class ComponentRegistryRestService {
     @POST
     @Path("/profiles/{profileId}")
     public Response manipulateRegisteredProfile(@PathParam("profileId") String profileId, @FormParam("method") String method,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        if ("delete".equalsIgnoreCase(method)) {
-            return deleteRegisteredProfile(profileId, userspace);
-        } else {
-            return Response.ok().build();
-        }
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+	if ("delete".equalsIgnoreCase(method)) {
+	    return deleteRegisteredProfile(profileId, userspace);
+	} else {
+	    return Response.ok().build();
+	}
     }
 
     @POST
     @Path("/profiles/{profileId}/publish")
     @Consumes("multipart/form-data")
     public Response publishRegisteredProfile(@PathParam("profileId") String profileId, @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        Principal principal = checkAndGetUserPrincipal();
-        ProfileDescription desc = getRegistry(true).getProfileDescription(profileId);
-        if (desc != null) {
-            updateDescription(desc, name, description, domainName, group);
-            return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
-        } else {
-            LOG.error("Update of nonexistent id (" + profileId + ") failed.");
-            return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
-        }
+	    @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+	    @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+	Principal principal = checkAndGetUserPrincipal();
+	try {
+	    ProfileDescription desc = getRegistry(true).getProfileDescription(profileId);
+	    if (desc != null) {
+		updateDescription(desc, name, description, domainName, group);
+		return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
+	    } else {
+		LOG.error("Update of nonexistent id (" + profileId + ") failed.");
+		return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
+	    }
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	}
     }
 
     @POST
     @Path("/profiles/{profileId}/update")
     @Consumes("multipart/form-data")
     public Response updateRegisteredProfile(@PathParam("profileId") String profileId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        Principal principal = checkAndGetUserPrincipal();
-        UserCredentials userCredentials = getUserCredentials(principal);
-        ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
-        if (desc != null) {
-            updateDescription(desc, name, description, domainName, group);
-            return register(input, desc, userCredentials, userspace, new UpdateAction());
-        } else {
-            LOG.error("Update of nonexistent id (" + profileId + ") failed.");
-            return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
-        }
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
+	    @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+	    @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+	Principal principal = checkAndGetUserPrincipal();
+	UserCredentials userCredentials = getUserCredentials(principal);
+	try {
+	    ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
+	    if (desc != null) {
+		updateDescription(desc, name, description, domainName, group);
+		return register(input, desc, userCredentials, userspace, new UpdateAction());
+	    } else {
+		LOG.error("Update of nonexistent id (" + profileId + ") failed.");
+		return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
+	    }
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	}
     }
 
     /**
@@ -249,149 +276,182 @@ public class ComponentRegistryRestService {
     @POST
     @Path("/components/{componentId}")
     public Response manipulateRegisteredComponent(@PathParam("componentId") String componentId, @FormParam("method") String method,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        if ("delete".equalsIgnoreCase(method)) {
-            return deleteRegisteredComponent(componentId, userspace);
-        } else {
-            return Response.ok().build();
-        }
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+	if ("delete".equalsIgnoreCase(method)) {
+	    return deleteRegisteredComponent(componentId, userspace);
+	} else {
+	    return Response.ok().build();
+	}
     }
 
     @POST
     @Path("/components/{componentId}/publish")
     @Consumes("multipart/form-data")
     public Response publishRegisteredComponent(@PathParam("componentId") String componentId,
-            @FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        Principal principal = checkAndGetUserPrincipal();
-        ComponentDescription desc = getRegistry(true).getComponentDescription(componentId);
-        if (desc != null) {
-            updateDescription(desc, name, description, domainName, group);
-            return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
-        } else {
-            LOG.error("Update of nonexistent id (" + componentId + ") failed.");
-            return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
-        }
+	    @FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
+	    @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
+	    @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+	Principal principal = checkAndGetUserPrincipal();
+	try {
+	    ComponentDescription desc = getRegistry(true).getComponentDescription(componentId);
+	    if (desc != null) {
+		updateDescription(desc, name, description, domainName, group);
+		return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
+	    } else {
+		LOG.error("Update of nonexistent id (" + componentId + ") failed.");
+		return Response.serverError().entity("Invalid id, cannot update nonexistent profile").build();
+	    }
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	}
     }
 
     @POST
     @Path("/components/{componentId}/update")
     @Consumes("multipart/form-data")
     public Response updateRegisteredComponent(@PathParam("componentId") String componentId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        Principal principal = checkAndGetUserPrincipal();
-        ComponentDescription desc = getRegistry(userspace).getComponentDescription(componentId);
-        if (desc != null) {
-            updateDescription(desc, name, description, domainName, group);
-            return register(input, desc, getUserCredentials(principal), userspace, new UpdateAction());
-        } else {
-            LOG.error("Update of nonexistent id (" + componentId + ") failed.");
-            return Response.serverError().entity("Invalid id, cannot update nonexistent component").build();
-        }
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @FormDataParam(DATA_FORM_FIELD) InputStream input,
+	    @FormDataParam(NAME_FORM_FIELD) String name, @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+	    @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+	Principal principal = checkAndGetUserPrincipal();
+	try {
+	    ComponentDescription desc = getRegistry(userspace).getComponentDescription(componentId);
+	    if (desc != null) {
+		updateDescription(desc, name, description, domainName, group);
+		return register(input, desc, getUserCredentials(principal), userspace, new UpdateAction());
+	    } else {
+		LOG.error("Update of nonexistent id (" + componentId + ") failed.");
+		return Response.serverError().entity("Invalid id, cannot update nonexistent component").build();
+	    }
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	}
     }
 
     private void updateDescription(AbstractDescription desc, String name, String description, String domainName, String group) {
-        desc.setName(name);
-        desc.setDescription(description);
-        desc.setDomainName(domainName);
-        desc.setGroupName(group);
-        desc.setRegistrationDate(AbstractDescription.createNewDate());
+	desc.setName(name);
+	desc.setDescription(description);
+	desc.setDomainName(domainName);
+	desc.setGroupName(group);
+	desc.setRegistrationDate(AbstractDescription.createNewDate());
     }
 
     @DELETE
     @Path("/components/{componentId}")
     public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = checkAndGetUserPrincipal();
-        ComponentRegistry registry = getRegistry(userspace);
-        LOG.info("Component with id: " + componentId + " set for deletion.");
-        try {
-            registry.deleteMDComponent(componentId, principal, false);
-        } catch (DeleteFailedException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed.", e);
-            return Response.status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
-        } catch (IOException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed.", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Component with id: " + componentId + " deletion failed: " + e.getMessage());
-            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
-        }
-        LOG.info("Component with id: " + componentId + " deleted.");
-        return Response.ok().build();
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+	Principal principal = checkAndGetUserPrincipal();
+	ComponentRegistry registry = getRegistry(userspace);
+	LOG.info("Component with id: " + componentId + " set for deletion.");
+	try {
+	    registry.deleteMDComponent(componentId, principal, false);
+	} catch (DeleteFailedException e) {
+	    LOG.info("Component with id: " + componentId + " deletion failed.", e);
+	    return Response.status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Component with id: " + componentId + " deletion failed.", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	} catch (IOException e) {
+	    LOG.info("Component with id: " + componentId + " deletion failed.", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	} catch (UserUnauthorizedException e) {
+	    LOG.info("Component with id: " + componentId + " deletion failed: " + e.getMessage());
+	    return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
+	}
+	LOG.info("Component with id: " + componentId + " deleted.");
+	return Response.ok().build();
     }
 
     @DELETE
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = checkAndGetUserPrincipal();
-        LOG.info("Profile with id: " + profileId + " set for deletion.");
-        try {
-            getRegistry(userspace).deleteMDProfile(profileId, principal);
-        } catch (DeleteFailedException e) {
-            LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
-            return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
-        } catch (IOException e) {
-            LOG.info("Profile with id: " + profileId + " deletion failed.", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
-            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
-        }
-        LOG.info("Profile with id: " + profileId + " deleted.");
-        return Response.ok().build();
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+	Principal principal = checkAndGetUserPrincipal();
+	LOG.info("Profile with id: " + profileId + " set for deletion.");
+	try {
+	    getRegistry(userspace).deleteMDProfile(profileId, principal);
+	} catch (DeleteFailedException e) {
+	    LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
+	    return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	} catch (IOException e) {
+	    LOG.info("Profile with id: " + profileId + " deletion failed.", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	} catch (UserUnauthorizedException e) {
+	    LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
+	    return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
+	}
+	LOG.info("Profile with id: " + profileId + " deleted.");
+	return Response.ok().build();
     }
 
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public Response getRegisteredProfileRawType(@PathParam("profileId") final String profileId, @PathParam("rawType") String rawType) {
-        LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
-        StreamingOutput result = null;
-        final ComponentRegistry registry = findRegistry(profileId, new ProfileClosure());
-        if (registry == null) {
-            return Response.status(Status.NOT_FOUND).entity("Id: " + profileId + " is not registered, cannot create data.").build();
-        }
-        ProfileDescription desc = registry.getProfileDescription(profileId);
-        checkAndThrowDescription(desc, profileId);
-        String fileName = desc.getName() + "." + rawType;
+	LOG.info("Profile with id: " + profileId + " and rawType:" + rawType + " is requested.");
+	StreamingOutput result = null;
+	try {
+	    final ComponentRegistry registry = findRegistry(profileId, new ProfileClosure());
+	    if (registry == null) {
+		return Response.status(Status.NOT_FOUND).entity("Id: " + profileId + " is not registered, cannot create data.").build();
+	    }
+	    ProfileDescription desc = registry.getProfileDescription(profileId);
+	    checkAndThrowDescription(desc, profileId);
+	    String fileName = desc.getName() + "." + rawType;
 
-        if ("xml".equalsIgnoreCase(rawType)) {
-            result = new StreamingOutput() {
+	    if ("xml".equalsIgnoreCase(rawType)) {
+		result = new StreamingOutput() {
 
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    registry.getMDProfileAsXml(profileId, output);
-                }
-            };
-        } else if ("xsd".equalsIgnoreCase(rawType)) {
-            result = new StreamingOutput() {
+		    @Override
+		    public void write(OutputStream output) throws IOException, WebApplicationException {
+			try {
+			    registry.getMDProfileAsXml(profileId, output);
+			} catch (ComponentRegistryException e) {
+			    LOG.info("Could not retrieve component", e);
+			    throw new WebApplicationException(Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
+			}
+		    }
+		};
+	    } else if ("xsd".equalsIgnoreCase(rawType)) {
+		result = new StreamingOutput() {
 
-                public void write(OutputStream output) throws IOException, WebApplicationException {
-                    registry.getMDProfileAsXsd(profileId, output);
-                }
-            };
-        } else {
-            throw new WebApplicationException(Response.serverError().entity(
-                    "unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
-        }
-        return createDownloadResponse(result, fileName);
+		    @Override
+		    public void write(OutputStream output) throws IOException, WebApplicationException {
+			try {
+			    registry.getMDProfileAsXsd(profileId, output);
+			} catch (ComponentRegistryException e) {
+			    LOG.info("Could not retrieve component", e);
+			    throw new WebApplicationException(Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
+			}
+		    }
+		};
+	    } else {
+		throw new WebApplicationException(Response.serverError().entity(
+			"unsupported rawType: " + rawType + " (only xml or xsd are supported)").build());
+	    }
+	    return createDownloadResponse(result, fileName);
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve component", e);
+	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+	}
     }
 
     private void checkAndThrowDescription(AbstractDescription desc, String id) {
-        if (desc == null) {
-            throw new WebApplicationException(Response.serverError().entity("Incorrect id:" + id + "cannot handle request").build());
-        }
+	if (desc == null) {
+	    throw new WebApplicationException(Response.serverError().entity("Incorrect id:" + id + "cannot handle request").build());
+	}
     }
 
     private Response createDownloadResponse(StreamingOutput result, String fileName) {
-        //Making response so it triggers browsers native save as dialog.
-        Response response = Response.ok().type("application/x-download").header("Content-Disposition",
-                "attachment; filename=\"" + fileName + "\"").entity(result).build();
-        return response;
+	//Making response so it triggers browsers native save as dialog.
+	Response response = Response.ok().type("application/x-download").header("Content-Disposition",
+		"attachment; filename=\"" + fileName + "\"").entity(result).build();
+	return response;
 
     }
 
@@ -400,19 +460,19 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
     public Response registerProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
-            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = checkAndGetUserPrincipal();
-        UserCredentials userCredentials = getUserCredentials(principal);
-        ProfileDescription desc = createNewProfileDescription();
-        desc.setCreatorName(userCredentials.getDisplayName());
+	    @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName,
+	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+	Principal principal = checkAndGetUserPrincipal();
+	UserCredentials userCredentials = getUserCredentials(principal);
+	ProfileDescription desc = createNewProfileDescription();
+	desc.setCreatorName(userCredentials.getDisplayName());
 	desc.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
-        desc.setName(name);
-        desc.setDescription(description);
-        desc.setGroupName(group);
-        desc.setDomainName(domainName);
-        LOG.info("Trying to register Profile: " + desc);
-        return register(input, desc, userCredentials, userspace, new NewAction());
+	desc.setName(name);
+	desc.setDescription(description);
+	desc.setGroupName(group);
+	desc.setDomainName(domainName);
+	LOG.info("Trying to register Profile: " + desc);
+	return register(input, desc, userCredentials, userspace, new NewAction());
     }
 
     @POST
@@ -420,95 +480,95 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
     public Response registerComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-        Principal principal = checkAndGetUserPrincipal();
-        UserCredentials userCredentials = getUserCredentials(principal);
-        ComponentDescription desc = createNewComponentDescription();
-        desc.setCreatorName(userCredentials.getDisplayName());
-        desc.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
-        desc.setName(name);
-        desc.setDescription(description);
-        desc.setGroupName(group);
-        desc.setDomainName(domainName);
-        LOG.info("Trying to register Component: " + desc);
-        return register(input, desc, userCredentials, userspace, new NewAction());
+	    @FormDataParam(DESCRIPTION_FORM_FIELD) String description, @FormDataParam(GROUP_FORM_FIELD) String group,
+	    @FormDataParam(DOMAIN_FORM_FIELD) String domainName, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+	Principal principal = checkAndGetUserPrincipal();
+	UserCredentials userCredentials = getUserCredentials(principal);
+	ComponentDescription desc = createNewComponentDescription();
+	desc.setCreatorName(userCredentials.getDisplayName());
+	desc.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
+	desc.setName(name);
+	desc.setDescription(description);
+	desc.setGroupName(group);
+	desc.setDomainName(domainName);
+	LOG.info("Trying to register Component: " + desc);
+	return register(input, desc, userCredentials, userspace, new NewAction());
     }
 
     @GET
     @Path("/pingSession")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response pingSession() {
-        boolean stillActive = false;
-        Principal userPrincipal = security.getUserPrincipal();
-        LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
-        if (request != null) {
-            if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
-                stillActive = !((HttpServletRequest) request).getSession().isNew();
-            }
-        }
-        return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
+	boolean stillActive = false;
+	Principal userPrincipal = security.getUserPrincipal();
+	LOG.info("ping by user: " + (userPrincipal == null ? "null" : userPrincipal.getName()));
+	if (request != null) {
+	    if (userPrincipal != null && !ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+		stillActive = !((HttpServletRequest) request).getSession().isNew();
+	    }
+	}
+	return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
     }
 
     private Response register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace,
-            RegisterAction action) {
-        try {
-            ComponentRegistry registry = getRegistry(userspace, userCredentials);
-            DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-            MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true), componentRegistryFactory.getPublicRegistry());
-            RegisterResponse response = new RegisterResponse();
-            response.setIsInUserSpace(userspace);
-            validate(response, descriptionValidator, validator);
-            if (response.getErrors().isEmpty()) {
-                CMDComponentSpec spec = validator.getCMDComponentSpec();
-                int returnCode = action.execute(desc, spec, response, registry);
-                if (returnCode == 0) {
-                    response.setRegistered(true);
-                    response.setDescription(desc);
-                } else {
-                    response.setRegistered(false);
-                    response.addError("Unable to register at this moment. Internal server error.");
-                }
-            } else {
-                LOG.info("Registration failed with validation errors:" + Arrays.toString(response.getErrors().toArray()));
-                response.setRegistered(false);
-            }
-            response.setIsProfile(desc.isProfile());
-            return Response.ok(response).build();
-        } finally {
-            try {
-                input.close();//either we read the input or there was an exception, we need to close it.
-            } catch (IOException e) {
-                LOG.error("Error when closing inputstream: ", e);
-            }
-        }
+	    RegisterAction action) {
+	try {
+	    ComponentRegistry registry = getRegistry(userspace, userCredentials);
+	    DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
+	    MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true), componentRegistryFactory.getPublicRegistry());
+	    RegisterResponse response = new RegisterResponse();
+	    response.setIsInUserSpace(userspace);
+	    validate(response, descriptionValidator, validator);
+	    if (response.getErrors().isEmpty()) {
+		CMDComponentSpec spec = validator.getCMDComponentSpec();
+		int returnCode = action.execute(desc, spec, response, registry);
+		if (returnCode == 0) {
+		    response.setRegistered(true);
+		    response.setDescription(desc);
+		} else {
+		    response.setRegistered(false);
+		    response.addError("Unable to register at this moment. Internal server error.");
+		}
+	    } else {
+		LOG.info("Registration failed with validation errors:" + Arrays.toString(response.getErrors().toArray()));
+		response.setRegistered(false);
+	    }
+	    response.setIsProfile(desc.isProfile());
+	    return Response.ok(response).build();
+	} finally {
+	    try {
+		input.close();//either we read the input or there was an exception, we need to close it.
+	    } catch (IOException e) {
+		LOG.error("Error when closing inputstream: ", e);
+	    }
+	}
     }
 
     private ComponentDescription createNewComponentDescription() {
-        ComponentDescription desc = ComponentDescription.createNewDescription();
-        desc.setHref(createXlink(desc.getId()));
-        return desc;
+	ComponentDescription desc = ComponentDescription.createNewDescription();
+	desc.setHref(createXlink(desc.getId()));
+	return desc;
     }
 
     private ProfileDescription createNewProfileDescription() {
-        ProfileDescription desc = ProfileDescription.createNewDescription();
-        desc.setHref(createXlink(desc.getId()));
-        return desc;
+	ProfileDescription desc = ProfileDescription.createNewDescription();
+	desc.setHref(createXlink(desc.getId()));
+	return desc;
     }
 
     private String createXlink(String id) {
-        URI uri = uriInfo.getRequestUriBuilder().path(id).build();
-        return uri.toString();
+	URI uri = uriInfo.getRequestUriBuilder().path(id).build();
+	return uri.toString();
     }
 
     private void validate(RegisterResponse response, Validator... validators) {
-        for (Validator validator : validators) {
-            if (!validator.validate()) {
-                for (String error : validator.getErrorMessages()) {
-                    response.addError(error);
-                }
-            }
-        }
+	for (Validator validator : validators) {
+	    if (!validator.validate()) {
+		for (String error : validator.getErrorMessages()) {
+		    response.addError(error);
+		}
+	    }
+	}
     }
 
     /**

@@ -14,17 +14,17 @@ public interface ComponentRegistry {
 
     public static final String REGISTRY_ID = "clarin.eu:cr1:";
 
-    List<ComponentDescription> getComponentDescriptions();
+    List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException;
 
-    ComponentDescription getComponentDescription(String id);
+    ComponentDescription getComponentDescription(String id) throws ComponentRegistryException;
 
-    List<ProfileDescription> getProfileDescriptions();
+    List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
 
-    ProfileDescription getProfileDescription(String id);
+    ProfileDescription getProfileDescription(String id) throws ComponentRegistryException;
 
-    CMDComponentSpec getMDProfile(String id);
+    CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException;
 
-    CMDComponentSpec getMDComponent(String id);
+    CMDComponentSpec getMDComponent(String id) throws ComponentRegistryException;
 
     /**
      * 
@@ -44,13 +44,13 @@ public interface ComponentRegistry {
      */
     int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal);
     
-    void getMDProfileAsXml(String profileId, OutputStream output);
+    void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException;
 
-    void getMDProfileAsXsd(String profileId, OutputStream outputStream);
+    void getMDProfileAsXsd(String profileId, OutputStream outputStream) throws ComponentRegistryException;
 
-    void getMDComponentAsXml(String componentId, OutputStream output);
+    void getMDComponentAsXml(String componentId, OutputStream output) throws ComponentRegistryException;
 
-    void getMDComponentAsXsd(String componentId, OutputStream outputStream);
+    void getMDComponentAsXsd(String componentId, OutputStream outputStream) throws ComponentRegistryException;
 
     /**
      * 
@@ -60,7 +60,7 @@ public interface ComponentRegistry {
      * @throws UserUnauthorizedException thrown when principal does not match creator of profile
      * @throws DeleteFailedException
      */
-    void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, DeleteFailedException;
+    void deleteMDProfile(String profileId, Principal principal) throws IOException, UserUnauthorizedException, ComponentRegistryException, DeleteFailedException;
 
     /**
      * 
@@ -71,7 +71,7 @@ public interface ComponentRegistry {
      * @throws UserUnauthorizedException thrown when principal does not match creator of component
      * @throws DeleteFailedException
      */
-    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, UserUnauthorizedException,
+    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,  ComponentRegistryException, UserUnauthorizedException,
             DeleteFailedException;
 
     /**
@@ -79,14 +79,14 @@ public interface ComponentRegistry {
      * @param componentId
      * @return List of ComponentDescriptions of Components that use the given Component.
      */
-    List<ComponentDescription> getUsageInComponents(String componentId);
+    List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException;
 
     /**
      * 
      * @param componentId
      * @return List of ProfileDescriptions of Profiles that use the given Component.
      */
-    List<ProfileDescription> getUsageInProfiles(String componentId);
+    List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException;
 
     /**
      * Return true if this registry is the public registry as opposed to a registry used for the user privately.

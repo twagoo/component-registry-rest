@@ -7,6 +7,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
@@ -19,6 +20,7 @@ public class MDValidator implements Validator {
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
     static final String PARSE_ERROR = "Error in validation input file. Error is: ";
     static final String COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR = "referenced component cannot be found in the published components: ";
+    static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
 
     private List<String> errorMessages = new ArrayList<String>();
     private CMDComponentSpec spec = null;
@@ -59,19 +61,23 @@ public class MDValidator implements Validator {
             errorMessages.add(PARSE_ERROR + e);
         }
         if (errorMessages.isEmpty()) {
-            validateComponents(spec.getCMDComponent());
+	    try {
+		validateComponents(spec.getCMDComponent());
+	    } catch (ComponentRegistryException e) {
+		errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + e);
+	    }
         }
         return errorMessages.isEmpty();
     }
 
-    private void validateComponents(List<CMDComponentType> cmdComponents) {
+    private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
         for (CMDComponentType cmdComponentType : cmdComponents) {
             validateDescribedComponents(cmdComponentType);
             validateComponents(cmdComponentType.getCMDComponent());//Recursion
         }
     }
 
-    private void validateDescribedComponents(CMDComponentType cmdComponentType) {
+    private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
         if (isDefinedInSeparateFile(cmdComponentType)) {
             String id = cmdComponentType.getComponentId();
             CMDComponentSpec registeredComponent = null;

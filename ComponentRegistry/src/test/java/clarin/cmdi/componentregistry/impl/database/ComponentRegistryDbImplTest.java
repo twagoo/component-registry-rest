@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -159,7 +160,7 @@ public class ComponentRegistryDbImplTest {
 	assertNull(registry.getMDProfile(description.getId()));
     }
 
-    private ProfileDescription createProfile(ComponentRegistry register) throws IOException, JAXBException, DeleteFailedException {
+    private ProfileDescription createProfile(ComponentRegistry register) throws IOException, JAXBException, DeleteFailedException, ComponentRegistryException {
 	ProfileDescription description = ProfileDescription.createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
@@ -294,7 +295,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
     }
 
-    private ComponentDescription createComponent(ComponentRegistry registry) throws IOException, DeleteFailedException, JAXBException {
+    private ComponentDescription createComponent(ComponentRegistry registry) throws IOException, DeleteFailedException, JAXBException, ComponentRegistryException {
 	ComponentDescription description = ComponentDescription.
 		createNewDescription();
 	description.setName("Aap");

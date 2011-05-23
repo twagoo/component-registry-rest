@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import static junit.framework.Assert.assertEquals;
@@ -31,7 +32,7 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
 
     @Test
-    public void testRegisterProfile() throws JAXBException {
+    public void testRegisterProfile() throws JAXBException, ComponentRegistryException {
 	ComponentRegistry register = getTestRegistry(getRegistryDir());
 	ProfileDescription description = ProfileDescription.createNewDescription();
 	description.setName("Aap");
@@ -61,7 +62,7 @@ public class ComponentRegistryImplTest extends ComponentRegistryTestCase {
     }
 
     @Test
-    public void testRegisterComponent() throws JAXBException {
+    public void testRegisterComponent() throws JAXBException, ComponentRegistryException {
 	ComponentRegistry register = getTestRegistry(getRegistryDir());
 	ComponentDescription description = ComponentDescription.
 		createNewDescription();

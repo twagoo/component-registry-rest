@@ -1,10 +1,12 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
 
@@ -40,10 +42,9 @@ import clarin.cmdi.componentregistry.model.UserMapping.User;
  */
 @SuppressWarnings("serial")
 public class MassMigratePage extends SecureAdminWebPage {
+
     private final static Logger LOG = LoggerFactory.getLogger(MassMigratePage.class);
-
     private FeedbackPanel feedback;
-
     @SpringBean(name = "fileRegistryFactory")
     private ComponentRegistryFactoryImpl fileRegistryFactory;
     @SpringBean
@@ -52,91 +53,98 @@ public class MassMigratePage extends SecureAdminWebPage {
     private ProfileDescriptionDao profileDescriptionDao;
     @SpringBean
     private UserDao userDao;
-
     private transient UserMapping userMap;
 
     public MassMigratePage(final PageParameters pageParameters) {
-        super(pageParameters);
-        userMap = fileRegistryFactory.getUserMap();
-        addLinks();
-        feedback = new FeedbackPanel("feedback") {
-            protected Component newMessageDisplayComponent(String id, FeedbackMessage message) {
-                Serializable serializable = message.getMessage();
-                MultiLineLabel label = new MultiLineLabel(id, (serializable == null) ? "" : serializable.toString());
-                label.setEscapeModelStrings(getEscapeModelStrings());
-                return label;
-            }
-        };
-        feedback.setOutputMarkupPlaceholderTag(true);
-        add(feedback);
-        addMigrationOptions();
+	super(pageParameters);
+	userMap = fileRegistryFactory.getUserMap();
+	addLinks();
+	feedback = new FeedbackPanel("feedback") {
+
+	    protected Component newMessageDisplayComponent(String id, FeedbackMessage message) {
+		Serializable serializable = message.getMessage();
+		MultiLineLabel label = new MultiLineLabel(id, (serializable == null) ? "" : serializable.toString());
+		label.setEscapeModelStrings(getEscapeModelStrings());
+		return label;
+	    }
+	};
+	feedback.setOutputMarkupPlaceholderTag(true);
+	add(feedback);
+	addMigrationOptions();
     }
 
     private void addLinks() {
-        add(new Label("linksMessage", "Do some mass migration or go to:"));
-        add(new Link("home") {
-            @Override
-            public void onClick() {
-                setResponsePage(AdminHomePage.class);
-            }
-        });
+	add(new Label("linksMessage", "Do some mass migration or go to:"));
+	add(new Link("home") {
+
+	    @Override
+	    public void onClick() {
+		setResponsePage(AdminHomePage.class);
+	    }
+	});
     }
 
     private void addMigrationOptions() {
-        add(new Label("migrate1Label", "Click here to start the migration of the file storage into the database."));
-        add(new IndicatingAjaxLink("migrate1") {
-            public void onClick(final AjaxRequestTarget target) {
-                if (target != null) {
-                    target.addComponent(feedback);
-                }
-                startMigration();
-            }
-        });
+	add(new Label("migrate1Label", "Click here to start the migration of the file storage into the database."));
+	add(new IndicatingAjaxLink("migrate1") {
+
+	    public void onClick(final AjaxRequestTarget target) {
+		if (target != null) {
+		    target.addComponent(feedback);
+		}
+		startMigration();
+	    }
+	});
     }
 
     private void startMigration() {
-        info("Start Migration users...");
-        List<User> users = userMap.getUsers();
-        for (User user : users) {
-            userDao.insertUser(user);
-        }
-        info("Start Migration descriptions and content...");
-        List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
-        registries.add(fileRegistryFactory.getPublicRegistry());
-        registries.addAll(fileRegistryFactory.getAllUserRegistries());
-        for (ComponentRegistry registry : registries) {
-            migrateDescriptions(registry.getComponentDescriptions(), registry, componentDescriptionDao);
-            migrateDescriptions(registry.getProfileDescriptions(), registry, profileDescriptionDao);
-        }
-        info("End Migration.");
+	info("Start Migration users...");
+	List<User> users = userMap.getUsers();
+	for (User user : users) {
+	    userDao.insertUser(user);
+	}
+	info("Start Migration descriptions and content...");
+	List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
+	registries.add(fileRegistryFactory.getPublicRegistry());
+	registries.addAll(fileRegistryFactory.getAllUserRegistries());
+	for (ComponentRegistry registry : registries) {
+	    try {
+		migrateDescriptions(registry.getComponentDescriptions(), registry, componentDescriptionDao);
+		migrateDescriptions(registry.getProfileDescriptions(), registry, profileDescriptionDao);
+	    } catch (ComponentRegistryException e) {
+		LOG.error("Error in migration, check the logs!", e);
+		info("Error cannot retrieve descriptions from registry " + registry.getName());
+	    }
+	}
+	info("End Migration.");
     }
 
     private void migrateDescriptions(List<? extends AbstractDescription> descs, ComponentRegistry registry, AbstractDescriptionDao descDao) {
-        int migrateCount = 0;
-        for (AbstractDescription description : descs) {
-            try {
-                User user = userDao.getByPrincipalName(userMap.findUser(description.getUserId()).getPrincipalName());
-                descDao.insertDescription(description, getContent(description, registry), registry.isPublic(), user.getId());
-            } catch (Exception e) {
-                LOG.error("Error in migration, check the logs!", e);
-                info("Error cannot migrate " + description.getId());
-            }
-            migrateCount++;
-        }
-        LOG.info(registry.getName() + " migrated: " + migrateCount + " out of " + descs.size() + " descs");
+	int migrateCount = 0;
+	for (AbstractDescription description : descs) {
+	    try {
+		User user = userDao.getByPrincipalName(userMap.findUser(description.getUserId()).getPrincipalName());
+		descDao.insertDescription(description, getContent(description, registry), registry.isPublic(), user.getId());
+	    } catch (Exception e) {
+		LOG.error("Error in migration, check the logs!", e);
+		info("Error cannot migrate " + description.getId());
+	    }
+	    migrateCount++;
+	}
+	LOG.info(registry.getName() + " migrated: " + migrateCount + " out of " + descs.size() + " descs");
     }
 
     private String getContent(AbstractDescription description, ComponentRegistry registry) throws UnsupportedEncodingException,
-            JAXBException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        CMDComponentSpec spec = null;
-        if (description.isProfile()) {
-            spec = registry.getMDProfile(description.getId());
-        } else {
-            spec = registry.getMDComponent(description.getId());
-        }
-        MDMarshaller.marshal(spec, out);
-        return out.toString();
+	    JAXBException,
+	    ComponentRegistryException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	CMDComponentSpec spec = null;
+	if (description.isProfile()) {
+	    spec = registry.getMDProfile(description.getId());
+	} else {
+	    spec = registry.getMDComponent(description.getId());
+	}
+	MDMarshaller.marshal(spec, out);
+	return out.toString();
     }
-
 }

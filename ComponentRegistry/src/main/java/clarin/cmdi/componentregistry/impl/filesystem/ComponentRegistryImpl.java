@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl.filesystem;
 
 import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -355,7 +356,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
 
     @Override
     public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,
-	    UserUnauthorizedException, DeleteFailedException {
+	    UserUnauthorizedException, DeleteFailedException, ComponentRegistryException {
 	ComponentDescription desc = componentDescriptions.get(componentId);
 	if (desc != null) {
 	    checkAuthorisation(desc, principal);

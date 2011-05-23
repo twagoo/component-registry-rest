@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
@@ -32,13 +33,13 @@ public class StatisticsPage extends SecureAdminWebPage {
         private int conceptlinkcounter = 0;
     }
 
-    public StatisticsPage(final PageParameters pageParameters) throws IOException {
+    public StatisticsPage(final PageParameters pageParameters) throws IOException, ComponentRegistryException {
         super(pageParameters);
         addLinks();
         DisplayStatistics();
     }
 
-    private void DisplayStatistics() {
+    private void DisplayStatistics() throws ComponentRegistryException {
         List<ProfileDescription> profileList = registry.getProfileDescriptions();
         RepeatingView repeating = new RepeatingView("repeating");
         add(repeating);

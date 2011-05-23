@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import java.io.File;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     @SpringBean(name="componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
 
-    public AdminHomePage(final PageParameters parameters) {
+    public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException {
         super(parameters);
         addLinks();
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
@@ -241,7 +242,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     }
 
-    private TreeModel createDBTreeModel() {
+    private TreeModel createDBTreeModel() throws ComponentRegistryException {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new DisplayDataNode("ComponentRegistry", false));
         DefaultMutableTreeNode publicNode = new DefaultMutableTreeNode(new DisplayDataNode("Public", false));
         rootNode.add(publicNode);
@@ -258,7 +259,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         return model;
     }
 
-    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) {
+    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException {
         DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
         parent.add(componentsNode);
         add(componentsNode, registry.getComponentDescriptions(), false);
