@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -142,5 +141,22 @@ public class MDMarshaller {
         } catch (JAXBException e) {
             LOG.error("Cannot marshall spec: " + spec, e);
         }
+    }
+
+    /**
+     * @param marshallableObject
+     * @return the xml representation of the marshallableObject
+     * @throws jaxb exceptions are wrapped in RuntimeExceptions
+     */
+    public static <T> String marshalToString(T marshallableObject) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            marshal(marshallableObject, out);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
+        return out.toString();
     }
 }
