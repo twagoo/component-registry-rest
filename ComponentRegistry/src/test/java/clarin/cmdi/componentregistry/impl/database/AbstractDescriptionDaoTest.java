@@ -1,28 +1,26 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.commons.lang.time.DateUtils;
-import org.junit.runner.RunWith;
-import org.junit.Test;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+
 /**
- *
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
+@ContextConfiguration(locations = { "/applicationContext-database-impl.xml" })
 public abstract class AbstractDescriptionDaoTest {
 
     @Autowired
@@ -73,8 +71,7 @@ public abstract class AbstractDescriptionDaoTest {
 
     @Test
     public void testGetUserspaceDescriptions() throws Exception {
-	List<AbstractDescription> descriptions = getDao().
-		getUserspaceDescriptions(-1);
+	List<AbstractDescription> descriptions = getDao().getUserspaceDescriptions(-1);
 	assertEquals(0, descriptions.size());
     }
 
@@ -87,12 +84,18 @@ public abstract class AbstractDescriptionDaoTest {
 
 	int count = getDao().getPublicDescriptions().size();
 	// insert
-	Number dbId = getDao().insertDescription(description, testComponent, true, null);
+	getDao().insertDescription(description, testComponent, true, null);
 	assertEquals(count + 1, getDao().getPublicDescriptions().size());
 
+	List deletedDescriptions = getDao().getDeletedDescriptions(null);
+	assertEquals(0, deletedDescriptions.size());
+
 	// delete
-	getDao().setDeleted(dbId);
+	getDao().setDeleted(description, true);
 	assertEquals(count, getDao().getPublicDescriptions().size());
+	
+	deletedDescriptions = getDao().getDeletedDescriptions(null);
+	assertEquals(1, deletedDescriptions.size());
     }
 
     @Test
@@ -104,14 +107,14 @@ public abstract class AbstractDescriptionDaoTest {
 	description.setGroupName("MyGroup");
 	description.setDomainName("MyDomain");
 	description.setHref("http://MyHref");
-	
+
 	String testComponent = RegistryTestHelper.getComponentTestContentString();
 	Number newId = getDao().insertDescription(description, testComponent, true, null);
 
 	// Change values
 	description.setName("Noot");
 	description.setDescription("AnotherDescription");
-		description.setCreatorName("AnotherAap");
+	description.setCreatorName("AnotherAap");
 	description.setGroupName("AnotherGroup");
 	description.setDomainName("AnotherDomain");
 	description.setHref("http://AnotherHref");

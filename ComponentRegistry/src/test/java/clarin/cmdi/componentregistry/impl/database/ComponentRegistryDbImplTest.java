@@ -1,36 +1,39 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.UserMapping.User;
-import clarin.cmdi.componentregistry.rest.DummyPrincipal;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Calendar;
-import javax.xml.bind.JAXBException;
-import org.apache.commons.lang.time.DateFormatUtils;
-
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableComponentDescription;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableProfileDescription;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableRegistryUser;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableXmlContent;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.resetDatabase;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.util.Calendar;
+
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.rest.DummyPrincipal;
+import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
@@ -159,8 +162,54 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
 	assertNull(registry.getMDProfile(description.getId()));
     }
+    
+    @Test
+    public void testGetDeletedDescriptions() throws Exception {
+	User user = createUser();
+	Number userId = userDao.insertUser(user);
+	ComponentRegistry registry = getComponentRegistryForUser(userId);
+	ComponentRegistry publicReg = getComponentRegistryForUser(null);
+	ProfileDescription desc1 = createProfile(registry);
+	ProfileDescription desc2 = createProfile(publicReg);
+	ComponentDescription desc3 = createComponent(registry);
+	ComponentDescription desc4 = createComponent(publicReg);
+	
+	assertEquals(0, registry.getDeletedProfileDescriptions().size());
+	assertEquals(0, publicReg.getDeletedProfileDescriptions().size());
+	assertEquals(0, registry.getDeletedComponentDescriptions().size());
+	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
 
-    private ProfileDescription createProfile(ComponentRegistry register) throws IOException, JAXBException, DeleteFailedException, ComponentRegistryException {
+	registry.deleteMDProfile(desc1.getId(), USER_CREDS.getPrincipal());
+	
+	assertEquals(1, registry.getDeletedProfileDescriptions().size());
+	assertEquals(0, publicReg.getDeletedProfileDescriptions().size());
+	assertEquals(0, registry.getDeletedComponentDescriptions().size());
+	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
+
+	publicReg.deleteMDProfile(desc2.getId(), USER_CREDS.getPrincipal());
+
+	assertEquals(1, registry.getDeletedProfileDescriptions().size());
+	assertEquals(1, publicReg.getDeletedProfileDescriptions().size());
+	assertEquals(0, registry.getDeletedComponentDescriptions().size());
+	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
+	
+	registry.deleteMDComponent(desc3.getId(), USER_CREDS.getPrincipal(), false);
+
+	assertEquals(1, registry.getDeletedProfileDescriptions().size());
+	assertEquals(1, publicReg.getDeletedProfileDescriptions().size());
+	assertEquals(1, registry.getDeletedComponentDescriptions().size());
+	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
+	
+	publicReg.deleteMDComponent(desc4.getId(), USER_CREDS.getPrincipal(), false);
+
+	assertEquals(1, registry.getDeletedProfileDescriptions().size());
+	assertEquals(1, publicReg.getDeletedProfileDescriptions().size());
+	assertEquals(1, registry.getDeletedComponentDescriptions().size());
+	assertEquals(1, publicReg.getDeletedComponentDescriptions().size());
+
+    }
+
+    private ProfileDescription createProfile(ComponentRegistry register) throws Exception {
 	ProfileDescription description = ProfileDescription.createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
@@ -295,7 +344,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
     }
 
-    private ComponentDescription createComponent(ComponentRegistry registry) throws IOException, DeleteFailedException, JAXBException, ComponentRegistryException {
+    private ComponentDescription createComponent(ComponentRegistry registry) throws Exception {
 	ComponentDescription description = ComponentDescription.
 		createNewDescription();
 	description.setName("Aap");
