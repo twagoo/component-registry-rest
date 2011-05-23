@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -21,46 +20,37 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import java.io.File;
-import org.junit.After;
-import org.junit.Before;
+import java.util.Collections;
+import java.util.Comparator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestCase {
+public abstract class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
-    protected static ComponentRegistry testRegistry;
-    private static File registryDir;
-
-    @Before
-    public void setUpTestRegistry() throws Exception {
-	registryDir = ComponentRegistryTestCase.createTempRegistryDir();
-	testRegistry = ComponentRegistryTestCase.getTestRegistry(registryDir);
-    }
-
-    @After
-    public void deleteAndRecreateEmptyRegistry() {
-	ComponentRegistryTestCase.cleanUpRegistryDir(registryDir);
-    }
+    private final static Logger LOG = LoggerFactory.getLogger(ConcurrentRestServiceTest.class);
+    private int NR_OF_PROFILES = 10;
+    private int NR_OF_COMPONENTS = 10;
 
     @Test
     public void testConcurrentRegisterProfile() throws Exception {
 	List<String> errors = new ArrayList();
 	List<Thread> ts = new ArrayList<Thread>();
-	int nrOfProfiles = 10;
-	registerProfiles(ts, nrOfProfiles, errors, "false");
-	registerProfiles(ts, nrOfProfiles, errors, "true");
-	int nrOfComponents = 10;
-	registerComponents(ts, nrOfComponents, errors, "false");
-	registerComponents(ts, nrOfComponents, errors, "true");
+
+	registerProfiles(ts, NR_OF_PROFILES, errors, "false");
+	registerProfiles(ts, NR_OF_PROFILES, errors, "true");
+
+	registerComponents(ts, NR_OF_COMPONENTS, errors, "false");
+	registerComponents(ts, NR_OF_COMPONENTS, errors, "true");
 	runAllThreads(ts);
 	if (errors.size() > 0) {
 	    System.out.println(Arrays.toString(errors.toArray()));
 	    fail();
 	}
-	assertProfiles(nrOfProfiles, "false");
-	assertProfiles(nrOfProfiles, "true");
+	assertProfiles(NR_OF_PROFILES, "false");
+	assertProfiles(NR_OF_PROFILES, "true");
 
-	assertComponents(nrOfComponents, "false");
-	assertComponents(nrOfComponents, "true");
+	assertComponents(NR_OF_COMPONENTS, "false");
+	assertComponents(NR_OF_COMPONENTS, "true");
     }
 
     private void assertProfiles(int nrOfProfiles, String userSpace) {
@@ -68,27 +58,33 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
 		getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, userSpace)).
 		accept(MediaType.APPLICATION_XML).get(
 		PROFILE_LIST_GENERICTYPE);
+	Collections.sort(response, descriptionComparator);
 	assertEquals("half should be deleted", nrOfProfiles / 2, response.size());
 	for (int i = 0; i < nrOfProfiles / 2; i++) {
 	    ProfileDescription desc = response.get(i);
 	    assertEquals("Test Profile" + (i * 2 + 1000), desc.getName());
-	    assertEquals("Test Profile" + (i * 2 + 1000) + " Description", desc.
-		    getDescription());
+	    assertEquals("Test Profile" + (i * 2 + 1000) + " Description", desc.getDescription());
 	}
     }
+    private Comparator<AbstractDescription> descriptionComparator = new Comparator<AbstractDescription>() {
+
+	@Override
+	public int compare(AbstractDescription o1, AbstractDescription o2) {
+	    return o1.getName().compareTo(o2.getName());
+	}
+    };
 
     private void assertComponents(int nrOfComponents, String userSpace) {
 	List<ComponentDescription> cResponse = getAuthenticatedResource(
 		getResource().path("/registry/components").queryParam(USERSPACE_PARAM, userSpace)).
 		accept(MediaType.APPLICATION_XML).get(
 		COMPONENT_LIST_GENERICTYPE);
-	assertEquals("half should be deleted", nrOfComponents / 2, cResponse.
-		size());
+	Collections.sort(cResponse, descriptionComparator);
+	assertEquals("half should be deleted", nrOfComponents / 2, cResponse.size());
 	for (int i = 0; i < nrOfComponents / 2; i++) {
 	    ComponentDescription desc = cResponse.get(i);
 	    assertEquals("Test Component" + (i * 2 + 1000), desc.getName());
-	    assertEquals("Test Component" + (i * 2 + 1000) + " Description", desc.
-		    getDescription());
+	    assertEquals("Test Component" + (i * 2 + 1000) + " Description", desc.getDescription());
 	}
     }
 
@@ -105,8 +101,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
     private void registerProfiles(List<Thread> ts, int size, final List<String> errors, String userSpace) throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
-	    Thread thread = createThread("/registry/profiles/", userSpace, i, "Test Profile" + (i + 1000), shouldDelete, RegistryTestHelper.
-		    getTestProfileContent(), errors);
+	    Thread thread = createThread("/registry/profiles/", userSpace, i, "Test Profile" + (i + 1000), shouldDelete, RegistryTestHelper.getTestProfileContent(), errors);
 	    ts.add(thread);
 	}
     }
@@ -120,7 +115,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
 	}
     }
 
-    private Thread createThread(final String path, final String userSpace, int nrOfProfiles, String name, final boolean alsoDelete,
+    private Thread createThread(final String path, final String userSpace, final int nrOfProfiles, final String name, final boolean alsoDelete,
 	    InputStream content, final List<String> errors) throws InterruptedException {
 	final FormDataMultiPart form = new FormDataMultiPart();
 	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
@@ -136,17 +131,16 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
 			type(MediaType.MULTIPART_FORM_DATA).post(
 			RegisterResponse.class, form);
 		if (!registerResponse.isRegistered()) {
-		    errors.add("Failed to register " + Arrays.toString(registerResponse.
-			    getErrors().toArray()));
+		    errors.add("Failed to register " + Arrays.toString(registerResponse.getErrors().toArray()));
 		}
+		LOG.debug(">>>>>>>>>>>>>>>> [Thread " + hashCode() + "] REGISTERING DESCRIPTION " + name + " " + registerResponse.getDescription().getId() + (Boolean.valueOf(userSpace) ? " userspace" : "") + (alsoDelete ? " alsoDelete" : ""));
 		if (alsoDelete) {
+		    LOG.debug(">>>>>>>>>>>>>>>> [Thread " + hashCode() + "] DELETING DESCRIPTION " + name + " " + registerResponse.getDescription().getId() + (Boolean.valueOf(userSpace) ? " userspace " : "") + (alsoDelete ? " alsoDelete" : ""));
 		    ClientResponse response = getAuthenticatedResource(
-			    getResource().path(path + registerResponse.
-			    getDescription().getId()).queryParam(USERSPACE_PARAM, userSpace)).
+			    getResource().path(path + registerResponse.getDescription().getId()).queryParam(USERSPACE_PARAM, userSpace)).
 			    delete(ClientResponse.class);
 		    if (response.getStatus() != 200) {
-			errors.add("Failed to delete " + registerResponse.
-				getDescription());
+			errors.add("Failed to delete " + registerResponse.getDescription());
 		    }
 		}
 		//                System.out.println("THREAD FINISHED"+Thread.currentThread().getName());
@@ -154,10 +148,5 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
 	});
 	return t;
 
-    }
-
-    @Override
-    protected String getApplicationContextFile() {
-	return "classpath:applicationContext.xml";
     }
 }
