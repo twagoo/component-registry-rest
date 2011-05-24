@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.filesystem;
+package clarin.cmdi.componentregistry.impl.database;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -19,8 +19,6 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
-import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;

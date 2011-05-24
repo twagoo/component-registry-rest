@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.filesystem;
+package clarin.cmdi.componentregistry.impl.database;
 
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableComponentDescription;
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableProfileDescription;
