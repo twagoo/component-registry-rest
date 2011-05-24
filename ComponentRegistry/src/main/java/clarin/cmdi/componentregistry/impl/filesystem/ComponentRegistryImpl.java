@@ -229,7 +229,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     public List<ProfileDescription> getProfileDescriptions() {
 	List<ProfileDescription> result = new ArrayList<ProfileDescription>(profileDescriptions.
 		values());
-	Collections.sort(result, ProfileDescription.COMPARE_ON_NAME);
+	Collections.sort(result, AbstractDescription.COMPARE_ON_NAME);
 	return result;
     }
 

@@ -17,10 +17,10 @@ public class ComponentDescription extends AbstractDescription implements Seriali
         public int compare(ComponentDescription o1, ComponentDescription o2) {
             int result = 0;
             if (o1.getGroupName() != null && o2.getGroupName() != null)
-                result = o1.getGroupName().compareTo(o2.getGroupName());
+                result = o1.getGroupName().compareToIgnoreCase(o2.getGroupName());
             if (result == 0) {
                 if (o1.getName() != null && o2.getName() != null) {
-                    result = o1.getName().compareTo(o2.getName());
+                    result = o1.getName().compareToIgnoreCase(o2.getName());
                 } else {
                     result = o1.getId().compareTo(o2.getId());
                 }

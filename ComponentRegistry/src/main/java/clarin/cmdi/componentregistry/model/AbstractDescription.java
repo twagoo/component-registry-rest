@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.model;
 
 import java.text.ParseException;
+import java.util.Comparator;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -144,4 +145,15 @@ public abstract class AbstractDescription {
         return result;
     }
 
+    public static final Comparator<? super AbstractDescription> COMPARE_ON_NAME = new Comparator<AbstractDescription>() {
+        public int compare(AbstractDescription o1, AbstractDescription o2) {
+            int result = 0;
+            if (o1.getName() != null && o2.getName() != null) {
+                result = o1.getName().compareToIgnoreCase(o2.getName());
+            } else {
+                result = o1.getId().compareTo(o2.getId());
+            }
+            return result;
+        }
+    };
 }
