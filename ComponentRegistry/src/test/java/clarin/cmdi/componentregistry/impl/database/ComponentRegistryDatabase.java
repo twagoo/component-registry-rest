@@ -29,7 +29,7 @@ public final class ComponentRegistryDatabase {
 		+ "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
-                + "  group_name character varying);");
+                + "  group_name character varying, CONSTRAINT UNIQUE_COMPONENT_ID UNIQUE (component_id));");
     }
 
     public static void createTableProfileDescription(JdbcTemplate jdbcTemplate) {
@@ -46,7 +46,7 @@ public final class ComponentRegistryDatabase {
 		+ "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
-                + "  group_name character varying);");
+                + "  group_name character varying, CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (profile_id));");
     }
 
     public static void createTableXmlContent(JdbcTemplate jdbcTemplate) {

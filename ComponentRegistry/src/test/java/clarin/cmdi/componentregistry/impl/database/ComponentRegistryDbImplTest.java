@@ -210,11 +210,7 @@ public class ComponentRegistryDbImplTest {
     }
 
     private ProfileDescription createProfile(ComponentRegistry register) throws Exception {
-	ProfileDescription description = ProfileDescription.createNewDescription();
-	description.setName("Aap");
-	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalName());
-	description.setDescription("MyDescription");
+	ProfileDescription description = getProfileDesc();
 
 	CMDComponentSpec testProfile = RegistryTestHelper.getTestProfile();
 	register.register(description, testProfile);
@@ -230,6 +226,15 @@ public class ComponentRegistryDbImplTest {
 
 	assertEquals(1, register.getProfileDescriptions().size());
 	assertNotNull(register.getMDProfile(description.getId()));
+	return description;
+    }
+
+    private ProfileDescription getProfileDesc() {
+	ProfileDescription description = ProfileDescription.createNewDescription();
+	description.setName("Aap");
+	description.setCreatorName(USER_CREDS.getDisplayName());
+	description.setUserId(USER_CREDS.getPrincipalName());
+	description.setDescription("MyDescription");
 	return description;
     }
 
@@ -267,12 +272,7 @@ public class ComponentRegistryDbImplTest {
 	Number userId = userDao.insertUser(createUser());
 	ComponentRegistry registry = getComponentRegistryForUser(userId);
 
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
-	description.setName("Aap");
-	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalName());
-	description.setDescription("MyDescription");
+	ComponentDescription description = getComponentDesc();
 	Calendar calendar = Calendar.getInstance();
 	calendar.set(Calendar.YEAR, 1999);
 	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.
@@ -297,7 +297,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getComponentDescriptions().size());
 
 	registry = getComponentRegistryForUser(userId); // ComponentRegistryFactoryImpl.getInstance().getComponentRegistry(true, USER_CREDS); //user registry
-	description.setUserId(USER_CREDS.getPrincipalName()); // Set again to principal name
+	description = getComponentDesc();
 	registry.register(description, testComp);
 	assertEquals(1, registry.getComponentDescriptions().size());
 	registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false); //user workspace can always delete
@@ -309,11 +309,7 @@ public class ComponentRegistryDbImplTest {
 	Number userId = userDao.insertUser(createUser());
 	ComponentRegistry registry = getComponentRegistryForUser(userId);
 
-	ProfileDescription description = ProfileDescription.createNewDescription();
-	description.setName("Aap");
-	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalName());
-	description.setDescription("MyDescription");
+	ProfileDescription description = getProfileDesc();
 	Calendar calendar = Calendar.getInstance();
 	calendar.set(Calendar.YEAR, 1999);
 	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.
@@ -337,7 +333,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
 
 	registry = getComponentRegistryForUser(userId);
-	description.setUserId(USER_CREDS.getPrincipalName()); // Set again to principal name
+	description = getProfileDesc();//Need to create a new one for a new id
 	registry.register(description, testComp);
 	assertEquals(1, registry.getProfileDescriptions().size());
 	registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal()); //user workspace can always delete
@@ -345,12 +341,7 @@ public class ComponentRegistryDbImplTest {
     }
 
     private ComponentDescription createComponent(ComponentRegistry registry) throws Exception {
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
-	description.setName("Aap");
-	description.setCreatorName(USER_CREDS.getDisplayName());
-	description.setUserId(USER_CREDS.getPrincipalName());
-	description.setDescription("MyDescription");
+	ComponentDescription description = getComponentDesc();
 	CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
 	registry.register(description, testComp);
@@ -364,6 +355,16 @@ public class ComponentRegistryDbImplTest {
 
 	assertEquals(1, registry.getComponentDescriptions().size());
 	assertNotNull(registry.getMDComponent(description.getId()));
+	return description;
+    }
+
+    private ComponentDescription getComponentDesc() {
+	ComponentDescription description = ComponentDescription.
+		createNewDescription();
+	description.setName("Aap");
+	description.setCreatorName(USER_CREDS.getDisplayName());
+	description.setUserId(USER_CREDS.getPrincipalName());
+	description.setDescription("MyDescription");
 	return description;
     }
 

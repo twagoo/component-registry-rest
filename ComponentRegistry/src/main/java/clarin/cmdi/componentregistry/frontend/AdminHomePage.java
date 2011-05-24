@@ -72,12 +72,9 @@ public class AdminHomePage extends SecureAdminWebPage {
 		Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
 		try {
 		    adminRegistry.delete(info, userPrincipal);
-		    tree.setModelObject(createDBTreeModel());
 		    info("Item deleted.");
+		    reloadTreeModel(info);
 		} catch (SubmitFailedException e) {
-		    LOG.error("Admin: ", e);
-		    error("Cannot delete: " + info.getName() + "\n error=" + e);
-		} catch (ComponentRegistryException e) {
 		    LOG.error("Admin: ", e);
 		    error("Cannot delete: " + info.getName() + "\n error=" + e);
 		}
@@ -103,11 +100,8 @@ public class AdminHomePage extends SecureAdminWebPage {
 		try {
 		    adminRegistry.undelete(info);
 		    info("Item put back.");
-		    tree.setModelObject(createDBTreeModel());
+		    reloadTreeModel(info);
 		} catch (SubmitFailedException e) {
-		    LOG.error("Admin: ", e);
-		    error("Cannot undelete: " + info.getName() + "\n error=" + e);
-		} catch (ComponentRegistryException e) {
 		    LOG.error("Admin: ", e);
 		    error("Cannot undelete: " + info.getName() + "\n error=" + e);
 		}
@@ -137,12 +131,14 @@ public class AdminHomePage extends SecureAdminWebPage {
 		try {
 		    adminRegistry.submitFile(info, userPrincipal);
 		    info("submitting done.");
+		    reloadTreeModel(info);
 		} catch (SubmitFailedException e) {
 		    LOG.error("Admin: ", e);
 		    error("Cannot submit: " + info.getName() + "\n error=" + e);
 		}
 		if (target != null) {
 		    target.addComponent(form);
+		    target.addComponent(tree);
 		    target.addComponent(feedback);
 		}
 	    }
@@ -170,6 +166,15 @@ public class AdminHomePage extends SecureAdminWebPage {
 	    }
 	});
 
+    }
+
+    private void reloadTreeModel(CMDItemInfo info) {
+	try {
+	    tree.setModelObject(createDBTreeModel());
+	} catch (ComponentRegistryException e) {
+	    LOG.error("Admin: ", e);
+	    error("Cannot reload tree: " + info.getName() + "\n error=" + e);
+	}
     }
 
     private void addLinks() {

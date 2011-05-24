@@ -238,11 +238,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return Database id for description record
      */
     public Number getDbId(String cmdId) {
-	// Check for is_deleted is important, because an id only has to be
-	// unique
-	// among non-deleted descriptions
 	StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID + " FROM ").append(getTableName());
-	query.append(" WHERE is_deleted = false AND ").append(getCMDIdColumn()).append(" = ?");
+	query.append(" WHERE ").append(getCMDIdColumn()).append(" = ?");
 	return getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId);
     }
 

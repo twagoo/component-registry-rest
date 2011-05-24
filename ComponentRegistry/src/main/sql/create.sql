@@ -45,7 +45,8 @@ CREATE TABLE component_description (
     creator_name character varying,
     domain_name character varying,
     group_name character varying,
-    href character varying
+    href character varying,
+    UNIQUE(component_id)
 );
 
 --
@@ -74,7 +75,8 @@ CREATE TABLE profile_description (
     creator_name character varying,
     domain_name character varying,
     group_name character varying,
-    href character varying
+    href character varying,
+    UNIQUE(profile_id)
 );
 
 --
