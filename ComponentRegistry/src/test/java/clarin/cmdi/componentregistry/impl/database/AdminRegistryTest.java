@@ -46,9 +46,9 @@ public class AdminRegistryTest  {
     
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
     @Before
-    public void init() { //TODO PD make super testcase and share with other test classes that have this. Also move this class to db package.
-			//TODO PD should we also check publish for the right user?
+    public void init() {
 	resetDatabase(jdbcTemplate);
 	createTableComponentDescription(jdbcTemplate);
 	createTableProfileDescription(jdbcTemplate);
