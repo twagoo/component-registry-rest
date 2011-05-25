@@ -24,7 +24,7 @@ package clarin.cmdi.componentregistry.common {
         public static const MULTILINGUAL:String = "Multilingual:";
 
 		//tooltip
-		public static const DISPLAY_PRIORITY_TOOLTIP:String = "Display preference for external tools, 0 means ignore and 1 means highest priority. Element with name='Name' or name='Title' is usually a good candidate to set to highest priority."        
+		public static const DISPLAY_PRIORITY_TOOLTIP:String = "Display preference for external tools, 1 means highest priority. Element with name='Name' or name='Title' is usually a good candidate to set to highest priority. Put the value to on 0 and the attribute will not be added to the element."        
 
 		//Data
 		public static const DOMAIN_NAME_DATA:ArrayCollection = new ArrayCollection([

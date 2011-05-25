@@ -1,11 +1,13 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-
+	
 	import com.adobe.net.URI;
-
+	
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
@@ -17,7 +19,7 @@ package clarin.cmdi.componentregistry.services {
 	import mx.utils.StringUtil;
 
 	[Event(name="itemsLoaded", type="flash.events.Event")]
-	public class BrowserService {
+	public class BrowserService extends EventDispatcher {
         public static const ITEMS_LOADED:String = "itemsLoaded";
 		private var service:HTTPService;
 

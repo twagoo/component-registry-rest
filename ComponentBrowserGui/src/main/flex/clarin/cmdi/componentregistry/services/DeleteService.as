@@ -54,13 +54,12 @@ package clarin.cmdi.componentregistry.services {
 
 		public function handleError(faultEvent:FaultEvent):void {
 			CursorManager.removeBusyCursor();
-			if (faultEvent.statusCode == 401) {
+			if (faultEvent.statusCode == 401) { //Apparrently depending on browser status codes and errormessages are sometimes not passed along to flash.
 				Alert.show("Item not deleted:" + faultEvent.message.body);
 			} else if (faultEvent.statusCode == 403) {
 				Alert.show("Item not deleted:" + faultEvent.message.body);
 			} else {
-				var errorMessage:String = StringUtil.substitute("Error in {0} status {1}: {2}", this, faultEvent.statusCode, faultEvent.fault.faultString);
-				Alert.show(errorMessage);
+				Alert.show("Item not deleted: Item is either public or in the case of a component still referenced by other components/profiles.");
 			}
 		}
 

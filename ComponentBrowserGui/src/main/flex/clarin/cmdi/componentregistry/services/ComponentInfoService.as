@@ -6,6 +6,9 @@ package clarin.cmdi.componentregistry.services {
 	
 	import com.adobe.net.URI;
 	
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	
 	import mx.controls.Alert;
 	import mx.messaging.messages.HTTPRequestMessage;
 	import mx.rpc.AsyncToken;
@@ -16,7 +19,7 @@ package clarin.cmdi.componentregistry.services {
 	import mx.utils.StringUtil;
 
 	[Event(name="ComponentLoaded", type="flash.events.Event")]
-	public class ComponentInfoService {
+	public class ComponentInfoService extends EventDispatcher{
 		public static const COMPONENT_LOADED:String = "ComponentLoaded";
 
 		private var service:HTTPService;

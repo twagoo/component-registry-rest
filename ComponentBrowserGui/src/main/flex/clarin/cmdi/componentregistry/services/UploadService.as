@@ -6,6 +6,7 @@ package clarin.cmdi.componentregistry.services {
 	import com.adobe.net.URI;
 	
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
@@ -22,7 +23,7 @@ package clarin.cmdi.componentregistry.services {
 
 	[Event(name="uploadComplete", type="clarin.cmdi.componentregistry.importer.UploadCompleteEvent")]
 	[Event(name="fileLoaded", type="clarin.cmdi.componentregistry.importer.FileLoadedEvent")]
-	public class UploadService {
+	public class UploadService extends EventDispatcher{
 
 		/**
 		 * Tries to Update the existing data (only valid for updating in private workspace)
