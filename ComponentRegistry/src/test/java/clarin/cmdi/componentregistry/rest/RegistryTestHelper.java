@@ -5,9 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,8 +22,6 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
  * 
  */
 public final class RegistryTestHelper {
-
-    private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");//TODO PD this is no longer user but do we still have same dates?
 
     private RegistryTestHelper() {
     }

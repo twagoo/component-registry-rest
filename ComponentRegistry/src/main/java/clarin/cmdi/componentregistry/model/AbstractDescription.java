@@ -118,7 +118,11 @@ public abstract class AbstractDescription {
     }
 
     public static String createNewDate() {
-        return DateFormatUtils.formatUTC(new Date(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
+        return createNewDate(new Date().getTime());
+    }
+    
+    public static String createNewDate(long time) {
+        return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
     /**

@@ -3,9 +3,7 @@ package clarin.cmdi.componentregistry.impl.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,12 +12,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -33,7 +30,7 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 public abstract class AbstractDescriptionDao<T extends AbstractDescription> extends ComponentRegistryDao<T> {
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
-    private final static DateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+
     @Autowired
     private PlatformTransactionManager txManager;
     @Autowired
@@ -42,6 +39,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     protected abstract String getTableName();
 
     protected abstract String getCMDIdColumn();
+
     /**
      * Class object required to instantiate new description domain objects
      */
@@ -110,11 +108,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
 	TransactionStatus transaction = getTransaction();
 	try {
-	    SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(COLUMN_ID);
+	    SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
+		    COLUMN_ID);
 	    Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
 
-	    SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(
-		    COLUMN_ID);
+	    SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName())
+		    .usingGeneratedKeyColumns(COLUMN_ID);
 	    Map<String, Object> params = new HashMap<String, Object>();
 	    params.put("content_id", contentId);
 	    params.put("user_id", userId);
@@ -169,11 +168,12 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		// Update description
 		StringBuilder updateDescription = new StringBuilder();
 		updateDescription.append("UPDATE ").append(getTableName());
-		updateDescription.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
+		updateDescription
+			.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
 		updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
 		getSimpleJdbcTemplate().update(updateDescription.toString(), description.getName(), description.getDescription(),
-			extractTimestamp(description), description.getCreatorName(), description.getDomainName(), description.getGroupName(),
-			description.getHref(), id);
+			extractTimestamp(description), description.getCreatorName(), description.getDomainName(),
+			description.getGroupName(), description.getHref(), id);
 	    }
 
 	    if (content != null) {
@@ -252,8 +252,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     /**
-     * @return List of deleted descriptions in user space or in public when
-     *         userId=null
+     * @return List of deleted descriptions in user space or in public when userId=null
      * @param userId
      */
     public List<T> getDeletedDescriptions(Number userId) {
@@ -345,6 +344,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     protected ParameterizedRowMapper<T> getRowMapper() {
 	return rowMapper;
     }
+
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
@@ -356,7 +356,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		newDescription.setName(rs.getString("name"));
 		newDescription.setDescription(rs.getString("description"));
 		newDescription.setId(rs.getString(getCMDIdColumn()));
-		newDescription.setRegistrationDate(registrationDate == null ? null : ISO_DATE_FORMAT.format(registrationDate));
+		newDescription.setRegistrationDate(registrationDate == null ? null : AbstractDescription.createNewDate(registrationDate
+			.getTime()));
 		newDescription.setCreatorName(rs.getString("creator_name"));
 		newDescription.setDomainName(rs.getString("domain_name"));
 		newDescription.setGroupName(rs.getString("group_name"));
