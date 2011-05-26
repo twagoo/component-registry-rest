@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.tree.DefaultMutableTreeNode;
