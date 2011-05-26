@@ -13,11 +13,22 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 public interface ComponentRegistry {
 
     public static final String REGISTRY_ID = "clarin.eu:cr1:";
+    public static final String PUBLIC_NAME = "Public Registry";
 
+    /**
+     * 
+     * @return List of component descriptions ordered by name ascending
+     * @throws ComponentRegistryException
+     */
     List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException;
 
     ComponentDescription getComponentDescription(String id) throws ComponentRegistryException;
-
+    
+    /**
+     * 
+     * @return List of profile descriptions ordered by name ascending
+     * @throws ComponentRegistryException
+     */
     List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
 
     ProfileDescription getProfileDescription(String id) throws ComponentRegistryException;
@@ -101,10 +112,21 @@ public interface ComponentRegistry {
      **/
     boolean isPublic();
 
+    /**
+     * @return {@link ComponentRegistry.PUBLIC_NAME} or name of the user's workspace
+     */
     String getName();
 
+    /**
+     * 
+     * @return List of profile descriptions ordered by name ascending
+     */
     List<ProfileDescription> getDeletedProfileDescriptions();
 
+    /**
+     * 
+     * @return List of component descriptions ordered by name ascending
+     */
     List<ComponentDescription> getDeletedComponentDescriptions();
 
 

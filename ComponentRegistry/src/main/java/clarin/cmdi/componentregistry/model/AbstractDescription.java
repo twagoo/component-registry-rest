@@ -154,7 +154,8 @@ public abstract class AbstractDescription {
             int result = 0;
             if (o1.getName() != null && o2.getName() != null) {
                 result = o1.getName().compareToIgnoreCase(o2.getName());
-            } else {
+            }
+            if (o1.getId() != null && result == 0) {
                 result = o1.getId().compareTo(o2.getId());
             }
             return result;

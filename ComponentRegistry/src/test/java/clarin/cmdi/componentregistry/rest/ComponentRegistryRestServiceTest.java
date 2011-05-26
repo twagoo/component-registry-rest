@@ -34,30 +34,38 @@ public abstract class ComponentRegistryRestServiceTest extends ComponentRegistry
     protected abstract ComponentRegistry getTestRegistry();
 
     private void fillUp() throws Exception {
-        RegistryTestHelper.addProfile(getTestRegistry(), "profile1");
         RegistryTestHelper.addProfile(getTestRegistry(), "profile2");
-        RegistryTestHelper.addComponent(getTestRegistry(), "component1");
+        RegistryTestHelper.addProfile(getTestRegistry(), "profile1");
         RegistryTestHelper.addComponent(getTestRegistry(), "component2");
+        RegistryTestHelper.addComponent(getTestRegistry(), "component1");
     };
 
     @Test
     public void testGetRegisteredProfiles() throws Exception {
         fillUp();
+        RegistryTestHelper.addProfile(getTestRegistry(), "PROFILE2");
         List<ProfileDescription> response = getResource().path("/registry/profiles").accept(MediaType.APPLICATION_XML).get(
                 PROFILE_LIST_GENERICTYPE);
-        assertEquals(2, response.size());
+        assertEquals(3, response.size());
         response = getResource().path("/registry/profiles").accept(MediaType.APPLICATION_JSON).get(PROFILE_LIST_GENERICTYPE);
-        assertEquals(2, response.size());
+        assertEquals(3, response.size());
+        assertEquals("profile1", response.get(0).getName());
+        assertEquals("PROFILE2", response.get(1).getName());
+        assertEquals("profile2", response.get(2).getName());
     }
 
     @Test
     public void testGetRegisteredComponents() throws Exception {
         fillUp();
+        RegistryTestHelper.addComponent(getTestRegistry(), "COMPONENT2");
         List<ComponentDescription> response = getResource().path("/registry/components").accept(MediaType.APPLICATION_XML).get(
                 COMPONENT_LIST_GENERICTYPE);
-        assertEquals(2, response.size());
+        assertEquals(3, response.size());
         response = getResource().path("/registry/components").accept(MediaType.APPLICATION_JSON).get(COMPONENT_LIST_GENERICTYPE);
-        assertEquals(2, response.size());
+        assertEquals(3, response.size());
+        assertEquals("component1", response.get(0).getName());
+        assertEquals("COMPONENT2", response.get(1).getName());
+        assertEquals("component2", response.get(2).getName());
     }
 
     @Test

@@ -1,14 +1,15 @@
 package clarin.cmdi.componentregistry.rest;
 
+import java.io.File;
+
+import org.junit.After;
+import org.junit.Before;
+
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
 import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryTestCase;
-import java.io.File;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.After;
-import org.junit.Before;
 
 /**
  *

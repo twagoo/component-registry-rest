@@ -460,7 +460,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public String getName() {
 	if (isPublic()) {
-	    return "Public Registry";
+	    return ComponentRegistry.PUBLIC_NAME;
 	} else {
 	    return "User " + getUserId() + " Registry";
 	}

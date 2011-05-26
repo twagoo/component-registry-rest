@@ -248,7 +248,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return All descriptions in the public space
      */
     public List<T> getPublicDescriptions() throws DataAccessException {
-	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = true"));
+	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = true ").append(getOrderByClause()));
     }
 
     /**
@@ -257,10 +257,10 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      */
     public List<T> getDeletedDescriptions(Number userId) {
 	if (userId != null) {
-	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = false AND user_id = ?").toString();
+	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = false AND user_id = ?").append(getOrderByClause()).toString();
 	    return getList(select, userId);
 	} else {
-	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = true").toString();
+	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = true").append(getOrderByClause()).toString();
 	    return getList(select);
 	}
     }
@@ -270,7 +270,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @return All the user's descriptions not in the public space
      */
     public List<T> getUserspaceDescriptions(Number userId) throws DataAccessException {
-	String select = getSelectStatement().append(" WHERE is_deleted = false AND is_public = false AND user_id = ?").toString();
+	String select = getSelectStatement().append(" WHERE is_deleted = false AND is_public = false AND user_id = ?").append(getOrderByClause()).toString();
 	return getList(select, userId);
     }
 
@@ -332,9 +332,18 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     private StringBuilder getDescriptionColumnList() {
 
 	StringBuilder sb = new StringBuilder();
-	sb.append("name,description,registration_date,creator_name,domain_name,group_name,href,user_id,");
+	sb.append(getOrderByColumn());
+	sb.append(",description,registration_date,creator_name,domain_name,group_name,href,user_id,");
 	sb.append(getCMDIdColumn());
 	return sb;
+    }
+
+    protected String getOrderByColumn() {
+	return "name";
+    }
+    
+    private String getOrderByClause() {
+	return " order by upper("+getOrderByColumn()+"), "+getCMDIdColumn()+" asc ";
     }
 
     /**

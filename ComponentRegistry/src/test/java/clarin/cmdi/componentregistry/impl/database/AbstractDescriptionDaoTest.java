@@ -68,6 +68,23 @@ public abstract class AbstractDescriptionDaoTest {
     }
 
     @Test
+    public void testGetDescriptionsOrdered() throws Exception {
+	insert("a", true, null);
+	insert("A", true, null);
+	insert("B", true, null);
+	insert("a", true, null);
+	
+	List<AbstractDescription> descs = getDao().getPublicDescriptions(); 
+	assertEquals(4, descs.size());
+	assertEquals("a", descs.get(0).getName()); //ordered by name case insensitive then by cmdId
+	assertEquals("A", descs.get(1).getName());
+	assertEquals("a", descs.get(2).getName());
+	assertTrue(descs.get(1).getId().compareTo(descs.get(2).getId()) < 0);
+	assertEquals("B", descs.get(3).getName());
+	
+    }
+    
+    @Test
     public void testGetPublicComponents() throws Exception {
 	List<AbstractDescription> descriptions = getDao().getPublicDescriptions();
 	assertNotNull(descriptions);
@@ -177,8 +194,12 @@ public abstract class AbstractDescriptionDaoTest {
     }
 
     private AbstractDescription insert(boolean isPublic, Number userId) {
+	return insert("Aap", isPublic, userId);
+    }
+    
+    private AbstractDescription insert(String name, boolean isPublic, Number userId) {
 	AbstractDescription desc = createNewDescription();
-	desc.setName("Aap");
+	desc.setName(name);
 	desc.setDescription("MyDescription");
 	getDao().insertDescription(desc, getContentString(), isPublic, userId);
 	return desc;

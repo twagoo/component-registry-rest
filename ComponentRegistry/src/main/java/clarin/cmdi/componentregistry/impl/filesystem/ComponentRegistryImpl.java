@@ -452,7 +452,7 @@ public class ComponentRegistryImpl extends ComponentRegistryImplBase implements 
     @Override
     public String getName() {
 	if (isPublic()) {
-	    return "Public Registry";
+	    return ComponentRegistry.PUBLIC_NAME;
 	} else {
 	    return "User " + getComponentDir().getParentFile().getName() + " Registry";
 	}

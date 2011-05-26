@@ -286,7 +286,6 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private void add(DefaultMutableTreeNode parent, List<? extends AbstractDescription> descs, boolean isDeleted, boolean isPublic) {
-	Collections.sort(descs, AbstractDescription.COMPARE_ON_NAME);
 	for (AbstractDescription desc : descs) {
 	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, isPublic));
 	    parent.add(child);
