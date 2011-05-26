@@ -6,3 +6,4 @@ mvn clean package -Dmaven.test.skip=true -Plux16
 
 CATALOG.CLARIN:
 mvn clean package -Dmaven.test.skip=true -Pclarin
+
