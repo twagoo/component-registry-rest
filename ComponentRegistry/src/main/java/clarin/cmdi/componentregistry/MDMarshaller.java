@@ -117,6 +117,7 @@ public class MDMarshaller {
 		    @Override
 		    public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId, String baseURI) {
 			InputSource resolveEntity = catRes.resolveEntity(publicId, systemId);
+			resolveEntity.setEncoding("UTF-8");
 			DOMImplementationLS domImplementation;
 			try {
 			    domImplementation = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
@@ -130,6 +131,7 @@ public class MDMarshaller {
 			    throw new RuntimeException(e);
 			}
 			LSInput lsInput = domImplementation.createLSInput();
+			lsInput.setEncoding("UTF-8");
 			lsInput.setByteStream(resolveEntity.getByteStream());
 			lsInput.setCharacterStream(resolveEntity.getCharacterStream());
 			return lsInput;
