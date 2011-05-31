@@ -493,10 +493,10 @@ public class ComponentRegistryDbImplTest {
 	assertTrue(xsd.endsWith("</xs:schema>"));
 	// System.out.println(xsd);
 
-	assertTrue(RegistryTestHelper.hasComponent(xsd, "ZZZ\u00e9", "1", "unbounded"));
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "YYY", "0", "2"));
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "1", "10"));
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "XXX", "0", "99"));
+	assertTrue(RegistryTestHelper.hasComponent(xsd, "ZZZ\u00e9", "1", "unbounded"));
     }
 
     @Test
