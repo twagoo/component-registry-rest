@@ -1,5 +1,11 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.8 (8 June 2011):
+- Backend reimplemented to use relational database instead of filesystem storage
+- Specify group for profiles http://trac.clarin.eu/ticket/49
+- Header name from specification copied to description when importing http://trac.clarin.eu/ticket/51
+- Fixed fold-out bug http://trac.clarin.eu/ticket/99
+
 Release ComponentRegistry-1.7 (26 Januari 2011):
 - Publishing means moving the private component/profile to public space. http://trac.clarin.eu/ticket/57
 - Edit pane is reloaded with saved component/profile. http://trac.clarin.eu/ticket/91

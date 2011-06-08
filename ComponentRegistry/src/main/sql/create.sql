@@ -86,7 +86,8 @@ CREATE TABLE profile_description (
 CREATE TABLE registry_user (
     id SERIAL NOT NULL,
     name character varying,
-    principal_name character varying
+    principal_name character varying,
+    UNIQUE(principal_name)
 );
 
 --
