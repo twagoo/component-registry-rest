@@ -168,12 +168,22 @@ public class MDMarshaller {
 	} catch (TransformerConfigurationException e) {
 	    LOG.error("Cannot create Transformer", e);
 	} catch (TransformerException e) {
-	    LOG.error("Cannot transform xml file: " + spec, e);
+	    LOG.error("Cannot transform xml file: " + getSpecId(spec), e);
 	} catch (UnsupportedEncodingException e) {
 	    LOG.error("Error in encoding: ", e);
 	} catch (JAXBException e) {
-	    LOG.error("Cannot marshall spec: " + spec, e);
+	    LOG.error("Cannot marshall spec: " + getSpecId(spec), e);
 	}
+    }
+
+    
+    
+    private static String getSpecId(CMDComponentSpec spec) {
+	String result = "";
+	if (spec != null && spec.getHeader() != null) {
+	    result = spec.getHeader().getID();
+	}
+	return result;
     }
 
     /**
