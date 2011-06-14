@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
 import static org.junit.Assert.assertEquals;
@@ -12,7 +13,9 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -24,13 +27,33 @@ import java.util.Collections;
 import java.util.Comparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-public abstract class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestCase {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "/applicationContext.xml" })
+public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
     private final static Logger LOG = LoggerFactory.getLogger(ConcurrentRestServiceTest.class);
     private int NR_OF_PROFILES = 50;
     private int NR_OF_COMPONENTS = 50;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Before
+    public void init() {
+	ComponentRegistryDatabase.resetAndCreateAllTables(jdbcTemplate);
+	createUserRecord();
+    }
+
+    @Override
+    protected String getApplicationContextFile() {
+	return "classpath:applicationContext.xml";
+    }
+    
     @Test
     public void testConcurrentRegisterProfile() throws Exception {
 	List<String> errors = new ArrayList();
