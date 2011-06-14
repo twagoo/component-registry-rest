@@ -60,4 +60,12 @@ public final class ComponentRegistryDatabase {
                 + " name character varying,"
                 + " principal_name character varying);");
     }
+
+    public static void resetAndCreateAllTables(JdbcTemplate jdbcTemplate) {
+	resetDatabase(jdbcTemplate);
+	createTableComponentDescription(jdbcTemplate);
+	createTableProfileDescription(jdbcTemplate);
+	createTableXmlContent(jdbcTemplate);
+	createTableRegistryUser(jdbcTemplate);
+    }
 }

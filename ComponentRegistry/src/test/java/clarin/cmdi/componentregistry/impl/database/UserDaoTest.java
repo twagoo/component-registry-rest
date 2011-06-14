@@ -19,7 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
+@ContextConfiguration(locations = {"/applicationContext.xml"})
 public class UserDaoTest {
 
     @Autowired

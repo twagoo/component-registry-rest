@@ -1,10 +1,5 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableComponentDescription;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableProfileDescription;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableRegistryUser;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableXmlContent;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.resetDatabase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -25,15 +20,13 @@ import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.DisplayDataNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
-import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
+@ContextConfiguration(locations = {"/applicationContext.xml"})
 public class AdminRegistryTest  {
     
     @Autowired
@@ -49,11 +42,7 @@ public class AdminRegistryTest  {
     
     @Before
     public void init() {
-	resetDatabase(jdbcTemplate);
-	createTableComponentDescription(jdbcTemplate);
-	createTableProfileDescription(jdbcTemplate);
-	createTableXmlContent(jdbcTemplate);
-	createTableRegistryUser(jdbcTemplate);
+	ComponentRegistryDatabase.resetAndCreateAllTables(jdbcTemplate);
     }
 
     @Test

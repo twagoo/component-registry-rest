@@ -36,7 +36,7 @@ import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
+@ContextConfiguration(locations = {"/applicationContext.xml"})
 public class ComponentRegistryDbImplTest {
 
     protected final static UserCredentials USER_CREDS = DummyPrincipal.DUMMY_CREDENTIALS;
@@ -50,11 +50,7 @@ public class ComponentRegistryDbImplTest {
 
     @Before
     public void init() {
-	resetDatabase(jdbcTemplate);
-	createTableComponentDescription(jdbcTemplate);
-	createTableProfileDescription(jdbcTemplate);
-	createTableXmlContent(jdbcTemplate);
-	createTableRegistryUser(jdbcTemplate);
+	ComponentRegistryDatabase.resetAndCreateAllTables(jdbcTemplate);
     }
 
     @Test

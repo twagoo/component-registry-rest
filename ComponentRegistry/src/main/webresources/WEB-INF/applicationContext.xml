@@ -8,17 +8,7 @@
     <context:annotation-config />
 
     <import resource="spring-config/component-registry.xml"/>
-<!--    <import resource="spring-config/filesystem-impl.xml"/>-->
     <import resource="spring-config/database-impl.xml"/>
     
-    <!--  For migration -->
-    <bean id="fileSystemConfiguration" class="clarin.cmdi.componentregistry.impl.filesystem.FileSystemConfiguration" init-method="init" factory-method="getInstance">
-        <property name="registryRoot" value="${registryRoot}" />
-    </bean>
-    <bean id="fileRegistryFactory" class="clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl" init-method="init" factory-method="getInstance">
-        <property name="configuration" ref="configuration"/>
-        <property name="fileSystemConfiguration" ref="fileSystemConfiguration"/>
-    </bean>
-    <!--  For migration end -->
 
 </beans>

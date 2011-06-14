@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotSame;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext-database-impl.xml"})
+@ContextConfiguration(locations = {"/applicationContext.xml"})
 public class ComponentRegistryFactoryDbImplTest {
 
     @Autowired

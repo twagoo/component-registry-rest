@@ -1,22 +1,25 @@
 package clarin.cmdi.componentregistry.frontend;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryFactoryImpl;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.impl.filesystem.CMDComponentSpecExpanderImpl;
-import clarin.cmdi.componentregistry.impl.filesystem.ComponentRegistryImpl;
-import clarin.cmdi.componentregistry.components.CMDElementType;
 import java.io.IOException;
 import java.util.List;
+
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.spring.injection.annot.SpringBean;
+
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.CMDElementType;
+import clarin.cmdi.componentregistry.impl.database.CMDComponentSpecExpanderDbImpl;
+import clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 /**
  *
@@ -25,7 +28,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 public class StatisticsPage extends SecureAdminWebPage {
 
     private static final long serialVersionUID = 1L;
-    private transient ComponentRegistry registry = ComponentRegistryFactoryImpl.getInstance().getPublicRegistry();
+    @SpringBean(name = "componentRegistryFactory")
+    private ComponentRegistryFactory componentRegistryFactory;
 
     private static class Statistics {
         private int componentnumber = 0;
@@ -35,33 +39,34 @@ public class StatisticsPage extends SecureAdminWebPage {
 
     public StatisticsPage(final PageParameters pageParameters) throws IOException, ComponentRegistryException {
         super(pageParameters);
+        ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
         addLinks();
-        DisplayStatistics();
+        displayStatistics(registry);
     }
 
-    private void DisplayStatistics() throws ComponentRegistryException {
+    private void displayStatistics(ComponentRegistry registry) throws ComponentRegistryException {
         List<ProfileDescription> profileList = registry.getProfileDescriptions();
         RepeatingView repeating = new RepeatingView("repeating");
         add(repeating);
         add(new Label("profilenumbermessage", "Current number of profiles in the component registry: " + profileList.size()));
         for (ProfileDescription pd : profileList) {
-            displayProfileStatistics(pd, repeating);
+            displayProfileStatistics(pd, repeating, registry);
         }
         List<ComponentDescription> componentList = registry.getComponentDescriptions();
         RepeatingView repeatingcomp = new RepeatingView("repeatingcomp");
         add(repeatingcomp);
         add(new Label("componentnumbermessage", "Current number of components in the component registry: " + componentList.size()));
         for (ComponentDescription cd : componentList) {
-            displayComponentStatistics(cd, repeatingcomp);
+            displayComponentStatistics(cd, repeatingcomp, registry);
         }
     }
 
-    private void displayProfileStatistics(ProfileDescription pd, RepeatingView repeatingview) throws ComponentRegistryException {
+    private void displayProfileStatistics(ProfileDescription pd, RepeatingView repeatingview, ComponentRegistry registry) throws ComponentRegistryException {
         WebMarkupContainer item = new WebMarkupContainer(repeatingview.newChildId());
         repeatingview.add(item);
         item.add(new Label("ID", pd.getId()));
         item.add(new Label("profname", pd.getName()));
-        CMDComponentSpec profile = CMDComponentSpecExpanderImpl.expandProfile(pd.getId(), (ComponentRegistryImpl) registry);
+        CMDComponentSpec profile = CMDComponentSpecExpanderDbImpl.expandProfile(pd.getId(), (ComponentRegistryDbImpl) registry);
         Statistics stats = new Statistics();
         componentCounter(profile.getCMDComponent(), stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));
@@ -69,12 +74,12 @@ public class StatisticsPage extends SecureAdminWebPage {
         item.add(new Label("nrproflinks", "" + stats.conceptlinkcounter));
     }
 
-    private void displayComponentStatistics(ComponentDescription cd, RepeatingView repeatingview) throws ComponentRegistryException {
+    private void displayComponentStatistics(ComponentDescription cd, RepeatingView repeatingview,  ComponentRegistry registry) throws ComponentRegistryException {
         WebMarkupContainer item = new WebMarkupContainer(repeatingview.newChildId());
         repeatingview.add(item);
         item.add(new Label("ID", cd.getId()));
         item.add(new Label("compname", cd.getName()));
-        CMDComponentSpec compspec = CMDComponentSpecExpanderImpl.expandComponent(cd.getId(), (ComponentRegistryImpl) registry);
+        CMDComponentSpec compspec = CMDComponentSpecExpanderDbImpl.expandComponent(cd.getId(), (ComponentRegistryDbImpl) registry);
         Statistics stats = new Statistics();
         componentCounter(compspec.getCMDComponent(), stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));

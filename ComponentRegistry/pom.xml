@@ -323,23 +323,6 @@
                     </execution>
                 </executions>
             </plugin>
-      <!--
-        Assembly helper to create the RegistryFiller tool a command line tool which can help fill in a registry with
-        existing components/profiles. Build the tool with: mvn -Dpackaging=jar -Dmaven.test.skip=true assembly:assembly
-        This creates a in "target" a ComponentRegistry-1.0-SNAPSHOT-RegistryFiller directory with a bin and share
-        directory. You can start the tool from the bin dir.
-      -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <attach>false</attach>
-                    <ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
-                    <descriptors>
-                        <descriptor>src/main/assembly/registryFiller.xml</descriptor>
-                    </descriptors>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 

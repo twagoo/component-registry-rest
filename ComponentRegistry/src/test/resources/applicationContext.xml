@@ -8,6 +8,7 @@
     <context:annotation-config />
 
     <import resource="spring-config/component-registry.xml"/>
-    <import resource="spring-config/filesystem-impl.xml"/>
+    <import resource="spring-config/database-impl.xml"/>
+    
 
 </beans>

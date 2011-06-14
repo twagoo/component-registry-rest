@@ -5,8 +5,10 @@ import java.util.List;
 import javax.ws.rs.core.HttpHeaders;
 
 
+import clarin.cmdi.componentregistry.impl.database.UserDao;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
 
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
@@ -19,6 +21,8 @@ import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import com.sun.jersey.test.framework.AppDescriptor;
 import com.sun.jersey.test.framework.JerseyTest;
 import com.sun.jersey.test.framework.WebAppDescriptor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 
@@ -30,6 +34,10 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected final static GenericType<List<ComponentDescription>> COMPONENT_LIST_GENERICTYPE = new GenericType<List<ComponentDescription>>() {
     };
 
+    @Autowired
+    private UserDao userDao;
+
+    
     protected abstract String getApplicationContextFile();
 
     @Override
@@ -57,6 +65,17 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected Builder getAuthenticatedResource(WebResource resource) {
         return resource.header(HttpHeaders.AUTHORIZATION, "Basic "
                 + new String(Base64.encode(DummyPrincipal.DUMMY_PRINCIPAL.getName() + ":dummy")));
+    }
+    
+    protected void createUserRecord() {
+	User user = new User();
+	user.setName("Database test user");
+	user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+	userDao.insertUser(user);
+    }
+    
+    protected UserDao getUserDao() {
+	return userDao;
     }
 
 }
