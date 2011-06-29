@@ -1,10 +1,5 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableComponentDescription;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableProfileDescription;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableRegistryUser;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.createTableXmlContent;
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.resetDatabase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
