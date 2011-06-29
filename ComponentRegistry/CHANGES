@@ -1,8 +1,5 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.8.1 (29 june 2011):
-- Fixed some issues with UTF-8 handling http://trac.clarin.eu/ticket/133
-
 Release ComponentRegistry-1.8 (8 June 2011):
 - Backend reimplemented to use relational database instead of filesystem storage
 - Specify group for profiles http://trac.clarin.eu/ticket/49

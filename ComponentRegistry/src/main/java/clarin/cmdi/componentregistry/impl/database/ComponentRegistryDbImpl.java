@@ -397,9 +397,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private String componentSpecToString(CMDComponentSpec spec) throws UnsupportedEncodingException, JAXBException {
-	ByteArrayOutputStream os = new ByteArrayOutputStream();
+	OutputStream os = new ByteArrayOutputStream();
 	MDMarshaller.marshal(spec, os);
-	String xml = os.toString("UTF-8");
+	String xml = os.toString();
 	return xml;
     }
 
@@ -407,12 +407,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	String xml = dao.getContent(false, id);
 	if (xml != null) {
 	    try {
-		InputStream is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+		InputStream is = new ByteArrayInputStream(xml.getBytes());
 		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, null);
 
 	    } catch (JAXBException ex) {
-		LOG.error(null, ex);
-	    } catch(UnsupportedEncodingException ex){
 		LOG.error(null, ex);
 	    }
 	}
