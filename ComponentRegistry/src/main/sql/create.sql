@@ -221,4 +221,4 @@ ALTER TABLE ONLY profile_description
 -- PostgreSQL database dump complete
 --
 
-grant all on comments, component_description, profile_description, registry_user, xml_content, comments_id_seq, component_description_id_seq, profile_description_id_seq, registry_user_id_seq, xml_content_id_seq  to component_registry;
+grant all on comments, component_description, profile_description, registry_user, xml_content, comments_id_seq, component_description_id_seq, profile_description_id_seq, registry_user_id_seq, xml_content_id_seq  to compreg;
