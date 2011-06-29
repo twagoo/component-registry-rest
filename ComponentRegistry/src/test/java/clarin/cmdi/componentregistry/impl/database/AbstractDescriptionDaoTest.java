@@ -47,7 +47,7 @@ public abstract class AbstractDescriptionDaoTest {
 	description.setDescription("MyDescription");
 	description.setCreatorName("Aap");
 	description.setGroupName("MyGroup");
-	description.setDomainName("MyDomain");
+	description.setDomainName("MyDomain \u00CA");
 	description.setHref("http://MyHref");
 
 	description.setRegistrationDate(regDate);
@@ -61,7 +61,7 @@ public abstract class AbstractDescriptionDaoTest {
 	assertEquals("MyDescription", descr.getDescription());
 	assertEquals("Aap", descr.getCreatorName());
 	assertEquals("MyGroup", descr.getGroupName());
-	assertEquals("MyDomain", descr.getDomainName());
+	assertEquals("MyDomain \u00CA", descr.getDomainName());
 	assertEquals("http://MyHref", descr.getHref());
 	assertEquals(AbstractDescription.getDate(regDate), AbstractDescription.getDate(descr.getRegistrationDate()));
 	assertEquals(testComponent, getDao().getContent(false, description.getId()));
@@ -137,7 +137,7 @@ public abstract class AbstractDescriptionDaoTest {
 	description.setDescription("AnotherDescription");
 	description.setCreatorName("AnotherAap");
 	description.setGroupName("AnotherGroup");
-	description.setDomainName("AnotherDomain");
+	description.setDomainName("AnotherDomain\u00CA");
 	description.setHref("http://AnotherHref");
 	// Update in db
 	getDao().updateDescription(newId, description, null);
@@ -148,7 +148,7 @@ public abstract class AbstractDescriptionDaoTest {
 	assertEquals("AnotherDescription", description.getDescription());
 	assertEquals("AnotherAap", description.getCreatorName());
 	assertEquals("AnotherGroup", description.getGroupName());
-	assertEquals("AnotherDomain", description.getDomainName());
+	assertEquals("AnotherDomain\u00CA", description.getDomainName());
 	assertEquals("http://AnotherHref", description.getHref());
 
 	// Update content
@@ -160,7 +160,7 @@ public abstract class AbstractDescriptionDaoTest {
 	// Update both
 	description.setName("Mies");
 	description.setDescription("YetAnotherDescription");
-	String testContent3 = "<test>More test content</test>";
+	String testContent3 = "<test>More test \u00CA content</test>";
 
 	// Update in db
 	getDao().updateDescription(newId, description, testContent3);

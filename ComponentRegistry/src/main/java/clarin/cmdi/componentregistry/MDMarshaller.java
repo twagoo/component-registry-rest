@@ -195,11 +195,11 @@ public class MDMarshaller {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	try {
 	    marshal(marshallableObject, out);
+	    return out.toString("UTF-8");
 	} catch (UnsupportedEncodingException e) {
 	    throw new RuntimeException(e);
 	} catch (JAXBException e) {
 	    throw new RuntimeException(e);
 	}
-	return out.toString();
     }
 }
