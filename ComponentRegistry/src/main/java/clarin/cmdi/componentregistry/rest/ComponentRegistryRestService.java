@@ -203,7 +203,8 @@ public class ComponentRegistryRestService {
 
     @GET
     @Path("/components/usage/{componentId}")
-    public List<ProfileDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<AbstractDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	try {
 	    final long start = System.currentTimeMillis();
 	    ComponentRegistry registry = getRegistry(userspace);
@@ -213,11 +214,11 @@ public class ComponentRegistryRestService {
 	    LOG.info("Found " + components.size() + " components and " + profiles.size() + " profiles that use component " + componentId
 		    + " (" + (System.currentTimeMillis() - start) + " millisecs)");
 	    
-	    ArrayList<AbstractDescription> usages = new ArrayList<AbstractDescription>(components.size() + profiles.size());
+	    List<AbstractDescription> usages = new ArrayList<AbstractDescription>(components.size() + profiles.size());
 	    usages.addAll(components);
 	    usages.addAll(profiles);
 
-	    return profiles;
+	    return usages;
 	} catch (ComponentRegistryException e) {
 	    LOG.info("Could not retrieve profile usage", e);
 	    throw e;
