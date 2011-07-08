@@ -220,7 +220,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	try {
 	    checkAuthorisation(description, principal);
 	    checkAge(description, principal);
-	    if (!forceUpdate && !description.isProfile()) {
+	    // For public components, check if used in other components or profiles (unless forced)
+	    if (!forceUpdate && this.isPublic() && !description.isProfile()) {
 		checkStillUsed(description.getId());
 	    }
 	    AbstractDescriptionDao<?> dao = getDaoForDescription(description);
