@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -200,6 +201,29 @@ public class ComponentRegistryRestService {
 	return getRegistry(userspace).getMDProfile(profileId);
     }
 
+    @GET
+    @Path("/components/usage/{componentId}")
+    public List<ProfileDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	try {
+	    final long start = System.currentTimeMillis();
+	    ComponentRegistry registry = getRegistry(userspace);
+	    List<ComponentDescription> components = registry.getUsageInComponents(componentId);
+	    List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
+	    
+	    LOG.info("Found " + components.size() + " components and " + profiles.size() + " profiles that use component " + componentId
+		    + " (" + (System.currentTimeMillis() - start) + " millisecs)");
+	    
+	    ArrayList<AbstractDescription> usages = new ArrayList<AbstractDescription>(components.size() + profiles.size());
+	    usages.addAll(components);
+	    usages.addAll(profiles);
+
+	    return profiles;
+	} catch (ComponentRegistryException e) {
+	    LOG.info("Could not retrieve profile usage", e);
+	    throw e;
+	}
+    }
+    
     /**
      * 
      * Purely helper method for my front-end (FLEX) which only does post/get requests. The query param is checked and the "proper" method is
