@@ -7,12 +7,14 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 
+@XmlRootElement(name = "description")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso( { ComponentDescription.class, ProfileDescription.class })
 public abstract class AbstractDescription {
