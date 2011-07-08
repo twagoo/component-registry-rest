@@ -18,13 +18,14 @@ public class RegisterResponseTest {
         RegisterResponse resp = new RegisterResponse();
         resp.setRegistered(false);
         resp.setIsProfile(true);
+        resp.setIsInUserSpace(true);
         resp.addError("Error 1");
         resp.addError("Error 2, <!-- to be escaped -->");
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"false\" isProfile=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+        expected += "<registerResponse registered=\"false\" isProfile=\"true\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors>\n";
         expected += "        <error>Error 1</error>\n";
         expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";

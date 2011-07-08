@@ -3,8 +3,6 @@ package clarin.cmdi.componentregistry;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import javax.xml.bind.JAXBException;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
