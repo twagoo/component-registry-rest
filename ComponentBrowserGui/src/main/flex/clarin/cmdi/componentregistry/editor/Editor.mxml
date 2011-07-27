@@ -42,7 +42,7 @@
 
 			<mx:VBox styleName="borderStyles"
 					 width="100%">
-				<mx:Label text="Drag TESTTEST existing components onto edit canvas"/>
+				<mx:Label text="Drag existing components onto edit canvas"/>
 				<browser:BrowserOverviewList id="componentsPaletteOverview"
 											 width="100%"
 											 browserDataProvider="{componentsSrv.itemDescriptions}"
