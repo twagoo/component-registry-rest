@@ -204,7 +204,7 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/usage/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<AbstractDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    public List<AbstractDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("true") boolean userspace) throws ComponentRegistryException {
 	try {
 	    final long start = System.currentTimeMillis();
 	    ComponentRegistry registry = getRegistry(userspace);

@@ -104,7 +104,7 @@ private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 		
 		// Private components that are in updated require usage check call. If in use, the user can choose whether or not to save the changes .
 		if(inUserSpace && uploadAction == UploadService.UPDATE && !item.isProfile){
-			checkUsage(item);
+			checkUsage(item, inUserSpace);
 		}else{
 			doUpload(uploadAction,item);
 		}
@@ -116,12 +116,17 @@ private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 /**
  * Calls usage check for the specified component. If in use, asks user whether to proceed; if positive, initiates update.
  */
-private function checkUsage(item:ItemDescription, uploadAction:int = UploadService.UPDATE):void{
-	var componentUsageService:ComponentUsageService = new ComponentUsageService(item);
+private function checkUsage(item:ItemDescription, inUserSpace:Boolean = true, uploadAction:int = UploadService.UPDATE):void{
+	var componentUsageService:ComponentUsageService = new ComponentUsageService(item,inUserSpace);
 	componentUsageService.addEventListener(ComponentUsageCheckEvent.COMPONENT_IN_USE, 
 		function (event:ComponentUsageCheckEvent):void{
 			if(event.isComponentInUse){
-				Alert.show("Component is used by other components and/or profiles. Changes in this component will affect these. Do you want to proceed?","Component is used", Alert.YES|Alert.NO,null,
+				var messageBody:String = "The component you are about to save is used by the following component(s) and/or profile(s):\n\n";
+				for each(var name:String in event.itemUsingComponent){
+					messageBody += " - " + name + "\n";
+				}
+				messageBody += "\nChanges in this component will affect the above. Do you want to proceed?";
+				Alert.show(messageBody,"Component is used", Alert.YES|Alert.NO,null,
 					function (eventObj:CloseEvent):void{
 						if(eventObj.detail == Alert.YES){
 							doUpload(uploadAction, item);
