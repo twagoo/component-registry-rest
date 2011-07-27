@@ -8,6 +8,8 @@ import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
 import clarin.cmdi.componentregistry.services.ComponentInfoService;
 import clarin.cmdi.componentregistry.services.ComponentListService;
+import clarin.cmdi.componentregistry.services.ComponentUsageCheckEvent;
+import clarin.cmdi.componentregistry.services.ComponentUsageService;
 import clarin.cmdi.componentregistry.services.Config;
 import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
@@ -87,7 +89,7 @@ private function handlePublishAlert(event:CloseEvent):void {
 }
 
 private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
-//	Alert.show(xmlEditor.cmdSpec.toXml());
+	//	Alert.show(xmlEditor.cmdSpec.toXml());
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
 		item.description = xmlEditor.cmdSpec.headerDescription;
@@ -99,10 +101,41 @@ private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 		if (itemDescription && itemDescription.isInUserSpace) {
 			item.id = xmlEditor.cmdSpec.headerId;
 		}
-		uploadService.upload(uploadAction, item, xmlEditor.cmdSpec.toXml());
+		
+		// Private components that are in updated require usage check call. If in use, the user can choose whether or not to save the changes .
+		if(inUserSpace && uploadAction == UploadService.UPDATE && !item.isProfile){
+			checkUsage(item);
+		}else{
+			doUpload(uploadAction,item);
+		}
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
 	}
+}
+
+/**
+ * Calls usage check for the specified component. If in use, asks user whether to proceed; if positive, initiates update.
+ */
+private function checkUsage(item:ItemDescription, uploadAction:int = UploadService.UPDATE):void{
+	var componentUsageService:ComponentUsageService = new ComponentUsageService(item);
+	componentUsageService.addEventListener(ComponentUsageCheckEvent.COMPONENT_IN_USE, 
+		function (event:ComponentUsageCheckEvent):void{
+			if(event.isComponentInUse){
+				Alert.show("Component is used by other components and/or profiles. Changes in this component will affect these. Do you want to proceed?","Component is used", Alert.YES|Alert.NO,null,
+					function (eventObj:CloseEvent):void{
+						if(eventObj.detail == Alert.YES){
+							doUpload(uploadAction, item);
+						}
+					});
+			} else {
+				doUpload(uploadAction,item);
+			}
+		});
+	componentUsageService.checkUsage();
+}
+
+private function doUpload(uploadAction:int, item:ItemDescription):void{
+	uploadService.upload(uploadAction, item, xmlEditor.cmdSpec.toXml());
 }
 
 private function handleSaveComplete(event:UploadCompleteEvent):void {

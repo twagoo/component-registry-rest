@@ -27,6 +27,7 @@ package clarin.cmdi.componentregistry.services {
 
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
+		private static const COMPONENT_USAGE_URL:String = "/rest/registry/components/usage/";
 		private static const UPLOAD_PROFILE_SERVICE_URL:String = "/rest/registry/profiles";
 		private static const UPLOAD_COMPONENT_SERVICE_URL:String = "/rest/registry/components";
 		private static const PROFILE_INFO_URL:String = "/rest/registry/profiles/";
@@ -86,6 +87,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function get componentListUrl():String {
 			return _serviceRootUrl + COMPONENT_LIST_URL;
+		}
+		
+		public function get componentUsageUrl():String {
+			return _serviceRootUrl + COMPONENT_USAGE_URL;
 		}
 
 		public function get profileInfoUrl():String {
