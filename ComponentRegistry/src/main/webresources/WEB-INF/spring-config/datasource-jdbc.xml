@@ -4,18 +4,37 @@
 
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 ">
-<!--    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="${jdbc.driverClassName}"/>
-        <property name="url" value="${jdbc.url}"/>
-        <property name="username" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
-    </bean>-->
 
-    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-	<property name="driverClassName" value="org.postgresql.Driver"/>
-	<property name="url" value="jdbc:postgresql:component_registry"/>
-	<property name="username" value="compreg"/>
-	<property name="password" value="compreg"/>
+    <!-- Using the Datasource JNDI defined in the servlet container. See below for a sample Tomcat datasource configuration -->
+
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	<property name="jndiName" value="java:comp/env/jdbc/ComponentRegistry"/>   
+	<property name="resourceRef" value="true" />
     </bean>
+    
+    <!--
+	
+    SAMPLE TOMCAT DATASOURCE CONFIGURATION:
+    
+    <Context>
+	...
+	<Resource
+	    name="jdbc/ComponentRegistry"
+	    auth="Container"
+	    type="javax.sql.DataSource"
+	    driverClassName="org.postgresql.Driver"
+	    url="jdbc:postgresql:component_registry"
+	    username="compreg"
+	    password="compreg"
+	    maxActive="10"
+	    maxIdle="5"
+	    maxWait="4000"
+	    removeAbandoned="false"
+	    removeAbandonedTimeout="10"
+	    logAbandoned="true" />
+	...
+    </Context>
+
+    -->
 
 </beans>

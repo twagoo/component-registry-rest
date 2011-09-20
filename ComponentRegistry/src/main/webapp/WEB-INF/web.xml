@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+        Configuration file for ComponentRegistry in NON-SHIBBOLIZED context,
+	i.e. development or testing environments.
+-->
+
 <web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>ComponentRegistry</display-name>
     <description>Clarin Metadata Component Registry</description>
