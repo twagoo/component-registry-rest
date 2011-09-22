@@ -8,7 +8,11 @@ Creating war artifact for deployment:
  The ComponentRegistry war will include the flex swf file needed to start the application. 
  So deploying the resulting war will be enough to start the application.
  By default the application is set to work when deployed on localhost. If you want to change that 
- change the serverRootUrl property in the pom.xml of ComponentRegistry.
+ change the serverRootUrl property in the pom.xml of ComponentRegistry. There are already build
+ profiles for lux16.mpi.nl and catalog.clarin.eu that set these correctly.
+
+ The rest service relies on a Component Registry database, for which a create script can be found in 
+ the src/sql directory. For configuration instructions, see the comments in context.xml.
 
 
 NOTE on generating java classes from general-component-schema.xsd.
