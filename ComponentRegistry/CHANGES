@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.9 (22 september 2011):
+- Save private components works even when component is used, warning message is shown in Flex UI http://trac.clarin.eu/ticket/134
+
 Release ComponentRegistry-1.8.1 (29 june 2011):
 - Fixed some issues with UTF-8 handling http://trac.clarin.eu/ticket/133
 
@@ -9,7 +12,7 @@ Release ComponentRegistry-1.8 (8 June 2011):
 - Header name from specification copied to description when importing http://trac.clarin.eu/ticket/51
 - Fixed fold-out bug http://trac.clarin.eu/ticket/99
 
-Release ComponentRegistry-1.7 (26 Januari 2011):
+Release ComponentRegistry-1.7 (26 January 2011):
 - Publishing means moving the private component/profile to public space. http://trac.clarin.eu/ticket/57
 - Edit pane is reloaded with saved component/profile. http://trac.clarin.eu/ticket/91
 - Created "show info" menu item that gives the xsd link and a bookmarkable link to open registry on selected item. http://trac.clarin.eu/ticket/59
