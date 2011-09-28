@@ -20,6 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -51,8 +52,7 @@ public class ComponentRegistryDbImplTest {
     @Test
     public void testRegisterComponent() throws Exception {
 	ComponentRegistry register = getComponentRegistryForUser(null);
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
+	ComponentDescription description = ComponentDescription.createNewDescription();
 
 	description.setName("Aap");
 	description.setDescription("MyDescription");
@@ -78,12 +78,10 @@ public class ComponentRegistryDbImplTest {
 
 	assertNull(register.getMDProfile(desc.getId()));
 
-	ComponentDescription componentDescription = register.
-		getComponentDescription(description.getId());
+	ComponentDescription componentDescription = register.getComponentDescription(description.getId());
 	assertNotNull(componentDescription);
 
-	assertEquals("Header id should be set from description id", description.
-		getId(), component.getHeader().getID());
+	assertEquals("Header id should be set from description id", description.getId(), component.getHeader().getID());
 	assertEquals("Aap", component.getHeader().getName());
 	assertEquals("Will not be overwritten", component.getHeader().
 		getDescription());
@@ -113,13 +111,11 @@ public class ComponentRegistryDbImplTest {
 
 	CMDComponentSpec profile = register.getMDProfile(desc.getId());
 
-	ProfileDescription profileDescription = register.getProfileDescription(description.
-		getId());
+	ProfileDescription profileDescription = register.getProfileDescription(description.getId());
 	assertNotNull(profileDescription);
 
 	assertNotNull(profile);
-	assertEquals("Header id should be set from description id", description.
-		getId(), profile.getHeader().getID());
+	assertEquals("Header id should be set from description id", description.getId(), profile.getHeader().getID());
 	assertEquals("Aap", profile.getHeader().getName());
 	assertEquals("MyDescription", profile.getHeader().getDescription());
     }
@@ -153,7 +149,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
 	assertNull(registry.getMDProfile(description.getId()));
     }
-    
+
     @Test
     public void testGetDeletedDescriptions() throws Exception {
 	User user = createUser();
@@ -164,14 +160,14 @@ public class ComponentRegistryDbImplTest {
 	ProfileDescription desc2 = createProfile(publicReg);
 	ComponentDescription desc3 = createComponent(registry);
 	ComponentDescription desc4 = createComponent(publicReg);
-	
+
 	assertEquals(0, registry.getDeletedProfileDescriptions().size());
 	assertEquals(0, publicReg.getDeletedProfileDescriptions().size());
 	assertEquals(0, registry.getDeletedComponentDescriptions().size());
 	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
 
 	registry.deleteMDProfile(desc1.getId(), USER_CREDS.getPrincipal());
-	
+
 	assertEquals(1, registry.getDeletedProfileDescriptions().size());
 	assertEquals(0, publicReg.getDeletedProfileDescriptions().size());
 	assertEquals(0, registry.getDeletedComponentDescriptions().size());
@@ -183,14 +179,14 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(1, publicReg.getDeletedProfileDescriptions().size());
 	assertEquals(0, registry.getDeletedComponentDescriptions().size());
 	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
-	
+
 	registry.deleteMDComponent(desc3.getId(), USER_CREDS.getPrincipal(), false);
 
 	assertEquals(1, registry.getDeletedProfileDescriptions().size());
 	assertEquals(1, publicReg.getDeletedProfileDescriptions().size());
 	assertEquals(1, registry.getDeletedComponentDescriptions().size());
 	assertEquals(0, publicReg.getDeletedComponentDescriptions().size());
-	
+
 	publicReg.deleteMDComponent(desc4.getId(), USER_CREDS.getPrincipal(), false);
 
 	assertEquals(1, registry.getDeletedProfileDescriptions().size());
@@ -266,9 +262,7 @@ public class ComponentRegistryDbImplTest {
 	ComponentDescription description = getComponentDesc();
 	Calendar calendar = Calendar.getInstance();
 	calendar.set(Calendar.YEAR, 1999);
-	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.
-		getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.
-		getPattern()));
+	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()));
 	CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();
 
 	registry.register(description, testComp);
@@ -278,8 +272,7 @@ public class ComponentRegistryDbImplTest {
 	registry = getComponentRegistryForUser(null);
 
 	try {
-	    registry.deleteMDComponent(description.getId(), USER_CREDS.
-		    getPrincipal(), false);
+	    registry.deleteMDComponent(description.getId(), USER_CREDS.getPrincipal(), false);
 	    fail("Should have thrown exception");
 	} catch (DeleteFailedException e) {
 	}
@@ -303,9 +296,7 @@ public class ComponentRegistryDbImplTest {
 	ProfileDescription description = getProfileDesc();
 	Calendar calendar = Calendar.getInstance();
 	calendar.set(Calendar.YEAR, 1999);
-	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.
-		getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.
-		getPattern()));
+	description.setRegistrationDate(DateFormatUtils.formatUTC(calendar.getTime(), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()));
 	CMDComponentSpec testComp = RegistryTestHelper.getTestProfile();
 
 	registry.register(description, testComp);
@@ -314,8 +305,7 @@ public class ComponentRegistryDbImplTest {
 	// Switch to public registry
 	registry = getComponentRegistryForUser(null);
 	try {
-	    registry.deleteMDProfile(description.getId(), USER_CREDS.
-		    getPrincipal());
+	    registry.deleteMDProfile(description.getId(), USER_CREDS.getPrincipal());
 	    fail("Should have thrown exception");
 	} catch (DeleteFailedException e) {
 	}
@@ -350,8 +340,7 @@ public class ComponentRegistryDbImplTest {
     }
 
     private ComponentDescription getComponentDesc() {
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
+	ComponentDescription description = ComponentDescription.createNewDescription();
 	description.setName("Aap");
 	description.setCreatorName(USER_CREDS.getDisplayName());
 	description.setUserId(USER_CREDS.getPrincipalName());
@@ -360,8 +349,7 @@ public class ComponentRegistryDbImplTest {
     }
 
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
-	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.
-		getNewComponentRegistry();
+	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
 	componentRegistry.setUserId(userId);
 	return componentRegistry;
     }
@@ -398,6 +386,64 @@ public class ComponentRegistryDbImplTest {
 	assertTrue(xsd.endsWith("</xs:schema>"));
 
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "unbounded"));
+    }
+
+    @Test
+    public void testGetNestedRecursiveComponentAsXsd() throws Exception {
+	User user = createUser();
+	Number userId = userDao.insertUser(user);
+	ComponentRegistry register = getComponentRegistryForUser(null);
+
+	String comp1Id = "component1";
+	String comp2Id = "component2";
+
+	// Component1 references component2
+	
+	String comp1Content = "";
+	comp1Content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	comp1Content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	comp1Content += "    <Header/>\n";
+	comp1Content += "    <CMD_Component name=\"Recursion\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	comp1Content += "       <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	comp1Content += "	<CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + comp2Id + "\" CardinalityMin=\"0\" CardinalityMax=\"5\"/>\n";
+	comp1Content += "    </CMD_Component>\n";
+	comp1Content += "</CMD_ComponentSpec>\n";
+
+	ComponentDescription comp1Desc = RegistryTestHelper.addComponent(register, comp1Id, comp1Content);
+
+	// Component2 references component1
+
+	String comp2Content = "";
+	comp2Content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	comp2Content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	comp2Content += "    <Header/>\n";
+	comp2Content += "    <CMD_Component name=\"Recursion\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	comp2Content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	comp2Content += "	 <CMD_Component ComponentId=\"" + comp1Desc.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"5\"/>\n";
+	comp2Content += "    </CMD_Component>\n";
+	comp2Content += "</CMD_ComponentSpec>\n";
+
+	RegistryTestHelper.addComponent(register, comp2Id, comp2Content);
+
+	String profileContent = "";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	profileContent += "    <Header />\n";
+	profileContent += "    <CMD_Component ComponentId=\"" + comp1Desc.getId()
+		+ "\" filename=\"component-test-file\" CardinalityMin=\"0\" CardinalityMax=\"5\">\n";
+	profileContent += "    </CMD_Component>\n";
+	profileContent += "</CMD_ComponentSpec>\n";
+
+	String id = "profile1";
+	ProfileDescription description = RegistryTestHelper.addProfile(register, id, profileContent);
+
+	OutputStream output = new ByteArrayOutputStream();
+	try {
+	    register.getMDProfileAsXml(description.getId(), output);
+	    // This should throw a ComponentRegistryException for recursion
+	    fail();
+	} catch (ComponentRegistryException ex) {
+	}
     }
 
     @Test
@@ -493,8 +539,7 @@ public class ComponentRegistryDbImplTest {
     @Test
     public void testUpdate() throws Exception {
 	ComponentRegistry register = getComponentRegistryForUser(null);
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
+	ComponentDescription description = ComponentDescription.createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
 
@@ -517,8 +562,7 @@ public class ComponentRegistryDbImplTest {
 	register.update(description, testComponent2, PRINCIPAL_ADMIN, false);
 	// Test if new content is there
 	assertEquals(RegistryTestHelper.getXml(testComponent2),
-		RegistryTestHelper.getXml(register.getMDComponent(description.
-		getId())));
+		RegistryTestHelper.getXml(register.getMDComponent(description.getId())));
 
 
 	// Update both
@@ -535,8 +579,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals("YetAnotherDescription", description.getDescription());
 	// Test if new content is there
 	assertEquals(RegistryTestHelper.getXml(testComponent3),
-		RegistryTestHelper.getXml(register.getMDComponent(description.
-		getId())));
+		RegistryTestHelper.getXml(register.getMDComponent(description.getId())));
     }
 
     @Test
@@ -545,8 +588,7 @@ public class ComponentRegistryDbImplTest {
 
 	ComponentRegistry userRegistry = getComponentRegistryForUser(userId);
 	ComponentRegistry publicRegistry = getComponentRegistryForUser(null);
-	ComponentDescription description = ComponentDescription.
-		createNewDescription();
+	ComponentDescription description = ComponentDescription.createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
 	description.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
@@ -577,8 +619,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals("AnotherDescription", description.getDescription());
 	// Test if new content is there
 	assertEquals(RegistryTestHelper.getXml(testComponent2),
-		RegistryTestHelper.getXml(publicRegistry.getMDComponent(description.
-		getId())));
+		RegistryTestHelper.getXml(publicRegistry.getMDComponent(description.getId())));
 	assertNull(userRegistry.getMDComponent(description.getId()));
     }
 }

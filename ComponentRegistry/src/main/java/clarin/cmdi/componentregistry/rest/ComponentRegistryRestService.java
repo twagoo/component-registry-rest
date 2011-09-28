@@ -437,8 +437,8 @@ public class ComponentRegistryRestService {
 			try {
 			    registry.getMDProfileAsXml(profileId, output);
 			} catch (ComponentRegistryException e) {
-			    LOG.info("Could not retrieve component", e);
-			    throw new WebApplicationException(Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
+			    LOG.warn("Could not retrieve component", e);
+			    throw new WebApplicationException(e, Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
 			}
 		    }
 		};
@@ -450,8 +450,8 @@ public class ComponentRegistryRestService {
 			try {
 			    registry.getMDProfileAsXsd(profileId, output);
 			} catch (ComponentRegistryException e) {
-			    LOG.info("Could not retrieve component", e);
-			    throw new WebApplicationException(Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
+			    LOG.warn("Could not retrieve component", e);
+			    throw new WebApplicationException(e, Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
 			}
 		    }
 		};

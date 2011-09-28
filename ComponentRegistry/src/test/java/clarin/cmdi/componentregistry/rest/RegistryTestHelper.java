@@ -49,6 +49,10 @@ public final class RegistryTestHelper {
 	return desc;
     }
 
+    public static int updateComponent(ComponentRegistry testRegistry, ComponentDescription description, String content) throws JAXBException {
+	return testRegistry.update(description, getComponentFromString(content), DummyPrincipal.DUMMY_CREDENTIALS.getPrincipal(), true);
+    }
+
     public static String getProfileTestContentString() {
 	return getProfileTestContentString("Actor");
     }
@@ -144,8 +148,16 @@ public final class RegistryTestHelper {
 	return compContent;
     }
 
+    public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
+	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentContent(contentString), MDMarshaller.getCMDComponentSchema());
+    }
+
+    public static InputStream getComponentContent(String content) {
+	return new ByteArrayInputStream(content.getBytes());
+    }
+
     public static InputStream getComponentTestContent(String componentName) {
-	return new ByteArrayInputStream(getComponentTestContentString(componentName).getBytes());
+	return getComponentContent(getComponentTestContentString(componentName));
     }
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {
@@ -176,5 +188,4 @@ public final class RegistryTestHelper {
 	Matcher matcher = pattern.matcher(xsd);
 	return matcher.find() && !matcher.find(); //find only one
     }
-
 }
