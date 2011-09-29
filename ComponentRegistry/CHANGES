@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.9.1 (29 september 2011):
+- When recursion is detected while expanding (for XML or XSD), an exception is thrown, which will lead to an error response to the user rather than an infinite loop and no response. http://trac.clarin.eu/ticket/148
+
 Release ComponentRegistry-1.9 (22 september 2011):
 - Save private components works even when component is used, warning message is shown in Flex UI http://trac.clarin.eu/ticket/134
 
