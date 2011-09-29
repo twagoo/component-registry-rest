@@ -4,7 +4,6 @@
 				layout="absolute"
 				preinitialize="initializeInstances();"
 				applicationComplete="appComplete();"
-				pageTitle="CompRegTest"
 				backgroundColor="#DDE3EF">
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
