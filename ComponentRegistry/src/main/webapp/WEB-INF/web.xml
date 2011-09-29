@@ -7,10 +7,6 @@
 <web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>ComponentRegistry</display-name>
     <description>Clarin Metadata Component Registry</description>
-    <context-param>
-        <param-name>ShhaaConfigLocation</param-name>
-        <param-value>/WEB-INF/shhaa.xml</param-value>
-    </context-param>
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
@@ -26,18 +22,6 @@
         <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <!-- Make sure this one is declared before the wicket filter, the order matters. Shibboleth should trigger the login, before continuing with the wicket filter.-->
-    <!--  <filter>
-    <filter-name>AAIFilter</filter-name>
-    <filter-class>de.mpg.aai.shhaa.AuthFilter</filter-class>
-  </filter>
-  <filter-mapping>
-    <filter-name>AAIFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>-->
-    <listener>
-        <listener-class>de.mpg.aai.shhaa.config.ConfigContextListener</listener-class>
-    </listener>
     <filter>
         <filter-name>wicket.componentregistry</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>

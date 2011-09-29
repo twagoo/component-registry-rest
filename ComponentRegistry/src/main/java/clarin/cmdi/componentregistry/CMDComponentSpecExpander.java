@@ -3,6 +3,8 @@ package clarin.cmdi.componentregistry;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,26 +23,36 @@ public abstract class CMDComponentSpecExpander {
     }
 
     private void expandNestedComponent(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
+	expandNestedComponent(cmdComponents, new HashSet<String>());
+    }
+
+    private void expandNestedComponent(List<CMDComponentType> cmdComponents, Collection<String> path) throws ComponentRegistryException {
 	List<CMDComponentType> expanded = new ArrayList<CMDComponentType>();
 	for (CMDComponentType cmdComponentType : cmdComponents) {
 	    String componentId = cmdComponentType.getComponentId();
 	    if (componentId != null) {
-		// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
-		CMDComponentSpec spec = getUncachedComponent(componentId);
-		if (spec != null) {
-		    CMDComponentType nested = getComponentTypeOfAComponent(spec);
-		    expandNestedComponent(nested.getCMDComponent());
-		    overwriteAttributes(cmdComponentType, nested);
-		    expanded.add(nested);
+		if (path.contains(componentId)) {
+		    throw new ComponentRegistryException("Detected recursion in component specification: " + path.toString() + " already contains " + componentId);
 		} else {
-		    // Spec could not be resolved
-		    LOG.warn("Could not resolve referenced component with id " + componentId);
-		    // Add spec itself, without futher expanding
-		    expanded.add(cmdComponentType);
+		    Collection<String> newPath = new HashSet<String>(path);
+		    newPath.add(componentId);
+		    // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
+		    CMDComponentSpec spec = getUncachedComponent(componentId);
+		    if (spec != null) {
+			CMDComponentType nested = getComponentTypeOfAComponent(spec);
+			expandNestedComponent(nested.getCMDComponent(), newPath);
+			overwriteAttributes(cmdComponentType, nested);
+			expanded.add(nested);
+		    } else {
+			// Spec could not be resolved
+			LOG.warn("Could not resolve referenced component with id " + componentId);
+			// Add spec itself, without futher expanding
+			expanded.add(cmdComponentType);
+		    }
 		}
 	    } else {
 		// No id = embedded component
-		expandNestedComponent(cmdComponentType.getCMDComponent());
+		expandNestedComponent(cmdComponentType.getCMDComponent(), path);
 		expanded.add(cmdComponentType);//no attributes overwritten
 	    }
 	}
