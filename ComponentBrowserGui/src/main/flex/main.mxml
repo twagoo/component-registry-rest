@@ -2,26 +2,62 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
 				xmlns:common="clarin.cmdi.componentregistry.common.components.*"
 				layout="absolute"
-				preinitialize="initializeInstances();"
+				preinitialize="init();"
 				applicationComplete="appComplete();"
 				backgroundColor="#DDE3EF">
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.common.Credentials;
+			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.PingSessionService;
+			
+			import com.flexspy.FlexSpy;
+			
+			import flash.utils.getTimer;
+			
+			import mx.containers.Box;
 			import mx.controls.Alert;
 			import mx.controls.Button;
-			import clarin.cmdi.componentregistry.services.Config;
-			import clarin.cmdi.componentregistry.common.Credentials;
+			import mx.core.UIComponent;
+			import mx.core.mx_internal;
+			import mx.events.FlexEvent;
 			import mx.managers.PopUpManager;
+			
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
-	        import com.flexspy.FlexSpy;
 
 			private var sessionPinger:PingSessionService;
-
+			[Bindable]
+			private var aboutMenu:ContextMenu;
+			
+			
+			private function init():void{
+				this.contextMenu = createMenu();
+				initializeInstances();
+			}
+			
 			private function initializeInstances():void {
 				Credentials.create(Application.application.parameters);
 				Config.create(Application.application.parameters);				
+			}
+			
+			private function createMenu():ContextMenu{
+				var menu:ContextMenu = new ContextMenu();
+				var item:ContextMenuItem = new ContextMenuItem("About Clarin Component Registry");
+				item.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showAbout);
+				menu.customItems = [item];
+				menu.hideBuiltInItems();
+				return menu;
+			}
+			
+			private function showAbout(evt:ContextMenuEvent):void{
+				aboutWindow.x = appPanel.width/2 - aboutWindow.width/2;
+				aboutWindow.y = appPanel.height/2 - aboutWindow.height/2;
+				aboutWindow.visible = true;
+			}
+			
+			private function closeAbout():void{
+				aboutWindow.visible = false;
 			}
 
 			private function appComplete():void {
@@ -44,10 +80,11 @@
 			private function showFlexSpy(event:Event):void{
 				FlexSpy.show();
 			}
+
 		]]>
 	</mx:Script>
 
-	<mx:Panel width="100%"
+	<mx:Panel id="appPanel" width="100%"
 			  height="100%"
 			  layout="absolute"
 			  title="Clarin Component Browser"
@@ -62,7 +99,7 @@
 									dataProvider="{viewStack}"/>
 				<mx:Spacer width="90%"/>
 				<mx:Label text="User: {Credentials.instance.userName}"/>
-				<common:LoginLabelButton id="login"/>
+				<common:LoginLabelButton id="login" />
 			</mx:HBox>
 			<common:RegistryViewStack id="viewStack"
 									  borderStyle="none"
@@ -70,5 +107,23 @@
 									  width="100%"/>
 		</mx:VBox>
 	</mx:Panel>
+	
+	<mx:TitleWindow 
+		id="aboutWindow"
+		title="About the Clarin Component Registry"
+		visible="false">
+		<mx:Text>			
+			<mx:htmlText>
+<![CDATA[Description...
+
+<a href="http://www.clarin.eu/cmdi">www.clarin.eu/cmdi</a>
+
+Written by: Patrick Duin and Twan Goosen
+Contact: <a href="mailto:cmdi@clarin.eu">cmdi@clarin.eu</a>
+]]>
+			</mx:htmlText>
+		</mx:Text>
+		<mx:Button label="close" click="closeAbout()" />
+	</mx:TitleWindow>
 		
 </mx:Application>
