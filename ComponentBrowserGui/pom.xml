@@ -16,7 +16,17 @@
     <name>ComponentBrowserGui</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <flexDebug>true</flexDebug>
     </properties>
+
+    <profiles>
+	<profile>
+	    <id>clarin</id>
+	    <properties>
+	    	<flexDebug>false</flexDebug>
+	    </properties>
+	</profile>
+    </profiles>
 
     <dependencies>
         <dependency>
@@ -68,7 +78,7 @@
                 <version>3.9</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <debug>true</debug>
+                    <debug>${flexDebug}</debug>
                     <generateHtmlWrapper>true</generateHtmlWrapper>
                     <targetPlayer>10.0.0</targetPlayer>
                 </configuration>
