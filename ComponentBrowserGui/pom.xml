@@ -81,6 +81,12 @@
                     <debug>${flexDebug}</debug>
                     <generateHtmlWrapper>true</generateHtmlWrapper>
                     <targetPlayer>10.0.0</targetPlayer>
+                    <definesDeclaration>
+					  <property>
+						<name>APPINFO::version</name>
+						<value>"${ComponentBrowserGui.version}"</value>
+					  </property>
+					</definesDeclaration>                    
                 </configuration>
                 <dependencies>
                     <dependency>

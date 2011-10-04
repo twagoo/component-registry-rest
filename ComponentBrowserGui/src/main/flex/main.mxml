@@ -8,6 +8,7 @@
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.common.AboutPopup;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.PingSessionService;
@@ -50,14 +51,11 @@
 				return menu;
 			}
 			
-			private function showAbout(evt:ContextMenuEvent):void{
-				aboutWindow.x = appPanel.width/2 - aboutWindow.width/2;
-				aboutWindow.y = appPanel.height/2 - aboutWindow.height/2;
-				aboutWindow.visible = true;
-			}
-			
-			private function closeAbout():void{
-				aboutWindow.visible = false;
+			private function showAbout(event:ContextMenuEvent):void{
+				var aboutBox:AboutPopup = new AboutPopup();
+				aboutBox.x = appPanel.width/2 - aboutBox.width/2;
+				aboutBox.y = appPanel.height/2 - aboutBox.height/2;
+				PopUpManager.addPopUp(aboutBox, event.mouseTarget);
 			}
 
 			private function appComplete():void {
@@ -107,23 +105,5 @@
 									  width="100%"/>
 		</mx:VBox>
 	</mx:Panel>
-	
-	<mx:TitleWindow 
-		id="aboutWindow"
-		title="About the Clarin Component Registry"
-		visible="false">
-		<mx:Text>			
-			<mx:htmlText>
-<![CDATA[Description...
-
-<a href="http://www.clarin.eu/cmdi">www.clarin.eu/cmdi</a>
-
-Written by: Patrick Duin and Twan Goosen
-Contact: <a href="mailto:cmdi@clarin.eu">cmdi@clarin.eu</a>
-]]>
-			</mx:htmlText>
-		</mx:Text>
-		<mx:Button label="close" click="closeAbout()" />
-	</mx:TitleWindow>
 		
 </mx:Application>
