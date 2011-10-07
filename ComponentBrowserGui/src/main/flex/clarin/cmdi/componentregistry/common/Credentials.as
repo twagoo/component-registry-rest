@@ -14,7 +14,7 @@ package clarin.cmdi.componentregistry.common {
 		}
         
         public function isLoggedIn():Boolean {
-            return userName && userName != "anonymous";
+            return userName && userName != "" && userName != "anonymous";
         }
 
 		private function init(applicationParameters:Object):void {
