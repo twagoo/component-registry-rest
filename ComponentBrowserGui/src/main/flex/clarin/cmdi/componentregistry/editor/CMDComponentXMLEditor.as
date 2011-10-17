@@ -236,6 +236,8 @@ package clarin.cmdi.componentregistry.editor {
 				});
 			link.enabled = false;
 			addChild(link);
+			
+			addChild(new AttributeListEdit(_firstComponent.attributeList, this))
 		}
 
 		private function addComponentAddButton():void {
