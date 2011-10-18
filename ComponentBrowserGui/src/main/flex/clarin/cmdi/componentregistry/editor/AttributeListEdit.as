@@ -68,7 +68,6 @@ package clarin.cmdi.componentregistry.editor {
 					drawFocus(false);
 				});
 			addChild(addAttributeLabelButton);
-
 		}
 
 		private function createAttributeBox(attribute:CMDAttribute):Form {
@@ -76,6 +75,11 @@ package clarin.cmdi.componentregistry.editor {
 			attributeBox.styleName = StyleConstants.XMLBROWSER;
 			addEditBar(attribute, attributeBox);
 			attributeBox.addChild(createAndAddValueScheme(attribute));
+			
+			attributeBox.addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, attribute.conceptLink, function(val:String):void {
+				attribute.conceptLink = val;
+			}));
+			
 			return attributeBox;
 		}
 

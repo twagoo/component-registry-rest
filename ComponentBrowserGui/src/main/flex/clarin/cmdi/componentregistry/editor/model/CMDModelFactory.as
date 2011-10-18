@@ -96,6 +96,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		private static function createAttribute(xml:XML):CMDAttribute {
 			var result:CMDAttribute = new CMDAttribute();
 			result.name = xml.Name;
+			result.conceptLink = xml.ConceptLink;
 			if (xml.hasOwnProperty(ComponentMD.TYPE)) {
 				result.valueSchemeSimple = xml.Type;
 			} else {

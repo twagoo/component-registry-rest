@@ -12,6 +12,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		//Elements
 		public var name:String;
 		private var type:String;
+		public var conceptLink:String;
 		private var _valueSchemePattern:String; //pattern
 		private var _valueSchemeEnumeration:ArrayCollection; // enumeration 
 
@@ -51,6 +52,9 @@ package clarin.cmdi.componentregistry.editor.model {
 		public function toXml():XML {
 			var result:XML = <Attribute></Attribute>;
 			result.appendChild(<Name>{name}</Name>);
+			if (conceptLink) {
+				result.appendChild(<ConceptLink>{conceptLink}</ConceptLink>);
+			}
 			if (valueSchemePattern) {
 				result.appendChild(<ValueScheme><pattern>{valueSchemePattern}</pattern></ValueScheme>);
 			} else if (valueSchemeEnumeration) {
