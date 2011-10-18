@@ -81,12 +81,12 @@ public class MDValidator implements Validator {
 	    validateComponents(cmdComponentType.getCMDComponent());//Recursion
 	}
     }
-    
+
     private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	checkPublicComponents(cmdComponentType);
 	checkLegalAttributeNames(cmdComponentType);
     }
-    
+
     private void checkPublicComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	if (isDefinedInSeparateFile(cmdComponentType)) {
 	    String id = cmdComponentType.getComponentId();
@@ -117,9 +117,11 @@ public class MDValidator implements Validator {
     }
 
     private void checkLegalAttributeNames(CMDComponentType cmdComponentType) {
-	for (Attribute attribute : cmdComponentType.getAttributeList().getAttribute()) {
-	    if (ILLEGAL_ATTRIBUTE_NAMES.contains(attribute.getName())) {
-		errorMessages.add(ILLEGAL_ATTRIBUTE_NAME_ERROR + attribute.getName() + " (" + cmdComponentType.getComponentId() + ")");
+	if (cmdComponentType.getAttributeList() != null) {
+	    for (Attribute attribute : cmdComponentType.getAttributeList().getAttribute()) {
+		if (ILLEGAL_ATTRIBUTE_NAMES.contains(attribute.getName())) {
+		    errorMessages.add(ILLEGAL_ATTRIBUTE_NAME_ERROR + attribute.getName() + " (" + cmdComponentType.getComponentId() + ")");
+		}
 	    }
 	}
     }
