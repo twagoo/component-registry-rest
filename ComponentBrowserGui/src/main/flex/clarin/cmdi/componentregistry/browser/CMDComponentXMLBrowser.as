@@ -79,7 +79,7 @@ package clarin.cmdi.componentregistry.browser {
 				heading.addChild(label);
 				parent.addChild(heading);
 				for each (var attribute:CMDAttribute in attributes) {
-					var child:XMLBrowserValueSchemeLine = new XMLBrowserValueSchemeLine(attribute.name, indent+1, attribute.valueSchemeSimple, attribute.valueSchemePattern, attribute.valueSchemeEnumeration);
+					var child:XMLBrowserValueSchemeLine = new XMLBrowserValueSchemeLine(attribute.name, indent+1, attribute.valueSchemeSimple, attribute.valueSchemePattern, attribute.valueSchemeEnumeration, attribute.conceptLink);
 					parent.addChild(child);
 				}
 			}
@@ -104,6 +104,9 @@ package clarin.cmdi.componentregistry.browser {
 
 		private function handleHeader(name:String):void {
 			addChild(new XMLBrowserLine(LabelConstants.NAME, name, StyleConstants.XMLBROWSER_FIELD, StyleConstants.XMLBROWSER_HEADER));
+			if(_spec.groupName){
+				addChild(new XMLBrowserLine(LabelConstants.GROUP_NAME, _spec.groupName));
+			}
 			addChild(new XMLBrowserLine(LabelConstants.DESCRIPTION, _spec.headerDescription));
 			if (_firstComponent.conceptLink) {
 				addChild(new XMLBrowserConceptLinkLine(LabelConstants.CONCEPTLINK, _firstComponent.conceptLink));

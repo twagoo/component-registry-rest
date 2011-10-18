@@ -1,11 +1,11 @@
 package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.common.components.LinkRenderer;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	
 	import flash.display.DisplayObject;
 	
 	import mx.collections.ArrayCollection;
-	import mx.collections.XMLListCollection;
 	import mx.containers.HBox;
 	import mx.controls.ComboBox;
 	import mx.controls.Label;
@@ -15,15 +15,17 @@ package clarin.cmdi.componentregistry.browser {
 
 	public class XMLBrowserValueSchemeLine extends HBox {
 		private var nameLabel:Label = new Label();
+		private var conceptLink:LinkRenderer;
 		private var valueObject:DisplayObject;
 		private var _indent:int = 0;
 
-		public function XMLBrowserValueSchemeLine(name:String, indent:int, value:String = null, valuePattern:String = null, valueList:ArrayCollection = null) {
+		public function XMLBrowserValueSchemeLine(name:String, indent:int, value:String = null, valuePattern:String = null, valueList:ArrayCollection = null, conceptLinkValue:String = null) {
 			super();
 			_indent = indent;
 			nameLabel.text = name;
 			nameLabel.styleName = StyleConstants.XMLBROWSER_FIELD;
 			valueObject = createValueScheme(value, valuePattern, valueList);
+			conceptLink = createConceptLink(conceptLinkValue);
 		}
 
 		protected override function createChildren():void {
@@ -32,6 +34,20 @@ package clarin.cmdi.componentregistry.browser {
 				addChild(CMDComponentXMLBrowser.getIndentSpacer(_indent));
 			addChild(nameLabel);
 			addChild(valueObject);
+			if(conceptLink){
+				addChild(conceptLink);
+			}
+		}
+		
+		public static function createConceptLink(linkValue:String):LinkRenderer{
+			if(linkValue){
+				var conceptLink:LinkRenderer = new LinkRenderer();
+				conceptLink.text = linkValue;
+				conceptLink.styleName = StyleConstants.XMLBROWSER_FIELD_VALUE;
+				return conceptLink;
+			} else {
+				return null;
+			}
 		}
 
 		public static function createValueScheme(value:String = null, valuePattern:String = null, valueList:ArrayCollection = null):UIComponent {
@@ -48,7 +64,6 @@ package clarin.cmdi.componentregistry.browser {
 			var result:Text = new Text();
 			result.text = value;
 			result.styleName = StyleConstants.XMLBROWSER_FIELD_VALUE;
-			result.width = 500;
 			return result;
 		}
 
