@@ -88,7 +88,7 @@ public class MDValidatorTest {
 	profileContent += "			<Type>string</Type>\n";
 	profileContent += "		    </Attribute>\n";
 	profileContent += "		    <Attribute>\n";
-	profileContent += "			<Name>componentId</Name>\n"; // allowed here, only forbidden on components
+	profileContent += "			<Name>ComponentId</Name>\n"; // allowed here, only forbidden on components
 	profileContent += "			<Type>string</Type>\n";
 	profileContent += "		    </Attribute>\n";
 	profileContent += "		</AttributeList>\n";
