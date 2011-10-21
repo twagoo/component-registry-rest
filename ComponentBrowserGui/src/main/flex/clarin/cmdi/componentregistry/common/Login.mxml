@@ -49,8 +49,6 @@
 								 viewType="{_viewType}"
 								 spaceType="{_spaceType}"
 								 itemId="{_itemId}"/>
-		<mx:Label text="If you do not have an account please go here to register:"/>
-		<common:LinkRenderer text="{Config.CLARIN_REGISTER_URL}"/>
 		<mx:Button id="cancelBtn"
 				   label="Cancel"
 				   click="{handleCancel(event);}"/>
