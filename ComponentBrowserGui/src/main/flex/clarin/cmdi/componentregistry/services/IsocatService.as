@@ -15,6 +15,7 @@ package clarin.cmdi.componentregistry.services {
 		public static const PROFILE_LOADED:String = "ProfileLoaded";
 		public static const TYPE_SIMPLE:String = "simple";
 		public static const TYPE_COMPLEX:String = "complex";
+		public static const TYPE_CONTAINER:String = "container";
 		
 		namespace dcif = "http://www.isocat.org/ns/dcif";
 

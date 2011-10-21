@@ -9,13 +9,14 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 	import clarin.cmdi.componentregistry.editor.model.CMDSpec;
-
+	import clarin.cmdi.componentregistry.services.IsocatService;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -233,8 +234,7 @@ package clarin.cmdi.componentregistry.editor {
 //			addChild(idInput);
 			var link:ConceptLinkInput = new ConceptLinkInput(LabelConstants.CONCEPTLINK, _firstComponent.conceptLink, function(val:String):void {
 					_firstComponent.conceptLink = val;
-				});
-			link.enabled = false;
+				}, IsocatService.TYPE_CONTAINER);
 			addChild(link);
 			
 			addChild(new AttributeListEdit(_firstComponent.attributeList, this))
