@@ -46,7 +46,7 @@ public class ComponentRegistryDbImplTest {
 
     @Before
     public void init() {
-	ComponentRegistryDatabase.resetAndCreateAllTables(jdbcTemplate);
+	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
     }
 
     @Test

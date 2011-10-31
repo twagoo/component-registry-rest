@@ -6,9 +6,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public final class ComponentRegistryDatabase {
+public final class ComponentRegistryTestDatabase {
 
-    private ComponentRegistryDatabase() {
+    private ComponentRegistryTestDatabase() {
     }
 
     public static void resetDatabase(JdbcTemplate jdbcTemplate) {
