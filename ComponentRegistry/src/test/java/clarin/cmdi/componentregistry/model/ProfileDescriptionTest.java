@@ -44,7 +44,8 @@ public class ProfileDescriptionTest {
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
-        expected += "</profileDescription>\n";
+        expected += "    <showInEditor>true</showInEditor>\n";
+	expected += "</profileDescription>\n";
         assertEquals(expected, out.toString());
 
         ProfileDescription pd = MDMarshaller.unmarshal(ProfileDescription.class, new ByteArrayInputStream(expected.getBytes()), null);

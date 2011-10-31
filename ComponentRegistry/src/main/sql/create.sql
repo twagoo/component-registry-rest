@@ -76,6 +76,7 @@ CREATE TABLE profile_description (
     domain_name character varying,
     group_name character varying,
     href character varying,
+    show_in_editor boolean DEFAULT true NOT NULL,
     UNIQUE(profile_id)
 );
 

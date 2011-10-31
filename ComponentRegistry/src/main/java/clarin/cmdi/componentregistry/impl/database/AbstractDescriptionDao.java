@@ -22,6 +22,9 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import java.util.Arrays;
+import java.util.Collection;
+import org.apache.commons.collections.ListUtils;
 
 /**
  * 
@@ -30,7 +33,6 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 public abstract class AbstractDescriptionDao<T extends AbstractDescription> extends ComponentRegistryDao<T> {
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
-
     @Autowired
     private PlatformTransactionManager txManager;
     @Autowired
@@ -39,7 +41,6 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     protected abstract String getTableName();
 
     protected abstract String getCMDIdColumn();
-
     /**
      * Class object required to instantiate new description domain objects
      */
@@ -112,21 +113,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		    COLUMN_ID);
 	    Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
 
-	    SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName())
-		    .usingGeneratedKeyColumns(COLUMN_ID);
+	    SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(COLUMN_ID);
 	    Map<String, Object> params = new HashMap<String, Object>();
-	    params.put("content_id", contentId);
-	    params.put("user_id", userId);
-	    params.put("is_public", isPublic);
-	    params.put("is_deleted", Boolean.FALSE);
-	    params.put(getCMDIdColumn(), description.getId());
-	    params.put("name", description.getName());
-	    params.put("description", description.getDescription());
-	    params.put("creator_name", description.getCreatorName());
-	    params.put("group_name", description.getGroupName());
-	    params.put("domain_name", description.getDomainName());
-	    params.put("href", description.getHref());
-	    params.put("registration_date", extractTimestamp(description));
+	    putInsertParameters(params, description, contentId, userId, isPublic);
 
 	    Number id = insertDescription.executeAndReturnKey(params);
 	    txManager.commit(transaction);
@@ -168,12 +157,10 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 		// Update description
 		StringBuilder updateDescription = new StringBuilder();
 		updateDescription.append("UPDATE ").append(getTableName());
-		updateDescription
-			.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
+		appendUpdateColumnsStatement(updateDescription);
 		updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
-		getSimpleJdbcTemplate().update(updateDescription.toString(), description.getName(), description.getDescription(),
-			extractTimestamp(description), description.getCreatorName(), description.getDomainName(),
-			description.getGroupName(), description.getHref(), id);
+		Collection updateParams = ListUtils.union(getUpdateParameterValues(description), Collections.singletonList(id));
+		getSimpleJdbcTemplate().update(updateDescription.toString(), updateParams.toArray());
 	    }
 
 	    if (content != null) {
@@ -310,9 +297,74 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	}
     }
 
+    /**
+     * @return the rowMapper
+     */
+    @Override
+    protected ParameterizedRowMapper<T> getRowMapper() {
+	return rowMapper;
+    }
+
+    /**
+     * Inserts parameters int <column, value> parameters map
+     * @param params
+     * @param description
+     * @param contentId
+     * @param userId
+     * @param isPublic 
+     */
+    protected void putInsertParameters(Map<String, Object> params, AbstractDescription description, Number contentId, Number userId, boolean isPublic) {
+	params.put("content_id", contentId);
+	params.put("user_id", userId);
+	params.put("is_public", isPublic);
+	params.put("is_deleted", Boolean.FALSE);
+	params.put(getCMDIdColumn(), description.getId());
+	params.put("name", description.getName());
+	params.put("description", description.getDescription());
+	params.put("creator_name", description.getCreatorName());
+	params.put("group_name", description.getGroupName());
+	params.put("domain_name", description.getDomainName());
+	params.put("href", description.getHref());
+	params.put("registration_date", extractTimestamp(description));
+    }
+
+    /**
+     * Sets values on a new description object from specified ResultSet
+     * @param rs ResultSet from database query
+     * @param newDescription Newly created description object to be filled
+     * @throws SQLException 
+     */
+    protected void setDescriptionValuesFromResultSet(ResultSet rs, AbstractDescription newDescription) throws SQLException {
+	Timestamp registrationDate = rs.getTimestamp("registration_date");
+	newDescription.setName(rs.getString("name"));
+	newDescription.setDescription(rs.getString("description"));
+	newDescription.setId(rs.getString(getCMDIdColumn()));
+	newDescription.setRegistrationDate(registrationDate == null ? null : AbstractDescription.createNewDate(registrationDate.getTime()));
+	newDescription.setCreatorName(rs.getString("creator_name"));
+	newDescription.setDomainName(rs.getString("domain_name"));
+	newDescription.setGroupName(rs.getString("group_name"));
+	newDescription.setHref(rs.getString("href"));
+
+	Object userId = rs.getObject("user_id");
+	if (!rs.wasNull()) {
+	    newDescription.setUserId(userId.toString());
+	}
+    }
+
+    protected void appendUpdateColumnsStatement(StringBuilder updateDescription) {
+	updateDescription.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
+    }
+
+    protected List getUpdateParameterValues(AbstractDescription description) {
+	List updateParams = Arrays.asList(description.getName(), description.getDescription(),
+		extractTimestamp(description), description.getCreatorName(), description.getDomainName(),
+		description.getGroupName(), description.getHref());
+	return updateParams;
+    }
     /*
      * DAO HELPER METHODS
      */
+
     private StringBuilder getSelectStatement(String... where) throws DataAccessException {
 	StringBuilder select = new StringBuilder("SELECT ").append(getDescriptionColumnList());
 	select.append(" FROM ").append(getTableName());
@@ -329,7 +381,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * 
      * @return List of all description columns to be used in SELECT queries
      */
-    private StringBuilder getDescriptionColumnList() {
+    protected StringBuilder getDescriptionColumnList() {
 
 	StringBuilder sb = new StringBuilder();
 	sb.append(getOrderByColumn());
@@ -338,44 +390,20 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	return sb;
     }
 
-    protected String getOrderByColumn() {
+    private String getOrderByColumn() {
 	return "name";
     }
-    
+
     private String getOrderByClause() {
-	return " order by upper("+getOrderByColumn()+"), "+getCMDIdColumn()+" asc ";
+	return " order by upper(" + getOrderByColumn() + "), " + getCMDIdColumn() + " asc ";
     }
-
-    /**
-     * @return the rowMapper
-     */
-    @Override
-    protected ParameterizedRowMapper<T> getRowMapper() {
-	return rowMapper;
-    }
-
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 	    try {
-		Timestamp registrationDate = rs.getTimestamp("registration_date");
-
 		AbstractDescription newDescription = (AbstractDescription) _class.newInstance();
-		newDescription.setName(rs.getString("name"));
-		newDescription.setDescription(rs.getString("description"));
-		newDescription.setId(rs.getString(getCMDIdColumn()));
-		newDescription.setRegistrationDate(registrationDate == null ? null : AbstractDescription.createNewDate(registrationDate
-			.getTime()));
-		newDescription.setCreatorName(rs.getString("creator_name"));
-		newDescription.setDomainName(rs.getString("domain_name"));
-		newDescription.setGroupName(rs.getString("group_name"));
-		newDescription.setHref(rs.getString("href"));
-
-		Object userId = rs.getObject("user_id");
-		if (!rs.wasNull()) {
-		    newDescription.setUserId(userId.toString());
-		}
+		setDescriptionValuesFromResultSet(rs, newDescription);
 		return (T) newDescription;
 	    } catch (InstantiationException ex) {
 		LOG.error("Error in row mapping", ex);
