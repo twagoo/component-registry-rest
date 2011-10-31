@@ -31,6 +31,13 @@ public interface ComponentRegistry {
      */
     List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
 
+    /**
+     * 
+     * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
+     * @throws ComponentRegistryException
+     */
+    List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException;
+
     ProfileDescription getProfileDescription(String id) throws ComponentRegistryException;
 
     CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException;

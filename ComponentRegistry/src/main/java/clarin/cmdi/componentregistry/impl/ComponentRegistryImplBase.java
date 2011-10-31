@@ -55,6 +55,28 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	return result;
     }
 
+    /**
+     * 
+     * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
+     * @throws ComponentRegistryException
+     */
+    @Override
+    public List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException {
+	// TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDao, should have better performance
+
+	// Get all profile descriptions
+	List<ProfileDescription> descriptionsCollection = getProfileDescriptions();
+	// Filter out ones that do should not be shown for metadata editor
+	ArrayList<ProfileDescription> descriptions = new ArrayList<ProfileDescription>(descriptionsCollection.size());
+	for (ProfileDescription profile : descriptionsCollection) {
+	    if (((ProfileDescription) profile).isShowInEditor()) {
+		descriptions.add((ProfileDescription) profile);
+	    }
+	}
+	// Return filtered list
+	return descriptions;
+    }
+
     /* HELPER METHODS */
     protected static String stripRegistryId(String id) {
 	return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
@@ -121,5 +143,4 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	result.append("Try to change above mentioned references first.");
 	return result.toString();
     }
-
 }
