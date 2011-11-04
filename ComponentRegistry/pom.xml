@@ -273,6 +273,11 @@
 			    </includes>
 			</resource>
 		    </webResources>
+		    <archive>
+			<manifest>
+			    <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+			</manifest>
+		    </archive>
 		</configuration>
 	    </plugin>
 	    <plugin>

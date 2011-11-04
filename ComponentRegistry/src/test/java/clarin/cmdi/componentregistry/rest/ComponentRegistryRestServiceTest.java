@@ -26,7 +26,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
-import clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase;
+import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -51,7 +51,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Before
     public void init() {
-	ComponentRegistryDatabase.resetAndCreateAllTables(jdbcTemplate);
+	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
 	createUserRecord();
 	// Get public component registry
 	testRegistry = componentRegistryBeanFactory.getNewComponentRegistry();

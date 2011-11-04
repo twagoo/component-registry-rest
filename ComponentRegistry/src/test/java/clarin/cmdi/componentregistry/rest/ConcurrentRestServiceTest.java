@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase;
+import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
 import static org.junit.Assert.assertEquals;
@@ -45,7 +45,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
 
     @Before
     public void init() {
-	ComponentRegistryDatabase.resetAndCreateAllTables(jdbcTemplate);
+	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
 	createUserRecord();
     }
 

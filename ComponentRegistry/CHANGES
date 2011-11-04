@@ -1,5 +1,13 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.10.0 (4 november 2011):
+- Attributes can be added and edited on components. http://trac.clarin.eu/ticket/125
+- ConceptLinks can be assigned to attributes of components and elements. http://trac.clarin.eu/ticket/125#comment:3
+- ConceptLinks are enabled for Components. The search is filtered to show 'container' type concepts only. http://trac.clarin.eu/ticket/141
+- XML browser ('component preview') shows the group name if available. http://trac.clarin.eu/ticket/159
+- Added the mdEditor parameter to registry/profiles REST call to filter on profiles that should appear in e.g. Arbil. http://trac.clarin.eu/ticket/160
+- An 'about' screen can be triggered from the context menu that shows some info including the application version. http://trac.clarin.eu/ticket/106
+
 Release ComponentRegistry-1.9.1 (29 september 2011):
 - When recursion is detected while expanding (for XML or XSD), an exception is thrown, which will lead to an error response to the user rather than an infinite loop and no response. http://trac.clarin.eu/ticket/148
 

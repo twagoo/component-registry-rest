@@ -29,8 +29,8 @@ public class UserDaoTest {
 
     @Before
     public void init() {
-	ComponentRegistryDatabase.resetDatabase(jdbcTemplate);
-	ComponentRegistryDatabase.createTableRegistryUser(jdbcTemplate);
+	ComponentRegistryTestDatabase.resetDatabase(jdbcTemplate);
+	ComponentRegistryTestDatabase.createTableRegistryUser(jdbcTemplate);
     }
 
     @Test

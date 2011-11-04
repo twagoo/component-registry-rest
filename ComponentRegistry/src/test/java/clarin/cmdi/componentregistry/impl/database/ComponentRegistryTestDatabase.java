@@ -6,9 +6,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public final class ComponentRegistryDatabase {
+public final class ComponentRegistryTestDatabase {
 
-    private ComponentRegistryDatabase() {
+    private ComponentRegistryTestDatabase() {
     }
 
     public static void resetDatabase(JdbcTemplate jdbcTemplate) {
@@ -46,7 +46,9 @@ public final class ComponentRegistryDatabase {
 		+ "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
-                + "  group_name character varying, CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (profile_id));");
+                + "  group_name character varying, "
+		+ "  show_in_editor boolean DEFAULT true NOT NULL, "
+		+ "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (profile_id));");
     }
 
     public static void createTableXmlContent(JdbcTemplate jdbcTemplate) {

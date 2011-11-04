@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryDatabase.*;
+import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase.*;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;

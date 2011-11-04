@@ -90,7 +90,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    throw new ComponentRegistryException("Database access error while trying to get profile descriptions", ex);
 	}
     }
-
+    
     @Override
     public ProfileDescription getProfileDescription(String id) throws ComponentRegistryException {
 	try {

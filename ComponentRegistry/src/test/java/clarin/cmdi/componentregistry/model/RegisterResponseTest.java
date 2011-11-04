@@ -59,7 +59,8 @@ public class RegisterResponseTest {
         expected += "        <registrationDate>myDate</registrationDate>\n";
         expected += "        <creatorName>myC</creatorName>\n";
         expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
-        expected += "    </description>\n";
+        expected += "        <showInEditor>true</showInEditor>\n";
+	expected += "    </description>\n";
         expected += "</registerResponse>\n";
         assertEquals(expected, out.toString());
 

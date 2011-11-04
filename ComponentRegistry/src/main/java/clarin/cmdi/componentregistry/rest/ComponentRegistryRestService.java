@@ -63,6 +63,7 @@ public class ComponentRegistryRestService {
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String USERSPACE_PARAM = "userspace";
+    public static final String METADATA_EDITOR_PARAM = "mdEditor";
     @Inject(value = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
 
@@ -106,9 +107,17 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace,
+	    @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
-	List<ProfileDescription> profiles = getRegistry(userspace).getProfileDescriptions();
+	
+	List<ProfileDescription> profiles;
+	if (metadataEditor) {
+	    profiles = getRegistry(userspace).getProfileDescriptionsForMetadaEditor();
+	} else {
+	    profiles = getRegistry(userspace).getProfileDescriptions();
+	}
+	
 	LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
 		+ " millisecs)");
 	return profiles;
@@ -210,10 +219,10 @@ public class ComponentRegistryRestService {
 	    ComponentRegistry registry = getRegistry(userspace);
 	    List<ComponentDescription> components = registry.getUsageInComponents(componentId);
 	    List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
-	    
+
 	    LOG.info("Found " + components.size() + " components and " + profiles.size() + " profiles that use component " + componentId
 		    + " (" + (System.currentTimeMillis() - start) + " millisecs)");
-	    
+
 	    List<AbstractDescription> usages = new ArrayList<AbstractDescription>(components.size() + profiles.size());
 	    usages.addAll(components);
 	    usages.addAll(profiles);
@@ -224,7 +233,7 @@ public class ComponentRegistryRestService {
 	    throw e;
 	}
     }
-    
+
     /**
      * 
      * Purely helper method for my front-end (FLEX) which only does post/get requests. The query param is checked and the "proper" method is
