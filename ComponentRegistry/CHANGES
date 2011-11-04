@@ -1,6 +1,6 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.10.0 ():
+Release ComponentRegistry-1.10.0 (4 november 2011):
 - Attributes can be added and edited on components. http://trac.clarin.eu/ticket/125
 - ConceptLinks can be assigned to attributes of components and elements. http://trac.clarin.eu/ticket/125#comment:3
 - ConceptLinks are enabled for Components. The search is filtered to show 'container' type concepts only. http://trac.clarin.eu/ticket/141
