@@ -23,6 +23,14 @@
     <ComponentBrowserGui.version>1.10.0-SNAPSHOT</ComponentBrowserGui.version>
     <ComponentRegistry.version>1.10.0-SNAPSHOT</ComponentRegistry.version>
   </properties>
+  
+  <repositories>
+<repository>
+<id>cmdi.clarin.repository</id>
+<name>Clarin Repository</name>
+<url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url> 
+</repository> 
+ </repositories>
 
   <reporting>
     <plugins>

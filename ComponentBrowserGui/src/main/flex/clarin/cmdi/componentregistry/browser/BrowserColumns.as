@@ -30,6 +30,7 @@ package clarin.cmdi.componentregistry.browser {
 			return columns;
 		}
 
+		
 		private function createColumn(dataField:String, headerText:String):DataGridColumn {
 			var c:DataGridColumn = new DataGridColumn();
 			c.dataField = dataField;
@@ -55,6 +56,16 @@ package clarin.cmdi.componentregistry.browser {
 			var sort:Sort = new Sort();
 			var sortByGroup:SortField = new SortField("groupName", true);
 			var sortByName:SortField = new SortField("name", true);
+			var sortByDate:SortField = new SortField("registrationDate", true, true);
+			sortByDate.compareFunction = compareRegistrationDate;
+			sort.fields = [sortByGroup, sortByName, sortByDate];
+			return sort
+		}
+		
+		public static function getInitialSortForComments():Sort {
+			var sort:Sort = new Sort();
+			var sortByGroup:SortField = new SortField("creatorName", true);
+			var sortByName:SortField = new SortField("id", true);
 			var sortByDate:SortField = new SortField("registrationDate", true, true);
 			sortByDate.compareFunction = compareRegistrationDate;
 			sort.fields = [sortByGroup, sortByName, sortByDate];

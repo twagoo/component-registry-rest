@@ -7,6 +7,7 @@ import java.util.List;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.CommentMapping.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -31,6 +32,9 @@ public interface ComponentRegistry {
      */
     List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
 
+    
+    //List<Comment> getComments() throws ComponentRegistryException;
+    
     /**
      * 
      * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
@@ -43,6 +47,7 @@ public interface ComponentRegistry {
     CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException;
 
     CMDComponentSpec getMDComponent(String id) throws ComponentRegistryException;
+    //CMDComponentSpec getMDComment(String id) throws ComponentRegistryException;
 
     /**
      * 
@@ -97,6 +102,8 @@ public interface ComponentRegistry {
     void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,  ComponentRegistryException, UserUnauthorizedException,
 	    DeleteFailedException;
 
+    
+    //void deleteMDComment(String commentId, Principal principal)throws IOException, UserUnauthorizedException, ComponentRegistryException, DeleteFailedException;
     /**
      * 
      * @param componentId
@@ -135,6 +142,18 @@ public interface ComponentRegistry {
      * @return List of component descriptions ordered by name ascending
      */
     List<ComponentDescription> getDeletedComponentDescriptions();
+    
+    
+    List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException;
+    
+    
+    
+    Comment getSpecifiedCommentInProfile(String commentId) throws ComponentRegistryException;
+    
+    List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException;
+    Comment getSpecifiedCommentInComponent(String commentId) throws ComponentRegistryException;
+
+
 
 
 }

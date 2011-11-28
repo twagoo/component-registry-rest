@@ -5,9 +5,8 @@
 		 width="100%"
 		 backgroundColor="#DDE3EF"
 		 >
-
+	
 	<common:Component id="component"/>
-
 	<browser:infoPage id="infoPanel"
 				   cmdComponent="{component.componentMD.xml}"
 				   itemDescription="{component.description}"

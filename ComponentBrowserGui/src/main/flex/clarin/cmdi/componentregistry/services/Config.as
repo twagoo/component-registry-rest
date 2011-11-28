@@ -27,11 +27,18 @@ package clarin.cmdi.componentregistry.services {
 
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
+		private static const COMMENT_LIST_URL:String = "/rest/registry/comments";
+/*		private static const COMMENTPROFILE_LIST_URL:String = "/rest/registry/profiles/comments";
+		private static const COMMENTCOMPONENT_LIST_URL:String = "/rest/registry/components/comments";*/
 		private static const COMPONENT_USAGE_URL:String = "/rest/registry/components/usage/";
 		private static const UPLOAD_PROFILE_SERVICE_URL:String = "/rest/registry/profiles";
 		private static const UPLOAD_COMPONENT_SERVICE_URL:String = "/rest/registry/components";
+/*		private static const UPLOAD_COMMENTC_SERVICE_URL:String = "/rest/registry/components/comments";
+		private static const UPLOAD_COMMENTP_SERVICE_URL:String = "/rest/registry/profiles/comments";*/
 		private static const PROFILE_INFO_URL:String = "/rest/registry/profiles/";
 		private static const COMPONENT_INFO_URL:String = "/rest/registry/components/";
+		private static const COMMENTPROFILE_INFO_URL:String = "/rest/registry/profiles/comments";
+		private static const COMMENTCOMPONENT_INFO_URL:String = "/rest/registry/components/comments";
 		private static const PING_SESSION_URL:String = "/rest/registry/pingSession";
 		private static const ISOCAT_SERVLET:String = "/isocat";
 
@@ -89,6 +96,18 @@ package clarin.cmdi.componentregistry.services {
 			return _serviceRootUrl + COMPONENT_LIST_URL;
 		}
 		
+		public function get commentListUrl():String {
+			return _serviceRootUrl + COMMENT_LIST_URL;
+		}
+		
+/*		public function get commentProfileListUrl():String {
+			return _serviceRootUrl + COMMENTPROFILE_LIST_URL;
+		}
+		
+		public function get commentComponentListUrl():String {
+			return _serviceRootUrl + COMMENTCOMPONENT_LIST_URL;
+		}*/
+		
 		public function get componentUsageUrl():String {
 			return _serviceRootUrl + COMPONENT_USAGE_URL;
 		}
@@ -100,6 +119,13 @@ package clarin.cmdi.componentregistry.services {
 		public function get componentInfoUrl():String {
 			return _serviceRootUrl + COMPONENT_INFO_URL;
 		}
+		
+		public function get commentProfileInfoUrl():String {
+			return _serviceRootUrl + COMMENTPROFILE_INFO_URL;
+		}
+		public function get commentComponentInfoUrl():String {
+			return _serviceRootUrl + COMMENTCOMPONENT_INFO_URL;
+		}
 
 		public function get uploadProfileUrl():String {
 			return _serviceRootUrl + UPLOAD_PROFILE_SERVICE_URL;
@@ -108,6 +134,14 @@ package clarin.cmdi.componentregistry.services {
 		public function get uploadComponentUrl():String {
 			return _serviceRootUrl + UPLOAD_COMPONENT_SERVICE_URL;
 		}
+		
+/*		public function get uploadCommentPURL():String {
+			return _serviceRootUrl + UPLOAD_COMMENTP_SERVICE_URL;
+		}
+		
+		public function get uploadCommentCURL():String {
+			return _serviceRootUrl + UPLOAD_COMMENTC_SERVICE_URL;
+		}*/
 
 		public function get isocatSearchUrl():String {
 			return _serviceRootUrl + ISOCAT_SERVLET;

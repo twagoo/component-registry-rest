@@ -26,7 +26,7 @@ public final class ComponentRegistryTestDatabase {
                 + "  name character varying NOT NULL,"
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"
-		+ "  href character varying,"
+                + "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
                 + "  group_name character varying, CONSTRAINT UNIQUE_COMPONENT_ID UNIQUE (component_id));");
@@ -43,12 +43,12 @@ public final class ComponentRegistryTestDatabase {
                 + "  name character varying NOT NULL,"
                 + "  description character varying NOT NULL,"
                 + "  registration_date timestamp,"// with timezone,"
-		+ "  href character varying,"
+                + "  href character varying,"
                 + "  creator_name character varying,"
                 + "  domain_name character varying,"
                 + "  group_name character varying, "
-		+ "  show_in_editor boolean DEFAULT true NOT NULL, "
-		+ "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (profile_id));");
+                + "  show_in_editor boolean DEFAULT true NOT NULL, "
+                + "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (profile_id));");
     }
 
     public static void createTableXmlContent(JdbcTemplate jdbcTemplate) {
@@ -63,11 +63,23 @@ public final class ComponentRegistryTestDatabase {
                 + " principal_name character varying);");
     }
 
+    public static void createTableComments(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.execute("CREATE TABLE comments ("
+                + "id IDENTITY NOT NULL,"
+                + "user_id integer,"
+                + "  profile_description_id character varying,"
+                + "  component_description_id character varying,"               
+                + "  comments character varying NOT NULL,"
+                + "  comment_date timestamp,"
+                + "  CONSTRAINT UNIQUE_COMMENTS_ID UNIQUE (id));");
+    }
+
     public static void resetAndCreateAllTables(JdbcTemplate jdbcTemplate) {
-	resetDatabase(jdbcTemplate);
-	createTableComponentDescription(jdbcTemplate);
-	createTableProfileDescription(jdbcTemplate);
-	createTableXmlContent(jdbcTemplate);
-	createTableRegistryUser(jdbcTemplate);
+        resetDatabase(jdbcTemplate);
+        createTableComponentDescription(jdbcTemplate);
+        createTableProfileDescription(jdbcTemplate);
+        createTableXmlContent(jdbcTemplate);
+        createTableRegistryUser(jdbcTemplate);
+        createTableComments(jdbcTemplate);
     }
 }

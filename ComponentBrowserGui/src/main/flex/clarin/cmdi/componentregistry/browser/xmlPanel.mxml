@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
-		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*">
+		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*" xmlns:common="clarin.cmdi.componentregistry.common.*">
 
 	<mx:XML id="cmdComponent"/>
 	<comp:ScrollableTextArea id="infoTextArea"

@@ -3,11 +3,97 @@
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*">
+	
+	<mx:Metadata>
+		[Event(name="startItemLoaded",type="flash.events.Event")]
+	</mx:Metadata>
+	<mx:Array id="browserColumns"/>
+	
+	<mx:Script>
+		import clarin.cmdi.componentregistry.services.CommentInfoService;
+		import clarin.cmdi.componentregistry.services.CommentListService;
+		import clarin.cmdi.componentregistry.services.Config;
+		import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
+		import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+		import clarin.cmdi.componentregistry.services.DeleteService;
+		import clarin.cmdi.componentregistry.services.BrowserService;
+		
+		[Bindable]
+		private var commentsMenu:BrowseContextMenu;
+		[Bindable]
+		private var selectedCommentItem:CommentDescription;
+		[Bindable]
+		private var commentsSrv:CommentListService = CommentListService.getInstance(Config.instance.userSpace);
+		[Bindable]
+		private var commentSrv:CommentInfoService = new CommentInfoService();
+		
+		public static const START_ITEM_LOADED:String = "startItemLoaded";
+		private var startupItemLoaded:Boolean = false;
+		private var deleteSrv:DeleteService = DeleteService.instance;
+		private var _itemToScrollToComment:CommentDescription;		
+		private var startupItemId:String = null;
+		
+		public function init():void {
+			commentsMenu = new BrowseContextMenu(true);
+			commentsMenu.viewStack = this.parent as RegistryViewStack;
+			commentsMenu.deleteService = deleteSrv;
+			deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
+		}
+		
+		public function loadStartup():void {
+			startupItemId = Config.instance.startupItem;
+			if (startupItemId) { //only load this once on startup
+				commentsSrv.addEventListener(BrowserService.ITEMS_LOADED, commentsLoaded);
+			}
+			
+			private function commentsLoaded(event:Event):void {
+				var item:CommentDescription = CommentListService.findDescription(startupItemId);
+				loadStartupComment(item);
+				commentsSrv.removeEventListener(BrowserService.ITEMS_LOADED, commentsLoaded);
+			}
+			
+			private function loadStartupComment(item:CommentDescription):void {
+				if (item) {
+					setSelectedCommentDescription(item);
+					startupItemId = null;
+					dispatchEvent(new Event(START_ITEM_LOADED));
+				} else if (startupItemLoaded) {
+					dispatchEvent(new Event(START_ITEM_LOADED));
+				}
+				startupItemLoaded = true;
+			}
+			
+			public function setSelectedCommentDescription(desc:CommentDescription):void {
+				tabnav.selectedIndex = 0;
+				this.selectedCommentItem = desc;
+				commentSrv.load(desc);
+			}
+			
+		public function refresh():void {
+			commentsSrv.load();
+		} 
 
+		
+		private function handleItemDeleted(event:Event):void {
+			refresh();
+		}
+		
+		private function loadCommentInfoPage(event:BrowserSelectionEvent):void {
+			commentSrv.load(event.commentDescription);
+			
+			
+		}
+		
+	</mx:Script>
+	
 	<mx:XML id="cmdComponent"/>
+	<mx:XML id="cmdComment"/>
+	<mx:XML id="nrOfComments"/>
 	<common:ItemDescription id="itemDescription"/>
+	<common:CommentDescription id="commentDescription"/>
+	
 	<mx:String id="headerLabel"/>
-
+	
 	<mx:HBox horizontalAlign="center"
 			 verticalAlign="middle"
 			 width="100%">
@@ -18,12 +104,13 @@
 		<mx:ToggleButtonBar id="toggleBar"
 							dataProvider="{infoViewStack}"/>
 	</mx:HBox>
-
+	
+	
 	<mx:ViewStack id="infoViewStack"
 				  height="100%"
 				  width="100%"
 				  styleName="borderStyles">
-
+		
 		<browser:xmlBrowsePanel id="viewPanel"
 								label="view"
 								cmdComponent="{cmdComponent}"
@@ -31,7 +118,21 @@
 		<browser:xmlPanel id="xmlPanel"
 						  label="xml"
 						  cmdComponent="{cmdComponent}"/>
-
+		
+		<mx:VDividedBox label="Comments({nrOfComments})" 
+						width="100%">
+			<browser:xmlCommentPanel  
+				id="viewAllComments" width="399" height="109"
+				browseMenu="{commentsMenu}"
+				browserColumns="{browserColumns.getCommentColumns()}"
+				browserCommentSelected="{loadCommentInfoPage(event)}"
+				browserDataProvider="{commentsSrv.itemDescriptions}"
+				itemToScrollToComment="{selectedCommentItem}"
+				cmdComment="{cmdComment}"
+				commentDescription="{commentDescription}"
+				/>
+			<!-- id="viewComments" width="100%" -->
+		</mx:VDividedBox>
 	</mx:ViewStack>
-
+	
 </mx:VBox>

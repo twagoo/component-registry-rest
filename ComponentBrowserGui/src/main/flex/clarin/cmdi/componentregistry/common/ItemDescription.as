@@ -69,6 +69,5 @@ package clarin.cmdi.componentregistry.common {
 		public function createComponent(itemDescription:XML, isInUserSpace:Boolean):void {
 			create(itemDescription, Config.instance.componentInfoUrl, false, isInUserSpace);
 		}
-
 	}
 }

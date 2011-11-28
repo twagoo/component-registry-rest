@@ -19,12 +19,15 @@ SET default_with_oids = false;
 -- Name: comments; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE TABLE comments (
-    id SERIAL NOT NULL,
-    profile_description_id integer,
-    component_description_id integer,
-    user_id integer,
-    comments text NOT NULL
+CREATE TABLE comments
+(
+  comment_id integer NOT NULL DEFAULT nextval('comments_id_seq'::regclass),
+  comments text NOT NULL,
+  comment_date timestamp with time zone,
+  profile_description_id character varying,
+  component_description_id character varying,
+  user_id integer
+
 );
 
 
@@ -92,6 +95,13 @@ CREATE TABLE registry_user (
 );
 
 --
+-- Name: comments_id_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace:
+--
+
+ALTER TABLE ONLY comments 
+    ADD CONSTRAINT comments_id_pkey PRIMARY KEY(id);
+
+--
 -- Name: component_description_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -131,6 +141,12 @@ CREATE INDEX fki_comments_fk_user ON comments USING btree (user_id);
 
 CREATE INDEX fki_comments_profile ON comments USING btree (profile_description_id);
 
+--
+-- Name: fki_comments_component; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX fki_comments_component ON comments USING btree (component_description_id);
+
 
 --
 -- Name: fki_component_content; Type: INDEX; Schema: public; Owner: -; Tablespace: 
@@ -165,7 +181,7 @@ CREATE INDEX fki_profile_user ON profile_description USING btree (user_id);
 --
 
 ALTER TABLE ONLY comments
-    ADD CONSTRAINT comments_profile FOREIGN KEY (profile_description_id) REFERENCES profile_description(id);
+    ADD CONSTRAINT comments_profile FOREIGN KEY (profile_description_id) REFERENCES profile_description(profile_id);
 
 
 --
@@ -174,6 +190,14 @@ ALTER TABLE ONLY comments
 
 ALTER TABLE ONLY comments
     ADD CONSTRAINT comments_user FOREIGN KEY (user_id) REFERENCES registry_user(id);
+
+
+--
+-- Name: comments_component; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY comments
+    ADD CONSTRAINT comments_component FOREIGN KEY (component_description_id) REFERENCES component_description(component_id);
 
 
 --

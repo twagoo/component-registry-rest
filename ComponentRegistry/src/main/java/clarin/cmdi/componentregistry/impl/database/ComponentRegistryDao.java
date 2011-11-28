@@ -11,12 +11,14 @@ import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
  */
 public abstract class ComponentRegistryDao<T> extends SimpleJdbcDaoSupport {
 
-    public final static String DATABASE_NAME = "component_registry";
+
+    public final static String TABLE_COMMENTS = "comments";
     public final static String TABLE_COMPONENT_DESCRIPTION = "component_description";
     public final static String TABLE_PROFILE_DESCRIPTION = "profile_description";
     public final static String TABLE_XML_CONTENT = "xml_content";
     public final static String TABLE_REGISTRY_USER = "registry_user";
     public final static String COLUMN_ID = "id";
+    
 
     public ComponentRegistryDao() {
     }

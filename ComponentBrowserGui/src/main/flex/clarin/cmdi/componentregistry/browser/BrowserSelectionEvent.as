@@ -1,13 +1,14 @@
 package clarin.cmdi.componentregistry.browser {
+	import clarin.cmdi.componentregistry.common.CommentDescription;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-
+	
 	import flash.events.Event;
 
 	public class BrowserSelectionEvent extends Event {
 
 		public static const BROWSER_ITEM_SELECTED:String = "browserItemSelected";
 		private var _itemDescription:ItemDescription;
-
+		private var _commentDescription:CommentDescription;
 		public function BrowserSelectionEvent(itemDescription:ItemDescription, bubbles:Boolean = false, cancelable:Boolean = false) {
 			super(BROWSER_ITEM_SELECTED, bubbles, cancelable);
 			_itemDescription = itemDescription;
@@ -15,6 +16,10 @@ package clarin.cmdi.componentregistry.browser {
 
 		public function get itemDescription():ItemDescription {
 			return _itemDescription;
+		}
+		
+		public function get commentDescription():CommentDescription {
+			return _commentDescription;
 		}
 
 		override public function clone():Event {

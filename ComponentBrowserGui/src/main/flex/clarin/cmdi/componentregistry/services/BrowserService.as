@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.CommentDescription;
 	
 	import com.adobe.net.URI;
 	
@@ -85,6 +86,15 @@ package clarin.cmdi.componentregistry.services {
 		 */
 		public function lookUpDescription(componentId:String):ItemDescription {
 			for each (var item:ItemDescription in unFilteredItemDescriptions) {
+				if (item.id == componentId) {
+					return item;
+				}
+			}
+			return null;
+		}
+		
+		public function lookUpComDescription(componentId:String):CommentDescription {
+			for each (var item:CommentDescription in unFilteredItemDescriptions) {
 				if (item.id == componentId) {
 					return item;
 				}

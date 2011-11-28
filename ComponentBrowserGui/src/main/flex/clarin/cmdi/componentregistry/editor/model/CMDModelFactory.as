@@ -1,8 +1,10 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
+	import clarin.cmdi.componentregistry.common.CommentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.CommentDescription;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 
@@ -21,6 +23,35 @@ package clarin.cmdi.componentregistry.editor.model {
 			for each (var component:XML in components) {
 				var cmdComp:CMDComponent = createComponent(component);
 				result.cmdComponents.addItem(cmdComp);
+			}
+			return result;
+		}
+		
+		public static function createCommentModel(xml:XML, description:CommentDescription):CMDSpec {
+			var result:CMDSpec = new CMDSpec(xml.@isProfile == "true");
+			result.headerName = xml.Header.Name;
+			result.headerId = xml.Header.ID;
+			result.headerDescription = xml.Header.Description;
+			var comments:XMLList = xml.elements(CommentMD.CMD_COMMENT);
+			for each (var comment:XML in comments) {
+				var cmdComp:CMDComment = createComment(comment);
+				result.cmdComponents.addItem(cmdComp);
+			}
+			return result;
+		}
+		
+		private static function createComment(xml:XML):CMDComment {
+			var result:CMDComment = new CMDComment();
+			result.componentId = xml.@ComponentId;
+			result.profileId = xml.@ProfileId;
+			result.creatorName = xml.@creatorName;
+			result.filename = xml.@filename;
+			result.registerDate= xml.@registerDate;
+			result.commentId= xml.@commentId;
+			var comments:XMLList = xml.comments();
+			for each (var comment:XML in comments) {
+				var cmdComment:CMDComment = createComment(comment);
+				result.cmdComments.addItem(cmdComment);
 			}
 			return result;
 		}
