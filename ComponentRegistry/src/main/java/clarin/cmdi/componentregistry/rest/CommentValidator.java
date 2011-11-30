@@ -1,27 +1,34 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.model.Comment;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-
-public class DescriptionValidator implements Validator {
-
-    private final AbstractDescription desc;
+/**
+ *
+ * @author jeafer
+ */
+class CommentValidator implements Validator{
+    private final Comment com;
     private List<String> errorMessages = new ArrayList<String>();
 
-    public DescriptionValidator(AbstractDescription desc) {
-        this.desc = desc;
+    public CommentValidator(Comment com) {
+        this.com = com;
     }
     
+    @Override
     public List<String> getErrorMessages() {
         return errorMessages;
     }
 
+    @Override
     public boolean validate() {
-        if (!isOk(desc.getCreatorName(), desc.getDescription(), desc.getName())) {
+        if (!isOk(com.getUserId(), com.getComment(), com.getCommentDate())) {
             errorMessages.add("Fields are not filled in correctly");
         }
         return errorMessages.isEmpty();
@@ -34,5 +41,5 @@ public class DescriptionValidator implements Validator {
         }
         return isOk;
     }
-
+    
 }

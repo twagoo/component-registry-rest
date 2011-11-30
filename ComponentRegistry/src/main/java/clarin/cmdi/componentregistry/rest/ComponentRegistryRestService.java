@@ -40,7 +40,7 @@ import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.CommentMapping.Comment;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
@@ -236,9 +236,9 @@ public class ComponentRegistryRestService {
     }
 
     @GET
-    @Path("/profile/{profileId}/comments")
+    @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Comment> getRegisteredCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    public List<Comment> getCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
         long start = System.currentTimeMillis();
         List<Comment> comments = getRegistry(userspace).getCommentsInProfile(profileId);
         LOG.info("Releasing " + comments.size() + " registered comments in Profile into the world (" + (System.currentTimeMillis() - start)
@@ -247,9 +247,9 @@ public class ComponentRegistryRestService {
     }
 
     @GET
-    @Path("/component/{componentId}/comments")
+    @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Comment> getRegisteredCommentsFromComponent(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    public List<Comment> getCommentsFromComponent(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
         long start = System.currentTimeMillis();
         List<Comment> comments = getRegistry(userspace).getCommentsInComponent(componentId);
         LOG.info("Releasing " + comments.size() + " registered comments in Component into the world (" + (System.currentTimeMillis() - start)
@@ -258,7 +258,7 @@ public class ComponentRegistryRestService {
     }
 
     @GET
-    @Path("/profiles/{profileId}/comments/{commentsId}")
+    @Path("/profiles/{profileId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Comment getSpecifiedCommentFromProfile(@PathParam("commentId") String commentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
         long start = System.currentTimeMillis();
@@ -267,9 +267,9 @@ public class ComponentRegistryRestService {
     }
 
     @GET
-    @Path("/component/{componentId}/comments/{commentsId}")
+    @Path("/components/{componentId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Comment getRegisteredCommentFromComponent(@PathParam("commentId") String commentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    public Comment getSpecifiedCommentFromComponent(@PathParam("commentId") String commentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
         LOG.info(" Comments of component with id" + commentId + " are requested.");
         return getRegistry(userspace).getSpecifiedCommentInComponent(commentId);
     }
@@ -293,27 +293,27 @@ public class ComponentRegistryRestService {
         }
     }
 
-//    @POST
-//    @Path("/profiles/{profileId}/comments/{commentId}")
-//    public Response manipulateRegisteredCommentFromProfile(@PathParam("profileId") String commentId, @FormParam("method") String method,
-//            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-//        if ("delete".equalsIgnoreCase(method)) {
-//            return deleteRegisteredProfile(commentId, userspace);
-//        } else {
-//            return Response.ok().build();
-//        }
-//    }
-//
-//    @POST
-//    @Path("/components/{componentId}/comments/{commentId}")
-//    public Response manipulateRegisteredCommentFromComponent(@PathParam("profileId") String commentId, @FormParam("method") String method,
-//            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-//        if ("delete".equalsIgnoreCase(method)) {
-//            return deleteRegisteredProfile(commentId, userspace);
-//        } else {
-//            return Response.ok().build();
-//        }
-//    }
+    @POST
+    @Path("/profiles/{profileId}/comments/{commentId}")
+    public Response manipulateCommentFromProfile(@PathParam("profileId") String commentId, @FormParam("method") String method,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        if ("delete".equalsIgnoreCase(method)) {
+            return deleteCommentFromProfile(commentId, userspace);
+        } else {
+            return Response.ok().build();
+        }
+    }
+
+    @POST
+    @Path("/components/{componentId}/comments/{commentId}")
+    public Response manipulateCommentFromComponent(@PathParam("profileId") String commentId, @FormParam("method") String method,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        if ("delete".equalsIgnoreCase(method)) {
+            return deleteCommentFromComponent(commentId, userspace);
+        } else {
+            return Response.ok().build();
+        }
+    }
 
     @POST
     @Path("/profiles/{profileId}/publish")
@@ -485,55 +485,55 @@ public class ComponentRegistryRestService {
         return Response.ok().build();
     }
 
-//    @DELETE
-//    @Path("/profiles/{profileId}/comments/{commentId}")
-//    public Response deleteRegisteredCommentFromProfile(@PathParam("commentId") String commentId,
-//            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-//        Principal principal = checkAndGetUserPrincipal();
-//        LOG.info("Comment with id: " + commentId + " set for deletion.");
-//        try {
-//            getRegistry(userspace).deleteMDComment(commentId, principal);
-//        } catch (DeleteFailedException e) {
-//            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
-//            return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
-//        } catch (ComponentRegistryException e) {
-//            LOG.info("Could not retrieve component", e);
-//            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-//        } catch (IOException e) {
-//            LOG.info("Comment with id: " + commentId + " deletion failed.", e);
-//            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-//        } catch (UserUnauthorizedException e) {
-//            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
-//            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
-//        }
-//        LOG.info("Profile with id: " + commentId + " deleted.");
-//        return Response.ok().build();
-//    }
-//
-//    @DELETE
-//    @Path("/components/{componentId}/comments/{commentId}")
-//    public Response deleteRegisteredCommentFromComponent(@PathParam("commentId") String commentId,
-//            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
-//        Principal principal = checkAndGetUserPrincipal();
-//        LOG.info("Comment with id: " + commentId + " set for deletion.");
-//        try {
-//            getRegistry(userspace).deleteMDComment(commentId, principal);
-//        } catch (DeleteFailedException e) {
-//            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
-//            return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
-//        } catch (ComponentRegistryException e) {
-//            LOG.info("Could not retrieve component", e);
-//            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-//        } catch (IOException e) {
-//            LOG.info("Comment with id: " + commentId + " deletion failed.", e);
-//            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-//        } catch (UserUnauthorizedException e) {
-//            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
-//            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
-//        }
-//        LOG.info("Profile with id: " + commentId + " deleted.");
-//        return Response.ok().build();
-//    }
+    @DELETE
+    @Path("/profiles/{profileId}/comments/{commentId}")
+    public Response deleteCommentFromProfile(@PathParam("commentId") String commentId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        Principal principal = checkAndGetUserPrincipal();
+        LOG.info("Comment with id: " + commentId + " set for deletion.");
+        try {
+            getRegistry(userspace).deleteComment(commentId, principal);
+        } catch (DeleteFailedException e) {
+            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
+            return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
+        } catch (ComponentRegistryException e) {
+            LOG.info("Could not retrieve component", e);
+            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+        } catch (IOException e) {
+            LOG.info("Comment with id: " + commentId + " deletion failed.", e);
+            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserUnauthorizedException e) {
+            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
+            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
+        }
+        LOG.info("Profile with id: " + commentId + " deleted.");
+        return Response.ok().build();
+    }
+
+    @DELETE
+    @Path("/components/{componentId}/comments/{commentId}")
+    public Response deleteCommentFromComponent(@PathParam("commentId") String commentId,
+            @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        Principal principal = checkAndGetUserPrincipal();
+        LOG.info("Comment with id: " + commentId + " set for deletion.");
+        try {
+            getRegistry(userspace).deleteComment(commentId, principal);
+        } catch (DeleteFailedException e) {
+            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
+            return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
+        } catch (ComponentRegistryException e) {
+            LOG.info("Could not retrieve component", e);
+            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+        } catch (IOException e) {
+            LOG.info("Comment with id: " + commentId + " deletion failed.", e);
+            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+        } catch (UserUnauthorizedException e) {
+            LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
+            return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
+        }
+        LOG.info("Profile with id: " + commentId + " deleted.");
+        return Response.ok().build();
+    }
 
     @GET
     @Path("/profiles/{profileId}/{rawType}")
@@ -641,6 +641,22 @@ public class ComponentRegistryRestService {
         return register(input, desc, userCredentials, userspace, new NewAction());
     }
 
+    @POST
+    @Path("/components/{componentId}/comments")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Consumes("multipart/form-data")
+    public Response registerCommentInComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String comment,
+            @FormDataParam("componentId") AbstractDescription componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        Principal principal = checkAndGetUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(principal);
+        Comment com = createNewComment();
+        com.setComponentDescriptionId("componentId");
+        com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
+        com.setComment(comment);
+        LOG.info("Trying to register Comment: " + com);
+        return registerComment(input, com, userCredentials, userspace, componentId, new NewAction());
+    }
+
     @GET
     @Path("/pingSession")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -690,6 +706,41 @@ public class ComponentRegistryRestService {
         }
     }
 
+    private Response registerComment(InputStream input, Comment com, UserCredentials userCredentials, boolean userspace,
+            AbstractDescription descriptionId,
+            RegisterAction action) {
+        try {
+            ComponentRegistry registry = getRegistry(userspace, userCredentials);
+            CommentValidator commentValidator = new CommentValidator(com);
+            ComValidator validator = new ComValidator(input, com, registry, getRegistry(true), descriptionId
+            );
+            RegisterResponse response = new RegisterResponse();
+            response.setIsInUserSpace(userspace);
+            validate(response, validator);
+            if (response.getErrors().isEmpty()) {
+                Comment spec = validator.getCommentSpec();
+                int returnCode = action.executeComment(com, spec, response, registry);
+                if (returnCode == 0) {
+                    response.setRegistered(true);
+                    response.setComment(com);
+                } else {
+                    response.setRegistered(false);
+                    response.addError("Unable to register at this moment. Internal server error.");
+                }
+            } else {
+                LOG.info("Registration failed with validation errors:" + Arrays.toString(response.getErrors().toArray()));
+                response.setRegistered(false);
+            }
+            return Response.ok(response).build();
+        } finally {
+            try {
+                input.close();//either we read the input or there was an exception, we need to close it.
+            } catch (IOException e) {
+                LOG.error("Error when closing inputstream: ", e);
+            }
+        }
+    }
+
     private ComponentDescription createNewComponentDescription() {
         ComponentDescription desc = ComponentDescription.createNewDescription();
         desc.setHref(createXlink(desc.getId()));
@@ -700,6 +751,11 @@ public class ComponentRegistryRestService {
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setHref(createXlink(desc.getId()));
         return desc;
+    }
+
+    private Comment createNewComment() {
+        Comment com = Comment.createANewComment();
+        return com;
     }
 
     private String createXlink(String id) {

@@ -347,7 +347,7 @@ public class ComponentRegistryDbImplTest {
 	description.setDescription("MyDescription");
 	return description;
     }
-
+    
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
 	componentRegistry.setUserId(userId);

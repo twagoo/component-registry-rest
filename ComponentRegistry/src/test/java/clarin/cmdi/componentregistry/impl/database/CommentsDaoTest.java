@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.model.CommentMapping;
-import clarin.cmdi.componentregistry.model.CommentMapping.Comment;
+import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.Comment;
 import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -72,7 +72,14 @@ public class CommentsDaoTest {
     
     @Test
     public void testGetCommentsFromProfile() {
-        
+        List<Comment> descriptions = commentsDao.getCommentsFromProfile(TEST_COMMENT_PROFILE_ID);
+	assertNotNull(descriptions);
+    }
+    
+    @Test
+    public void testGetCommentFromComponent(){
+        List<Comment> descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_COMPONENT_ID);
+	assertNotNull(descriptions);
     }
 
     @Test
@@ -94,9 +101,29 @@ public class CommentsDaoTest {
         testComment.setComment(TEST_COMMENT_NAME);
         testComment.setCommentDate(TEST_COMMENT_DATE);
         testComment.setId(TEST_COMMENT_ID);
+        //testComment.setComponentDescriptionId(TEST_COMMENT_COMPONENT_ID);
+        testComment.setProfileDescriptionId(TEST_COMMENT_PROFILE_ID);
+        testComment.setUserId(TEST_COMMENT_USER_ID);
         return testComment;
     }
+    
+    public void testSetDelete(){
+        Comment testComment = createTestComment();
+        int count = commentsDao.getAllComments().size();
+        
+        commentsDao.insertComment(testComment);
+	assertEquals(count + 1, commentsDao.getAllComments().size());
+
+        commentsDao.deleteComment(testComment, true);
+        assertEquals(count, commentsDao.getAllComments().size());
+        
+        assertNull(commentsDao.getByComment("NOT_EXISTING_COMMENT_NAME"));
+    }
+    
     public final static String TEST_COMMENT_ID = "1";
+    public final static String TEST_COMMENT_PROFILE_ID = "clarin.eu:cr1:p_1297242111880";
+    public final static String TEST_COMMENT_COMPONENT_ID = "clarin.eu:cr1:c_1290431694600";
     public final static String TEST_COMMENT_NAME = "test";
+    public final static String TEST_COMMENT_USER_ID = "8";
     public final static String TEST_COMMENT_DATE = Comment.createNewDate();
 }

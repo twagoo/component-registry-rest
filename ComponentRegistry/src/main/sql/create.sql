@@ -136,16 +136,16 @@ CREATE INDEX fki_comments_fk_user ON comments USING btree (user_id);
 
 
 --
--- Name: fki_comments_profile; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: fki_comments_profile_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE INDEX fki_comments_profile ON comments USING btree (profile_description_id);
+CREATE INDEX fki_comments_profile_id ON comments USING btree (profile_description_id);
 
 --
--- Name: fki_comments_component; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: fki_comments_component_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
-CREATE INDEX fki_comments_component ON comments USING btree (component_description_id);
+CREATE INDEX fki_comments_component_id ON comments USING btree (component_description_id);
 
 
 --
@@ -177,11 +177,11 @@ CREATE INDEX fki_profile_user ON profile_description USING btree (user_id);
 
 
 --
--- Name: comments_profile; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: comments_profile_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY comments
-    ADD CONSTRAINT comments_profile FOREIGN KEY (profile_description_id) REFERENCES profile_description(profile_id);
+    ADD CONSTRAINT comments_profile_id FOREIGN KEY (profile_description_id) REFERENCES profile_description(profile_id);
 
 
 --
@@ -193,11 +193,11 @@ ALTER TABLE ONLY comments
 
 
 --
--- Name: comments_component; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: comments_component_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY comments
-    ADD CONSTRAINT comments_component FOREIGN KEY (component_description_id) REFERENCES component_description(component_id);
+    ADD CONSTRAINT comments_component_id FOREIGN KEY (component_description_id) REFERENCES component_description(component_id);
 
 
 --

@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,7 +29,7 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.CommentMapping.Comment;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
@@ -49,7 +50,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
     private ComponentDescriptionDao componentDescriptionDao;
-    @Autowired    
+    @Autowired
     private UserDao userDao;
     @Autowired
     @Qualifier("componentsCache")
@@ -131,7 +132,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         try {
             return commentsDao.getCommentsFromProfile(profileId);
         } catch (DataAccessException ex) {
-            throw new ComponentRegistryException("Database access error while trying to get comment from profile", ex);
+            throw new ComponentRegistryException("Database access error while trying to get list of comments from profile", ex);
         }
     }
 
@@ -140,7 +141,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         try {
             return commentsDao.getSpecifiedCommentFromProfile(commentId);
         } catch (DataAccessException ex) {
-            throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
+            throw new ComponentRegistryException("Database access error while trying to get comment from profile", ex);
         }
     }
 
@@ -149,7 +150,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         try {
             return commentsDao.getCommentsFromComponent(componentId);
         } catch (DataAccessException ex) {
-            throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
+            throw new ComponentRegistryException("Database access error while trying to get list of comments from component", ex);
         }
     }
 
@@ -161,11 +162,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
         }
     }
-
-//    @Override
-//    public List<Comment> getComments() throws ComponentRegistryException {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
 
     @Override
     public CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException {
@@ -211,29 +207,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throw new ComponentRegistryException("Database access error while trying to get component", ex);
         }
     }
-
-////    @Override
-////    public CMDComponentSpec getMDComment(String id) throws ComponentRegistryException {
-//////        if (inWorkspace(commentsDao, id)) {
-//////            CMDComponentSpec result = commentsCache.get(id);
-//////            if (result == null && !commentsCache.containsKey(id)) {
-//////                result = getUncachedMDComment(id);
-//////                commentsCache.put(id, result);
-//////            }
-//////            return result;
-//////        } else {
-//////            // May exist, but not in this workspace
-////            return null;
-//////       }
-////    }
-//
-////    public CMDComponentSpec getUncachedMDComment(String id) throws ComponentRegistryException {
-////        try {
-////            return getUncachedMDComment(id, commentsDao);
-////        } catch (DataAccessException ex) {
-////            throw new ComponentRegistryException("Database access error while trying to get component", ex);
-//       }
-//  }
 
     @Override
     public int register(AbstractDescription description, CMDComponentSpec spec) {
@@ -382,20 +355,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
     }
-    
-//    public void deleteMDComment(String commentId, Principal principal) throws UserUnauthorizedException, DeleteFailedException, ComponentRegistryException {
-//        Comment desc = getCommentsInComponent(commentId);
-//        if(desc != null) {
-//            try {
-//                checkAuthorisationComment(desc, principal);
-//                checkCommentAge(desc, principal);
-//                commentsDao.setDeleted(desc, true);
-//                invalidateCommentCache(desc);
-//            } catch (DataAccessException ex) {
-//                throw new DeleteFailedException("Database access error while trying to delete profile", ex);
-//            }
-//        }
-//    }
 
     @Override
     public void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws UserUnauthorizedException,
@@ -449,18 +408,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             componentsCache.remove(description.getId());
         }
     }
-    
-//        private void invalidateCommentCache(Comment comment) {
-//            commentsCache.remove(comment.getId());
-//    }
 
     private AbstractDescriptionDao<?> getDaoForDescription(AbstractDescription description) {
         return description.isProfile() ? profileDescriptionDao : componentDescriptionDao;
     }
     
-//    private CommentsDao getDaoForCommentDescription(Comment comment) {
-//        return commentsDao;
-//    }
 
     /**
      * Looks up description on basis of CMD Id. This will also check if such a
@@ -487,21 +439,19 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
     }
 
-    
-//        private Number getIdForCommentDescription(Comment comment) throws IllegalArgumentException {
-//        Number dbId = null;
-//        CommentsDao dao = getDaoForCommentDescription(comment);
-//        try {
-//            dbId = dao.getDbId(comment.getId());
-//        } catch (DataAccessException ex) {
-//            LOG.error("Error getting dbId for comment with id " + comment.getId(), ex);
-//        }
-//        if (dbId == null) {
-//            throw new IllegalArgumentException("Could not get database Id for description");
-//        } else {
-//            return dbId;
-//        }
-//    }
+        private Number getIdForCommentDescription(Comment comment) throws IllegalArgumentException {
+        Number dbId = null;
+        try {
+            dbId = commentsDao.getDbId(Integer.parseInt(comment.getId()));
+        } catch (DataAccessException ex) {
+            LOG.error("Error getting dbId for comment with id " + comment.getId(), ex);
+        }
+        if (dbId == null) {
+            throw new IllegalArgumentException("Could not get database Id for description");
+        } else {
+            return dbId;
+        }
+    }
     
     private String componentSpecToString(CMDComponentSpec spec) throws UnsupportedEncodingException, JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -526,22 +476,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return null;
     }
 
-//    private CMDComponentSpec getUncachedMDComment(String id, CommentsDao dao) {
-//        String xml = dao.getContent(false, id);
-//        if (xml != null) {
-//            try {
-//                InputStream is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-//                return MDMarshaller.unmarshal(CMDComponentSpec.class, is, null);
-//
-//            } catch (JAXBException ex) {
-//                LOG.error(null, ex);
-//            } catch (UnsupportedEncodingException ex) {
-//                LOG.error(null, ex);
-//            }
-//        }
-//        return null;
-//    }
-
     private void checkAuthorisation(AbstractDescription desc, Principal principal) throws UserUnauthorizedException {
         if (!isOwnerOfDescription(desc, principal.getName()) && !configuration.isAdminUser(principal)) {
             throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
@@ -549,27 +483,27 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                     + ").");
         }
     }
-    
-//    private void checkAuthorisationComment(Comment desc, Principal principal)throws UserUnauthorizedException {
-//        if (!isOwnerOfComment(desc, principal.getName()) && !configuration.isAdminUser(principal)) {
-//            throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
-//                    + "' is not the creator (nor an administrator) of the " + (desc.getId()) + "(" + desc
-//                    + ").");
-//        }
-//    }
+
+    private void checkAuthorisationComment(Comment desc, Principal principal) throws UserUnauthorizedException {
+        if (!isOwnerOfComment(desc, principal.getName()) && !configuration.isAdminUser(principal)) {
+            throw new UserUnauthorizedException("Unauthorized operation user '" + principal.getName()
+                    + "' is not the creator (nor an administrator) of the " + (desc.getId()) + "(" + desc
+                    + ").");
+        }
+    }
 
     private boolean isOwnerOfDescription(AbstractDescription desc, String principalName) {
         String owner = getDaoForDescription(desc).getOwnerPrincipalName(getIdForDescription(desc));
         return owner != null // If owner is null, no one can be owner
                 && principalName.equals(owner);
     }
-    
-//        private boolean isOwnerOfComment(Comment desc, String principalName) {
-//        String owner = getDaoForCommentDescription(desc).getOwnerPrincipalName(getIdForCommentDescription(desc));
-//        return owner != null // If owner is null, no one can be owner
-//                && principalName.equals(owner);
-//    }
 
+        private boolean isOwnerOfComment(Comment desc, String principalName) {
+        String owner = commentsDao.getOwnerPrincipalName(getIdForCommentDescription(desc));
+        return owner != null // If owner is null, no one can be owner
+                && principalName.equals(owner);
+    }
+    
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
         if (isPublic() && !configuration.isAdminUser(principal)) {
             try {
@@ -587,24 +521,24 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
     }
-    
-//        private void checkCommentAge(Comment desc, Principal principal) throws DeleteFailedException {
-//        if (isPublic() && !configuration.isAdminUser(principal)) {
-//            try {
-//                Date regDate = Comment.getDate(desc.getCommentDate());
-//                Calendar calendar = Calendar.getInstance();
-//                calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
-//                if (regDate.before(calendar.getTime())) { // More then month old
-//                    throw new DeleteFailedException(
-//                            "The "
-//                            + (desc.getId())
-//                            + " is more then a month old and cannot be deleted anymore.");
-//                }
-//            } catch (ParseException e) {
-//                LOG.error("Cannot parse date of " + desc + " Error:" + e);
-//            }
-//        }
-//    }
+
+    private void checkCommentAge(Comment desc, Principal principal) throws DeleteFailedException {
+        if (isPublic() && !configuration.isAdminUser(principal)) {
+            try {
+                Date regDate = Comment.getDate(desc.getCommentDate());
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
+                if (regDate.before(calendar.getTime())) { // More then month old
+                    throw new DeleteFailedException(
+                            "The "
+                            + (desc.getId())
+                            + " is more then a month old and cannot be deleted anymore.");
+                }
+            } catch (ParseException e) {
+                LOG.error("Cannot parse date of " + desc + " Error:" + e);
+            }
+        }
+    }
 
     private boolean inWorkspace(AbstractDescriptionDao<?> dao, String cmdId) {
         if (isPublic()) {
@@ -621,7 +555,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 //            return dao.isInUserSpace(cmdId, getUserId());
 //        }
 //    }
-
     @Override
     public String getName() {
         if (isPublic()) {
@@ -640,4 +573,20 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public List<ComponentDescription> getDeletedComponentDescriptions() {
         return componentDescriptionDao.getDeletedDescriptions(getUserId());
     }
-}
+
+    @Override
+    public void deleteComment(String commentId, Principal principal) throws IOException, 
+    ComponentRegistryException, UserUnauthorizedException, DeleteFailedException {
+
+            Comment com = commentsDao.getById(commentId);        
+            if (com!= null) {
+            try {
+                    checkAuthorisationComment(com, principal);
+                    checkCommentAge(com, principal);
+                    commentsDao.deleteComment(com, true);
+                } catch (DataAccessException ex) {
+                    throw new DeleteFailedException("Database access error while trying to delete component", ex);
+                }
+            }
+        }
+    }

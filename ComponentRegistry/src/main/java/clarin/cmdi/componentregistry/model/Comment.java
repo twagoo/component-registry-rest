@@ -4,10 +4,16 @@
  */
 package clarin.cmdi.componentregistry.model;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.IdSequence;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 
@@ -15,11 +21,11 @@ import org.apache.commons.lang.time.DateUtils;
  *
  * @author jeafer
  */
-public class CommentMapping {
-
-    @XmlAccessorType(XmlAccessType.FIELD)
-    public static class Comment {
-
+@XmlRootElement(name = "comment")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Comment {
+        @XmlElement(name = "Comment_Type")
+    protected List<Comment> commentType;
         private String comments;
         private String commentDate;
         private String componentDescriptionId;
@@ -27,6 +33,14 @@ public class CommentMapping {
         private String userId;
         private String id;
 
+        
+        public List<Comment> getComments() {
+        if (commentType == null) {
+            commentType = new ArrayList<Comment>();
+        }
+        return this.commentType;
+    }
+        
         public void setComment(String comment) {
             this.comments = comment;
         }
@@ -46,7 +60,6 @@ public class CommentMapping {
         public void setId(String commentId) {
             this.id = commentId;
         }
-
 
         public String getId() {
             return id;
@@ -68,10 +81,9 @@ public class CommentMapping {
             return profileDescriptionId;
         }
 
-        public void setUserID(String userId) {
+        public void setUserId(String userId) {
             this.userId = userId;
         }
-
 
         public String getUserId() {
             return userId;
@@ -80,13 +92,20 @@ public class CommentMapping {
         public static String createNewDate() {
             return createNewDate(new Date().getTime());
         }
-        
-            public static Date getDate(String registrationDate) throws ParseException {
-        return DateUtils.parseDate(registrationDate, new String[] { DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern() });
-    }
+
+        public static Date getDate(String registrationDate) throws ParseException {
+            return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
+        }
 
         public static String createNewDate(long time) {
             return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
         }
+        
+            public static Comment createANewComment() {
+	String id = ComponentRegistry.REGISTRY_ID + "p_" + IdSequence.get();
+	Comment com = new Comment();
+	com.setId(id);
+	com.setCommentDate(createNewDate());
+	return com;
     }
-}
+    }

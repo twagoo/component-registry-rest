@@ -32,6 +32,8 @@ public class RegisterResponse {
 
     @XmlElement
     private AbstractDescription description;
+    @XmlElement
+    private Comment comment;
 
 
     public void setRegistered(boolean registered) {
@@ -56,6 +58,10 @@ public class RegisterResponse {
 
     public void setDescription(AbstractDescription description) {
         this.description = description;
+    }
+    
+    public void setComment(Comment comment) {
+        this.comment = comment;
     }
 
     public AbstractDescription getDescription() {

@@ -7,7 +7,7 @@ import java.util.List;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.CommentMapping.Comment;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -152,6 +152,9 @@ public interface ComponentRegistry {
     
     List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException;
     Comment getSpecifiedCommentInComponent(String commentId) throws ComponentRegistryException;
+
+    public void deleteComment(String commentId, Principal principal)throws IOException,  ComponentRegistryException, UserUnauthorizedException,
+	    DeleteFailedException;;
 
 
 
