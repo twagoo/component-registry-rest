@@ -15,7 +15,7 @@ public class NewAction implements RegisterAction {
 
     @Override
     public int executeComment(Comment com, Comment spec, RegisterResponse response, ComponentRegistry registry) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return registry.registerComment(com, spec);
     }
 
 }

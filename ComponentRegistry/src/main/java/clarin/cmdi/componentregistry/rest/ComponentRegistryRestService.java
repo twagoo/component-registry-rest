@@ -656,6 +656,22 @@ public class ComponentRegistryRestService {
         LOG.info("Trying to register Comment: " + com);
         return registerComment(input, com, userCredentials, userspace, componentId, new NewAction());
     }
+    
+        @POST
+    @Path("/profiles/{profileId}/comments")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Consumes("multipart/form-data")
+    public Response registerCommentInProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String comment,
+            @FormDataParam("profileId") AbstractDescription profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+        Principal principal = checkAndGetUserPrincipal();
+        UserCredentials userCredentials = getUserCredentials(principal);
+        Comment com = createNewComment();
+        com.setComponentDescriptionId("profileId");
+        com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
+        com.setComment(comment);
+        LOG.info("Trying to register Comment: " + com);
+        return registerComment(input, com, userCredentials, userspace, profileId, new NewAction());
+    }
 
     @GET
     @Path("/pingSession")
@@ -716,7 +732,7 @@ public class ComponentRegistryRestService {
             );
             RegisterResponse response = new RegisterResponse();
             response.setIsInUserSpace(userspace);
-            validate(response, validator);
+            validate(response, commentValidator, validator);
             if (response.getErrors().isEmpty()) {
                 Comment spec = validator.getCommentSpec();
                 int returnCode = action.executeComment(com, spec, response, registry);

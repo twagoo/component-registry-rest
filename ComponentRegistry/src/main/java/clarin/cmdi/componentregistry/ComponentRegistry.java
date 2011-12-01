@@ -55,6 +55,8 @@ public interface ComponentRegistry {
      */
     int register(AbstractDescription desc, CMDComponentSpec spec);
 
+    
+    int registerComment(Comment comment, Comment spec);
     /**
      * 
      * @return -1 if component could not be updated

@@ -19,6 +19,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -105,7 +106,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
             header.setDescription(description.getDescription());
         }
     }
-
+       
     protected static boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
         for (CMDComponentType cmdComponent : componentReferences) {
             if (componentId.equals(cmdComponent.getComponentId())) {

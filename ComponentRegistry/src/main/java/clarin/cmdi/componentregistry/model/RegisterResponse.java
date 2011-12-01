@@ -63,6 +63,10 @@ public class RegisterResponse {
     public void setComment(Comment comment) {
         this.comment = comment;
     }
+    
+    public Comment getComment() {
+        return comment;
+    }
 
     public AbstractDescription getDescription() {
         return description;

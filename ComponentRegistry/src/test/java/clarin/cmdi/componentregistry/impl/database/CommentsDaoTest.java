@@ -42,32 +42,32 @@ public class CommentsDaoTest {
 
     @Test
     public void testInsertComment() {
-        Comment testComment = createTestComment();
+        Comment comment = createTestComment();
 
 
 
-        String regDate = Comment.createNewDate();
 
         //testComment.setId(TEST_COMMENT_ID);
-        testComment.setComment("test");
-        //testComment.setUserID("1");
+        
+        //comment.setUserId("1");
         //testComment.setComponentDescriptionId("A component1");
         //testComment.setProfileDescriptionId("A profile1");
-        testComment.setCommentDate(regDate);
 
+        String testComment = comment.getComment();
         assertEquals(0, commentsDao.getAllComments().size());
-        Number newId = commentsDao.insertComment(testComment);
+        Number newId = commentsDao.insertComment(comment, testComment, Integer.parseInt(TEST_COMMENT_USER_ID));
         assertNotNull(newId);
-
+      
         List<Comment> comments = commentsDao.getAllComments();
+        assertNotNull(comments);
         assertEquals(1, comments.size());
 
         assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
        // assertEquals("A component1", comments.get(0).getComponentDescriptionId());
-        //assertEquals("A profile1", comments.get(0).getProfileDescriptionId());
-        assertEquals(regDate, comments.get(0).getCommentDate());
-       // assertEquals("1", comments.get(0).getUserId());
-       // assertEquals(TEST_COMMENT_ID, comments.get(0).getId());
+        assertEquals(TEST_COMMENT_PROFILE_ID, comments.get(0).getProfileDescriptionId());
+        assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
+        assertEquals(TEST_COMMENT_USER_ID, comments.get(0).getUserId());
+        //assertEquals(TEST_COMMENT_ID, comments.get(0).getId());
     }
     
     @Test
@@ -89,8 +89,9 @@ public class CommentsDaoTest {
 
     @Test
     public void testGetComment() {
-        Comment testComment = createTestComment();
-        commentsDao.insertComment(testComment);
+        Comment comment = createTestComment();
+        String testComment = comment.getComment();
+        commentsDao.insertComment(comment, testComment, 8);
 
         assertNotNull(commentsDao.getByComment(TEST_COMMENT_NAME));
         assertNull(commentsDao.getByComment("NOT_EXITING_COMMENT_NAME"));
@@ -108,13 +109,14 @@ public class CommentsDaoTest {
     }
     
     public void testSetDelete(){
-        Comment testComment = createTestComment();
+        Comment comment = createTestComment();
+        String testComment = comment.getComment();
         int count = commentsDao.getAllComments().size();
         
-        commentsDao.insertComment(testComment);
+        commentsDao.insertComment(comment, testComment, 8);
 	assertEquals(count + 1, commentsDao.getAllComments().size());
 
-        commentsDao.deleteComment(testComment, true);
+        commentsDao.deleteComment(comment, true);
         assertEquals(count, commentsDao.getAllComments().size());
         
         assertNull(commentsDao.getByComment("NOT_EXISTING_COMMENT_NAME"));

@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,34 +97,52 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      * @return Principal name of description's owner, if any. Otherwise, null.
      */
     public String getOwnerPrincipalName(Number id) {
-	StringBuilder select = new StringBuilder("SELECT principal_name FROM " + TABLE_REGISTRY_USER);
-	select.append(" JOIN ").append(getTableName());
-	select.append(" ON user_id = " + TABLE_REGISTRY_USER + ".id ");
-	select.append(" WHERE ").append(getTableName()).append(".id = ?");
-	List<String> owner = getSimpleJdbcTemplate().query(select.toString(), new ParameterizedSingleColumnRowMapper<String>(), id);
-	if (owner.isEmpty()) {
-	    return null;
-	} else {
-	    return owner.get(0);
-	}
+        StringBuilder select = new StringBuilder("SELECT principal_name FROM " + TABLE_REGISTRY_USER);
+        select.append(" JOIN ").append(getTableName());
+        select.append(" ON user_id = " + TABLE_REGISTRY_USER + ".id ");
+        select.append(" WHERE ").append(getTableName()).append(".id = ?");
+        List<String> owner = getSimpleJdbcTemplate().query(select.toString(), new ParameterizedSingleColumnRowMapper<String>(), id);
+        if (owner.isEmpty()) {
+            return null;
+        } else {
+            return owner.get(0);
+        }
     }
+
     /**
      *
      * @param comment
      * @return Record id of the inserted comment
      * @throws DataAccessException
      */
-    public Number insertComment(Comment comment) throws DataAccessException {
-        SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_COMMENTS).usingGeneratedKeyColumns(
-                COLUMN_ID);
+    public Number insertComment(Comment comment, String content, Number userId) throws DataAccessException {
+        TransactionStatus transaction = getTransaction();
+        try {
+            SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_COMMENTS).usingGeneratedKeyColumns(
+                    COLUMN_ID);
+            //Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
 
-        Map<String, Object> params = new HashMap<String, Object>();
+            SimpleJdbcInsert insertComment = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(COLUMN_ID);
+            Map<String, Object> params = new HashMap<String, Object>();
+            putInsertComment(params, comment, content, userId);
+
+            Number id = insertComment.executeAndReturnKey(params);
+            txManager.commit(transaction);
+            return id;
+        } catch (DataAccessException ex) {
+            txManager.rollback(transaction);
+            throw ex;
+        }
+    }
+
+    protected void putInsertComment(Map<String, Object> params, Comment comment, String contentId, Number userId) throws DataAccessException {
+        // SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_COMMENTS).usingGeneratedKeyColumns(
+        //         COLUMN_ID);
         params.put("comments", comment.getComment());
         params.put("comment_date", extractTimestamp(comment));
         params.put("component_description_id", comment.getComponentDescriptionId());
         params.put("profile_description_id", comment.getProfileDescriptionId());
         params.put("user_id", comment.getUserId());
-        return insert.executeAndReturnKey(params);
     }
 
     @Override
@@ -180,6 +199,33 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         query.append(" WHERE ").append(getDbId(cmdId)).append(" = ?");
         return getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId);
     }
+//    public Comment getDbId(Number cmId) {
+//        return getFirstOrNull(getSelectStatement("WHERE id=?"), cmId);
+//    }
+//
+//    private StringBuilder getSelectStatement(String... where) throws DataAccessException {
+//        StringBuilder select = new StringBuilder("SELECT ").append(getCommentColumnList());
+//        select.append(" FROM ").append(getTableName());
+//        if (where.length > 0) {
+//            select.append(" ");
+//            for (String str : where) {
+//                select.append(" ").append(str);
+//            }
+//        }
+//        return select;
+//    }
+//
+//    protected StringBuilder getCommentColumnList() {
+//
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(getOrderByColumn());
+//        sb.append(",comment,comment_date,user_id,");
+//        return sb;
+//    }
+//
+//    private String getOrderByColumn() {
+//        return "name";
+//    }
 
     private Timestamp extractTimestamp(Comment comment) {
         if (comment.getCommentDate() != null) {

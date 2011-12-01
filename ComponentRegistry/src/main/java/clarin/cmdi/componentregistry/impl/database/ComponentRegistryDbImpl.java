@@ -229,6 +229,26 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             return -3;
         }
     }
+    
+    @Override
+    public int registerComment(Comment comment, Comment spec){
+        try {
+            String xml = commmentSpecToString(spec);
+            // Convert principal name to user record id
+            Number uid = convertUserIdInComment(comment);
+            commentsDao.insertComment(comment, xml, uid);
+            return 0;
+        } catch (DataAccessException ex) {
+            LOG.error("Database error while registering component", ex);
+            return -1;
+        } catch (JAXBException ex) {
+            LOG.error("Error while registering component", ex);
+            return -2;
+        } catch (UnsupportedEncodingException ex) {
+            LOG.error("Error while registering component", ex);
+            return -3;
+        }
+    }
 
     /**
      * Calling service sets user id to principle. Our task is to convert this to
@@ -252,6 +272,22 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
         if (uid != null) {
             description.setUserId(uid.toString());
+        }
+        return uid;
+    }
+    
+        private Number convertUserIdInComment(Comment comment) throws DataAccessException {
+        Number uid = null;
+        if (comment.getUserId() != null) {
+            User user = userDao.getByPrincipalName(comment.getUserId());
+            if (user != null) {
+                uid = user.getId();
+            }
+        } else {
+            uid = userId;
+        }
+        if (uid != null) {
+            comment.setUserId(uid.toString());
         }
         return uid;
     }
@@ -459,6 +495,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         String xml = os.toString("UTF-8");
         return xml;
     }
+    
+        private String commmentSpecToString(Comment spec) throws UnsupportedEncodingException, JAXBException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        MDMarshaller.marshal(spec, os);
+        String xml = os.toString("UTF-8");
+        return xml;
+    }
 
     private CMDComponentSpec getUncachedMDComponent(String id, AbstractDescriptionDao dao) {
         String xml = dao.getContent(false, id);
@@ -522,24 +565,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
     }
 
-    private void checkCommentAge(Comment desc, Principal principal) throws DeleteFailedException {
-        if (isPublic() && !configuration.isAdminUser(principal)) {
-            try {
-                Date regDate = Comment.getDate(desc.getCommentDate());
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
-                if (regDate.before(calendar.getTime())) { // More then month old
-                    throw new DeleteFailedException(
-                            "The "
-                            + (desc.getId())
-                            + " is more then a month old and cannot be deleted anymore.");
-                }
-            } catch (ParseException e) {
-                LOG.error("Cannot parse date of " + desc + " Error:" + e);
-            }
-        }
-    }
-
     private boolean inWorkspace(AbstractDescriptionDao<?> dao, String cmdId) {
         if (isPublic()) {
             return dao.isPublic(cmdId);
@@ -548,13 +573,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
     }
 
-//    private boolean inWorkspace(CommentsDao dao, String cmdId) {
-//        if (isPublic()) {
-//            return dao.isPublic(cmdId);
-//        } else {
-//            return dao.isInUserSpace(cmdId, getUserId());
-//        }
-//    }
     @Override
     public String getName() {
         if (isPublic()) {
@@ -582,7 +600,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             if (com!= null) {
             try {
                     checkAuthorisationComment(com, principal);
-                    checkCommentAge(com, principal);
                     commentsDao.deleteComment(com, true);
                 } catch (DataAccessException ex) {
                     throw new DeleteFailedException("Database access error while trying to delete component", ex);

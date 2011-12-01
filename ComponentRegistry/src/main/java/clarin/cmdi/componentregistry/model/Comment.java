@@ -102,9 +102,10 @@ public class Comment {
         }
         
             public static Comment createANewComment() {
-	String id = ComponentRegistry.REGISTRY_ID + "p_" + IdSequence.get();
+	String descriptionId = ComponentRegistry.REGISTRY_ID+ "p_" + IdSequence.get();
 	Comment com = new Comment();
-	com.setId(id);
+        com.setComment("Actual");
+        com.setProfileDescriptionId(descriptionId);        
 	com.setCommentDate(createNewDate());
 	return com;
     }
