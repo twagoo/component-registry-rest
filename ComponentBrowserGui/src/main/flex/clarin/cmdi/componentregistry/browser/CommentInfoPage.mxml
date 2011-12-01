@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:common="clarin.cmdi.componentregistry.common.*"
+		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
+		 width="100%"
+		 backgroundColor="#DDE3EF">
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
+			
+			[Bindable]
+			private var commentsMenu:BrowseContextMenu;
+		]]>
+	</mx:Script>
+
+	
+	<common:Comment id="comment"/>		
+	<browser:infoPage id="infoPanel"
+					 cmdComment="{comment.commentSource}"
+					  commentDescription ="{comment.description}"
+					  headerLabel="{comment.description.id}"
+					  nrOfComments="{comment.nrOfComments}"
+					  width="100%"
+					  height="100%"
+					  visible="{comment != null}"
+					  contextMenu="{commentsMenu.cm}"/>	
+</mx:VBox>
