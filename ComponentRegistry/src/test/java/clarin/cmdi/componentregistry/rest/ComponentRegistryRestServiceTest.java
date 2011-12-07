@@ -75,9 +75,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegistryTestHelper.addProfile(getTestRegistry(), "profile1");
         RegistryTestHelper.addComponent(getTestRegistry(), "component2");
         RegistryTestHelper.addComponent(getTestRegistry(), "component1");
-        RegistryTestHelper.addComment(getTestRegistry(), "comment2");
-        RegistryTestHelper.addComment(getTestRegistry(), "comment1");
-        
+        RegistryTestHelper.addComment(getTestRegistry(), "comment2", "profile1", "JUnit@test.com");
+        RegistryTestHelper.addComment(getTestRegistry(), "comment1", "profile1", "JUnit@test.com");
+        RegistryTestHelper.addComment(getTestRegistry(), "comment3", "component1", "JUnit@test.com");
+        RegistryTestHelper.addComment(getTestRegistry(), "comment4", "component1", "JUnit@test.com");
+
     }
 
     ;
@@ -142,16 +144,99 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testGetRegisteredCommentsInProfile() throws Exception {
         fillUp();
-        RegistryTestHelper.addComment(getTestRegistry(), "COMMENT1");
-        List<Comment> response = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments").accept(MediaType.APPLICATION_XML).
+        RegistryTestHelper.addComment(getTestRegistry(), "COMMENT1", "profile1", "JUnit@test.com");
+        List<Comment> response = getResource().path("/registry/profiles/profile1/comments/").accept(MediaType.APPLICATION_XML).
                 get(COMMENT_LIST_GENERICTYPE);
-        assertEquals(0, response.size());
-        response = getResource().path("/registry/components/clarin.eu:cr1:profile1/comments").accept(MediaType.APPLICATION_JSON).get(
+        assertEquals(3, response.size());
+        response = getResource().path("/registry/profiles/profile1/comments").accept(MediaType.APPLICATION_JSON).get(
                 COMMENT_LIST_GENERICTYPE);
         assertEquals(3, response.size());
-        assertEquals("comment1", response.get(0).getComment());
-        assertEquals("comment2", response.get(1).getComment());
+        assertEquals("comment2", response.get(0).getComment());
+        assertEquals("comment1", response.get(1).getComment());
         assertEquals("COMMENT1", response.get(2).getComment());
+    }
+
+    @Test
+    public void testGetRegisteredCommentsInComponent() throws Exception {
+        fillUp();
+        RegistryTestHelper.addComment(getTestRegistry(), "COMMENT2", "component1", "JUnit@test.com");
+        List<Comment> response = getResource().path("/registry/components/component1/comments/").accept(MediaType.APPLICATION_XML).
+                get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+        response = getResource().path("/registry/components/component1/comments").accept(MediaType.APPLICATION_JSON).get(
+                COMMENT_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+        assertEquals("comment3", response.get(0).getComment());
+        assertEquals("comment4", response.get(1).getComment());
+        assertEquals("COMMENT2", response.get(2).getComment());
+    }
+
+    @Test
+    public void testGetSpecifiedCommentInComponent() throws Exception {
+        fillUp();
+        Comment comment = getResource().path("/registry/components/component1/comments/2").accept(MediaType.APPLICATION_JSON).get(Comment.class);
+        assertNotNull(comment);
+        assertEquals("comment3", comment.getComment());
+        assertEquals("2", comment.getId());
+        comment = getResource().path("/registry/components/component1/comments/3").accept(MediaType.APPLICATION_JSON).get(Comment.class);
+        assertNotNull(comment);
+        assertEquals("comment4", comment.getComment());
+        assertEquals("3", comment.getId());
+        assertEquals("component1", comment.getComponentDescriptionId());
+    }
+
+    @Test
+    public void testGetSpecifiedCommentInProfile() throws Exception {
+        fillUp();
+        Comment comment = getResource().path("/registry/profiles/profile1/comments/0").accept(MediaType.APPLICATION_JSON).get(Comment.class);
+        assertNotNull(comment);
+        assertEquals("comment2", comment.getComment());
+        assertEquals("0", comment.getId());
+        comment = getResource().path("/registry/profiles/profile1/comments/1").accept(MediaType.APPLICATION_JSON).get(Comment.class);
+        assertNotNull(comment);
+        assertEquals("comment1", comment.getComment());
+        assertEquals("1", comment.getId());
+        assertEquals("profile1", comment.getProfileDescriptionId());
+    }
+    
+    @Test
+    public void testDeleteCommentFromComponent() throws Exception {
+        fillUp();
+        List<Comment> comments = getResource().path("/registry/components/component1/comments").get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(2, comments.size());
+        Comment aComment = getResource().path("/registry/components/component1/comments/2").get(Comment.class);
+        assertNotNull(aComment);
+        ClientResponse response = getAuthenticatedResource("/registry/components/component1/comments/2").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        
+        comments = getResource().path("/registry/components/component1/comments/").get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(1, comments.size());
+        
+        response = getAuthenticatedResource("/registry/components/component1/comments/3").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        
+        comments = getResource().path("/registry/components/component1/comments").get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(0, comments.size());
+    }
+    
+        @Test
+    public void testDeleteCommentFromProfile() throws Exception {
+        fillUp();
+        List<Comment> comments = getResource().path("/registry/profiles/profile1/comments").get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(2, comments.size());
+        Comment aComment = getResource().path("/registry/profiles/profile1/comments/0").get(Comment.class);
+        assertNotNull(aComment);
+        ClientResponse response = getAuthenticatedResource("/registry/profiles/profile1/comments/0").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        
+        comments = getResource().path("/registry/profiles/profile1/comments/").get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(1, comments.size());
+        
+        response = getAuthenticatedResource("/registry/profiles/profile1/comments/1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        
+        comments = getResource().path("/registry/profiles/profile1/comments").get(COMMENT_LIST_GENERICTYPE);
+        assertEquals(0, comments.size());
     }
 
     @Test
@@ -768,15 +853,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUp();
         RegisterResponse response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1/comments").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
+        assertTrue(response.isRegistered());
         assertFalse(response.isInUserSpace());
-        Comment comment = (Comment) response.getComment();
+        Comment comment = response.getComment();
         assertNotNull(comment);
-        assertEquals("CommentTest1", comment.getComment());
+        assertEquals("Actual", comment.getComment());
         assertEquals(expectedUserId("JUnit@test.com"), comment.getUserId());
-        assertTrue(comment.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
         assertNotNull(comment.getCommentDate());
-        String url = getResource().getUriBuilder().build().toString();
-        assertEquals(url + "registry/profiles/{clarin.eu:cr1:p_1297242111880}/comments/" + comment.getId(), 1);
     }
 
     @Test

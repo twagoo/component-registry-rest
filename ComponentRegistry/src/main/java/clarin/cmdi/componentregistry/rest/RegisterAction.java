@@ -10,6 +10,6 @@ public interface RegisterAction {
 
     int execute(AbstractDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry);
 
-    int executeComment(Comment com, Comment spec, RegisterResponse response, ComponentRegistry registry);
+    int executeComment(Comment com, RegisterResponse response, ComponentRegistry registry, String userId);
 
 }

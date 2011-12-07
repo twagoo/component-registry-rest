@@ -14,9 +14,12 @@ import javax.xml.bind.JAXBException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.impl.database.UserDao;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.UserMapping.User;
+import java.security.Principal;
 
 /**
  * Static helper methods to be used in tests
@@ -180,49 +183,57 @@ public final class RegistryTestHelper {
         return xml;
     }
 
-    public static Comment addComment(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
-        return addComment(testRegistry, id, RegistryTestHelper.getCommentTestContent());
+    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException {
+        return addComment(testRegistry, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
 
-//    public static Comment addComment(ComponentRegistry testRegistry, String id, String content) throws ParseException,
-//            JAXBException {
-//        return addComment(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
-//    }
-
-    private static Comment addComment(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
+    private static Comment addComment(ComponentRegistry testRegistry, InputStream content, String principal) throws ParseException,
             JAXBException {
-        Comment com = Comment.createANewComment();
-        com.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
-        com.setId(id);
-        com.setComment("Test Comment");
         Comment spec = MDMarshaller.unmarshal(Comment.class, content, null);
-        testRegistry.registerComment(com, spec);
-        return com;
+        testRegistry.registerComment(spec, principal);
+        return spec;
     }
 
-    public static String getCommentTestContentString(String commentName) {
+    public static String getCommentTestContentString(String commentName, String profileId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
-        comContent += "    <comments>"+ commentName +"</comments>\n";
-        comContent += "    <commentDate>myDate</commentDate>\n";
-        comContent += "    <profileDescriptionId>profile1</profileDescriptionId>\n";
-        comContent += "    <userId>8</userId>\n";
+        comContent += "    <comments>" + commentName + "</comments>\n";
+        comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
+        comContent += "    <profileDescriptionId>" + profileId + "</profileDescriptionId>\n";
+        comContent += "    <userId>0</userId>\n";
         comContent += "    <id>1</id>\n";
         comContent += "</comment>\n";
         return comContent;
     }
 
-    public static InputStream getTestCommentContent(String content) {
-        return new ByteArrayInputStream(getCommentTestContentString(content).getBytes());
+    public static String getCommentTestContentStringForComponent(String commentName, String componentId) {
+        String comContent = "";
+        comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
+        comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+        comContent += "    <comments>" + commentName + "</comments>\n";
+        comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
+        comContent += "     <componentDescriptionId>" + componentId + "</componentDescriptionId>";
+        comContent += "    <userId>0</userId>\n";
+        comContent += "    <id>1</id>\n";
+        comContent += "</comment>\n";
+        return comContent;
     }
 
-    public static String getCommentTestContent(String commentName) {
-        return getCommentTestContentString("Actual");
+    public static InputStream getTestCommentContent(String content, String descriptionId) {
+        if (descriptionId.contains("profile")) {
+            return new ByteArrayInputStream(getCommentTestContentString(content, descriptionId).getBytes());
+        } else {
+            return new ByteArrayInputStream(getCommentTestContentStringForComponent(content, descriptionId).getBytes());
+        }
+    }
+
+    public static String getCommentTestContent(String commentId, String descriptionId) {
+        return getCommentTestContentString(commentId, descriptionId);
     }
 
     public static InputStream getCommentTestContent() {
-        return getTestCommentContent("Actual");
+        return getTestCommentContent("Actual", "profile1");
     }
 
     /**

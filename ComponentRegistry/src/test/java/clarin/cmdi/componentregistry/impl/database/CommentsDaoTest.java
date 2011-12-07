@@ -1,7 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.Comment;
-import clarin.cmdi.componentregistry.model.Comment;
 import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -17,7 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  *
- * @author jeafer
+ * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext.xml"})
@@ -43,15 +42,6 @@ public class CommentsDaoTest {
     @Test
     public void testInsertComment() {
         Comment comment = createTestComment();
-
-
-
-
-        //testComment.setId(TEST_COMMENT_ID);
-        
-        //comment.setUserId("1");
-        //testComment.setComponentDescriptionId("A component1");
-        //testComment.setProfileDescriptionId("A profile1");
 
         String testComment = comment.getComment();
         assertEquals(0, commentsDao.getAllComments().size());
@@ -116,7 +106,7 @@ public class CommentsDaoTest {
         commentsDao.insertComment(comment, testComment, 8);
 	assertEquals(count + 1, commentsDao.getAllComments().size());
 
-        commentsDao.deleteComment(comment, true);
+        commentsDao.deleteComment(comment);
         assertEquals(count, commentsDao.getAllComments().size());
         
         assertNull(commentsDao.getByComment("NOT_EXISTING_COMMENT_NAME"));

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.Comment;
@@ -11,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +23,7 @@ import org.springframework.transaction.TransactionStatus;
 
 /**
  *
- * @author jeafer
+ * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public class CommentsDao extends ComponentRegistryDao<Comment> {
 
@@ -44,12 +39,21 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         return TABLE_COMMENTS;
     }
 
+    protected String getCMDIdColumn() {
+        return COLUMN_ID;
+    }
+
+    /**
+     * Get the list of all the comments available in the database
+     * The distinction between profile or component is not treated in this method
+     * @return list of Comments 
+     */
     public List<Comment> getAllComments() throws DataAccessException {
         return getList(SELECT_BASE);
     }
 
     /**
-     *
+     * Look for a specified Comment through its id
      * @param id Database record id (key)
      * @return Comment, if it exists
      * @throws DataAccessException
@@ -59,35 +63,43 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
     }
 
     /**
-     * @param id Database record id (key)
-     * Method to retrieve comments from profiles
-     * @return  Comments, comments_date, user_id and id
+     * Retrieve the comments related to a certain profile
+     * @param id Database record id (fkey)
+     * @return list of Comments
      */
     public List<Comment> getCommentsFromProfile(String profileId) throws DataAccessException {
         return getList(SELECT_BASE + " WHERE profile_description_id = ?", profileId);
     }
 
+    /**
+     * Retrieve a specific comment related to a profile
+     * @param id Database record id (key)
+     * @return Comment
+     * @throws DataAccessException 
+     */
     public Comment getSpecifiedCommentFromProfile(String commentId) throws DataAccessException {
         //String select = SELECT_BASE + " WHERE " + COLUMN_ID + " = ?";
         return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", Integer.parseInt(commentId));
     }
 
     /**
-     * @param id Database record id (key)
-     * Method to retrieve comments from components
-     * @return  Comments, comments_date, user_id and id
+     * Retrieve the comments related to a certain component
+     * @param id Database record id (fkey)
+     * @return list of Comments
+     * @throws DataAccessException 
      */
-    public Comment getSpecifiedCommentFromComponent(String commentId) throws DataAccessException {
-        //String select = SELECT_BASE + " WHERE " + COLUMN_ID + " =  ?";
-        return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " =  ?", Integer.parseInt(commentId));
-    }
-
     public List<Comment> getCommentsFromComponent(String componentId) throws DataAccessException {
         return getList(SELECT_BASE + " WHERE component_description_id = ?", componentId);
     }
 
-    public Comment getByComment(String aComment) throws DataAccessException {
-        return getFirstOrNull(SELECT_BASE + " WHERE comments = ?", aComment);
+    /**
+     * Retrieve a specific comment related to a component
+     * @param id Database record id (key)
+     * @return Comment
+     * @throws DataAccessException 
+     */
+    public Comment getSpecifiedCommentFromComponent(String commentId) throws DataAccessException {
+        return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " =  ?", Integer.parseInt(commentId));
     }
 
     /**
@@ -104,7 +116,8 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         List<String> owner = getSimpleJdbcTemplate().query(select.toString(), new ParameterizedSingleColumnRowMapper<String>(), id);
         if (owner.isEmpty()) {
             return null;
-        } else {
+        }
+        {
             return owner.get(0);
         }
     }
@@ -112,6 +125,11 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
     /**
      *
      * @param comment
+     *              the comment to be inserted
+     * @param content
+     *              
+     * @param userId
+     *              the id of the user
      * @return Record id of the inserted comment
      * @throws DataAccessException
      */
@@ -120,11 +138,9 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         try {
             SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_COMMENTS).usingGeneratedKeyColumns(
                     COLUMN_ID);
-            //Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
-
             SimpleJdbcInsert insertComment = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(COLUMN_ID);
             Map<String, Object> params = new HashMap<String, Object>();
-            putInsertComment(params, comment, content, userId);
+            putInsertComment(params, comment, userId);
 
             Number id = insertComment.executeAndReturnKey(params);
             txManager.commit(transaction);
@@ -135,14 +151,20 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         }
     }
 
-    protected void putInsertComment(Map<String, Object> params, Comment comment, String contentId, Number userId) throws DataAccessException {
-        // SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_COMMENTS).usingGeneratedKeyColumns(
-        //         COLUMN_ID);
+    /**
+     * 
+     * @param params
+     * @param comment
+     * @param contentId
+     * @param userId
+     * @throws DataAccessException 
+     */
+    protected void putInsertComment(Map<String, Object> params, Comment comment, Number userId) throws DataAccessException {
         params.put("comments", comment.getComment());
         params.put("comment_date", extractTimestamp(comment));
         params.put("component_description_id", comment.getComponentDescriptionId());
         params.put("profile_description_id", comment.getProfileDescriptionId());
-        params.put("user_id", comment.getUserId());
+        params.put("user_id", userId);
     }
 
     @Override
@@ -164,68 +186,32 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
             return comment;
         }
     };
-//    protected String getTableName() {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    
-//    protected String getCMDIdColumn() {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    String getContent(boolean b, String id) {
-//        throw new UnsupportedOperationException("Not yet implemented");
-//    }
-//
-//    boolean isPublic(String cmdId) {
-//        throw new UnsupportedOperationException("Not yet implemented");
-//    }
-//
-//    boolean isInUserSpace(String cmdId, Number userId) {
-//        throw new UnsupportedOperationException("Not yet implemented");
-//    }
 
-    public void deleteComment(Comment com, boolean isDeleted) throws DataAccessException {
+    /**
+     * Method that will delete a comment from the database based on its id
+     * @param com
+     *           comment to be deleted
+     * @throws DataAccessException 
+     */
+    public void deleteComment(Comment com) throws DataAccessException {
         TransactionStatus transaction = getTransaction();
-        Number dbId = getDbId(Integer.parseInt(com.getId()));
-        StringBuilder delete = new StringBuilder("DELETE ").append(getTableName());
+        Number dbId = Integer.parseInt(com.getId());
+        StringBuilder delete = new StringBuilder("DELETE FROM ").append(getTableName());
         delete.append(" WHERE " + COLUMN_ID + " = ?");
         getSimpleJdbcTemplate().update(delete.toString(), dbId);
         txManager.commit(transaction);
     }
 
-    public Number getDbId(Number cmdId) {
+    /**
+     * Retrieve comment Id From a comment
+     * @param cmdId
+     * @return query for database access to id
+     */
+    public Number getDbId(String cmdId) {
         StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID + " FROM ").append(getTableName());
-        query.append(" WHERE ").append(getDbId(cmdId)).append(" = ?");
+        query.append(" WHERE ").append(COLUMN_ID).append(" = ?");
         return getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId);
     }
-//    public Comment getDbId(Number cmId) {
-//        return getFirstOrNull(getSelectStatement("WHERE id=?"), cmId);
-//    }
-//
-//    private StringBuilder getSelectStatement(String... where) throws DataAccessException {
-//        StringBuilder select = new StringBuilder("SELECT ").append(getCommentColumnList());
-//        select.append(" FROM ").append(getTableName());
-//        if (where.length > 0) {
-//            select.append(" ");
-//            for (String str : where) {
-//                select.append(" ").append(str);
-//            }
-//        }
-//        return select;
-//    }
-//
-//    protected StringBuilder getCommentColumnList() {
-//
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(getOrderByColumn());
-//        sb.append(",comment,comment_date,user_id,");
-//        return sb;
-//    }
-//
-//    private String getOrderByColumn() {
-//        return "name";
-//    }
 
     private Timestamp extractTimestamp(Comment comment) {
         if (comment.getCommentDate() != null) {
@@ -243,5 +229,15 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
 
     private TransactionStatus getTransaction() {
         return txManager.getTransaction(txDefinition);
+    }
+
+    /**
+     * Method use for tests that will select comments based on the content
+     * @param aComment
+     * @return list of Comments
+     * @throws DataAccessException 
+     */
+    public Comment getByComment(String aComment) throws DataAccessException {
+        return getFirstOrNull(SELECT_BASE + " WHERE comments = ?", aComment);
     }
 }

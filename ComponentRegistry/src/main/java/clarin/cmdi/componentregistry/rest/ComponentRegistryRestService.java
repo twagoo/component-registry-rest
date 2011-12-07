@@ -506,7 +506,7 @@ public class ComponentRegistryRestService {
             LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
             return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
         }
-        LOG.info("Profile with id: " + commentId + " deleted.");
+        LOG.info("Comment with id: " + commentId + " deleted.");
         return Response.ok().build();
     }
 
@@ -531,7 +531,7 @@ public class ComponentRegistryRestService {
             LOG.info("Comment with id: " + commentId + " deletion failed: " + e.getMessage());
             return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
         }
-        LOG.info("Profile with id: " + commentId + " deleted.");
+        LOG.info("Comment with id: " + commentId + " deleted.");
         return Response.ok().build();
     }
 
@@ -646,31 +646,35 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
     public Response registerCommentInComponent(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String comment,
-            @FormDataParam("componentId") AbstractDescription componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+            @PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
         Principal principal = checkAndGetUserPrincipal();
         UserCredentials userCredentials = getUserCredentials(principal);
+        ComponentRegistry registry = getRegistry(userspace, userCredentials);
+        AbstractDescription description = registry.getComponentDescription(componentId);
         Comment com = createNewComment();
         com.setComponentDescriptionId("componentId");
-        com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
-        com.setComment(comment);
+        //com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
+        //com.setComment(comment);
         LOG.info("Trying to register Comment: " + com);
-        return registerComment(input, com, userCredentials, userspace, componentId, new NewAction());
+        return registerComment(input, registry, userspace, description, principal, new NewAction());
     }
-    
-        @POST
+
+    @POST
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
-    public Response registerCommentInProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input, @FormDataParam(NAME_FORM_FIELD) String comment,
-            @FormDataParam("profileId") AbstractDescription profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
+    public Response registerCommentInProfile(@FormDataParam(DATA_FORM_FIELD) InputStream input,
+            @PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
         Principal principal = checkAndGetUserPrincipal();
         UserCredentials userCredentials = getUserCredentials(principal);
-        Comment com = createNewComment();
-        com.setComponentDescriptionId("profileId");
-        com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
-        com.setComment(comment);
-        LOG.info("Trying to register Comment: " + com);
-        return registerComment(input, com, userCredentials, userspace, profileId, new NewAction());
+        ComponentRegistry registry = getRegistry(userspace, userCredentials);
+        AbstractDescription description = registry.getProfileDescription(profileId);
+        //Comment com = createNewComment(); 
+        //com.setProfileDescriptionId("profileId");
+        //com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
+        //com.setComment(comment);
+        LOG.info("Trying to register Comment: ");
+        return registerComment(input, registry, userspace, description, principal, new NewAction());
     }
 
     @GET
@@ -722,20 +726,18 @@ public class ComponentRegistryRestService {
         }
     }
 
-    private Response registerComment(InputStream input, Comment com, UserCredentials userCredentials, boolean userspace,
-            AbstractDescription descriptionId,
+    private Response registerComment(InputStream input, ComponentRegistry registry, boolean userspace,
+            AbstractDescription description, Principal principal,
             RegisterAction action) {
         try {
-            ComponentRegistry registry = getRegistry(userspace, userCredentials);
-            CommentValidator commentValidator = new CommentValidator(com);
-            ComValidator validator = new ComValidator(input, com, registry, getRegistry(true), descriptionId
-            );
+            CommentValidator validator = new CommentValidator(input, registry, getRegistry(true), description);
             RegisterResponse response = new RegisterResponse();
             response.setIsInUserSpace(userspace);
-            validate(response, commentValidator, validator);
+            validate(response, validator);
             if (response.getErrors().isEmpty()) {
-                Comment spec = validator.getCommentSpec();
-                int returnCode = action.executeComment(com, spec, response, registry);
+                Comment com = validator.getCommentSpec();
+               int returnCode = action.executeComment(com, response, registry, principal.getName());
+              // registry.registerComment(com, principal.getName());
                 if (returnCode == 0) {
                     response.setRegistered(true);
                     response.setComment(com);

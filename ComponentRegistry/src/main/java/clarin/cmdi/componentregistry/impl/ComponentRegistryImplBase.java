@@ -56,19 +56,6 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         return result;
     }
 
-//    public List<Comment> getUsageInComments(String componentId) throws ComponentRegistryException {
-//        List<Comment> result = new ArrayList<Comment>();
-//        for (Comment comment : getComments()) {
-//            CMDComponentSpec myComment = getMDComment(comment.getId());
-//            if (myComment != null && findComponentId(componentId, myComment.getCMDComponent())) {
-//            result.add(comment);
-//            System.out.println("get unsage in comments : " + myComment + "\n");
-//            }
-//        }
-//        
-//        return result;
-//    }
-
     /**
      * 
      * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor

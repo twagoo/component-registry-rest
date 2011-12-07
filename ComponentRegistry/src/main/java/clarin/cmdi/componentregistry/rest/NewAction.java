@@ -14,8 +14,8 @@ public class NewAction implements RegisterAction {
     }
 
     @Override
-    public int executeComment(Comment com, Comment spec, RegisterResponse response, ComponentRegistry registry) {
-        return registry.registerComment(com, spec);
+    public int executeComment(Comment com, RegisterResponse response, ComponentRegistry registry, String userId) {
+        return registry.registerComment(com, userId);
     }
 
 }

@@ -22,7 +22,7 @@ public class UpdateAction implements RegisterAction {
     }
 
     @Override
-    public int executeComment(Comment com, Comment spec, RegisterResponse response, ComponentRegistry registry) {
+    public int executeComment(Comment com, RegisterResponse response, ComponentRegistry registry, String userId) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

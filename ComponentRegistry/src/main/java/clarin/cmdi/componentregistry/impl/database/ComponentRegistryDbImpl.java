@@ -60,7 +60,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private CMDComponentSpecCache profilesCache;
     @Autowired
     private CommentsDao commentsDao;
-    //private CMDComponentSpecCache commentsCache;
 
     /**
      * Default constructor, makes this a (spring) bean. No user is set, so
@@ -229,13 +228,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             return -3;
         }
     }
-    
+
     @Override
-    public int registerComment(Comment comment, Comment spec){
+    public int registerComment(Comment comment, String userId) {
         try {
-            String xml = commmentSpecToString(spec);
+            String xml = commmentSpecToString(comment);
             // Convert principal name to user record id
-            Number uid = convertUserIdInComment(comment);
+            Number uid = convertUserIdInComment(comment, userId);
+            //Number uid = Integer.parseInt(userId.toString());
             commentsDao.insertComment(comment, xml, uid);
             return 0;
         } catch (DataAccessException ex) {
@@ -275,11 +275,21 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
         return uid;
     }
-    
-        private Number convertUserIdInComment(Comment comment) throws DataAccessException {
+
+    /**
+     * Calling service sets user id to principle. Our task is to convert this to
+     * an id for later reference. If none is set and this is a user's workspace,
+     * set from that user's id.
+     * 
+     * @param comment
+     *            Comment containing principle name as userId
+     * @return Id (from database)
+     * @throws DataAccessException
+     */
+    private Number convertUserIdInComment(Comment comment, String uId) throws DataAccessException {
         Number uid = null;
         if (comment.getUserId() != null) {
-            User user = userDao.getByPrincipalName(comment.getUserId());
+            User user = userDao.getByPrincipalName(uId);
             if (user != null) {
                 uid = user.getId();
             }
@@ -448,7 +458,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private AbstractDescriptionDao<?> getDaoForDescription(AbstractDescription description) {
         return description.isProfile() ? profileDescriptionDao : componentDescriptionDao;
     }
-    
 
     /**
      * Looks up description on basis of CMD Id. This will also check if such a
@@ -475,28 +484,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
     }
 
-        private Number getIdForCommentDescription(Comment comment) throws IllegalArgumentException {
-        Number dbId = null;
-        try {
-            dbId = commentsDao.getDbId(Integer.parseInt(comment.getId()));
-        } catch (DataAccessException ex) {
-            LOG.error("Error getting dbId for comment with id " + comment.getId(), ex);
-        }
-        if (dbId == null) {
-            throw new IllegalArgumentException("Could not get database Id for description");
-        } else {
-            return dbId;
-        }
-    }
-    
     private String componentSpecToString(CMDComponentSpec spec) throws UnsupportedEncodingException, JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MDMarshaller.marshal(spec, os);
         String xml = os.toString("UTF-8");
         return xml;
     }
-    
-        private String commmentSpecToString(Comment spec) throws UnsupportedEncodingException, JAXBException {
+
+    private String commmentSpecToString(Comment spec) throws UnsupportedEncodingException, JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MDMarshaller.marshal(spec, os);
         String xml = os.toString("UTF-8");
@@ -541,12 +536,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                 && principalName.equals(owner);
     }
 
-        private boolean isOwnerOfComment(Comment desc, String principalName) {
-        String owner = commentsDao.getOwnerPrincipalName(getIdForCommentDescription(desc));
+    private boolean isOwnerOfComment(Comment com, String principalName) {
+        String owner = commentsDao.getOwnerPrincipalName(Integer.parseInt(com.getId()));
         return owner != null // If owner is null, no one can be owner
                 && principalName.equals(owner);
     }
-    
+
     private void checkAge(AbstractDescription desc, Principal principal) throws DeleteFailedException {
         if (isPublic() && !configuration.isAdminUser(principal)) {
             try {
@@ -593,17 +588,16 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void deleteComment(String commentId, Principal principal) throws IOException, 
-    ComponentRegistryException, UserUnauthorizedException, DeleteFailedException {
-
-            Comment com = commentsDao.getById(commentId);        
-            if (com!= null) {
+    public void deleteComment(String commentId, Principal principal) throws IOException,
+            ComponentRegistryException, UserUnauthorizedException, DeleteFailedException {
+        Comment com = commentsDao.getById(commentId);
+        if (com != null) {
             try {
-                    checkAuthorisationComment(com, principal);
-                    commentsDao.deleteComment(com, true);
-                } catch (DataAccessException ex) {
-                    throw new DeleteFailedException("Database access error while trying to delete component", ex);
-                }
+                checkAuthorisationComment(com, principal);
+                commentsDao.deleteComment(com);
+            } catch (DataAccessException ex) {
+                throw new DeleteFailedException("Database access error while trying to delete component", ex);
             }
         }
     }
+}
