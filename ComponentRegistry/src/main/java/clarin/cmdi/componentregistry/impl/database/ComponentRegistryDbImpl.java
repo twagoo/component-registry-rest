@@ -232,21 +232,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public int registerComment(Comment comment, String userId) {
         try {
-            String xml = commmentSpecToString(comment);
             // Convert principal name to user record id
             Number uid = convertUserIdInComment(comment, userId);
-            //Number uid = Integer.parseInt(userId.toString());
-            commentsDao.insertComment(comment, xml, uid);
+            commentsDao.insertComment(comment, uid);
             return 0;
         } catch (DataAccessException ex) {
             LOG.error("Database error while registering component", ex);
             return -1;
-        } catch (JAXBException ex) {
-            LOG.error("Error while registering component", ex);
-            return -2;
-        } catch (UnsupportedEncodingException ex) {
-            LOG.error("Error while registering component", ex);
-            return -3;
         }
     }
 
@@ -485,13 +477,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private String componentSpecToString(CMDComponentSpec spec) throws UnsupportedEncodingException, JAXBException {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        MDMarshaller.marshal(spec, os);
-        String xml = os.toString("UTF-8");
-        return xml;
-    }
-
-    private String commmentSpecToString(Comment spec) throws UnsupportedEncodingException, JAXBException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         MDMarshaller.marshal(spec, os);
         String xml = os.toString("UTF-8");

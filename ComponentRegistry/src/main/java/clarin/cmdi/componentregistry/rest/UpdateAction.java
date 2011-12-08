@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.model.Comment;
 import java.security.Principal;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
@@ -19,11 +18,6 @@ public class UpdateAction implements RegisterAction {
     @Override
     public int execute(AbstractDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) {
         return registry.update(desc, spec, principal, false);
-    }
-
-    @Override
-    public int executeComment(Comment com, RegisterResponse response, ComponentRegistry registry, String userId) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

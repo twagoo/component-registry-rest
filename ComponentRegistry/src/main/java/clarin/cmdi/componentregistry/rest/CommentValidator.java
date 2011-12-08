@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -19,7 +18,6 @@ import javax.xml.bind.JAXBException;
  */
 class CommentValidator implements Validator {
 
-    static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     static final String COMMENT_NOT_REGISTERED_ERROR = "referenced comment is not registered or does not have a correct commentId: ";
     static final String PARSE_ERROR = "Error in validation input file. Error is: ";
     static final String COMMENT_NOT_PUBLICLY_REGISTERED_ERROR = "referenced comment cannot be found in the published comments: ";
@@ -35,7 +33,7 @@ class CommentValidator implements Validator {
      * @param input In order to validate the input is consumed. So use @see getCommentSpec to get the parsed CommentSpec.
      * @param description use to validate the comment with the appropriate description (profile or a component)
      */
-    public CommentValidator(InputStream input, ComponentRegistry registry, ComponentRegistry userRegistry, AbstractDescription description) {
+    public CommentValidator(InputStream input, AbstractDescription description) {
         this.input = input;
         this.description = description;
     }
@@ -67,15 +65,15 @@ class CommentValidator implements Validator {
      * @param comment, the comment to be validated
      */
     private void validateComment(Comment comment) throws ComponentRegistryException {
-        if (comment.getComment() == null) {
+        if (comment.getComment() == null | comment.getComment().isEmpty()) {
             errorMessages.add(ILLEGAL_ATTRIBUTE_NAME_ERROR + "comment has to be filled in");
         }
         if (description.isProfile()) {
-            if (comment.getProfileDescriptionId() == null) {
+            if (comment.getProfileDescriptionId() == null | comment.getProfileDescriptionId().isEmpty()) {
                 errorMessages.add(ILLEGAL_ATTRIBUTE_NAME_ERROR + "profileId could not be found");
             }
         } else {
-            if (comment.getComponentDescriptionId() == null) {
+            if (comment.getComponentDescriptionId() == null | comment.getComponentDescriptionId().isEmpty()) {
                 errorMessages.add(ILLEGAL_ATTRIBUTE_NAME_ERROR + "componentId could not be found");
             }
         }

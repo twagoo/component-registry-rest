@@ -43,6 +43,7 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 import com.sun.jersey.multipart.FormDataParam;
@@ -653,10 +654,8 @@ public class ComponentRegistryRestService {
         AbstractDescription description = registry.getComponentDescription(componentId);
         Comment com = createNewComment();
         com.setComponentDescriptionId("componentId");
-        //com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
-        //com.setComment(comment);
         LOG.info("Trying to register Comment: " + com);
-        return registerComment(input, registry, userspace, description, principal, new NewAction());
+        return registerComment(input, registry, userspace, description, principal);
     }
 
     @POST
@@ -669,12 +668,8 @@ public class ComponentRegistryRestService {
         UserCredentials userCredentials = getUserCredentials(principal);
         ComponentRegistry registry = getRegistry(userspace, userCredentials);
         AbstractDescription description = registry.getProfileDescription(profileId);
-        //Comment com = createNewComment(); 
-        //com.setProfileDescriptionId("profileId");
-        //com.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
-        //com.setComment(comment);
         LOG.info("Trying to register Comment: ");
-        return registerComment(input, registry, userspace, description, principal, new NewAction());
+        return registerComment(input, registry, userspace, description, principal);
     }
 
     @GET
@@ -727,17 +722,16 @@ public class ComponentRegistryRestService {
     }
 
     private Response registerComment(InputStream input, ComponentRegistry registry, boolean userspace,
-            AbstractDescription description, Principal principal,
-            RegisterAction action) {
+            AbstractDescription description, Principal principal) {
         try {
-            CommentValidator validator = new CommentValidator(input, registry, getRegistry(true), description);
-            RegisterResponse response = new RegisterResponse();
+            CommentValidator validator = new CommentValidator(input, description);
+            CommentResponse response = new CommentResponse();
             response.setIsInUserSpace(userspace);
-            validate(response, validator);
+            validateComment(response, validator);
             if (response.getErrors().isEmpty()) {
                 Comment com = validator.getCommentSpec();
-               int returnCode = action.executeComment(com, response, registry, principal.getName());
-              // registry.registerComment(com, principal.getName());
+               //int returnCode = action.executeComment(com, response, registry, principal.getName());
+              int returnCode =  registry.registerComment(com, principal.getName());
                 if (returnCode == 0) {
                     response.setRegistered(true);
                     response.setComment(com);
@@ -782,6 +776,16 @@ public class ComponentRegistryRestService {
     }
 
     private void validate(RegisterResponse response, Validator... validators) {
+        for (Validator validator : validators) {
+            if (!validator.validate()) {
+                for (String error : validator.getErrorMessages()) {
+                    response.addError(error);
+                }
+            }
+        }
+    }
+    
+        private void validateComment(CommentResponse response, Validator... validators) {
         for (Validator validator : validators) {
             if (!validator.validate()) {
                 for (String error : validator.getErrorMessages()) {

@@ -43,9 +43,8 @@ public class CommentsDaoTest {
     public void testInsertComment() {
         Comment comment = createTestComment();
 
-        String testComment = comment.getComment();
         assertEquals(0, commentsDao.getAllComments().size());
-        Number newId = commentsDao.insertComment(comment, testComment, Integer.parseInt(TEST_COMMENT_USER_ID));
+        Number newId = commentsDao.insertComment(comment, Integer.parseInt(TEST_COMMENT_USER_ID));
         assertNotNull(newId);
       
         List<Comment> comments = commentsDao.getAllComments();
@@ -80,8 +79,7 @@ public class CommentsDaoTest {
     @Test
     public void testGetComment() {
         Comment comment = createTestComment();
-        String testComment = comment.getComment();
-        commentsDao.insertComment(comment, testComment, 8);
+        commentsDao.insertComment(comment, 8);
 
         assertNotNull(commentsDao.getByComment(TEST_COMMENT_NAME));
         assertNull(commentsDao.getByComment("NOT_EXITING_COMMENT_NAME"));
@@ -100,10 +98,9 @@ public class CommentsDaoTest {
     
     public void testSetDelete(){
         Comment comment = createTestComment();
-        String testComment = comment.getComment();
         int count = commentsDao.getAllComments().size();
         
-        commentsDao.insertComment(comment, testComment, 8);
+        commentsDao.insertComment(comment, 8);
 	assertEquals(count + 1, commentsDao.getAllComments().size());
 
         commentsDao.deleteComment(comment);

@@ -68,7 +68,7 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      * @return list of Comments
      */
     public List<Comment> getCommentsFromProfile(String profileId) throws DataAccessException {
-        return getList(SELECT_BASE + " WHERE profile_description_id = ?", profileId);
+        return getList((SELECT_BASE + " WHERE profile_description_id = ?").concat(getOrderByDate()), profileId);
     }
 
     /**
@@ -78,7 +78,6 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      * @throws DataAccessException 
      */
     public Comment getSpecifiedCommentFromProfile(String commentId) throws DataAccessException {
-        //String select = SELECT_BASE + " WHERE " + COLUMN_ID + " = ?";
         return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", Integer.parseInt(commentId));
     }
 
@@ -89,7 +88,7 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      * @throws DataAccessException 
      */
     public List<Comment> getCommentsFromComponent(String componentId) throws DataAccessException {
-        return getList(SELECT_BASE + " WHERE component_description_id = ?", componentId);
+        return getList((SELECT_BASE + " WHERE component_description_id = ?").concat(getOrderByDate()), componentId);
     }
 
     /**
@@ -133,11 +132,9 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      * @return Record id of the inserted comment
      * @throws DataAccessException
      */
-    public Number insertComment(Comment comment, String content, Number userId) throws DataAccessException {
+    public Number insertComment(Comment comment, Number userId) throws DataAccessException {
         TransactionStatus transaction = getTransaction();
         try {
-            SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_COMMENTS).usingGeneratedKeyColumns(
-                    COLUMN_ID);
             SimpleJdbcInsert insertComment = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(COLUMN_ID);
             Map<String, Object> params = new HashMap<String, Object>();
             putInsertComment(params, comment, userId);
@@ -239,5 +236,13 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      */
     public Comment getByComment(String aComment) throws DataAccessException {
         return getFirstOrNull(SELECT_BASE + " WHERE comments = ?", aComment);
+    }
+    
+    /**
+     * Sort the returned comments per date from the most recent to the oldest
+     * @return 
+     */
+        private String getOrderByDate() {
+	return " order by comment_date asc ";
     }
 }

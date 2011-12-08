@@ -31,6 +31,7 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -151,9 +152,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getResource().path("/registry/profiles/profile1/comments").accept(MediaType.APPLICATION_JSON).get(
                 COMMENT_LIST_GENERICTYPE);
         assertEquals(3, response.size());
-        assertEquals("comment2", response.get(0).getComment());
+        assertEquals("COMMENT1", response.get(0).getComment());
         assertEquals("comment1", response.get(1).getComment());
-        assertEquals("COMMENT1", response.get(2).getComment());
+        assertEquals("comment2", response.get(2).getComment());
     }
 
     @Test
@@ -166,9 +167,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getResource().path("/registry/components/component1/comments").accept(MediaType.APPLICATION_JSON).get(
                 COMMENT_LIST_GENERICTYPE);
         assertEquals(3, response.size());
-        assertEquals("comment3", response.get(0).getComment());
+        assertEquals("COMMENT2", response.get(0).getComment());
         assertEquals("comment4", response.get(1).getComment());
-        assertEquals("COMMENT2", response.get(2).getComment());
+        assertEquals("comment3", response.get(2).getComment());
     }
 
     @Test
@@ -851,8 +852,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         fillUp();
-        RegisterResponse response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1/comments").type(MediaType.MULTIPART_FORM_DATA).post(
-                RegisterResponse.class, form);
+        CommentResponse response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1/comments").type(MediaType.MULTIPART_FORM_DATA).post(
+                CommentResponse.class, form);
         assertTrue(response.isRegistered());
         assertFalse(response.isInUserSpace());
         Comment comment = response.getComment();
