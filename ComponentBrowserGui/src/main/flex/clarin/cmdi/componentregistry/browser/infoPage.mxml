@@ -79,9 +79,6 @@
 			refresh();
 		}
 		
-		private function loadCommentInfoPage(event:BrowserSelectionEvent):void {
-			commentSrv.load(event.commentDescription);			
-		}
 		
 	</mx:Script>
 	
@@ -130,7 +127,6 @@
 				id="viewAllComments" width="399" height="109"
 				browseMenu="{commentsMenu}"
 				browserColumns="{browserColumns.getCommentColumns()}"
-				browserCommentSelected="{loadCommentInfoPage(event)}"
 				browserDataProvider="{commentsSrv.itemDescriptions}"
 				itemToScrollToComment="{selectedCommentItem}"
 				cmdComment="{cmdComment}"
