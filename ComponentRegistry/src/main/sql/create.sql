@@ -21,7 +21,7 @@ SET default_with_oids = false;
 
 CREATE TABLE comments
 (
-  comment_id integer NOT NULL DEFAULT nextval('comments_id_seq'::regclass),
+  id SERIAL NOT NULL,
   comments text NOT NULL,
   comment_date timestamp with time zone,
   profile_description_id character varying,
