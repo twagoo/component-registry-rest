@@ -11,13 +11,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
-import clarin.cmdi.componentregistry.impl.database.UserDao;
 
 /**
  * Page that starts up somekind of migration on the underlying data in the registry. Migrations are usually one off things so do not blindly

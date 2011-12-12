@@ -1,7 +1,5 @@
 package clarin.cmdi.componentregistry.model;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.IdSequence;
 import java.text.ParseException;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -94,9 +92,7 @@ public class Comment {
     }
 
     public static Comment createANewComment() {
-        String Id = ComponentRegistry.REGISTRY_ID + IdSequence.get();
         Comment com = new Comment();
-        com.setId(Id);
         com.setCommentDate(createNewDate());
         return com;
     }
