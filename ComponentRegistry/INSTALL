@@ -1,0 +1,43 @@
+INSTALLING THE COMPONENT REGISTRY REST SERVICE AND FLEX UI
+
+Important to know
+-----------------
+The Component Registry REST service depends on a PostgreSQL database to
+store its data. It is packaged as a servlet and has been tested to work with
+Tomcat. 
+
+The package includes a Flex based client that runs client-side in the
+user's browser. It is wrapped by an index.jsp page that embeds it and passes
+some parameters; it is located in the root of the application directory. 
+
+The web application uses the Spring framework and in the current version it
+is partly configured through Spring (see below).
+
+Setting up the database
+-----------------------
+- Create a new PostgreSQL database and configure users and roles
+- Run the create script 'create.sql' under the appropriate permissions
+
+Configuring Tomcat
+------------------
+By default, the application assumes a named (JNDI) datasource 
+jdbc/ComponentRegistry that provides access to the ComponentRegistry
+database. Set it up for the database described above in the Tomcat 
+configuration.
+    
+For more information, or configuring a custom datasource Spring bean,
+see WEB-INF/spring-config/datasource-jdbc.xml
+
+Deploying the application
+-------------------------
+Deploy the ComponentRegistry.war file to the Tomcat instance.
+
+Configuring the application
+---------------------------
+Some aspects could require additional configuration depending on the
+context:
+
+- Shibboleth authentication. ComponentRegistry uses the SHHAA filter, which
+  is configured in WEB-INF/shhaa.xml. Make sure SSO and SLO URL's are correct.
+- Misc configuration including admin users (has sensible defaults for
+  catalog server): WEB-INF/spring-config/component-registry.xml

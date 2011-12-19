@@ -1,4 +1,33 @@
-The componentRegistry is setup as a Flex Gui frontend communicating with a java based backend.
+
+What is it?
+-----------
+
+The Component Registry stores CMDI metadata components and profiles and
+offers a service to list and retrieve them. The BrowserGui is a web
+application displaying available components in the component registry in the
+correct context: application domain, creator, creation date, version, etc.
+The registry offers a hierarchical structure for browsing the components. 
+
+The componentRegistry is set up as a Flex Gui frontend communicating with a
+Java based backend (REST service).
+
+The ComponentRegistry is a central software component to the Clarin MetaData
+Infrastructure (CMDI). For more information on CMDI, see
+<http://www.clarin.eu/cmdi>.
+
+Documentation
+-------------
+
+- A set of TRAC pages for developers has been setup on the Clarin.eu TRAC at
+<http://trac.clarin.eu/wiki/ComponentRegistryAndEditor>. You will need a
+login to access these pages. To request one, contact <clarin@clarin.eu>.
+
+- The REST interface is documented at <http://www.clarin.eu/node/3248>.
+
+- Documentation for users is available at <http://www.clarin.eu/node/3223>.
+
+How to set up for development/building from source
+--------------------------------------------------
 
 Creating war artifact for deployment:
 
@@ -24,8 +53,12 @@ Missing some artifacts for Maven?:
 The ComponentBrowserGui project needs some swf files which are not in any maven repository I could find. 
 So install them manually: go to ComponentBrowserGui/libs/ and run the commands in maveninstalllib.txt
  
-------
 Creating initial setup files (eclipse config):
+
  - in ComponentBrowserGui: mvn flexmojos:flexbuilder
  - in ComponentRegistry: mvn eclipse:eclipse
  
+Installation
+------------
+
+Please see the file called INSTALL

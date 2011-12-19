@@ -1,0 +1,16 @@
+UPDATING THE COMPONENT REGISTRY REST SERVICE AND FLEX UI
+
+Procedure for updating
+----------------------
+
+- When upgrading to a new version of the ComponentRegistry, check if there are
+  updates of the database schema. These will be named upgrade-x.yy.sql, e.g.
+  upgrade-1.10.sql
+
+- If the database needs upgrading, first make a backup (dump) of the existing
+  database. Stop the application before doing so
+
+- Execute the upgrade script. When upgrading over multiple minor versions, 
+  execute the upgrade scripts incrementally
+
+- Then redeploy the WAR and start the application
