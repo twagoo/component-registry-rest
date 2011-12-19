@@ -12,6 +12,7 @@
                 <value>guilherme.silva@mpi.nl</value>
                 <value>daan.broeder@mpi.nl</value>
                 <value>dietuyt@mpi.nl</value>
+                <value>Menzo.Windhouwer@mpi.nl</value>
             </set>
         </property>
         <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
