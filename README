@@ -1,0 +1,11 @@
+CLARIN COMPONENT REGISTRY
+=========================
+
+This project contains two modules:
+
+- 'ComponentRegistry', a Java project that implements the Component Registry
+  REST service, administration pages and a web container for a client UI.
+- 'ComponentBrowserGui', a Flex project that implements a client for the
+  Component Registry REST service.
+
+For more information, see ComponentRegistry/README.
