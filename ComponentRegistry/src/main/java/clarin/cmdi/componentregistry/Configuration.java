@@ -3,11 +3,12 @@ package clarin.cmdi.componentregistry;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -19,7 +20,7 @@ public class Configuration {
     private String generalComponentSchema = "http://www.clarin.eu/cmd/general-component-schema.xsd";
     private String component2SchemaXsl = "http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
     private String isocatRestUrl = "http://www.isocat.org/rest/";
-    private Set<String> adminUsers = new HashSet<String>();
+    private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
 
     {//Default values
@@ -63,13 +64,23 @@ public class Configuration {
 
     public boolean isAdminUser(Principal principal) {
 	if (principal != null) {
-	    return adminUsers.contains(principal.getName());
+	    return principal.getName().trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
+		    && adminUsers.contains(principal.getName());
 	}
 	return false;
     }
 
-    public void setAdminUsers(Set<String> adminUsers) {
+    public void setAdminUsers(Collection<String> adminUsers) {
 	this.adminUsers = adminUsers;
+    }
+
+    /**
+     * 
+     * @param adminUsers Whitespace-separated list of admin users
+     */
+    public void setAdminUsersList(String adminUsersList) {
+	String[] adminUsersArray = adminUsersList.trim().split("\\s+");
+	setAdminUsers(Arrays.asList(adminUsersArray));
     }
 
     public void setComponent2SchemaXsl(String component2SchemaXsl) {
