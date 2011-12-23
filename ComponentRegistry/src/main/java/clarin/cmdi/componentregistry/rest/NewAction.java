@@ -11,5 +11,4 @@ public class NewAction implements RegisterAction {
     public int execute(AbstractDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) {
         return registry.register(desc, spec);
     }
-
 }

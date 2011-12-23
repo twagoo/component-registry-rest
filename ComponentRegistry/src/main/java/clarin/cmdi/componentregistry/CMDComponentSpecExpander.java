@@ -102,6 +102,13 @@ public abstract class CMDComponentSpecExpander {
 	expandNestedComponent(cmdComponents);
 	return result;
     }
+    
+//    protected CMDComponentSpec expandComment(String commentId) throws ComponentRegistryException {
+//        CMDComponentSpec result = getUncachedComment(commentId);
+//        List<CMDComponentType> cmdComponents = result.getCMDComponent();
+//        expandNestedComponent(cmdComponents);
+//        return result;
+//    }
 
     /**
      * Get uncached component from "this" registry and possibly from public registry. Note: "this" registry can be a user registry.
@@ -110,4 +117,6 @@ public abstract class CMDComponentSpecExpander {
     protected abstract CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException;
 
     protected abstract CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException;
+    
+//    protected abstract CMDComponentSpec getUncachedComment(String commentId) throws ComponentRegistryException;
 }

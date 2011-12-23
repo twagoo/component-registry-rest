@@ -20,5 +20,4 @@ public class PublishAction implements RegisterAction {
         response.setIsInUserSpace(false);
         return registry.publish(desc, spec, principal);
     }
-
 }

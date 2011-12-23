@@ -139,6 +139,7 @@ public class MDValidatorTest {
 	profileContent += "    <CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id2 + "\"/>\n"; //id not registered
 	profileContent += "</CMD_ComponentSpec>\n";
 
+        // Ids not registered will return two errors. One for each id
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertFalse(validator.validate());
@@ -146,12 +147,14 @@ public class MDValidatorTest {
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 	assertTrue(validator.getErrorMessages().get(1).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
+        // id1 will be added and therefore only id2 is not registered
 	RegistryTestHelper.addComponent(publicRegistry, id1);
 	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertFalse(validator.validate());
 	assertEquals(1, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
+        // id2 is added, no more errors shoud be return
 	RegistryTestHelper.addComponent(publicRegistry, id2);
 	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertTrue("component is registered should be valid now", validator.validate());

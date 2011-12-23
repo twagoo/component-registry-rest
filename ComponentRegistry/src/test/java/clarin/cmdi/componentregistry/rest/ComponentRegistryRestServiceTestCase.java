@@ -6,6 +6,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 
 import clarin.cmdi.componentregistry.impl.database.UserDao;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.UserMapping.User;
@@ -32,6 +33,8 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected final static GenericType<List<ProfileDescription>> PROFILE_LIST_GENERICTYPE = new GenericType<List<ProfileDescription>>() {
     };
     protected final static GenericType<List<ComponentDescription>> COMPONENT_LIST_GENERICTYPE = new GenericType<List<ComponentDescription>>() {
+    };
+    protected final static GenericType<List<Comment>> COMMENT_LIST_GENERICTYPE = new GenericType<List<Comment>>() {
     };
 
     @Autowired

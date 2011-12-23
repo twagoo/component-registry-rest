@@ -25,7 +25,7 @@ public class RegisterResponseTest {
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"false\" isProfile=\"true\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+        expected += "<registerResponse isProfile=\"true\" isInUserSpace=\"true\" registered=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors>\n";
         expected += "        <error>Error 1</error>\n";
         expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
@@ -50,7 +50,7 @@ public class RegisterResponseTest {
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"true\" isProfile=\"true\" isInUserSpace=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+        expected += "<registerResponse isProfile=\"true\" isInUserSpace=\"false\" registered=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors/>\n";
         expected += "    <description xsi:type=\"profileDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";
@@ -81,7 +81,7 @@ public class RegisterResponseTest {
         MDMarshaller.marshal(resp, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<registerResponse registered=\"true\" isProfile=\"false\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+        expected += "<registerResponse isProfile=\"false\" isInUserSpace=\"true\" registered=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <errors/>\n";
         expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
         expected += "        <id>myId</id>\n";

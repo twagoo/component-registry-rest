@@ -15,7 +15,7 @@ public class DescriptionValidator implements Validator {
     public DescriptionValidator(AbstractDescription desc) {
         this.desc = desc;
     }
-
+    
     public List<String> getErrorMessages() {
         return errorMessages;
     }
@@ -26,7 +26,7 @@ public class DescriptionValidator implements Validator {
         }
         return errorMessages.isEmpty();
     }
-
+    
     private boolean isOk(String... fields) {
         boolean isOk = true;
         for (String field : fields) {
