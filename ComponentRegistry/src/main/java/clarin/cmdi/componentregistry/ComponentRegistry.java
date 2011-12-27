@@ -24,14 +24,14 @@ public interface ComponentRegistry {
     List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException;
 
     ComponentDescription getComponentDescription(String id) throws ComponentRegistryException;
-    
+
     /**
      * 
      * @return List of profile descriptions ordered by name ascending
      * @throws ComponentRegistryException
      */
     List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
-    
+
     /**
      * 
      * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
@@ -56,7 +56,8 @@ public interface ComponentRegistry {
      * @param comment
      * @return -1 if comment could not be registered
      */
-    int registerComment(Comment comment, String userId);
+    int registerComment(Comment comment, String userId) throws ComponentRegistryException;
+
     /**
      * 
      * @return -1 if component could not be updated
@@ -101,7 +102,7 @@ public interface ComponentRegistry {
      *             thrown when principal does not match creator of component
      * @throws DeleteFailedException
      */
-    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException,  ComponentRegistryException, UserUnauthorizedException,
+    void deleteMDComponent(String componentId, Principal principal, boolean forceDelete) throws IOException, ComponentRegistryException, UserUnauthorizedException,
 	    DeleteFailedException;
 
     /**
@@ -142,8 +143,7 @@ public interface ComponentRegistry {
      * @return List of component descriptions ordered by name ascending
      */
     List<ComponentDescription> getDeletedComponentDescriptions();
-    
-    
+
     /**
      * 
      * @param profileId
@@ -151,15 +151,16 @@ public interface ComponentRegistry {
      * @throws ComponentRegistryException 
      */
     List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException;
-    
+
     /**
      * 
-     * @param commentId
+     * @param profileId Id of profile to retrieve comment from
+     * @param commentId Id of comment to retrieve
      * @return a specific comment from a profile
      * @throws ComponentRegistryException 
      */
-    Comment getSpecifiedCommentInProfile(String commentId) throws ComponentRegistryException;
-    
+    Comment getSpecifiedCommentInProfile(String profileId, String commentId) throws ComponentRegistryException;
+
     /**
      * 
      * @param componentId
@@ -167,28 +168,26 @@ public interface ComponentRegistry {
      * @throws ComponentRegistryException 
      */
     List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException;
-    
+
     /**
      * 
-     * @param commentId
+     * @param componentId Id of component to retrieve comment from
+     * @param commentId Id of comment to retrieve
      * @return a specific comment from a component
      * @throws ComponentRegistryException 
      */
-    Comment getSpecifiedCommentInComponent(String commentId) throws ComponentRegistryException;
+    Comment getSpecifiedCommentInComponent(String componentId, String commentId) throws ComponentRegistryException;
 
     /**
      * 
-     * @param commentId
-     * @param principal
+     * @param commentId Id of comment to delete
+     * @param principal User principal
      * @throws IOException
-     * @throws ComponentRegistryException
+     * @throws ComponentRegistryException When comment cannot be successfully retrieved from registry
      * @throws UserUnauthorizedException
      * @throws DeleteFailedException 
      */
-    public void deleteComment(String commentId, Principal principal)throws IOException,  ComponentRegistryException, UserUnauthorizedException,
-	    DeleteFailedException;;
-
-
-
-
+    public void deleteComment(String commentId, Principal principal) throws IOException, ComponentRegistryException, UserUnauthorizedException,
+	    DeleteFailedException;
+;
 }

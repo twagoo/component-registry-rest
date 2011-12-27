@@ -54,7 +54,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * 
      * @param cmdId
      *            CMD id
-     * @return Whether the specified item is in the public space or in a user's workspace
+     * @return Whether the specified item is in the public space
      */
     public boolean isPublic(String cmdId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
@@ -69,13 +69,29 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            CMD id
      * @param userId
      *            User db id of workspace owner
-     * @return Whether the specified item is in the specified user's workspace or the public space
+     * @return Whether the specified item is in the specified user's workspace
      */
     public boolean isInUserSpace(String cmdId, Number userId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
 	query.append(getTableName());
 	query.append(" WHERE is_public = false AND user_id = ? AND ").append(getCMDIdColumn()).append(" = ?");
 	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), userId, cmdId));
+    }
+
+    /**
+     * 
+     * @param cmdId
+     *            CMD id
+     * @param userId
+     *            User db id of workspace owner, null for public registry
+     * @return Whether the specified item is in the specified workspace (user or public)
+     */
+    public boolean isInRegistry(String cmdId, Number userId) {
+	if (userId == null) {
+	    return isPublic(cmdId);
+	} else {
+	    return isInUserSpace(cmdId, userId);
+	}
     }
 
     /**
