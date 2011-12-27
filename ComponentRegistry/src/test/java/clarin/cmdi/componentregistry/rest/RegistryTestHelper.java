@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.ComponentRegistryException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -180,12 +181,13 @@ public final class RegistryTestHelper {
         return xml;
     }
 
-    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException {
+    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException {
         return addComment(testRegistry, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
 
     private static Comment addComment(ComponentRegistry testRegistry, InputStream content, String principal) throws ParseException,
-            JAXBException {
+            JAXBException, 
+            ComponentRegistryException {
         Comment spec = MDMarshaller.unmarshal(Comment.class, content, null);
         testRegistry.registerComment(spec, principal);
         return spec;
@@ -230,7 +232,7 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getCommentTestContent() {
-        return getTestCommentContent("Actual", "profile1");
+        return getTestCommentContent("Actual", "clarin.eu:cr1:profile1");
     }
 
     /**
