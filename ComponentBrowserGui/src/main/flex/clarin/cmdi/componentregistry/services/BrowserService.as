@@ -3,25 +3,11 @@ package clarin.cmdi.componentregistry.services {
 	
 	import com.adobe.net.URI;
 	
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.net.URLRequest;
-	import flash.net.navigateToURL;
-	
 	import mx.collections.ArrayCollection;
-	import mx.controls.Alert;
-	import mx.messaging.messages.HTTPRequestMessage;
-	import mx.rpc.AsyncToken;
-	import mx.rpc.Responder;
-	import mx.rpc.events.FaultEvent;
+	
 	import mx.rpc.events.ResultEvent;
-	import mx.rpc.http.HTTPService;
-	import mx.utils.StringUtil;
-
-	[Event(name="itemsLoaded", type="flash.events.Event")]
-	public class BrowserService extends EventDispatcher {
+	public class BrowserService extends ComponentRegistryService {
         public static const ITEMS_LOADED:String = "itemsLoaded";
-		private var service:HTTPService;
 
 		/**
 		 * Typed ArrayCollection publicly available for outside code to bind to and watch.
@@ -30,46 +16,26 @@ package clarin.cmdi.componentregistry.services {
 		[ArrayElementType("ItemDescription")]
 		public var itemDescriptions:ArrayCollection;
 
-		private var serviceUrl:String;
-
 		// Not bindable needed for lookups over the whole collections of itemDescriptions
 		protected var unFilteredItemDescriptions:ArrayCollection;
 		protected var userSpace:Boolean;
 
 		public function BrowserService(restUrl:String, userSpace:Boolean) {
-			this.serviceUrl = restUrl;
-			service = new HTTPService();
-			service.method = HTTPRequestMessage.GET_METHOD;
-			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
+			super(restUrl);
 			this.userSpace = userSpace;
 		}
-
-		private function initService():void {
-			var url:URI = new URI(serviceUrl);
-			url.setQueryValue("unique", new Date().getTime().toString());
+		
+		override protected function initServiceUrl(url:URI):void{
 			if (userSpace) {
 				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
-			service.url = url.toString();
 		}
-
-		public function load():void {
-			initService();
-			var token:AsyncToken = this.service.send();
-			token.addResponder(new Responder(result, fault));
-		}
-
+		
 		/**
 		 * Override in concrete subclasses
 		 */
-		protected function result(resultEvent:ResultEvent):void {
-		    dispatchEvent(new Event(ITEMS_LOADED));
-		}
-
-		public function fault(faultEvent:FaultEvent):void {
-			var errorMessage:String = StringUtil.substitute("Error in {0}: \n Fault: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			trace(errorMessage);
-			Alert.show("Internal Server error cannot process the data, try reloading the application.");
+		override protected function result(resultEvent:ResultEvent):void {
+			dispatchEvent(new Event(ITEMS_LOADED));
 		}
 
 		protected function setItemDescriptions(items:ArrayCollection):void {
