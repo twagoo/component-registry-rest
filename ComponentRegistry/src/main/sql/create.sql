@@ -26,6 +26,7 @@ CREATE TABLE comments
   comment_date timestamp with time zone,
   profile_description_id character varying,
   component_description_id character varying,
+  user_id integer NOT NULL,
   user_id integer
 
 );

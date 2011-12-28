@@ -55,6 +55,7 @@ public class CommentsDaoTest {
 	assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
 	assertEquals(TEST_COMMENT_PROFILE_ID, comments.get(0).getProfileDescriptionId());
 	assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
+	assertEquals(TEST_COMMENT_USER_NAME, comments.get(0).getUserName());
 	assertEquals(Integer.toString(TEST_COMMENT_USER_ID), comments.get(0).getUserId());
     }
 
@@ -74,6 +75,7 @@ public class CommentsDaoTest {
 	assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
 	assertEquals(TEST_COMMENT_COMPONENT_ID, comments.get(0).getComponentDescriptionId());
 	assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
+	assertEquals(TEST_COMMENT_USER_NAME, comments.get(0).getUserName());
 	assertEquals(Integer.toString(TEST_COMMENT_USER_ID), comments.get(0).getUserId());
     }
 
@@ -130,7 +132,7 @@ public class CommentsDaoTest {
 	commentsDao.insertComment(comment, 8);
 
 	assertNotNull(commentsDao.getByComment(TEST_COMMENT_NAME));
-	assertNull(commentsDao.getByComment("NOT_EXITING_COMMENT_NAME"));
+	assertNull(commentsDao.getByComment("NON_EXISTENT_COMMENT_NAME"));
     }
 
     @Test
@@ -155,6 +157,7 @@ public class CommentsDaoTest {
 	testComment.setComment(TEST_COMMENT_NAME);
 	testComment.setCommentDate(TEST_COMMENT_DATE);
 	testComment.setUserId(Integer.toString(TEST_COMMENT_USER_ID));
+	testComment.setUserName(TEST_COMMENT_USER_NAME);
 	return testComment;
     }
     public final static String TEST_COMMENT_ID = "1";
@@ -162,5 +165,6 @@ public class CommentsDaoTest {
     public final static String TEST_COMMENT_COMPONENT_ID = "clarin.eu:cr1:c_1290431694600";
     public final static String TEST_COMMENT_NAME = "test";
     public final static int TEST_COMMENT_USER_ID = 8;
+    public final static String TEST_COMMENT_USER_NAME = "J. Unit";
     public final static String TEST_COMMENT_DATE = Comment.createNewDate();
 }

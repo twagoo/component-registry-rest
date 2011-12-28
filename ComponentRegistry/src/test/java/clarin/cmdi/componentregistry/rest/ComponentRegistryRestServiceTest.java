@@ -878,8 +878,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	Comment comment = response.getComment();
 	assertNotNull(comment);
 	assertEquals("Actual", comment.getComment());
-	assertEquals(expectedUserId("JUnit@test.com"), comment.getUserId());
+	assertEquals("J. Unit", comment.getUserName());
 	assertNotNull(comment.getCommentDate());
+	
+	// User id should not be serialized!
+	assertEquals(null, comment.getUserId());
     }
 
     @Test

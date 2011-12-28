@@ -33,7 +33,7 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
     private TransactionDefinition txDefinition;
     private final static Logger LOG = LoggerFactory.getLogger(CommentsDao.class);
     private final static String SELECT_BASE = "SELECT " + COLUMN_ID + ", comments, comment_date, user_id, "
-            + "component_description_id, profile_description_id FROM " + TABLE_COMMENTS;
+            + "component_description_id, profile_description_id, user_name FROM " + TABLE_COMMENTS;
 
     protected String getTableName() {
         return TABLE_COMMENTS;
@@ -162,6 +162,7 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         params.put("component_description_id", comment.getComponentDescriptionId());
         params.put("profile_description_id", comment.getProfileDescriptionId());
         params.put("user_id", userId);
+	params.put("user_name", comment.getUserName());
     }
 
     @Override
@@ -179,6 +180,7 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
             comment.setComponentDescriptionId(rs.getString("component_description_id"));
             comment.setProfileDescriptionId(rs.getString("profile_description_id"));
             comment.setUserId(rs.getString("user_id"));
+	    comment.setUserName(rs.getString("user_name"));
             comment.setCommentDate(commentDate == null ? null : Comment.createNewDate(commentDate.getTime()));
             return comment;
         }

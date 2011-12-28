@@ -71,6 +71,7 @@ public final class ComponentRegistryTestDatabase {
                 + "  component_description_id character varying,"               
                 + "  comments character varying NOT NULL,"
                 + "  comment_date timestamp,"
+		+ "  user_name character varying,"
                 + "  CONSTRAINT UNIQUE_COMMENTS_ID UNIQUE (id));");
     }
 

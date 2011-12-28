@@ -193,14 +193,14 @@ public final class RegistryTestHelper {
         return spec;
     }
 
-    public static String getCommentTestContentString(String commentName, String profileId) {
+    public static String getCommentTestContentStringForProfile(String commentName, String profileId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         comContent += "    <comments>" + commentName + "</comments>\n";
         comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
         comContent += "    <profileDescriptionId>" + profileId + "</profileDescriptionId>\n";
-        comContent += "    <userId>0</userId>\n";
+        comContent += "    <userName>J. Unit</userName>\n";
         comContent += "    <id>1</id>\n";
         comContent += "</comment>\n";
         return comContent;
@@ -213,7 +213,7 @@ public final class RegistryTestHelper {
         comContent += "    <comments>" + commentName + "</comments>\n";
         comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
         comContent += "     <componentDescriptionId>" + componentId + "</componentDescriptionId>";
-        comContent += "    <userId>0</userId>\n";
+        comContent += "    <userName>J. Unit</userName>\n";
         comContent += "    <id>1</id>\n";
         comContent += "</comment>\n";
         return comContent;
@@ -221,14 +221,14 @@ public final class RegistryTestHelper {
 
     public static InputStream getTestCommentContent(String content, String descriptionId) {
         if (descriptionId.contains("profile")) {
-            return new ByteArrayInputStream(getCommentTestContentString(content, descriptionId).getBytes());
+            return new ByteArrayInputStream(getCommentTestContentStringForProfile(content, descriptionId).getBytes());
         } else {
             return new ByteArrayInputStream(getCommentTestContentStringForComponent(content, descriptionId).getBytes());
         }
     }
 
     public static String getCommentTestContent(String commentId, String descriptionId) {
-        return getCommentTestContentString(commentId, descriptionId);
+        return getCommentTestContentStringForProfile(commentId, descriptionId);
     }
 
     public static InputStream getCommentTestContent() {
