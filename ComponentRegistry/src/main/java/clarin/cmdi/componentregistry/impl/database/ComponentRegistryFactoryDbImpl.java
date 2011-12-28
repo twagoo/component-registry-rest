@@ -53,10 +53,9 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     public ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials) {
 	ComponentRegistry result = null;
 	if (userspace) {
-	    if (credentials != null && !ANONYMOUS_USER.equals(credentials.getPrincipalName())) {
-		String principalName = credentials.getPrincipalName();
+	    RegistryUser user = getOrCreateUser(credentials);
+	    if (user != null) {
 		try {
-		    RegistryUser user = getOrCreateUser(principalName, credentials.getDisplayName());
 		    result = getNewComponentRegistryForUser(user.getId());
 		} catch (DataAccessException ex) {
 		    LOG.error("Could not retrieve or create user", ex);
@@ -103,6 +102,15 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
 	componentRegistry.setUserId(userId);
 	return componentRegistry;
+    }
+
+    @Override
+    public RegistryUser getOrCreateUser(UserCredentials credentials) {
+	if (credentials != null && !ANONYMOUS_USER.equals(credentials.getPrincipalName())) {
+	    String principalName = credentials.getPrincipalName();
+	    return getOrCreateUser(principalName, credentials.getDisplayName());
+	}
+	return null;
     }
 
     private synchronized RegistryUser getOrCreateUser(String principalName, String displayName) {

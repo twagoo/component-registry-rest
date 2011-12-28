@@ -685,6 +685,9 @@ public class ComponentRegistryRestService {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
 	    UserCredentials userCredentials = getUserCredentials(principal);
+	    if (null == componentRegistryFactory.getOrCreateUser(userCredentials)) {
+		throw new UserUnauthorizedException("Cannot materialize authenticated user");
+	    }
 	    ComponentRegistry registry = getRegistry(userspace, userCredentials);
 	    ComponentDescription description = registry.getComponentDescription(componentId);
 	    if (description != null) {
@@ -708,6 +711,9 @@ public class ComponentRegistryRestService {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
 	    UserCredentials userCredentials = getUserCredentials(principal);
+	    if (null == componentRegistryFactory.getOrCreateUser(userCredentials)) {
+		throw new UserUnauthorizedException("Cannot materialize authenticated user");
+	    }
 	    ComponentRegistry registry = getRegistry(userspace, userCredentials);
 	    ProfileDescription description = registry.getProfileDescription(profileId);
 	    if (description != null) {

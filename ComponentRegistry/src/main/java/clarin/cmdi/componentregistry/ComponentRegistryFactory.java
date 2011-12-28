@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import java.security.Principal;
 import java.util.List;
 
@@ -13,6 +9,7 @@ import java.util.List;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public interface ComponentRegistryFactory {
+
     public static final String ANONYMOUS_USER = "anonymous"; //Default shibboleth fallback.
 
     List<ComponentRegistry> getAllUserRegistries();
@@ -22,4 +19,6 @@ public interface ComponentRegistryFactory {
     ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userId);
 
     ComponentRegistry getPublicRegistry();
+
+    RegistryUser getOrCreateUser(UserCredentials credentials);
 }

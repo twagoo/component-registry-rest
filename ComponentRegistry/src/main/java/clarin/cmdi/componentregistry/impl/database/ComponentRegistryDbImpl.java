@@ -256,12 +256,18 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public int registerComment(Comment comment, String userId) throws ComponentRegistryException {
+    public int registerComment(Comment comment, String principalName) throws ComponentRegistryException {
 	try {
 	    if (comment.getComponentDescriptionId() != null && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())
 		    || comment.getProfileDescriptionId() != null && profileDescriptionDao.isInRegistry(comment.getProfileDescriptionId(), getUserId())) {
 		// Convert principal name to user record id
-		Number uid = convertUserIdInComment(comment, userId);
+		Number uid = convertUserIdInComment(principalName);
+		if (uid != null) {
+		    // Set user id in comment for convenience of calling method 
+		    comment.setUserId(uid.toString());
+		} else {
+		    throw new ComponentRegistryException("Cannot find user with principal name: " + principalName);
+		}
 		commentsDao.insertComment(comment, uid);
 	    } else {
 		throw new ComponentRegistryException("Cannot insert comment into this registry. Unknown profileId or componentId");
@@ -309,20 +315,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * @return Id (from database)
      * @throws DataAccessException
      */
-    private Number convertUserIdInComment(Comment comment, String uId) throws DataAccessException {
-	Number uid = null;
-	if (comment.getUserId() != null) {
-	    RegistryUser user = userDao.getByPrincipalName(uId);
+    private Number convertUserIdInComment(String principalName) throws DataAccessException {
+	if (principalName != null) {
+	    RegistryUser user = userDao.getByPrincipalName(principalName);
 	    if (user != null) {
-		uid = user.getId();
+		return user.getId();
 	    }
-	} else {
-	    uid = userId;
 	}
-	if (uid != null) {
-	    comment.setUserId(uid.toString());
-	}
-	return uid;
+	return null;
     }
 
     @Override

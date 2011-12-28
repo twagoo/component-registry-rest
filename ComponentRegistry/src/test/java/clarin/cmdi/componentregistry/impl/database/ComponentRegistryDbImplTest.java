@@ -33,6 +33,7 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import java.util.Date;
+import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext.xml"})
@@ -199,6 +200,25 @@ public class ComponentRegistryDbImplTest {
 
     }
 
+    private Comment createComment(ComponentRegistry register, ProfileDescription description) throws Exception {
+	Comment comment = createComment(description);
+	register.registerComment(comment, USER_CREDS.getPrincipalName());
+	assertEquals(1, register.getCommentsInProfile(description.getId()).size());
+	return comment;
+    }
+
+    private Comment createComment(AbstractDescription description) {
+	Comment comment = Comment.createANewComment();
+	if (description instanceof ComponentDescription) {
+	    comment.setComponentDescriptionId(description.getId());
+	} else if (description instanceof ProfileDescription) {
+	    comment.setProfileDescriptionId(description.getId());
+	}
+	comment.setComment("Test comment at " + new Date().toString());
+	comment.setUserName(USER_CREDS.getDisplayName());
+	return comment;
+    }
+
     private ProfileDescription createProfile(ComponentRegistry register) throws Exception {
 	ProfileDescription description = getProfileDesc();
 
@@ -234,7 +254,6 @@ public class ComponentRegistryDbImplTest {
 //	ComponentDescription description = createComponent(registry);
 //
 //    }
-
     @Test
     public void testDeletePublicComponent() throws Exception {
 	ComponentRegistry registry = getComponentRegistryForUser(null);
@@ -349,18 +368,6 @@ public class ComponentRegistryDbImplTest {
 	return description;
     }
 
-    private Comment createComment(AbstractDescription description) {
-	Comment comment = Comment.createANewComment();
-	if (description instanceof ComponentDescription) {
-	    comment.setComponentDescriptionId(description.getId());
-	} else if (description instanceof ProfileDescription) {
-	    comment.setProfileDescriptionId(description.getId());
-	}
-	comment.setComment("Test comment at " + new Date().toString());
-	comment.setUserId(USER_CREDS.getPrincipalName());
-	return comment;
-    }
-
     private ComponentDescription getComponentDesc() {
 	ComponentDescription description = ComponentDescription.createNewDescription();
 	description.setName("Aap");
@@ -377,9 +384,13 @@ public class ComponentRegistryDbImplTest {
     }
 
     private RegistryUser createUser() {
+	return createUser(USER_CREDS);
+    }
+
+    private RegistryUser createUser(UserCredentials credentials) {
 	RegistryUser user = new RegistryUser();
-	user.setName(USER_CREDS.getDisplayName());
-	user.setPrincipalName(USER_CREDS.getPrincipalName());
+	user.setName(credentials.getDisplayName());
+	user.setPrincipalName(credentials.getPrincipalName());
 	return user;
     }
 
@@ -643,5 +654,93 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(RegistryTestHelper.getXml(testComponent2),
 		RegistryTestHelper.getXml(publicRegistry.getMDComponent(description.getId())));
 	assertNull(userRegistry.getMDComponent(description.getId()));
+    }
+
+    @Test
+    public void testRegisterPublicComment() throws Exception {
+	// Associated user should exist when posting a comment
+	RegistryUser user = createUser();
+	userDao.insertUser(user);
+
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	ProfileDescription description = createProfile(register);
+	Comment comment = createComment(register, description);
+	assertNotNull(comment);
+
+	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	assertEquals(1, comments.size());
+
+	comment = comments.get(0);
+	assertEquals("0", comment.getUserId());
+	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
+    }
+
+    @Test
+    public void testRegisterPrivateComment() throws Exception {
+	// Associated user should exist when posting a comment
+	RegistryUser user = createUser();
+	Number uid = userDao.insertUser(user);
+
+	ComponentRegistry register = getComponentRegistryForUser(uid);
+	ProfileDescription description = createProfile(register);
+	Comment comment = createComment(register, description);
+	assertNotNull(comment);
+
+	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	assertEquals(1, comments.size());
+
+	comment = comments.get(0);
+	assertEquals("0", comment.getUserId());
+	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
+    }
+
+    @Test
+    public void testDeleteComment() throws Exception {
+	// Associated user should exist when posting a comment
+	RegistryUser user = createUser();
+	userDao.insertUser(user);
+
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	ProfileDescription description = createProfile(register);
+	Comment comment = createComment(register, description);
+	assertNotNull(comment);
+
+	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	assertEquals(1, comments.size());
+	comment = comments.get(0);
+
+	register.deleteComment(comment.getId(), USER_CREDS.getPrincipal());
+	comments = register.getCommentsInProfile(description.getId());
+	assertEquals(0, comments.size());
+    }
+
+    @Test
+    public void testDeleteSomeoneElsesComment() throws Exception {
+	// User 1 posts a comment...
+
+	RegistryUser user1 = createUser(USER_CREDS);
+	userDao.insertUser(user1);
+
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	ProfileDescription description = createProfile(register);
+	Comment comment = createComment(register, description);
+	assertNotNull(comment);
+
+	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	assertEquals(1, comments.size());
+	comment = comments.get(0);
+
+	// Another user comes along....
+
+	DummyPrincipal user2 = new DummyPrincipal(USER_CREDS.getPrincipalName() + "2");
+	userDao.insertUser(createUser(user2.getCredentials()));
+
+	try {
+	    register.deleteComment(comment.getId(), user2);
+	    // Should not get beyond this
+	    fail("Could delete someone else's comment!");
+	} catch (UserUnauthorizedException ex) {
+	    System.err.print(ex);
+	}
     }
 }

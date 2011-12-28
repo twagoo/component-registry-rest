@@ -155,6 +155,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("COMMENT1", response.get(0).getComment());
 	assertEquals("comment1", response.get(1).getComment());
 	assertEquals("comment2", response.get(2).getComment());
+	
+	assertEquals("J. Unit", response.get(0).getUserName());
     }
 
     @Test
@@ -170,6 +172,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("COMMENT2", response.get(0).getComment());
 	assertEquals("comment4", response.get(1).getComment());
 	assertEquals("comment3", response.get(2).getComment());
+	
+	assertEquals("J. Unit", response.get(0).getUserName());
     }
 
     @Test
