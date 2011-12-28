@@ -9,7 +9,7 @@ import clarin.cmdi.componentregistry.impl.database.UserDao;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
@@ -71,7 +71,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     }
     
     protected void createUserRecord() {
-	User user = new User();
+	RegistryUser user = new RegistryUser();
 	user.setName("Database test user");
 	user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
 	userDao.insertUser(user);

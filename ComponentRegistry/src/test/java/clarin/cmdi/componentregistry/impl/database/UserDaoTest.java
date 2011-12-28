@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import java.util.List;
 import org.junit.runner.RunWith;
 import org.junit.Test;
@@ -41,13 +41,13 @@ public class UserDaoTest {
 
     @Test
     public void testInsertUser() {
-	User testUser = createTestUser();
+	RegistryUser testUser = createTestUser();
 
 	assertEquals(0, userDao.getAllUsers().size());
 	Number newId =  userDao.insertUser(testUser);
 	assertNotNull(newId);
 
-	List<User> users = userDao.getAllUsers();
+	List<RegistryUser> users = userDao.getAllUsers();
 	assertEquals(1, users.size());
 
 	assertEquals(TEST_USER_NAME, users.get(0).getName());
@@ -61,15 +61,15 @@ public class UserDaoTest {
 
     @Test
     public void testGetUserByPrincipalName(){
-	User testUser = createTestUser();
+	RegistryUser testUser = createTestUser();
 	userDao.insertUser(testUser);
 
 	assertNotNull(userDao.getByPrincipalName(TEST_USER_PRINCIPAL_NAME));
 	assertNull(userDao.getByPrincipalName("NON-EXISTING PRINCIPAL NAME"));
     }
 
-    public static User createTestUser(){
-	User testUser = new User();
+    public static RegistryUser createTestUser(){
+	RegistryUser testUser = new RegistryUser();
 	testUser.setName(TEST_USER_NAME);
 	testUser.setPrincipalName(TEST_USER_PRINCIPAL_NAME);
 	return testUser;

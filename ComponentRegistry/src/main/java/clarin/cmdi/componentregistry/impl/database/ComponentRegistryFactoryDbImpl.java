@@ -13,7 +13,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 
 /**
  * Implementation of ComponentRegistryFactory that uses the
@@ -37,9 +37,9 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     public List<ComponentRegistry> getAllUserRegistries() {
 	// TODO: this probably could use some caching
 	try {
-	    List<User> users = userDao.getAllUsers();
+	    List<RegistryUser> users = userDao.getAllUsers();
 	    List<ComponentRegistry> registries = new ArrayList<ComponentRegistry>();
-	    for (User user : users) {
+	    for (RegistryUser user : users) {
 		registries.add(getNewComponentRegistryForUser(user.getId()));
 	    }
 	    return registries;
@@ -56,7 +56,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	    if (credentials != null && !ANONYMOUS_USER.equals(credentials.getPrincipalName())) {
 		String principalName = credentials.getPrincipalName();
 		try {
-		    User user = getOrCreateUser(principalName, credentials.getDisplayName());
+		    RegistryUser user = getOrCreateUser(principalName, credentials.getDisplayName());
 		    result = getNewComponentRegistryForUser(user.getId());
 		} catch (DataAccessException ex) {
 		    LOG.error("Could not retrieve or create user", ex);
@@ -74,7 +74,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     @Override
     public ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userId) {
 	try {
-	    User user = userDao.getById(Integer.parseInt(userId));
+	    RegistryUser user = userDao.getById(Integer.parseInt(userId));
 	    ComponentRegistry result = null;
 	    if (user != null) {
 		if (configuration.isAdminUser(adminPrincipal)) {
@@ -105,12 +105,12 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	return componentRegistry;
     }
 
-    private synchronized User getOrCreateUser(String principalName, String displayName) {
+    private synchronized RegistryUser getOrCreateUser(String principalName, String displayName) {
 	// Try getting it from db
-	User user = userDao.getByPrincipalName(principalName);
+	RegistryUser user = userDao.getByPrincipalName(principalName);
 	if (user == null) {
 	    // Create the new user
-	    user = new User();
+	    user = new RegistryUser();
 	    user.setPrincipalName(principalName);
 	    user.setName(displayName);
 	    userDao.insertUser(user);

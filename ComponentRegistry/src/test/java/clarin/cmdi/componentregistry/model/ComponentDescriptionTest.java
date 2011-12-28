@@ -41,6 +41,7 @@ public class ComponentDescriptionTest {
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyComponent</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
+        expected += "    <commentsCount>0</commentsCount>\n";
         expected += "</componentDescription>\n";
         assertEquals(expected, out.toString());
 

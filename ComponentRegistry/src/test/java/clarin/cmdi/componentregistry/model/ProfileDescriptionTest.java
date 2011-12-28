@@ -44,6 +44,7 @@ public class ProfileDescriptionTest {
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
+        expected += "    <commentsCount>0</commentsCount>\n";
         expected += "    <showInEditor>true</showInEditor>\n";
 	expected += "</profileDescription>\n";
         assertEquals(expected, out.toString());

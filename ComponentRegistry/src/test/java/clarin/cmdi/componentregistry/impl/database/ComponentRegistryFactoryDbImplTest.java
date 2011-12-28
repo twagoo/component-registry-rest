@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.Before;
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
@@ -54,7 +54,7 @@ public class ComponentRegistryFactoryDbImplTest {
 	assertNotNull(componentRegistryFactory.getComponentRegistry(false, null));
 
 	// Get for non-existing user
-	final User testUser = UserDaoTest.createTestUser();
+	final RegistryUser testUser = UserDaoTest.createTestUser();
 	UserCredentials credentials = new DummyPrincipal(testUser.
 		getPrincipalName()).getCredentials();
 

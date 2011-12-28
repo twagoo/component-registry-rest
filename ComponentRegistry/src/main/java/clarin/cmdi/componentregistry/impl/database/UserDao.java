@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -14,11 +14,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class UserDao extends ComponentRegistryDao<User> {
+public class UserDao extends ComponentRegistryDao<RegistryUser> {
 
     private final static String SELECT_BASE = "SELECT " + COLUMN_ID + ", name, principal_name FROM " + TABLE_REGISTRY_USER;
 
-    public List<User> getAllUsers() throws DataAccessException {
+    public List<RegistryUser> getAllUsers() throws DataAccessException {
 	return getList(SELECT_BASE);
     }
 
@@ -28,7 +28,7 @@ public class UserDao extends ComponentRegistryDao<User> {
      * @return User, if it exists
      * @throws DataAccessException
      */
-    public User getByPrincipalName(String principalName) throws DataAccessException {
+    public RegistryUser getByPrincipalName(String principalName) throws DataAccessException {
 	return getFirstOrNull(SELECT_BASE + " WHERE principal_name = ?", principalName);
     }
 
@@ -38,7 +38,7 @@ public class UserDao extends ComponentRegistryDao<User> {
      * @return User, if it exists
      * @throws DataAccessException
      */
-    public User getById(Number id) throws DataAccessException {
+    public RegistryUser getById(Number id) throws DataAccessException {
 	return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", id);
     }
 
@@ -48,7 +48,7 @@ public class UserDao extends ComponentRegistryDao<User> {
      * @return Record id of the inserted user
      * @throws DataAccessException
      */
-    public Number insertUser(User user) throws DataAccessException {
+    public Number insertUser(RegistryUser user) throws DataAccessException {
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
 		withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
 		COLUMN_ID);
@@ -60,14 +60,14 @@ public class UserDao extends ComponentRegistryDao<User> {
     }
 
     @Override
-    protected ParameterizedRowMapper<User> getRowMapper() {
+    protected ParameterizedRowMapper<RegistryUser> getRowMapper() {
 	return rowMapper;
     }
-    private final ParameterizedRowMapper<User> rowMapper = new ParameterizedRowMapper<User>() {
+    private final ParameterizedRowMapper<RegistryUser> rowMapper = new ParameterizedRowMapper<RegistryUser>() {
 
 	@Override
-	public User mapRow(ResultSet rs, int rowNumber) throws SQLException {
-	    User user = new User();
+	public RegistryUser mapRow(ResultSet rs, int rowNumber) throws SQLException {
+	    RegistryUser user = new RegistryUser();
 	    user.setId(rs.getInt(COLUMN_ID));
 	    user.setName(rs.getString("name"));
 	    user.setPrincipalName(rs.getString("principal_name"));

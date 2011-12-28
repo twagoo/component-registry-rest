@@ -25,11 +25,14 @@ import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+import java.util.Date;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext.xml"})
@@ -134,7 +137,7 @@ public class ComponentRegistryDbImplTest {
 
     @Test
     public void testDeleteUserProfile() throws Exception {
-	User user = createUser();
+	RegistryUser user = createUser();
 	Number userId = userDao.insertUser(user);
 	ComponentRegistry registry = getComponentRegistryForUser(userId);
 	ProfileDescription description = createProfile(registry);
@@ -152,7 +155,7 @@ public class ComponentRegistryDbImplTest {
 
     @Test
     public void testGetDeletedDescriptions() throws Exception {
-	User user = createUser();
+	RegistryUser user = createUser();
 	Number userId = userDao.insertUser(user);
 	ComponentRegistry registry = getComponentRegistryForUser(userId);
 	ComponentRegistry publicReg = getComponentRegistryForUser(null);
@@ -225,6 +228,13 @@ public class ComponentRegistryDbImplTest {
 	return description;
     }
 
+//    @Test
+//    public void testPostComponentcomment() throws Exception {
+//	ComponentRegistry registry = getComponentRegistryForUser(null);
+//	ComponentDescription description = createComponent(registry);
+//
+//    }
+
     @Test
     public void testDeletePublicComponent() throws Exception {
 	ComponentRegistry registry = getComponentRegistryForUser(null);
@@ -237,7 +247,7 @@ public class ComponentRegistryDbImplTest {
 
     @Test
     public void testDeleteUserComponent() throws Exception {
-	User user = createUser();
+	RegistryUser user = createUser();
 	Number userId = userDao.insertUser(user);
 	ComponentRegistry registry = getComponentRegistryForUser(userId);
 	ComponentDescription description = createComponent(registry);
@@ -339,6 +349,18 @@ public class ComponentRegistryDbImplTest {
 	return description;
     }
 
+    private Comment createComment(AbstractDescription description) {
+	Comment comment = Comment.createANewComment();
+	if (description instanceof ComponentDescription) {
+	    comment.setComponentDescriptionId(description.getId());
+	} else if (description instanceof ProfileDescription) {
+	    comment.setProfileDescriptionId(description.getId());
+	}
+	comment.setComment("Test comment at " + new Date().toString());
+	comment.setUserId(USER_CREDS.getPrincipalName());
+	return comment;
+    }
+
     private ComponentDescription getComponentDesc() {
 	ComponentDescription description = ComponentDescription.createNewDescription();
 	description.setName("Aap");
@@ -347,15 +369,15 @@ public class ComponentRegistryDbImplTest {
 	description.setDescription("MyDescription");
 	return description;
     }
-    
+
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
 	componentRegistry.setUserId(userId);
 	return componentRegistry;
     }
 
-    private User createUser() {
-	User user = new User();
+    private RegistryUser createUser() {
+	RegistryUser user = new RegistryUser();
 	user.setName(USER_CREDS.getDisplayName());
 	user.setPrincipalName(USER_CREDS.getPrincipalName());
 	return user;
@@ -390,7 +412,7 @@ public class ComponentRegistryDbImplTest {
 
     @Test
     public void testGetNestedRecursiveComponentAsXsd() throws Exception {
-	User user = createUser();
+	RegistryUser user = createUser();
 	Number userId = userDao.insertUser(user);
 	ComponentRegistry register = getComponentRegistryForUser(null);
 
@@ -398,7 +420,7 @@ public class ComponentRegistryDbImplTest {
 	String comp2Id = "component2";
 
 	// Component1 references component2
-	
+
 	String comp1Content = "";
 	comp1Content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	comp1Content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";

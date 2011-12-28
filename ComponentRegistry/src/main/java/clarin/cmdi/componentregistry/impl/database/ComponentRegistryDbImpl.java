@@ -32,7 +32,7 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.UserMapping.User;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
@@ -258,10 +258,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public int registerComment(Comment comment, String userId) throws ComponentRegistryException {
 	try {
-	    // Convert principal name to user record id
-	    Number uid = convertUserIdInComment(comment, userId);
 	    if (comment.getComponentDescriptionId() != null && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())
 		    || comment.getProfileDescriptionId() != null && profileDescriptionDao.isInRegistry(comment.getProfileDescriptionId(), getUserId())) {
+		// Convert principal name to user record id
+		Number uid = convertUserIdInComment(comment, userId);
 		commentsDao.insertComment(comment, uid);
 	    } else {
 		throw new ComponentRegistryException("Cannot insert comment into this registry. Unknown profileId or componentId");
@@ -286,7 +286,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private Number convertUserIdInDescription(AbstractDescription description) throws DataAccessException {
 	Number uid = null;
 	if (description.getUserId() != null) {
-	    User user = userDao.getByPrincipalName(description.getUserId());
+	    RegistryUser user = userDao.getByPrincipalName(description.getUserId());
 	    if (user != null) {
 		uid = user.getId();
 	    }
@@ -312,7 +312,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private Number convertUserIdInComment(Comment comment, String uId) throws DataAccessException {
 	Number uid = null;
 	if (comment.getUserId() != null) {
-	    User user = userDao.getByPrincipalName(uId);
+	    RegistryUser user = userDao.getByPrincipalName(uId);
 	    if (user != null) {
 		uid = user.getId();
 	    }

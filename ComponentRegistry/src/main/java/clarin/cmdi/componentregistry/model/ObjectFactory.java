@@ -19,8 +19,4 @@ public class ObjectFactory {
     public RegisterResponse createRegisterErrorResponse() {
         return new RegisterResponse();
     }
-
-    public UserMapping createUserMapping() {
-        return new UserMapping();
-    }
 }
