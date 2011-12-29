@@ -41,6 +41,8 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     protected abstract String getTableName();
 
     protected abstract String getCMDIdColumn();
+
+    protected abstract String getCommentsForeignKeyColumn();
     /**
      * Class object required to instantiate new description domain objects
      */
@@ -360,6 +362,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	newDescription.setDomainName(rs.getString("domain_name"));
 	newDescription.setGroupName(rs.getString("group_name"));
 	newDescription.setHref(rs.getString("href"));
+	newDescription.setCommentsCount(rs.getInt("columns_count"));
 
 	Object userId = rs.getObject("user_id");
 	if (!rs.wasNull()) {
@@ -403,6 +406,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	sb.append(getOrderByColumn());
 	sb.append(",description,registration_date,creator_name,domain_name,group_name,href,user_id,");
 	sb.append(getCMDIdColumn());
+	sb.append(", (select count(*) from comments where ").append(getCommentsForeignKeyColumn()).append(" = ").append(getCMDIdColumn()).append(") as columns_count");
 	return sb;
     }
 

@@ -59,7 +59,7 @@ public class RegisterResponseTest {
         expected += "        <registrationDate>myDate</registrationDate>\n";
         expected += "        <creatorName>myC</creatorName>\n";
         expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
-        expected += "        <commentsCount>0</commentsCount>\n";
+        expected += "        <commentsCount>2</commentsCount>\n";
         expected += "        <showInEditor>true</showInEditor>\n";
 	expected += "    </description>\n";
         expected += "</registerResponse>\n";
@@ -92,7 +92,7 @@ public class RegisterResponseTest {
         expected += "        <creatorName>myC</creatorName>\n";
         expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "        <groupName>imdi</groupName>\n";
-        expected += "        <commentsCount>0</commentsCount>\n";
+        expected += "        <commentsCount>2</commentsCount>\n";
         expected += "    </description>\n";
         expected += "</registerResponse>\n";
         assertEquals(expected, out.toString());
@@ -112,6 +112,7 @@ public class RegisterResponseTest {
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
         desc.setHref("linkToMyProfile");
+	desc.setCommentsCount(2);
         return desc;
     }
 
@@ -123,6 +124,7 @@ public class RegisterResponseTest {
         desc.setDescription("myD");
         desc.setRegistrationDate("myDate");
         desc.setHref("linkToMyProfile");
+	desc.setCommentsCount(2);
         return desc;
     }
 }

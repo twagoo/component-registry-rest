@@ -29,6 +29,7 @@ public class ProfileDescriptionTest {
         desc.setDomainName("Linguistics");
         desc.setHref("linkToMyProfile");
         desc.setGroupName("MyGroup");
+	desc.setCommentsCount(2);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(desc, out);
@@ -44,7 +45,7 @@ public class ProfileDescriptionTest {
         expected += "    <domainName>Linguistics</domainName>\n";
         expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
-        expected += "    <commentsCount>0</commentsCount>\n";
+        expected += "    <commentsCount>2</commentsCount>\n";
         expected += "    <showInEditor>true</showInEditor>\n";
 	expected += "</profileDescription>\n";
         assertEquals(expected, out.toString());

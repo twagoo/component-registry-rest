@@ -10,20 +10,25 @@ import java.util.List;
 public class ComponentDescriptionDao extends AbstractDescriptionDao<ComponentDescription> {
 
     public ComponentDescriptionDao() {
-        super(ComponentDescription.class);
+	super(ComponentDescription.class);
     }
 
     @Override
     protected String getTableName() {
-        return TABLE_COMPONENT_DESCRIPTION;
+	return TABLE_COMPONENT_DESCRIPTION;
     }
 
     @Override
     protected String getCMDIdColumn() {
-        return "component_id";
+	return "component_id";
+    }
+
+    @Override
+    protected String getCommentsForeignKeyColumn() {
+	return "component_description_id";
     }
 
     public List<ComponentDescription> getPublicComponentDescriptions() {
-        return getPublicDescriptions();
+	return getPublicDescriptions();
     }
 }

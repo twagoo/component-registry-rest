@@ -666,6 +666,7 @@ public class ComponentRegistryDbImplTest {
 	ProfileDescription description = createProfile(register);
 	Comment comment = createComment(register, description);
 	assertNotNull(comment);
+	assertEquals(0, description.getCommentsCount());
 
 	List<Comment> comments = register.getCommentsInProfile(description.getId());
 	assertEquals(1, comments.size());
@@ -673,6 +674,9 @@ public class ComponentRegistryDbImplTest {
 	comment = comments.get(0);
 	assertEquals("0", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
+	
+	description = register.getProfileDescription(description.getId());
+	assertEquals(1, description.getCommentsCount());
     }
 
     @Test
@@ -685,6 +689,7 @@ public class ComponentRegistryDbImplTest {
 	ProfileDescription description = createProfile(register);
 	Comment comment = createComment(register, description);
 	assertNotNull(comment);
+	assertEquals(0, description.getCommentsCount());
 
 	List<Comment> comments = register.getCommentsInProfile(description.getId());
 	assertEquals(1, comments.size());
@@ -692,6 +697,9 @@ public class ComponentRegistryDbImplTest {
 	comment = comments.get(0);
 	assertEquals("0", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
+	
+	description = register.getProfileDescription(description.getId());
+	assertEquals(1, description.getCommentsCount());
     }
 
     @Test
@@ -707,11 +715,15 @@ public class ComponentRegistryDbImplTest {
 
 	List<Comment> comments = register.getCommentsInProfile(description.getId());
 	assertEquals(1, comments.size());
+	description = register.getProfileDescription(description.getId());
+	assertEquals(1, description.getCommentsCount());
+	
 	comment = comments.get(0);
-
 	register.deleteComment(comment.getId(), USER_CREDS.getPrincipal());
 	comments = register.getCommentsInProfile(description.getId());
 	assertEquals(0, comments.size());
+	description = register.getProfileDescription(description.getId());
+	assertEquals(0, description.getCommentsCount());
     }
 
     @Test

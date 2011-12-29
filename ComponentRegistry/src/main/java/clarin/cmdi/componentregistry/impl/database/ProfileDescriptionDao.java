@@ -34,6 +34,11 @@ public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescrip
     }
 
     @Override
+    protected String getCommentsForeignKeyColumn() {
+	return "profile_description_id";
+    }
+
+    @Override
     protected StringBuilder getDescriptionColumnList() {
 	return super.getDescriptionColumnList().append(",show_in_editor");
     }
@@ -59,7 +64,7 @@ public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescrip
     @Override
     protected List getUpdateParameterValues(AbstractDescription description) {
 	return ListUtils.union(
-		super.getUpdateParameterValues(description), 
+		super.getUpdateParameterValues(description),
 		// Add value for 'shown_in_editor' to abstract description
 		Collections.singletonList(((ProfileDescription) description).isShowInEditor()));
     }

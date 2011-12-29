@@ -27,6 +27,7 @@ public class ComponentDescriptionDaoTest extends AbstractDescriptionDaoTest {
 	createTableComponentDescription(jdbcTemplate);
 	createTableXmlContent(jdbcTemplate);
 	createTableRegistryUser(jdbcTemplate);
+	createTableComments(jdbcTemplate);
     }
 
     @Override
