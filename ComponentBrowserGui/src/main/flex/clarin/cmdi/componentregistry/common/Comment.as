@@ -17,7 +17,7 @@ package clarin.cmdi.componentregistry.common
 		
 		public function Comment(comment:XML):void{
 			this.comments = comment.comments;
-			this.commentDate  = comment.commentDate;
+			this.commentDate  = DateUtils.formatDateString(comment.commentDate);
 			this.componentDescriptionId = comment.componentDescriptionId;
 			this.profileDescriptionId = comment.profileDescriptionId;
 			this.id = comment.id;

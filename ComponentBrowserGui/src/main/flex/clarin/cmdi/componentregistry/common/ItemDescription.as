@@ -1,7 +1,5 @@
 package clarin.cmdi.componentregistry.common {
 	import clarin.cmdi.componentregistry.services.Config;
-	
-	import mx.formatters.DateFormatter;
 
 	[Bindable]
 	public class ItemDescription {
@@ -25,8 +23,7 @@ package clarin.cmdi.componentregistry.common {
 
 		private function create(itemDescription:XML, infoUrl:String, isProfileValue:Boolean, isInUserSpace:Boolean):void {
 			this.id = itemDescription.id;
-			this.name = itemDescription.name;
-			this.registrationDate = convertDate(itemDescription.registrationDate);
+			this.name = itemDescription.name;			
 			this.description = itemDescription.description;
 			this.creatorName = itemDescription.creatorName;
 			this.groupName = itemDescription.groupName;
@@ -35,33 +32,12 @@ package clarin.cmdi.componentregistry.common {
 			this.commentsCount = itemDescription.commentsCount;
 			this.isProfile = isProfileValue;
 			this.isInUserSpace = isInUserSpace;
-		}
-
-		/**
-		 * getting ISO-8601 (GMT/UTC timezone) dates from the server. Need to convert this, flex does not support ISO-8601 times out of the box.
-		 */
-		private function convertDate(dateString:String):String {
-			var validator:DateFormatter = new DateFormatter();
-			var s:String = parseDate(dateString);
-			var n:Number = Date.parse(s);
-			this.registrationDateValue = new Date(n);
-			var result:String;
-			if (isNaN(n)) {
-				trace("cannot convert date: " + dateString);
-				result = dateString;
-			} else {
-				validator.formatString = "DD MMMM YYYY H:NN:SS"; //e.g. 02 December 2009 13:48:39 
-				result = validator.format(registrationDateValue);
+			
+			// getting ISO-8601 (GMT/UTC timezone) dates from the server. Need to convert this, flex does not support ISO-8601 times out of the box.
+			this.registrationDateValue = DateUtils.convertDate(itemDescription.registrationDate);
+			if(registrationDateValue){
+				this.registrationDate = DateUtils.convertDateToString(registrationDateValue);
 			}
-			return result;
-		}
-
-		public static function parseDate(value:String):String {
-			var dateStr:String = value;
-			dateStr = dateStr.replace(/-/g, "/");
-			dateStr = dateStr.replace("T", " ");
-			dateStr = dateStr.replace("+00:00", " GMT-0000");
-			return dateStr;
 		}
 
 		public function createProfile(itemDescription:XML, isInUserSpace:Boolean):void {
