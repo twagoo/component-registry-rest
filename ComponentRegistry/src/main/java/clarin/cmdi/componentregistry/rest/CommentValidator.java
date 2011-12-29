@@ -57,7 +57,7 @@ class CommentValidator implements Validator {
      * @param comment, the comment to be validated
      */
     private void validateComment(Comment comment) {
-	if (comment.getComment() == null | comment.getComment().isEmpty()) {
+	if (comment.getComment() == null || comment.getComment().isEmpty()) {
 	    errorMessages.add(COMMENT_SPECIFICATION_ERROR + "comment has to be filled in");
 	}
 	if (description.isProfile()) {

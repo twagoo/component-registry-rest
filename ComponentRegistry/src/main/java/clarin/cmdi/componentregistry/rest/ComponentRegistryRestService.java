@@ -267,7 +267,6 @@ public class ComponentRegistryRestService {
     @Path("/profiles/{profileId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Comment getSpecifiedCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
-	long start = System.currentTimeMillis();
 	LOG.info(" Comments of component with id" + commentId + " are requested.");
 	return getRegistry(userspace).getSpecifiedCommentInProfile(profileId, commentId);
     }
