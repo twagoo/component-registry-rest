@@ -63,8 +63,8 @@ public class CommentResponseTest {
 	expected += "        <comments>Name</comments>\n";
 	expected += "        <commentDate>myDate</commentDate>\n";
 	expected += "        <profileDescriptionId>myD</profileDescriptionId>\n";
-	expected += "        <userId>myU</userId>\n";
 	expected += "        <id>myId</id>\n";
+	expected += "        <userName>J. Unit</userName>\n";
 	expected += "    </comment>\n";
 	expected += "</commentResponse>\n";
 	assertEquals(expected, out.toString());
@@ -81,6 +81,7 @@ public class CommentResponseTest {
 	com.setUserId("myU");
 	com.setProfileDescriptionId("myD");
 	com.setCommentDate("myDate");
+	com.setUserName("J. Unit");
 	return com;
     }
 }

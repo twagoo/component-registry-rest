@@ -21,6 +21,7 @@ public class CommentTest {
         comment1.setId("1");
         comment1.setProfileDescriptionId("clarin.eu:cr1:p_1297242111880");
         comment1.setUserId("8");
+	comment1.setUserName("J. Unit");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(comment1, out);
@@ -30,8 +31,8 @@ public class CommentTest {
         expected += "    <comments>tester</comments>\n";
         expected += "    <commentDate>myDate</commentDate>\n";
         expected += "    <profileDescriptionId>clarin.eu:cr1:p_1297242111880</profileDescriptionId>\n";
-        expected += "    <userId>8</userId>\n";
         expected += "    <id>1</id>\n";
+        expected += "    <userName>J. Unit</userName>\n";
         expected += "</comment>\n";
         assertEquals(expected, out.toString());
 
@@ -48,6 +49,7 @@ public class CommentTest {
         comment1.setId("1");
         comment1.setComponentDescriptionId("clarin.eu:cr1:c_1297242111880");
         comment1.setUserId("8");
+	comment1.setUserName("J. Unit");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         MDMarshaller.marshal(comment1, out);
@@ -57,8 +59,8 @@ public class CommentTest {
         expected += "    <comments>tester</comments>\n";
         expected += "    <commentDate>myDate</commentDate>\n";
         expected += "    <componentDescriptionId>clarin.eu:cr1:c_1297242111880</componentDescriptionId>\n";
-        expected += "    <userId>8</userId>\n";
         expected += "    <id>1</id>\n";
+        expected += "    <userName>J. Unit</userName>\n";
         expected += "</comment>\n";
         assertEquals(expected, out.toString());
 
