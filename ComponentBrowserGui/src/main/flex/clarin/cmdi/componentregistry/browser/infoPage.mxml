@@ -5,7 +5,7 @@
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*">
 
 	<mx:XML id="cmdComponent"/>
-	<common:ItemDescription id="itemDescription"/>
+	<!--<common:ItemDescription id="itemDescription"/>-->
 	<mx:String id="headerLabel"/>
 
 	<mx:HBox horizontalAlign="center"
@@ -27,11 +27,33 @@
 		<browser:xmlBrowsePanel id="viewPanel"
 								label="view"
 								cmdComponent="{cmdComponent}"
-								itemDescription="{itemDescription}"/>
+								itemDescription="{_itemDescription}"/>
 		<browser:xmlPanel id="xmlPanel"
 						  label="xml"
 						  cmdComponent="{cmdComponent}"/>
-
+		<browser:CommentsPanel id="commentsPanel"
+							   label="{commentsLabel}"
+							   itemDescription="{_itemDescription}" 
+							   show="commentsPanel.load()" />
 	</mx:ViewStack>
-
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.common.ItemDescription;
+			
+			[Bindable]
+			private var _itemDescription:ItemDescription;
+			
+			public function set itemDescription(itemDescription:ItemDescription):void{
+				_itemDescription = itemDescription;
+				commentsPanel.label = commentsLabel;
+				if(infoViewStack.selectedChild == commentsPanel){
+					commentsPanel.load();
+				}
+			}
+			
+			private function get commentsLabel():String{
+				return "Comments (" + _itemDescription.commentsCount + ")";
+			} 
+		]]>
+	</mx:Script>
 </mx:VBox>

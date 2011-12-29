@@ -14,7 +14,6 @@ package clarin.cmdi.componentregistry.services
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
 	
-	[Event(name="itemsLoaded", type="flash.events.Event")]
 	public class ComponentRegistryService extends EventDispatcher {
 		private var service:HTTPService;
 		

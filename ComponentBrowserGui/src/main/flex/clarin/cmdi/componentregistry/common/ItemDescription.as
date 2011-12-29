@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.common {
 	import clarin.cmdi.componentregistry.services.Config;
-
+	
 	import mx.formatters.DateFormatter;
 
 	[Bindable]
@@ -17,6 +17,7 @@ package clarin.cmdi.componentregistry.common {
 		public var registrationDate:String;
 		public var registrationDateValue:Date;
 		public var isInUserSpace:Boolean;
+		public var commentsCount:int;
 
 		public function ItemDescription() {
 
@@ -30,7 +31,8 @@ package clarin.cmdi.componentregistry.common {
 			this.creatorName = itemDescription.creatorName;
 			this.groupName = itemDescription.groupName;
 			this.domainName = itemDescription.domainName;
-			this.dataUrl = infoUrl + itemDescription.id
+			this.dataUrl = infoUrl + itemDescription.id;
+			this.commentsCount = itemDescription.commentsCount;
 			this.isProfile = isProfileValue;
 			this.isInUserSpace = isInUserSpace;
 		}
