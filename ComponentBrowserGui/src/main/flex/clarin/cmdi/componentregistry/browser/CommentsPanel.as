@@ -11,6 +11,7 @@ package clarin.cmdi.componentregistry.browser
 	
 	public class CommentsPanel extends VBox
 	{
+		[Bindable]
 		private var _itemDescription:ItemDescription;
 		private var service:CommentListService;
 		
@@ -23,6 +24,12 @@ package clarin.cmdi.componentregistry.browser
 		
 		public function load():void{
 			removeAllChildren();
+			
+			var postPanel:commentPostPanel = new commentPostPanel();
+			postPanel.itemDescription = _itemDescription;
+			
+			addChild(postPanel);
+			
 			service = new CommentListService(_itemDescription, _itemDescription.isInUserSpace);
 			service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
 			service.load();

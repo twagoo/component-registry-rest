@@ -44,7 +44,8 @@ package clarin.cmdi.componentregistry.services {
 			
 			comments = new ArrayCollection();
 			for each (var node:XML in nodes) {
-				var comment:Comment = new Comment(node);
+				var comment:Comment = new Comment();
+				comment.create(node);
 				comments.addItem(comment);
 			}
 			comments.refresh();

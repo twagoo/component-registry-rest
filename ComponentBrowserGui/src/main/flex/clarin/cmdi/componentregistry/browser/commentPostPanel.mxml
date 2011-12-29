@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="300" xmlns:common="clarin.cmdi.componentregistry.common.*">
+	<mx:HBox x="54" y="137" width="100%">
+		<mx:Label text="User name:"/>
+		<mx:TextInput id="userName"/>
+	</mx:HBox>
+	<common:ItemDescription id="itemDescription" />
+	
+	<mx:TextArea width="100%" id="comments"/>
+	<mx:Button label="Submit" 
+			   id="submitButton"
+			   click="postComment()"
+			   />
+	<mx:HRule width="100%" />
+	
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.common.Comment;
+			import clarin.cmdi.componentregistry.services.CommentPostService;
+			
+			private var commentPostService:CommentPostService = new CommentPostService();
+			
+			private function postComment():void{
+				var comment:Comment = new Comment();
+				comment.userName = userName.text;
+				comment.comments = comments.text;
+				if(itemDescription.isProfile){
+					comment.profileDescriptionId = itemDescription.id;
+				} else{
+					comment.componentDescriptionId = itemDescription.id;
+				}
+				commentPostService.upload(comment);
+			}
+		]]>
+	</mx:Script>
+	
+</mx:VBox>
