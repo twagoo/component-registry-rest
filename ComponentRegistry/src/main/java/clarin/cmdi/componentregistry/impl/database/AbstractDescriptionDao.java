@@ -406,7 +406,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	sb.append(getOrderByColumn());
 	sb.append(",description,registration_date,creator_name,domain_name,group_name,href,user_id,");
 	sb.append(getCMDIdColumn());
-	sb.append(", (select count(*) from comments where ").append(getCommentsForeignKeyColumn()).append(" = ").append(getCMDIdColumn()).append(") as columns_count");
+	sb.append(", (SELECT COUNT(*) FROM comments WHERE ").append(getCommentsForeignKeyColumn()).append(" = ").append(getCMDIdColumn()).append(") AS columns_count");
 	return sb;
     }
 
