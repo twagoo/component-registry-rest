@@ -34,15 +34,18 @@ package clarin.cmdi.componentregistry.browser
 			header.addChild(userNameLabel);
 			header.addChild(dateLabel);
 			
-			userNameLabel.setStyle("font-weight","bold");
+			userNameLabel.setStyle("fontWeight","bold");
+			userNameLabel.setStyle("textDecoration","underline");
 			userNameLabel.percentWidth = 70;
+			dateLabel.setStyle("textAlign", "right");
+			dateLabel.setStyle("fontWeight","bold");
 			dateLabel.percentWidth = 30;
 			
 			addChild(header);
 			
 			commentText.percentWidth = 100;
 			addChild(commentText);
-			
+
 			var rule:HRule = new HRule();
 			rule.percentWidth = 100;
 			addChild(rule);

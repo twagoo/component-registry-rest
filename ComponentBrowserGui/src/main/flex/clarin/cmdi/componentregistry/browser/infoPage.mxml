@@ -5,7 +5,6 @@
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*">
 
 	<mx:XML id="cmdComponent"/>
-	<!--<common:ItemDescription id="itemDescription"/>-->
 	<mx:String id="headerLabel"/>
 
 	<mx:HBox horizontalAlign="center"

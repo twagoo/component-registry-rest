@@ -4,7 +4,7 @@ Application {
 }
 
 ToggleButtonBar {
-   buttonWidth: 90;
+   buttonWidth: 120;
    horizontalGap: -1;
 }
 
