@@ -38,7 +38,7 @@
 				} else{
 					comment.componentDescriptionId = itemDescription.id;
 				}
-				commentPostService.upload(comment);
+				commentPostService.upload(comment, itemDescription);
 			}
 
 			protected function postCompleteHandler(event:Event):void
