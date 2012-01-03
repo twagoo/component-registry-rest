@@ -14,3 +14,15 @@ Procedure for updating
   execute the upgrade scripts incrementally
 
 - Then redeploy the WAR and start the application
+
+Version specific issues
+-----------------------
+
+=== 1.x -> 1.11 ==
+
+- The following should be added to the context fragment for the Component
+  Registry:
+    <Parameter
+	name="componentRegistryAdminUsers"
+	value="space-separated-list-of-admin-eppns"/>
+

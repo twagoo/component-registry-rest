@@ -37,7 +37,17 @@ Configuring the application
 Some aspects could require additional configuration depending on the
 context:
 
+- Admin users. The application expects a context parameter
+  'componentRegistryAdminUsers' to be set as a white-space separated list of
+  users that should be granted access to the administration interface. So,
+  make sure the following is set in the relevant context fragment:
+
+    <Parameter 
+        name="componentRegistryAdminUsers" 
+	value="joe.admin@mpi.nl someone.else@clarin.eu"/>
+
 - Shibboleth authentication. ComponentRegistry uses the SHHAA filter, which
   is configured in WEB-INF/shhaa.xml. Make sure SSO and SLO URL's are correct.
+
 - Misc configuration including admin users (has sensible defaults for
   catalog server): WEB-INF/spring-config/component-registry.xml
