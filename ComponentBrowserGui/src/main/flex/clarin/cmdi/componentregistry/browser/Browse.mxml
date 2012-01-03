@@ -190,7 +190,7 @@
 											 browserItemSelected="{loadComponentInfoPage(event)}"
 											 itemToScrollTo="{selectedComponentItem}"
 											 width="100%"
-											 height="50%"
+											 height="70%"
 											 browseMenu="{componentsMenu}"/>
 				<browser:ComponentInfoPage id="componentInfoPage"
 										   component="{componentSrv.component}"
