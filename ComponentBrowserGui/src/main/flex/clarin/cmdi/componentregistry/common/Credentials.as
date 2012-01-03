@@ -1,5 +1,4 @@
 package clarin.cmdi.componentregistry.common {
-	import mx.core.Application;
 
 	public class Credentials {
 		private static var _instance:Credentials = new Credentials();
@@ -12,7 +11,7 @@ package clarin.cmdi.componentregistry.common {
 				throw new Error("Config can only be accessed through Credentials.instance");
 			}
 		}
-        
+		
         public function isLoggedIn():Boolean {
             return userName && userName != "" && userName != "anonymous";
         }

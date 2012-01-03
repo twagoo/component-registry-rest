@@ -16,10 +16,10 @@ package clarin.cmdi.componentregistry.services {
 	
 	import ru.inspirit.net.MultipartURLLoader;
 	
-	[Event(name="PostComplete", type="flash.events.Event")]
+	[Event(name="postComplete", type="flash.events.Event")]
 	public class CommentPostService extends EventDispatcher{
 		
-		public static const POST_COMPLETE:String = "PostComplete";
+		public static const POST_COMPLETE:String = "postComplete";
 		
 		public function CommentPostService() {
 		}

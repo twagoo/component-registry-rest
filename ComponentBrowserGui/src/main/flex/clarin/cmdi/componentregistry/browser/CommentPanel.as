@@ -25,9 +25,7 @@ package clarin.cmdi.componentregistry.browser
 		}
 		
 		private function initLayout():void{
-			this.percentWidth = 80;
-			this.maxWidth = 600;
-			
+			this.width = 400;
 			
 			var header:HBox = new HBox();
 			header.percentWidth = 100;
