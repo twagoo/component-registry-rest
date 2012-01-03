@@ -2,7 +2,8 @@
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
-		 xmlns:browser="clarin.cmdi.componentregistry.browser.*">
+		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
+		 >
 
 	<mx:XML id="cmdComponent"/>
 	<mx:String id="headerLabel"/>
@@ -33,11 +34,16 @@
 		<browser:CommentsPanel id="commentsPanel"
 							   label="{commentsLabel}"
 							   itemDescription="{_itemDescription}" 
-							   show="commentsPanel.load()" />
+							   show="commentsPanel.load()"
+							   commentsLoaded="commentsLoadedHandler(event)"
+							   />
 	</mx:ViewStack>
 	<mx:Script>
 		<![CDATA[
 			import clarin.cmdi.componentregistry.common.ItemDescription;
+			import clarin.cmdi.componentregistry.services.CommentListService;
+			
+			import mx.events.FlexEvent;
 			
 			[Bindable]
 			private var _itemDescription:ItemDescription;
@@ -52,7 +58,13 @@
 			
 			private function get commentsLabel():String{
 				return "Comments (" + _itemDescription.commentsCount + ")";
-			} 
+			}
+			
+			private function commentsLoadedHandler(event:Event):void {
+				// After loading, re-create string for comments label because number of comments might have changed (e.g. after a post)
+				commentsPanel.label = commentsLabel;
+			}
+
 		]]>
 	</mx:Script>
 </mx:VBox>

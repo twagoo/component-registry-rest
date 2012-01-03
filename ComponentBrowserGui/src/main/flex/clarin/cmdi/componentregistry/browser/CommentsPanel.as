@@ -12,12 +12,19 @@ package clarin.cmdi.componentregistry.browser
 	import mx.controls.HRule;
 	import mx.controls.Label;
 	
+	[Event(name="commentsLoaded",type="flash.events.Event")]
 	public class CommentsPanel extends VBox
 	{
+		public static const COMMENTS_LOADED:String = "commentsLoaded";
+		
 		[Bindable]
 		private var _itemDescription:ItemDescription;
 		private var service:CommentListService;
 		private var commentsBox:VBox;
+		
+		public function get commentListService():CommentListService {
+			return service;
+		}
 		
 		public function set itemDescription(itemDescription:ItemDescription):void {
 			_itemDescription = itemDescription;
@@ -58,12 +65,15 @@ package clarin.cmdi.componentregistry.browser
 		
 		private function commentsLoaded(event:Event):void{
 			if(service) {
-				if(service.comments.length > 0){
-				for each(var comment:Comment in service.comments){
-					var panel:CommentPanel = new CommentPanel(comment);
-					commentsBox.addChild(panel);
-				}
-				} else{
+				var commentsCount:int = service.comments.length;
+				_itemDescription.commentsCount = commentsCount;
+				
+				if(commentsCount > 0) {
+					for each(var comment:Comment in service.comments) {
+						var panel:CommentPanel = new CommentPanel(comment);
+						commentsBox.addChild(panel);
+					}
+				} else {
 					var noCommentsPostedLabel:Label = new Label();
 					noCommentsPostedLabel.text = "No comments have been posted thus far.";
 					commentsBox.addChild(noCommentsPostedLabel);
@@ -73,6 +83,7 @@ package clarin.cmdi.componentregistry.browser
 					commentsBox.addChild(rule);
 				}
 			}
+			dispatchEvent(new Event(COMMENTS_LOADED));
 		}
 		
 		private function postCompleteHandler(event:Event):void{
