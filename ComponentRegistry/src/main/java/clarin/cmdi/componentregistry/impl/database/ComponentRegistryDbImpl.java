@@ -268,6 +268,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		} else {
 		    throw new ComponentRegistryException("Cannot find user with principal name: " + principalName);
 		}
+		// Set date to current date
+		comment.setCommentDate(Comment.createNewDate());
 		commentsDao.insertComment(comment, uid);
 	    } else {
 		throw new ComponentRegistryException("Cannot insert comment into this registry. Unknown profileId or componentId");

@@ -691,7 +691,7 @@ public class ComponentRegistryRestService {
 	    ComponentDescription description = registry.getComponentDescription(componentId);
 	    if (description != null) {
 		LOG.info("Trying to register comment to " + componentId);
-		return registerComment(input, registry, userspace, description, principal);
+		return registerComment(input, registry, userspace, description, principal, userCredentials);
 	    } else {
 		LOG.error("Attempt to post comment on nonexistent component id (" + componentId + ") failed.");
 		return Response.serverError().entity("Invalid id, cannot comment on nonexistent component").build();
@@ -717,7 +717,7 @@ public class ComponentRegistryRestService {
 	    ProfileDescription description = registry.getProfileDescription(profileId);
 	    if (description != null) {
 		LOG.info("Trying to register comment to " + profileId);
-		return registerComment(input, registry, userspace, description, principal);
+		return registerComment(input, registry, userspace, description, principal, userCredentials);
 	    } else {
 		LOG.error("Attempt to post comment on nonexistent profile id (" + profileId + ") failed.");
 		return Response.serverError().entity("Invalid id, cannot comment on nonexistent profile").build();
@@ -777,7 +777,7 @@ public class ComponentRegistryRestService {
     }
 
     private Response registerComment(InputStream input, ComponentRegistry registry, boolean userspace,
-	    AbstractDescription description, Principal principal) {
+	    AbstractDescription description, Principal principal, UserCredentials userCredentials) {
 	try {
 	    CommentValidator validator = new CommentValidator(input, description);
 	    CommentResponse response = new CommentResponse();
@@ -786,6 +786,16 @@ public class ComponentRegistryRestService {
 	    if (response.getErrors().isEmpty()) {
 		Comment com = validator.getCommentSpec();
 		//int returnCode = action.executeComment(com, response, registry, principal.getName());
+
+		// If user name is left empty, fill it using the user's display name
+		if (null == com.getUserName() || "".equals(com.getUserName())) {
+		    if (userCredentials != null) {
+			com.setUserName(userCredentials.getDisplayName());
+		    } else {
+			com.setUserName(principal.getName());
+		    }
+		}
+
 		int returnCode = registry.registerComment(com, principal.getName());
 		if (returnCode == 0) {
 		    response.setRegistered(true);
