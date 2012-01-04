@@ -201,7 +201,6 @@ public final class RegistryTestHelper {
         comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
         comContent += "    <profileDescriptionId>" + profileId + "</profileDescriptionId>\n";
         comContent += "    <userName>J. Unit</userName>\n";
-        comContent += "    <id>1</id>\n";
         comContent += "</comment>\n";
         return comContent;
     }
@@ -214,7 +213,6 @@ public final class RegistryTestHelper {
         comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
         comContent += "     <componentDescriptionId>" + componentId + "</componentDescriptionId>";
         comContent += "    <userName>J. Unit</userName>\n";
-        comContent += "    <id>1</id>\n";
         comContent += "</comment>\n";
         return comContent;
     }

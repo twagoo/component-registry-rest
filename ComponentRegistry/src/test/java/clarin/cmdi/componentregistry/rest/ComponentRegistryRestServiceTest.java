@@ -37,6 +37,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import org.springframework.util.Assert;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext.xml"})
@@ -883,7 +884,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertNotNull(comment);
 	assertEquals("Actual", comment.getComment());
 	assertEquals("J. Unit", comment.getUserName());
-	assertNotNull(comment.getCommentDate());
+	Assert.hasText(comment.getCommentDate());
+	Assert.hasText(comment.getId());
 	
 	// User id should not be serialized!
 	assertEquals(null, comment.getUserId());
