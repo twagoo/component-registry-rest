@@ -25,13 +25,14 @@
 			private var simpleValueSchemeDataProvider:ArrayCollection = new ArrayCollection([{label: "anyURI", data: "anyURI"},
 				{label: "boolean", data: "boolean"},
 				{label: "date", data: "date"},
+				{label: "time", data: "time"},
 				{label: "decimal", data: "decimal"},
 				{label: "float", data: "float"},
 				{label: "gDay", data: "gDay"},
 				{label: "gMonth", data: "gMonth"},
 				{label: "gYear", data: "gYear"},
 				{label: "string", data: "string"},
-				{label: "time", data: "time"},]);
+				{label: "dateTime", data: "dateTime"},]);
 
 			private var isocatPopup:IsocatSearchPopUp;
 
