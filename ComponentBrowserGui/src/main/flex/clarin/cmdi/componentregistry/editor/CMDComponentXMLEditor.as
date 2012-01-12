@@ -337,7 +337,5 @@ package clarin.cmdi.componentregistry.editor {
 			startOverButton.text = "start over";
 			return startOverButton;
 		}
-
 	}
-
 }

@@ -1,8 +1,6 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
 import clarin.cmdi.componentregistry.common.ItemDescription;
-import clarin.cmdi.componentregistry.editor.model.CMDComponent;
-import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
@@ -32,7 +30,7 @@ private var componentsSrv:ComponentListService = ComponentListService.getInstanc
 public var cmdComponent:XML;
 
 [Bindable]
-private var cmdSpec:CMDSpec = CMDSpec.createEmptyProfile();
+private var cmdSpec:CMDSpec;
 
 [Bindable]
 private var browserColumns:BrowserColumns = new BrowserColumns();
@@ -42,6 +40,7 @@ private var uploadService:UploadService = new UploadService();
 
 
 public function init():void {
+	cmdSpec  = CMDSpec.createEmptyProfile();
 	profileSrv.addEventListener(ProfileInfoService.PROFILE_LOADED, profileLoaded);
 	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
 	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
@@ -164,4 +163,3 @@ private function initPaletteOverview():void {
 public function getType():String {
 	return Config.VIEW_EDIT;
 }
-
