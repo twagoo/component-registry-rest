@@ -28,8 +28,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import net.sf.saxon.event.SaxonOutputKeys;
-
 import org.apache.xml.resolver.tools.CatalogResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +39,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import net.sf.saxon.lib.SaxonOutputKeys;
 
 public class MDMarshaller {
 

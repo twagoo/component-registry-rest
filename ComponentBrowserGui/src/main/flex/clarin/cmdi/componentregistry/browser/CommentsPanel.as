@@ -31,7 +31,11 @@ package clarin.cmdi.componentregistry.browser
 		}
 		
 		public function CommentsPanel()
-		{ }
+		{ 
+			this.setStyle("paddingLeft", 5);
+			this.setStyle("paddingTop", 5);
+			this.setStyle("paddingBottom", 5);
+		}
 		
 		public function load():void{
 			removeAllChildren();
