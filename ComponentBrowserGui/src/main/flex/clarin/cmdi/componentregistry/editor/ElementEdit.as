@@ -20,7 +20,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.core.UIComponent;
 
 	[Event(name="removeElement", type="flash.events.Event")]
-	public class ElementEdit extends Form {
+	public class ElementEdit extends Form implements CMDValidator {
 		public static const REMOVE_ELEMENT_EVENT:String = "removeElement";
 		private var _element:CMDComponentElement;
 		private var _parentComponent:CMDComponent;
@@ -152,6 +152,21 @@ package clarin.cmdi.componentregistry.editor {
 				})
 			addChild(nameInput);
 		}
-
+		
+		
+		public function validate():Boolean{
+			// Parent must not have another component or element of the same name
+			for each (var component:CMDComponent in _parentComponent.cmdComponents) {
+				if(component.name == _element.name){
+					return false;
+				} 	
+			}
+			for each (var element:CMDComponentElement in _parentComponent.cmdElements) {
+				if(element != _element && element.name == _element.name){
+					return false;
+				}
+			}
+			return true;
+		}
 	}
 }
