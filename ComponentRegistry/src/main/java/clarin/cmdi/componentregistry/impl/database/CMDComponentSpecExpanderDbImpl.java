@@ -11,7 +11,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 public class CMDComponentSpecExpanderDbImpl extends CMDComponentSpecExpander {
 
     private ComponentRegistryDbImpl dbImplRegistry;
-
+    
     public CMDComponentSpecExpanderDbImpl(ComponentRegistryDbImpl registry) {
         super(registry);
         dbImplRegistry = registry;

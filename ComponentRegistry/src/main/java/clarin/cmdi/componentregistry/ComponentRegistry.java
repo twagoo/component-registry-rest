@@ -189,5 +189,10 @@ public interface ComponentRegistry {
      */
     public void deleteComment(String commentId, Principal principal) throws IOException, ComponentRegistryException, UserUnauthorizedException,
 	    DeleteFailedException;
-;
+
+    /**
+     * 
+     * @return a component specification expander for this registry
+     */
+    public CMDComponentSpecExpander getExpander();
 }

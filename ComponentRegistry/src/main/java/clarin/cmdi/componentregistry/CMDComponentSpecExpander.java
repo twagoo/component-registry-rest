@@ -4,6 +4,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
@@ -22,7 +23,11 @@ public abstract class CMDComponentSpecExpander {
 	this.registry = registry;
     }
 
-    private void expandNestedComponent(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
+    public void expandNestedComponent(List<CMDComponentType> cmdComponents, String id) throws ComponentRegistryException {
+	expandNestedComponent(cmdComponents, new HashSet<String>(Collections.singleton(id)));
+    }
+
+    public void expandNestedComponent(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
 	expandNestedComponent(cmdComponents, new HashSet<String>());
     }
 
@@ -91,7 +96,7 @@ public abstract class CMDComponentSpecExpander {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedComponent(componentId);//registry.getUncachedComponent(componentId);
 	CMDComponentType cmdComponentType = getComponentTypeOfAComponent(result);
-	expandNestedComponent(cmdComponentType.getCMDComponent());
+	expandNestedComponent(cmdComponentType.getCMDComponent(), componentId);
 	return result;
     }
 
@@ -99,17 +104,16 @@ public abstract class CMDComponentSpecExpander {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedProfile(profileId);//registry.getUncachedProfile(profileId);
 	List<CMDComponentType> cmdComponents = result.getCMDComponent();
-	expandNestedComponent(cmdComponents);
+	expandNestedComponent(cmdComponents, profileId);
 	return result;
     }
-    
+
 //    protected CMDComponentSpec expandComment(String commentId) throws ComponentRegistryException {
 //        CMDComponentSpec result = getUncachedComment(commentId);
 //        List<CMDComponentType> cmdComponents = result.getCMDComponent();
 //        expandNestedComponent(cmdComponents);
 //        return result;
 //    }
-
     /**
      * Get uncached component from "this" registry and possibly from public registry. Note: "this" registry can be a user registry.
      * @param componentId
@@ -117,6 +121,5 @@ public abstract class CMDComponentSpecExpander {
     protected abstract CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException;
 
     protected abstract CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException;
-    
 //    protected abstract CMDComponentSpec getUncachedComment(String commentId) throws ComponentRegistryException;
 }

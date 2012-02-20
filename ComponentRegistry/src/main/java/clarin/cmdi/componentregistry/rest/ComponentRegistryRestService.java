@@ -753,13 +753,23 @@ public class ComponentRegistryRestService {
 	    validate(response, descriptionValidator, validator);
 	    if (response.getErrors().isEmpty()) {
 		CMDComponentSpec spec = validator.getCMDComponentSpec();
-		int returnCode = action.execute(desc, spec, response, registry);
-		if (returnCode == 0) {
-		    response.setRegistered(true);
-		    response.setDescription(desc);
-		} else {
+		try {
+		    // Expand to check for recursion
+		    registry.getExpander().expandNestedComponent(spec.getCMDComponent(), desc.getId());
+
+		    // Add profile
+		    int returnCode = action.execute(desc, spec, response, registry);
+		    if (returnCode == 0) {
+			response.setRegistered(true);
+			response.setDescription(desc);
+		    } else {
+			response.setRegistered(false);
+			response.addError("Unable to register at this moment. Internal server error.");
+		    }
+		} catch (ComponentRegistryException ex) {
+		    // Recursion detected
 		    response.setRegistered(false);
-		    response.addError("Unable to register at this moment. Internal server error.");
+		    response.addError("Error while expanding specification. " + ex.getMessage());
 		}
 	    } else {
 		LOG.info("Registration failed with validation errors:" + Arrays.toString(response.getErrors().toArray()));

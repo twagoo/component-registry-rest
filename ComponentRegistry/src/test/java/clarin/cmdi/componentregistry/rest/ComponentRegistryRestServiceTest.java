@@ -156,7 +156,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("COMMENT1", response.get(0).getComment());
 	assertEquals("comment1", response.get(1).getComment());
 	assertEquals("comment2", response.get(2).getComment());
-	
+
 	assertEquals("J. Unit", response.get(0).getUserName());
     }
 
@@ -173,7 +173,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("COMMENT2", response.get(0).getComment());
 	assertEquals("comment4", response.get(1).getComment());
 	assertEquals("comment3", response.get(2).getComment());
-	
+
 	assertEquals("J. Unit", response.get(0).getUserName());
     }
 
@@ -725,6 +725,45 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
+    public void testCreateComponentWithRecursion() throws Exception {
+	// Create new componet
+	FormDataMultiPart form = createFormData(RegistryTestHelper.getComponentTestContent());
+	ClientResponse cResponse = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+	assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+	RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
+	assertTrue(response.isRegistered());
+	ComponentDescription desc = (ComponentDescription) response.getDescription();
+
+	// Re-define with self-recursion
+	String compContent = "";
+	compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	compContent += "\n";
+	compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	compContent += "    xsi:noNamespaceSchemaLocation=\"../../general-component-schema.xsd\">\n";
+	compContent += "    \n";
+	compContent += "    <Header/>\n";
+	compContent += "    \n";
+	compContent += "    <CMD_Component name=\"Nested\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+	compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	compContent += "        <CMD_Component ComponentId=\"" + desc.getId() + "\" name=\"Recursive\" CardinalityMin=\"1\" CardinalityMax=\"1\" />\n";
+	compContent += "    </CMD_Component>\n";
+	compContent += "\n";
+	compContent += "</CMD_ComponentSpec>\n";
+
+	// Update component
+	form = createFormData(RegistryTestHelper.getComponentContent(compContent), "UPDATE DESCRIPTION!");
+	cResponse = getAuthenticatedResource(
+		getResource().path("/registry/components/" + desc.getId() + "/update").queryParam(USERSPACE_PARAM, "true")).type(
+		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+	assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+	response = cResponse.getEntity(RegisterResponse.class);
+	assertFalse("Recursive definition should fail", response.isRegistered());
+	assertEquals("There should be an error message for the recursion", 1, response.getErrors().size());
+	assertTrue("There error message should specify the point of recursion", response.getErrors().get(0).contains("already contains " + desc.getId()));
+
+    }
+
+    @Test
     public void testUpdateComponent() throws Exception {
 	List<ComponentDescription> components = getUserComponents();
 	assertEquals("user registered components", 0, components.size());
@@ -886,7 +925,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("J. Unit", comment.getUserName());
 	Assert.hasText(comment.getCommentDate());
 	Assert.hasText(comment.getId());
-	
+
 	// User id should not be serialized!
 	assertEquals(null, comment.getUserId());
     }

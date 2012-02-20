@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -624,5 +625,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	} catch (DataAccessException ex) {
 	    throw new DeleteFailedException("Database access error while trying to delete component", ex);
 	}
+    }
+
+    @Override
+    public CMDComponentSpecExpander getExpander() {
+	return new CMDComponentSpecExpanderDbImpl(this);
     }
 }
