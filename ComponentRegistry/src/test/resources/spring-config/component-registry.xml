@@ -4,21 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" factory-method="getInstance">
-        <property name="adminUsers">
-            <set>
-		<value>JUnit.Admin@test.com</value>
-                <value>patdui@mpi.nl</value> <!-- short names are for shibbolet on lux16 -->
-                <value>patrick.duin@mpi.nl</value>
-                <value>guisil@mpi.nl</value>
-                <value>guilherme.silva@mpi.nl</value>
-                <value>twagoo@mpi.nl</value>
-                <value>twan.goosen@mpi.nl</value>
-                <value>daan.broeder@mpi.nl</value>
-            </set>
-        </property>
+	<property name="adminUsersList" value="JUnit.Admin@test.com" />
         <property name="generalComponentSchema" value="http://www.clarin.eu/cmd/general-component-schema.xsd" />
-    <!-- <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/comp2schema.xsl" />-->
         <property name="component2SchemaXsl" value="http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
+<!--        <property name="component2SchemaXsl" value="file:/Users/twagoo/Documents/Repositories/svn.clarin.eu/metadata/trunk/toolkit/xslt/comp2schema-v2/comp2schema.xsl"/>-->
         <property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd http://www.clarin.eu/cmd/general-component-schema.xsd" />
         <property name="isocatRestUrl" value="http://www.isocat.org/rest/" />
     <!-- Extra attribute keys that are passed in a shibboleth authenticated request principal.

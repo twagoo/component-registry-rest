@@ -362,13 +362,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testGetRegisteredProfileRawData() throws Exception {
 	fillUp();
-	String profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xsd").accept(MediaType.TEXT_XML).get(String.class);
+	String profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
 
-	profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class);
+	profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-	assertTrue(profile.endsWith("</CMD_ComponentSpec>\n"));
+	assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
 	assertTrue(profile.contains("xsi:schemaLocation"));
 
 	try {
@@ -385,7 +385,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertTrue(response.isProfile());
 	assertEquals(1, getUserProfiles().size());
 	AbstractDescription desc = response.getDescription();
-	String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class);
+	String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
     }
@@ -397,7 +397,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertFalse(response.isProfile());
 	assertEquals(1, getUserComponents().size());
 	AbstractDescription desc = response.getDescription();
-	String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class);
+	String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
     }
@@ -430,13 +430,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     public void testGetRegisteredComponentRawData() throws Exception {
 	fillUp();
 	String component = getResource().path("/registry/components/clarin.eu:cr1:component1/xsd").accept(MediaType.TEXT_XML).get(
-		String.class);
+		String.class).trim();
 	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
 	assertTrue(component.endsWith("</xs:schema>"));
 
-	component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class);
+	component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-	assertTrue(component.endsWith("</CMD_ComponentSpec>\n"));
+	assertTrue(component.endsWith("</CMD_ComponentSpec>"));
 	assertTrue(component.contains("xsi:schemaLocation"));
 
 	try {
@@ -928,7 +928,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertTrue(postResponse.isProfile());
 	assertFalse(postResponse.isRegistered());
 	assertEquals(1, postResponse.getErrors().size());
-	assertTrue(postResponse.getErrors().get(0).contains("SAXParseException"));
+	assertTrue(postResponse.getErrors().get(0).contains("isProfile"));
     }
 
     @Test

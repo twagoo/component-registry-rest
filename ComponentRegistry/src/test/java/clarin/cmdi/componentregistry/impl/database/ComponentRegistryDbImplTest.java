@@ -415,7 +415,7 @@ public class ComponentRegistryDbImplTest {
 
 	OutputStream output = new ByteArrayOutputStream();
 	register.getMDProfileAsXsd(description.getId(), output);
-	String xsd = output.toString();
+	String xsd = output.toString().trim();
 	assertTrue(xsd.endsWith("</xs:schema>"));
 
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "unbounded"));
@@ -509,7 +509,7 @@ public class ComponentRegistryDbImplTest {
 
 	OutputStream output = new ByteArrayOutputStream();
 	register.getMDProfileAsXsd(description.getId(), output);
-	String xsd = output.toString();
+	String xsd = output.toString().trim();
 
 	assertTrue(xsd.endsWith("</xs:schema>"));
 	assertTrue(RegistryTestHelper.hasComponent(xsd, "Actor", "0", "5"));
@@ -558,7 +558,7 @@ public class ComponentRegistryDbImplTest {
 
 	ByteArrayOutputStream output = new ByteArrayOutputStream();
 	register.getMDComponentAsXsd(compDesc3.getId(), output);
-	String xsd = output.toString("UTF-8");
+	String xsd = output.toString("UTF-8").trim();
 
 	assertTrue(xsd.endsWith("</xs:schema>"));
 	// System.out.println(xsd);
