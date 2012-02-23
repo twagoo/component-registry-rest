@@ -17,6 +17,8 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.schema.cmd.Validator.Message;
 import clarin.cmdi.schema.cmd.ValidatorException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MDValidator implements Validator {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(MDValidator.class);
     static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
@@ -62,29 +64,30 @@ public class MDValidator implements Validator {
 	this.userRegistry = userRegistry;
 	this.publicRegistry = publicRegistry;
     }
-    
+
     @Override
     public List<String> getErrorMessages() {
 	return errorMessages;
     }
-    
+
     @Override
     public boolean validate() {
 	try {
 	    clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
-	    StreamSource source = new StreamSource(input);
-	    if (validator.validateProfile(source)) {
+	    // We may need to reuse the input stream, so save it to a byte array first
+	    byte[] inputBytes = getBytesFromInputStream();
+	    StreamSource source = new StreamSource(new ByteArrayInputStream(inputBytes));
+	    if (!validator.validateProfile(source)) {
 		final List<Message> validatorMessages = validator.getMessages();
 		if (validatorMessages.size() > 0) {
 		    for (Message message : validatorMessages) {
-			errorMessages.add(message.getText());
+			errorMessages.add(PARSE_ERROR + message.getText());
 		    }
 		} else {
-		    errorMessages.add(UNKNOWN_VALIDATION_ERROR);
+		    errorMessages.add(PARSE_ERROR + UNKNOWN_VALIDATION_ERROR);
 		}
 	    } else {
-		input.reset();
-		spec = MDMarshaller.unmarshal(CMDComponentSpec.class, input, MDMarshaller.getCMDComponentSchema());
+		spec = MDMarshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
 		if (spec.isIsProfile() != description.isProfile()) {
 		    errorMessages.add(MISMATCH_ERROR);
 		}
@@ -108,19 +111,31 @@ public class MDValidator implements Validator {
 	}
 	return errorMessages.isEmpty();
     }
-    
+
+    private byte[] getBytesFromInputStream() throws IOException {
+	int len;
+	byte[] b = new byte[4096];
+	final ByteArrayOutputStream bOS = new ByteArrayOutputStream();
+	
+	while ((len = input.read(b)) > 0) {
+	    bOS.write(b, 0, len);
+	}
+	
+	return bOS.toByteArray();
+    }
+
     private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
 	for (CMDComponentType cmdComponentType : cmdComponents) {
 	    validateDescribedComponents(cmdComponentType);
 	    validateComponents(cmdComponentType.getCMDComponent());//Recursion
 	}
     }
-    
+
     private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	checkPublicComponents(cmdComponentType);
 	checkLegalAttributeNames(cmdComponentType);
     }
-    
+
     private void checkPublicComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	if (isDefinedInSeparateFile(cmdComponentType)) {
 	    String id = cmdComponentType.getComponentId();
@@ -145,11 +160,11 @@ public class MDValidator implements Validator {
 			errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
 		    }
 		}
-		
+
 	    }
 	}
     }
-    
+
     private void checkLegalAttributeNames(CMDComponentType cmdComponentType) {
 	if (cmdComponentType.getAttributeList() != null) {
 	    for (Attribute attribute : cmdComponentType.getAttributeList().getAttribute()) {
@@ -159,11 +174,11 @@ public class MDValidator implements Validator {
 	    }
 	}
     }
-    
+
     private boolean isDefinedInSeparateFile(CMDComponentType cmdComponentType) {
 	return cmdComponentType.getName() == null;
     }
-    
+
     public CMDComponentSpec getCMDComponentSpec() {
 	return spec;
     }
