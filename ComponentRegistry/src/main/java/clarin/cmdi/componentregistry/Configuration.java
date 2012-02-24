@@ -9,14 +9,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class Configuration {
-    //NOTE: Default values, can be overwritten in applicationContext.xml
 
+    private static Logger LOG = LoggerFactory.getLogger(Configuration.class);
+    //NOTE: Default values, can be overwritten in applicationContext.xml
     private String generalComponentSchema = "http://www.clarin.eu/cmd/general-component-schema.xsd";
     private String component2SchemaXsl = "http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
     private String isocatRestUrl = "http://www.isocat.org/rest/";
@@ -71,6 +74,7 @@ public class Configuration {
     }
 
     public void setAdminUsers(Collection<String> adminUsers) {
+	LOG.debug("Setting adminUsers to {}", Arrays.toString(adminUsers.toArray()));
 	this.adminUsers = adminUsers;
     }
 
@@ -79,27 +83,33 @@ public class Configuration {
      * @param adminUsers Whitespace-separated list of admin users
      */
     public void setAdminUsersList(String adminUsersList) {
+	LOG.debug("Setting adminUsersList to {}", adminUsersList);
 	String[] adminUsersArray = adminUsersList.trim().split("\\s+");
 	setAdminUsers(Arrays.asList(adminUsersArray));
     }
 
     public void setComponent2SchemaXsl(String component2SchemaXsl) {
+	LOG.debug("Setting component2SchemaXsl to {}", component2SchemaXsl);
 	this.component2SchemaXsl = component2SchemaXsl;
     }
 
     public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {
+	LOG.debug("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
 	schemaLocations.put(CMDComponentSpec.class.getName(), componentSpecSchemaLocation);
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {
+	LOG.debug("Setting displayNameShibbolethKeys to {}", displayNameShibbolethKeys);
 	this.displayNameShibbolethKeys = displayNameShibbolethKeys;
     }
 
     public void setGeneralComponentSchema(String generalComponentSchema) {
+	LOG.debug("Setting generalComponentSchema to {}", generalComponentSchema);
 	this.generalComponentSchema = generalComponentSchema;
     }
 
     public void setIsocatRestUrl(String isocatRestUrl) {
+	LOG.debug("Setting isocatRestUrl to {}", isocatRestUrl);
 	this.isocatRestUrl = isocatRestUrl;
     }
 
