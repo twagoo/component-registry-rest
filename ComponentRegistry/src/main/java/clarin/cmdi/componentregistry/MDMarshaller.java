@@ -158,8 +158,6 @@ public class MDMarshaller {
 	}
 	try {
 	    Transformer transformer = componentToSchemaTemplates.newTransformer();
-	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    // We used to also set SaxonOutputKeys.INDENT_SPACES to 1 to keep downloads smaller, but this is no longer available in Saxon-HE
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    MDMarshaller.marshal(spec, out);
 	    ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
