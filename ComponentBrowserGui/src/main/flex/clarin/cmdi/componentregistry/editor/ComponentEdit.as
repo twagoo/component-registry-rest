@@ -28,7 +28,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.managers.DragManager;
 	
 	[Event(name="removeComponent", type="flash.events.Event")]
-	public class ComponentEdit extends Form implements CMDValidator {
+	public class ComponentEdit extends Form {
 		public static const REMOVE_COMPONENT_EVENT:String = "removeComponent";
 		private static const DRAG_ITEMS:String = "items";
 		
@@ -160,8 +160,8 @@ package clarin.cmdi.componentregistry.editor {
 		
 		private function addNameInput():void {
 			var nameInput:FormItemInputLine = new NameInputLine(_component.name, function(val:String):void {
-				_component.name = val;
-			});
+				_component.name = val;	
+			}, new ChildNameValidator(_parentComponent, component));
 			addChild(nameInput);
 		}
 		
@@ -289,21 +289,6 @@ package clarin.cmdi.componentregistry.editor {
 			heading.label = LabelConstants.COMPONENT;
 			heading.styleName = StyleConstants.XMLBROWSER_HEADER;
 			return heading;
-		}
-		
-		public function validate():Boolean{
-			// Parent must not have another component or element of the same name
-			for each (var component:CMDComponent in _parentComponent.cmdComponents) {
-				if(component != _component && component.name == _component.name){
-					return false;
-				} 	
-			}
-			for each (var element:CMDComponentElement in _parentComponent.cmdElements) {
-				if(element.name == _component.name){
-					return false;
-				}
-			}
-			return true;
 		}
 	}
 }

@@ -1,12 +1,9 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	
-	import flash.events.Event;
-	
 	import mx.binding.utils.BindingUtils;
 	import mx.containers.FormItem;
 	import mx.controls.TextInput;
-	import mx.events.FlexEvent;
 	import mx.events.ValidationResultEvent;
 	import mx.validators.Validator;
 
