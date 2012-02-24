@@ -156,7 +156,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("COMMENT1", response.get(0).getComment());
 	assertEquals("comment1", response.get(1).getComment());
 	assertEquals("comment2", response.get(2).getComment());
-	
+
 	assertEquals("J. Unit", response.get(0).getUserName());
     }
 
@@ -173,7 +173,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("COMMENT2", response.get(0).getComment());
 	assertEquals("comment4", response.get(1).getComment());
 	assertEquals("comment3", response.get(2).getComment());
-	
+
 	assertEquals("J. Unit", response.get(0).getUserName());
     }
 
@@ -363,7 +363,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     public void testGetRegisteredProfileRawData() throws Exception {
 	fillUp();
 	String profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
-	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
 
 	profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class).trim();
@@ -386,7 +386,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals(1, getUserProfiles().size());
 	AbstractDescription desc = response.getDescription();
 	String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
-	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
     }
 
@@ -398,7 +398,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals(1, getUserComponents().size());
 	AbstractDescription desc = response.getDescription();
 	String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
-	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
     }
 
@@ -431,7 +431,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	fillUp();
 	String component = getResource().path("/registry/components/clarin.eu:cr1:component1/xsd").accept(MediaType.TEXT_XML).get(
 		String.class).trim();
-	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(component.endsWith("</xs:schema>"));
 
 	component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class).trim();
@@ -886,7 +886,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("J. Unit", comment.getUserName());
 	Assert.hasText(comment.getCommentDate());
 	Assert.hasText(comment.getId());
-	
+
 	// User id should not be serialized!
 	assertEquals(null, comment.getUserId());
     }
@@ -929,6 +929,43 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertFalse(postResponse.isRegistered());
 	assertEquals(1, postResponse.getErrors().size());
 	assertTrue(postResponse.getErrors().get(0).contains("isProfile"));
+    }
+
+    /**
+     * Two elements on the same level with the same name violates schematron rule, and should fail validation
+     * @throws Exception 
+     */
+    @Test
+    public void testRegisterInvalidProfile() throws Exception {
+	FormDataMultiPart form = new FormDataMultiPart();
+	String profileContent = "";
+	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	profileContent += "    <Header />\n";
+	profileContent += "    <CMD_Component name=\"ProfileTest1\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+	profileContent += "        <CMD_Element name=\"Age\">\n";
+	profileContent += "            <ValueScheme>\n";
+	profileContent += "                <pattern>[23][0-9]</pattern>\n";
+	profileContent += "            </ValueScheme>\n";
+	profileContent += "        </CMD_Element>\n";
+	profileContent += "        <CMD_Element name=\"Age\">\n";
+	profileContent += "            <ValueScheme>\n";
+	profileContent += "                <pattern>[23][0-9]</pattern>\n";
+	profileContent += "            </ValueScheme>\n";
+	profileContent += "        </CMD_Element>\n";
+	profileContent += "    </CMD_Component>\n";
+	profileContent += "</CMD_ComponentSpec>\n";
+	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentContent(profileContent),
+		MediaType.APPLICATION_OCTET_STREAM_TYPE);
+	form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+	form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+	form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+	form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
+	RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
+		RegisterResponse.class, form);
+	assertFalse("Subsequent elements should not be allowed to have the same name", response.isRegistered());
+	assertTrue(response.getErrors().get(0).contains(MDValidator.PARSE_ERROR));
     }
 
     @Test
