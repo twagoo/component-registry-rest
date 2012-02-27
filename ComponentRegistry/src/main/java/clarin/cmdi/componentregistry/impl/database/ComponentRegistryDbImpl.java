@@ -592,7 +592,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	if (isPublic()) {
 	    return ComponentRegistry.PUBLIC_NAME;
 	} else {
-	    return "User " + getUserId() + " Registry";
+	    return "Registry of " + userDao.getById(getUserId()).getName();
 	}
     }
 

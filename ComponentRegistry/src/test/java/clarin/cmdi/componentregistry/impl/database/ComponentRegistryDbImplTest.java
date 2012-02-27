@@ -674,7 +674,7 @@ public class ComponentRegistryDbImplTest {
 	comment = comments.get(0);
 	assertEquals("0", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
-	
+
 	description = register.getProfileDescription(description.getId());
 	assertEquals(1, description.getCommentsCount());
     }
@@ -697,7 +697,7 @@ public class ComponentRegistryDbImplTest {
 	comment = comments.get(0);
 	assertEquals("0", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
-	
+
 	description = register.getProfileDescription(description.getId());
 	assertEquals(1, description.getCommentsCount());
     }
@@ -717,7 +717,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(1, comments.size());
 	description = register.getProfileDescription(description.getId());
 	assertEquals(1, description.getCommentsCount());
-	
+
 	comment = comments.get(0);
 	register.deleteComment(comment.getId(), USER_CREDS.getPrincipal());
 	comments = register.getCommentsInProfile(description.getId());
@@ -754,5 +754,17 @@ public class ComponentRegistryDbImplTest {
 	} catch (UserUnauthorizedException ex) {
 	    System.err.print(ex);
 	}
+    }
+
+    @Test
+    public void testGetName() throws Exception {
+	ComponentRegistry register = getComponentRegistryForUser(null);
+	assertEquals(ComponentRegistry.PUBLIC_NAME, register.getName());
+
+	RegistryUser user1 = createUser(USER_CREDS);
+	Number id = userDao.insertUser(user1);
+
+	register = getComponentRegistryForUser(id);
+	assertEquals("Registry of J.Unit", register.getName());
     }
 }
