@@ -37,14 +37,12 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
+
     private static final long serialVersionUID = 1L;
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
-
     private final CMDItemInfo info = new CMDItemInfo();
     private final LinkTree tree;
-
     private transient AdminRegistry adminRegistry = new AdminRegistry();
-
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     @SpringBean
@@ -65,6 +63,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 	add(form);
 
 	Button deleteButton = new AjaxFallbackButton("delete", form) {
+
 	    @Override
 	    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		CMDItemInfo info = (CMDItemInfo) form.getModelObject();
@@ -85,14 +84,17 @@ public class AdminHomePage extends SecureAdminWebPage {
 		}
 	    }
 
+	    @Override
 	    public boolean isEnabled() {
 		return info.isDeletable();
 
-	    };
+	    }
+	;
 	};
 	form.add(deleteButton);
 
 	Button undeleteButton = new AjaxFallbackButton("undelete", form) {
+
 	    @Override
 	    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		CMDItemInfo info = (CMDItemInfo) form.getModelObject();
@@ -112,10 +114,10 @@ public class AdminHomePage extends SecureAdminWebPage {
 		}
 	    }
 
+	    @Override
 	    public boolean isEnabled() {
 		return info.isUndeletable();
 	    }
-
 	};
 	form.add(undeleteButton);
 
@@ -123,6 +125,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 	form.add(forceUpdateCheck);
 
 	Button submitButton = new AjaxFallbackButton("submit", form) {
+
 	    @Override
 	    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		CMDItemInfo info = (CMDItemInfo) form.getModelObject();
@@ -143,16 +146,17 @@ public class AdminHomePage extends SecureAdminWebPage {
 		}
 	    }
 
+	    @Override
 	    public boolean isEnabled() {
 		return info.isEditable();
 	    }
-
 	};
 	form.add(submitButton);
 
 	tree = createTree("tree", form, createDBTreeModel());
 	add(tree);
 	add(new Link("expandAll") {
+
 	    @Override
 	    public void onClick() {
 		tree.getTreeState().expandAll();
@@ -160,6 +164,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 	});
 
 	add(new Link("collapseAll") {
+
 	    @Override
 	    public void onClick() {
 		tree.getTreeState().collapseAll();
@@ -180,18 +185,21 @@ public class AdminHomePage extends SecureAdminWebPage {
     private void addLinks() {
 	add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
 	add(new Link("massMigrate") {
+
 	    @Override
 	    public void onClick() {
 		setResponsePage(MassMigratePage.class);
 	    }
 	});
 	add(new Link("log") {
+
 	    @Override
 	    public void onClick() {
 		setResponsePage(ViewLogPage.class);
 	    }
 	});
 	add(new Link("statistics") {
+
 	    @Override
 	    public void onClick() {
 		setResponsePage(StatisticsPage.class);
@@ -200,7 +208,8 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private LinkTree createTree(String id, final Form form, TreeModel treeModel) {
-	final LinkTree tree = new LinkTree(id, treeModel) {
+	final LinkTree adminTree = new LinkTree(id, treeModel) {
+
 	    @Override
 	    protected void onNodeLinkClicked(Object node, BaseTree tree, AjaxRequestTarget target) {
 		super.onNodeLinkClicked(node, tree, target);
@@ -227,7 +236,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 		}
 	    }
 	};
-	return tree;
+	return adminTree;
     }
 
     private class ItemEditForm extends Form<CMDItemInfo> {
@@ -244,7 +253,6 @@ public class AdminHomePage extends SecureAdminWebPage {
 	    contentArea.setOutputMarkupId(true);
 	    add(contentArea);
 	}
-
     }
 
     private TreeModel createDBTreeModel() throws ComponentRegistryException {
@@ -290,5 +298,4 @@ public class AdminHomePage extends SecureAdminWebPage {
 	    parent.add(child);
 	}
     }
-
 }

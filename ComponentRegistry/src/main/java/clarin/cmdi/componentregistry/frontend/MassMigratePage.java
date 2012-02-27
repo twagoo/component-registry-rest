@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Page that starts up somekind of migration on the underlying data in the registry. Migrations are usually one off things so do not blindly
  * migrate but take a little time to know what you are doing. Backing up the data before a migrate is probably a good idea as well.
@@ -37,6 +36,7 @@ public class MassMigratePage extends SecureAdminWebPage {
 	addLinks();
 	feedback = new FeedbackPanel("feedback") {
 
+	    @Override
 	    protected Component newMessageDisplayComponent(String id, FeedbackMessage message) {
 		Serializable serializable = message.getMessage();
 		MultiLineLabel label = new MultiLineLabel(id, (serializable == null) ? "" : serializable.toString());
@@ -64,6 +64,7 @@ public class MassMigratePage extends SecureAdminWebPage {
 	add(new Label("migrate1Label", "No migration implemented at the moment..."));
 	add(new IndicatingAjaxLink("migrate1") {
 
+	    @Override
 	    public void onClick(final AjaxRequestTarget target) {
 		if (target != null) {
 		    target.addComponent(feedback);
@@ -76,5 +77,4 @@ public class MassMigratePage extends SecureAdminWebPage {
     private void startMigration() {
 	info("Nothing to migrate...");
     }
-
 }

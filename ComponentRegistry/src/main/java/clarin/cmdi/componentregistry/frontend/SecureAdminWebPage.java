@@ -19,7 +19,7 @@ public abstract class SecureAdminWebPage extends WebPage {
         add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName() + ".\n"));
     }
 
-    protected Principal getUserPrincipal() {
+    protected final Principal getUserPrincipal() {
 	return getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
     }
 
