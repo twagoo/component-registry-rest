@@ -49,14 +49,24 @@ public class UserDao extends ComponentRegistryDao<RegistryUser> {
      * @throws DataAccessException
      */
     public Number insertUser(RegistryUser user) throws DataAccessException {
-	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).
-		withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
+	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
 		COLUMN_ID);
 
 	Map<String, Object> params = new HashMap<String, Object>();
 	params.put("name", user.getName());
 	params.put("principal_name", user.getPrincipalName());
 	return insert.executeAndReturnKey(params);
+    }
+
+    /**
+     * Updates some data stored about the user. At this point only the display name will be updated. ID is taken from 'id' parameter,
+     * not user object.
+     * @param id ID of user to update
+     * @param user object containing new info
+     */
+    public void updateUser(Number id, RegistryUser user) throws DataAccessException {
+	String updateString = String.format("UPDATE %1$s SET name = ? WHERE %2$s = ?", TABLE_REGISTRY_USER, COLUMN_ID);
+	getSimpleJdbcTemplate().update(updateString, user.getName(), id);
     }
 
     @Override

@@ -1,0 +1,22 @@
+<html
+    xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+    <head>
+        <title>CMDI ComponentRegistry Admin Page</title>
+        <link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
+    </head>
+    <body>
+	<h1>
+	    User settings for <span wicket:id="userName">userName</span>
+	</h1>
+	<div wicket:id="feedback">[Feedback Panel]</div>
+        <form wicket:id="settingsForm">
+	    <p>
+		<label>User display name:</label>
+		<input wicket:id="displayName"/>
+	    </p>
+	    <p>
+		<input type="submit" value="Submit"/>
+	    </p>
+	</form>
+    </body>
+</html>
