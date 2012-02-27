@@ -207,7 +207,7 @@ package clarin.cmdi.componentregistry.editor {
 			var nameInput:NameInputLine = new NameInputLine(_firstComponent.name, function(val:String):void {
 					_firstComponent.name = val;
 					_spec.headerName = val;
-				}); // editable, not required
+				}, InputValidators.getNameValidator());
 			addChild(nameInput);
 			
 			var groupNameInput:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {

@@ -127,7 +127,7 @@ package clarin.cmdi.componentregistry.editor {
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {
 			var name:NameInputLine = new NameInputLine(attribute.name, function(val:String):void {
 					attribute.name = val;
-				});
+				}, InputValidators.getNameValidator());
 			name.direction = FormItemDirection.HORIZONTAL
 			var removeButton:Label = new RemoveLabelButton();
 			removeButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
