@@ -103,9 +103,9 @@ public class MDValidatorTest {
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
 	assertFalse(validator.validate());
-	assertEquals(validator.getErrorMessages().size(), 2);
-	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.ILLEGAL_ATTRIBUTE_NAME_ERROR));
-	assertTrue(validator.getErrorMessages().get(1).startsWith(MDValidator.ILLEGAL_ATTRIBUTE_NAME_ERROR));
+	assertEquals(4, validator.getErrorMessages().size());
+	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.PARSE_ERROR));
+	assertTrue(validator.getErrorMessages().get(1).startsWith(MDValidator.PARSE_ERROR));
     }
 
     @Test
@@ -131,15 +131,17 @@ public class MDValidatorTest {
 	String id2 = "component2";
 
 	String profileContent = "";
-	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-	profileContent += "    <Header />\n";
-	profileContent += "    <CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id1 + "\"/>\n"; //id not registered
-	profileContent += "    <CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id2 + "\"/>\n"; //id not registered
-	profileContent += "</CMD_ComponentSpec>\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">";
+	profileContent += "    <Header />";
+	profileContent += "    <CMD_Component name=\"Test\">";
+	profileContent += "	<CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id1 + "\"/>"; //id not registered
+	profileContent += "	<CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id2 + "\"/>"; //id not registered
+	profileContent += "    </CMD_Component>";
+	profileContent += "</CMD_ComponentSpec>";
 
-        // Ids not registered will return two errors. One for each id
+	// Ids not registered will return two errors. One for each id
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertFalse(validator.validate());
@@ -147,14 +149,14 @@ public class MDValidatorTest {
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 	assertTrue(validator.getErrorMessages().get(1).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
-        // id1 will be added and therefore only id2 is not registered
+	// id1 will be added and therefore only id2 is not registered
 	RegistryTestHelper.addComponent(publicRegistry, id1);
 	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertFalse(validator.validate());
 	assertEquals(1, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
-        // id2 is added, no more errors shoud be return
+	// id2 is added, no more errors shoud be return
 	RegistryTestHelper.addComponent(publicRegistry, id2);
 	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertTrue("component is registered should be valid now", validator.validate());
@@ -168,13 +170,15 @@ public class MDValidatorTest {
 	ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
 
 	String profileContent = "";
-	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-	profileContent += "    <Header />\n";
-	profileContent += "    <CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id1 + "\"/>\n"; //id not registered
-	profileContent += "    <CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id2 + "\"/>\n"; //id not registered
-	profileContent += "</CMD_ComponentSpec>\n";
+	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">";
+	profileContent += "    <Header />";
+	profileContent += "    <CMD_Component name=\"Test\">";
+	profileContent += "	<CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id1 + "\"/>"; //id not registered
+	profileContent += "	<CMD_Component ComponentId=\"" + ComponentRegistry.REGISTRY_ID + id2 + "\"/>"; //id not registered
+	profileContent += "    </CMD_Component>";
+	profileContent += "</CMD_ComponentSpec>";
 
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, userRegistry, userRegistry, publicRegistry);

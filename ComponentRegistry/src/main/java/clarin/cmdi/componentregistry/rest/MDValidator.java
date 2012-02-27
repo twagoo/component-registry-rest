@@ -10,7 +10,6 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.components.AttributeListType.Attribute;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -116,11 +115,11 @@ public class MDValidator implements Validator {
 	int len;
 	byte[] b = new byte[4096];
 	final ByteArrayOutputStream bOS = new ByteArrayOutputStream();
-	
+
 	while ((len = input.read(b)) > 0) {
 	    bOS.write(b, 0, len);
 	}
-	
+
 	return bOS.toByteArray();
     }
 
@@ -133,7 +132,6 @@ public class MDValidator implements Validator {
 
     private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	checkPublicComponents(cmdComponentType);
-	checkLegalAttributeNames(cmdComponentType);
     }
 
     private void checkPublicComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
@@ -161,16 +159,6 @@ public class MDValidator implements Validator {
 		    }
 		}
 
-	    }
-	}
-    }
-
-    private void checkLegalAttributeNames(CMDComponentType cmdComponentType) {
-	if (cmdComponentType.getAttributeList() != null) {
-	    for (Attribute attribute : cmdComponentType.getAttributeList().getAttribute()) {
-		if (ILLEGAL_ATTRIBUTE_NAMES.contains(attribute.getName())) {
-		    errorMessages.add(ILLEGAL_ATTRIBUTE_NAME_ERROR + attribute.getName() + " (" + cmdComponentType.getComponentId() + ")");
-		}
 	    }
 	}
     }
