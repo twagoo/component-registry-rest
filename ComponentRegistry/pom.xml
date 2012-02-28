@@ -362,6 +362,20 @@
 	</plugins>
     </build>
 
+    <reporting>
+	<plugins>
+	    <plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>findbugs-maven-plugin</artifactId>
+		<configuration>
+		    <excludeFilterFile>${basedir}/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
+		    <threshold>Normal</threshold>
+		    <effort>Min</effort>
+		</configuration>
+	    </plugin>
+	</plugins>
+    </reporting>
+    
     <repositories>
 	<repository>
 	    <id>maven2-repository.dev.java.net</id>

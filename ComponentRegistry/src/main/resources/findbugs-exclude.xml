@@ -1,0 +1,9 @@
+
+<FindBugsFilter>
+    <!-- Exclude filter for ComponentRegistry Java classes) -->
+    <Match>
+    <!-- Injection in wicket pages -->
+	<Package name="clarin.cmdi.componentregistry.frontend" />
+	<Bug pattern="SE_BAD_FIELD" />
+    </Match>
+</FindBugsFilter>
