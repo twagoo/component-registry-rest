@@ -78,13 +78,14 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	RegistryTestHelper.addComponent(getTestRegistry(), "component2");
 	RegistryTestHelper.addComponent(getTestRegistry(), "component1");
 	RegistryTestHelper.addComment(getTestRegistry(), "comment2", "clarin.eu:cr1:profile1", "JUnit@test.com");
+	Thread.sleep(10l); // wait so order becomes predictable
 	RegistryTestHelper.addComment(getTestRegistry(), "comment1", "clarin.eu:cr1:profile1", "JUnit@test.com");
+	Thread.sleep(10l); // wait so order becomes predictable
 	RegistryTestHelper.addComment(getTestRegistry(), "comment3", "clarin.eu:cr1:component1", "JUnit@test.com");
+	Thread.sleep(10l); // wait so order becomes predictable
 	RegistryTestHelper.addComment(getTestRegistry(), "comment4", "clarin.eu:cr1:component1", "JUnit@test.com");
-
+	Thread.sleep(10l); // wait so order becomes predictable
     }
-
-    ;
 
     @Test
     public void testGetRegisteredProfiles() throws Exception {
