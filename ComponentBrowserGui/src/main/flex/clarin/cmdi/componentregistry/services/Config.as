@@ -33,6 +33,7 @@ package clarin.cmdi.componentregistry.services {
 		private static const PROFILE_INFO_URL:String = "/rest/registry/profiles/";
 		private static const COMPONENT_INFO_URL:String = "/rest/registry/components/";
 		private static const PING_SESSION_URL:String = "/rest/registry/pingSession";
+		private static const USER_SETTINGS_URL:String = "/admin/userSettings";
 		private static const COMMENTS_URL_PATH:String = "/comments/";
 		private static const ISOCAT_SERVLET:String = "/isocat";
 
@@ -128,6 +129,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function get pingSessionUrl():String {
 			return _serviceRootUrl + PING_SESSION_URL;
+		}
+		
+		public function get userSettingsUrl():String{
+			return _serviceRootUrl + USER_SETTINGS_URL;
 		}
 
 		public function set userSpace(userSpace:Boolean):void {

@@ -21,7 +21,7 @@ package clarin.cmdi.componentregistry.common.components {
 		public function LoginLabelButton() {
 			super();
 			text = "login";
-			toolTip = "click to login";
+			toolTip = "Click to login";
 			setStyle("color", "green");
 			setStyle("textDecoration", "underline")
 			addEventListener(MouseEvent.CLICK, handleLogin);

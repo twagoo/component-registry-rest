@@ -97,7 +97,8 @@
 									dataProvider="{viewStack}"/>
 				<mx:Spacer width="90%"/>
 				<mx:Label text="User: {Credentials.instance.userName}"/>
-				<common:LoginLabelButton id="login" />
+				<common:LoginLabelButton id="login" includeInLayout="{!Credentials.instance.isLoggedIn()}" visible="{!Credentials.instance.isLoggedIn()}" />
+				<common:UserSettingsLabelButton id="userSettings" includeInLayout="{Credentials.instance.isLoggedIn()}" visible="{Credentials.instance.isLoggedIn()}"/>
 			</mx:HBox>
 			<common:RegistryViewStack id="viewStack"
 									  borderStyle="none"
