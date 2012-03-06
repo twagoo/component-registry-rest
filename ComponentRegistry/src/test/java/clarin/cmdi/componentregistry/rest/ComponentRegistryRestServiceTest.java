@@ -466,7 +466,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("TestDomain", profileDesc.getDomainName());
 	assertEquals("My Test Group", profileDesc.getGroupName());
 	assertEquals(expectedUserId("JUnit@test.com"), profileDesc.getUserId());
-	assertEquals("JUnit@test.com", profileDesc.getCreatorName());
+	assertEquals("Database test user", profileDesc.getCreatorName());
 	assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
 	assertNotNull(profileDesc.getRegistrationDate());
 	assertEquals("http://localhost:9998/registry/profiles/" + profileDesc.getId(), profileDesc.getHref());
@@ -548,7 +548,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("Test1", profileDesc.getName());
 	assertEquals("My Test", profileDesc.getDescription());
 	assertEquals(expectedUserId("JUnit@test.com"), profileDesc.getUserId());
-	assertEquals("JUnit@test.com", profileDesc.getCreatorName());
+	assertEquals("Database test user", profileDesc.getCreatorName());
 	assertTrue(profileDesc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "p_"));
 	assertNotNull(profileDesc.getRegistrationDate());
 	assertEquals("http://localhost:9998/registry/profiles/" + profileDesc.getId() + "?userspace=true", profileDesc.getHref());
@@ -686,7 +686,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("Test1", desc.getName());
 	assertEquals("My Test", desc.getDescription());
 	assertEquals(expectedUserId("JUnit@test.com"), desc.getUserId());
-	assertEquals("JUnit@test.com", desc.getCreatorName());
+	assertEquals("Database test user", desc.getCreatorName());
 	assertEquals("TestGroup", desc.getGroupName());
 	assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
 	assertNotNull(desc.getRegistrationDate());
@@ -900,7 +900,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("ComponentTest1", desc.getName());
 	assertEquals("My Test Component", desc.getDescription());
 	assertEquals(expectedUserId("JUnit@test.com"), desc.getUserId());
-	assertEquals("JUnit@test.com", desc.getCreatorName());
+	assertEquals("Database test user", desc.getCreatorName());
 	assertEquals("TestGroup", desc.getGroupName());
 	assertEquals("TestDomain", desc.getDomainName());
 	assertTrue(desc.getId().startsWith(ComponentRegistry.REGISTRY_ID + "c_"));

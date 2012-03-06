@@ -240,7 +240,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	try {
 	    String xml = componentSpecToString(spec);
 	    // Convert principal name to user record id
-	    Number uid = convertUserIdInDescription(description);
+	    Number uid = convertUserInDescription(description);
 	    getDaoForDescription(description).insertDescription(description, xml, isPublic(), uid);
 	    invalidateCache(description);
 	    return 0;
@@ -288,23 +288,30 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * an id for later reference. If none is set and this is a user's workspace,
      * set from that user's id.
      * 
+     * It also sets the name in the description according to the display name in the database.
+     * 
      * @param description
      *            Description containing principle name as userId
      * @return Id (from database)
      * @throws DataAccessException
      */
-    private Number convertUserIdInDescription(AbstractDescription description) throws DataAccessException {
+    private Number convertUserInDescription(AbstractDescription description) throws DataAccessException {
 	Number uid = null;
+	String name = null;
 	if (description.getUserId() != null) {
 	    RegistryUser user = userDao.getByPrincipalName(description.getUserId());
 	    if (user != null) {
 		uid = user.getId();
+		name = user.getName();
 	    }
 	} else {
 	    uid = userId;
 	}
 	if (uid != null) {
 	    description.setUserId(uid.toString());
+	}
+	if (name != null) {
+	    description.setCreatorName(name);
 	}
 	return uid;
     }
