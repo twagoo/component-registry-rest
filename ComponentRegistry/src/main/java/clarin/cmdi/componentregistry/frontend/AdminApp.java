@@ -11,6 +11,8 @@ public class AdminApp extends WebApplication {
         super.init();
         getDebugSettings().setAjaxDebugModeEnabled(false);
         addComponentInstantiationListener(new SpringComponentInjector(this));
+	
+	mountBookmarkablePage("userSettings", UserSettingsPage.class);
     }
 
     @Override

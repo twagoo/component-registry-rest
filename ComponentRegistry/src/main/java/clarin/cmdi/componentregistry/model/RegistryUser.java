@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.io.Serializable;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -8,7 +9,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 @XmlAccessorType(value = XmlAccessType.FIELD)
-public class RegistryUser {
+public class RegistryUser implements Serializable {
 
     private String name;
     private String principalName;
