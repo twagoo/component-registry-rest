@@ -44,7 +44,7 @@ public class UserDaoTest {
 	RegistryUser testUser = createTestUser();
 
 	assertEquals(0, userDao.getAllUsers().size());
-	Number newId =  userDao.insertUser(testUser);
+	Number newId = userDao.insertUser(testUser);
 	assertNotNull(newId);
 
 	List<RegistryUser> users = userDao.getAllUsers();
@@ -60,7 +60,7 @@ public class UserDaoTest {
     }
 
     @Test
-    public void testGetUserByPrincipalName(){
+    public void testGetUserByPrincipalName() {
 	RegistryUser testUser = createTestUser();
 	userDao.insertUser(testUser);
 
@@ -68,13 +68,23 @@ public class UserDaoTest {
 	assertNull(userDao.getByPrincipalName("NON-EXISTING PRINCIPAL NAME"));
     }
 
-    public static RegistryUser createTestUser(){
+    public static RegistryUser createTestUser() {
 	RegistryUser testUser = new RegistryUser();
 	testUser.setName(TEST_USER_NAME);
 	testUser.setPrincipalName(TEST_USER_PRINCIPAL_NAME);
 	return testUser;
     }
 
+    @Test
+    public void testUpdateUser() {
+	RegistryUser testUser = createTestUser();
+	Number id = userDao.insertUser(testUser);
+
+	testUser.setName("I. Changed");
+	userDao.updateUser(id, testUser);
+
+	assertEquals("I. Changed", userDao.getById(id).getName());
+    }
     public final static String TEST_USER_NAME = "Aap";
     public final static String TEST_USER_PRINCIPAL_NAME = "aap@clarin.eu";
 }
