@@ -78,13 +78,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	RegistryTestHelper.addComponent(getTestRegistry(), "component2");
 	RegistryTestHelper.addComponent(getTestRegistry(), "component1");
 	RegistryTestHelper.addComment(getTestRegistry(), "comment2", "clarin.eu:cr1:profile1", "JUnit@test.com");
-	Thread.sleep(10l); // wait so order becomes predictable
+	Thread.sleep(1000); // wait so order becomes predictable
 	RegistryTestHelper.addComment(getTestRegistry(), "comment1", "clarin.eu:cr1:profile1", "JUnit@test.com");
-	Thread.sleep(10l); // wait so order becomes predictable
+	Thread.sleep(1000); // wait so order becomes predictable
 	RegistryTestHelper.addComment(getTestRegistry(), "comment3", "clarin.eu:cr1:component1", "JUnit@test.com");
-	Thread.sleep(10l); // wait so order becomes predictable
+	Thread.sleep(1000); // wait so order becomes predictable
 	RegistryTestHelper.addComment(getTestRegistry(), "comment4", "clarin.eu:cr1:component1", "JUnit@test.com");
-	Thread.sleep(10l); // wait so order becomes predictable
+	Thread.sleep(1000); // wait so order becomes predictable
     }
 
     @Test
@@ -154,9 +154,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	response = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments").accept(MediaType.APPLICATION_JSON).get(
 		COMMENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
-	assertEquals("COMMENT1", response.get(0).getComment());
+	assertEquals("comment2", response.get(0).getComment());
 	assertEquals("comment1", response.get(1).getComment());
-	assertEquals("comment2", response.get(2).getComment());
+	assertEquals("COMMENT1", response.get(2).getComment());
 
 	assertEquals("J. Unit", response.get(0).getUserName());
     }
@@ -171,9 +171,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	response = getResource().path("/registry/components/clarin.eu:cr1:component1/comments").accept(MediaType.APPLICATION_JSON).get(
 		COMMENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
-	assertEquals("COMMENT2", response.get(0).getComment());
+	assertEquals("comment3", response.get(0).getComment());
 	assertEquals("comment4", response.get(1).getComment());
-	assertEquals("comment3", response.get(2).getComment());
+	assertEquals("COMMENT2", response.get(2).getComment());
 
 	assertEquals("J. Unit", response.get(0).getUserName());
     }
