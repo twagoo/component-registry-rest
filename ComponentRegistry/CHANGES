@@ -4,6 +4,7 @@ Release ComponentRegistry-1.11.0 (???????????????):
 - Comments can be posted on profiles and components through a set of new REST calls, with support in the Flex UI. http://trac.clarin.eu/ticket/144
 - Data type 'dateTime' has been added as ValueScheme for elements. http://trac.clarin.eu/ticket/163
 - Recursion detection takes place at every component/profile registration or update. http://trac.clarin.eu/ticket/168
+- Users can set their display name through a web form linked from the Flex UI. http://trac.clarin.eu/ticket/156
 
 Release ComponentRegistry-1.10.0 (4 november 2011):
 - Attributes can be added and edited on components. http://trac.clarin.eu/ticket/125
