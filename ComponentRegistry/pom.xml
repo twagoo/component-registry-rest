@@ -32,13 +32,8 @@
 	</dependency>
 	<dependency>
 	    <groupId>net.sf.saxon</groupId>
-	    <artifactId>saxon</artifactId>
-	    <version>8.7</version>
-	</dependency>
-	<dependency>
-	    <groupId>net.sf.saxon</groupId>
-	    <artifactId>saxon-dom</artifactId>
-	    <version>8.7</version>
+	    <artifactId>saxon-he</artifactId>
+	    <version>9.4</version>
 	</dependency>
 	<dependency>
 	    <groupId>javax.servlet</groupId>
@@ -185,6 +180,11 @@
 	    <artifactId>hsqldb</artifactId>
 	    <version>1.8.0.10</version>
 	    <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>clarin.cmdi</groupId>
+	    <artifactId>cmd-validate</artifactId>
+	    <version>1.0</version>
 	</dependency>
     </dependencies>
 
@@ -361,7 +361,7 @@
 	    </plugin>
 	</plugins>
     </build>
-
+    
     <reporting>
 	<plugins>
 	    <plugin>
@@ -374,7 +374,7 @@
 		</configuration>
 	    </plugin>
 	</plugins>
-    </reporting>
+    </reporting>  
     
     <repositories>
 	<repository>
@@ -399,9 +399,8 @@
 	    <url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url>
 	</repository>
 	<repository>
-	    <id>MPI-Snapshot</id>
-	    <name>MPI LAT Repository/</name>
-	    <url>http://lux15.mpi.nl/nexus/content/repositories/MPI-Snapshots</url>
+	    <id>sonatype</id>
+	    <url>https://oss.sonatype.org/content/groups/public</url>
 	</repository>
     </repositories>
     <pluginRepositories>

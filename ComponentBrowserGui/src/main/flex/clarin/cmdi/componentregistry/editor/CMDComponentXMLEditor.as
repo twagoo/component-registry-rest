@@ -70,7 +70,11 @@ package clarin.cmdi.componentregistry.editor {
 			var result:Boolean = true;
 			for each (var o:Object in children) {
 				if (o is CMDValidator) {
-					result = CMDValidator(o).validate() && result;
+					var validatorResult : Boolean = CMDValidator(o).validate();
+					if(!validatorResult){
+						CMDValidator(o).validate();
+					}
+					result = validatorResult && result;
 				}
 				if (o is Container) {
 					var newKey:Object = key;

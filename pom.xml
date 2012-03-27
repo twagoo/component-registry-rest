@@ -12,6 +12,7 @@
   <modules>
     <module>ComponentBrowserGui</module>
     <module>ComponentRegistry</module>
+    <module>CMDValidate</module>
   </modules>
 
   <scm>
@@ -48,14 +49,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <configuration>
-          <threshold>Normal</threshold>
-          <effort>Min</effort>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

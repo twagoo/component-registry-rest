@@ -1,27 +1,5 @@
 package clarin.cmdi.componentregistry.rest;
 
-import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.util.Date;
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -29,15 +7,29 @@ import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
-
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import java.io.ByteArrayInputStream;
+import java.util.Date;
+import java.util.List;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
+
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext.xml"})
@@ -363,13 +355,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testGetRegisteredProfileRawData() throws Exception {
 	fillUp();
-	String profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xsd").accept(MediaType.TEXT_XML).get(String.class);
-	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	String profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
+	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
 
-	profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class);
+	profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/xml").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-	assertTrue(profile.endsWith("</CMD_ComponentSpec>\n"));
+	assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
 	assertTrue(profile.contains("xsi:schemaLocation"));
 
 	try {
@@ -386,8 +378,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertTrue(response.isProfile());
 	assertEquals(1, getUserProfiles().size());
 	AbstractDescription desc = response.getDescription();
-	String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class);
-	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
+	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
     }
 
@@ -398,8 +390,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertFalse(response.isProfile());
 	assertEquals(1, getUserComponents().size());
 	AbstractDescription desc = response.getDescription();
-	String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class);
-	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+	String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
+	assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
     }
 
@@ -431,13 +423,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     public void testGetRegisteredComponentRawData() throws Exception {
 	fillUp();
 	String component = getResource().path("/registry/components/clarin.eu:cr1:component1/xsd").accept(MediaType.TEXT_XML).get(
-		String.class);
-	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xs:schema"));
+		String.class).trim();
+	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(component.endsWith("</xs:schema>"));
 
-	component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class);
+	component = getResource().path("/registry/components/clarin.eu:cr1:component1/xml").accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(component.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-	assertTrue(component.endsWith("</CMD_ComponentSpec>\n"));
+	assertTrue(component.endsWith("</CMD_ComponentSpec>"));
 	assertTrue(component.contains("xsi:schemaLocation"));
 
 	try {
@@ -968,7 +960,44 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertTrue(postResponse.isProfile());
 	assertFalse(postResponse.isRegistered());
 	assertEquals(1, postResponse.getErrors().size());
-	assertTrue(postResponse.getErrors().get(0).contains("SAXParseException"));
+	assertTrue(postResponse.getErrors().get(0).contains("isProfile"));
+    }
+
+    /**
+     * Two elements on the same level with the same name violates schematron rule, and should fail validation
+     * @throws Exception 
+     */
+    @Test
+    public void testRegisterInvalidProfile() throws Exception {
+	FormDataMultiPart form = new FormDataMultiPart();
+	String profileContent = "";
+	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	profileContent += "    <Header />\n";
+	profileContent += "    <CMD_Component name=\"ProfileTest1\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+	profileContent += "        <CMD_Element name=\"Age\">\n";
+	profileContent += "            <ValueScheme>\n";
+	profileContent += "                <pattern>[23][0-9]</pattern>\n";
+	profileContent += "            </ValueScheme>\n";
+	profileContent += "        </CMD_Element>\n";
+	profileContent += "        <CMD_Element name=\"Age\">\n";
+	profileContent += "            <ValueScheme>\n";
+	profileContent += "                <pattern>[23][0-9]</pattern>\n";
+	profileContent += "            </ValueScheme>\n";
+	profileContent += "        </CMD_Element>\n";
+	profileContent += "    </CMD_Component>\n";
+	profileContent += "</CMD_ComponentSpec>\n";
+	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentContent(profileContent),
+		MediaType.APPLICATION_OCTET_STREAM_TYPE);
+	form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+	form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+	form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+	form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
+	RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
+		RegisterResponse.class, form);
+	assertFalse("Subsequent elements should not be allowed to have the same name", response.isRegistered());
+	assertTrue(response.getErrors().get(0).contains(MDValidator.PARSE_ERROR));
     }
 
     @Test

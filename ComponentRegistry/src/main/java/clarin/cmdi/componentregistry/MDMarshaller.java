@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,12 +13,10 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -27,9 +26,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
-import net.sf.saxon.event.SaxonOutputKeys;
-
 import org.apache.xml.resolver.tools.CatalogResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +35,6 @@ import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 
 public class MDMarshaller {
 
@@ -159,8 +153,6 @@ public class MDMarshaller {
 	}
 	try {
 	    Transformer transformer = componentToSchemaTemplates.newTransformer();
-	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    transformer.setOutputProperty(SaxonOutputKeys.INDENT_SPACES, "1"); //Keeps the downloads a lot smaller.
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    MDMarshaller.marshal(spec, out);
 	    ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());

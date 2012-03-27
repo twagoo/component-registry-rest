@@ -1,6 +1,8 @@
 Bug Fixes and Features
 
 Release ComponentRegistry-1.11.0 (???????????????):
+- Upgraded to Saxon-HE 9.4
+- Validation of component specifications now also supports schematron rules in the general component schema.
 - Comments can be posted on profiles and components through a set of new REST calls, with support in the Flex UI. http://trac.clarin.eu/ticket/144
 - Data type 'dateTime' has been added as ValueScheme for elements. http://trac.clarin.eu/ticket/163
 - Recursion detection takes place at every component/profile registration or update. http://trac.clarin.eu/ticket/168
