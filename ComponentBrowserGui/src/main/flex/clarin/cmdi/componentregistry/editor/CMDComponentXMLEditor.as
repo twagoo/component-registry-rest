@@ -174,6 +174,7 @@ package clarin.cmdi.componentregistry.editor {
 			} else {
 				cmdSpec = CMDSpec.createEmptyProfile();
 			}
+			dispatchEditorChangeEvent();
 		}
 
 		/**
