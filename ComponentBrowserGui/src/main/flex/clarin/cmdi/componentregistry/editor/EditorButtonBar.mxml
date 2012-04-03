@@ -10,7 +10,9 @@
 	</mx:Metadata>
 	<mx:Button id="saveBtn"
 			   label="save"
-			   click="dispatchEvent(new MouseEvent('saveClick'))"/>
+			   click="dispatchEvent(new MouseEvent('saveClick'))"
+			   enabled="false"
+			   />
 	<mx:Button id="saveAsNewBtn"
 			   label="save as new"
 			   click="dispatchEvent(new MouseEvent('saveAsNewClick'))"/>

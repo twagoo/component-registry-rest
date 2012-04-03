@@ -38,7 +38,7 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
  * accessing the registry (ergo: a database implementation)
- * 
+ *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry {
@@ -65,7 +65,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Default constructor, makes this a (spring) bean. No user is set, so
      * public registry by default. Use setUser() to make it a user registry.
-     * 
+     *
      * @see setUser
      */
     public ComponentRegistryDbImpl() {
@@ -74,10 +74,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Creates a new ComponentRegistry (either public or not) for the provided
      * user
-     * 
+     *
      * @param userId
-     *            User id of the user to create registry for. Pass null for
-     *            public
+     * User id of the user to create registry for. Pass null for
+     * public
      */
     public ComponentRegistryDbImpl(Number userId) {
 	this.userId = userId;
@@ -262,13 +262,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    if (comment.getComponentDescriptionId() != null && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())
 		    || comment.getProfileDescriptionId() != null && profileDescriptionDao.isInRegistry(comment.getProfileDescriptionId(), getUserId())) {
 		// Convert principal name to user record id
-		Number uid = convertUserIdInComment(principalName);
-		if (uid != null) {
-		    // Set user id in comment for convenience of calling method 
-		    comment.setUserId(uid.toString());
-		} else {
-		    throw new ComponentRegistryException("Cannot find user with principal name: " + principalName);
-		}
+		Number uid = convertUserIdInComment(comment, principalName);
 		// Set date to current date
 		comment.setCommentDate(Comment.createNewDate());
 		Number commentId = commentsDao.insertComment(comment, uid);
@@ -287,11 +281,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * Calling service sets user id to principle. Our task is to convert this to
      * an id for later reference. If none is set and this is a user's workspace,
      * set from that user's id.
-     * 
+     *
      * It also sets the name in the description according to the display name in the database.
-     * 
+     *
      * @param description
-     *            Description containing principle name as userId
+     * Description containing principle name as userId
      * @return Id (from database)
      * @throws DataAccessException
      */
@@ -320,17 +314,26 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * Calling service sets user id to principle. Our task is to convert this to
      * an id for later reference. If none is set and this is a user's workspace,
      * set from that user's id.
-     * 
+     *
      * @param comment
-     *            Comment containing principle name as userId
+     * Comment containing principle name as userId
      * @return Id (from database)
      * @throws DataAccessException
      */
-    private Number convertUserIdInComment(String principalName) throws DataAccessException {
+    private Number convertUserIdInComment(Comment comment, String principalName) throws DataAccessException, ComponentRegistryException {
 	if (principalName != null) {
 	    RegistryUser user = userDao.getByPrincipalName(principalName);
 	    if (user != null) {
-		return user.getId();
+		Number id = user.getId();
+		if (id != null) {
+		    // Set user id in comment for convenience of calling method 
+		    comment.setUserId(id.toString());
+		    // Set name to user's preferred display name
+		    comment.setUserName(user.getName());
+		    return id;
+		} else {
+		    throw new ComponentRegistryException("Cannot find user with principal name: " + principalName);
+		}
 	    }
 	}
 	return null;
@@ -474,8 +477,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     /**
      * @param User
-     *            for which this should be the registry. Pass null for the
-     *            public registry
+     * for which this should be the registry. Pass null for the
+     * public registry
      */
     public void setUserId(Number user) {
 	this.userId = user;
@@ -496,12 +499,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Looks up description on basis of CMD Id. This will also check if such a
      * record even exists.
-     * 
+     *
      * @param description
-     *            Description to look up
+     * Description to look up
      * @return Database id for description
      * @throws IllegalArgumentException
-     *             If description with non-existing id is passed
+     * If description with non-existing id is passed
      */
     private Number getIdForDescription(AbstractDescription description) throws IllegalArgumentException {
 	Number dbId = null;
