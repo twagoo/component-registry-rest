@@ -13,6 +13,10 @@ Procedure for updating
 - Execute the upgrade script. When upgrading over multiple minor versions, 
   execute the upgrade scripts incrementally
 
+- Make sure to grant all required rights (GRANT ALL unless specified
+  otherwise) to the component registry database user (usually compreg) on
+  any newly added tables, views, and sequences.
+
 - Then redeploy the WAR and start the application
 
 Version specific issues
