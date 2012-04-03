@@ -1,6 +1,6 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.11.0 (???????????????):
+Release ComponentRegistry-1.11.0 (3 april 2012):
 - Upgraded to Saxon-HE 9.4
 - Validation of component specifications now also supports schematron rules in the general component schema.
 - Flex component editor does client side checks for duplicate component names.
