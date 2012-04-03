@@ -27,7 +27,7 @@ package clarin.cmdi.componentregistry.browser {
 			columns.push(createColumn("name", "Name"));
 			columns.push(createColumn("groupName", "Group Name"));
 			columns.push(createColumn("domainName", "Domain Name"));
-			columns.push(createColumn("creatorName", "Creator Name"));
+			columns.push(createColumn("creatorName", "Creator"));
 			columns.push(createColumn("description", "Description"));
 			columns.push(createDateColumn());
 			columns.push(createCommentsColumn());
@@ -83,8 +83,6 @@ package clarin.cmdi.componentregistry.browser {
 		}
 		
 		private static function compareCommentsCount(objectA:Object, objectB:Object):int {
-			//var stringA:String = itemA.toString();
-			//var stringB:String = itemB.toString();
 			var itemA:ItemDescription = ItemDescription(objectA);
 			var itemB:ItemDescription = ItemDescription(objectB);
 			return ObjectUtil.numericCompare(itemA.commentsCount, itemB.commentsCount);
