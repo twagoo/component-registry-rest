@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentRegistryResourceResolver;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -27,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MDValidator implements Validator {
-
+    
     private final static Logger LOG = LoggerFactory.getLogger(MDValidator.class);
     static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
@@ -48,11 +49,13 @@ public class MDValidator implements Validator {
     private final ComponentRegistry publicRegistry;
 
     /**
-     * 
-     * @param input In order to validate the input is consumed. So use @see getCMDComponentSpec to get the parsed CMDComponentSpec.
+     *
+     * @param input In order to validate the input is consumed. So use
+     * @see getCMDComponentSpec to get the parsed CMDComponentSpec.
      * @param desc
-     * @param registry (registry you currently used) 
-     * @param userRegistry can be null, We get user registry as well so we can give nice error messages if needed. Can be the same as @param registry
+     * @param registry (registry you currently used)
+     * @param userRegistry can be null, We get user registry as well so we can give nice error messages if needed. Can be the same as
+     * @param registry
      */
     public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry) {
 	this.input = input;
@@ -61,16 +64,17 @@ public class MDValidator implements Validator {
 	this.userRegistry = userRegistry;
 	this.publicRegistry = publicRegistry;
     }
-
+    
     @Override
     public List<String> getErrorMessages() {
 	return errorMessages;
     }
-
+    
     @Override
     public boolean validate() {
 	try {
 	    clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
+	    validator.setResourceResolver(new ComponentRegistryResourceResolver());
 	    // We may need to reuse the input stream, so save it to a byte array first
 	    byte[] inputBytes = getBytesFromInputStream();
 	    StreamSource source = new StreamSource(new ByteArrayInputStream(inputBytes));
@@ -108,30 +112,30 @@ public class MDValidator implements Validator {
 	}
 	return errorMessages.isEmpty();
     }
-
+    
     private byte[] getBytesFromInputStream() throws IOException {
 	int len;
 	byte[] b = new byte[4096];
 	final ByteArrayOutputStream bOS = new ByteArrayOutputStream();
-
+	
 	while ((len = input.read(b)) > 0) {
 	    bOS.write(b, 0, len);
 	}
-
+	
 	return bOS.toByteArray();
     }
-
+    
     private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
 	for (CMDComponentType cmdComponentType : cmdComponents) {
 	    validateDescribedComponents(cmdComponentType);
 	    validateComponents(cmdComponentType.getCMDComponent());//Recursion
 	}
     }
-
+    
     private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	checkPublicComponents(cmdComponentType);
     }
-
+    
     private void checkPublicComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	if (isDefinedInSeparateFile(cmdComponentType)) {
 	    String id = cmdComponentType.getComponentId();
@@ -156,15 +160,15 @@ public class MDValidator implements Validator {
 			errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
 		    }
 		}
-
+		
 	    }
 	}
     }
-
+    
     private boolean isDefinedInSeparateFile(CMDComponentType cmdComponentType) {
 	return cmdComponentType.getName() == null;
     }
-
+    
     public CMDComponentSpec getCMDComponentSpec() {
 	return spec;
     }

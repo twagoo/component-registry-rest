@@ -40,7 +40,9 @@ public class MDMarshaller {
 
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
     /**
-     * I define W3C_XML_SCHEMA_NS_URI here cannot get it from @see XMLConstants there is a conflict between stax-api and java5.
+     * I define W3C_XML_SCHEMA_NS_URI here cannot get it from
+     *
+     * @see XMLConstants there is a conflict between stax-api and java5.
      */
     private static final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
     private static Schema generalComponentSchema;
@@ -64,7 +66,7 @@ public class MDMarshaller {
     }
 
     /**
-     * 
+     *
      * @param docClass
      * @param inputStream
      * @param schema to validate against, can be null for no validation.
@@ -101,36 +103,11 @@ public class MDMarshaller {
 	m.marshal(marshallableObject, writer);
     }
 
-    public static Schema getCMDComponentSchema() {
+    public static synchronized Schema getCMDComponentSchema() {
 	if (generalComponentSchema == null) {
 	    try {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
-		schemaFactory.setResourceResolver(new LSResourceResolver() {
-		    private CatalogResolver catRes = new CatalogResolver();
-
-		    @Override
-		    public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId, String baseURI) {
-			InputSource resolveEntity = catRes.resolveEntity(publicId, systemId);
-			resolveEntity.setEncoding("UTF-8");
-			DOMImplementationLS domImplementation;
-			try {
-			    domImplementation = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
-			} catch (ClassCastException e) {
-			    throw new RuntimeException(e);
-			} catch (ClassNotFoundException e) {
-			    throw new RuntimeException(e);
-			} catch (InstantiationException e) {
-			    throw new RuntimeException(e);
-			} catch (IllegalAccessException e) {
-			    throw new RuntimeException(e);
-			}
-			LSInput lsInput = domImplementation.createLSInput();
-			lsInput.setEncoding("UTF-8");
-			lsInput.setByteStream(resolveEntity.getByteStream());
-			lsInput.setCharacterStream(resolveEntity.getCharacterStream());
-			return lsInput;
-		    }
-		});
+		schemaFactory.setResourceResolver(new ComponentRegistryResourceResolver());
 		generalComponentSchema = schemaFactory.newSchema(new URL(Configuration.getInstance().getGeneralComponentSchema()));
 	    } catch (MalformedURLException e) {
 		LOG.error("Cannot instantiate schema", e);
@@ -168,8 +145,6 @@ public class MDMarshaller {
 	}
     }
 
-    
-    
     private static String getSpecId(CMDComponentSpec spec) {
 	String result = "";
 	if (spec != null && spec.getHeader() != null) {
