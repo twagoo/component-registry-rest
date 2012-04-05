@@ -80,7 +80,7 @@ public class ComponentRegistryRestService {
     }
 
     /**
-     * 
+     *
      * @return Principal of current request
      * @throws IllegalArgumentException If no user principal found
      */
@@ -280,9 +280,10 @@ public class ComponentRegistryRestService {
     }
 
     /**
-     * 
+     *
      * Purely helper method for my front-end (FLEX) which only does post/get requests. The query param is checked and the "proper" method is
      * called.
+     *
      * @param profileId
      * @param method
      * @return
@@ -372,9 +373,10 @@ public class ComponentRegistryRestService {
     }
 
     /**
-     * 
+     *
      * Purely helper method for my front-end (FLEX) which van only do post/get requests. The query param is checked and the "proper" method
      * is called.
+     *
      * @param componentId
      * @param method
      * @return
