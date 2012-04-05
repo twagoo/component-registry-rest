@@ -2,29 +2,21 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.ws.rs.core.MediaType;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
-
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import javax.ws.rs.core.MediaType;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +24,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
+import static org.junit.Assert.*;
+
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/applicationContext.xml" })
+@ContextConfiguration(locations = {"/applicationContext.xml"})
 public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
     private final static Logger LOG = LoggerFactory.getLogger(ConcurrentRestServiceTest.class);
-    private int NR_OF_PROFILES = 50;
-    private int NR_OF_COMPONENTS = 50;
-
+    private int NR_OF_PROFILES = 20;
+    private int NR_OF_COMPONENTS = 20;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -53,7 +47,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
     protected String getApplicationContextFile() {
 	return "classpath:applicationContext.xml";
     }
-    
+
     @Test
     public void testConcurrentRegisterProfile() throws Exception {
 	List<String> errors = new ArrayList();
@@ -124,6 +118,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
     private void registerProfiles(List<Thread> ts, int size, final List<String> errors, String userSpace) throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
+	    LOG.debug("Profile {} should be registered in {} and {}", new Object[]{i + 1000, Boolean.parseBoolean(userSpace) ? "user space" : "public space", shouldDelete ? "ALSO DELETED" : "not deleted"});
 	    Thread thread = createThread("/registry/profiles/", userSpace, "Test Profile" + (i + 1000), shouldDelete, RegistryTestHelper.getTestProfileContent(), errors);
 	    ts.add(thread);
 	}
@@ -132,6 +127,7 @@ public class ConcurrentRestServiceTest extends ComponentRegistryRestServiceTestC
     private void registerComponents(List<Thread> ts, int size, final List<String> errors, String userSpace) throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
+	    LOG.debug("Component {} should be registered in {} and {}", new Object[]{i + 1000, Boolean.parseBoolean(userSpace) ? "user space" : "public space", shouldDelete ? "ALSO DELETED" : "not deleted"});
 	    Thread thread = createThread("/registry/components/", userSpace, "Test Component" + (i + 1000), shouldDelete,
 		    RegistryTestHelper.getComponentTestContent(), errors);
 	    ts.add(thread);
