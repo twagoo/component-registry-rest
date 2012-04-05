@@ -778,9 +778,6 @@ public class ComponentRegistryRestService {
 		response.setRegistered(false);
 	    }
 	    response.setIsProfile(desc.isProfile());
-	    if (response.isRegistered()) {
-		LOG.info("Registration of {} was successful", response.getDescription().getId());
-	    }
 	    return Response.ok(response).build();
 	} finally {
 	    try {

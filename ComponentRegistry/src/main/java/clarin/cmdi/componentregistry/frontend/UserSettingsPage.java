@@ -4,6 +4,8 @@
  */
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.impl.database.UserDao;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import java.security.Principal;
@@ -28,14 +30,16 @@ public class UserSettingsPage extends WebPage {
 
     @SpringBean
     private UserDao userDao;
+    @SpringBean(name = "componentRegistryFactory")
+    private ComponentRegistryFactory componentRegistryFactory;
     private RegistryUser registryUser;
 
     public UserSettingsPage(PageParameters parameters) {
 	super(parameters);
 
 	Principal userPrincipal = ((WebRequestCycle) (RequestCycle.get())).getWebRequest().getHttpServletRequest().getUserPrincipal();
-	registryUser = userDao.getByPrincipalName(userPrincipal.getName());
-	
+	registryUser = componentRegistryFactory.getOrCreateUser(new UserCredentials(userPrincipal));
+
 	add(new Label("userName", registryUser.getPrincipalName()));
 
 	add(new FeedbackPanel("feedback"));
