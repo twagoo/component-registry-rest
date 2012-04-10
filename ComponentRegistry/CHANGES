@@ -1,5 +1,9 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.11.1 (10 april 2012):
+- Fixed caching of w3c xml.xsd schema in validator
+- Fixes issue with user settings page users without user entry in database
+
 Release ComponentRegistry-1.11.0 (3 april 2012):
 - Upgraded to Saxon-HE 9.4
 - Validation of component specifications now also supports schematron rules in the general component schema.
