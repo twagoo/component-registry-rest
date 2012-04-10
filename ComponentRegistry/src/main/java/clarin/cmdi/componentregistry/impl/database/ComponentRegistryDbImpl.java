@@ -644,4 +644,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public CMDComponentSpecExpander getExpander() {
 	return new CMDComponentSpecExpanderDbImpl(this);
     }
+
+    @Override
+    public String toString() {
+	return getName();
+    }
 }

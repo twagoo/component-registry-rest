@@ -346,9 +346,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	try {
 	    profile = getResource().path("/registry/profiles/clarin.eu:cr1:profileXXXX").accept(MediaType.APPLICATION_XML).get(
 		    CMDComponentSpec.class);
-	    fail("Exception should have been thrown resource does not exist, HttpStatusCode 204");
+	    fail("Exception should have been thrown resource does not exist, HttpStatusCode 404");
 	} catch (UniformInterfaceException e) {
-	    assertEquals(204, e.getResponse().getStatus());
+	    assertEquals(404, e.getResponse().getStatus());
 	}
     }
 
@@ -557,8 +557,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	// Try get from public registry
 	cResponse = getResource().path("/registry/profiles/" + profileDesc.getId()).accept(MediaType.APPLICATION_XML).get(
 		ClientResponse.class);
-	// Should return 204 = no content
-	assertEquals(204, cResponse.getStatus());
+	// Should return 404 = not found
+	assertEquals(404, cResponse.getStatus());
 	CMDComponentSpec spec = getAuthenticatedResource(
 		getResource().path("/registry/profiles/" + profileDesc.getId()).queryParam(USERSPACE_PARAM, "true")).accept(
 		MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
@@ -697,8 +697,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	// Try to get from public registry
 	cResponse = getResource().path("/registry/components/" + desc.getId()).accept(MediaType.APPLICATION_XML).get(
 		ClientResponse.class);
-	// Should return 204 = no content
-	assertEquals(204, cResponse.getStatus());
+	// Should return 404 = not found
+	assertEquals(404, cResponse.getStatus());
 	CMDComponentSpec spec = getUserComponent(desc);
 	assertNotNull(spec);
 
@@ -965,7 +965,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     /**
      * Two elements on the same level with the same name violates schematron rule, and should fail validation
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
     public void testRegisterInvalidProfile() throws Exception {

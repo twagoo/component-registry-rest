@@ -1,5 +1,20 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.CommentResponse;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegisterResponse;
+import com.sun.jersey.multipart.FormDataParam;
+import com.sun.jersey.spi.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,7 +23,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,30 +38,12 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.Comment;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.CommentResponse;
-import clarin.cmdi.componentregistry.model.RegisterResponse;
-
-import com.sun.jersey.multipart.FormDataParam;
-import com.sun.jersey.spi.inject.Inject;
 
 @Path("/registry")
 public class ComponentRegistryRestService {
@@ -133,10 +129,15 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public CMDComponentSpec getRegisteredComponent(@PathParam("componentId") String componentId,
+    public Response getRegisteredComponent(@PathParam("componentId") String componentId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	LOG.info("Component with id: " + componentId + " is requested.");
-	return getRegistry(userspace).getMDComponent(componentId);
+	CMDComponentSpec mdComponent = getRegistry(userspace).getMDComponent(componentId);
+	if (mdComponent == null) {
+	    return Response.status(Status.NOT_FOUND).build();
+	} else {
+	    return Response.ok(mdComponent).build();
+	}
     }
 
     @GET
@@ -211,10 +212,15 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public CMDComponentSpec getRegisteredProfile(@PathParam("profileId") String profileId,
+    public Response getRegisteredProfile(@PathParam("profileId") String profileId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	LOG.info("Profile with id: " + profileId + " is requested.");
-	return getRegistry(userspace).getMDProfile(profileId);
+	CMDComponentSpec mdProfile = getRegistry(userspace).getMDProfile(profileId);
+	if (mdProfile == null) {
+	    return Response.status(Status.NOT_FOUND).build();
+	} else {
+	    return Response.ok(mdProfile).build();
+	}
     }
 
     @GET
