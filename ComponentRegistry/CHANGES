@@ -1,6 +1,6 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.11.1 (17 april 2012):
+Release ComponentRegistry-1.11.1 (10 april 2012):
 - Fixed caching of w3c xml.xsd schema in validator
 - Fixes issue with user settings page users without user entry in database
 
