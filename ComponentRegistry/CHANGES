@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.12.0 (?):
+- REST service produces 404 status when component requested that does not exist.
+
 Release ComponentRegistry-1.11.1 (10 april 2012):
 - Fixed caching of w3c xml.xsd schema in validator
 - Fixes issue with user settings page users without user entry in database
