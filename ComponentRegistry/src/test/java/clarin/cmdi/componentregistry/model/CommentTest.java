@@ -1,11 +1,11 @@
 package clarin.cmdi.componentregistry.model;
 
-import static org.junit.Assert.assertEquals;
-
 import clarin.cmdi.componentregistry.MDMarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -33,6 +33,7 @@ public class CommentTest {
         expected += "    <profileDescriptionId>clarin.eu:cr1:p_1297242111880</profileDescriptionId>\n";
         expected += "    <id>1</id>\n";
         expected += "    <userName>J. Unit</userName>\n";
+	expected += "    <canDelete>false</canDelete>\n";
         expected += "</comment>\n";
         assertEquals(expected, out.toString());
 
@@ -61,6 +62,7 @@ public class CommentTest {
         expected += "    <componentDescriptionId>clarin.eu:cr1:c_1297242111880</componentDescriptionId>\n";
         expected += "    <id>1</id>\n";
         expected += "    <userName>J. Unit</userName>\n";
+	expected += "    <canDelete>false</canDelete>\n";
         expected += "</comment>\n";
         assertEquals(expected, out.toString());
 

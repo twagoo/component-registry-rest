@@ -15,6 +15,7 @@ public final class DummyPrincipal implements Principal {
 	    return "J.Unit";
 	}
     };
+    public static final UserCredentials DUMMY_ADMIN_CREDENTIALS = new UserCredentials(DUMMY_ADMIN_PRINCIPAL);
     private final String username;
 
     public DummyPrincipal(String username) {

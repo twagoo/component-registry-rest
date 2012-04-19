@@ -1,24 +1,5 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.Calendar;
-
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.DeleteFailedException;
@@ -32,8 +13,21 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/applicationContext.xml"})
@@ -203,7 +197,7 @@ public class ComponentRegistryDbImplTest {
     private Comment createComment(ComponentRegistry register, ProfileDescription description) throws Exception {
 	Comment comment = createComment(description);
 	register.registerComment(comment, USER_CREDS.getPrincipalName());
-	assertEquals(1, register.getCommentsInProfile(description.getId()).size());
+	assertEquals(1, register.getCommentsInProfile(description.getId(), null).size());
 	return comment;
     }
 
@@ -668,15 +662,27 @@ public class ComponentRegistryDbImplTest {
 	assertNotNull(comment);
 	assertEquals(0, description.getCommentsCount());
 
-	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	List<Comment> comments = register.getCommentsInProfile(description.getId(), null);
 	assertEquals(1, comments.size());
 
 	comment = comments.get(0);
 	assertEquals("0", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
+	
+	// Should not be allowed to delete, not authenticated
+	assertFalse(comment.isCanDelete());
 
 	description = register.getProfileDescription(description.getId());
 	assertEquals(1, description.getCommentsCount());
+
+	// Test if owner can delete
+	comments = register.getCommentsInProfile(description.getId(), DummyPrincipal.DUMMY_PRINCIPAL);
+	assertTrue(comments.get(0).isCanDelete());
+
+	// Test if admin can delete
+	userDao.insertUser(createUser(DummyPrincipal.DUMMY_ADMIN_CREDENTIALS));
+	comments = register.getCommentsInProfile(description.getId(), PRINCIPAL_ADMIN);
+	assertTrue(comments.get(0).isCanDelete());
     }
 
     @Test
@@ -691,7 +697,7 @@ public class ComponentRegistryDbImplTest {
 	assertNotNull(comment);
 	assertEquals(0, description.getCommentsCount());
 
-	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	List<Comment> comments = register.getCommentsInProfile(description.getId(), null);
 	assertEquals(1, comments.size());
 
 	comment = comments.get(0);
@@ -713,14 +719,14 @@ public class ComponentRegistryDbImplTest {
 	Comment comment = createComment(register, description);
 	assertNotNull(comment);
 
-	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	List<Comment> comments = register.getCommentsInProfile(description.getId(), null);
 	assertEquals(1, comments.size());
 	description = register.getProfileDescription(description.getId());
 	assertEquals(1, description.getCommentsCount());
 
 	comment = comments.get(0);
 	register.deleteComment(comment.getId(), USER_CREDS.getPrincipal());
-	comments = register.getCommentsInProfile(description.getId());
+	comments = register.getCommentsInProfile(description.getId(), null);
 	assertEquals(0, comments.size());
 	description = register.getProfileDescription(description.getId());
 	assertEquals(0, description.getCommentsCount());
@@ -738,7 +744,7 @@ public class ComponentRegistryDbImplTest {
 	Comment comment = createComment(register, description);
 	assertNotNull(comment);
 
-	List<Comment> comments = register.getCommentsInProfile(description.getId());
+	List<Comment> comments = register.getCommentsInProfile(description.getId(), null);
 	assertEquals(1, comments.size());
 	comment = comments.get(0);
 

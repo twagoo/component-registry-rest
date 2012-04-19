@@ -16,8 +16,9 @@ import org.junit.Test;
 public class CommentResponseTest {
 
     /**
-     * Test with no validate attribute should return errors 
-     * @throws Exception 
+     * Test with no validate attribute should return errors
+     *
+     * @throws Exception
      */
     @Test
     public void testRegisterError() throws Exception {
@@ -45,7 +46,8 @@ public class CommentResponseTest {
 
     /**
      * Test successfully processed
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
     public void testRegisterSucces() throws Exception {
@@ -65,6 +67,7 @@ public class CommentResponseTest {
 	expected += "        <profileDescriptionId>myD</profileDescriptionId>\n";
 	expected += "        <id>myId</id>\n";
 	expected += "        <userName>J. Unit</userName>\n";
+	expected += "        <canDelete>false</canDelete>\n";
 	expected += "    </comment>\n";
 	expected += "</commentResponse>\n";
 	assertEquals(expected, out.toString());

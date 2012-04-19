@@ -34,6 +34,8 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
@@ -128,10 +130,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException {
+    public List<Comment> getCommentsInProfile(String profileId, Principal principal) throws ComponentRegistryException {
 	try {
 	    if (profileDescriptionDao.isInRegistry(profileId, getUserId())) {
-		return commentsDao.getCommentsFromProfile(profileId);
+		final List<Comment> commentsFromProfile = commentsDao.getCommentsFromProfile(profileId);
+		setCanDeleteInComments(commentsFromProfile, principal);
+		return commentsFromProfile;
 	    } else {
 		// Profile does not exist (at least not in this registry)
 		throw new ComponentRegistryException("Profile " + profileId + " does not exist in specified registry");
@@ -142,12 +146,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public Comment getSpecifiedCommentInProfile(String profileId, String commentId) throws ComponentRegistryException {
+    public Comment getSpecifiedCommentInProfile(String profileId, String commentId, Principal principal) throws ComponentRegistryException {
 	try {
 	    Comment comment = commentsDao.getSpecifiedCommentFromProfile(commentId);
 	    if (comment != null
 		    && profileId.equals(comment.getProfileDescriptionId())
 		    && profileDescriptionDao.isInRegistry(comment.getProfileDescriptionId(), getUserId())) {
+		setCanDeleteInComments(Collections.singleton(comment), principal);
 		return comment;
 	    } else {
 		// Comment exists in DB, but profile is not in this registry
@@ -159,10 +164,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException {
+    public List<Comment> getCommentsInComponent(String componentId, Principal principal) throws ComponentRegistryException {
 	try {
 	    if (componentDescriptionDao.isInRegistry(componentId, getUserId())) {
-		return commentsDao.getCommentsFromComponent(componentId);
+		final List<Comment> commentsFromComponent = commentsDao.getCommentsFromComponent(componentId);
+		setCanDeleteInComments(commentsFromComponent, principal);
+		return commentsFromComponent;
 	    } else {
 		// Component does not exist (at least not in this registry)
 		throw new ComponentRegistryException("Component " + componentId + " does not exist in specified registry");
@@ -173,12 +180,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public Comment getSpecifiedCommentInComponent(String componentId, String commentId) throws ComponentRegistryException {
+    public Comment getSpecifiedCommentInComponent(String componentId, String commentId, Principal principal) throws ComponentRegistryException {
 	try {
 	    Comment comment = commentsDao.getSpecifiedCommentFromComponent(commentId);
 	    if (comment != null
 		    && componentId.equals(comment.getComponentDescriptionId())
 		    && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())) {
+		setCanDeleteInComments(Collections.singleton(comment), principal);
 		return comment;
 	    } else {
 		// Comment does not exists in DB or component is not in this registry
@@ -186,6 +194,26 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	} catch (DataAccessException ex) {
 	    throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
+	}
+    }
+
+    /**
+     * Sets the {@link Comment#setCanDelete(boolean) canDelete} property on all comments in the provided collection for the perspective of
+     * the specified principal.
+     * Comment owners (determined by {@link Comment#getUserId() }) and admins can delete, others cannot.
+     *
+     * @param comments comments to configure
+     * @param principal user to configure for
+     * @see Comment#isCanDelete()
+     */
+    private void setCanDeleteInComments(Collection<Comment> comments, Principal principal) {
+	if (principal != null && principal.getName() != null) {
+	    final RegistryUser registryUser = userDao.getByPrincipalName(principal.getName());
+	    final String registryUserId = registryUser.getId().toString();
+	    final boolean isAdmin = configuration.isAdminUser(principal);
+	    for (Comment comment : comments) {
+		comment.setCanDelete(isAdmin || comment.getUserId().equals(registryUserId));
+	    }
 	}
     }
 
