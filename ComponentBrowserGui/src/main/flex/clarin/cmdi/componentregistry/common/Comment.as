@@ -14,6 +14,7 @@ package clarin.cmdi.componentregistry.common
 		public var componentDescriptionId:String;
 		public var profileDescriptionId:String;
 		public var id:String;
+		public var canDelete:Boolean;
 		
 		public function Comment():void{
 			
@@ -26,6 +27,7 @@ package clarin.cmdi.componentregistry.common
 			this.profileDescriptionId = comment.profileDescriptionId;
 			this.id = comment.id;
 			this.userName = comment.userName;
+			this.canDelete = comment.canDelete == "true";
 		}
 		
 		public function toXml():XML {
