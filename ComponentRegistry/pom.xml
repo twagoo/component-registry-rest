@@ -17,6 +17,10 @@
         ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
         The goal of the ComponentRegistry will be to register and make searchable Metadata Components and Profiles. 
     </description>
+    <ciManagement>
+        <system>hudson</system>
+        <url>http://lux16.mpi.nl/jenkins/job/ComponentRegistry/</url>
+    </ciManagement>
     <scm>
 	<connection>scm:svn:http://svn.clarin.eu/ComponentRegistry/trunk/ComponentRegistry</connection>
 	<developerConnection>scm:svn:http://svn.clarin.eu/ComponentRegistry/trunk/ComponentRegistry</developerConnection>
