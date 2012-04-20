@@ -242,7 +242,7 @@ package clarin.cmdi.componentregistry.editor {
 				}, IsocatService.TYPE_CONTAINER);
 			addChild(link);
 			
-			addChild(new AttributeListEdit(_firstComponent.attributeList, this))
+			addChild(new AttributeListEdit(_firstComponent, this))
 		}
 
 		private function addComponentAddButton():void {

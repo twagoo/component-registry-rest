@@ -7,7 +7,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	import mx.collections.ArrayCollection;
 
 	[Bindable]
-	public class CMDComponentElement implements XmlAble, ValueSchemeInterface {
+	public class CMDComponentElement implements XmlAble, ValueSchemeInterface, AttributeContainer {
 
 		//Attributes
 		public var name:String;
@@ -96,6 +96,9 @@ package clarin.cmdi.componentregistry.editor.model {
 			return result;
 		}
 
+		public function getAttributeList():ArrayCollection {
+			return attributeList;
+		}
 
 	}
 }

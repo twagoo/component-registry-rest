@@ -135,7 +135,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		private function handleCMDAttributeList():void {
-			var attributeEdit:Container = new AttributeListEdit(_element.attributeList, this);
+			var attributeEdit:Container = new AttributeListEdit(_element, this);
 			addChild(attributeEdit);
 		}
 

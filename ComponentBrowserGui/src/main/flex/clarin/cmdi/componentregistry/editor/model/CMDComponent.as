@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
-
+	
 	import mx.collections.ArrayCollection;
 
-	public class CMDComponent implements XmlAble {
+	public class CMDComponent implements XmlAble, AttributeContainer {
 
 		//Attributes
 		public var name:String;
@@ -110,6 +110,9 @@ package clarin.cmdi.componentregistry.editor.model {
 			}
 			return result;
 		}
-
+		
+		public function getAttributeList():ArrayCollection {
+			return attributeList;
+		}
 	}
 }
