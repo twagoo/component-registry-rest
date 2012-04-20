@@ -652,7 +652,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public void deleteComment(String commentId, Principal principal) throws IOException,
 	    ComponentRegistryException, UserUnauthorizedException, DeleteFailedException {
 	try {
-	    Comment comment = commentsDao.getById(commentId);
+	    Comment comment = commentsDao.getById(Integer.parseInt(commentId));
 	    if (comment != null
 		    // Comment must have an existing (in this registry) componentId or profileId
 		    && (comment.getComponentDescriptionId() != null && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())
@@ -665,6 +665,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	} catch (DataAccessException ex) {
 	    throw new DeleteFailedException("Database access error while trying to delete component", ex);
+	} catch (NumberFormatException ex) {
+	    throw new DeleteFailedException("Illegal comment ID, cannot parse integer", ex);
 	}
     }
 

@@ -58,7 +58,7 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
      * @return Comment, if it exists
      * @throws DataAccessException
      */
-    public Comment getById(String id) throws DataAccessException {
+    public Comment getById(Number id) throws DataAccessException {
         return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", id);
     }
 
@@ -199,17 +199,6 @@ public class CommentsDao extends ComponentRegistryDao<Comment> {
         delete.append(" WHERE " + COLUMN_ID + " = ?");
         getSimpleJdbcTemplate().update(delete.toString(), dbId);
         txManager.commit(transaction);
-    }
-
-    /**
-     * Retrieve comment Id From a comment
-     * @param cmdId
-     * @return query for database access to id
-     */
-    public Number getDbId(String cmdId) {
-        StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID + " FROM ").append(getTableName());
-        query.append(" WHERE ").append(COLUMN_ID).append(" = ?");
-        return getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId);
     }
 
     private Timestamp extractTimestamp(Comment comment) {
