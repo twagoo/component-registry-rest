@@ -311,7 +311,7 @@ public class ComponentRegistryRestService {
     
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
-    public Response manipulateCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("profileId") String commentId, @FormParam("method") String method,
+    public Response manipulateCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId, @FormParam("method") String method,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
 	if ("delete".equalsIgnoreCase(method)) {
 	    return deleteCommentFromProfile(profileId, commentId, userspace);
@@ -322,7 +322,7 @@ public class ComponentRegistryRestService {
     
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
-    public Response manipulateCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("profileId") String commentId, @FormParam("method") String method,
+    public Response manipulateCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("commentId") String commentId, @FormParam("method") String method,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
 	if ("delete".equalsIgnoreCase(method)) {
 	    return deleteCommentFromComponent(componentId, commentId, userspace);

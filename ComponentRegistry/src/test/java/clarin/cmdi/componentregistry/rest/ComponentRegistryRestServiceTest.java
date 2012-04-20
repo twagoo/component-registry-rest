@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
@@ -224,6 +225,25 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
+    public void testManipulateCommentFromComponent() throws Exception {
+	fillUp();
+	List<Comment> comments = getResource().path("/registry/components/clarin.eu:cr1:component1/comments").get(COMMENT_LIST_GENERICTYPE);
+	assertEquals(2, comments.size());
+	Comment aComment = getResource().path("/registry/components/clarin.eu:cr1:component1/comments/2").get(Comment.class);
+	assertNotNull(aComment);
+
+	Form manipulateForm = new Form();
+	manipulateForm.add("method", "delete");
+
+	// Try to delete from other component
+	ClientResponse response = getAuthenticatedResource("/registry/components/clarin.eu:cr1:component1/comments/2").post(ClientResponse.class, manipulateForm);
+	assertEquals(200, response.getStatus());
+
+	comments = getResource().path("/registry/components/clarin.eu:cr1:component1/comments/").get(COMMENT_LIST_GENERICTYPE);
+	assertEquals(1, comments.size());
+    }
+
+    @Test
     public void testDeleteCommentFromProfile() throws Exception {
 	fillUp();
 	List<Comment> comments = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments").get(COMMENT_LIST_GENERICTYPE);
@@ -246,6 +266,24 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
 	comments = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments").get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(0, comments.size());
+    }
+
+    @Test
+    public void testManipulateCommentFromProfile() throws Exception {
+	fillUp();
+	List<Comment> comments = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments").get(COMMENT_LIST_GENERICTYPE);
+	assertEquals(2, comments.size());
+	Comment aComment = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments/0").get(Comment.class);
+	assertNotNull(aComment);
+
+	Form manipulateForm = new Form();
+	manipulateForm.add("method", "delete");
+	// Delete from correct profile
+	ClientResponse response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1/comments/0").post(ClientResponse.class, manipulateForm);
+	assertEquals(200, response.getStatus());
+
+	comments = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments/").get(COMMENT_LIST_GENERICTYPE);
+	assertEquals(1, comments.size());
     }
 
     @Test
@@ -325,6 +363,27 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals(200, response.getStatus());
 	components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
 	assertEquals(0, components.size());
+    }
+
+    @Test
+    public void testManipulateRegisteredComponent() throws Exception {
+	fillUp();
+	List<ComponentDescription> components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+	assertEquals(2, components.size());
+	CMDComponentSpec profile = getResource().path("/registry/components/clarin.eu:cr1:component1").get(CMDComponentSpec.class);
+	assertNotNull(profile);
+
+	Form manipulateForm = new Form();
+	manipulateForm.add("method", "delete");
+
+	ClientResponse response = getAuthenticatedResource("/registry/components/clarin.eu:cr1:component1").post(ClientResponse.class, manipulateForm);
+	assertEquals(200, response.getStatus());
+
+	components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+	assertEquals(1, components.size());
+
+	response = getAuthenticatedResource("/registry/components/clarin.eu:cr1:component2").post(ClientResponse.class, manipulateForm);
+	assertEquals(200, response.getStatus());
     }
 
     @Test
@@ -416,6 +475,27 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals(0, profiles.size());
 
 	response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1").delete(ClientResponse.class);
+	assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testManipulateRegisteredProfile() throws Exception {
+	fillUp();
+	List<ProfileDescription> profiles = getResource().path("/registry/profiles").get(PROFILE_LIST_GENERICTYPE);
+	assertEquals(2, profiles.size());
+	CMDComponentSpec profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1").get(CMDComponentSpec.class);
+	assertNotNull(profile);
+
+	Form manipulateForm = new Form();
+	manipulateForm.add("method", "delete");
+
+	ClientResponse response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1").post(ClientResponse.class, manipulateForm);
+	assertEquals(200, response.getStatus());
+
+	profiles = getResource().path("/registry/profiles").get(PROFILE_LIST_GENERICTYPE);
+	assertEquals(1, profiles.size());
+
+	response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile2").post(ClientResponse.class, manipulateForm);
 	assertEquals(200, response.getStatus());
     }
 
