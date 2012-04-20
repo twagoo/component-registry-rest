@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.browser
 {
 	import clarin.cmdi.componentregistry.common.Comment;
+	import clarin.cmdi.componentregistry.services.DeleteService;
 	
 	import flash.events.MouseEvent;
 	
@@ -73,7 +74,7 @@ package clarin.cmdi.componentregistry.browser
 		
 		private function deleteHandler(event:CloseEvent):void {
 			if(event.detail == Alert.OK){
-				Alert.show("Will delete","TODO");
+				DeleteService.instance.deleteComment(comment);
 			}	
 		}
 	}
