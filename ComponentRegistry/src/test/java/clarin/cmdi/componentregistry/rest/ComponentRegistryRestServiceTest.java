@@ -1109,6 +1109,20 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
+    public void testRegisterLargeProfile() throws Exception {
+	FormDataMultiPart form = new FormDataMultiPart();
+	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getLargeProfileContent(),
+		MediaType.APPLICATION_OCTET_STREAM_TYPE);
+	form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+	form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+	form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+	form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
+	ClientResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
+		ClientResponse.class, form);
+	assertEquals(200, response.getStatus());
+    }
+
+    @Test
     public void testRegisterComponentAsProfile() throws Exception {
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
