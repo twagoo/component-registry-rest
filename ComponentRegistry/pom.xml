@@ -93,12 +93,12 @@
 	<dependency>
 	    <groupId>com.sun.jersey.contribs</groupId>
 	    <artifactId>jersey-multipart</artifactId>
-	    <version>1.3</version>
+	    <version>1.12</version>
 	</dependency>
 	<dependency>
 	    <groupId>com.sun.jersey</groupId>
 	    <artifactId>jersey-bundle</artifactId>
-	    <version>1.3</version>
+	    <version>1.12</version>
 	    <exclusions>
 				<!--
           Jersey has dependencies with different group ids therefore maven cannot resolve the conflict and gives me both
@@ -113,7 +113,7 @@
 	<dependency>
 	    <groupId>com.sun.jersey.jersey-test-framework</groupId>
 	    <artifactId>jersey-test-framework-grizzly</artifactId>
-	    <version>1.3</version>
+	    <version>1.12</version>
 	    <scope>test</scope>
 	</dependency>
 	<dependency>
@@ -161,7 +161,7 @@
 	<dependency>
 	    <groupId>com.sun.jersey.contribs</groupId>
 	    <artifactId>jersey-spring</artifactId>
-	    <version>1.3</version>
+	    <version>1.12</version>
 	</dependency>
 	<dependency>
 	    <groupId>org.springframework</groupId>
