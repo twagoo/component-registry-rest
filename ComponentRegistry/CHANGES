@@ -4,6 +4,7 @@ Release ComponentRegistry-1.12.0 (?):
 - REST service produces 404 status when component requested that does not exist.
 - Users can delete their own comments from the Flex UI. http://trac.clarin.eu/ticket/185
 - Attribute name uniqueness check in editor of Flex UI. http://trac.clarin.eu/ticket/184
+- Improved usability of the type edit dialog of the component editor in the Flex UI. http://trac.clarin.eu/ticket/191
 
 Release ComponentRegistry-1.11.1 (10 april 2012):
 - Fixed caching of w3c xml.xsd schema in validator
