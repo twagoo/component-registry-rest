@@ -167,13 +167,26 @@ package clarin.cmdi.componentregistry.editor {
 			addComponentAddButton();
 			trace("Created editor view in " + (getTimer() - start) + " ms.");
 		}
+		
+		private function clearEditorHandler(event:Event):void {
+			clearEditor();
+		}
 
-		private function clearEditor(event:Event):void {
+		public function clearEditor():void {
 			if (_spec && !_spec.isProfile) {
-				cmdSpec = CMDSpec.createEmptyComponent();
+				clearEditorComponent();
 			} else {
-				cmdSpec = CMDSpec.createEmptyProfile();
+				clearEditorProfile();
 			}
+		}
+		
+		public function clearEditorComponent() : void{
+			cmdSpec = CMDSpec.createEmptyComponent();
+			dispatchEditorChangeEvent();
+		}
+		
+		public function clearEditorProfile() : void{
+			cmdSpec = CMDSpec.createEmptyProfile();
 			dispatchEditorChangeEvent();
 		}
 
@@ -337,7 +350,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function createStartOverButton():Label {
 			var startOverButton:Label = new RemoveLabelButton();
-			startOverButton.addEventListener(MouseEvent.CLICK, clearEditor);
+			startOverButton.addEventListener(MouseEvent.CLICK, clearEditorHandler);
 			startOverButton.toolTip = "Clears all input and removes added components";
 			startOverButton.text = "start over";
 			return startOverButton;

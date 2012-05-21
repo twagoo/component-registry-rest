@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
+import flash.sampler.startSampling;
 
 import mx.controls.Alert;
 import mx.events.CloseEvent;
@@ -82,6 +83,14 @@ public function setDescription(itemDescription:ItemDescription):void {
 		}
 		buttonBar.saveBtn.enabled = false;
 	}
+}
+
+public function startNewProfile():void {
+	xmlEditor.clearEditorProfile();
+}
+
+public function startNewComponent():void {
+	xmlEditor.clearEditorComponent();
 }
 
 private function publishSpec():void {

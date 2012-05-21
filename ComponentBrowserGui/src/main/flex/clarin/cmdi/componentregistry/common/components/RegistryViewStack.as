@@ -97,6 +97,10 @@ package clarin.cmdi.componentregistry.common.components {
 		private function loginFailed(event:Event):void {
 			this.selectedChild = browse;
 		}
+		
+		public function getEditor():Editor {
+			return this.editor;
+		}
 
 	}
 }

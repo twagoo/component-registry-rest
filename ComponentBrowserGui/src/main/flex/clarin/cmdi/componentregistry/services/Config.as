@@ -142,6 +142,7 @@ package clarin.cmdi.componentregistry.services {
 			}
 		}
 
+		[Bindable(event="userSpaceToggle")]
 		public function get userSpace():Boolean {
 			return _userSpace;
 		}
