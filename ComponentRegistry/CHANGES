@@ -5,6 +5,8 @@ Release ComponentRegistry-1.12.0 (?):
 - Users can delete their own comments from the Flex UI. http://trac.clarin.eu/ticket/185
 - Attribute name uniqueness check in editor of Flex UI. http://trac.clarin.eu/ticket/184
 - Improved usability of the type edit dialog of the component editor in the Flex UI. http://trac.clarin.eu/ticket/191
+- Component browser of Flex UI now has create and edit buttons. Slight re-arrangement of other browser components. http://trac.clarin.eu/ticket/201
+- User gets warned when an action in the component editor leads to discarding pending changes. http://trac.clarin.eu/ticket/202
 
 Release ComponentRegistry-1.11.1 (10 april 2012):
 - Fixed caching of w3c xml.xsd schema in validator
