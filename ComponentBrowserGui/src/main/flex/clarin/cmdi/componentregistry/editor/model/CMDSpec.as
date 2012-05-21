@@ -1,7 +1,8 @@
 package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.XmlAble;
-
+	
 	import mx.collections.ArrayCollection;
+	import mx.events.CollectionEvent;
 
 	[Bindable]
 	public class CMDSpec implements XmlAble {
@@ -16,15 +17,51 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public var groupName:String = ""; //Not in xml but stored in the description
 		private var _domainName:String = ""; //Not in xml but stored in the description
+		
+		private var changed:Boolean = false;
+		private var _changeTracking:Boolean = false;
 
 		public function CMDSpec(isProfile:Boolean) {
 			this.isProfile = isProfile;
+			cmdComponents.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangedHandler);
+		}
+		
+		
+		public function set changeTracking(value:Boolean):void {
+			_changeTracking = value;
+			for each (var component:CMDComponent in cmdComponents){
+				component.changeTracking = value;
+			}
+		}
+		
+		public function setChanged(value:Boolean):void {
+			if(_changeTracking) {
+				this.changed = value;
+			}
+		}
+		
+		public function get hasChanged():Boolean{
+			if(changed){
+				return changed;
+			} else {
+				for each (var component:CMDComponent in cmdComponents){
+					if(component.hasChanged){
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
+		private function collectionChangedHandler(event:CollectionEvent):void {
+			setChanged(true);
 		}
 
 		public function removeComponent(component:CMDComponent):void {
 			var index:int = cmdComponents.getItemIndex(component);
 			if (index != -1) {
 				cmdComponents.removeItemAt(index);
+				setChanged(true);
 			}
 		}
 
@@ -53,6 +90,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			} else {
 				_domainName = "";
 			}
+			this.changed = true;
 		}
 
 		public static function createEmptyComponent():CMDSpec {

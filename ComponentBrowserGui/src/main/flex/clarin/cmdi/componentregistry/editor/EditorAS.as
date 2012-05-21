@@ -13,7 +13,6 @@ import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
-import flash.sampler.startSampling;
 
 import mx.controls.Alert;
 import mx.events.CloseEvent;
@@ -60,6 +59,7 @@ private function determineSaveButtonEnabled():void {
 private function profileLoaded(event:Event):void {
 	var cmdComponent:XML = profileSrv.profile.profileSource;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
+	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
 	CursorManager.removeBusyCursor();
 }
@@ -67,6 +67,8 @@ private function profileLoaded(event:Event):void {
 private function componentLoaded(event:Event):void {
 	var cmdComponent:XML = componentSrv.component.componentMD.xml;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, componentSrv.component.description);
+	// Track changes for components being edited
+	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
 	CursorManager.removeBusyCursor();
 }

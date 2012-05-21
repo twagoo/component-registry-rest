@@ -16,23 +16,13 @@
 
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
-			import clarin.cmdi.componentregistry.common.Login;
-			import clarin.cmdi.componentregistry.common.StyleConstants;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.Config;
 			
-			import com.adobe.utils.ArrayUtil;
-			
 			import mx.collections.ArrayCollection;
-			import mx.collections.ArrayList;
-			import mx.controls.Alert;
-			import mx.events.CollectionEvent;
-			
-		
 
 			private var defaultColor:Object;
 			private var currentSelectedItem:ItemDescription;

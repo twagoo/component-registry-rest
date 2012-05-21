@@ -23,8 +23,20 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var attributeList:ArrayCollection = new ArrayCollection();
 		private var _valueSchemeEnumeration:ArrayCollection;
 		private var _valueSchemePattern:String;
+		private var changed:Boolean = false;
+		public var changeTracking:Boolean = false;
 
 		public function CMDComponentElement() {
+		}
+		
+		public function setChanged(value:Boolean):void {
+			if(changeTracking) {
+				this.changed = value;
+			}
+		}
+		
+		public function get hasChanged():Boolean{
+			return changed;
 		}
 
 		public static function createEmptyElement():CMDComponentElement {
@@ -40,6 +52,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function set valueSchemeSimple(valueSchemeSimple:String):void {
 			this._valueSchemeSimple = valueSchemeSimple;
+			setChanged(true);
 		}
 
 		public function get valueSchemeEnumeration():ArrayCollection {
@@ -48,6 +61,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function set valueSchemeEnumeration(valueSchemeEnumeration:ArrayCollection):void {
 			this._valueSchemeEnumeration = valueSchemeEnumeration;
+			setChanged(true);
 		}
 
 		public function get valueSchemePattern():String {
@@ -56,6 +70,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function set valueSchemePattern(valueSchemePattern:String):void {
 			this._valueSchemePattern = valueSchemePattern;
+			setChanged(true);
 		}
 
 		public function toXml():XML {

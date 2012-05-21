@@ -12,11 +12,9 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.browser.BrowserSelectionEvent;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.Login;
-			import clarin.cmdi.componentregistry.common.Profile;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.BrowserService;
@@ -28,8 +26,6 @@
 			import clarin.cmdi.componentregistry.services.ProfileListService;
 			
 			import mx.collections.ArrayCollection;
-			import mx.controls.Alert;
-			import mx.events.CollectionEvent;
 			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
