@@ -1,4 +1,5 @@
 package clarin.cmdi.componentregistry.editor.model {
+	import clarin.cmdi.componentregistry.common.ChangeTrackingCMDElement;
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
@@ -6,7 +7,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	
 	import mx.collections.ArrayCollection;
 
-	public class CMDAttribute implements XmlAble, ValueSchemeInterface {
+	public class CMDAttribute implements XmlAble, ValueSchemeInterface, ChangeTrackingCMDElement {
 		//No Attributes
 
 		//Elements
@@ -17,7 +18,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		private var _valueSchemeEnumeration:ArrayCollection; // enumeration 
 		
 		private var changed:Boolean = false;
-		public var changeTracking:Boolean = false;
+		private var _changeTracking:Boolean = false;
 		
 		public function CMDAttribute() {
 		}
@@ -28,8 +29,12 @@ package clarin.cmdi.componentregistry.editor.model {
 			return result;
 		}
 		
+		public function set changeTracking(value:Boolean):void{
+			_changeTracking = value;
+		}
+		
 		public function setChanged(value:Boolean):void {
-			if(changeTracking) {
+			if(_changeTracking) {
 				this.changed = value;
 			}
 		}

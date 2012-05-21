@@ -1,11 +1,13 @@
 package clarin.cmdi.componentregistry.editor.model {
+	import clarin.cmdi.componentregistry.common.ChangeTrackingCMDElement;
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
 
 	[Bindable]
-	public class CMDSpec implements XmlAble {
+	public class CMDSpec implements XmlAble, ChangeTrackingCMDElement {
 		//Attribute
 		public var isProfile:Boolean;
 
@@ -54,7 +56,14 @@ package clarin.cmdi.componentregistry.editor.model {
 		}
 		
 		private function collectionChangedHandler(event:CollectionEvent):void {
-			setChanged(true);
+			if(event.kind == CollectionEventKind.ADD ||event.kind == CollectionEventKind.MOVE || event.kind == CollectionEventKind.REMOVE){ 
+				setChanged(true);
+			}
+			if(event.kind == CollectionEventKind.ADD){
+				for each(var item:ChangeTrackingCMDElement in event.items){
+					item.changeTracking = _changeTracking;
+				}
+			}
 		}
 
 		public function removeComponent(component:CMDComponent):void {
