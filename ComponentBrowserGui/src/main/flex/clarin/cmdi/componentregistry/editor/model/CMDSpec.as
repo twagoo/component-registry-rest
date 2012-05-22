@@ -99,7 +99,7 @@ package clarin.cmdi.componentregistry.editor.model {
 			} else {
 				_domainName = "";
 			}
-			this.changed = true;
+			setChanged(true);
 		}
 
 		public static function createEmptyComponent():CMDSpec {

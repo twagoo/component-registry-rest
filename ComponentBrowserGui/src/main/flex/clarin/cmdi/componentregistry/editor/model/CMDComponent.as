@@ -36,7 +36,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		}
 		
 		private function collectionChangedHandler(event:CollectionEvent):void {
-			if(event.kind == CollectionEventKind.ADD ||event.kind == CollectionEventKind.MOVE || event.kind == CollectionEventKind.REMOVE){ 
+			if(event.kind == CollectionEventKind.ADD ||event.kind == CollectionEventKind.MOVE || event.kind == CollectionEventKind.REMOVE || event.kind == CollectionEventKind.REPLACE){
 				setChanged(true);
 			}
 			if(event.kind == CollectionEventKind.ADD){
