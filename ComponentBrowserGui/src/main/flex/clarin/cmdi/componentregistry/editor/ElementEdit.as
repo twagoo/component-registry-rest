@@ -55,17 +55,26 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(new DisplayPriorityInput(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
 					_element.displayPriority = val;
 				}));
-			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
-					_element.cardinalityMin = val;
-				}));
-			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
-					_element.cardinalityMax = val;
-				}));
+			
+			var cardinalityMinInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
+				_element.cardinalityMin = val;
+			});
+			addChild(cardinalityMinInput);
+			
+			var cardinalityMaxInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
+				_element.cardinalityMax = val;
+			});
+			// Max cardinatlity field should be disabled when multilingual is selected - binding to that field here
+			BindingUtils.bindSetter(function(value:String):void {
+				cardinalityMaxInput.enabled = _element.multilingual != "true";
+			}, _element, "multilingual");
+			addChild(cardinalityMaxInput);
+			
 			addChild(AttributeListEdit.createAndAddValueScheme(_element));
 			var multiLingualCheck:CheckboxInput = new CheckboxInput(LabelConstants.MULTILINGUAL, _element.multilingual == "true", function(val:Boolean):void {
 					_element.multilingual = String(val);
 				});
-			multiLingualCheck.toolTip = "Can the value of this element be in multiple languages?";
+			multiLingualCheck.toolTip = "Can the value of this element be in multiple languages? Setting this will cause \"Max occurences\" to be always unbounded.";
 			BindingUtils.bindSetter(function(val:String):void {
 					var show:Boolean = "string" == val;
 					multiLingualCheck.visible = show;
@@ -74,7 +83,7 @@ package clarin.cmdi.componentregistry.editor {
 						_element.multilingual = null;
 					}
 				}, _element, "valueSchemeSimple");
-
+			
 			addChild(multiLingualCheck);
 			handleCMDAttributeList();
 		}
