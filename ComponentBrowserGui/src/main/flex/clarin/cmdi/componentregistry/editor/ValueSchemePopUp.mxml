@@ -111,6 +111,7 @@
 			<mx:Label text="Select type:"/>
 			<mx:HBox width="100%">
 				<mx:ComboBox id="simpleValueSchemeBox"
+							 selectedItem="{valueSchemeInput.valueSchemeSimple}"
 							 prompt="{valueSchemeInput.valueSchemeSimple}"
 							 dataProvider="{simpleValueSchemeDataProvider}">
 				</mx:ComboBox>
