@@ -1,14 +1,17 @@
 package clarin.cmdi.componentregistry.editor.model {
+	import clarin.cmdi.componentregistry.common.ChangeTrackingCMDElement;
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
 	
 	import mx.collections.ArrayCollection;
-
+	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
+	
 	[Bindable]
-	public class CMDComponentElement implements XmlAble, ValueSchemeInterface {
-
+	public class CMDComponentElement implements XmlAble, ValueSchemeInterface, AttributeContainer, ChangeTrackingCMDElement {
+		
 		//Attributes
 		public var name:String;
 		public var conceptLink:String;
@@ -18,46 +21,89 @@ package clarin.cmdi.componentregistry.editor.model {
 		private var _valueSchemeSimple:String;
 		public var cardinalityMin:String = "1";
 		public var cardinalityMax:String = "1";
-
+		
 		//elements
 		public var attributeList:ArrayCollection = new ArrayCollection();
 		private var _valueSchemeEnumeration:ArrayCollection;
 		private var _valueSchemePattern:String;
-
+		private var changed:Boolean = false;
+		private var _changeTracking:Boolean = false;
+		
 		public function CMDComponentElement() {
+			attributeList.addEventListener(CollectionEvent.COLLECTION_CHANGE, collectionChangedHandler);
 		}
-
+		
+		public function set changeTracking(value:Boolean):void{
+			_changeTracking = value;
+			for each (var attribute:CMDAttribute in attributeList){
+				attribute.changeTracking = value;
+			}
+		}
+		
+		private function collectionChangedHandler(event:CollectionEvent):void {
+			if(event.kind == CollectionEventKind.ADD ||event.kind == CollectionEventKind.MOVE || event.kind == CollectionEventKind.REMOVE || event.kind == CollectionEventKind.REPLACE){ 
+				setChanged(true);
+			}
+			if(event.kind == CollectionEventKind.ADD){
+				for each(var item:ChangeTrackingCMDElement in event.items){
+					item.changeTracking = _changeTracking;
+				}
+			}
+		}
+		
+		public function setChanged(value:Boolean):void {
+			if(_changeTracking) {
+				this.changed = value;
+			}
+		}
+		
+		public function get hasChanged():Boolean{
+			if(changed){
+				return changed;
+			} else {
+				for each (var attribute:CMDAttribute in attributeList){
+					if(attribute.hasChanged){
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
 		public static function createEmptyElement():CMDComponentElement {
 			var result:CMDComponentElement = new CMDComponentElement();
 			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
 			return result;
 		}
-
-
+		
+		
 		public function get valueSchemeSimple():String {
 			return this._valueSchemeSimple
 		}
-
+		
 		public function set valueSchemeSimple(valueSchemeSimple:String):void {
 			this._valueSchemeSimple = valueSchemeSimple;
+			setChanged(true);
 		}
-
+		
 		public function get valueSchemeEnumeration():ArrayCollection {
 			return this._valueSchemeEnumeration
 		}
-
+		
 		public function set valueSchemeEnumeration(valueSchemeEnumeration:ArrayCollection):void {
 			this._valueSchemeEnumeration = valueSchemeEnumeration;
+			setChanged(true);
 		}
-
+		
 		public function get valueSchemePattern():String {
 			return this._valueSchemePattern;
 		}
-
+		
 		public function set valueSchemePattern(valueSchemePattern:String):void {
 			this._valueSchemePattern = valueSchemePattern;
+			setChanged(true);
 		}
-
+		
 		public function toXml():XML {
 			var result:XML = <CMD_Element></CMD_Element>;
 			if (name)
@@ -95,7 +141,10 @@ package clarin.cmdi.componentregistry.editor.model {
 			}
 			return result;
 		}
-
-
+		
+		public function getAttributeList():ArrayCollection {
+			return attributeList;
+		}
+		
 	}
 }

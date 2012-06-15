@@ -4,14 +4,18 @@ Procedure for updating
 ----------------------
 
 - When upgrading to a new version of the ComponentRegistry, check if there are
-  updates of the database schema. These will be named upgrade-x.yy.sql, e.g.
-  upgrade-1.10.sql
+  updates to the schema of the PostgreSQL database. These will be named 
+  upgrade-x.yy.sql, e.g. upgrade-1.10.sql for version 1.10.
 
 - If the database needs upgrading, first make a backup (dump) of the existing
   database. Stop the application before doing so
 
 - Execute the upgrade script. When upgrading over multiple minor versions, 
   execute the upgrade scripts incrementally
+
+- Make sure to grant all required rights (GRANT ALL unless specified
+  otherwise) to the component registry database user (usually compreg) on
+  any newly added tables, views, and sequences.
 
 - Then redeploy the WAR and start the application
 
@@ -26,3 +30,6 @@ Version specific issues
 	name="componentRegistryAdminUsers"
 	value="space-separated-list-of-admin-eppns"/>
 
+- Added to database schema:
+	* comments
+	* comments_id_seq

@@ -80,6 +80,16 @@ public class CommentsDaoTest {
     }
 
     @Test
+    public void testGetById() {
+	Comment comment1 = createTestComment();
+	comment1.setProfileDescriptionId(TEST_COMMENT_PROFILE_ID);
+	Number commentId = commentsDao.insertComment(comment1, TEST_COMMENT_USER_ID);
+	Comment commentById = commentsDao.getById(commentId);
+	assertEquals(TEST_COMMENT_PROFILE_ID, commentById.getProfileDescriptionId());
+	assertEquals(TEST_COMMENT_NAME, commentById.getComment());
+    }
+
+    @Test
     public void testGetCommentsFromProfile() {
 	List<Comment> descriptions = commentsDao.getCommentsFromProfile(TEST_COMMENT_PROFILE_ID);
 	assertNotNull(descriptions);

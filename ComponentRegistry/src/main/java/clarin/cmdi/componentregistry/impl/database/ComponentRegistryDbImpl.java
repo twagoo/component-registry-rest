@@ -34,11 +34,13 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
  * accessing the registry (ergo: a database implementation)
- * 
+ *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry {
@@ -65,7 +67,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Default constructor, makes this a (spring) bean. No user is set, so
      * public registry by default. Use setUser() to make it a user registry.
-     * 
+     *
      * @see setUser
      */
     public ComponentRegistryDbImpl() {
@@ -74,10 +76,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Creates a new ComponentRegistry (either public or not) for the provided
      * user
-     * 
+     *
      * @param userId
-     *            User id of the user to create registry for. Pass null for
-     *            public
+     * User id of the user to create registry for. Pass null for
+     * public
      */
     public ComponentRegistryDbImpl(Number userId) {
 	this.userId = userId;
@@ -128,10 +130,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException {
+    public List<Comment> getCommentsInProfile(String profileId, Principal principal) throws ComponentRegistryException {
 	try {
 	    if (profileDescriptionDao.isInRegistry(profileId, getUserId())) {
-		return commentsDao.getCommentsFromProfile(profileId);
+		final List<Comment> commentsFromProfile = commentsDao.getCommentsFromProfile(profileId);
+		setCanDeleteInComments(commentsFromProfile, principal);
+		return commentsFromProfile;
 	    } else {
 		// Profile does not exist (at least not in this registry)
 		throw new ComponentRegistryException("Profile " + profileId + " does not exist in specified registry");
@@ -142,12 +146,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public Comment getSpecifiedCommentInProfile(String profileId, String commentId) throws ComponentRegistryException {
+    public Comment getSpecifiedCommentInProfile(String profileId, String commentId, Principal principal) throws ComponentRegistryException {
 	try {
 	    Comment comment = commentsDao.getSpecifiedCommentFromProfile(commentId);
 	    if (comment != null
 		    && profileId.equals(comment.getProfileDescriptionId())
 		    && profileDescriptionDao.isInRegistry(comment.getProfileDescriptionId(), getUserId())) {
+		setCanDeleteInComments(Collections.singleton(comment), principal);
 		return comment;
 	    } else {
 		// Comment exists in DB, but profile is not in this registry
@@ -159,10 +164,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException {
+    public List<Comment> getCommentsInComponent(String componentId, Principal principal) throws ComponentRegistryException {
 	try {
 	    if (componentDescriptionDao.isInRegistry(componentId, getUserId())) {
-		return commentsDao.getCommentsFromComponent(componentId);
+		final List<Comment> commentsFromComponent = commentsDao.getCommentsFromComponent(componentId);
+		setCanDeleteInComments(commentsFromComponent, principal);
+		return commentsFromComponent;
 	    } else {
 		// Component does not exist (at least not in this registry)
 		throw new ComponentRegistryException("Component " + componentId + " does not exist in specified registry");
@@ -173,12 +180,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public Comment getSpecifiedCommentInComponent(String componentId, String commentId) throws ComponentRegistryException {
+    public Comment getSpecifiedCommentInComponent(String componentId, String commentId, Principal principal) throws ComponentRegistryException {
 	try {
 	    Comment comment = commentsDao.getSpecifiedCommentFromComponent(commentId);
 	    if (comment != null
 		    && componentId.equals(comment.getComponentDescriptionId())
 		    && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())) {
+		setCanDeleteInComments(Collections.singleton(comment), principal);
 		return comment;
 	    } else {
 		// Comment does not exists in DB or component is not in this registry
@@ -186,6 +194,26 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	} catch (DataAccessException ex) {
 	    throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
+	}
+    }
+
+    /**
+     * Sets the {@link Comment#setCanDelete(boolean) canDelete} property on all comments in the provided collection for the perspective of
+     * the specified principal.
+     * Comment owners (determined by {@link Comment#getUserId() }) and admins can delete, others cannot.
+     *
+     * @param comments comments to configure
+     * @param principal user to configure for
+     * @see Comment#isCanDelete()
+     */
+    private void setCanDeleteInComments(Collection<Comment> comments, Principal principal) {
+	if (principal != null && principal.getName() != null) {
+	    final RegistryUser registryUser = userDao.getByPrincipalName(principal.getName());
+	    final String registryUserId = registryUser.getId().toString();
+	    final boolean isAdmin = configuration.isAdminUser(principal);
+	    for (Comment comment : comments) {
+		comment.setCanDelete(isAdmin || comment.getUserId().equals(registryUserId));
+	    }
 	}
     }
 
@@ -200,6 +228,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    return result;
 	} else {
 	    // May exist, but not in this workspace
+	    LOG.warn("Could not find profile '{}' in registry '{}'", new Object[]{id, this.toString()});
 	    return null;
 	}
     }
@@ -222,6 +251,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	    return result;
 	} else {
+	    // May exist, but not in this workspace
+	    LOG.warn("Could not find component '{}' was in registry '{}'", new Object[]{id, this.toString()});
 	    return null;
 	}
     }
@@ -262,13 +293,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    if (comment.getComponentDescriptionId() != null && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())
 		    || comment.getProfileDescriptionId() != null && profileDescriptionDao.isInRegistry(comment.getProfileDescriptionId(), getUserId())) {
 		// Convert principal name to user record id
-		Number uid = convertUserIdInComment(principalName);
-		if (uid != null) {
-		    // Set user id in comment for convenience of calling method 
-		    comment.setUserId(uid.toString());
-		} else {
-		    throw new ComponentRegistryException("Cannot find user with principal name: " + principalName);
-		}
+		Number uid = convertUserIdInComment(comment, principalName);
 		// Set date to current date
 		comment.setCommentDate(Comment.createNewDate());
 		Number commentId = commentsDao.insertComment(comment, uid);
@@ -287,11 +312,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * Calling service sets user id to principle. Our task is to convert this to
      * an id for later reference. If none is set and this is a user's workspace,
      * set from that user's id.
-     * 
+     *
      * It also sets the name in the description according to the display name in the database.
-     * 
+     *
      * @param description
-     *            Description containing principle name as userId
+     * Description containing principle name as userId
      * @return Id (from database)
      * @throws DataAccessException
      */
@@ -320,17 +345,26 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * Calling service sets user id to principle. Our task is to convert this to
      * an id for later reference. If none is set and this is a user's workspace,
      * set from that user's id.
-     * 
+     *
      * @param comment
-     *            Comment containing principle name as userId
+     * Comment containing principle name as userId
      * @return Id (from database)
      * @throws DataAccessException
      */
-    private Number convertUserIdInComment(String principalName) throws DataAccessException {
+    private Number convertUserIdInComment(Comment comment, String principalName) throws DataAccessException, ComponentRegistryException {
 	if (principalName != null) {
 	    RegistryUser user = userDao.getByPrincipalName(principalName);
 	    if (user != null) {
-		return user.getId();
+		Number id = user.getId();
+		if (id != null) {
+		    // Set user id in comment for convenience of calling method 
+		    comment.setUserId(id.toString());
+		    // Set name to user's preferred display name
+		    comment.setUserName(user.getName());
+		    return id;
+		} else {
+		    throw new ComponentRegistryException("Cannot find user with principal name: " + principalName);
+		}
 	    }
 	}
 	return null;
@@ -474,8 +508,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     /**
      * @param User
-     *            for which this should be the registry. Pass null for the
-     *            public registry
+     * for which this should be the registry. Pass null for the
+     * public registry
      */
     public void setUserId(Number user) {
 	this.userId = user;
@@ -496,12 +530,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      * Looks up description on basis of CMD Id. This will also check if such a
      * record even exists.
-     * 
+     *
      * @param description
-     *            Description to look up
+     * Description to look up
      * @return Database id for description
      * @throws IllegalArgumentException
-     *             If description with non-existing id is passed
+     * If description with non-existing id is passed
      */
     private Number getIdForDescription(AbstractDescription description) throws IllegalArgumentException {
 	Number dbId = null;
@@ -618,7 +652,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public void deleteComment(String commentId, Principal principal) throws IOException,
 	    ComponentRegistryException, UserUnauthorizedException, DeleteFailedException {
 	try {
-	    Comment comment = commentsDao.getById(commentId);
+	    Comment comment = commentsDao.getById(Integer.parseInt(commentId));
 	    if (comment != null
 		    // Comment must have an existing (in this registry) componentId or profileId
 		    && (comment.getComponentDescriptionId() != null && componentDescriptionDao.isInRegistry(comment.getComponentDescriptionId(), getUserId())
@@ -631,11 +665,18 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    }
 	} catch (DataAccessException ex) {
 	    throw new DeleteFailedException("Database access error while trying to delete component", ex);
+	} catch (NumberFormatException ex) {
+	    throw new DeleteFailedException("Illegal comment ID, cannot parse integer", ex);
 	}
     }
 
     @Override
     public CMDComponentSpecExpander getExpander() {
 	return new CMDComponentSpecExpanderDbImpl(this);
+    }
+
+    @Override
+    public String toString() {
+	return getName();
     }
 }

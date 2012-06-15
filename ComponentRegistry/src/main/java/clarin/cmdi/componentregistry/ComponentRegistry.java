@@ -150,7 +150,7 @@ public interface ComponentRegistry {
      * @return List of comments fro a specific profile
      * @throws ComponentRegistryException 
      */
-    List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException;
+    List<Comment> getCommentsInProfile(String profileId, Principal principal) throws ComponentRegistryException;
 
     /**
      * 
@@ -159,7 +159,7 @@ public interface ComponentRegistry {
      * @return a specific comment from a profile
      * @throws ComponentRegistryException 
      */
-    Comment getSpecifiedCommentInProfile(String profileId, String commentId) throws ComponentRegistryException;
+    Comment getSpecifiedCommentInProfile(String profileId, String commentId, Principal principal) throws ComponentRegistryException;
 
     /**
      * 
@@ -167,7 +167,7 @@ public interface ComponentRegistry {
      * @return List of comments from a specific component
      * @throws ComponentRegistryException 
      */
-    List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException;
+    List<Comment> getCommentsInComponent(String componentId, Principal principal) throws ComponentRegistryException;
 
     /**
      * 
@@ -176,7 +176,7 @@ public interface ComponentRegistry {
      * @return a specific comment from a component
      * @throws ComponentRegistryException 
      */
-    Comment getSpecifiedCommentInComponent(String componentId, String commentId) throws ComponentRegistryException;
+    Comment getSpecifiedCommentInComponent(String componentId, String commentId, Principal principal) throws ComponentRegistryException;
 
     /**
      * 

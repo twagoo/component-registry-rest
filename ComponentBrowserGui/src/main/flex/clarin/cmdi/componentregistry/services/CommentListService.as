@@ -12,6 +12,7 @@ package clarin.cmdi.componentregistry.services {
 		public static const COMMENTS_LOADED:String = "CommentsLoaded";
 		;
 		private var userSpace:Boolean;
+		private var itemDescription:ItemDescription;
 		
 		/**
 		 * Typed ArrayCollection publicly available for outside code to bind to and watch.
@@ -29,6 +30,7 @@ package clarin.cmdi.componentregistry.services {
 			}
 			super(url);
 			
+			this.itemDescription = itemDescription;
 			this.userSpace = userSpace;
 		}
 		
@@ -45,7 +47,7 @@ package clarin.cmdi.componentregistry.services {
 			comments = new ArrayCollection();
 			for each (var node:XML in nodes) {
 				var comment:Comment = new Comment();
-				comment.create(node);
+				comment.create(node, itemDescription);
 				comments.addItem(comment);
 			}
 			comments.refresh();

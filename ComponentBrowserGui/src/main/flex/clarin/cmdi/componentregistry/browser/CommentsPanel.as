@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.browser
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.services.CommentListService;
 	import clarin.cmdi.componentregistry.services.CommentPostService;
+	import clarin.cmdi.componentregistry.services.DeleteService;
 	
 	import flash.events.Event;
 	
@@ -35,6 +36,11 @@ package clarin.cmdi.componentregistry.browser
 			this.setStyle("paddingLeft", 5);
 			this.setStyle("paddingTop", 5);
 			this.setStyle("paddingBottom", 5);
+			
+			// this is for responding to the deletion of comments. At this point there is no way to distinghuish between item and component deletion
+			// and that probably is fine since they mostly require the same response. It does mean that this component will also reload when a
+			// component gets deleted, which is a bit superfluous.
+			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
 		public function load():void{
@@ -91,6 +97,10 @@ package clarin.cmdi.componentregistry.browser
 		}
 		
 		private function postCompleteHandler(event:Event):void{
+			load();
+		}
+		
+		private function commentDeletedHandler(event:Event):void {
 			load();
 		}
 	}

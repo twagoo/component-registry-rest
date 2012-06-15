@@ -52,15 +52,24 @@ private function toggleUserSpace(event:Event):void {
 	componentsSrv = ComponentListService.getInstance(Config.instance.userSpace);
 }
 
+private function determineSaveButtonEnabled():void {
+	buttonBar.saveBtn.enabled = (itemDescription != null && itemDescription.isInUserSpace && null != itemDescription.id && null != xmlEditor.cmdSpec.headerId); 
+}
+
 private function profileLoaded(event:Event):void {
 	var cmdComponent:XML = profileSrv.profile.profileSource;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
+	this.cmdSpec.changeTracking = true;
+	determineSaveButtonEnabled();
 	CursorManager.removeBusyCursor();
 }
 
 private function componentLoaded(event:Event):void {
 	var cmdComponent:XML = componentSrv.component.componentMD.xml;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, componentSrv.component.description);
+	// Track changes for components being edited
+	this.cmdSpec.changeTracking = true;
+	determineSaveButtonEnabled();
 	CursorManager.removeBusyCursor();
 }
 
@@ -74,7 +83,16 @@ public function setDescription(itemDescription:ItemDescription):void {
 		} else {
 			componentSrv.load(itemDescription);
 		}
+		buttonBar.saveBtn.enabled = false;
 	}
+}
+
+public function startNewProfile():void {
+	xmlEditor.clearEditorProfile();
+}
+
+public function startNewComponent():void {
+	xmlEditor.clearEditorComponent();
 }
 
 private function publishSpec():void {
@@ -152,6 +170,7 @@ private function handleEditorChange(event:Event):void {
 	errorMessageField.text = "";
 	uploadProgress.visible = false;
 	uploadProgress.includeInLayout = false;
+	determineSaveButtonEnabled();
 }
 
 private function initPaletteOverview():void {

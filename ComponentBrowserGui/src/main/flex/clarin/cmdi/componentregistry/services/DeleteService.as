@@ -1,11 +1,12 @@
 package clarin.cmdi.componentregistry.services {
+	import clarin.cmdi.componentregistry.common.Comment;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
-
+	
 	import com.adobe.net.URI;
-
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-
+	
 	import mx.controls.Alert;
 	import mx.managers.CursorManager;
 	import mx.messaging.messages.HTTPRequestMessage;
@@ -39,6 +40,23 @@ package clarin.cmdi.componentregistry.services {
 			if (item.isInUserSpace) {
 				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
+			sendDelete(url);
+		}
+		
+		public function deleteComment(comment:Comment):void {
+			// Deletion of comments triggers the same response as deletion of items (which was there first). This is suboptimal
+			// but will do for now. E.g. the error messages refer to items but that is generic enough to work in the context of comment deletion. 
+			// Also there is just one event, splitting this out is trivial but a bit messy.
+			
+			CursorManager.setBusyCursor();
+			var url:URI = new URI(comment.dataUrl);
+			if (comment.itemDescription.isInUserSpace) {
+				url.setQueryValue(Config.PARAM_USERSPACE, "true");
+			}
+			sendDelete(url);
+		}
+		
+		private function sendDelete(url:URI):void {
 			service.url = url.toString();
 			service.send(DELETE_METHOD);
 		}

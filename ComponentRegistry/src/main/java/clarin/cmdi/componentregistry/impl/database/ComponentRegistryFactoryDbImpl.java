@@ -19,7 +19,7 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
  * Implementation of ComponentRegistryFactory that uses the
  * ComponentRegistryDbImpl implementation of ComponentRegistry for accessing the
  * registry
- * 
+ *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory {
@@ -117,6 +117,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	// Try getting it from db
 	RegistryUser user = userDao.getByPrincipalName(principalName);
 	if (user == null) {
+	    LOG.info("Request to create user with principal name {} and display name {}", new Object[]{principalName, displayName});
 	    // Create the new user
 	    user = new RegistryUser();
 	    user.setPrincipalName(principalName);

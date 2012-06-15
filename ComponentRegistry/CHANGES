@@ -1,12 +1,29 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.11.0 (???????????????):
+Release ComponentRegistry-1.12.0 (?):
+- REST service produces 404 status when component requested that does not exist.
+- Users can delete their own comments from the Flex UI. http://trac.clarin.eu/ticket/185
+- Attribute name uniqueness check in editor of Flex UI. http://trac.clarin.eu/ticket/184
+- Added a search button to the ISOCat search dialog. http://trac.clarin.eu/ticket/190
+- Improved usability of the type edit dialog of the component editor in the Flex UI. http://trac.clarin.eu/ticket/191
+- Component browser of Flex UI now has create and edit buttons. Slight re-arrangement of other browser components. http://trac.clarin.eu/ticket/201
+- User gets warned when an action in the component editor leads to discarding pending changes. http://trac.clarin.eu/ticket/202
+- If string element is set to multilingual, max occurences field gets disabled. http://trac.clarin.eu/ticket/208
+- Added 'close' link to user settings page. http://trac.clarin.eu/ticket/156
+
+Release ComponentRegistry-1.11.1 (10 april 2012):
+- Fixed caching of w3c xml.xsd schema in validator
+- Fixes issue with user settings page users without user entry in database
+
+Release ComponentRegistry-1.11.0 (3 april 2012):
 - Upgraded to Saxon-HE 9.4
 - Validation of component specifications now also supports schematron rules in the general component schema.
+- Flex component editor does client side checks for duplicate component names.
 - Comments can be posted on profiles and components through a set of new REST calls, with support in the Flex UI. http://trac.clarin.eu/ticket/144
 - Data type 'dateTime' has been added as ValueScheme for elements. http://trac.clarin.eu/ticket/163
 - Recursion detection takes place at every component/profile registration or update. http://trac.clarin.eu/ticket/168
 - Users can set their display name through a web form linked from the Flex UI. http://trac.clarin.eu/ticket/156
+- 'Save' button in editor is only enabled when editing existing components/profiles from workspace. http://trac.clarin.eu/ticket/165
 
 Release ComponentRegistry-1.10.0 (4 november 2011):
 - Attributes can be added and edited on components. http://trac.clarin.eu/ticket/125

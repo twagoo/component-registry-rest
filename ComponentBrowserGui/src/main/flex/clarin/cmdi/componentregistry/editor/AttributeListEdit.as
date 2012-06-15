@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.AddAttributeLabelButton;
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
+	import clarin.cmdi.componentregistry.editor.model.AttributeContainer;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
 	
@@ -25,16 +26,18 @@ package clarin.cmdi.componentregistry.editor {
 
 		private var _attributes:ArrayCollection;
 		private var _parent:UIComponent;
+		private var _parentContainer:AttributeContainer;
 		private var noAttributesLabel:Label = new Label();
 		[Bindable]
 		public var hasNoAttributes:Boolean = true;
 		private var addAttributeLabelButton:AddAttributeLabelButton;
 
-		public function AttributeListEdit(attributes:ArrayCollection, parent:UIComponent) {
+		public function AttributeListEdit(parentContainer:AttributeContainer, parent:UIComponent) {
 			super();
-			_attributes = attributes;
-			hasNoAttributes = _attributes.length == 0;
+			_parentContainer = parentContainer;
+			_attributes = parentContainer.getAttributeList();
 			_parent = parent;
+			hasNoAttributes = _attributes.length == 0;
 			styleName = StyleConstants.XMLBROWSER;
 			noAttributesLabel.text = "No Attributes";
 			BindingUtils.bindProperty(noAttributesLabel, "visible", this, "hasNoAttributes");
@@ -127,7 +130,7 @@ package clarin.cmdi.componentregistry.editor {
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {
 			var name:NameInputLine = new NameInputLine(attribute.name, function(val:String):void {
 					attribute.name = val;
-				}, InputValidators.getNameValidator());
+				}, new AttributeNameValidator(_parentContainer, attribute));
 			name.direction = FormItemDirection.HORIZONTAL
 			var removeButton:Label = new RemoveLabelButton();
 			removeButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {

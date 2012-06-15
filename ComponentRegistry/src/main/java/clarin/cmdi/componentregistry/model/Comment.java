@@ -11,7 +11,8 @@ import org.apache.commons.lang.time.DateUtils;
 
 /**
  *
- * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author Jean-Charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 @XmlRootElement(name = "comment")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -23,6 +24,7 @@ public class Comment {
     private String profileDescriptionId;
     private String id;
     private String userName;
+    private boolean canDelete;
     @XmlTransient // this prevents userId from being serialized to XML and thus exposed (which is useless and undesirable)
     private String userId;
 
@@ -75,7 +77,7 @@ public class Comment {
     }
 
     /**
-     * 
+     *
      * @return userName, that is the user's 'real' name, not login name
      */
     public String getUserName() {
@@ -87,6 +89,20 @@ public class Comment {
      */
     public void setUserName(String userName) {
 	this.userName = userName;
+    }
+
+    /**
+     * @return whether comment can be deleted
+     */
+    public boolean isCanDelete() {
+	return canDelete;
+    }
+
+    /**
+     * @param canDelete whether comment can be deleted
+     */
+    public void setCanDelete(boolean canDelete) {
+	this.canDelete = canDelete;
     }
 
     public static Date getDate(String registrationDate) throws ParseException {
@@ -102,7 +118,7 @@ public class Comment {
 
     /*
      * Helper method to set the Date in the same format
-     * @param time, long that contains the time to be set 
+     * @param time, long that contains the time to be set
      */
     public static String createNewDate(long time) {
 	return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());

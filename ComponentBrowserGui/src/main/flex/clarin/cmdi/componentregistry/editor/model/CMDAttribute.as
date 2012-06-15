@@ -1,4 +1,5 @@
 package clarin.cmdi.componentregistry.editor.model {
+	import clarin.cmdi.componentregistry.common.ChangeTrackingCMDElement;
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
@@ -6,7 +7,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	
 	import mx.collections.ArrayCollection;
 
-	public class CMDAttribute implements XmlAble, ValueSchemeInterface {
+	public class CMDAttribute implements XmlAble, ValueSchemeInterface, ChangeTrackingCMDElement {
 		//No Attributes
 
 		//Elements
@@ -15,7 +16,10 @@ package clarin.cmdi.componentregistry.editor.model {
 		public var conceptLink:String;
 		private var _valueSchemePattern:String; //pattern
 		private var _valueSchemeEnumeration:ArrayCollection; // enumeration 
-
+		
+		private var changed:Boolean = false;
+		private var _changeTracking:Boolean = false;
+		
 		public function CMDAttribute() {
 		}
 
@@ -24,13 +28,28 @@ package clarin.cmdi.componentregistry.editor.model {
 			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
 			return result;
 		}
-
+		
+		public function set changeTracking(value:Boolean):void{
+			_changeTracking = value;
+		}
+		
+		public function setChanged(value:Boolean):void {
+			if(_changeTracking) {
+				this.changed = value;
+			}
+		}
+		
+		public function get hasChanged():Boolean{
+			return changed;
+		}
+		
 		public function get valueSchemeSimple():String {
 			return this.type
 		}
 
 		public function set valueSchemeSimple(valueSchemeSimple:String):void {
 			this.type = valueSchemeSimple;
+			setChanged(true);
 		}
 
 		public function get valueSchemeEnumeration():ArrayCollection {
@@ -39,6 +58,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function set valueSchemeEnumeration(valueSchemeEnumeration:ArrayCollection):void {
 			this._valueSchemeEnumeration = valueSchemeEnumeration;
+			setChanged(true);
 		}
 
 		public function get valueSchemePattern():String {
@@ -47,6 +67,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public function set valueSchemePattern(valueSchemePattern:String):void {
 			this._valueSchemePattern = valueSchemePattern;
+			setChanged(true);
 		}
 
 		public function toXml():XML {

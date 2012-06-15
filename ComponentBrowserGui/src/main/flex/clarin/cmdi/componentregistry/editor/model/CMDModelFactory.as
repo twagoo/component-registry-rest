@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.XMLListCollection;
 

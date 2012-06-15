@@ -3,7 +3,7 @@
 		   xmlns:local="clarin.cmdi.componentregistry.services.*"
 		   width="100%"
 		   height="100%"
-		   label="Import..."
+		   label="Import file"
 		   implements="clarin.cmdi.componentregistry.common.components.RegistryView">
 
 	<mx:Script>
