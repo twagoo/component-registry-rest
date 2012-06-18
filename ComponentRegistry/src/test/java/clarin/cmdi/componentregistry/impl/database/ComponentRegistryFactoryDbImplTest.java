@@ -65,7 +65,7 @@ public class ComponentRegistryFactoryDbImplTest {
 	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.
 		getComponentRegistry(true, credentials);
 	assertNotNull(cr2);
-	assertEquals(cr1.getUserId(), cr2.getUserId());
+	assertEquals(cr1.getOwner(), cr2.getOwner());
 
 	// Get for another new user
 	UserCredentials credentials2 = new DummyPrincipal(testUser.
@@ -73,7 +73,7 @@ public class ComponentRegistryFactoryDbImplTest {
 	ComponentRegistryDbImpl cr3 = (ComponentRegistryDbImpl) componentRegistryFactory.
 		getComponentRegistry(true, credentials2);
 	assertNotNull(cr3);
-	assertNotSame(cr1.getUserId(), cr3.getUserId());
+	assertNotSame(cr1.getOwner(), cr3.getOwner());
     }
 
     @Test
@@ -85,14 +85,14 @@ public class ComponentRegistryFactoryDbImplTest {
 	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.
 		getComponentRegistry(true, userCredentials);
 
-	String id = cr1.getUserId().toString();
+	String id = cr1.getOwner().getId().toString();
 
 	// Get it as admin
 	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.
 		getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, id);
 	assertNotNull(cr2);
 	// Should be this user's registry
-	assertEquals(cr1.getUserId(), cr2.getUserId());
+	assertEquals(cr1.getOwner(), cr2.getOwner());
 
 	// Try get it as non-admin
 	try {

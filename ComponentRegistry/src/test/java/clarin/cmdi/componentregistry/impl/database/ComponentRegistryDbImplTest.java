@@ -2,7 +2,10 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.OwnerGroup;
+import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -373,7 +376,9 @@ public class ComponentRegistryDbImplTest {
 
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-	componentRegistry.setUserId(userId);
+	if (userId != null) {
+	    componentRegistry.setStatus(ComponentStatus.DEVELOPMENT, new OwnerUser(userId));
+	}
 	return componentRegistry;
     }
 
@@ -668,7 +673,7 @@ public class ComponentRegistryDbImplTest {
 	comment = comments.get(0);
 	assertEquals("0", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
-	
+
 	// Should not be allowed to delete, not authenticated
 	assertFalse(comment.isCanDelete());
 
@@ -772,5 +777,50 @@ public class ComponentRegistryDbImplTest {
 
 	register = getComponentRegistryForUser(id);
 	assertEquals("Registry of J.Unit", register.getName());
+    }
+
+    @Test
+    public void testGetStatus() {
+	ComponentRegistry register = new ComponentRegistryDbImpl();
+	assertEquals(ComponentStatus.PUBLIC, register.getStatus());
+	register = new ComponentRegistryDbImpl(ComponentStatus.DEVELOPMENT, null);
+	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+    }
+
+    @Test
+    public void testGetOwner() {
+	ComponentRegistry register = new ComponentRegistryDbImpl();
+	assertNull(register.getOwner());
+	register = new ComponentRegistryDbImpl(ComponentStatus.DEVELOPMENT, new OwnerUser(101));
+	assertEquals(new OwnerUser(101), register.getOwner());
+
+	register = new ComponentRegistryDbImpl(ComponentStatus.DEVELOPMENT, new OwnerGroup(101));
+	assertEquals(new OwnerGroup(101), register.getOwner());
+    }
+
+    @Test
+    public void testSetStatus() throws Exception {
+	// Construct with an owner
+	ComponentRegistryDbImpl register = new ComponentRegistryDbImpl(ComponentStatus.PUBLIC, new OwnerUser(101));
+	register.setStatus(ComponentStatus.DEVELOPMENT);
+	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	// Owner should remain unchanged
+	assertEquals(new OwnerUser(101), register.getOwner());
+
+	// Construct with no owner
+	register = new ComponentRegistryDbImpl(ComponentStatus.PUBLIC, null);
+	register.setStatus(ComponentStatus.DEVELOPMENT);
+	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	// Owner should remain unchanged
+	assertNull(register.getOwner());
+    }
+
+    @Test
+    public void testSetStatusAndOwner() throws Exception {
+	ComponentRegistryDbImpl register = new ComponentRegistryDbImpl(ComponentStatus.PUBLIC, new OwnerUser(101));
+
+	register.setStatus(ComponentStatus.DEVELOPMENT, new OwnerGroup(102));
+	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	assertEquals(new OwnerGroup(102), register.getOwner());
     }
 }

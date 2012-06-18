@@ -1,6 +1,23 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.Owner;
+import clarin.cmdi.componentregistry.OwnerGroup;
+import clarin.cmdi.componentregistry.OwnerUser;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
+import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,32 +27,16 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import javax.xml.bind.JAXBException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
-
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.Configuration;
-import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.Comment;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.model.RegistryUser;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
@@ -46,9 +47,17 @@ import java.util.Collections;
 public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryDbImpl.class);
-    private Number userId;
+    private Owner owner;
+    private ComponentStatus status;
     @Autowired
     private Configuration configuration;
+    @Autowired
+    @Qualifier("componentsCache")
+    private CMDComponentSpecCache componentsCache;
+    @Autowired
+    @Qualifier("profilesCache")
+    private CMDComponentSpecCache profilesCache;
+    // DAO's
     @Autowired
     private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
@@ -56,42 +65,46 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Autowired
     private UserDao userDao;
     @Autowired
-    @Qualifier("componentsCache")
-    private CMDComponentSpecCache componentsCache;
-    @Autowired
-    @Qualifier("profilesCache")
-    private CMDComponentSpecCache profilesCache;
-    @Autowired
     private CommentsDao commentsDao;
 
     /**
-     * Default constructor, makes this a (spring) bean. No user is set, so
-     * public registry by default. Use setUser() to make it a user registry.
+     * Default constructor, to use this as a (spring) bean. The public registry by default.
+     * Use setStatus() and setOwner() to make it another kind of registry.
      *
      * @see setUser
      */
     public ComponentRegistryDbImpl() {
+	this.status = ComponentStatus.PUBLIC;
     }
 
     /**
      * Creates a new ComponentRegistry (either public or not) for the provided
-     * user
+     * user. Only use for test and/or make sure to inject all dao's and other services
      *
      * @param userId
      * User id of the user to create registry for. Pass null for
      * public
      */
-    public ComponentRegistryDbImpl(Number userId) {
-	this.userId = userId;
+    public ComponentRegistryDbImpl(ComponentStatus status, Owner owner) {
+	this.status = status;
+	this.owner = owner;
     }
 
     @Override
     public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException {
 	try {
-	    if (isPublic()) {
-		return profileDescriptionDao.getPublicProfileDescriptions();
-	    } else {
-		return profileDescriptionDao.getUserspaceDescriptions(getUserId());
+	    switch (status) {
+		// TODO: support other status types
+		case DEVELOPMENT:
+		    if (owner == null) {
+			throw new ComponentRegistryException("Development workspace without owner!");
+		    }
+		    // TODO: Support group space
+		    return profileDescriptionDao.getUserspaceDescriptions(owner.getId());
+		case PUBLIC:
+		    return profileDescriptionDao.getPublicProfileDescriptions();
+		default:
+		    throw new ComponentRegistryException("Unsupported status type" + status);
 	    }
 	} catch (DataAccessException ex) {
 	    throw new ComponentRegistryException("Database access error while trying to get profile descriptions", ex);
@@ -330,7 +343,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		name = user.getName();
 	    }
 	} else {
-	    uid = userId;
+	    uid = getUserId(); // this can be null as well
 	}
 	if (uid != null) {
 	    description.setUserId(uid.toString());
@@ -490,29 +503,62 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	}
     }
 
+    /**
+     *
+     * @return whether this is the public registry
+     * @deprecated use {@link #getStatus() } to check if this is the {@link ComponentStatus#PUBLIC public registry}
+     */
     @Override
+    @Deprecated
     public boolean isPublic() {
-	return null == userId;
-    }
-
-    public void setPublic() {
-	this.userId = null;
+	return status == ComponentStatus.PUBLIC;
     }
 
     /**
-     * @return The user, or null if this is the public registry.
+     * @return The user id, or null if there is no owner or it is not a user.
      */
-    public Number getUserId() {
-	return userId;
+    private Number getUserId() {
+	if (owner instanceof OwnerUser) {
+	    return owner.getId();
+	} else {
+	    return null;
+	}
     }
 
     /**
-     * @param User
-     * for which this should be the registry. Pass null for the
-     * public registry
+     * @return The group id, or null if there is no owner or it is not a group.
      */
-    public void setUserId(Number user) {
-	this.userId = user;
+    private Number getGroupId() {
+	if (owner instanceof OwnerGroup) {
+	    return owner.getId();
+	} else {
+	    return null;
+	}
+    }
+
+    @Override
+    public Owner getOwner() {
+	return owner;
+    }
+
+    /**
+     * Sets status and owner of this registry
+     *
+     * @param status new status for registry
+     * @param owner new owner for registry
+     */
+    public void setStatus(ComponentStatus status, Owner owner) {
+	setStatus(status);
+	this.owner = owner;
+    }
+
+    public void setStatus(ComponentStatus status) {
+	this.status = status;
+    }
+
+    @Override
+    public ComponentStatus getStatus() {
+	return status;
     }
 
     private void invalidateCache(AbstractDescription description) {

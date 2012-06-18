@@ -11,7 +11,9 @@ import org.springframework.dao.DataAccessException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 
@@ -100,7 +102,11 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 
     private ComponentRegistry getNewComponentRegistryForUser(Number userId) {
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-	componentRegistry.setUserId(userId);
+	if (userId != null) {
+	    // Null means public registry
+	    // TODO: Make this more explicit
+	    componentRegistry.setStatus(ComponentStatus.DEVELOPMENT, new OwnerUser(userId));
+	}
 	return componentRegistry;
     }
 
