@@ -4,7 +4,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.Before;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Test;
@@ -49,54 +52,46 @@ public class ComponentRegistryFactoryDbImplTest {
     }
 
     @Test
-    public void getComponentRegistry() {
+    public void getComponentRegistry() throws UserUnauthorizedException {
 	// Get public
-	assertNotNull(componentRegistryFactory.getComponentRegistry(false, null));
+	assertNotNull(componentRegistryFactory.getComponentRegistry(ComponentStatus.PUBLIC, null, null));
 
 	// Get for non-existing user
 	final RegistryUser testUser = UserDaoTest.createTestUser();
-	UserCredentials credentials = new DummyPrincipal(testUser.
-		getPrincipalName()).getCredentials();
+	UserCredentials credentials = new DummyPrincipal(testUser.getPrincipalName()).getCredentials();
 
-	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.
-		getComponentRegistry(true, credentials);
+	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, credentials);
 	assertNotNull(cr1);
 	// Get for existing user
-	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.
-		getComponentRegistry(true, credentials);
+	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, credentials);;
 	assertNotNull(cr2);
 	assertEquals(cr1.getOwner(), cr2.getOwner());
 
 	// Get for another new user
-	UserCredentials credentials2 = new DummyPrincipal(testUser.
-		getPrincipalName() + "2").getCredentials();
-	ComponentRegistryDbImpl cr3 = (ComponentRegistryDbImpl) componentRegistryFactory.
-		getComponentRegistry(true, credentials2);
+	UserCredentials credentials2 = new DummyPrincipal(testUser.getPrincipalName() + "2").getCredentials();
+	ComponentRegistryDbImpl cr3 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, credentials2);
 	assertNotNull(cr3);
 	assertNotSame(cr1.getOwner(), cr3.getOwner());
     }
 
     @Test
-    public void testGetOtherUserComponentRegistry() {
-	UserCredentials userCredentials = DummyPrincipal.DUMMY_PRINCIPAL.
-		getCredentials();
+    public void testGetOtherUserComponentRegistry() throws UserUnauthorizedException {
+	UserCredentials userCredentials = DummyPrincipal.DUMMY_PRINCIPAL.getCredentials();
 
 	// Create registry for new user
-	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.
-		getComponentRegistry(true, userCredentials);
+	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, userCredentials);
 
-	String id = cr1.getOwner().getId().toString();
+	Number id = cr1.getOwner().getId();
 
 	// Get it as admin
-	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.
-		getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, id);
+	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, ComponentStatus.DEVELOPMENT, new OwnerUser(id));
 	assertNotNull(cr2);
 	// Should be this user's registry
 	assertEquals(cr1.getOwner(), cr2.getOwner());
 
 	// Try get it as non-admin
 	try {
-	    componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_PRINCIPAL, id);
+	    componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_PRINCIPAL, ComponentStatus.DEVELOPMENT, new OwnerUser(id));
 	    fail("Non-admin can get other user's component registry");
 	} catch (Exception ex) {
 	    // Exception should occur

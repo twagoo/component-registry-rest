@@ -1,21 +1,21 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserCredentials;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Implementation of ComponentRegistryFactory that uses the
@@ -52,13 +52,28 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     }
 
     @Override
-    public ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials) {
-	ComponentRegistry result = null;
-	if (userspace) {
+    public ComponentRegistry getComponentRegistry(ComponentStatus status, Owner owner, UserCredentials credentials) throws UserUnauthorizedException {
+	switch (status) {
+	    case DEVELOPMENT:
+		return getDevelopmentRegistry(owner, credentials);
+	    case PUBLIC:
+		return getPublicRegistry();
+	    default:
+		// TODO: Add support for other status types
+		throw new UnsupportedOperationException("Unsupported component status" + status);
+	}
+    }
+
+    private ComponentRegistry getDevelopmentRegistry(Owner owner, UserCredentials credentials) throws IllegalArgumentException, DataAccessException, UserUnauthorizedException {
+	if (owner == null || owner instanceof OwnerUser) {
 	    RegistryUser user = getOrCreateUser(credentials);
 	    if (user != null) {
+		if (owner != null && !user.getId().equals(owner.getId())) {
+		    throw new UserUnauthorizedException("User cannot access other user's development registry");
+		}
+
 		try {
-		    result = getNewComponentRegistryForUser(user.getId());
+		    return getNewComponentRegistryForUser(user.getId());
 		} catch (DataAccessException ex) {
 		    LOG.error("Could not retrieve or create user", ex);
 		    throw ex;
@@ -67,15 +82,21 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 		throw new IllegalArgumentException("No user credentials available cannot load userspace.");
 	    }
 	} else {
-	    result = getPublicRegistry();
+	    // TODO: Support group owners
+	    throw new UnsupportedOperationException("Group owners not supported");
 	}
-	return result;
     }
 
     @Override
-    public ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userId) {
+    public ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, ComponentStatus status, Owner owner) {
 	try {
-	    RegistryUser user = userDao.getById(Integer.parseInt(userId));
+	    RegistryUser user;
+	    if (owner instanceof OwnerUser) {
+		user = userDao.getById(owner.getId());
+	    } else {
+		// TODO: Implement for groups
+		throw new UnsupportedOperationException("Groups not implemented yet");
+	    }
 	    ComponentRegistry result = null;
 	    if (user != null) {
 		if (configuration.isAdminUser(adminPrincipal)) {

@@ -13,8 +13,10 @@ import org.springframework.dao.DataAccessException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
@@ -24,8 +26,8 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class AdminRegistry {
-    private final static Logger LOG = LoggerFactory.getLogger(AdminRegistry.class);
 
+    private final static Logger LOG = LoggerFactory.getLogger(AdminRegistry.class);
     private ComponentRegistryFactory componentRegistryFactory;
     private ProfileDescriptionDao profileDescriptionDao;
     private ComponentDescriptionDao componentDescriptionDao;
@@ -117,10 +119,10 @@ public class AdminRegistry {
 
     private ComponentRegistry getRegistry(Principal userPrincipal, AbstractDescription desc, CMDItemInfo info) {
 	ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
-	if (info.isInUserWorkSpace()) {
-	    registry = componentRegistryFactory.getOtherUserComponentRegistry(userPrincipal, desc.getUserId());
+	//TODO: More generic check
+	if (info.getStatus() == ComponentStatus.DEVELOPMENT /* || info.getStatus() == ComponentStatus.PRIVATE */) {
+	    registry = componentRegistryFactory.getOtherUserComponentRegistry(userPrincipal, info.getStatus(), new OwnerUser(Integer.parseInt(desc.getUserId())));
 	}
 	return registry;
     }
-
 }

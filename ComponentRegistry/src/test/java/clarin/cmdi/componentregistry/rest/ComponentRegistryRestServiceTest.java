@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
@@ -15,6 +16,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import java.awt.image.ComponentSampleModel;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.List;
@@ -688,7 +690,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testRegisterWithUserComponents() throws Exception {
-	ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
+	ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, DummyPrincipal.DUMMY_CREDENTIALS);
 	String content = "";
 	content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";

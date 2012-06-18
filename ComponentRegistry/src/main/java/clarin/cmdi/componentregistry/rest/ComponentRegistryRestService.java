@@ -3,7 +3,9 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -47,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
 @Path("/registry")
 public class ComponentRegistryRestService {
-    
+
     @Context
     private UriInfo uriInfo;
     @Context
@@ -64,15 +66,37 @@ public class ComponentRegistryRestService {
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
     @Inject(value = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
-    
-    private ComponentRegistry getRegistry(boolean userspace) {
+
+    /**
+     * Converts userspace boolean to component status. Temporary solution!!!
+     *
+     * TODO: Replace all calls to getRegistry that use this by calls using ComponentStatus
+     * @param userSpace
+     * @return
+     * @deprecated All calls should go directly to {@link #getRegistry(clarin.cmdi.componentregistry.ComponentStatus)}
+     */
+    @Deprecated
+    private static ComponentStatus getStatus(boolean userSpace) {
+	if (userSpace) {
+	    return ComponentStatus.DEVELOPMENT;
+	} else {
+	    return ComponentStatus.PUBLIC;
+	}
+    }
+
+    private ComponentRegistry getRegistry(ComponentStatus status) {
 	Principal userPrincipal = security.getUserPrincipal();
 	UserCredentials userCredentials = getUserCredentials(userPrincipal);
-	return getRegistry(userspace, userCredentials);
+	return getRegistry(status, null, userCredentials);
     }
-    
-    private ComponentRegistry getRegistry(boolean userspace, UserCredentials userCredentials) {
-	return componentRegistryFactory.getComponentRegistry(userspace, userCredentials);
+
+    private ComponentRegistry getRegistry(ComponentStatus status, Owner owner, UserCredentials userCredentials) {
+	try {
+	    return componentRegistryFactory.getComponentRegistry(status, owner, userCredentials);
+	} catch (UserUnauthorizedException uuEx) {
+	    //TODO: Throw actual exception and catch nicely
+	    throw new RuntimeException("Cannot access requested registry", uuEx);
+	}
     }
 
     /**
@@ -87,7 +111,7 @@ public class ComponentRegistryRestService {
 	}
 	return principal;
     }
-    
+
     private UserCredentials getUserCredentials(Principal userPrincipal) {
 	UserCredentials userCredentials = null;
 	if (userPrincipal != null) {
@@ -95,51 +119,51 @@ public class ComponentRegistryRestService {
 	}
 	return userCredentials;
     }
-    
+
     @GET
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<ComponentDescription> getRegisteredComponents(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
-	List<ComponentDescription> components = getRegistry(userspace).getComponentDescriptions();
+	List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
 	LOG.info("Releasing " + components.size() + " registered components into the world (" + (System.currentTimeMillis() - start)
 		+ " millisecs)");
 	return components;
     }
-    
+
     @GET
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace,
 	    @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
-	
+
 	List<ProfileDescription> profiles;
 	if (metadataEditor) {
-	    profiles = getRegistry(userspace).getProfileDescriptionsForMetadaEditor();
+	    profiles = getRegistry(getStatus(userspace)).getProfileDescriptionsForMetadaEditor();
 	} else {
-	    profiles = getRegistry(userspace).getProfileDescriptions();
+	    profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
 	}
-	
+
 	LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
 		+ " millisecs)");
 	return profiles;
     }
-    
+
     @GET
     @Path("/components/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response getRegisteredComponent(@PathParam("componentId") String componentId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	LOG.info("Component with id: " + componentId + " is requested.");
-	CMDComponentSpec mdComponent = getRegistry(userspace).getMDComponent(componentId);
+	CMDComponentSpec mdComponent = getRegistry(getStatus(userspace)).getMDComponent(componentId);
 	if (mdComponent == null) {
 	    return Response.status(Status.NOT_FOUND).build();
 	} else {
 	    return Response.ok(mdComponent).build();
 	}
     }
-    
+
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
@@ -156,7 +180,7 @@ public class ComponentRegistryRestService {
 	    String fileName = desc.getName() + "." + rawType;
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-		    
+
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -169,7 +193,7 @@ public class ComponentRegistryRestService {
 		};
 	    } else if ("xsd".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-		    
+
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -178,7 +202,7 @@ public class ComponentRegistryRestService {
 			    LOG.info("Could not retrieve component", e);
 			    throw new WebApplicationException(e, Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
 			}
-			
+
 		    }
 		};
 	    } else {
@@ -191,10 +215,10 @@ public class ComponentRegistryRestService {
 	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 	}
     }
-    
+
     public ComponentRegistry findRegistry(String id, RegistryClosure<? extends AbstractDescription> clos) throws ComponentRegistryException {
 	AbstractDescription desc = null;
-	ComponentRegistry result = getRegistry(false);
+	ComponentRegistry result = getRegistry(getStatus(false));
 	desc = clos.getDescription(result, id);
 	if (desc == null) {
 	    List<ComponentRegistry> userRegs = componentRegistryFactory.getAllUserRegistries();
@@ -208,85 +232,85 @@ public class ComponentRegistryRestService {
 	}
 	return result;
     }
-    
+
     @GET
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response getRegisteredProfile(@PathParam("profileId") String profileId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	LOG.info("Profile with id: " + profileId + " is requested.");
-	CMDComponentSpec mdProfile = getRegistry(userspace).getMDProfile(profileId);
+	CMDComponentSpec mdProfile = getRegistry(getStatus(userspace)).getMDProfile(profileId);
 	if (mdProfile == null) {
 	    return Response.status(Status.NOT_FOUND).build();
 	} else {
 	    return Response.ok(mdProfile).build();
 	}
     }
-    
+
     @GET
     @Path("/components/usage/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<AbstractDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("true") boolean userspace) throws ComponentRegistryException {
 	try {
 	    final long start = System.currentTimeMillis();
-	    ComponentRegistry registry = getRegistry(userspace);
+	    ComponentRegistry registry = getRegistry(getStatus(userspace));
 	    List<ComponentDescription> components = registry.getUsageInComponents(componentId);
 	    List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
-	    
+
 	    LOG.info("Found " + components.size() + " components and " + profiles.size() + " profiles that use component " + componentId
 		    + " (" + (System.currentTimeMillis() - start) + " millisecs)");
-	    
+
 	    List<AbstractDescription> usages = new ArrayList<AbstractDescription>(components.size() + profiles.size());
 	    usages.addAll(components);
 	    usages.addAll(profiles);
-	    
+
 	    return usages;
 	} catch (ComponentRegistryException e) {
 	    LOG.info("Could not retrieve profile usage", e);
 	    throw e;
 	}
     }
-    
+
     @GET
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Comment> getCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
 	final Principal principal = security.getUserPrincipal();
-	List<Comment> comments = getRegistry(userspace).getCommentsInProfile(profileId, principal);
+	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
 	LOG.info("Releasing " + comments.size() + " registered comments in Profile into the world (" + (System.currentTimeMillis() - start)
 		+ " millisecs)");
 	return comments;
     }
-    
+
     @GET
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Comment> getCommentsFromComponent(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
 	final Principal principal = security.getUserPrincipal();
-	List<Comment> comments = getRegistry(userspace).getCommentsInComponent(componentId, principal);
+	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
 	LOG.info("Releasing " + comments.size() + " registered comments in Component into the world (" + (System.currentTimeMillis() - start)
 		+ " millisecs)");
 	return comments;
     }
-    
+
     @GET
     @Path("/profiles/{profileId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Comment getSpecifiedCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	LOG.info(" Comments of component with id" + commentId + " are requested.");
 	final Principal principal = security.getUserPrincipal();
-	return getRegistry(userspace).getSpecifiedCommentInProfile(profileId, commentId, principal);
+	return getRegistry(getStatus(userspace)).getSpecifiedCommentInProfile(profileId, commentId, principal);
     }
-    
+
     @GET
     @Path("/components/{componentId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Comment getSpecifiedCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("commentId") String commentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	LOG.info(" Comments of component with id" + commentId + " are requested.");
 	final Principal principal = security.getUserPrincipal();
-	return getRegistry(userspace).getSpecifiedCommentInComponent(componentId, commentId, principal);
+	return getRegistry(getStatus(userspace)).getSpecifiedCommentInComponent(componentId, commentId, principal);
     }
 
     /**
@@ -308,7 +332,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
     public Response manipulateCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId, @FormParam("method") String method,
@@ -319,7 +343,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
     public Response manipulateCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("commentId") String commentId, @FormParam("method") String method,
@@ -330,7 +354,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/publish")
     @Consumes("multipart/form-data")
@@ -339,7 +363,7 @@ public class ComponentRegistryRestService {
 	    @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
-	    ProfileDescription desc = getRegistry(true).getProfileDescription(profileId);
+	    ProfileDescription desc = getRegistry(getStatus(true)).getProfileDescription(profileId);
 	    if (desc != null) {
 		updateDescription(desc, name, description, domainName, group);
 		return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
@@ -354,7 +378,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/update")
     @Consumes("multipart/form-data")
@@ -365,7 +389,7 @@ public class ComponentRegistryRestService {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
 	    UserCredentials userCredentials = getUserCredentials(principal);
-	    ProfileDescription desc = getRegistry(userspace).getProfileDescription(profileId);
+	    ProfileDescription desc = getRegistry(getStatus(userspace)).getProfileDescription(profileId);
 	    if (desc != null) {
 		updateDescription(desc, name, description, domainName, group);
 		return register(input, desc, userCredentials, userspace, new UpdateAction(principal));
@@ -379,7 +403,7 @@ public class ComponentRegistryRestService {
 	} catch (UserUnauthorizedException ex) {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
-	
+
     }
 
     /**
@@ -401,7 +425,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/publish")
     @Consumes("multipart/form-data")
@@ -411,7 +435,8 @@ public class ComponentRegistryRestService {
 	    @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
-	    ComponentDescription desc = getRegistry(true).getComponentDescription(componentId);
+	    // TODO: Get status from parameter
+	    ComponentDescription desc = getRegistry(getStatus(true)).getComponentDescription(componentId);
 	    if (desc != null) {
 		updateDescription(desc, name, description, domainName, group);
 		return register(input, desc, getUserCredentials(principal), true, new PublishAction(principal));
@@ -426,7 +451,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/update")
     @Consumes("multipart/form-data")
@@ -436,7 +461,7 @@ public class ComponentRegistryRestService {
 	    @FormDataParam(GROUP_FORM_FIELD) String group, @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
-	    ComponentDescription desc = getRegistry(userspace).getComponentDescription(componentId);
+	    ComponentDescription desc = getRegistry(getStatus(userspace)).getComponentDescription(componentId);
 	    if (desc != null) {
 		updateDescription(desc, name, description, domainName, group);
 		return register(input, desc, getUserCredentials(principal), userspace, new UpdateAction(principal));
@@ -451,7 +476,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     private void updateDescription(AbstractDescription desc, String name, String description, String domainName, String group) {
 	desc.setName(name);
 	desc.setDescription(description);
@@ -459,14 +484,14 @@ public class ComponentRegistryRestService {
 	desc.setGroupName(group);
 	desc.setRegistrationDate(AbstractDescription.createNewDate());
     }
-    
+
     @DELETE
     @Path("/components/{componentId}")
     public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
-	    ComponentRegistry registry = getRegistry(userspace);
+	    ComponentRegistry registry = getRegistry(getStatus(userspace));
 	    LOG.info("Component with id: " + componentId + " set for deletion.");
 	    registry.deleteMDComponent(componentId, principal, false);
 	} catch (DeleteFailedException e) {
@@ -485,7 +510,7 @@ public class ComponentRegistryRestService {
 	LOG.info("Component with id: " + componentId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @DELETE
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId,
@@ -493,7 +518,7 @@ public class ComponentRegistryRestService {
 	try {
 	    Principal principal = checkAndGetUserPrincipal();
 	    LOG.info("Profile with id: " + profileId + " set for deletion.");
-	    getRegistry(userspace).deleteMDProfile(profileId, principal);
+	    getRegistry(getStatus(userspace)).deleteMDProfile(profileId, principal);
 	} catch (DeleteFailedException e) {
 	    LOG.info("Profile with id: " + profileId + " deletion failed: " + e.getMessage());
 	    return Response.serverError().status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
@@ -510,14 +535,14 @@ public class ComponentRegistryRestService {
 	LOG.info("Profile with id: " + profileId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @DELETE
     @Path("/profiles/{profileId}/comments/{commentId}")
     public Response deleteCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
 	try {
 	    final Principal principal = checkAndGetUserPrincipal();
-	    final ComponentRegistry registry = getRegistry(userspace);
+	    final ComponentRegistry registry = getRegistry(getStatus(userspace));
 	    final Comment comment = registry.getSpecifiedCommentInProfile(profileId, commentId, principal);
 	    if (comment != null && profileId.equals(comment.getProfileDescriptionId())) {
 		LOG.info("Comment with id: " + commentId + " set for deletion.");
@@ -541,14 +566,14 @@ public class ComponentRegistryRestService {
 	LOG.info("Comment with id: " + commentId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @DELETE
     @Path("/components/{componentId}/comments/{commentId}")
     public Response deleteCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("commentId") String commentId,
 	    @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) {
 	try {
 	    final Principal principal = checkAndGetUserPrincipal();
-	    final ComponentRegistry registry = getRegistry(userspace);
+	    final ComponentRegistry registry = getRegistry(getStatus(userspace));
 	    final Comment comment = registry.getSpecifiedCommentInComponent(componentId, commentId, principal);
 	    if (comment != null && componentId.equals(comment.getComponentDescriptionId())) {
 		LOG.info("Comment with id: " + commentId + " set for deletion.");
@@ -572,7 +597,7 @@ public class ComponentRegistryRestService {
 	LOG.info("Comment with id: " + commentId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
@@ -587,10 +612,10 @@ public class ComponentRegistryRestService {
 	    ProfileDescription desc = registry.getProfileDescription(profileId);
 	    checkAndThrowDescription(desc, profileId);
 	    String fileName = desc.getName() + "." + rawType;
-	    
+
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-		    
+
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -603,7 +628,7 @@ public class ComponentRegistryRestService {
 		};
 	    } else if ("xsd".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-		    
+
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -624,21 +649,21 @@ public class ComponentRegistryRestService {
 	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 	}
     }
-    
+
     private void checkAndThrowDescription(AbstractDescription desc, String id) {
 	if (desc == null) {
 	    throw new WebApplicationException(Response.serverError().entity("Incorrect id:" + id + "cannot handle request").build());
 	}
     }
-    
+
     private Response createDownloadResponse(StreamingOutput result, String fileName) {
 	//Making response so it triggers browsers native save as dialog.
 	Response response = Response.ok().type("application/x-download").header("Content-Disposition",
 		"attachment; filename=\"" + fileName + "\"").entity(result).build();
 	return response;
-	
+
     }
-    
+
     @POST
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -662,7 +687,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -686,7 +711,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -699,7 +724,8 @@ public class ComponentRegistryRestService {
 	    if (null == componentRegistryFactory.getOrCreateUser(userCredentials)) {
 		throw new UserUnauthorizedException("Cannot materialize authenticated user");
 	    }
-	    ComponentRegistry registry = getRegistry(userspace, userCredentials);
+	    // TODO: Add user/group param
+	    ComponentRegistry registry = getRegistry(getStatus(userspace), null, userCredentials);
 	    ComponentDescription description = registry.getComponentDescription(componentId);
 	    if (description != null) {
 		LOG.info("Trying to register comment to " + componentId);
@@ -712,7 +738,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -725,7 +751,8 @@ public class ComponentRegistryRestService {
 	    if (null == componentRegistryFactory.getOrCreateUser(userCredentials)) {
 		throw new UserUnauthorizedException("Cannot materialize authenticated user");
 	    }
-	    ComponentRegistry registry = getRegistry(userspace, userCredentials);
+	    // TODO: Add user/group param
+	    ComponentRegistry registry = getRegistry(getStatus(userspace), null, userCredentials);
 	    ProfileDescription description = registry.getProfileDescription(profileId);
 	    if (description != null) {
 		LOG.info("Trying to register comment to " + profileId);
@@ -738,7 +765,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @GET
     @Path("/pingSession")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -753,13 +780,14 @@ public class ComponentRegistryRestService {
 	}
 	return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
     }
-    
+
     private Response register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace,
 	    RegisterAction action) {
 	try {
-	    ComponentRegistry registry = getRegistry(userspace, userCredentials);
+	    // TODO: Add user/group param
+	    ComponentRegistry registry = getRegistry(getStatus(userspace), null, userCredentials);
 	    DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-	    MDValidator validator = new MDValidator(input, desc, registry, getRegistry(true), componentRegistryFactory.getPublicRegistry());
+	    MDValidator validator = new MDValidator(input, desc, registry, getRegistry(getStatus(true)), componentRegistryFactory.getPublicRegistry());
 	    RegisterResponse response = new RegisterResponse();
 	    response.setIsInUserSpace(userspace);
 	    validate(response, descriptionValidator, validator);
@@ -797,7 +825,7 @@ public class ComponentRegistryRestService {
 	    }
 	}
     }
-    
+
     private Response registerComment(InputStream input, ComponentRegistry registry, boolean userspace,
 	    AbstractDescription description, Principal principal, UserCredentials userCredentials) {
 	try {
@@ -817,7 +845,7 @@ public class ComponentRegistryRestService {
 			com.setUserName(principal.getName());
 		    }
 		}
-		
+
 		int returnCode = registry.registerComment(com, principal.getName());
 		if (returnCode == 0) {
 		    response.setRegistered(true);
@@ -843,29 +871,29 @@ public class ComponentRegistryRestService {
 	    }
 	}
     }
-    
+
     private ComponentDescription createNewComponentDescription() {
 	ComponentDescription desc = ComponentDescription.createNewDescription();
 	desc.setHref(createXlink(desc.getId()));
 	return desc;
     }
-    
+
     private ProfileDescription createNewProfileDescription() {
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	desc.setHref(createXlink(desc.getId()));
 	return desc;
     }
-    
+
     private Comment createNewComment() {
 	Comment com = Comment.createANewComment();
 	return com;
     }
-    
+
     private String createXlink(String id) {
 	URI uri = uriInfo.getRequestUriBuilder().path(id).build();
 	return uri.toString();
     }
-    
+
     private void validate(RegisterResponse response, Validator... validators) {
 	for (Validator validator : validators) {
 	    if (!validator.validate()) {
@@ -875,7 +903,7 @@ public class ComponentRegistryRestService {
 	    }
 	}
     }
-    
+
     private void validateComment(CommentResponse response, Validator... validators) {
 	for (Validator validator : validators) {
 	    if (!validator.validate()) {

@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -163,7 +164,7 @@ public class MDValidatorTest {
     public void testValidateUserRegistry() throws Exception {
 	String id1 = "component1";
 	String id2 = "component2";
-	ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(true, DummyPrincipal.DUMMY_CREDENTIALS);
+	ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, DummyPrincipal.DUMMY_CREDENTIALS);
 
 	String profileContent = "";
 	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";

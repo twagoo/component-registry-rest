@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.ComponentStatus;
 import java.io.Serializable;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -91,11 +92,11 @@ public class CMDItemInfo implements Serializable {
         this.editable = editable;
     }
 
-
-    public boolean isInUserWorkSpace() {
-        return !displayNode.isPublic();
+    
+    public ComponentStatus getStatus() {
+	return displayNode.getStatus();
     }
-
+	
     public void setForceUpdate(boolean forceUpdate) {
         this.forceUpdate = forceUpdate;
     }

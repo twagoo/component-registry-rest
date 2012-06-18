@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
 import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
 import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
@@ -274,27 +275,27 @@ public class AdminHomePage extends SecureAdminWebPage {
     private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException {
 	DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
 	parent.add(componentsNode);
-	add(componentsNode, registry.getComponentDescriptions(), false, registry.isPublic());
+	add(componentsNode, registry.getComponentDescriptions(), false, registry.getStatus());
 
 	DefaultMutableTreeNode profilesNode = new DefaultMutableTreeNode(new DisplayDataNode("Profiles", false));
 	parent.add(profilesNode);
-	add(profilesNode, registry.getProfileDescriptions(), false, registry.isPublic());
+	add(profilesNode, registry.getProfileDescriptions(), false, registry.getStatus());
 
 	DefaultMutableTreeNode deletedCompNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Components", true));
 	parent.add(deletedCompNode);
 
 	List<ComponentDescription> deletedComponentDescriptions = registry.getDeletedComponentDescriptions();
-	add(deletedCompNode, deletedComponentDescriptions, true, registry.isPublic());
+	add(deletedCompNode, deletedComponentDescriptions, true, registry.getStatus());
 
 	DefaultMutableTreeNode deletedProfNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Profiles", true));
 	parent.add(deletedProfNode);
 	List<ProfileDescription> deletedProfileDescriptions = registry.getDeletedProfileDescriptions();
-	add(deletedProfNode, deletedProfileDescriptions, true, registry.isPublic());
+	add(deletedProfNode, deletedProfileDescriptions, true, registry.getStatus());
     }
 
-    private void add(DefaultMutableTreeNode parent, List<? extends AbstractDescription> descs, boolean isDeleted, boolean isPublic) {
+    private void add(DefaultMutableTreeNode parent, List<? extends AbstractDescription> descs, boolean isDeleted, ComponentStatus status) {
 	for (AbstractDescription desc : descs) {
-	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, isPublic));
+	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, status));
 	    parent.add(child);
 	}
     }

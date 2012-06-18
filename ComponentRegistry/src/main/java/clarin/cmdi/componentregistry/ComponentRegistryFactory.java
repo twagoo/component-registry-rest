@@ -14,9 +14,17 @@ public interface ComponentRegistryFactory {
 
     List<ComponentRegistry> getAllUserRegistries();
 
-    ComponentRegistry getComponentRegistry(boolean userspace, UserCredentials credentials);
+    /**
+     * Gets the specified registry
+     *
+     * @param status status of the registry
+     * @param owner owner of the registry. Passing null will assume the authenticated user as a {@link OwnerUser}
+     * @param credentials credentials that authenticate user, can be left null if requested registry has a public status
+     * @return
+     */
+    ComponentRegistry getComponentRegistry(ComponentStatus status, Owner owner, UserCredentials credentials) throws UserUnauthorizedException;
 
-    ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, String userId);
+    ComponentRegistry getOtherUserComponentRegistry(Principal adminPrincipal, ComponentStatus status, Owner owner);
 
     ComponentRegistry getPublicRegistry();
 
