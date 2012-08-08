@@ -166,10 +166,10 @@ package clarin.cmdi.componentregistry.editor {
 		}
 		
 		private function addCardinalityInput():void {
-			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _component.cardinalityMin, function(val:String):void {
+			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _component.cardinalityMin, CardinalityInput.BOUNDED, function(val:String):void {
 				_component.cardinalityMin = val;
 			}));
-			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _component.cardinalityMax, function(val:String):void {
+			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _component.cardinalityMax, CardinalityInput.UNBOUNDED,function(val:String):void {
 				_component.cardinalityMax = val;
 			}));
 		}

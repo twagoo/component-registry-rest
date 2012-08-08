@@ -56,12 +56,12 @@ package clarin.cmdi.componentregistry.editor {
 					_element.displayPriority = val;
 				}));
 			
-			var cardinalityMinInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, function(val:String):void {
+			var cardinalityMinInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, CardinalityInput.BOUNDED, function(val:String):void {
 				_element.cardinalityMin = val;
 			});
 			addChild(cardinalityMinInput);
 			
-			var cardinalityMaxInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, function(val:String):void {
+			var cardinalityMaxInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, CardinalityInput.UNBOUNDED, function(val:String):void {
 				_element.cardinalityMax = val;
 			});
 			// Max cardinatlity field should be disabled when multilingual is selected - binding to that field here
