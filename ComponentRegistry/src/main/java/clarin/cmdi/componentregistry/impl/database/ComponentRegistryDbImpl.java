@@ -47,8 +47,8 @@ import org.springframework.dao.DataAccessException;
 public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implements ComponentRegistry {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryDbImpl.class);
-    private Owner owner;
-    private ComponentStatus status;
+    private Owner registryOwner;
+    private ComponentStatus registryStatus;
     @Autowired
     private Configuration configuration;
     @Autowired
@@ -74,7 +74,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * @see setUser
      */
     public ComponentRegistryDbImpl() {
-	this.status = ComponentStatus.PUBLIC;
+	this.registryStatus = ComponentStatus.PUBLIC;
     }
 
     /**
@@ -86,25 +86,25 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * public
      */
     public ComponentRegistryDbImpl(ComponentStatus status, Owner owner) {
-	this.status = status;
-	this.owner = owner;
+	this.registryStatus = status;
+	this.registryOwner = owner;
     }
 
     @Override
     public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException {
 	try {
-	    switch (status) {
+	    switch (registryStatus) {
 		// TODO: support other status types
 		case DEVELOPMENT:
-		    if (owner == null) {
+		    if (registryOwner == null) {
 			throw new ComponentRegistryException("Development workspace without owner!");
 		    }
 		    // TODO: Support group space
-		    return profileDescriptionDao.getUserspaceDescriptions(owner.getId());
+		    return profileDescriptionDao.getUserspaceDescriptions(registryOwner.getId());
 		case PUBLIC:
 		    return profileDescriptionDao.getPublicProfileDescriptions();
 		default:
-		    throw new ComponentRegistryException("Unsupported status type" + status);
+		    throw new ComponentRegistryException("Unsupported status type" + registryStatus);
 	    }
 	} catch (DataAccessException ex) {
 	    throw new ComponentRegistryException("Database access error while trying to get profile descriptions", ex);
@@ -511,15 +511,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     @Deprecated
     public boolean isPublic() {
-	return status == ComponentStatus.PUBLIC;
+	return registryStatus == ComponentStatus.PUBLIC;
     }
 
     /**
      * @return The user id, or null if there is no owner or it is not a user.
      */
     private Number getUserId() {
-	if (owner instanceof OwnerUser) {
-	    return owner.getId();
+	if (registryOwner instanceof OwnerUser) {
+	    return registryOwner.getId();
 	} else {
 	    return null;
 	}
@@ -529,8 +529,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * @return The group id, or null if there is no owner or it is not a group.
      */
     private Number getGroupId() {
-	if (owner instanceof OwnerGroup) {
-	    return owner.getId();
+	if (registryOwner instanceof OwnerGroup) {
+	    return registryOwner.getId();
 	} else {
 	    return null;
 	}
@@ -538,7 +538,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public Owner getOwner() {
-	return owner;
+	return registryOwner;
     }
 
     /**
@@ -549,16 +549,16 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      */
     public void setStatus(ComponentStatus status, Owner owner) {
 	setStatus(status);
-	this.owner = owner;
+	this.registryOwner = owner;
     }
 
     public void setStatus(ComponentStatus status) {
-	this.status = status;
+	this.registryStatus = status;
     }
 
     @Override
     public ComponentStatus getStatus() {
-	return status;
+	return registryStatus;
     }
 
     private void invalidateCache(AbstractDescription description) {
