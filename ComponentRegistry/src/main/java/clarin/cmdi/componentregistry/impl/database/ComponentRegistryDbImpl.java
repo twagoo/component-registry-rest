@@ -222,8 +222,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private void setCanDeleteInComments(Collection<Comment> comments, Principal principal) {
 	if (principal != null && principal.getName() != null) {
 	    final RegistryUser registryUser = userDao.getByPrincipalName(principal.getName());
-	    final String registryUserId = registryUser.getId().toString();
-	    final boolean isAdmin = configuration.isAdminUser(principal);
+	    final String registryUserId = registryUser == null ? null : registryUser.getId().toString();
+	    final boolean isAdmin = registryUser != null && configuration.isAdminUser(principal);
 	    for (Comment comment : comments) {
 		comment.setCanDelete(isAdmin || comment.getUserId().equals(registryUserId));
 	    }
