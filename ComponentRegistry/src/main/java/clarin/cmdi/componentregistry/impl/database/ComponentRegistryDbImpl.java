@@ -1,26 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.Principal;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.bind.JAXBException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
-
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.Configuration;
@@ -34,8 +14,25 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import javax.xml.bind.JAXBException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
@@ -209,8 +206,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private void setCanDeleteInComments(Collection<Comment> comments, Principal principal) {
 	if (principal != null && principal.getName() != null) {
 	    final RegistryUser registryUser = userDao.getByPrincipalName(principal.getName());
-	    final String registryUserId = registryUser.getId().toString();
-	    final boolean isAdmin = configuration.isAdminUser(principal);
+	    final String registryUserId = registryUser == null ? null : registryUser.getId().toString();
+	    final boolean isAdmin = registryUser != null && configuration.isAdminUser(principal);
 	    for (Comment comment : comments) {
 		comment.setCanDelete(isAdmin || comment.getUserId().equals(registryUserId));
 	    }
