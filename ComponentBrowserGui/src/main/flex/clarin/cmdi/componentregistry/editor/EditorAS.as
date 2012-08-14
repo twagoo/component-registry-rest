@@ -135,12 +135,16 @@ private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 }
 
 private function cancel():void {
-	Alert.show("Are you sure you want to cancel editing?", "Cancel editing", Alert.YES|Alert.NO, null, 
+	if(xmlEditor.specHasChanges){
+	Alert.show("There are pending changes. Cancelling will discard these. Are you sure you want to proceed?", "Discard changes?", Alert.YES|Alert.NO, null, 
 		function (eventObj:CloseEvent):void{
 			if(eventObj.detail == Alert.YES){
 				viewStack.switchToBrowse(itemDescription);				
 			}
 		});
+	} else {
+		viewStack.switchToBrowse(itemDescription);
+	}
 }
 
 /**

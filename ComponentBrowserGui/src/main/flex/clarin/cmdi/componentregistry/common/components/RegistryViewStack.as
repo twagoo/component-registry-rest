@@ -77,17 +77,7 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		public function switchToEditor(itemDescription:ItemDescription):void {
-			// About to open item in editor, check if there are pending changes
-			if(itemDescription != null && editor.xmlEditor.specHasChanges){
-				Alert.show("Doing this will discard all changes in the component that is currently being edited. Proceed?", "Discard changes", Alert.OK|Alert.CANCEL, this, 
-					function(event:CloseEvent):void {
-						if(event.detail == Alert.OK) {
-							doSwitchToEditor(itemDescription);
-						}
-					} );
-			} else {
-				doSwitchToEditor(itemDescription);
-			}
+			doSwitchToEditor(itemDescription);
 		}
 		
 		private function doSwitchToEditor(itemDescription:ItemDescription):void {
