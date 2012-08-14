@@ -90,6 +90,10 @@
 				viewStack.switchToEditor(item);
 			}
 			
+			private function importItem():void{
+				viewStack.switchToImport();
+			}
+			
 			private function dispatchCreateNewEvent():void{
 				dispatchEvent(new CreateNewComponentEvent());
 			}
@@ -118,6 +122,9 @@
 					   visible="{!Config.instance.userSpace}" includeInLayout="{!Config.instance.userSpace}"
 					   enabled="{!Config.instance.userSpace &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
+			<mx:Button label="Import"
+					   toolTip="Import an item from a local file"
+					   click="importItem()" />
 		</mx:HBox>
 		
 		<mx:HBox horizontalAlign="right"

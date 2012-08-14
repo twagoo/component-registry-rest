@@ -8,19 +8,21 @@
 
 	<mx:Script>
 		<![CDATA[
-			import mx.core.UIComponent;
 			import clarin.cmdi.componentregistry.common.ComponentMD;
-			import clarin.cmdi.componentregistry.common.Profile;
-			import clarin.cmdi.componentregistry.services.Config;
-			import mx.events.ValidationResultEvent;
-			import mx.collections.ArrayCollection;
-			import mx.validators.Validator;
-			import clarin.cmdi.componentregistry.editor.InputValidators;
-			import clarin.cmdi.componentregistry.common.LabelConstants;
 			import clarin.cmdi.componentregistry.common.Credentials;
-			import mx.core.Application;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
+			import clarin.cmdi.componentregistry.common.LabelConstants;
+			import clarin.cmdi.componentregistry.common.Profile;
+			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+			import clarin.cmdi.componentregistry.editor.InputValidators;
+			import clarin.cmdi.componentregistry.services.Config;
+			
+			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
+			import mx.core.Application;
+			import mx.core.UIComponent;
+			import mx.events.ValidationResultEvent;
+			import mx.validators.Validator;
 
 			private var validators:ArrayCollection = new ArrayCollection();
 
@@ -49,6 +51,11 @@
 						uploadSrv.upload(UploadService.NEW, item);
 					}
 				}
+			}
+			
+			private function close():void{
+				var viewStack:RegistryViewStack = this.parent as RegistryViewStack;
+				viewStack.switchToBrowse(null);
 			}
 
 			private function validate():Boolean {
@@ -244,8 +251,14 @@
 				<mx:TextInput id="groupName"
 							  width="300"/>
 			</mx:FormItem>
-			<mx:Button label="Submit"
-					   click="submit(event)"/>
+
+			<mx:HBox>
+				<mx:Button label="Submit"
+						   click="submit(event)"/>
+				<mx:Button label="Close"
+						   click="close()"/>				
+			</mx:HBox>
+			
 			<mx:ProgressBar id="uploadProgress"
 							label=""
 							mode="manual"
