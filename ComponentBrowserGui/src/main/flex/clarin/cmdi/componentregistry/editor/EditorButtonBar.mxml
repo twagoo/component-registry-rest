@@ -7,16 +7,21 @@
 		[Event(name="saveClick", type="flash.events.MouseEvent")]
 		[Event(name="saveAsNewClick", type="flash.events.MouseEvent")]
 		[Event(name="publishClick", type="flash.events.MouseEvent")]
+		[Event(name="cancelClick", type="flash.events.MouseEvent")]
 	</mx:Metadata>
 	<mx:Button id="saveBtn"
-			   label="save"
+			   label="Save"
 			   click="dispatchEvent(new MouseEvent('saveClick'))"
 			   enabled="false"
 			   />
 	<mx:Button id="saveAsNewBtn"
-			   label="save as new"
+			   label="Save as new"
 			   click="dispatchEvent(new MouseEvent('saveAsNewClick'))"/>
 	<mx:Button id="publishBtn"
-			   label="publish in public space"
+			   label="Publish in public space"
 			   click="dispatchEvent(new MouseEvent('publishClick'))"/>
+	
+	<mx:Button id="cancelBtn"
+			   label="Cancel"
+			   click="dispatchEvent(new MouseEvent('cancelClick'))"/>
 </mx:HBox>

@@ -7,7 +7,7 @@
 		   height="100%"
 		   label="Editor"
 		   creationComplete="init()"
-		   implements="clarin.cmdi.componentregistry.common.components.RegistryView"
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView" xmlns:components="clarin.cmdi.componentregistry.common.components.*"
 		   >
 	
 	<mx:Script source="EditorAS.as"/>
@@ -20,7 +20,9 @@
 									height="25"
 									saveClick="saveSpec(true, UploadService.UPDATE)"
 									saveAsNewClick="saveSpec(true, UploadService.NEW)"
-									publishClick="publishSpec()"/>
+									publishClick="publishSpec()"
+									cancelClick="cancel()"
+									/>
 			<mx:Text id="errorMessageField"
 					 text="{uploadService.message}"
 					 visible='{errorMessageField.text != ""}'
