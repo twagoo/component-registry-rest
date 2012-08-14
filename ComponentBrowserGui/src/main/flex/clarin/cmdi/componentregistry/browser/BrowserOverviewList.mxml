@@ -102,32 +102,27 @@
 	
 		<mx:HBox horizontalAlign="left"
 				 verticalAlign="middle"
-				 width="50%">
+				 width="70%">
 			
-			<!-- public space -->
-			<mx:Button label="Edit as new" 
-					   toolTip="Edit the selected item as a new item in the private workspace"
-					   includeInLayout="{!Config.instance.userSpace}" 
-					   visible="{!Config.instance.userSpace}"
-					   enabled="{(dataGrid.selectedItem != null) &amp;&amp; Credentials.instance.isLoggedIn()}" 
-					   click="editItem()" />
-			<!-- private space -->
-			<mx:Button label="Create new" includeInLayout="{Config.instance.userSpace}"
+			<mx:Button label="Create new" 
 					   toolTip="Create a new item in the private workspace"
-					   visible="{Config.instance.userSpace}"
-					   enabled="{Credentials.instance.isLoggedIn()}"
 					   click="dispatchCreateNewEvent()"
 					   />
-			<mx:Button label="Edit" includeInLayout="{Config.instance.userSpace}"
+			<mx:Button label="Edit"
 					   toolTip="Edit the selected item in the editor"
-					   visible="{Config.instance.userSpace}"
-					   enabled="{dataGrid.selectedItem != null &amp;&amp; Credentials.instance.isLoggedIn()}" 
+					   visible="{Config.instance.userSpace}" includeInLayout="{Config.instance.userSpace}"
+					   enabled="{Config.instance.userSpace}" 
+					   click="editItem()" />
+			<mx:Button label="Edit as new" 
+					   toolTip="Edit the selected item as a new item in the private workspace"
+					   visible="{!Config.instance.userSpace}" includeInLayout="{!Config.instance.userSpace}"
+					   enabled="{!Config.instance.userSpace &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
 		</mx:HBox>
 		
 		<mx:HBox horizontalAlign="right"
 				 verticalAlign="middle"
-				 width="50%">
+				 width="30%">
 	
 			<rictus:SearchBox id="searchBox"
 							  label="filter..."/>
