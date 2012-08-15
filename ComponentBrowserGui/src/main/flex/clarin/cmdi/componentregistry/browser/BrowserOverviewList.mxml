@@ -114,12 +114,14 @@
 					   />
 			<mx:Button label="Edit"
 					   toolTip="Edit the selected item in the editor"
-					   visible="{Config.instance.userSpace}" includeInLayout="{Config.instance.userSpace}"
-					   enabled="{Config.instance.userSpace}" 
+					   visible="{Config.instance.userSpace}" 
+					   includeInLayout="{Config.instance.userSpace}"
+					   enabled="{Config.instance.userSpace &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
 			<mx:Button label="Edit as new" 
 					   toolTip="Edit the selected item as a new item in the private workspace"
-					   visible="{!Config.instance.userSpace}" includeInLayout="{!Config.instance.userSpace}"
+					   visible="{!Config.instance.userSpace}" 
+					   includeInLayout="{!Config.instance.userSpace}"
 					   enabled="{!Config.instance.userSpace &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
 			<mx:Button label="Import"
