@@ -89,22 +89,16 @@
 			  x="0"
 			  y="0">			  
 
-		<mx:VBox height="100%"
-				 width="100%">
-			<mx:HBox borderStyle="none" id="topBar"
-					 width="100%">
-				<mx:ToggleButtonBar id="toggleBar"
-									dataProvider="{viewStack}"/>
-				<mx:Spacer width="90%"/>
-				<mx:Label text="User: {Credentials.instance.userName}"/>
-				<common:LoginLabelButton id="login" includeInLayout="{!Credentials.instance.isLoggedIn()}" visible="{!Credentials.instance.isLoggedIn()}" />
-				<common:UserSettingsLabelButton id="userSettings" includeInLayout="{Credentials.instance.isLoggedIn()}" visible="{Credentials.instance.isLoggedIn()}"/>
-			</mx:HBox>
-			<common:RegistryViewStack id="viewStack"
-									  borderStyle="none"
-									  height="100%"
-									  width="100%"/>
-		</mx:VBox>
+		<common:RegistryViewStack id="viewStack"
+								  borderStyle="none"
+								  height="100%"
+								  width="100%"/>
+		
+		<mx:HBox borderStyle="none" id="topBar" right="0">
+			<mx:Label text="User: {Credentials.instance.userName}"/>
+			<common:LoginLabelButton id="login" includeInLayout="{!Credentials.instance.isLoggedIn()}" visible="{!Credentials.instance.isLoggedIn()}" />
+			<common:UserSettingsLabelButton id="userSettings" includeInLayout="{Credentials.instance.isLoggedIn()}" visible="{Credentials.instance.isLoggedIn()}"/>
+		</mx:HBox>
 	</mx:Panel>
 		
 </mx:Application>

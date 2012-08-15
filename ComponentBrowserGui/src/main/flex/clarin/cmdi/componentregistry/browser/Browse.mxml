@@ -187,8 +187,7 @@
 	
 	<browser:BrowserColumns id="browserColumns"/>
 	
-	<mx:Panel layout="absolute" 
-			  width="100%" 
+	<mx:Panel width="100%" 
 			  height="100%"
 			  headerHeight="0"
 			  borderThicknessTop="0"
@@ -196,21 +195,21 @@
 			  borderThicknessBottom="0"
 			  borderThicknessLeft="0"
 			  >
-			
-		<mx:ComboBox right="0" 
-					 top="0"				
-					 id="userSpaceCB"
-					 dataProvider="{spaces}"
-					 width="110"
-					 close="userSpaceCloseHandler(event);"/>
 		
 		<mx:VBox left="0"
 				 top="5"
 				 borderStyle="none"
-				 horizontalAlign="center"
 				 height="100%"
 				 width="100%">
 			
+			<mx:Box paddingTop="5" paddingLeft="5">
+				<mx:ComboBox id="userSpaceCB"
+							 dataProvider="{spaces}"
+							 width="110"
+							 close="userSpaceCloseHandler(event);"
+							 />
+			</mx:Box>
+						
 			<mx:TabNavigator id="tabnav"
 							 width="100%"
 							 height="100%"
