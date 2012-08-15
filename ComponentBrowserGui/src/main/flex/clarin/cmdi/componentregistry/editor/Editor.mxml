@@ -47,6 +47,8 @@
 				<mx:Label text="Drag existing components onto edit canvas"/>
 				<browser:BrowserOverviewList id="componentsPaletteOverview"
 											 width="100%" height="90%"
+											 buttonsEnabled="false"
+											 spaceSwitchEnabled="true"
 											 browserDataProvider="{componentsSrv.itemDescriptions}"
 											 browserColumns="{browserColumns.getComponentColumns()}"
 											 creationComplete="initPaletteOverview();"/>

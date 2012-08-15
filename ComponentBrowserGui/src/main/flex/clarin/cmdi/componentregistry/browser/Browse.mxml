@@ -6,7 +6,7 @@
 		   width="100%"
 		   height="100%"
 		   label="Component Browser"
-		   implements="clarin.cmdi.componentregistry.common.components.RegistryView"
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView" xmlns:components="clarin.cmdi.componentregistry.common.components.*"
 		   >
 	<mx:Metadata>
 		[Event(name="startItemLoaded",type="flash.events.Event")]
@@ -161,27 +161,12 @@
 				RegistryViewStack(this.parent).switchToEditor(null);
 			}
 			
-			private static const USERSPACE_LABEL:String = "Work space";
-			private static const PUBLICSPACE_LABEL:String = "Public space";
-			[Bindable]
-			public var spaces:ArrayCollection = new ArrayCollection([{label: PUBLICSPACE_LABEL, data: 1}, {label: USERSPACE_LABEL, data: 2}]);
-			
 			private function setUserSpace(event:Event = null):void {
 				if (Config.instance.userSpace) {
 					userSpaceCB.selectedIndex = 1;
 				} else {
 					userSpaceCB.selectedIndex = 0;
 				}
-			}
-			
-			private function userSpaceCloseHandler(event:Event):void {
-				if (Credentials.instance.isLoggedIn()) {
-					Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
-				} else if (userSpaceCB.selectedIndex != 0) {
-					userSpaceCB.selectedIndex = 0;
-					new Login().show(this, Config.VIEW_BROWSE, Config.SPACE_USER, null);
-				}
-				
 			}
 		]]>
 	</mx:Script>
@@ -204,13 +189,9 @@
 				 width="100%">
 			
 			<mx:Box paddingTop="5" paddingLeft="5">
-				<mx:ComboBox id="userSpaceCB"
-							 dataProvider="{spaces}"
-							 width="110"
-							 close="userSpaceCloseHandler(event);"
-							 />
+				<components:SpaceSwitch id="userSpaceCB"  />
 			</mx:Box>
-						
+			
 			<mx:TabNavigator id="tabnav"
 							 width="100%"
 							 height="100%"

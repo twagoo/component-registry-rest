@@ -34,6 +34,12 @@
 			[Bindable]
 			public var viewStack:RegistryViewStack;
 			
+			[Bindable]
+			public var buttonsEnabled:Boolean = true;
+			
+			[Bindable]
+			public var spaceSwitchEnabled:Boolean = false;
+			
 			public function set browserDataProvider(dataProvider:ArrayCollection):void {
 				if (dataProvider) {
 					var data:ArrayCollection = new ArrayCollection(dataProvider.toArray().slice());
@@ -103,10 +109,18 @@
 	<mx:HBox paddingLeft="5" 
 			 paddingRight="5"
 			 width="100%">
-	
+		
+		<mx:Box paddingTop="5" paddingLeft="5" 
+				visible="{spaceSwitchEnabled}" 
+				includeInLayout="{spaceSwitchEnabled}">
+			<comp:SpaceSwitch id="userSpaceCB" />
+		</mx:Box>
+		
 		<mx:HBox horizontalAlign="left"
 				 verticalAlign="middle"
-				 width="70%">
+				 width="70%"
+				 visible="{buttonsEnabled}"
+				 >
 			
 			<mx:Button label="Create new" 
 					   toolTip="Create a new item in the private workspace"
