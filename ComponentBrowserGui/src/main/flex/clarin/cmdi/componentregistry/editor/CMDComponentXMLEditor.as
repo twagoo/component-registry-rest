@@ -236,13 +236,9 @@ package clarin.cmdi.componentregistry.editor {
 			head.direction = FormItemDirection.HORIZONTAL;
 			var buttons:FormItem = new SelectTypeRadioButtons(spec);
 			head.addChild(buttons);
-			var startOverLabel:Label = createStartOverButton();
-			startOverLabel.setStyle("paddingTop", "2");
-			startOverLabel.height = buttons.height;
 			var space:Spacer = new Spacer();
 			space.width = 55;
 			head.addChild(space);
-			head.addChild(startOverLabel);
 			addChild(head);
 			
 			var nameInput:NameInputLine = new NameInputLine(_firstComponent.name, function(val:String):void {
@@ -369,14 +365,6 @@ package clarin.cmdi.componentregistry.editor {
 			var elem:CMDComponentElement = ElementEdit(event.currentTarget).element;
 			_firstComponent.removeElement(elem);
 			removeChild(event.currentTarget as DisplayObject);
-		}
-		
-		private function createStartOverButton():Label {
-			var startOverButton:Label = new RemoveLabelButton();
-			startOverButton.addEventListener(MouseEvent.CLICK, clearEditorHandler);
-			startOverButton.toolTip = "Clears all input and removes added components";
-			startOverButton.text = "start over";
-			return startOverButton;
 		}
 	}
 }
