@@ -4,7 +4,8 @@
 		   width="100%"
 		   height="100%"
 		   label="Import file"
-		   implements="clarin.cmdi.componentregistry.common.components.RegistryView">
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView"
+		   >
 
 	<mx:Script>
 		<![CDATA[
@@ -210,6 +211,7 @@
 						 fileLoaded="fileLoaded(event)"
 						 uploadComplete="registryChange(event)"/>
 	<mx:VBox>
+		
 		<mx:Form>
 			<mx:HBox>
 				<mx:Button label="Select xml..."

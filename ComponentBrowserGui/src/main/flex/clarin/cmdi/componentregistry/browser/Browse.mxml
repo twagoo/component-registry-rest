@@ -5,8 +5,9 @@
 		   creationComplete="creationComplete()"
 		   width="100%"
 		   height="100%"
-		   label="Browser"
-		   implements="clarin.cmdi.componentregistry.common.components.RegistryView">
+		   label="Component Browser"
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView"
+		   >
 	<mx:Metadata>
 		[Event(name="startItemLoaded",type="flash.events.Event")]
 	</mx:Metadata>

@@ -62,6 +62,14 @@ TitleWindow {
     fontWeight: bold;
 }
 
+.topBar{
+	backgroundColor: #DDE3EF;	
+}
+
+.sectionTitle {
+    fontWeight: bold;
+    fontSize: 18px;	
+}
 
 
 
