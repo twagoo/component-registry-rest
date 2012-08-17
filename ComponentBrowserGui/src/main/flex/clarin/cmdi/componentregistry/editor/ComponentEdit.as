@@ -38,6 +38,8 @@ package clarin.cmdi.componentregistry.editor {
 		private var addComponentLabel:Label
 		private var addElementLabel:Label
 		
+		private var showToggleBox:ShowToggleBox;
+		private var hideableForm:Form;
 		
 		public function ComponentEdit(component:CMDComponent, parent:UIComponent, parentComponent:CMDComponent) {
 			super();
@@ -97,10 +99,22 @@ package clarin.cmdi.componentregistry.editor {
 			addRuler();
 			createComponentEditBar();
 			
+			hideableForm = createHidableForm();			
+			showToggleBox.visibleContainer = hideableForm;
+			
+			addChild(hideableForm);			
+			
+			var summary:ComponentSummary = new ComponentSummary();
+			summary.component = _component;
+			summary.visible = false;
+			showToggleBox.invisibleContainer = summary;
+			
+			addChild(summary);
+			
 			var componentLink:FormItem = createComponentLink(_component);
 			if (componentLink != null) {
 				addCardinalityInput();
-				addChild(componentLink);
+				hideableForm.addChild(componentLink);
 			} else {
 				addNameInput();
 				addConceptLink();
@@ -126,7 +140,7 @@ package clarin.cmdi.componentregistry.editor {
 			addComponentLabel.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 				drawFocus(false);
 			});
-			addChild(addComponentLabel);
+			hideableForm.addChild(addComponentLabel);
 		}
 		
 		private function addElementAddButton():void {
@@ -143,11 +157,11 @@ package clarin.cmdi.componentregistry.editor {
 			addElementLabel.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 				drawFocus(false);
 			});
-			addChild(addElementLabel);
+			hideableForm.addChild(addElementLabel);
 		}
 		
 		private function addConceptLink():void {
-			addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _component.conceptLink, function(val:String):void {
+			hideableForm.addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _component.conceptLink, function(val:String):void {
 				_component.conceptLink = val;
 			}));
 		}
@@ -162,20 +176,35 @@ package clarin.cmdi.componentregistry.editor {
 			var nameInput:FormItemInputLine = new NameInputLine(_component.name, function(val:String):void {
 				_component.name = val;	
 			}, new ChildNameValidator(_parentComponent, component));
-			addChild(nameInput);
+			hideableForm.addChild(nameInput);
 		}
 		
 		private function addCardinalityInput():void {
-			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _component.cardinalityMin, CardinalityInput.BOUNDED, function(val:String):void {
+			hideableForm.addChild(new CardinalityInput(LabelConstants.CARDINALITY_MIN, _component.cardinalityMin, CardinalityInput.BOUNDED, function(val:String):void {
 				_component.cardinalityMin = val;
 			}));
-			addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _component.cardinalityMax, CardinalityInput.UNBOUNDED,function(val:String):void {
+			hideableForm.addChild(new CardinalityInput(LabelConstants.CARDINALITY_MAX, _component.cardinalityMax, CardinalityInput.UNBOUNDED,function(val:String):void {
 				_component.cardinalityMax = val;
 			}));
 		}
 		
+		private function createHidableForm():Form {
+			var form:Form = new Form();
+			form.styleName = StyleConstants.XMLBROWSER;
+			form.setStyle("paddingTop","0");
+			form.setStyle("paddingBottom","0");
+			form.verticalScrollPolicy = "off";
+			form.horizontalScrollPolicy = "off";
+			return form;
+		}
+		
 		private function createComponentEditBar():void {
 			var editBar:HBox = new HBox();
+			
+			showToggleBox = new ShowToggleBox();
+			showToggleBox.visibleState = true;
+			editBar.addChild(showToggleBox);
+			
 			editBar.addChild(createHeading());
 			var removeButton:Label = new RemoveLabelButton();
 			addFocusListeners(removeButton).addEventListener(MouseEvent.CLICK, fireRemoveComponent);
@@ -235,7 +264,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 		
 		private function handleCMDAttributeList():void {
-			addChild(new AttributeListEdit(_component, this));
+			hideableForm.addChild(new AttributeListEdit(_component, this));
 		}
 		
 		private function handleComponents(components:ArrayCollection):void {
@@ -249,16 +278,16 @@ package clarin.cmdi.componentregistry.editor {
 			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
 			comp.setStyle("paddingLeft", "50");
 			if (!addComponentLabel) {
-				addChild(comp);
+				hideableForm.addChild(comp);
 			} else {
-				addChildAt(comp, getChildIndex(addComponentLabel));
+				hideableForm.addChildAt(comp, hideableForm.getChildIndex(addComponentLabel));
 			}
 		}
 		
 		private function removeComponent(event:Event):void {
 			var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
 			_component.removeComponent(comp);
-			removeChild(event.currentTarget as DisplayObject);
+			hideableForm.removeChild(event.currentTarget as DisplayObject);
 		}
 		
 		private function handleElements(elements:ArrayCollection):void {
@@ -272,16 +301,16 @@ package clarin.cmdi.componentregistry.editor {
 			elem.setStyle("paddingLeft", "50");
 			elem.addEventListener(ElementEdit.REMOVE_ELEMENT_EVENT, removeElement);
 			if (!addElementLabel) {
-				addChild(elem);
+				hideableForm.addChild(elem);
 			} else {
-				addChildAt(elem, getChildIndex(addElementLabel));
+				hideableForm.addChildAt(elem, hideableForm.getChildIndex(addElementLabel));
 			}
 		}
 		
 		private function removeElement(event:Event):void {
 			var elem:CMDComponentElement = ElementEdit(event.currentTarget).element;
 			_component.removeElement(elem);
-			removeChild(event.currentTarget as DisplayObject);
+			hideableForm.removeChild(event.currentTarget as DisplayObject);
 		}
 		
 		private function createHeading():FormItem {

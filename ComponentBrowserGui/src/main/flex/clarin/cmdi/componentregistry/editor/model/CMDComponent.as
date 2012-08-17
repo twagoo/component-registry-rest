@@ -6,6 +6,7 @@ package clarin.cmdi.componentregistry.editor.model {
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 
+	[Bindable]
 	public class CMDComponent implements XmlAble, AttributeContainer, ChangeTrackingCMDElement {
 
 		//Attributes

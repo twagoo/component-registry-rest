@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 includeInLayout="{visible}"
+		 paddingLeft="50"
+		 >
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.editor.model.CMDComponent;
+			import clarin.cmdi.componentregistry.services.ComponentListService;
+			
+			[Bindable]
+			public var component:CMDComponent;
+		]]>
+	</mx:Script>
+	
+	<mx:HBox>	
+		<mx:HBox minWidth="160"
+				 visible="{component.componentId == null}"
+				 includeInLayout="{component.componentId == null}"
+				 >			
+			<mx:Label text="Name: " fontWeight="bold"/>
+			<mx:Label text="{component.name}" />
+		</mx:HBox>
+		
+		<mx:HBox minWidth="160"
+				 visible="{component.componentId != null}"
+				 includeInLayout="{component.componentId != null}"
+				 >			
+			<mx:Label text="ComponentId: " fontWeight="bold"/>
+			<mx:Label text="{ComponentListService.findDescription(component.componentId).name}" />
+		</mx:HBox>
+		
+		<mx:HBox minWidth="150">
+			<mx:Label text="Cardinality: " fontWeight="bold"/>
+			<mx:Label text="{component.cardinalityMin+':'+component.cardinalityMax}" />
+		</mx:HBox>
+		
+		<mx:HBox minWidth="120"
+				 visible="{component.cmdComponents.length > 0}"
+				 includeInLayout="{component.cmdComponents.length > 0}">
+			<mx:Label text="Child components: " fontWeight="bold"/>
+			<mx:Label text="{component.cmdComponents.length}" />
+		</mx:HBox>
+
+		<mx:HBox minWidth="120"
+				 visible="{component.cmdElements.length > 0}"
+				 includeInLayout="{component.cmdElements.length > 0}">
+			<mx:Label text="Child elements: " fontWeight="bold"/>
+			<mx:Label text="{component.cmdElements.length}" />
+		</mx:HBox>
+
+		<mx:HBox visible="{ component.attributeList.length > 0}"
+				 includeInLayout="{component.attributeList.length > 0}">
+			<mx:Label text="Attribute count: " fontWeight="bold"/>
+			<mx:Label text="{component.attributeList.length}" />
+		</mx:HBox>
+	</mx:HBox>
+</mx:VBox>
