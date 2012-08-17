@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.AddComponentLabelButton;
 	import clarin.cmdi.componentregistry.common.components.AddElementLabelButton;
+	import clarin.cmdi.componentregistry.common.components.LabelButton;
 	import clarin.cmdi.componentregistry.common.components.RemoveLabelButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
@@ -21,6 +22,7 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.containers.Form;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
+	import mx.containers.HBox;
 	import mx.controls.Alert;
 	import mx.controls.Label;
 	import mx.controls.Spacer;
@@ -162,11 +164,48 @@ package clarin.cmdi.componentregistry.editor {
 			removeAllChildren();
 			checkFirstDefiningComponent(_spec.cmdComponents);
 			handleHeader(_spec);
+			
+			var collapseExpandBox:HBox = new HBox();
+			collapseExpandBox.addChild(createCollapseAllButton());
+			collapseExpandBox.addChild(createExpandAllButton());
+			addChild(collapseExpandBox);
+			
 			handleElements(_firstComponent.cmdElements);
 			addElementAddButton();
 			handleComponents(_firstComponent.cmdComponents);
 			addComponentAddButton();
+						
 			trace("Created editor view in " + (getTimer() - start) + " ms.");
+		}
+		
+		private function createCollapseAllButton():UIComponent{
+			var button:LabelButton = new LabelButton(collapseAll,  "Collapse all");
+			button.setStyle("color","blue");
+			return button;
+		}
+		
+		private function collapseAll(event:Event):void{
+			for(var i:int=0;i<numChildren;i++){
+				var child:Object = getChildAt(i);
+				if(child is ElementEdit || child is ComponentEdit){
+					ItemEdit(child).collapseAll();
+				}
+			}
+		}
+		
+		private function createExpandAllButton():UIComponent{
+			var button:LabelButton = new LabelButton(expandAll,  "Expand all");
+			button.setStyle("color","blue");
+			return button;
+		}		
+		
+		private function expandAll(event:Event):void{
+			for(var i:int=0;i<numChildren;i++){
+				var child:Object = getChildAt(i);
+				if(child is ElementEdit || child is ComponentEdit){
+					ItemEdit(child).expandAll();
+				}
+			}
 		}
 		
 		private function clearEditorHandler(event:Event):void {

@@ -48,7 +48,9 @@
 					visibleContainer.visible = visibleState;
 					visibleContainer.includeInLayout = visibleState;
 					if(visibleState){
-						invisibleContainer.drawFocus(false);
+						if(invisibleContainer != null){
+							invisibleContainer.drawFocus(false);
+						}
 						visibleContainer.drawFocus(true);
 					}
 				}
@@ -57,7 +59,9 @@
 					invisibleContainer.visible = !visibleState;
 					invisibleContainer.includeInLayout = !visibleState;
 					if(!visibleState){
-						visibleContainer.drawFocus(false);
+						if(visibleContainer != null){
+							visibleContainer.drawFocus(false);
+						}
 						invisibleContainer.drawFocus(true);
 					}					
 				}

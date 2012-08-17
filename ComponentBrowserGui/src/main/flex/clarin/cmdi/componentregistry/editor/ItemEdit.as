@@ -48,5 +48,29 @@ package clarin.cmdi.componentregistry.editor
 		protected function addToHideableForm(child:DisplayObject):void{
 			hideableForm.addChild(child);
 		}
+		
+		public function setDetailsVisibleState(visibleState:Boolean):void{
+			showToggleBox.visibleState = visibleState;
+		}
+		
+		
+		
+		protected function setAllVisibleState(visibleState:Boolean):void{
+			setDetailsVisibleState(visibleState);
+			for(var i:int=0;i<numChildren;i++){
+				var child:Object = getChildAt(i);
+				if(child is ElementEdit || child is ComponentEdit){
+					ItemEdit(child).setAllVisibleState(visibleState);
+				}
+			}
+		}
+		
+		public function collapseAll():void{
+			setAllVisibleState(false);
+		}
+		
+		public function expandAll():void{
+			setAllVisibleState(true);
+		}
 	}
 }
