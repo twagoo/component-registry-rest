@@ -165,22 +165,29 @@ package clarin.cmdi.componentregistry.editor {
 			checkFirstDefiningComponent(_spec.cmdComponents);
 			handleHeader(_spec);
 			
-			var collapseExpandBox:HBox = new HBox();
-			collapseExpandBox.addChild(createCollapseAllButton());
-			collapseExpandBox.addChild(createExpandAllButton());
-			addChild(collapseExpandBox);
+			addChild(createCollapseExpandBox());
 			
 			handleElements(_firstComponent.cmdElements);
 			addElementAddButton();
 			handleComponents(_firstComponent.cmdComponents);
 			addComponentAddButton();
-						
+			
+			addChild(createCollapseExpandBox());
+
 			trace("Created editor view in " + (getTimer() - start) + " ms.");
+		}
+		
+		private function createCollapseExpandBox():HBox{
+			var collapseExpandBox:HBox = new HBox();
+			collapseExpandBox.addChild(createCollapseAllButton());
+			collapseExpandBox.addChild(createExpandAllButton());
+			return collapseExpandBox;
 		}
 		
 		private function createCollapseAllButton():UIComponent{
 			var button:LabelButton = new LabelButton(collapseAll,  "Collapse all");
 			button.setStyle("color","blue");
+			button.toolTip = "Collapse all components and elements in this editor";
 			return button;
 		}
 		
@@ -196,6 +203,7 @@ package clarin.cmdi.componentregistry.editor {
 		private function createExpandAllButton():UIComponent{
 			var button:LabelButton = new LabelButton(expandAll,  "Expand all");
 			button.setStyle("color","blue");
+			button.toolTip = "Expand all components and elements in this editor";
 			return button;
 		}		
 		
