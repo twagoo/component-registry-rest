@@ -15,16 +15,16 @@
 	
 	<mx:HBox>	
 		<mx:HBox minWidth="160"
-				 visible="{component.componentId == null}"
-				 includeInLayout="{component.componentId == null}"
+				 visible="{component.componentId == null || component.componentId == ''}"
+				 includeInLayout="{component.componentId == null || component.componentId == ''}"
 				 >			
 			<mx:Label text="Name: " fontWeight="bold"/>
 			<mx:Label text="{component.name}" />
 		</mx:HBox>
 		
 		<mx:HBox minWidth="160"
-				 visible="{component.componentId != null}"
-				 includeInLayout="{component.componentId != null}"
+				 visible="{component.componentId != null &amp;&amp; component.componentId != ''}"
+				 includeInLayout="{component.componentId != null &amp;&amp; component.componentId != ''}"
 				 >			
 			<mx:Label text="ComponentId: " fontWeight="bold"/>
 			<mx:Label text="{ComponentListService.findDescription(component.componentId).name}" />
