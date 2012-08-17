@@ -22,13 +22,11 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.core.UIComponent;
 
 	[Event(name="removeElement", type="flash.events.Event")]
-	public class ElementEdit extends Form {
+	public class ElementEdit extends ItemEdit {
 		public static const REMOVE_ELEMENT_EVENT:String = "removeElement";
 		private var _element:CMDComponentElement;
 		private var _parentComponent:CMDComponent;
 		private var _parent:UIComponent;
-		private var showToggleBox:ShowToggleBox;
-		private var hideableForm:Form;
 
 		public function ElementEdit(element:CMDComponentElement, parent:UIComponent, parentComponent:CMDComponent) {
 			super();
@@ -56,33 +54,30 @@ package clarin.cmdi.componentregistry.editor {
 						
 			addChild(createEditBar());
 			
-			hideableForm = createHidableForm();			
-			showToggleBox.visibleContainer = hideableForm;
-			
-			addChild(hideableForm);
+			addChild(getHideableForm());
 			
 			var summary:ElementSummary = new ElementSummary();
 			summary.element = _element;
 			summary.visible = false;
-			showToggleBox.invisibleContainer = summary;
-
+			
+			setSummaryContainer(summary);
 			addChild(summary);
 			
-			hideableForm.addChild(createNameInput());
-			hideableForm.addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _element.conceptLink, function(val:String):void {
+			addToHideableForm(createNameInput());
+			addToHideableForm(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
 				}));
-			hideableForm.addChild(new FormItemInputLine(LabelConstants.DOCUMENTATION, _element.documentation, function(val:String):void {
+			addToHideableForm(new FormItemInputLine(LabelConstants.DOCUMENTATION, _element.documentation, function(val:String):void {
 					_element.documentation = val;
 				}));
-			hideableForm.addChild(new DisplayPriorityInput(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
+			addToHideableForm(new DisplayPriorityInput(LabelConstants.DISPLAY_PRIORITY, _element.displayPriority, function(val:String):void {
 					_element.displayPriority = val;
 				}));
 			
 			var cardinalityMinInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MIN, _element.cardinalityMin, CardinalityInput.BOUNDED, function(val:String):void {
 				_element.cardinalityMin = val;
 			});
-			hideableForm.addChild(cardinalityMinInput);
+			addToHideableForm(cardinalityMinInput);
 			
 			var cardinalityMaxInput:CardinalityInput = new CardinalityInput(LabelConstants.CARDINALITY_MAX, _element.cardinalityMax, CardinalityInput.UNBOUNDED, function(val:String):void {
 				_element.cardinalityMax = val;
@@ -91,9 +86,9 @@ package clarin.cmdi.componentregistry.editor {
 			BindingUtils.bindSetter(function(value:String):void {
 				cardinalityMaxInput.enabled = _element.multilingual != "true";
 			}, _element, "multilingual");
-			hideableForm.addChild(cardinalityMaxInput);
+			addToHideableForm(cardinalityMaxInput);
 			
-			hideableForm.addChild(AttributeListEdit.createAndAddValueScheme(_element));
+			addToHideableForm(AttributeListEdit.createAndAddValueScheme(_element));
 			var multiLingualCheck:CheckboxInput = new CheckboxInput(LabelConstants.MULTILINGUAL, _element.multilingual == "true", function(val:Boolean):void {
 					_element.multilingual = String(val);
 				});
@@ -107,26 +102,14 @@ package clarin.cmdi.componentregistry.editor {
 					}
 				}, _element, "valueSchemeSimple");
 			
-			hideableForm.addChild(multiLingualCheck);
+			addToHideableForm(multiLingualCheck);
 			handleCMDAttributeList();
-		}
-		
-		private function createHidableForm():Form {
-			var form:Form = new Form();
-			form.styleName = StyleConstants.XMLBROWSER;
-			form.setStyle("paddingTop","0");
-			form.setStyle("paddingBottom","0");
-			form.verticalScrollPolicy = "off";
-			form.horizontalScrollPolicy = "off";
-			return form;
 		}
 
 		private function createEditBar():HBox {
 			var editBar:HBox = new HBox();
 			
-			showToggleBox = new ShowToggleBox();
-			showToggleBox.visibleState = true;
-			editBar.addChild(showToggleBox);
+			editBar.addChild(getShowToggleBox());
 			
 			editBar.addChild(createHeading());
 			var removeButton:Label = new RemoveLabelButton();
@@ -183,7 +166,7 @@ package clarin.cmdi.componentregistry.editor {
 
 		private function handleCMDAttributeList():void {
 			var attributeEdit:Container = new AttributeListEdit(_element, this);
-			hideableForm.addChild(attributeEdit);
+			addToHideableForm(attributeEdit);
 		}
 
 		private function createHeading():FormItem {
