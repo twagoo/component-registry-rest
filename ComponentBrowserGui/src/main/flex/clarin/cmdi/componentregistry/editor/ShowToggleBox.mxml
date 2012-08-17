@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml"
+		borderStyle="solid"
+		initialize="initHandler(event)"
+		click="clickHandler(event)"
+		mouseOver="mouseOverHandler(event)"
+		mouseOut="mouseOutHandler(event)"
+		toolTip="Expand/collapse item details"
+		borderColor="#B7BABC"
+		>
+	<mx:Script>
+		<![CDATA[
+			import mx.binding.utils.BindingUtils;
+			import mx.core.Container;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			public var visibleState:Boolean;
+			[Bindable]
+			public var visibleContainer:Container;
+			[Bindable]
+			public var invisibleContainer:Container;						
+			
+			protected function initHandler(event:FlexEvent):void
+			{
+				BindingUtils.bindSetter(updateState, this, "visibleState");
+			}
+			
+			protected function clickHandler(event:MouseEvent):void
+			{
+				visibleState = !visibleState;
+			}
+			
+			private function updateState(val:Boolean):void{
+				if(visibleContainer != null){
+					visibleContainer.visible = visibleState;
+					visibleContainer.includeInLayout = visibleState;
+				}
+				
+				if(invisibleContainer != null){
+					invisibleContainer.visible = !visibleState;
+					invisibleContainer.includeInLayout = !visibleState;
+				}
+			}
+
+
+			protected function mouseOverHandler(event:MouseEvent):void
+			{
+				event.currentTarget.setStyle("borderColor", "#000000");
+			}
+
+
+			protected function mouseOutHandler(event:MouseEvent):void
+			{
+				event.currentTarget.setStyle("borderColor", "#B7BABC");
+			}
+
+		]]>
+	</mx:Script>
+	
+	<mx:Label textAlign="center" text="{visibleState?'-':'+'}" />
+</mx:Box>
