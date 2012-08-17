@@ -19,7 +19,7 @@
 			[Bindable]
 			public var visibleContainer:Container;
 			[Bindable]
-			public var invisibleContainer:Container;						
+			public var invisibleContainer:Container;	
 			
 			protected function initHandler(event:FlexEvent):void
 			{
@@ -29,30 +29,53 @@
 			protected function clickHandler(event:MouseEvent):void
 			{
 				visibleState = !visibleState;
+				//removeDrawFocus();
+			}
+			
+			protected function mouseOverHandler(event:MouseEvent):void
+			{
+				event.currentTarget.setStyle("borderColor", "#000000");
+				if(visibleContainer != null){
+					visibleContainer.drawFocus(visibleState);
+				}
+				if(invisibleContainer != null){
+					invisibleContainer.drawFocus(!visibleState);
+				}
 			}
 			
 			private function updateState(val:Boolean):void{
 				if(visibleContainer != null){
 					visibleContainer.visible = visibleState;
 					visibleContainer.includeInLayout = visibleState;
+					if(visibleState){
+						invisibleContainer.drawFocus(false);
+						visibleContainer.drawFocus(true);
+					}
 				}
 				
 				if(invisibleContainer != null){
 					invisibleContainer.visible = !visibleState;
 					invisibleContainer.includeInLayout = !visibleState;
+					if(!visibleState){
+						visibleContainer.drawFocus(false);
+						invisibleContainer.drawFocus(true);
+					}					
 				}
 			}
-
-
-			protected function mouseOverHandler(event:MouseEvent):void
-			{
-				event.currentTarget.setStyle("borderColor", "#000000");
-			}
-
 
 			protected function mouseOutHandler(event:MouseEvent):void
 			{
 				event.currentTarget.setStyle("borderColor", "#B7BABC");
+				removeDrawFocus();
+			}
+			
+			private function removeDrawFocus():void{
+				if(visibleContainer != null){
+					visibleContainer.drawFocus(false);
+				}
+				if(invisibleContainer != null){
+					invisibleContainer.drawFocus(false);
+				}
 			}
 
 		]]>
