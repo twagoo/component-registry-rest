@@ -30,23 +30,9 @@
 			<mx:Label text="{ComponentListService.findDescription(component.componentId).name}" />
 		</mx:HBox>
 		
-		<mx:HBox minWidth="150">
+		<mx:HBox minWidth="160">
 			<mx:Label text="Cardinality: " fontWeight="bold"/>
-			<mx:Label text="{component.cardinalityMin+':'+component.cardinalityMax}" />
-		</mx:HBox>
-		
-		<mx:HBox minWidth="120"
-				 visible="{component.cmdComponents.length > 0}"
-				 includeInLayout="{component.cmdComponents.length > 0}">
-			<mx:Label text="Child components: " fontWeight="bold"/>
-			<mx:Label text="{component.cmdComponents.length}" />
-		</mx:HBox>
-
-		<mx:HBox minWidth="120"
-				 visible="{component.cmdElements.length > 0}"
-				 includeInLayout="{component.cmdElements.length > 0}">
-			<mx:Label text="Child elements: " fontWeight="bold"/>
-			<mx:Label text="{component.cmdElements.length}" />
+			<mx:Label text="{component.cardinalityMin+' - '+component.cardinalityMax}" />
 		</mx:HBox>
 
 		<mx:HBox visible="{ component.attributeList.length > 0}"

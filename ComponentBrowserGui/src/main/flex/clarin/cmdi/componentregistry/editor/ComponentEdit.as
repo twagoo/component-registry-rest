@@ -140,7 +140,7 @@ package clarin.cmdi.componentregistry.editor {
 			addComponentLabel.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 				drawFocus(false);
 			});
-			hideableForm.addChild(addComponentLabel);
+			addChild(addComponentLabel);
 		}
 		
 		private function addElementAddButton():void {
@@ -157,7 +157,7 @@ package clarin.cmdi.componentregistry.editor {
 			addElementLabel.addEventListener(MouseEvent.MOUSE_OUT, function(event:MouseEvent):void {
 				drawFocus(false);
 			});
-			hideableForm.addChild(addElementLabel);
+			addChild(addElementLabel);
 		}
 		
 		private function addConceptLink():void {
@@ -278,16 +278,16 @@ package clarin.cmdi.componentregistry.editor {
 			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
 			comp.setStyle("paddingLeft", "50");
 			if (!addComponentLabel) {
-				hideableForm.addChild(comp);
+				addChild(comp);
 			} else {
-				hideableForm.addChildAt(comp, hideableForm.getChildIndex(addComponentLabel));
+				addChildAt(comp, getChildIndex(addComponentLabel));
 			}
 		}
 		
 		private function removeComponent(event:Event):void {
 			var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
 			_component.removeComponent(comp);
-			hideableForm.removeChild(event.currentTarget as DisplayObject);
+			removeChild(event.currentTarget as DisplayObject);
 		}
 		
 		private function handleElements(elements:ArrayCollection):void {
@@ -301,16 +301,16 @@ package clarin.cmdi.componentregistry.editor {
 			elem.setStyle("paddingLeft", "50");
 			elem.addEventListener(ElementEdit.REMOVE_ELEMENT_EVENT, removeElement);
 			if (!addElementLabel) {
-				hideableForm.addChild(elem);
+				addChild(elem);
 			} else {
-				hideableForm.addChildAt(elem, hideableForm.getChildIndex(addElementLabel));
+				addChildAt(elem, getChildIndex(addElementLabel));
 			}
 		}
 		
 		private function removeElement(event:Event):void {
 			var elem:CMDComponentElement = ElementEdit(event.currentTarget).element;
 			_component.removeElement(elem);
-			hideableForm.removeChild(event.currentTarget as DisplayObject);
+			removeChild(event.currentTarget as DisplayObject);
 		}
 		
 		private function createHeading():FormItem {

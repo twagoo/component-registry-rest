@@ -40,9 +40,9 @@
 		
 	<mx:HBox>	
 		-->
-		<mx:HBox minWidth="150">
+		<mx:HBox minWidth="160">
 			<mx:Label text="Cardinality: " fontWeight="bold"/>
-			<mx:Label text="{element.cardinalityMin+':'+element.cardinalityMax}" />
+			<mx:Label text="{element.cardinalityMin+' - '+element.cardinalityMax}" />
 		</mx:HBox>
 	
 		<mx:HBox minWidth="120">
