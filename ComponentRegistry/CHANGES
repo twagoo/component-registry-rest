@@ -10,6 +10,9 @@ Release ComponentRegistry-1.12.0 (?):
 - User gets warned when an action in the component editor leads to discarding pending changes. http://trac.clarin.eu/ticket/202
 - If string element is set to multilingual, max occurences field gets disabled. http://trac.clarin.eu/ticket/208
 - Added 'close' link to user settings page. http://trac.clarin.eu/ticket/156
+- Removed 'unbounded' option from minimal occurrences drop-down in editor. http://trac.clarin.eu/ticket/210
+- Made elements and components in component editor collapsable. http://trac.clarin.eu/ticket/217
+- Removed top-level tabs in the Flex UI, added buttons to browser, editor and import for navigation. http://trac.clarin.eu/ticket/218
 
 Release ComponentRegistry-1.11.1 (10 april 2012):
 - Fixed caching of w3c xml.xsd schema in validator
