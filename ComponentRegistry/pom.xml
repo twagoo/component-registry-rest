@@ -34,11 +34,11 @@
 	    <version>4.4</version>
 	    <scope>test</scope>
 	</dependency>
-	<dependency>
-	    <groupId>net.sf.saxon</groupId>
-	    <artifactId>saxon-he</artifactId>
-	    <version>9.4</version>
-	</dependency>
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <version>9.4</version>
+        </dependency>                                                  
 	<dependency>
 	    <groupId>javax.servlet</groupId>
 	    <artifactId>servlet-api</artifactId>
@@ -382,22 +382,6 @@
     
     <repositories>
 	<repository>
-	    <id>maven2-repository.dev.java.net</id>
-	    <name>Java.net Maven 2 Repository</name>
-	    <url>http://download.java.net/maven/2</url>
-	</repository>
-	<repository>
-	    <id>maven-glassfish-repository.dev.java.net</id>
-	    <name>Java.net Maven Glassfish Repository</name>
-	    <url>http://download.java.net/maven/glassfish</url>
-	</repository>
-	<repository>
-	    <id>maven-repository.dev.java.net</id>
-	    <name>Java.net Maven 1 Repository (legacy)</name>
-	    <url>http://download.java.net/maven/1</url>
-	    <layout>legacy</layout>
-	</repository>
-	<repository>
 	    <id>cmdi.clarin.repository</id>
 	    <name>Clarin Repository</name>
 	    <url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url>
@@ -407,18 +391,4 @@
 	    <url>https://oss.sonatype.org/content/groups/public</url>
 	</repository>
     </repositories>
-    <pluginRepositories>
-	<pluginRepository>
-	    <id>maven2-repository.dev.java.net</id>
-	    <name>Java.net Maven 2 Repository</name>
-	    <url>http://download.java.net/maven/2</url>
-	</pluginRepository>
-	<pluginRepository>
-	    <id>maven-repository.dev.java.net</id>
-	    <name>Java.net Maven 1 Repository (legacy)</name>
-	    <url>http://download.java.net/maven/1</url>
-	    <layout>legacy</layout>
-	</pluginRepository>
-    </pluginRepositories>
-
 </project>
