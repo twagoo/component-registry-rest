@@ -71,7 +71,9 @@
 					var flexSpyButton:Button = new Button();
 					flexSpyButton.label="FlexSpy";
 					flexSpyButton.addEventListener(MouseEvent.CLICK,showFlexSpy);
-					topBar.addChild(flexSpyButton);
+					flexSpyButton.setStyle("right","0");
+					flexSpyButton.setStyle("top","0");
+					addChild(flexSpyButton);
 				}
 			}
 			
@@ -85,21 +87,22 @@
 	<mx:Panel id="appPanel" width="100%"
 			  height="100%"
 			  layout="absolute"
-			  title="Clarin Component Browser"
+			  title="Clarin Component Registry"
 			  x="0"
 			  y="0">			  
-
-		<mx:VBox height="100%"
-				 width="100%">
-			<mx:HBox borderStyle="none" id="topBar"
-					 width="100%">
-				<mx:ToggleButtonBar id="toggleBar"
-									dataProvider="{viewStack}"/>
-				<mx:Spacer width="90%"/>
-				<mx:Label text="User: {Credentials.instance.userName}"/>
-				<common:LoginLabelButton id="login" includeInLayout="{!Credentials.instance.isLoggedIn()}" visible="{!Credentials.instance.isLoggedIn()}" />
-				<common:UserSettingsLabelButton id="userSettings" includeInLayout="{Credentials.instance.isLoggedIn()}" visible="{Credentials.instance.isLoggedIn()}"/>
+		
+		<mx:VBox height="100%" width="100%">			
+			
+			<mx:HBox width="100%" id="topBar" styleName="topBar" verticalAlign="middle">
+				<mx:Label width="20%" styleName="sectionTitle" paddingLeft="5" text="{viewStack.selectedChild.label}" />
+			
+				<mx:HBox width="80%" horizontalAlign="right" paddingRight="5">					
+					<mx:Label text="User: {Credentials.instance.userName}"/>
+					<common:LoginLabelButton id="login" includeInLayout="{!Credentials.instance.isLoggedIn()}" visible="{!Credentials.instance.isLoggedIn()}" />
+					<common:UserSettingsLabelButton id="userSettings" includeInLayout="{Credentials.instance.isLoggedIn()}" visible="{Credentials.instance.isLoggedIn()}"/>
+				</mx:HBox>
 			</mx:HBox>
+			
 			<common:RegistryViewStack id="viewStack"
 									  borderStyle="none"
 									  height="100%"

@@ -5,9 +5,9 @@
 		   xmlns:editor="clarin.cmdi.componentregistry.editor.*"
 		   width="100%"
 		   height="100%"
-		   label="Editor"
+		   label="Component Editor"
 		   creationComplete="init()"
-		   implements="clarin.cmdi.componentregistry.common.components.RegistryView"
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView" xmlns:components="clarin.cmdi.componentregistry.common.components.*"
 		   >
 	
 	<mx:Script source="EditorAS.as"/>
@@ -20,7 +20,9 @@
 									height="25"
 									saveClick="saveSpec(true, UploadService.UPDATE)"
 									saveAsNewClick="saveSpec(true, UploadService.NEW)"
-									publishClick="publishSpec()"/>
+									publishClick="publishSpec()"
+									cancelClick="cancel()"
+									/>
 			<mx:Text id="errorMessageField"
 					 text="{uploadService.message}"
 					 visible='{errorMessageField.text != ""}'
@@ -45,6 +47,8 @@
 				<mx:Label text="Drag existing components onto edit canvas"/>
 				<browser:BrowserOverviewList id="componentsPaletteOverview"
 											 width="100%" height="90%"
+											 buttonsEnabled="false"
+											 spaceSwitchEnabled="true"
 											 browserDataProvider="{componentsSrv.itemDescriptions}"
 											 browserColumns="{browserColumns.getComponentColumns()}"
 											 creationComplete="initPaletteOverview();"/>

@@ -1,14 +1,15 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.ShowInfoPopUp;
+	import clarin.cmdi.componentregistry.services.Config;
 	import clarin.cmdi.componentregistry.services.DeleteService;
 	import clarin.cmdi.componentregistry.services.SaveItemDialog;
-
+	
 	import flash.events.ContextMenuEvent;
 	import flash.geom.Point;
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
-
+	
 	import mx.controls.Alert;
 	import mx.controls.DataGrid;
 	import mx.events.CloseEvent;
@@ -30,12 +31,18 @@ package clarin.cmdi.componentregistry.common.components {
 
 		private var saveItemDialog:SaveItemDialog = new SaveItemDialog();
 		private var isComponent:Boolean = false;
+		
+		private var editMenuItem:ContextMenuItem;
+		private var editAsNewMenuItem:ContextMenuItem;
 
 		public function BrowseContextMenu(isComponent:Boolean = false) {
 			this.isComponent = isComponent
 			cm = new ContextMenu();
 			cm.hideBuiltInItems();
 			cm.customItems = createMenuItems();
+			setItemStates();
+			
+			Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setItemStates);
 		}
 
 		private function createMenuItems():Array {
@@ -51,21 +58,29 @@ package clarin.cmdi.componentregistry.common.components {
 				cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, saveAsXsd);
 				result.push(cmi);
 			}
-			cmi = new ContextMenuItem("Edit Item...");
-			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editItem);
-			result.push(cmi);
+			editMenuItem = new ContextMenuItem("Edit Item...");
+			editMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editItem);
+			result.push(editMenuItem);
+			
+			editAsNewMenuItem = new ContextMenuItem("Edit Item as New...");
+			editAsNewMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, editItem);
+			result.push(editAsNewMenuItem);
+			
 			cmi = new ContextMenuItem("Delete Item...", true);
 			cmi.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, handleDelete);
 			result.push(cmi);
 
 			return result;
 		}
+		
+		private function setItemStates(event:Event = null):void {
+			editMenuItem.visible = Config.instance.userSpace;
+			editAsNewMenuItem.visible = !Config.instance.userSpace;
+		}
 
 		public function set dataGrid(dataGrid:DataGrid):void {
 			_dataGrid = dataGrid;
 		}
-
-
 
 		private function showInfo(event:ContextMenuEvent):void {
 			var item:ItemDescription = _dataGrid.selectedItem as ItemDescription;

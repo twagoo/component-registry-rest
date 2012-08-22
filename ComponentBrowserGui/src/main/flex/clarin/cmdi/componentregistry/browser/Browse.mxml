@@ -5,8 +5,9 @@
 		   creationComplete="creationComplete()"
 		   width="100%"
 		   height="100%"
-		   label="Browser"
-		   implements="clarin.cmdi.componentregistry.common.components.RegistryView">
+		   label="Component Browser"
+		   implements="clarin.cmdi.componentregistry.common.components.RegistryView" xmlns:components="clarin.cmdi.componentregistry.common.components.*"
+		   >
 	<mx:Metadata>
 		[Event(name="startItemLoaded",type="flash.events.Event")]
 	</mx:Metadata>
@@ -160,11 +161,6 @@
 				RegistryViewStack(this.parent).switchToEditor(null);
 			}
 			
-			private static const USERSPACE_LABEL:String = "Work space";
-			private static const PUBLICSPACE_LABEL:String = "Public space";
-			[Bindable]
-			public var spaces:ArrayCollection = new ArrayCollection([{label: PUBLICSPACE_LABEL, data: 1}, {label: USERSPACE_LABEL, data: 2}]);
-			
 			private function setUserSpace(event:Event = null):void {
 				if (Config.instance.userSpace) {
 					userSpaceCB.selectedIndex = 1;
@@ -172,42 +168,33 @@
 					userSpaceCB.selectedIndex = 0;
 				}
 			}
-			
-			private function userSpaceCloseHandler(event:Event):void {
-				if (Credentials.instance.isLoggedIn()) {
-					Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
-				} else if (userSpaceCB.selectedIndex != 0) {
-					userSpaceCB.selectedIndex = 0;
-					new Login().show(this, Config.VIEW_BROWSE, Config.SPACE_USER, null);
-				}
-				
-			}
 		]]>
 	</mx:Script>
 	
 	<browser:BrowserColumns id="browserColumns"/>
 	
-	<mx:Panel layout="absolute" 
-			  width="100%" 
+	<mx:Panel width="100%" 
 			  height="100%"
 			  headerHeight="0"
 			  borderThicknessTop="0"
 			  borderThicknessRight="0"
 			  borderThicknessBottom="0"
 			  borderThicknessLeft="0"
+			  layout="absolute"
+			  horizontalAlign="center"
 			  >
-			
-		<mx:ComboBox right="0" 
-					 top="0"				
-					 id="userSpaceCB"
-					 dataProvider="{spaces}"
-					 width="110"
-					 close="userSpaceCloseHandler(event);"/>
+		
+		
+		<mx:Box paddingTop="5" paddingLeft="5"
+				top="-5"
+				horizontalCenter="-110"
+				>
+			<components:SpaceSwitch id="userSpaceCB" width="110" />
+		</mx:Box>
 		
 		<mx:VBox left="0"
 				 top="5"
 				 borderStyle="none"
-				 horizontalAlign="center"
 				 height="100%"
 				 width="100%">
 			

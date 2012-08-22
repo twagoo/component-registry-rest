@@ -1,6 +1,7 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
 import clarin.cmdi.componentregistry.common.ItemDescription;
+import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
@@ -38,6 +39,8 @@ private var browserColumns:BrowserColumns = new BrowserColumns();
 [Bindable]
 private var uploadService:UploadService = new UploadService();
 
+[Bindable]
+private var viewStack:RegistryViewStack;
 
 public function init():void {
 	cmdSpec  = CMDSpec.createEmptyProfile();
@@ -46,6 +49,7 @@ public function init():void {
 	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 	uploadService.init(uploadProgress);
 	Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
+	viewStack = this.parent as RegistryViewStack;
 }
 
 private function toggleUserSpace(event:Event):void {
@@ -127,6 +131,19 @@ private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 		}
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
+	}
+}
+
+private function cancel():void {
+	if(xmlEditor.specHasChanges){
+	Alert.show("There are pending changes. Cancelling will discard these. Are you sure you want to proceed?", "Discard changes?", Alert.YES|Alert.NO, null, 
+		function (eventObj:CloseEvent):void{
+			if(eventObj.detail == Alert.YES){
+				viewStack.switchToBrowse(itemDescription);				
+			}
+		});
+	} else {
+		viewStack.switchToBrowse(itemDescription);
 	}
 }
 

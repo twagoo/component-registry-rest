@@ -104,7 +104,9 @@
 			<mx:Spacer width="100%"/>
 			<mx:Button id="okBtn"
 					   label="OK"
-					   click="handleOkClick()"/>
+					   click="handleOkClick()"
+					   enabled="{dataGrid.selectedItem != null}"
+					   />
 			<mx:Button label="Cancel"
 					   click="cleanUp()"/>
 		</mx:HBox>
