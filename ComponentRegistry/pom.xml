@@ -1,7 +1,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
 	<groupId>clarin.cmdi</groupId>
@@ -14,12 +14,12 @@
     <version>${ComponentRegistry.version}</version>
     <name>ComponentRegistry</name>
     <description>
-        ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
-        The goal of the ComponentRegistry will be to register and make searchable Metadata Components and Profiles. 
+	ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
+	The goal of the ComponentRegistry will be to register and make searchable Metadata Components and Profiles. 
     </description>
     <ciManagement>
-        <system>hudson</system>
-        <url>http://lux16.mpi.nl/jenkins/job/ComponentRegistry/</url>
+	<system>hudson</system>
+	<url>http://lux16.mpi.nl/jenkins/job/ComponentRegistry/</url>
     </ciManagement>
     <scm>
 	<connection>scm:svn:http://svn.clarin.eu/ComponentRegistry/trunk/ComponentRegistry</connection>
@@ -34,11 +34,11 @@
 	    <version>4.4</version>
 	    <scope>test</scope>
 	</dependency>
-        <dependency>
-            <groupId>net.sf.saxon</groupId>
-            <artifactId>Saxon-HE</artifactId>
-            <version>9.4</version>
-        </dependency>                                                  
+	<dependency>
+	    <groupId>net.sf.saxon</groupId>
+	    <artifactId>Saxon-HE</artifactId>
+	    <version>9.4</version>
+	</dependency>                                                  
 	<dependency>
 	    <groupId>javax.servlet</groupId>
 	    <artifactId>servlet-api</artifactId>
@@ -100,10 +100,10 @@
 	    <artifactId>jersey-bundle</artifactId>
 	    <version>1.12</version>
 	    <exclusions>
-				<!--
-          Jersey has dependencies with different group ids therefore maven cannot resolve the conflict and gives me both
-          jars (two of stax and two of jaxb-impl). Excluding them manually to overcome the problem
-        -->
+		<!--
+    Jersey has dependencies with different group ids therefore maven cannot resolve the conflict and gives me both
+    jars (two of stax and two of jaxb-impl). Excluding them manually to overcome the problem
+  -->
 		<exclusion>
 		    <groupId>stax</groupId>
 		    <artifactId>stax-api</artifactId>
@@ -195,11 +195,11 @@
     <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<packaging>war</packaging>
-		<!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
+	<!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
 	<serviceRootUrl>http://localhost:8080/${pom.artifactId}</serviceRootUrl>
-		<!-- Will be inserted in context.xml -->
+	<!-- Will be inserted in context.xml -->
 	<webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
-		<!-- non-shib web.xml -->
+	<!-- non-shib web.xml -->
 	<isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
 	<ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
 	<flexDebug>0</flexDebug>
@@ -210,26 +210,26 @@
 	    <id>lux16</id>
 	    <properties>
 		<serviceRootUrl>http://lux16.mpi.nl/ds/ComponentRegistry</serviceRootUrl>
-				<!-- Will be inserted in context.xml -->
+		<!-- Will be inserted in context.xml -->
 		<shibLI>http://lux16.mpi.nl/Shibboleth.sso/DS</shibLI>
-				<!-- Shibboleth login URI for SHHAA -->
+		<!-- Shibboleth login URI for SHHAA -->
 		<shibLO>http://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
-				<!-- Shibboleth logout URI for SHHAA -->
+		<!-- Shibboleth logout URI for SHHAA -->
 		<webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
-				<!-- web.xml for shibboleth authentication -->
+		<!-- web.xml for shibboleth authentication -->
 	    </properties>
 	</profile>
 	<profile>
 	    <id>clarin</id>
 	    <properties>
 		<serviceRootUrl>http://catalog.clarin.eu/ds/ComponentRegistry</serviceRootUrl>
-				<!-- Will be inserted in context.xml -->
+		<!-- Will be inserted in context.xml -->
 		<shibLI>https://catalog.clarin.eu/Shibboleth.sso/DiscoJuice</shibLI>
-				<!-- Shibboleth login URI for SHHAA -->
+		<!-- Shibboleth login URI for SHHAA -->
 		<shibLO>https://catalog.clarin.eu/Shibboleth.sso/Logout</shibLO>
-				<!-- Shibboleth logout URI for SHHAA -->
+		<!-- Shibboleth logout URI for SHHAA -->
 		<webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
-				<!-- web.xml for shibboleth authentication -->
+		<!-- web.xml for shibboleth authentication -->
 	    </properties>
 	</profile>
     </profiles>
@@ -241,7 +241,11 @@
 	<resources>
 	    <resource>
 		<filtering>false</filtering>
-		<directory>src/generated/jaxb</directory>
+		<directory>src/generated/jaxb/components</directory>
+	    </resource>
+	    <resource>
+		<filtering>false</filtering>
+		<directory>src/generated/jaxb/rss</directory>
 	    </resource>
 	    <resource>
 		<filtering>true</filtering>
@@ -300,24 +304,42 @@
 		<artifactId>maven-jaxb2-plugin</artifactId>
 		<executions>
 		    <execution>
+			<id>jaxb-components</id>
 			<goals>
 			    <goal>generate</goal>
 			</goals>
+			<configuration>
+			    <schemaDirectory>src/main/binding/components</schemaDirectory>
+			    <schemaIncludes>
+				<include>general-component-schema.xsd</include>
+			    </schemaIncludes>
+			    <bindingDirectory>src/main/binding/components</bindingDirectory>
+			    <extension>true</extension>
+			    <generateDirectory>${basedir}/src/generated/jaxb/components</generateDirectory>
+			    <generatePackage>clarin.cmdi.componentregistry.components</generatePackage>
+			    <catalog>src/main/resources/catalog.cat</catalog>
+			    <catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>
+			</configuration>
+		    </execution>
+		    <execution>
+			<id>jaxb-rrs</id>
+			<goals>
+			    <goal>generate</goal>
+			</goals>
+			<configuration>
+			    <schemaDirectory>src/main/binding/rss</schemaDirectory>
+			    <schemaIncludes>
+				<include>rss-2_0.xsd</include>
+			    </schemaIncludes>
+			    <bindingDirectory>src/main/binding/rss</bindingDirectory>
+			    <extension>true</extension>
+			    <generateDirectory>${basedir}/src/generated/jaxb/rss</generateDirectory>
+			    <generatePackage>clarin.cmdi.componentregistry.rss</generatePackage>
+			    <catalog>src/main/resources/catalog.cat</catalog>
+			    <catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>
+			</configuration>
 		    </execution>
 		</executions>
-		<configuration>
-					<!-- assuming claring metadata project is checked out in same folder as this project -->
-		    <schemaDirectory>src/main/binding</schemaDirectory>
-		    <schemaIncludes>
-			<include>general-component-schema.xsd</include>
-		    </schemaIncludes>
-		    <bindingDirectory>src/main/binding</bindingDirectory>
-		    <extension>true</extension>
-		    <generateDirectory>${basedir}/src/generated/jaxb</generateDirectory>
-		    <generatePackage>clarin.cmdi.componentregistry.components</generatePackage>
-		    <catalog>src/main/resources/catalog.cat</catalog>
-		    <catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>
-		</configuration>
 	    </plugin>
 	    <plugin>
 		<groupId>org.apache.maven.plugins</groupId>
