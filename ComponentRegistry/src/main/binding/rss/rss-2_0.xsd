@@ -65,7 +65,6 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
       <xs:documentation>An item may represent a "story" -- much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. An item may also be complete in itself, if so, the description contains the text (entity-encoded HTML is allowed), and the link and title may be omitted.</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:choice maxOccurs="unbounded">
         <xs:element name="title" type="xs:string" minOccurs="0">
           <xs:annotation>
             <xs:documentation>The title of the item.</xs:documentation>
@@ -121,13 +120,12 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
             <xs:documentation>Extensibility element.</xs:documentation>
           </xs:annotation>
         </xs:any>
-      </xs:choice>
+      
     </xs:sequence>
     <xs:anyAttribute namespace="##any"/>
   </xs:complexType>
   <xs:complexType name="RssChannel">
     <xs:sequence>
-      <xs:choice maxOccurs="unbounded">
         <xs:element name="title" type="xs:string">
           <xs:annotation>
             <xs:documentation>The name of the channel. It's how people refer to your service. If you have an HTML website that contains the same information as your RSS file, the title of your channel should be the same as the title of your website.</xs:documentation>
@@ -223,12 +221,7 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
             <xs:documentation>A hint for aggregators telling them which days they can skip.</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded">
-          <xs:annotation>
-            <xs:documentation>Extensibility element.</xs:documentation>
-          </xs:annotation>
-        </xs:any>
-      </xs:choice>
+      
       <xs:element name="item" type="RssItem" minOccurs="1" maxOccurs="unbounded">
          <!-- 
            HACK: According to the RSS 2.0 spec, it should strictly be possible to have zero item elements, 
@@ -236,11 +229,6 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
                  so for the moment we undid bug-fix 10231 and set minOccurs=1 to work around this problem. 
          -->
       </xs:element>
-      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>Extensibility element.</xs:documentation>
-        </xs:annotation>
-      </xs:any>
     </xs:sequence>
     <xs:anyAttribute namespace="##any"/>
   </xs:complexType>
