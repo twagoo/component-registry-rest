@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml"
+				 dataProvider="{spaces}"
+				 selectedIndex="{Config.instance.userSpace ? 1 : 0}"
+				 width="110"
+				 close="userSpaceCloseHandler(event);"
+				 >
+	
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.common.Credentials;
+			import clarin.cmdi.componentregistry.common.Login;
+			import clarin.cmdi.componentregistry.services.Config;
+			
+			import mx.collections.ArrayCollection;
+			
+			private static const USERSPACE_LABEL:String = "Work space";
+			private static const PUBLICSPACE_LABEL:String = "Public space";
+			[Bindable]
+			public static var spaces:ArrayCollection = new ArrayCollection([{label: PUBLICSPACE_LABEL, data: 1}, {label: USERSPACE_LABEL, data: 2}]);
+			
+			private function userSpaceCloseHandler(event:Event):void {
+				if (Credentials.instance.isLoggedIn()) {
+					Config.instance.userSpace = ComboBox(event.target).selectedItem.data == 2;
+				} else if (selectedIndex != 0) {
+					selectedIndex = 0;
+					new Login().show(this.parent.parent, Config.VIEW_BROWSE, Config.SPACE_USER, null);
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:ComboBox>
