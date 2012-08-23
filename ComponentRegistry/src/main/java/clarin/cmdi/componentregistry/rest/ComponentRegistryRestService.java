@@ -9,6 +9,7 @@ import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
@@ -792,12 +793,26 @@ public class ComponentRegistryRestService {
 	    response.setIsInUserSpace(userspace);
 	    validate(response, descriptionValidator, validator);
 	    if (response.getErrors().isEmpty()) {
-		CMDComponentSpec spec = validator.getCMDComponentSpec();
+		
+                CMDComponentSpec spec = validator.getCMDComponentSpec();
+                
+                // Olha was here: remove filename from spec before it gets extended!!! recursion over all the components
+                List<CMDComponentType> listofcomponents=spec.getCMDComponent();
+                for (CMDComponentType currentcomponent : listofcomponents) {
+                    currentcomponent.setFilename(null);
+                }
+                
 		try {
+                       
+                    
 		    // Expand to check for recursion
 		    registry.getExpander().expandNestedComponent(spec.getCMDComponent(), desc.getId());
 
+                    
+                    
 		    // Add profile
+                    
+                    
 		    int returnCode = action.execute(desc, spec, response, registry);
 		    if (returnCode == 0) {
 			response.setRegistered(true);
