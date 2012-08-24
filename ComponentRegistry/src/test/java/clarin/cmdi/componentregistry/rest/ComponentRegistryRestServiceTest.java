@@ -1140,4 +1140,6 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals(1, response.getErrors().size());
 	assertEquals(MDValidator.MISMATCH_ERROR, response.getErrors().get(0));
     }
+    
+    
 }

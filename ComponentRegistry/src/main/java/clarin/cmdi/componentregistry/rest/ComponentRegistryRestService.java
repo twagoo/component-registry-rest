@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.CMDComponentTypeWrapper;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -796,11 +797,18 @@ public class ComponentRegistryRestService {
 		
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
                 
-                // Olha was here: remove filename from spec before it gets extended!!! recursion over all the components
+                // Olha: removing filename from spec before it gets extended!!! recursion over all the components
                 List<CMDComponentType> listofcomponents=spec.getCMDComponent();
+                CMDComponentTypeWrapper setnulls= new CMDComponentTypeWrapper();
+                
                 for (CMDComponentType currentcomponent : listofcomponents) {
-                    currentcomponent.setFilename(null);
-                }
+                  setnulls.setFileNamesToNull(currentcomponent);
+                  } 
+               
+                //for (CMDComponentType currentcomponent : listofcomponents) {
+                  //((CMDComponentTypeWrapper) currentcomponent). setFileNamesToNull();
+                    
+                //} 
                 
 		try {
                        
@@ -935,4 +943,6 @@ public class ComponentRegistryRestService {
     public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
 	this.componentRegistryFactory = componentRegistryFactory;
     }
+    
+    
 }
