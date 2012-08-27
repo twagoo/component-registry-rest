@@ -798,17 +798,9 @@ public class ComponentRegistryRestService {
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
                 
                 // Olha: removing filename from spec before it gets extended!!! recursion over all the components
-                List<CMDComponentType> listofcomponents=spec.getCMDComponent();
-                CMDComponentTypeWrapper setnulls= new CMDComponentTypeWrapper();
-                
-                for (CMDComponentType currentcomponent : listofcomponents) {
-                  setnulls.setFileNamesToNull(currentcomponent);
-                  } 
+                CMDComponentTypeWrapper setnull = new CMDComponentTypeWrapper(spec);
                
-                //for (CMDComponentType currentcomponent : listofcomponents) {
-                  //((CMDComponentTypeWrapper) currentcomponent). setFileNamesToNull();
-                    
-                //} 
+               
                 
 		try {
                        

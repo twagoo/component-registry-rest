@@ -4,6 +4,7 @@
  */
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import java.util.List;
 
@@ -11,28 +12,30 @@ import java.util.List;
  *
  * @author olhsha
  */
-public class CMDComponentTypeWrapper { // extending CMDComponentType does not work :( does not want to cast
+public class CMDComponentTypeWrapper { // extending CMDComponentType does not work :( does not want to downcast
     
-     /**
-     * Olha: null fileName of *this*, also in children
-     *
-     */
+    CMDComponentType component;
+    List<CMDComponentType> listofcomponents;
     
-    // may be do this method static? 
-    public void setFileNamesToNull(CMDComponentType component){ 
-    //public void setFileNamesToNull(){    
+    public CMDComponentTypeWrapper(CMDComponentType newcomponent){
+        component = newcomponent;
+        listofcomponents = newcomponent.getCMDComponent();
+    }
+    
+    
+    public CMDComponentTypeWrapper(CMDComponentSpec newspec){
+        component = null;
+        listofcomponents = newspec.getCMDComponent();
+    }
+    
+    
+    public void setFileNamesToNull(){ 
+   
+        if (component != null) {component.setFilename(null);}
         
-        // null the filename of component
-        component.setFilename(null);
-        //filename=null;
-                
-        // and now null filenames in all children's components
-        List<CMDComponentType> cildrencomponents = component.getCMDComponent();
-        CMDComponentTypeWrapper childwrapper = new CMDComponentTypeWrapper();
-        for (CMDComponentType currentcomponent : cildrencomponents) {
-        //for (CMDComponentType currentcomponent : cmdComponent) {
-                childwrapper.setFileNamesToNull(currentcomponent);
-                //((CMDComponentTypeWrapper) currentcomponent).setFileNamesToNull();
+        for (CMDComponentType currentcomponent : listofcomponents) { 
+                CMDComponentTypeWrapper currentwrapper = new CMDComponentTypeWrapper(currentcomponent);
+                currentwrapper.setFileNamesToNull();
                 } 
     
     }
