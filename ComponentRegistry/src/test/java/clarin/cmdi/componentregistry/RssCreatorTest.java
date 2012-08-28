@@ -4,10 +4,14 @@
  */
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import clarin.cmdi.componentregistry.rss.RssItem;
+import java.io.IOException;
+import javax.xml.bind.JAXBException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -129,4 +133,17 @@ public class RssCreatorTest {
         assertEqualDescriptions(cdesc, result);
        
     }
+    
+    
+    @Test
+      public  void fileLargeProfileTestToRssItem() throws IOException, JAXBException {
+          
+          String largeprofilestring = RegistryTestHelper.getLargeProfileContent(); // reading from the file
+          CMDComponentSpec compspec=RegistryTestHelper.getComponentFromString(largeprofilestring); // calling unmarchaller
+          
+          
+      // do not know how to get AbstractDescription from this file    
+          
+      }
+      
 }
