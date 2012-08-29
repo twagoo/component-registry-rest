@@ -33,10 +33,23 @@ public class CMDComponentTypeWrapper { // extending CMDComponentType does not wo
    
         if (component != null) {component.setFilename(null);}
         
-        for (CMDComponentType currentcomponent : listofcomponents) { 
-                CMDComponentTypeWrapper currentwrapper = new CMDComponentTypeWrapper(currentcomponent);
-                currentwrapper.setFileNamesToNull();
+        setFileNamesFromListToNull(listofcomponents);
+    
+    }
+    
+    
+    private void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents){ 
+     
+        for (CMDComponentType currentcomponent : listofcomponents) {
+                setFileNamesToNullCurrent(currentcomponent);
                 } 
+    
+    }
+    
+    private void setFileNamesToNullCurrent(CMDComponentType currentcomponent){ 
+     
+      currentcomponent.setFilename(null);
+      setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     
     }
     

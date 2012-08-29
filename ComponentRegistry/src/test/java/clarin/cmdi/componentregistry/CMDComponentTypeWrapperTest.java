@@ -255,8 +255,6 @@ public class CMDComponentTypeWrapperTest {
           CMDComponentSpec compspec=makeTestSpecFromLargeProfile();
           writeSpecToFile(compspec, "src/test/resources/xml/largeProfileDummyFilenames.xml");
           
-          
-          
       }
         
       
@@ -279,6 +277,9 @@ public class CMDComponentTypeWrapperTest {
          wrapper.setFileNamesToNull();
          
          checkNullnessOfFilenamesInListOfComponents(newcompspec.getCMDComponent());
+         writeSpecToFile(newcompspec, "src/test/resources/xml/largeProfileUndummied.xml");
+         
+         
       }
       
       
