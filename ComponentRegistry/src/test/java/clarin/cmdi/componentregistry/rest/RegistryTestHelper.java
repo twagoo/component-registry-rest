@@ -166,7 +166,28 @@ public final class RegistryTestHelper {
 	    largeProfileStream.close();
 	}
     }
+    
+    
+    // Olha was here
+    // a method similar to getLargeProfileContent(), but allowing to get profile from any fil, not only largeProfile.xml 
+    public static String getProfileContentFromFile(String filename) throws IOException {
+	InputStream largeProfileStream = RegistryTestHelper.class.getResourceAsStream(filename);
+	try {
+	    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
+	    StringBuilder profileStringBuilder = new StringBuilder();
+	    String line;
+	    while (null != (line = bufferedReader.readLine())) {
+		profileStringBuilder.append(line);
+	    }
+	    return profileStringBuilder.toString();
+	} finally {
+	    largeProfileStream.close();
+	}
+    }
 
+    //////////////////////
+    
+    
     public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
 	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentContent(contentString), MDMarshaller.getCMDComponentSchema());
     }
