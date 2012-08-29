@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rss>
+    <channel>
+        <item>
+            <title>name1dum</title>
+            <description>description1dum</description>
+            <link>href1dum</link>
+            <author>God</author>
+            <pubDate>2012-08-29T14:44:09+00:00</pubDate>
+        </item>
+        <item>
+            <title>name2dum</title>
+            <description>description2dum</description>
+            <link>href2dum</link>
+            <author>Allah</author>
+            <pubDate>2012-08-29T14:44:10+00:00</pubDate>
+        </item>
+    </channel>
+</rss>

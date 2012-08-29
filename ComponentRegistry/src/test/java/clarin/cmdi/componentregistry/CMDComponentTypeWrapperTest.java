@@ -227,7 +227,7 @@ public class CMDComponentTypeWrapperTest {
           
       }
       
-       //writing profile file compspec  into the file filename
+       //writing compspec  into the file filename
       private void writeSpecToFile(CMDComponentSpec compspec, String filename) throws IOException, JAXBException {
           
         String  os = RegistryTestHelper.getXml(compspec);
