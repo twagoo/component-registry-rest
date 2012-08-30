@@ -1,4 +1,4 @@
-,<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <rss>
     <channel>
         <item>
@@ -6,14 +6,14 @@
             <description>description1dum</description>
             <link>href1dum</link>
             <author>God</author>
-            <pubDate>2012-08-29T15:05:08+00:00</pubDate>
+            <pubDate>2012-08-29T15:12:50+00:00</pubDate>
         </item>
         <item>
             <title>name2dum</title>
             <description>description2dum</description>
             <link>href2dum</link>
             <author>Allah</author>
-            <pubDate>2012-08-29T15:05:08+00:00</pubDate>
+            <pubDate>2012-08-29T15:12:50+00:00</pubDate>
         </item>
     </channel>
 </rss>

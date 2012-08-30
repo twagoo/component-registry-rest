@@ -213,9 +213,9 @@ public class CMDComponentTypeWrapperTest {
     }
     
       // adds dummy filenames to the content of largeProfile.XML  
-      private  CMDComponentSpec makeTestSpecFromLargeProfile() throws IOException, JAXBException {
+      private  CMDComponentSpec makeTestFromFile(String filename) throws IOException, JAXBException {
           
-          String largeprofilestring = RegistryTestHelper.getLargeProfileContent(); // reading from the file
+          String largeprofilestring = RegistryTestHelper.getProfileContentFromFile(filename);
           CMDComponentSpec compspec=RegistryTestHelper.getComponentFromString(largeprofilestring); // calling unmarchaller
           
           List<CMDComponentType> listofcomponents = compspec.getCMDComponent();
@@ -250,11 +250,10 @@ public class CMDComponentTypeWrapperTest {
       
       
       // creating the profile with filenames filled by "Dummy" and writing it into the file 
-      public void writeDummiedXML() throws IOException, JAXBException{
+      public void writeDummiedXML(String filenamein, String filenameout) throws IOException, JAXBException{
           
-          CMDComponentSpec compspec=makeTestSpecFromLargeProfile();
-          writeSpecToFile(compspec, "src/test/resources/xml/largeProfileDummyFilenames.xml");
-          
+          CMDComponentSpec compspec=makeTestFromFile(filenamein);
+          writeSpecToFile(compspec, filenameout);
       }
         
       
@@ -264,9 +263,10 @@ public class CMDComponentTypeWrapperTest {
             
       @Test
       
-      public void setFileNamesToNullTestFile() throws IOException, JAXBException {
+      public void setFileNamesToNullTestFile1() throws IOException, JAXBException {
           
-         writeDummiedXML();
+         writeDummiedXML("/xml/largeProfile.xml", "src/test/resources/xml/largeProfileDummyFilenames.xml");
+         
          
          String dummiedcontent = RegistryTestHelper.getProfileContentFromFile("/xml/largeProfileDummyFilenames.xml");
          CMDComponentSpec newcompspec  = RegistryTestHelper.getComponentFromString(dummiedcontent); // calling unmarchaller
@@ -281,8 +281,29 @@ public class CMDComponentTypeWrapperTest {
          
          
       }
+      ////////////////////////////////////
       
+      @Test
       
+      public void setFileNamesToNullTestFile2() throws IOException, JAXBException {
+          
+         writeDummiedXML("/xml/A.xml", "src/test/resources/xml/ADummyFilenames.xml");
+         
+         
+         String  dummiedcontent= RegistryTestHelper.getProfileContentFromFile("/xml/ADummyFilenames.xml");
+         assertTrue(dummiedcontent != null);
+         CMDComponentSpec newcompspec  = RegistryTestHelper.getComponentFromString(dummiedcontent); // calling unmarchaller
+         assertTrue(newcompspec != null);
+         
+         CMDComponentTypeWrapper wrapper = new CMDComponentTypeWrapper(newcompspec);
+         
+         wrapper.setFileNamesToNull();
+         
+         checkNullnessOfFilenamesInListOfComponents(newcompspec.getCMDComponent());
+         writeSpecToFile(newcompspec, "src/test/resources/xml/AUndummied.xml");
+         
+         
+      }
      
     }
     
