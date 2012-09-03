@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.CMDComponentTypeWrapper;
+
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -798,7 +798,7 @@ public class ComponentRegistryRestService {
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
                 
                 // Olha: removing filename from spec before it gets extended!!! recursion over all the components
-                CMDComponentTypeWrapper setnull = new CMDComponentTypeWrapper(spec);
+                setFileNamesFromListToNull(spec.getCMDComponent());
                
                
                 
@@ -935,6 +935,32 @@ public class ComponentRegistryRestService {
     public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
 	this.componentRegistryFactory = componentRegistryFactory;
     }
+    
+    
+    /// two muchually recursive methods below are used to set filenames of components (and their child components) to null
+    /*
+     * @param List<CMDComponentType> listofcomponents the list of components whose filenames (and the children's names) are to be set to null
+     */
+    public void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents){ 
+     
+        for (CMDComponentType currentcomponent : listofcomponents) {
+                setFileNamesToNullCurrent(currentcomponent);
+                } 
+    
+    }
+    
+    /*
+     * @param CMDComponentType currentcomponent the component whose filename (and whose children filenames) is to be set to null
+     */
+    
+    public void setFileNamesToNullCurrent(CMDComponentType currentcomponent){ 
+     
+      currentcomponent.setFilename(null);
+      setFileNamesFromListToNull(currentcomponent.getCMDComponent());
+    
+    }
+    
+    ////////////////////////////////////////////////
     
     
 }

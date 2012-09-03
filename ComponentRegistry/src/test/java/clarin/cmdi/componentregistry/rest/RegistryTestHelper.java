@@ -19,6 +19,8 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 
 /**
@@ -26,6 +28,8 @@ import java.io.InputStreamReader;
  *
  */
 public final class RegistryTestHelper {
+
+    
 
     private RegistryTestHelper() {
     }
@@ -152,38 +156,29 @@ public final class RegistryTestHelper {
 	return compContent;
     }
 
+    
+    public static String getStringFromStream(InputStream largeProfileStream) throws IOException {
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
+            StringBuilder profileStringBuilder = new StringBuilder();
+            String line;
+            while (null != (line = bufferedReader.readLine())) {
+                profileStringBuilder.append(line);
+            }
+            return profileStringBuilder.toString();
+        } finally {
+            largeProfileStream.close();
+        }
+    }
+    ///////////////////////////////////////////////////////
+    
     public static String getLargeProfileContent() throws IOException {
 	InputStream largeProfileStream = RegistryTestHelper.class.getResourceAsStream("/xml/largeProfile.xml");
-	try {
-	    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
-	    StringBuilder profileStringBuilder = new StringBuilder();
-	    String line;
-	    while (null != (line = bufferedReader.readLine())) {
-		profileStringBuilder.append(line);
-	    }
-	    return profileStringBuilder.toString();
-	} finally {
-	    largeProfileStream.close();
-	}
+        return getStringFromStream(largeProfileStream);
     }
     
     
-    // Olha was here
-    // a method similar to getLargeProfileContent(), but allowing to get profile from any fil, not only largeProfile.xml 
-    public static String getProfileContentFromFile(String filename) throws IOException {
-	InputStream largeProfileStream = RegistryTestHelper.class.getResourceAsStream(filename);
-	try {
-	    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
-	    StringBuilder profileStringBuilder = new StringBuilder();
-	    String line;
-	    while (null != (line = bufferedReader.readLine())) {
-		profileStringBuilder.append(line);
-	    }
-	    return profileStringBuilder.toString();
-	} finally {
-	    largeProfileStream.close();
-	}
-    }
+    
 
     //////////////////////
     
@@ -280,4 +275,38 @@ public final class RegistryTestHelper {
 	Matcher matcher = pattern.matcher(xsd);
 	return matcher.find() && !matcher.find(); //find only one
     }
+    
+    
+     // helping method writing byte[] bytes into the filename  
+      public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
+                 
+        File file = new File(filename);
+        FileOutputStream fop = new FileOutputStream(file);
+        
+        fop.write(bytes);
+	
+        fop.flush();
+	fop.close();
+ 
+        
+      }
+    
+    
+    
+      //helping method writing String str  into the file filename
+      public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
+          
+        writeBytesToFile(str.getBytes(), filename);
+ 
+        
+      }
+      
+      /////////////////////////////////////////
+    // writing ByteArrayOutputStream into the file filename
+      public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
+          
+        writeBytesToFile(os.toByteArray(), filename);
+ 
+        
+      }
 }

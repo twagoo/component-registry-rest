@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.rss.RssChannel;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -114,26 +115,6 @@ public class RssCreatorTest {
     }
     
     
-    /////////////////////////////////////////
-    // writing ByteArrayOutputStream into the file filename
-      private void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
-         
-        FileOutputStream fop = null;
-        File file;
-        
-        file = new File(filename);
-        fop = new FileOutputStream(file);
-        
-        fop.write(os.toByteArray());
-	
-        fop.flush();
-	fop.close();
- 
-	System.out.println("the rss is written into the file and saved");
- 
-        
-      }
-    
    
    
     ////////////////////////////
@@ -159,7 +140,7 @@ public class RssCreatorTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 	MDMarshaller.marshal(cdesc, os);
         
-        writeStreamToFile(os, filename);
+        RegistryTestHelper.writeStreamToFile(os, filename);
        
     }
     
@@ -191,18 +172,31 @@ public class RssCreatorTest {
     @Test
     public void testRssChannelAndMarshal() throws IOException, JAXBException {
         
+         String dirName="MyTestXmls";
+         File testDir = new File(dirName);
+         testDir.mkdir();
+        
+         String path = new File(testDir, dirName).getAbsolutePath();
+         
+         String comp1="Component1.xml";
+         String comp2="Component2.xml";
+         String rssOut="rssTest.xml";
+                  
+        
+        
+        
         ComponentDescription cdesc1=makeTestComponent1();
-        writeComponentIntoFile(cdesc1, "src/test/resources/xml/Component1.xml");
+        writeComponentIntoFile(cdesc1, path+comp1);
         
         ComponentDescription cdesc2=makeTestComponent2();
-        writeComponentIntoFile(cdesc2, "src/test/resources/xml/Component2.xml");
+        writeComponentIntoFile(cdesc2, path+comp2);
         
         
         
-        InputStream  is1 = RegistryTestHelper.getComponentContent(RegistryTestHelper.getProfileContentFromFile("/xml/Component1.xml"));
+        FileInputStream  is1 = new FileInputStream(path+comp1);
         ComponentDescription desc1 = MDMarshaller.unmarshal(ComponentDescription.class, is1, null) ;
         
-        InputStream  is2 = RegistryTestHelper.getComponentContent(RegistryTestHelper.getProfileContentFromFile("/xml/Component2.xml"));
+        FileInputStream  is2 = new FileInputStream(path+comp2);
         ComponentDescription desc2 = MDMarshaller.unmarshal(ComponentDescription.class, is2, null) ;
         
         
@@ -228,45 +222,11 @@ public class RssCreatorTest {
         ByteArrayOutputStream osrss = new ByteArrayOutputStream();
 	MDMarshaller.marshal(rss, osrss);
         
-        writeStreamToFile(osrss, "src/test/resources/xml/rssTest.xml");
+        RegistryTestHelper.writeStreamToFile(osrss, path+rssOut);
         
        
     }
     
     
-     
-    
-      
-    
-    
-    //////////////////////////////////////////////
-    /* @Test
-      public  void fileLargeProfileTestToRssItem() throws IOException, JAXBException {
-         
-        InputStream largeProfileStream = RegistryTestHelper.class.getResourceAsStream("/xml/largeProfile.xml");
-          
-        AbstractDescription desc=MDMarshaller.unmarshal(ComponentDescription.class, largeProfileStream, null);
-        
-        assertTrue(desc !=null);
-          
-        RssCreator creator = new RssCreator(desc);
-        RssItem rss = creator.toRssItem();
-        
-        //assertTrue(rss !=null);
-        
-        
-        System.out.println(rss.getAuthor());
-        System.out.println(rss.getDescription());
-        System.out.println(rss.getLink());
-        System.out.println(rss.getPubDate());
-        System.out.println(rss.getTitle());
-        
-        
-        writeRssToFile(rss, "src/test/resources/xml/rssOfLargeProfile.xml"); 
-        
-        
-        
-          
-      }
-      */
+   
 }

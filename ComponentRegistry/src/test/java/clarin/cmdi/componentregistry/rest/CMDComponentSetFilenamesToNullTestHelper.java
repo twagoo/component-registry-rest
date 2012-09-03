@@ -2,30 +2,37 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package clarin.cmdi.componentregistry;
+
+package clarin.cmdi.componentregistry.rest;
+
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import javax.xml.bind.JAXBException;
 import org.junit.Test;
 import static org.junit.Assert.*;
-
 /**
  *
  * @author olhsha
  */
-
-public class CMDComponentTypeWrapperTest {
+public class CMDComponentSetFilenamesToNullTestHelper {
+    
+   
+/**
+ *
+ * @author olhsha
+ */
+    final ComponentRegistryRestService testrestservice = new ComponentRegistryRestService();
+    
+   
+    public ComponentRegistryRestService getTestRestService(){
+     return testrestservice;
+    }
 
     //////////////////////////////////////////////////
     private CMDComponentType copyCMDComponentType(CMDComponentType newcomponent) {
@@ -53,7 +60,7 @@ public class CMDComponentTypeWrapperTest {
     ////////////////////////////////////////////
     
     
-    private CMDComponentType makeTestComponent(){
+    public CMDComponentType makeTestComponent(){
        CMDComponentType component= new CMDComponentType();
        
        // fil-in filename
@@ -93,7 +100,7 @@ public class CMDComponentTypeWrapperTest {
     
     ///////////////////////////////
     // checks if all the filenames related to the list of component are nulls
-    private void checkNullnessOfFilenamesInListOfComponents(List<CMDComponentType> listofcomponents){
+    public void checkNullnessOfFilenamesInListOfComponents(List<CMDComponentType> listofcomponents){
         
       
       for (CMDComponentType currentcomponent : listofcomponents){
@@ -119,7 +126,7 @@ public class CMDComponentTypeWrapperTest {
     
     ////////////////// /////////////
     // returns true if all thefilenames related to the list of components are not null
-    private boolean checkNonNullnessOfFilenamesInListOfComponents(List<CMDComponentType> listofcomponents){
+    public boolean checkNonNullnessOfFilenamesInListOfComponents(List<CMDComponentType> listofcomponents){
         
         boolean check;
       
@@ -141,8 +148,7 @@ public class CMDComponentTypeWrapperTest {
       
       // check  a fresh (empty)  CMDComponentType
       CMDComponentType emptycomponent= new CMDComponentType();
-      CMDComponentTypeWrapper emptywrapper = new CMDComponentTypeWrapper(emptycomponent);
-      emptywrapper.setFileNamesToNull(); 
+      testrestservice.setFileNamesToNullCurrent(emptycomponent);
       assertEquals(emptycomponent.getFilename(), null);
       
       
@@ -152,35 +158,13 @@ public class CMDComponentTypeWrapperTest {
       CMDComponentType component= makeTestComponent();
       assertTrue(checkNonNullnessOfFilenamesInComponent(component));
       
-      CMDComponentTypeWrapper wrapper = new CMDComponentTypeWrapper(component);
-      wrapper.setFileNamesToNull();
+      
+      testrestservice.setFileNamesToNullCurrent(component);
       checkNullnessOfFilenamesInComponent(component);
       
     }
     
-    ///////////////////////////////////////
     
-    @Test    
-    public void setFileNamesToNullTestSpec(){
-      
-      // make test spec
-      CMDComponentSpec componentspec= new CMDComponentSpec();  
-        
-      CMDComponentType component= makeTestComponent();
-      CMDComponentType anothercomponent= copyCMDComponentType(component);
-      
-      
-      List<CMDComponentType> listofcomponents = componentspec.getCMDComponent();
-      listofcomponents.add(component);
-      listofcomponents.add(anothercomponent);
-      
-      // run the nuller 
-      CMDComponentTypeWrapper wrapper = new CMDComponentTypeWrapper(componentspec);
-      wrapper.setFileNamesToNull();
-      
-      checkNullnessOfFilenamesInListOfComponents(listofcomponents);
-    }
-      
    
     
     //////////////////////////////////////////////////////////////
@@ -201,7 +185,7 @@ public class CMDComponentTypeWrapperTest {
     }
     
     // adding dummy filenames to the list of  components
-    private void addDummyFilenamesToListOfComponents(List<CMDComponentType> listofcomponents){
+    public void addDummyFilenamesToListOfComponents(List<CMDComponentType> listofcomponents){
         
         
         for (CMDComponentType currentcomponent : listofcomponents) { 
@@ -215,7 +199,8 @@ public class CMDComponentTypeWrapperTest {
       // adds dummy filenames to the content of largeProfile.XML  
       private  CMDComponentSpec makeTestFromFile(String filename) throws IOException, JAXBException {
           
-          String largeprofilestring = RegistryTestHelper.getProfileContentFromFile(filename);
+          FileInputStream is = new FileInputStream(filename);
+          String largeprofilestring = RegistryTestHelper.getStringFromStream(is);
           CMDComponentSpec compspec=RegistryTestHelper.getComponentFromString(largeprofilestring); // calling unmarchaller
           
           List<CMDComponentType> listofcomponents = compspec.getCMDComponent();
@@ -227,35 +212,44 @@ public class CMDComponentTypeWrapperTest {
           
       }
       
-       //writing compspec  into the file filename
-      private void writeSpecToFile(CMDComponentSpec compspec, String filename) throws IOException, JAXBException {
-          
-        String  os = RegistryTestHelper.getXml(compspec);
-        
-        FileOutputStream fop = null;
-        File file;
-        
-        file = new File(filename);
-        fop = new FileOutputStream(file);
-        
-        fop.write(os.getBytes());
-	
-        fop.flush();
-	fop.close();
- 
-	System.out.println("Done");
- 
-        
-      }
+     
       
       
       // creating the profile with filenames filled by "Dummy" and writing it into the file 
       public void writeDummiedXML(String filenamein, String filenameout) throws IOException, JAXBException{
           
           CMDComponentSpec compspec=makeTestFromFile(filenamein);
-          writeSpecToFile(compspec, filenameout);
+          
+          String  os = RegistryTestHelper.getXml(compspec);
+          RegistryTestHelper.writeStringToFile(os, filenameout);
       }
+      
+      
+      
+      // generic test-from-file read/write
+      public void testGenericSetFileNamesToNullInFile(String dirName, String fileNameInit, String fileNameDummied, String fileNameUnDummied) throws IOException, JAXBException {
+          
+         File testDir = new File(dirName);
+         testDir.mkdir();
         
+         String path = new File(testDir, dirName).getAbsolutePath();
+         
+         // make a file with a lot of "Dummy" filenames
+         writeDummiedXML(path+fileNameInit, path+fileNameDummied);
+         
+         FileInputStream is = new FileInputStream(path+fileNameDummied);
+         String dummiedcontent = RegistryTestHelper.getStringFromStream(is);
+         CMDComponentSpec compspec  = RegistryTestHelper.getComponentFromString(dummiedcontent); // calling unmarchaller
+         
+         List<CMDComponentType> listofcomponents = compspec.getCMDComponent();
+         testrestservice.setFileNamesFromListToNull(listofcomponents);
+         checkNullnessOfFilenamesInListOfComponents(listofcomponents);
+         
+         String  os = RegistryTestHelper.getXml(compspec);
+         RegistryTestHelper.writeStringToFile(os, path+fileNameUnDummied);
+         
+         
+      }
       
       
       /////////////////////////////////////////////
@@ -265,20 +259,20 @@ public class CMDComponentTypeWrapperTest {
       
       public void setFileNamesToNullTestFile1() throws IOException, JAXBException {
           
-         writeDummiedXML("/xml/largeProfile.xml", "src/test/resources/xml/largeProfileDummyFilenames.xml");
+         String dirName = "MyTestXmls"; 
+         String fileNameInit = "largeProfile.xml";
+         String fileNameDummied = "LargeProfileDummyFilenames.xml";
+         String fileNameUnDummied = "LargeProfileUnDummiedFilenames.xml";
+         
+         // copy largeProfile.xml from the resource directory to the just created directory
+         File testDir = new File(dirName);
+         testDir.mkdir();
+         String path = new File(testDir, dirName).getAbsolutePath();
+         String buffer = RegistryTestHelper.getLargeProfileContent();
+         RegistryTestHelper.writeStringToFile(buffer, path+fileNameInit);
          
          
-         String dummiedcontent = RegistryTestHelper.getProfileContentFromFile("/xml/largeProfileDummyFilenames.xml");
-         CMDComponentSpec newcompspec  = RegistryTestHelper.getComponentFromString(dummiedcontent); // calling unmarchaller
-         
-         
-         CMDComponentTypeWrapper wrapper = new CMDComponentTypeWrapper(newcompspec);
-         
-         wrapper.setFileNamesToNull();
-         
-         checkNullnessOfFilenamesInListOfComponents(newcompspec.getCMDComponent());
-         writeSpecToFile(newcompspec, "src/test/resources/xml/largeProfileUndummied.xml");
-         
+         testGenericSetFileNamesToNullInFile(dirName, fileNameInit, fileNameDummied, fileNameUnDummied);
          
       }
       ////////////////////////////////////
@@ -287,27 +281,15 @@ public class CMDComponentTypeWrapperTest {
       
       public void setFileNamesToNullTestFile2() throws IOException, JAXBException {
           
-         writeDummiedXML("/xml/A.xml", "src/test/resources/xml/ADummyFilenames.xml");
-         
-         
-         String  dummiedcontent= RegistryTestHelper.getProfileContentFromFile("/xml/ADummyFilenames.xml");
-         assertTrue(dummiedcontent != null);
-         CMDComponentSpec newcompspec  = RegistryTestHelper.getComponentFromString(dummiedcontent); // calling unmarchaller
-         assertTrue(newcompspec != null);
-         
-         CMDComponentTypeWrapper wrapper = new CMDComponentTypeWrapper(newcompspec);
-         
-         wrapper.setFileNamesToNull();
-         
-         checkNullnessOfFilenamesInListOfComponents(newcompspec.getCMDComponent());
-         writeSpecToFile(newcompspec, "src/test/resources/xml/AUndummied.xml");
+         String dirName = "MyTestXmls"; 
+         String fileNameInit = "A.xml";
+         String fileNameDummied = "ADummiedFilenames.xml";
+         String fileNameUnDummied = "AUnDummiedFilenames.xml";
+        
+         testGenericSetFileNamesToNullInFile(dirName, fileNameInit, fileNameDummied, fileNameUnDummied);
          
          
       }
      
-    }
     
-    
-    
-    
-
+}

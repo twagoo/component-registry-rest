@@ -4,6 +4,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -16,7 +17,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import java.awt.image.ComponentSampleModel;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.List;
@@ -1141,5 +1141,48 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals(MDValidator.MISMATCH_ERROR, response.getErrors().get(0));
     }
     
+    
+    
+    /////////////////////////////////
+    @Test 
+    public void testSetFilenamesToNullOnTestComponent() throws Exception {
+        
+       CMDComponentSpec spec = RegistryTestHelper.getTestComponent();
+       
+       
+       List<CMDComponentType> listofcomponents = spec.getCMDComponent();
+       CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
+       
+       helper.addDummyFilenamesToListOfComponents(listofcomponents);
+       assertTrue(helper.checkNonNullnessOfFilenamesInListOfComponents(listofcomponents));
+       CMDComponentType compaux = helper.makeTestComponent();
+       listofcomponents.add(compaux);
+       
+       
+       ComponentRegistryRestService restservice = helper.getTestRestService();
+       restservice.setFileNamesFromListToNull(spec.getCMDComponent());
+       helper.checkNullnessOfFilenamesInListOfComponents(listofcomponents);
+    }
+    
+    ///////////////////////////////////
+     @Test 
+     public void testSetFilenamesToNullOnLargeProfile() throws Exception {
+      
+      
+      String largeprofilestring = RegistryTestHelper.getLargeProfileContent();
+      CMDComponentSpec spec=RegistryTestHelper.getComponentFromString(largeprofilestring); // calling unmarchaller
+      
+      
+      List<CMDComponentType> listofcomponents = spec.getCMDComponent();
+      CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
+       
+       helper.addDummyFilenamesToListOfComponents(listofcomponents);
+       assertTrue(helper.checkNonNullnessOfFilenamesInListOfComponents(listofcomponents));
+       
+       ComponentRegistryRestService restservice = helper.getTestRestService();
+       restservice.setFileNamesFromListToNull(spec.getCMDComponent());
+       helper.checkNullnessOfFilenamesInListOfComponents(listofcomponents);
+      
+    }
     
 }
