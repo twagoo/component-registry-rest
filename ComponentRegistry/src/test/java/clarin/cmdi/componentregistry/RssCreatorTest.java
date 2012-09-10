@@ -12,11 +12,10 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssChannel;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.JAXBException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -133,16 +132,7 @@ public class RssCreatorTest {
         
     }
     
-    // write test component into file
-    private void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-        
-       
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-	MDMarshaller.marshal(cdesc, os);
-        
-        RegistryTestHelper.writeStreamToFile(os, filename);
-       
-    }
+   
     
     ///////////////////////////////////////
     // make test component 1 and write it into file
@@ -172,24 +162,20 @@ public class RssCreatorTest {
     @Test
     public void testRssChannelAndMarshal() throws IOException, JAXBException {
         
-         String dirName="MyTestXmls";
-         File testDir = new File(dirName);
-         testDir.mkdir();
+        // preparing tests 
         
-         String path = new File(testDir, dirName).getAbsolutePath();
+        String path = RegistryTestHelper.openTestDir("MyTestXmls");
          
          String comp1="Component1.xml";
          String comp2="Component2.xml";
          String rssOut="rssTest.xml";
                   
         
-        
-        
         ComponentDescription cdesc1=makeTestComponent1();
-        writeComponentIntoFile(cdesc1, path+comp1);
+        RegistryTestHelper.writeComponentIntoFile(cdesc1, path+comp1);
         
         ComponentDescription cdesc2=makeTestComponent2();
-        writeComponentIntoFile(cdesc2, path+comp2);
+        RegistryTestHelper.writeComponentIntoFile(cdesc2, path+comp2);
         
         
         
@@ -199,25 +185,16 @@ public class RssCreatorTest {
         FileInputStream  is2 = new FileInputStream(path+comp2);
         ComponentDescription desc2 = MDMarshaller.unmarshal(ComponentDescription.class, is2, null) ;
         
+        List<AbstractDescription> listOfDesc = new ArrayList<AbstractDescription>();
+        listOfDesc.add(desc1);
+        listOfDesc.add(desc2);
         
-        RssCreator creator1 = new RssCreator(desc1);
-        RssItem rssitem1 = creator1.toRssItem();
-        assertTrue(rssitem1 !=null);
-        assertEqualDescriptions(desc1, rssitem1);
+        //actually here are the things: makeing an Rss (with the channel inside)
         
+        RssCreator creator= new RssCreator(null);
+        final Rss rss = creator.makeRssChannelFromDescriptions(listOfDesc);
         
-        RssCreator creator2 = new RssCreator(desc2);
-        RssItem rssitem2 = creator2.toRssItem();
-        assertTrue(rssitem2 !=null);
-        assertEqualDescriptions(desc2, rssitem2);
-        
-        
-        
-        final Rss rss = new Rss();
-        final RssChannel channel = new RssChannel();
-	rss.setChannel(channel);
-        channel.getItem().add(rssitem1);
-        channel.getItem().add(rssitem2);
+        //writing the results into the file
         
         ByteArrayOutputStream osrss = new ByteArrayOutputStream();
 	MDMarshaller.marshal(rss, osrss);

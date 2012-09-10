@@ -309,4 +309,29 @@ public final class RegistryTestHelper {
  
         
       }
+      
+      //writing a component into the filename
+    public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
+        
+       
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+	MDMarshaller.marshal(cdesc, os);
+        
+        writeStreamToFile(os, filename);
+       
+    }
+      
+      
+      
+      
+      //creating/opening a local directory for your testing files, returns its absolute path
+      public static String openTestDir(String dirName){
+      
+         File testDir = new File(dirName);
+         testDir.mkdir();
+        
+         return(new File(testDir, dirName).getAbsolutePath());
+         
+      }
+      
 }
