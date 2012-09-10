@@ -8,10 +8,10 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import javax.xml.bind.JAXBException;
 import org.junit.Test;
@@ -199,9 +199,13 @@ public class CMDComponentSetFilenamesToNullTestHelper {
       // adds dummy filenames to the content of largeProfile.XML  
       private  CMDComponentSpec makeTestFromFile(String filename) throws IOException, JAXBException {
           
+          
           FileInputStream is = new FileInputStream(filename);
-          String largeprofilestring = RegistryTestHelper.getStringFromStream(is);
-          CMDComponentSpec compspec=RegistryTestHelper.getComponentFromString(largeprofilestring); // calling unmarchaller
+          
+          
+          
+          String profilestring = RegistryTestHelper.getStringFromStream(is);
+          CMDComponentSpec compspec=RegistryTestHelper.getComponentFromString(profilestring); // calling unmarchaller
           
           List<CMDComponentType> listofcomponents = compspec.getCMDComponent();
           addDummyFilenamesToListOfComponents(listofcomponents);
@@ -218,22 +222,23 @@ public class CMDComponentSetFilenamesToNullTestHelper {
       // creating the profile with filenames filled by "Dummy" and writing it into the file 
       public void writeDummiedXML(String filenamein, String filenameout) throws IOException, JAXBException{
           
+          
           CMDComponentSpec compspec=makeTestFromFile(filenamein);
           
+          
           String  os = RegistryTestHelper.getXml(compspec);
+          
+          
           RegistryTestHelper.writeStringToFile(os, filenameout);
       }
       
       
       
       // generic test-from-file read/write
-      public void testGenericSetFileNamesToNullInFile(String dirName, String fileNameInit, String fileNameDummied, String fileNameUnDummied) throws IOException, JAXBException {
+      public void setFileNamesToNullInFile(String dirName, String fileNameInit, String fileNameDummied, String fileNameUnDummied) throws IOException, JAXBException {
           
-         File testDir = new File(dirName);
-         testDir.mkdir();
-        
-         String path = new File(testDir, dirName).getAbsolutePath();
-         
+         String path = RegistryTestHelper.openTestDir(dirName);
+   
          // make a file with a lot of "Dummy" filenames
          writeDummiedXML(path+fileNameInit, path+fileNameDummied);
          
@@ -252,44 +257,44 @@ public class CMDComponentSetFilenamesToNullTestHelper {
       }
       
       
-      /////////////////////////////////////////////
-      // testing the nuller on the XML file
+      
+     /////// developer test method: nulling  filenames in an arbitrary (component) file 
+      
+      public static void main(String args[])
+        throws java.io.IOException , JAXBException {
             
-      @Test
-      
-      public void setFileNamesToNullTestFile1() throws IOException, JAXBException {
+            
+          BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+
           
-         String dirName = "MyTestXmls"; 
-         String fileNameInit = "largeProfile.xml";
-         String fileNameDummied = "LargeProfileDummyFilenames.xml";
-         String fileNameUnDummied = "LargeProfileUnDummiedFilenames.xml";
-         
-         // copy largeProfile.xml from the resource directory to the just created directory
-         File testDir = new File(dirName);
-         testDir.mkdir();
-         String path = new File(testDir, dirName).getAbsolutePath();
-         String buffer = RegistryTestHelper.getLargeProfileContent();
-         RegistryTestHelper.writeStringToFile(buffer, path+fileNameInit);
-         
-         
-         testGenericSetFileNamesToNullInFile(dirName, fileNameInit, fileNameDummied, fileNameUnDummied);
-         
-      }
-      ////////////////////////////////////
-      
-      @Test
-      
-      public void setFileNamesToNullTestFile2() throws IOException, JAXBException {
-          
-         String dirName = "MyTestXmls"; 
-         String fileNameInit = "A.xml";
-         String fileNameDummied = "ADummiedFilenames.xml";
-         String fileNameUnDummied = "AUnDummiedFilenames.xml";
-        
-         testGenericSetFileNamesToNullInFile(dirName, fileNameInit, fileNameDummied, fileNameUnDummied);
-         
-         
-      }
+            
+            
+            System.out.println("");  
+            System.out.print("Sub-directory (of target/) name? (up to 32 symbols): ");
+            String dirName=buffer.readLine();
+            System.out.println("");  
+            System.out.println("(Watch out: this is a temorary directory, which is removed after any new build)");
+            System.out.println(dirName);
+            
+            System.out.println(""); 
+            System.out.println("Check if your file is in this temorary directory");
+            System.out.print("and input the file name (up to 32 symbols): ");
+            String fileName = buffer.readLine();
+            System.out.println(fileName);
+            
+            System.out.println("Bedankt, ff wachten .. ");
+            
+            String fileNameDummied = "Dummied"+fileName;
+            String fileNameUnDummied ="Nulled"+fileName;
+            
+            CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
+            
+            helper.setFileNamesToNullInFile(dirName, fileName, fileNameDummied, fileNameUnDummied);
+            
+            System.out.println("Now look up the directory target/"+dirName);
+            
+            
+    }
      
     
 }

@@ -327,10 +327,16 @@ public final class RegistryTestHelper {
       //creating/opening a local directory for your testing files, returns its absolute path
       public static String openTestDir(String dirName){
       
-         File testDir = new File(dirName);
+         File testDir = new File("target/" + dirName);
+         
+         
          testDir.mkdir();
+         
+         System.out.println(dirName);
+         //String retval = new File(testDir, dirName).getAbsolutePath();
+         String retval = new File(testDir, "/").getAbsolutePath();
         
-         return(new File(testDir, dirName).getAbsolutePath());
+         return(retval);
          
       }
       

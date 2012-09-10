@@ -32,6 +32,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
 
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
+import java.io.IOException;
+import javax.xml.bind.JAXBException;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -1164,25 +1166,30 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
        helper.checkNullnessOfFilenamesInListOfComponents(listofcomponents);
     }
     
-    ///////////////////////////////////
-     @Test 
-     public void testSetFilenamesToNullOnLargeProfile() throws Exception {
+    
+     
+     
+      /////////////////////////////////////////////
+      // testing the nuller on the XML file
+            
+      @Test
       
+      public void setFileNamesToNullInLargeProfile() throws IOException, JAXBException {
+          
+         String dirName = "MyTestXmls"; 
+         String fileNameInit = "largeProfile.xml";
+         String fileNameDummied = "LargeProfileDummyFilenames.xml";
+         String fileNameUnDummied = "LargeProfileUnDummiedFilenames.xml";
+         
+         // copy largeProfile.xml from the resource directory to the test created directory
+         String path = RegistryTestHelper.openTestDir(dirName);
+         String buffer = RegistryTestHelper.getLargeProfileContent();
+         RegistryTestHelper.writeStringToFile(buffer, path+fileNameInit);
+         
+          CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
+          helper.setFileNamesToNullInFile(dirName, fileNameInit, fileNameDummied, fileNameUnDummied);
+         
+      }
       
-      String largeprofilestring = RegistryTestHelper.getLargeProfileContent();
-      CMDComponentSpec spec=RegistryTestHelper.getComponentFromString(largeprofilestring); // calling unmarchaller
-      
-      
-      List<CMDComponentType> listofcomponents = spec.getCMDComponent();
-      CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
-       
-       helper.addDummyFilenamesToListOfComponents(listofcomponents);
-       assertTrue(helper.checkNonNullnessOfFilenamesInListOfComponents(listofcomponents));
-       
-       ComponentRegistryRestService restservice = helper.getTestRestService();
-       restservice.setFileNamesFromListToNull(spec.getCMDComponent());
-       helper.checkNullnessOfFilenamesInListOfComponents(listofcomponents);
-      
-    }
     
 }
