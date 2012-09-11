@@ -32,8 +32,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
 
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
-import java.io.IOException;
-import javax.xml.bind.JAXBException;
+import java.util.ArrayList;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -1145,51 +1144,94 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     
     
     
-    /////////////////////////////////
+    /**
+     * creates a tree-like component, whose root has two kids, and the kids have three their own kids each
+     * the corresponding filenames are:
+     * "wortel", "nodel-L", "node-R", "leaf-LL", "leaf-LM", "leaf-LR", "leaf-RL", "leaf-RM", "leaf-RR"
+     * @throws Exception 
+     */
     @Test 
-    public void testSetFilenamesToNullOnTestComponent() throws Exception {
+    public void testSetFilenamesToNull() throws Exception {
         
-       CMDComponentSpec spec = RegistryTestHelper.getTestComponent();
+        // helper assists in generating a test component
+        CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
+        
+        // making an (up to ternary) tree of test components
+        //inductive explaination of the variable names, an example: leaf-LM is the middle child of the nodeL
+        // the filename is this leaf is "leaf-LM"
+        
+       // making children of the node L 
+       CMDComponentType leafLR = helper.makeTestComponent("leaf-LR", null);
+       CMDComponentType leafLM = helper.makeTestComponent("leaf-LM", null);
+       CMDComponentType leafLL = helper.makeTestComponent("leaf-LL", null);
        
        
-       List<CMDComponentType> listofcomponents = spec.getCMDComponent();
-       CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
-       
-       helper.addDummyFilenamesToListOfComponents(listofcomponents);
-       assertTrue(helper.checkNonNullnessOfFilenamesInListOfComponents(listofcomponents));
-       CMDComponentType compaux = helper.makeTestComponent();
-       listofcomponents.add(compaux);
+       // making node L
+       List<CMDComponentType> nodeLchild = (new ArrayList<CMDComponentType>());
+       nodeLchild.add(leafLL); nodeLchild.add(leafLM); nodeLchild.add(leafLR);
+       CMDComponentType nodeL = helper.makeTestComponent("node-L",nodeLchild);
        
        
-       ComponentRegistryRestService restservice = helper.getTestRestService();
-       restservice.setFileNamesFromListToNull(spec.getCMDComponent());
-       helper.checkNullnessOfFilenamesInListOfComponents(listofcomponents);
+       // making children of the node R
+       CMDComponentType leafRR = helper.makeTestComponent("leaf-RR", null);
+       CMDComponentType leafRM = helper.makeTestComponent("leaf-RM", null);
+       CMDComponentType leafRL = helper.makeTestComponent("leaf-RL", null);
+       
+       // making node R
+       List<CMDComponentType> nodeRchild = (new ArrayList<CMDComponentType>());
+       nodeRchild.add(leafRL); nodeRchild.add(leafRM); nodeRchild.add(leafRR);
+       CMDComponentType nodeR = helper.makeTestComponent("node-R",nodeRchild);
+       
+       // making the root, which has children NodeL and nodeR
+       List<CMDComponentType> wortelchild = (new ArrayList<CMDComponentType>());
+       wortelchild.add(nodeL); wortelchild.add(nodeR);
+       CMDComponentType wortel = helper.makeTestComponent("wortel", wortelchild);
+       
+       //checking if the test compnent has the expected structure and the expected filenames 
+       //ALSO this checking code below shows the strtucture of the tree
+       
+       assertEquals(wortel.getCMDComponent().size(), 2);
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().size(), 3);
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().size(), 3);
+       
+       assertEquals(wortel.getFilename(), "wortel");
+       
+       assertEquals(wortel.getCMDComponent().get(0).getFilename(), "node-L");
+       assertEquals(wortel.getCMDComponent().get(1).getFilename(), "node-R");
+       
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().get(0).getFilename(), "leaf-LL");
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().get(1).getFilename(), "leaf-LM");
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().get(2).getFilename(), "leaf-LR");
+       
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().get(0).getFilename(), "leaf-RL");
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().get(1).getFilename(), "leaf-RM");
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().get(2).getFilename(), "leaf-RR");
+       
+       
+       // the actual job
+      // nulling the filenames will be called as a method of testrestservice
+        ComponentRegistryRestService restservice = new ComponentRegistryRestService();
+        restservice.setFileNamesToNullCurrent(wortel);
+        
+      
+       // check if the filenames are nulled
+       assertEquals(wortel.getFilename(), null); 
+        
+       assertEquals(wortel.getCMDComponent().get(0).getFilename(), null);
+       assertEquals(wortel.getCMDComponent().get(1).getFilename(), null);
+       
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().get(0).getFilename(), null);
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().get(1).getFilename(), null);
+       assertEquals(wortel.getCMDComponent().get(0).getCMDComponent().get(2).getFilename(), null);
+       
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().get(0).getFilename(), null);
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().get(1).getFilename(), null);
+       assertEquals(wortel.getCMDComponent().get(1).getCMDComponent().get(2).getFilename(), null);  
+        
+        
+       
     }
     
     
-     
-     
-      /////////////////////////////////////////////
-      // testing the nuller on the XML file
-            
-      @Test
-      
-      public void setFileNamesToNullInLargeProfile() throws IOException, JAXBException {
-          
-         String dirName = "MyTestXmls"; 
-         String fileNameInit = "largeProfile.xml";
-         String fileNameDummied = "LargeProfileDummyFilenames.xml";
-         String fileNameUnDummied = "LargeProfileUnDummiedFilenames.xml";
-         
-         // copy largeProfile.xml from the resource directory to the test created directory
-         String path = RegistryTestHelper.openTestDir(dirName);
-         String buffer = RegistryTestHelper.getLargeProfileContent();
-         RegistryTestHelper.writeStringToFile(buffer, path+fileNameInit);
-         
-          CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
-          helper.setFileNamesToNullInFile(dirName, fileNameInit, fileNameDummied, fileNameUnDummied);
-         
-      }
-      
     
 }

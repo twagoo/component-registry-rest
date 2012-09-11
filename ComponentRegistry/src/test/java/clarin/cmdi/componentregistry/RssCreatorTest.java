@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.xml.bind.JAXBException;
 import org.junit.After;
@@ -29,181 +30,103 @@ import static org.junit.Assert.*;
  * @author olhsha
  */
 public class RssCreatorTest {
+
     
-    public RssCreatorTest() {
+    
+
+    private void createTestDescription(AbstractDescription desc, int commentcount, String creatorname,
+            String description, String domainname, String groupname, String href,
+            String name, String uid, String date) {
+
+        desc.setCommentsCount(commentcount);
+        desc.setCreatorName(creatorname);
+        desc.setDescription(description);
+        desc.setDomainName(domainname);
+        desc.setGroupName(groupname);
+        desc.setHref(href);
+        desc.setName(name);
+        desc.setUserId(uid);
+        desc.setRegistrationDate(date);
+
     }
-    
-    // ????????????????
-    @BeforeClass
-    public static void setUpClass() {
+
+    private ProfileDescription createTestProfileDescription(int commentcount, String creatorname,
+            String description, String domainname, String groupname, String href,
+            String name, boolean editorFlag, String uid, String date) {
+
+        ProfileDescription pdesc = ProfileDescription.createNewDescription();
+
+        createTestDescription(pdesc, commentcount, creatorname, description, domainname, groupname, href, name, uid, date);
+
+        pdesc.setShowInEditor(editorFlag);
+
+        return pdesc;
+
+
     }
-    
-    @AfterClass
-    public static void tearDownClass() {
+
+    private ComponentDescription createTestComponentDescription(int commentcount, String creatorname,
+            String description, String domainname, String groupname, String href,
+            String name, String uid, String date) {
+
+        ComponentDescription cdesc = ComponentDescription.createNewDescription();
+
+        createTestDescription(cdesc, commentcount, creatorname, description, domainname, groupname, href, name, uid, date);
+
+        return cdesc;
+
+
     }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
+
+    //////////////////////////////////////
+    private void compareRssVsValues(String creatorname, String description, String href, String date, String nametitle, RssItem item) {
+        assertEquals(creatorname, item.getAuthor());
+        assertEquals(description, item.getDescription());
+        assertEquals(href, item.getLink());
+        assertEquals(date, item.getPubDate());
+        assertEquals(nametitle, item.getTitle());
     }
 
     /**
-     * Test of toRssItem method, of class RssCreator.
+     * Creates 3 profile descriptions, makes them into a list, and makes a 3-item Rss out of this list
+     * Checks if the values of the fields in each item are as expected
      */
     @Test
-    public void nullTestToRssItem() {
-        
-        RssCreator creator = new RssCreator(null);
-        RssItem result = creator.toRssItem();
-        assertEquals(null, result);
-       
+    public void testMakeRssChannelFromDescriptions() {
+
+
+        AbstractDescription desc1 = createTestProfileDescription(23, "Joe Unit",
+                "description-1", "domainname-1", "groupname-1", "href-1", "titlename-1", true, "uid1", "2001-01-01");
+
+        AbstractDescription desc2 = createTestProfileDescription(23, "Joe Unit",
+                "description-2", "domainname-2", "groupname-2", "href-2", "titlename-2", false, "uid-2", "2001-01-02");
+
+        AbstractDescription desc3 = createTestProfileDescription(23, "Terminator",
+                "description-3", "domainname-3", "groupname-3", "href-3", "titlename-3", true, "uid-3", "2001-01-03");
+
+        List<AbstractDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
+
+        RssCreator instance = new RssCreator();
+        Rss result = instance.makeRssChannelFromDescriptions(descriptions);
+
+        List<RssItem> items = result.getChannel().getItem();
+
+        assertEquals(3, result.getChannel().getItem().size());
+
+        // String creatorname, String description, String href, String date, String nametitle, RssItem item
+        compareRssVsValues("Joe Unit",
+                "description-1", "href-1", "2001-01-01", "titlename-1", items.get(0));
+
+        compareRssVsValues("Joe Unit",
+                "description-2", "href-2", "2001-01-02", "titlename-2", items.get(1));
+
+        compareRssVsValues("Terminator",
+                "description-3", "href-3", "2001-01-03", "titlename-3", items.get(2));
+
+
     }
-    
-    
-    
-    private ProfileDescription createTestProfileDescription(int commentcount, String creatorname, 
-    String description, String domainname, String groupname, String href, 
-    String name, boolean editorflag, String uid){
-        
-        ProfileDescription pdesc = ProfileDescription.createNewDescription();
-        
-        pdesc.setCommentsCount(commentcount);
-        pdesc.setCreatorName(creatorname);
-        pdesc.setDescription(description);
-        pdesc.setDomainName(domainname);
-        pdesc.setGroupName(groupname);
-        pdesc.setHref(href);
-        pdesc.setName(name);
-        pdesc.setShowInEditor(editorflag);
-        pdesc.setUserId(uid);
-        
-        return pdesc;
-        
-        
-    }
-    
-    private ComponentDescription createTestComponentDescription(int commentcount, String creatorname, 
-    String description, String domainname, String groupname, String href, 
-    String name, String uid){
-        
-        ComponentDescription cdesc = ComponentDescription.createNewDescription();
-        
-        cdesc.setCommentsCount(commentcount);
-        cdesc.setCreatorName(creatorname);
-        cdesc.setDescription(description);
-        cdesc.setDomainName(domainname);
-        cdesc.setGroupName(groupname);
-        cdesc.setHref(href);
-        cdesc.setName(name);
-        cdesc.setUserId(uid);
-        
-        return cdesc;
-        
-        
-    }
-    
-    private void assertEqualDescriptions(AbstractDescription desc, RssItem item){
-        assertEquals(desc.getCreatorName(), item.getAuthor());
-        assertEquals(desc.getDescription(), item.getDescription());
-        assertEquals(desc.getHref(), item.getLink());
-        assertEquals(desc.getRegistrationDate(), item.getPubDate());
-        assertEquals(desc.getName(), item.getTitle());
-    }
-    
-    
-   
-   
-    ////////////////////////////
-    @Test
-    public void profileTestToRssItem() {
-        
-        ProfileDescription pdesc=
-                createTestProfileDescription(23, "creatorname", 
-                "description", "domainname", "groupname", "href", "name", true, "uid");
-        
-         
-        RssCreator creator = new RssCreator(pdesc);
-        RssItem result = creator.toRssItem();
-        assertEqualDescriptions(pdesc, result);
-       
-        
-    }
-    
-   
-    
-    ///////////////////////////////////////
-    // make test component 1 and write it into file
-    
-    private  ComponentDescription makeTestComponent1() throws IOException, JAXBException {
-        
-        ComponentDescription cdesc=
-                createTestComponentDescription(67, "God", 
-                "description1dum", "domainname1dum", "groupname1dum", "href1dum", "name1dum", "uid1dum");
-      
-        return cdesc;
-    }
-    
-    ///////////////////////////////////////
-    // make test component 1 and write it into file
-    
-    private  ComponentDescription makeTestComponent2() throws IOException, JAXBException {
-        
-        ComponentDescription cdesc=
-                createTestComponentDescription(23, "Allah", 
-                "description2dum", "domainname2dum", "groupname2dum", "href2dum", "name2dum", "uid2dum");
-      
-        return cdesc;
-    }
-    
-    ////////////////////////////////////////
-    @Test
-    public void testRssChannelAndMarshal() throws IOException, JAXBException {
-        
-        // preparing tests 
-        
-        String path = RegistryTestHelper.openTestDir("MyTestXmls");
-         
-         String comp1="Component1.xml";
-         String comp2="Component2.xml";
-         String rssOut="rssTest.xml";
-                  
-        
-        ComponentDescription cdesc1=makeTestComponent1();
-        RegistryTestHelper.writeComponentIntoFile(cdesc1, path+comp1);
-        
-        ComponentDescription cdesc2=makeTestComponent2();
-        RegistryTestHelper.writeComponentIntoFile(cdesc2, path+comp2);
-        
-        
-        
-        FileInputStream  is1 = new FileInputStream(path+comp1);
-        ComponentDescription desc1 = MDMarshaller.unmarshal(ComponentDescription.class, is1, null) ;
-        
-        FileInputStream  is2 = new FileInputStream(path+comp2);
-        ComponentDescription desc2 = MDMarshaller.unmarshal(ComponentDescription.class, is2, null) ;
-        
-        List<AbstractDescription> listOfDesc = new ArrayList<AbstractDescription>();
-        listOfDesc.add(desc1);
-        listOfDesc.add(desc2);
-        
-        //actually here are the things: makeing an Rss (with the channel inside)
-        
-        RssCreator creator= new RssCreator(null);
-        final Rss rss = creator.makeRssChannelFromDescriptions(listOfDesc);
-        
-        //writing the results into the file
-        
-        ByteArrayOutputStream osrss = new ByteArrayOutputStream();
-	MDMarshaller.marshal(rss, osrss);
-        
-        RegistryTestHelper.writeStreamToFile(osrss, path+rssOut);
-        
-       
-    }
-    
-    
-   
 }
+// String comp1 = "Component1.xml";
+// String path = RegistryTestHelper.openTestDir("MyTestXmls");
+// FileInputStream is1 = new FileInputStream(path + comp1);
+// ComponentDescription desc1 = MDMarshaller.unmarshal(ComponentDescription.class, is1, null);

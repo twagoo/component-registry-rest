@@ -277,7 +277,13 @@ public final class RegistryTestHelper {
     }
     
     
-     // helping method writing byte[] bytes into the filename  
+     /**
+      * 
+      * @param bytes is an array of bytes to be written in the file filename (from scratch!)
+      * @param filename is the name of the file where the array "bytes" is to be written to
+      * @throws IOException
+      * @throws JAXBException 
+      */ 
       public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
                  
         File file = new File(filename);
@@ -293,7 +299,13 @@ public final class RegistryTestHelper {
     
     
     
-      //helping method writing String str  into the file filename
+      /**
+       * 
+       * @param str is a string which is to be written into the filename (from scratch!)
+       * @param filename is a filename where the string is to be written to
+       * @throws IOException
+       * @throws JAXBException 
+       */
       public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
           
         writeBytesToFile(str.getBytes(), filename);
@@ -301,8 +313,14 @@ public final class RegistryTestHelper {
         
       }
       
-      /////////////////////////////////////////
-    // writing ByteArrayOutputStream into the file filename
+    /**
+       * 
+       * @param os is an output stream which is to be written into the filename (from scratch!)
+       * @param filename is a filename where the stream is to be written to
+       * @throws IOException
+       * @throws JAXBException 
+       */
+      
       public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
           
         writeBytesToFile(os.toByteArray(), filename);
@@ -310,7 +328,14 @@ public final class RegistryTestHelper {
         
       }
       
-      //writing a component into the filename
+    
+    /**
+     * 
+     * @param cdesc is a component which is to be written into the filename (from scratch!)
+     * @param filename is a filename where the component is to be written to
+     * @throws IOException
+     * @throws JAXBException 
+     */  
     public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
         
        
@@ -324,7 +349,11 @@ public final class RegistryTestHelper {
       
       
       
-      //creating/opening a local directory for your testing files, returns its absolute path
+      /**
+       * opens a temporary sub-directory dirName in /target/
+       * @param dirName is the name of the temporary subdirectory which is to be opened
+       * @return the absolute part for this directory
+       */
       public static String openTestDir(String dirName){
       
          File testDir = new File("target/" + dirName);
