@@ -107,7 +107,11 @@ public class RssCreatorTest {
         List<AbstractDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
 
         RssCreator instance = new RssCreator();
-        Rss result = instance.makeRssChannelFromDescriptions(descriptions);
+        
+        instance.setDescriptions(descriptions);
+        // instance.setVersion(2.0); 
+        
+        Rss result = instance.makeRssChannel();
 
         List<RssItem> items = result.getChannel().getItem();
 
