@@ -7,6 +7,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.Owner;
+import clarin.cmdi.componentregistry.RssCreator;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -17,6 +18,7 @@ import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
+import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -66,6 +69,7 @@ public class ComponentRegistryRestService {
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String USERSPACE_PARAM = "userspace";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
+    public static final String NUMBER_OF_RSSITEMS = "limit";
     @Inject(value = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
 
@@ -961,6 +965,51 @@ public class ComponentRegistryRestService {
     }
     
     ////////////////////////////////////////////////
+    @GET
+    @Path("/components/rss")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Rss getRss(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
+	
+        long start = System.currentTimeMillis();
+        List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
+        
+        
+         
+        RssCreator rssCreator = new RssCreator();
+        int limitInt = Integer.parseInt(limit);
+        
+        if (components.size()<limitInt) {limitInt = components.size();};
+        
+        List<ComponentDescription> sublist = components.subList(0, limitInt);
+        //Collections.sort(sublist, );
+        
+        rssCreator.setComponentDescriptions(sublist);
+        
+        if (userspace)   {rssCreator.setTitle("Workspace components");} 
+        else {rssCreator.setTitle("Public components");}
+        
+         
+        Rss rss =rssCreator.makeRssChannel();
+        
+	LOG.info("Releasing " + limitInt + "most recent registered components into the world sorted by creations day");
+	return rss;
+    }
     
-    
+       
+       
+       /* public static final Comparator<? super ComponentDescription> COMPARE_ON_GROUP_AND_NAME = new Comparator<ComponentDescription>() {
+        public int compare(ComponentDescription o1, ComponentDescription o2) {
+            int result = 0;
+            if (o1.getGroupName() != null && o2.getGroupName() != null)
+                result = o1.getGroupName().compareToIgnoreCase(o2.getGroupName());
+            if (result == 0) {
+                if (o1.getName() != null && o2.getName() != null) {
+                    result = o1.getName().compareToIgnoreCase(o2.getName());
+                } else {
+                    result = o1.getId().compareTo(o2.getId());
+                }
+            }
+            return result;
+        }
+    };*/
 }

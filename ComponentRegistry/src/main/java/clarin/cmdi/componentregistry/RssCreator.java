@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
 import clarin.cmdi.componentregistry.rss.Image;
@@ -22,57 +24,58 @@ import java.util.List;
  */
 public class RssCreator { // extends nothing so far, throuw nothing // make it abstract
     
-    public List<AbstractDescription> descrs;
+    private List<AbstractDescription> descrs;
     
-    protected String title;
-    protected String link;
-    protected String description;
-    protected String language;
-    protected String copyright;
-    protected String managingEditor;
-    protected String webMaster;
-    protected String pubDate;
-    protected String lastBuildDate;
-    protected Category category;
-    protected String generator;
-    protected String docs;
-    protected Cloud cloud;
-    protected BigInteger ttl;
-    protected Image image;
-    protected String rating;
-    protected TextInput textInput;
-    protected SkipHoursList skipHours;
-    protected SkipDaysList skipDays;
+    private String title;
+    private String link;
+    private String description;
+    private String language;
+    private String copyright;
+    private String managingEditor;
+    private String webMaster;
+    private String pubDate;
+    private String lastBuildDate;
+    private Category category;
+    private String generator;
+    private String docs;
+    private Cloud cloud;
+    private BigInteger ttl;
+    private Image image;
+    private String rating;
+    private TextInput textInput;
+    private SkipHoursList skipHours;
+    private SkipDaysList skipDays;
     
-    protected BigDecimal version; // of an rss
+    private BigDecimal version; // of an rss
+    
+    
     
     /**
      * 
-     * @return 
+     * @param descrs 
      */
-    public List<AbstractDescription> getDescriptions(){
-        return descrs;
+    public void setComponentDescriptions(List<ComponentDescription> descrs){
+        
+        this.descrs = new ArrayList<AbstractDescription>();
+        
+        for (ComponentDescription currentdesc : descrs)
+        {this.descrs.add(currentdesc);};
     }
     
     /**
      * 
      * @param descrs 
      */
-    public void setDescriptions(List<AbstractDescription> descrs){
-        this.descrs = descrs;
+    public void setProfileDescriptions(List<ProfileDescription> descrs){
+        
+        this.descrs = new ArrayList<AbstractDescription>();
+        
+        for (ProfileDescription currentdesc : descrs)
+        {this.descrs.add(currentdesc);};
+        
     }
     
     
-    
-    /**
-     * 
-     * @return 
-     */
-    
-    
-    public BigDecimal getVersion() {
-        return version;
-    }
     
     /**
      * 
@@ -83,14 +86,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.version = version;
     }
     
-    /**
-     * 
-     * @return 
-     */
     
-    public String getTitle() {
-        return title;
-    }
 
     /**
      * Sets the value of the title property.
@@ -104,17 +100,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.title = value;
     }
 
-    /**
-     * Gets the value of the link property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getLink() {
-        return link;
-    }
+   
 
     /**
      * Sets the value of the link property.
@@ -128,17 +114,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.link = value;
     }
 
-    /**
-     * Gets the value of the description property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getDescription() {
-        return description;
-    }
+    
 
     /**
      * Sets the value of the description property.
@@ -152,17 +128,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.description = value;
     }
 
-    /**
-     * Gets the value of the language property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getLanguage() {
-        return language;
-    }
+    
 
     /**
      * Sets the value of the language property.
@@ -176,17 +142,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.language = value;
     }
 
-    /**
-     * Gets the value of the copyright property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getCopyright() {
-        return copyright;
-    }
+   
 
     /**
      * Sets the value of the copyright property.
@@ -200,17 +156,6 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.copyright = value;
     }
 
-    /**
-     * Gets the value of the managingEditor property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getManagingEditor() {
-        return managingEditor;
-    }
 
     /**
      * Sets the value of the managingEditor property.
@@ -224,17 +169,6 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.managingEditor = value;
     }
 
-    /**
-     * Gets the value of the webMaster property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getWebMaster() {
-        return webMaster;
-    }
 
     /**
      * Sets the value of the webMaster property.
@@ -248,17 +182,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.webMaster = value;
     }
 
-    /**
-     * Gets the value of the pubDate property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getPubDate() {
-        return pubDate;
-    }
+    
 
     /**
      * Sets the value of the pubDate property.
@@ -272,17 +196,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.pubDate = value;
     }
 
-    /**
-     * Gets the value of the lastBuildDate property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getLastBuildDate() {
-        return lastBuildDate;
-    }
+    
 
     /**
      * Sets the value of the lastBuildDate property.
@@ -296,17 +210,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.lastBuildDate = value;
     }
 
-    /**
-     * Gets the value of the category property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Category }
-     *     
-     */
-    public Category getCategory() {
-        return category;
-    }
+   
 
     /**
      * Sets the value of the category property.
@@ -320,17 +224,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.category = value;
     }
 
-    /**
-     * Gets the value of the generator property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getGenerator() {
-        return generator;
-    }
+  
 
     /**
      * Sets the value of the generator property.
@@ -344,17 +238,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.generator = value;
     }
 
-    /**
-     * Gets the value of the docs property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getDocs() {
-        return docs;
-    }
+   
 
     /**
      * Sets the value of the docs property.
@@ -368,18 +252,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.docs = value;
     }
 
-    /**
-     * Gets the value of the cloud property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Cloud }
-     *     
-     */
-    public Cloud getCloud() {
-        return cloud;
-    }
-
+   
     /**
      * Sets the value of the cloud property.
      * 
@@ -392,17 +265,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.cloud = value;
     }
 
-    /**
-     * Gets the value of the ttl property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BigInteger }
-     *     
-     */
-    public BigInteger getTtl() {
-        return ttl;
-    }
+    
 
     /**
      * Sets the value of the ttl property.
@@ -416,17 +279,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.ttl = value;
     }
 
-    /**
-     * Gets the value of the image property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Image }
-     *     
-     */
-    public Image getImage() {
-        return image;
-    }
+   
 
     /**
      * Sets the value of the image property.
@@ -440,17 +293,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.image = value;
     }
 
-    /**
-     * Gets the value of the rating property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getRating() {
-        return rating;
-    }
+    
 
     /**
      * Sets the value of the rating property.
@@ -464,17 +307,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.rating = value;
     }
 
-    /**
-     * Gets the value of the textInput property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link TextInput }
-     *     
-     */
-    public TextInput getTextInput() {
-        return textInput;
-    }
+   
 
     /**
      * Sets the value of the textInput property.
@@ -488,17 +321,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.textInput = value;
     }
 
-    /**
-     * Gets the value of the skipHours property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link SkipHoursList }
-     *     
-     */
-    public SkipHoursList getSkipHours() {
-        return skipHours;
-    }
+   
 
     /**
      * Sets the value of the skipHours property.
@@ -512,17 +335,7 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.skipHours = value;
     }
 
-    /**
-     * Gets the value of the skipDays property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link SkipDaysList }
-     *     
-     */
-    public SkipDaysList getSkipDays() {
-        return skipDays;
-    }
+   
 
     /**
      * Sets the value of the skipDays property.
