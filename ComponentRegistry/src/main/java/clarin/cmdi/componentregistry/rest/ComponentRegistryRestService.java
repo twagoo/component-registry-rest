@@ -28,7 +28,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -964,13 +964,43 @@ public class ComponentRegistryRestService {
     
     }
     
+    /*
+     * generating rss: commom part for profile and component descriptions
+     * 
+     */
+    
+   /* private Rss getRss(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit,
+            List<AbstractDescription> descs) throws ComponentRegistryException {
+	
+        
+        
+        RssCreator rssCreator = new RssCreator();
+        int limitInt = Integer.parseInt(limit);
+        
+        if (descs.size()<limitInt) {limitInt = descs.size();};
+        
+        List<AbstractDescription> sublist = descs.subList(0, limitInt);
+       
+        Collections.sort(sublist, AbstractDescription.COMPARE_ON_DATE);
+        
+        rssCreator.setComponentDescriptions(sublist);
+        
+        if (userspace)   {rssCreator.setTitle("Workspace components");} 
+        else {rssCreator.setTitle("Public components");}
+        
+         
+        Rss rss =rssCreator.makeRssChannel();
+        
+	LOG.info("Releasing " + limitInt + "most recent registered components into the world sorted by their registration date-and-time");
+	return rss;
+    }*/
     ////////////////////////////////////////////////
     @GET
     @Path("/components/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Rss getRss(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
+    public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
 	
-        long start = System.currentTimeMillis();
+        
         List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
         
         
@@ -981,7 +1011,8 @@ public class ComponentRegistryRestService {
         if (components.size()<limitInt) {limitInt = components.size();};
         
         List<ComponentDescription> sublist = components.subList(0, limitInt);
-        //Collections.sort(sublist, );
+       
+        Collections.sort(sublist, ComponentDescription.COMPARE_ON_DATE);
         
         rssCreator.setComponentDescriptions(sublist);
         
@@ -991,25 +1022,40 @@ public class ComponentRegistryRestService {
          
         Rss rss =rssCreator.makeRssChannel();
         
-	LOG.info("Releasing " + limitInt + "most recent registered components into the world sorted by creations day");
+	LOG.info("Releasing " + limitInt + "most recent registered components into the world sorted by their registration date-and-time");
 	return rss;
     }
     
+     ////////////////////////////////////////////////
+    @GET
+    @Path("/profiles/rss")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
+	
+        long start = System.currentTimeMillis();
+        List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
+        
+        
+         
+        RssCreator rssCreator = new RssCreator();
+        int limitInt = Integer.parseInt(limit);
+        
+        if (profiles.size()<limitInt) {limitInt = profiles.size();};
+        
+        List<ProfileDescription> sublist = profiles.subList(0, limitInt);
        
-       
-       /* public static final Comparator<? super ComponentDescription> COMPARE_ON_GROUP_AND_NAME = new Comparator<ComponentDescription>() {
-        public int compare(ComponentDescription o1, ComponentDescription o2) {
-            int result = 0;
-            if (o1.getGroupName() != null && o2.getGroupName() != null)
-                result = o1.getGroupName().compareToIgnoreCase(o2.getGroupName());
-            if (result == 0) {
-                if (o1.getName() != null && o2.getName() != null) {
-                    result = o1.getName().compareToIgnoreCase(o2.getName());
-                } else {
-                    result = o1.getId().compareTo(o2.getId());
-                }
-            }
-            return result;
-        }
-    };*/
+        Collections.sort(sublist, ProfileDescription.COMPARE_ON_DATE);
+        
+        rssCreator.setProfileDescriptions(sublist);
+        
+        if (userspace)   {rssCreator.setTitle("Workspace profiles");} 
+        else {rssCreator.setTitle("Public profiles");}
+        
+         
+        Rss rss =rssCreator.makeRssChannel();
+        
+	LOG.info("Releasing " + limitInt + "most recent registered profiles into the world sorted by their registration date-and-time");
+	return rss;
+    }   
+    
 }

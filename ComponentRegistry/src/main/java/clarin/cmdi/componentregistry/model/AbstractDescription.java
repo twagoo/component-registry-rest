@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
@@ -165,6 +166,7 @@ public abstract class AbstractDescription {
 	}
 	return result;
     }
+    
     public static final Comparator<? super AbstractDescription> COMPARE_ON_NAME = new Comparator<AbstractDescription>() {
 
 	public int compare(AbstractDescription o1, AbstractDescription o2) {
@@ -178,4 +180,30 @@ public abstract class AbstractDescription {
 	    return result;
 	}
     };
+    
+    public static final Comparator<? super AbstractDescription> COMPARE_ON_DATE = new Comparator<AbstractDescription>() {
+        
+        //compare two components by the date of registration
+        // the dates, which are strings accrording to  ISO 8601, compared lexicographically 
+        
+        public int compare(AbstractDescription o1, AbstractDescription o2) {
+            
+            int result = 0;
+             
+            DateFormat df = DateFormat.getDateTimeInstance();
+            
+            try{
+            Date d1 = df.parse(o1.getRegistrationDate());
+            Date d2 = df.parse(o2.getRegistrationDate());
+            
+            result = d1.compareTo(d2);
+            
+            } catch (ParseException pe)  {return 0;};
+            
+            
+            
+            return result;
+        }
+    };
+    
 }

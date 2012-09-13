@@ -54,6 +54,16 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
      * 
      * @param descrs 
      */
+    /* public void setDescriptions(List<AbstractDescription> descrs){
+        
+        this.descrs = new ArrayList<AbstractDescription>();
+        
+        for (AbstractDescription currentdesc : descrs)
+        {this.descrs.add(currentdesc);};
+    }/**
+     * 
+     * @param descrs 
+     */
     public void setComponentDescriptions(List<ComponentDescription> descrs){
         
         this.descrs = new ArrayList<AbstractDescription>();
