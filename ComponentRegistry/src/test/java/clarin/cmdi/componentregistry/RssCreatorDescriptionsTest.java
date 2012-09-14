@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
@@ -18,12 +15,32 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import javax.xml.bind.JAXBException;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 /**
  *
  * @author olhsha
  */
-public class RssCreatorTest {
+public class RssCreatorDescriptionsTest {
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
 
     
     
@@ -86,7 +103,7 @@ public class RssCreatorTest {
      * Checks if the values of the fields in each item are as expected
      */
     @Test
-    public void testMakeRssChannelFromDescriptions() throws JAXBException, UnsupportedEncodingException, IOException{
+    public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException{
 
         
         
@@ -101,9 +118,9 @@ public class RssCreatorTest {
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
 
-        RssCreator instance = new RssCreator();
+        RssCreatorDescriptions instance = new RssCreatorDescriptions();
         
-        instance.setProfileDescriptions(descriptions);
+        
         
         BigDecimal tmp= new BigDecimal("2.0");
         instance.setVersion(tmp);
@@ -127,9 +144,10 @@ public class RssCreatorTest {
         instance.setTitle("TITLE");
         instance.setWebMaster("webMaster");
         
-        Rss result = instance.makeRssChannel();
+        Rss result = instance.makeRss(descriptions);
         
-
+        
+        
         List<RssItem> items = result.getChannel().getItem();
 
         assertEquals(3, result.getChannel().getItem().size());
@@ -177,7 +195,7 @@ public class RssCreatorTest {
     // the test below shows that if we do not set parameters for the channel or no version for Rss
     // then nothing wrong happen, no null pointer exception, etc.
     @Test
-    public void testMakeRssChannelWithNoChalletSet() throws JAXBException, UnsupportedEncodingException, IOException{
+    public void testMakeRssNoChannelSet() throws JAXBException, UnsupportedEncodingException, IOException{
 
        
         ProfileDescription desc1 = createTestProfileDescription(23, "Joe Unit",
@@ -185,13 +203,8 @@ public class RssCreatorTest {
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1);
 
-        RssCreator instance = new RssCreator();
-        
-        instance.setProfileDescriptions(descriptions);
-        
-        
-        
-        Rss result = instance.makeRssChannel();
+        RssCreatorDescriptions instance = new RssCreatorDescriptions();
+        Rss result = instance.makeRss(descriptions);
         
 
         List<RssItem> items = result.getChannel().getItem();
@@ -203,14 +216,13 @@ public class RssCreatorTest {
                 "description-1", "href-1", "2001-01-01", "titlename-1", items.get(0));
 
         
-
-        
         //write the Rss chaneel into the file, so you can see  how it looks like in the browser
         String path=RegistryTestHelper.openTestDir("testRss");
         String os = MDMarshaller.marshalToString(result);
         RegistryTestHelper.writeStringToFile(os, path + "testRssNoChannelSet.xml");
     }
-    
+
+  
 }
 // String comp1 = "Component1.xml";
 // String path = RegistryTestHelper.openTestDir("MyTestXmls");

@@ -7,7 +7,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.Owner;
-import clarin.cmdi.componentregistry.RssCreator;
+import clarin.cmdi.componentregistry.RssCreatorDescriptions;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -969,31 +969,22 @@ public class ComponentRegistryRestService {
      * 
      */
     
-   /* private Rss getRss(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit,
-            List<AbstractDescription> descs) throws ComponentRegistryException {
+     private <T extends AbstractDescription> Rss getRss(boolean userspace,String limit, List<T> descs, String kindofdesc) throws ComponentRegistryException {
 	
-        
-        
-        RssCreator rssCreator = new RssCreator();
+        RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
         int limitInt = Integer.parseInt(limit);
         
         if (descs.size()<limitInt) {limitInt = descs.size();};
-        
-        List<AbstractDescription> sublist = descs.subList(0, limitInt);
-       
+        List<T> sublist = descs.subList(0, limitInt);
         Collections.sort(sublist, AbstractDescription.COMPARE_ON_DATE);
         
-        rssCreator.setComponentDescriptions(sublist);
         
-        if (userspace)   {rssCreator.setTitle("Workspace components");} 
-        else {rssCreator.setTitle("Public components");}
-        
+        if (userspace)   {rssCreator.setTitle("Workspace "+kindofdesc);} 
+        else {rssCreator.setTitle("Public "+kindofdesc);}
          
-        Rss rss =rssCreator.makeRssChannel();
-        
-	LOG.info("Releasing " + limitInt + "most recent registered components into the world sorted by their registration date-and-time");
+        Rss rss =rssCreator.makeRss(sublist);
 	return rss;
-    }*/
+    }
     ////////////////////////////////////////////////
     @GET
     @Path("/components/rss")
@@ -1001,29 +992,13 @@ public class ComponentRegistryRestService {
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
 	
         
-        List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
+      List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
+      Rss rss = getRss(userspace, limit, components, "components");
         
+      LOG.info("Releasing " + limit + "most recent registered components into the world sorted by their registration date-and-time");
+	
         
-         
-        RssCreator rssCreator = new RssCreator();
-        int limitInt = Integer.parseInt(limit);
-        
-        if (components.size()<limitInt) {limitInt = components.size();};
-        
-        List<ComponentDescription> sublist = components.subList(0, limitInt);
-       
-        Collections.sort(sublist, ComponentDescription.COMPARE_ON_DATE);
-        
-        rssCreator.setComponentDescriptions(sublist);
-        
-        if (userspace)   {rssCreator.setTitle("Workspace components");} 
-        else {rssCreator.setTitle("Public components");}
-        
-         
-        Rss rss =rssCreator.makeRssChannel();
-        
-	LOG.info("Releasing " + limitInt + "most recent registered components into the world sorted by their registration date-and-time");
-	return rss;
+       return rss;
     }
     
      ////////////////////////////////////////////////
@@ -1032,30 +1007,26 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
 	
-        long start = System.currentTimeMillis();
-        List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
-        
-        
+       List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
+       Rss rss = getRss(userspace, limit, profiles, "profiles");
          
-        RssCreator rssCreator = new RssCreator();
-        int limitInt = Integer.parseInt(limit);
-        
-        if (profiles.size()<limitInt) {limitInt = profiles.size();};
-        
-        List<ProfileDescription> sublist = profiles.subList(0, limitInt);
-       
-        Collections.sort(sublist, ProfileDescription.COMPARE_ON_DATE);
-        
-        rssCreator.setProfileDescriptions(sublist);
-        
-        if (userspace)   {rssCreator.setTitle("Workspace profiles");} 
-        else {rssCreator.setTitle("Public profiles");}
-        
-         
-        Rss rss =rssCreator.makeRssChannel();
-        
-	LOG.info("Releasing " + limitInt + "most recent registered profiles into the world sorted by their registration date-and-time");
+	LOG.info("Releasing " + limit + "most recent registered profiles into the world sorted by their registration date-and-time");
 	return rss;
-    }   
+    }  
+    
+    /*
+    
+    @GET
+    @Path("/profiles/{profileId}/comments")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Comment> getCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	long start = System.currentTimeMillis();
+	final Principal principal = security.getUserPrincipal();
+	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
+	LOG.info("Releasing " + comments.size() + " registered comments in Profile into the world (" + (System.currentTimeMillis() - start)
+		+ " millisecs)");
+	return comments;
+    }
+    */
     
 }

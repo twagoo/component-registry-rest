@@ -1,8 +1,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
 import clarin.cmdi.componentregistry.rss.Image;
@@ -22,10 +21,11 @@ import java.util.List;
  *
  * @author olhsha
  */
-public class RssCreator { // extends nothing so far, throuw nothing // make it abstract
+public abstract class RssCreator<T> { // extends nothing so far, throuw nothing // make it abstract
     
-    private List<AbstractDescription> descrs;
     
+    
+    // all the fields below are not mandatory, no crashes will happen if they are not set
     private String title;
     private String link;
     private String description;
@@ -47,43 +47,6 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
     private SkipDaysList skipDays;
     
     private BigDecimal version; // of an rss
-    
-    
-    
-    /**
-     * 
-     * @param descrs 
-     */
-    /* public void setDescriptions(List<AbstractDescription> descrs){
-        
-        this.descrs = new ArrayList<AbstractDescription>();
-        
-        for (AbstractDescription currentdesc : descrs)
-        {this.descrs.add(currentdesc);};
-    }/**
-     * 
-     * @param descrs 
-     */
-    public void setComponentDescriptions(List<ComponentDescription> descrs){
-        
-        this.descrs = new ArrayList<AbstractDescription>();
-        
-        for (ComponentDescription currentdesc : descrs)
-        {this.descrs.add(currentdesc);};
-    }
-    
-    /**
-     * 
-     * @param descrs 
-     */
-    public void setProfileDescriptions(List<ProfileDescription> descrs){
-        
-        this.descrs = new ArrayList<AbstractDescription>();
-        
-        for (ProfileDescription currentdesc : descrs)
-        {this.descrs.add(currentdesc);};
-        
-    }
     
     
     
@@ -359,54 +322,15 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         this.skipDays = value;
     }
 
-    /**
-     * Gets the value of the item property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the item property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getItem().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link RssItem }
-     * 
-     * 
-     */
+   
     
     
+      // creator method,  to rssItem 
+     protected abstract RssItem fromArgToRssItem(T obj); 
+    
 
-    // creator method, this.desc to rssItem 
-    private RssItem fromDescToRssItem(AbstractDescription desc) {
-
-
-
-        RssItem retval = new RssItem();
-
-        retval.setAuthor(desc.getCreatorName());
-        // retval.setCategory(desc.???);
-        // retval.setComments(desc.???);
-        retval.setDescription(desc.getDescription());
-        //retval.setEnclosure(desc.???);
-        //retval.setGuid(desc.getId()); type mismatch
-        retval.setLink(desc.getHref());
-        retval.setPubDate(desc.getRegistrationDate());
-        //retval.setSource(desc.???);
-        retval.setTitle(desc.getName());
-
-
-        return retval;
-
-    }
-
+    
+     
     //makes (and returns ) an  rss out of a list of RssItems
     private Rss makeRssChannel(List<RssItem> rssItems) {
 
@@ -444,28 +368,24 @@ public class RssCreator { // extends nothing so far, throuw nothing // make it a
         return rss;
     }
 
-    //makes (nad returns) a list of items out a list of descriptions, return the pointer to the list of items
-    private List<RssItem> makeListOfRssItems() {
+    //makes (and returns) a list of items out a list of descriptions, return the pointer to the list of items
+   private List<RssItem> makeListOfRssItems(List<T> objs) {
         List<RssItem> listOfItems = new ArrayList<RssItem>();
 
-        for (AbstractDescription currentDesc : descrs) {
+        for (T currentObj : objs) {
 
-            RssItem currentItem = fromDescToRssItem(currentDesc);
+            RssItem currentItem = fromArgToRssItem(currentObj);
             listOfItems.add(currentItem);
         }
 
         return listOfItems;
     }
 
-    //makes (and returns) a channel out a list of descriptions
-    /**
-     * 
-     * @param descrs refers to the list of  component or profile descriptions, which is to be turn into an Rss
-     * in principle, "descrs" parameter should not be null 
-     * @return the reference to Rss created from descrs
-     */
-    public Rss makeRssChannel() {
-
-        return (makeRssChannel(makeListOfRssItems()));
-    }
+    
+   
+   
+   public  Rss makeRss(List<T> objs){
+       return(makeRssChannel(makeListOfRssItems(objs)));
+   }  
+    
 }
