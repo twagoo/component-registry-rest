@@ -7,6 +7,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.Owner;
+import clarin.cmdi.componentregistry.RssCreatorComments;
 import clarin.cmdi.componentregistry.RssCreatorDescriptions;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -1007,6 +1008,20 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
 	
+       // ?? How to get 
+        /* grabbing all registered profile names from the register and outputting them  on the Apachetomcat terminal */
+        List<ProfileDescription> lprf = getRegisteredProfiles(userspace, true);
+        
+        
+        for (ProfileDescription currentProfile : lprf){
+            
+           String currentProfileId =  currentProfile.getId();
+           System.out.println(currentProfileId);
+        
+        } 
+        /* end of grabbing */
+        
+        // ?? How to get rid of the deprecated stuff ??
        List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
        Rss rss = getRss(userspace, limit, profiles, "profiles");
          
@@ -1014,19 +1029,56 @@ public class ComponentRegistryRestService {
 	return rss;
     }  
     
-    /*
     
+    ///////////////////////////////////////////////////////////
     @GET
-    @Path("/profiles/{profileId}/comments")
+    @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<Comment> getCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
-	long start = System.currentTimeMillis();
+    public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+	 
+        
+        
 	final Principal principal = security.getUserPrincipal();
 	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
-	LOG.info("Releasing " + comments.size() + " registered comments in Profile into the world (" + (System.currentTimeMillis() - start)
-		+ " millisecs)");
-	return comments;
+	
+         
+        RssCreatorComments instance = new RssCreatorComments();
+        instance.setFlagIsFromProfile(true);
+        
+         //this is a testing piece testing piece: prints out on tomcat's output terminal the comments 
+        // from  clarin.eu:cr1:p_1284723009187
+        if (profileId.equals("clarin.eu:cr1:p_1284723009187")) {
+        System.out.println(getRegistry(getStatus(userspace)).getName());    
+        for (Comment comment : comments){
+           System.out.println(comment.getComment());
+           
+            } 
+        }
+        
+        
+        // this is another testng piece: gathers all the comments from all the profiles in clarin.eu:cr1:p_1347889257775
+        if (profileId.equals("clarin.eu:cr1:p_1347889257775")) {
+        List<ProfileDescription> lprf = getRegisteredProfiles(userspace, true);
+        for (ProfileDescription currentProfile : lprf){
+           String currentProfileId =  currentProfile.getId();
+           List<Comment> currcomments = getRegistry(getStatus(userspace)).getCommentsInProfile(currentProfileId, principal);
+	   comments.addAll(currcomments);
+           
+            } 
+        }
+        // end of the testing piece 
+        
+       
+        
+        
+        Rss result = instance.makeRss(comments);
+        
+        System.out.println(result.getChannel().getItem().size());
+        
+	return result;
     }
-    */
+    
+   
+   
     
 }

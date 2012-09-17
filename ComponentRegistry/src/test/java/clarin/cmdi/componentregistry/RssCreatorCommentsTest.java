@@ -5,15 +5,14 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.rest.ComponentRegistryRestService;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssItem;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -47,12 +46,13 @@ public class RssCreatorCommentsTest {
      * 
      */
     
-    private void compareInputsVsRss(String userName, String commtext, String date, RssItem rssItem){
+    private void compareInputsVsRss(String userName, String commtext, String date, String title, RssItem rssItem){
         
         
         assertEquals(userName, rssItem.getAuthor());  
-        assertEquals(commtext, rssItem.getComments());
+        assertEquals(commtext, rssItem.getDescription());
         assertEquals(date, rssItem.getPubDate());
+        assertEquals(title, rssItem.getTitle());
        
     }
             
@@ -63,25 +63,26 @@ public class RssCreatorCommentsTest {
         
          
         Comment comm1 = makeTestComment(true, "this is comment # 1", "2012-09-13", "DescrId1", 
-                "Id1", "ProdileDescId1", "us1", "userello");
+                "Id1", "ProfileDescId1", "us1", "userello");
         
         Comment comm2 = makeTestComment(false, "this is comment # 2", "2012-10-13", "DescrId2", 
-                "Id2", "ProdileDescId2", "us2", "userino");
+                "Id2", "ProfileDescId2", "us2", "userino");
         
-        Comment comm3 = makeTestComment(true, "this is comment # 3", "2012-09-14", "DescrId2", 
-                "Id2", "ProdileDescId2", "us2", "userito");
+        Comment comm3 = makeTestComment(true, "this is comment # 3", "2012-09-14", "DescrId3", 
+                "Id3", "ProfileDescId3", "us3", "userito");
         
         Comment[] commar = {comm1, comm2, comm3};
         List<Comment> comms = new ArrayList<Comment>(Arrays.asList(commar));
         
         RssCreatorComments instance = new RssCreatorComments();
+        instance.setFlagIsFromProfile(true);
         Rss result = instance.makeRss(comms);
         
         List<RssItem> resitems = result.getChannel().getItem();
         
-        compareInputsVsRss("userello", "this is comment # 1", "2012-09-13", resitems.get(0));
-        compareInputsVsRss("userino", "this is comment # 2", "2012-10-13", resitems.get(1));
-        compareInputsVsRss("userito", "this is comment # 3", "2012-09-14", resitems.get(2));
+        compareInputsVsRss("userello", "this is comment # 1", "2012-09-13", "The comment in ProfileDescId1.", resitems.get(0));
+        compareInputsVsRss("userino", "this is comment # 2", "2012-10-13", "The comment in ProfileDescId2.", resitems.get(1));
+        compareInputsVsRss("userito", "this is comment # 3", "2012-09-14", "The comment in ProfileDescId3.", resitems.get(2));
         
     }
     
@@ -103,4 +104,6 @@ public class RssCreatorCommentsTest {
         assertEquals(null, result.getChannel().getItem());
         
     }*/
+    
+    
 }

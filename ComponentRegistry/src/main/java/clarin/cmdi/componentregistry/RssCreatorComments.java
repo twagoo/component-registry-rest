@@ -14,9 +14,14 @@ import clarin.cmdi.componentregistry.rss.RssItem;
 public class RssCreatorComments extends RssCreator<Comment> {
 
     
-    
+    private boolean isFromProfile;
     
     // creator method, comment to rssItem, ovverrides the dummy method of the RssCreator class
+    // ?? is there a better way than boolean flag to arrange switch beween comment for profiles and commentss for components
+    
+    public void setFlagIsFromProfile(boolean isFromProfile){
+        this.isFromProfile = isFromProfile;
+    }
     
     @Override  
     protected RssItem fromArgToRssItem(Comment comm) {
@@ -28,15 +33,17 @@ public class RssCreatorComments extends RssCreator<Comment> {
         
         retval.setAuthor(comm.getUserName()); 
         // retval.setCategory(desc.???);
-        retval.setComments(comm.getComment());
+        //retval.setComments(comm.??);
         
-        //retval.setDescription(comm.??); 
-        //retval.setEnclosure(desc.???);
+        retval.setDescription(comm.getComment()); 
+        //retval.setEnclosure(comm.???);
         //retval.setGuid(desc.getId()); type mismatch
         //retval.setLink(com.???);
         retval.setPubDate(comm.getCommentDate()); 
-        //retval.setSource(desc.???);
-        //retval.setTitle(com.getName());
+        // retval.setSource(comm.???);
+        
+        if (isFromProfile) {retval.setTitle("The comment in "+comm.getProfileDescriptionId()+".");}
+        else {retval.setTitle("The comment in "+comm.getComponentDescriptionId()+".");};
 
         
         return retval;
