@@ -56,7 +56,7 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
         <xs:element name="channel" type="RssChannel"/>
         <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
-      <xs:attribute name="version" type="xs:decimal" use="required" fixed="2.0"/>
+      <xs:attribute name="version" type="xs:double" use="required" fixed="2.0"/>
       <xs:anyAttribute namespace="##any"/>
     </xs:complexType>
   </xs:element>

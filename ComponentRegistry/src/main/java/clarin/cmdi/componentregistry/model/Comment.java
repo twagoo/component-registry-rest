@@ -109,6 +109,8 @@ public class Comment {
 	return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
     }
 
+    
+    
     /*
      * Helper method to set the Date
      */

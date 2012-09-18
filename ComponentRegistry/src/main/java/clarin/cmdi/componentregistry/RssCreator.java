@@ -1,7 +1,5 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
 import clarin.cmdi.componentregistry.rss.Image;
@@ -12,10 +10,14 @@ import clarin.cmdi.componentregistry.rss.RssItem;
 import clarin.cmdi.componentregistry.rss.SkipDaysList;
 import clarin.cmdi.componentregistry.rss.SkipHoursList;
 import clarin.cmdi.componentregistry.rss.TextInput;
-import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  *
@@ -46,8 +48,12 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     private SkipHoursList skipHours;
     private SkipDaysList skipDays;
     
-    private BigDecimal version; // of an rss
+    private double version=2.0; // of an rss
     
+    
+    public double getVersion(){
+        return (version);
+    }
     
     
     /**
@@ -55,7 +61,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      * @param version 
      */
 
-    public void setVersion(BigDecimal version) {
+    public void setVersion (double version) {
         this.version = version;
     }
     
@@ -326,7 +332,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     
     
       // creator method,  to rssItem 
-     protected abstract RssItem fromArgToRssItem(T obj); 
+     protected abstract RssItem fromArgToRssItem(T obj) throws ParseException; 
     
 
     
@@ -369,7 +375,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     }
 
     //makes (and returns) a list of items out a list of descriptions, return the pointer to the list of items
-   private List<RssItem> makeListOfRssItems(List<T> objs) {
+   private List<RssItem> makeListOfRssItems(List<T> objs) throws ParseException{
         List<RssItem> listOfItems = new ArrayList<RssItem>();
 
         for (T currentObj : objs) {
@@ -384,8 +390,15 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     
    
    
-   public  Rss makeRss(List<T> objs){
+   public  Rss makeRss(List<T> objs) throws ParseException{
        return(makeRssChannel(makeListOfRssItems(objs)));
    }  
     
+   
+   public String getRFCDateTime(String datestring) throws ParseException {
+       
+       Date date = DatatypeConverter.parseDateTime(datestring).getTime();
+       SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+       return RFC822DATEFORMAT.format(date);
+    }
 }

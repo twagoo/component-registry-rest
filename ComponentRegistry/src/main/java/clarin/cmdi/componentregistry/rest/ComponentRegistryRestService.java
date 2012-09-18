@@ -6,6 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.RssCreatorComments;
 import clarin.cmdi.componentregistry.RssCreatorDescriptions;
@@ -22,11 +23,15 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.security.Principal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,8 +55,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
 
 @Path("/registry")
 public class ComponentRegistryRestService {
@@ -970,7 +978,7 @@ public class ComponentRegistryRestService {
      * 
      */
     
-     private <T extends AbstractDescription> Rss getRss(boolean userspace,String limit, List<T> descs, String kindofdesc) throws ComponentRegistryException {
+     private <T extends AbstractDescription> Rss getRss(boolean userspace,String limit, List<T> descs, String kindofdesc) throws ComponentRegistryException, ParseException {
 	
         RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
         int limitInt = Integer.parseInt(limit);
@@ -990,7 +998,7 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
+    public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	
         
       List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
@@ -1006,7 +1014,7 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException {
+    public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	
        // ?? How to get 
         /* grabbing all registered profile names from the register and outputting them  on the Apachetomcat terminal */
@@ -1034,7 +1042,7 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
+    public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException, IOException, JAXBException, ParseException {
 	 
         
         
@@ -1051,10 +1059,10 @@ public class ComponentRegistryRestService {
         System.out.println(getRegistry(getStatus(userspace)).getName());    
         for (Comment comment : comments){
            System.out.println(comment.getComment());
-           
+           System.out.println(comment.getCommentDate());
             } 
         }
-        
+        // end of the testing piece
         
         // this is another testng piece: gathers all the comments from all the profiles in clarin.eu:cr1:p_1347889257775
         if (profileId.equals("clarin.eu:cr1:p_1347889257775")) {
@@ -1065,6 +1073,10 @@ public class ComponentRegistryRestService {
 	   comments.addAll(currcomments);
            
             } 
+          for (Comment comment : comments){
+           System.out.println(comment.getComment());
+           System.out.println(comment.getCommentDate());
+            }
         }
         // end of the testing piece 
         
@@ -1073,12 +1085,118 @@ public class ComponentRegistryRestService {
         
         Rss result = instance.makeRss(comments);
         
+        
+        String path=openTestDir("testRss");
+        String os = MDMarshaller.marshalToString(result);
+        writeStringToFile(os, path + "testRssResl.xml");
+        
+        
+        System.out.println(result.getVersion());
         System.out.println(result.getChannel().getItem().size());
+        
         
 	return result;
     }
     
    
-   
+   ////////////////////////////////////////////////////////
+    
+   // temporarily for rss-bug fixing
+    
+    
+     /**
+      * 
+      * @param bytes is an array of bytes to be written in the file filename (from scratch!)
+      * @param filename is the name of the file where the array "bytes" is to be written to
+      * @throws IOException
+      * @throws JAXBException 
+      */ 
+      public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
+                 
+        File file = new File(filename);
+        FileOutputStream fop = new FileOutputStream(file);
+        
+        fop.write(bytes);
+	
+        fop.flush();
+	fop.close();
+ 
+        
+      }
+    
+    
+    
+      /**
+       * 
+       * @param str is a string which is to be written into the filename (from scratch!)
+       * @param filename is a filename where the string is to be written to
+       * @throws IOException
+       * @throws JAXBException 
+       */
+      public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
+          
+        writeBytesToFile(str.getBytes(), filename);
+ 
+        
+      }
+      
+    /**
+       * 
+       * @param os is an output stream which is to be written into the filename (from scratch!)
+       * @param filename is a filename where the stream is to be written to
+       * @throws IOException
+       * @throws JAXBException 
+       */
+      
+      public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
+          
+        writeBytesToFile(os.toByteArray(), filename);
+ 
+        
+      }
+      
+    
+    /**
+     * 
+     * @param cdesc is a component which is to be written into the filename (from scratch!)
+     * @param filename is a filename where the component is to be written to
+     * @throws IOException
+     * @throws JAXBException 
+     */  
+    public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
+        
+       
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+	MDMarshaller.marshal(cdesc, os);
+        
+        writeStreamToFile(os, filename);
+       
+    }
+      
+      
+      
+      
+      /**
+       * opens a temporary sub-directory dirName in /target/
+       * @param dirName is the name of the temporary subdirectory which is to be opened
+       * @return the absolute part for this directory
+       */
+      public static String openTestDir(String dirName){
+      
+         File testDir = new File("target/" + dirName);
+         
+         
+         testDir.mkdir();
+         
+         System.out.println(dirName);
+         //String retval = new File(testDir, dirName).getAbsolutePath();
+         String retval = new File(testDir, "/").getAbsolutePath();
+        
+         return(retval);
+         
+      }
+    
+    
+    
     
 }

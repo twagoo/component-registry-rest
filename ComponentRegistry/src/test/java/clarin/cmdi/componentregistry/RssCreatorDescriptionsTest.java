@@ -9,11 +9,11 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import java.math.BigDecimal;
 import javax.xml.bind.JAXBException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -103,7 +103,7 @@ public class RssCreatorDescriptionsTest {
      * Checks if the values of the fields in each item are as expected
      */
     @Test
-    public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException{
+    public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
 
         
         
@@ -122,8 +122,8 @@ public class RssCreatorDescriptionsTest {
         
         
         
-        BigDecimal tmp= new BigDecimal("2.0");
-        instance.setVersion(tmp);
+        
+        instance.setVersion(2.0);
         
         instance.setCategory(null);
         instance.setCloud(null);
@@ -145,7 +145,7 @@ public class RssCreatorDescriptionsTest {
         instance.setWebMaster("webMaster");
         
         Rss result = instance.makeRss(descriptions);
-        
+        assertEquals(Double.toString(result.getVersion()), "2.0");
         
         
         List<RssItem> items = result.getChannel().getItem();
@@ -164,7 +164,7 @@ public class RssCreatorDescriptionsTest {
 
         
         
-        assertEquals(tmp, result.getVersion());
+        assertEquals("2.0", Double.toString(result.getVersion()));
         
         assertEquals(null, result.getChannel().getCategory());
         assertEquals(null, result.getChannel().getCloud());
@@ -195,7 +195,7 @@ public class RssCreatorDescriptionsTest {
     // the test below shows that if we do not set parameters for the channel or no version for Rss
     // then nothing wrong happen, no null pointer exception, etc.
     @Test
-    public void testMakeRssNoChannelSet() throws JAXBException, UnsupportedEncodingException, IOException{
+    public void testMakeRssNoChannelSet() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
 
        
         ProfileDescription desc1 = createTestProfileDescription(23, "Joe Unit",

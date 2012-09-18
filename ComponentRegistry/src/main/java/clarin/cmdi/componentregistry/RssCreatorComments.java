@@ -6,6 +6,7 @@ package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rss.RssItem;
+import java.text.ParseException;
 
 /**
  *
@@ -19,12 +20,12 @@ public class RssCreatorComments extends RssCreator<Comment> {
     // creator method, comment to rssItem, ovverrides the dummy method of the RssCreator class
     // ?? is there a better way than boolean flag to arrange switch beween comment for profiles and commentss for components
     
-    public void setFlagIsFromProfile(boolean isFromProfile){
+    public void setFlagIsFromProfile(boolean isFromProfile) {
         this.isFromProfile = isFromProfile;
     }
     
     @Override  
-    protected RssItem fromArgToRssItem(Comment comm) {
+    protected RssItem fromArgToRssItem(Comment comm) throws ParseException{
 
 
        
@@ -39,7 +40,8 @@ public class RssCreatorComments extends RssCreator<Comment> {
         //retval.setEnclosure(comm.???);
         //retval.setGuid(desc.getId()); type mismatch
         //retval.setLink(com.???);
-        retval.setPubDate(comm.getCommentDate()); 
+        
+        retval.setPubDate(getRFCDateTime(comm.getCommentDate())); 
         // retval.setSource(comm.???);
         
         if (isFromProfile) {retval.setTitle("The comment in "+comm.getProfileDescriptionId()+".");}
@@ -50,5 +52,7 @@ public class RssCreatorComments extends RssCreator<Comment> {
         
         
     }
+    
+    
     
 }
