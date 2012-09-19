@@ -21,6 +21,8 @@ public class RssMarshallingTest {
     @Test
     public void testMarshall() throws Exception {
 	final Rss rss = new Rss();
+        
+        rss.setVersion(2.0);
 
 	final RssChannel channel = new RssChannel();
 	rss.setChannel(channel);
@@ -38,7 +40,8 @@ public class RssMarshallingTest {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
 	MDMarshaller.marshal(rss, os);
 	String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
-		+ "<rss>\n"
+		+ "<rss version=\"2.0\""
+                + ">\n"
 		+ "    <channel>\n"
 		+ "        <item>\n"
 		+ "            <title>Item 1</title>\n"
