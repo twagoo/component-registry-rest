@@ -46,7 +46,7 @@ public class RssCreatorCommentsTest {
     private void compareInputsVsRssItems(String userName, String commtext, String date, String title, RssItem rssItem){
         
         
-        assertEquals(userName, rssItem.getAuthor());  
+        assertEquals(userName, rssItem.getCreator().getValue());  
         assertEquals(commtext, rssItem.getDescription());
         assertEquals(date, rssItem.getPubDate());
         assertEquals(title, rssItem.getTitle());
@@ -75,16 +75,20 @@ public class RssCreatorCommentsTest {
         assertEquals(Double.toString(instance.getVersion()) , "2.0"); // check if the default version is set properly
         
         instance.setFlagIsFromProfile(true);
-        instance.setVersion(2.0);
+        instance.setVersion(3.0); 
         
         Rss result = instance.makeRss(comms);
         
-        assertEquals(Double.toString(result.getVersion()), "2.0");
+        assertEquals(Double.toString(result.getVersion()), "3.0"); // now, check if updating version has taken place
+        
+        String rfcdate1 = instance.getRFCDateTime("2012-04-02T11:38:23+00:00");
+        String rfcdate2 = instance.getRFCDateTime("2012-05-02T12:38:23+00:00");
+        String rfcdate3 = instance.getRFCDateTime("2012-04-07T11:38:23+01:00");
         
         List<RssItem> resitems = result.getChannel().getItem();
-        //compareInputsVsRssItems("userello", "this is comment # 1", "2012-04-02T11:38:23+00:00", "The comment in ProfileDescId1.", resitems.get(0));
-        //compareInputsVsRssItems("userino", "this is comment # 2", "2012-10-13", "The comment in ProfileDescId2.", resitems.get(1));
-        //compareInputsVsRssItems("userito", "this is comment # 3", "2012-09-14", "The comment in ProfileDescId3.", resitems.get(2));
+        compareInputsVsRssItems("userello", "this is comment # 1", rfcdate1 , "The comment in ProfileDescId1.", resitems.get(0));
+        compareInputsVsRssItems("userino", "this is comment # 2", rfcdate2, "The comment in ProfileDescId2.", resitems.get(1));
+        compareInputsVsRssItems("userito", "this is comment # 3", rfcdate3, "The comment in ProfileDescId3.", resitems.get(2));
         
         
         System.out.println(resitems.get(0).getPubDate());

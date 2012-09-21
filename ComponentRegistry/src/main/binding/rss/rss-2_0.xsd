@@ -38,9 +38,13 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
     (E) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement. 
 
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-           elementFormDefault="unqualified" 
-           version="2.0.2.16">
+<xs:schema 
+  xmlns:dc="http://purl.org/dc/elements/1.1/" 
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified" 
+  version="2.0.2.16">
+  
   <xs:annotation>
     <xs:documentation>XML Schema for RSS v2.0 feed files.</xs:documentation>
     <xs:documentation>Project home: http://www.codeplex.com/rss2schema/ </xs:documentation>
@@ -50,6 +54,18 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
     <xs:documentation>Date: 01-Nov-2008</xs:documentation>
     <xs:documentation>Feedback to: http://www.codeplex.com/rss2schema/WorkItem/List.aspx </xs:documentation>
   </xs:annotation>
+  
+  
+  <xs:import  namespace="http://purl.org/dc/elements/1.1/"
+    schemaLocation="http://dublincore.org/schemas/xmls/simpledc20021212.xsd"/>
+  
+  <xs:import namespace="http://www.w3.org/2005/Atom" schemaLocation="http://dataconnector.eea.europa.eu/wise/bwqd/atom.xsd"/>
+  <!--   Possible schemaLocation for Atom: 
+     "http://www.w3.org/2005/Atom http://www.openarchives.org/OAI/2.0/atom_entry.xsd" : was not found 
+      "http://dataconnector.eea.europa.eu/wise/bwqd/atom.xsd" - currently it is there 
+        http://dataconnector.eea.europa.eu/wise/bwqd/atom.xsd - not checked -->
+  
+  
   <xs:element name="rss">
     <xs:complexType>
       <xs:sequence>
@@ -65,170 +81,178 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
       <xs:documentation>An item may represent a "story" -- much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. An item may also be complete in itself, if so, the description contains the text (entity-encoded HTML is allowed), and the link and title may be omitted.</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-        <xs:element name="title" type="xs:string" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The title of the item.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="description" type="xs:string" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The item synopsis.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="link" type="xs:anyURI" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The URL of the item.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="author" type="EmailAddress" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Email address of the author of the item.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="category" type="Category" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Includes the item in one or more categories. </xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="comments" type="xs:anyURI" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>URL of a page for comments relating to the item.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="enclosure" type="Enclosure" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Describes a media object that is attached to the item.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="guid" type="Guid" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>guid or permalink URL for this entry</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="pubDate" type="Rfc822FormatDate" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Indicates when the item was published.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="source" type="Source" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The RSS channel that the item came from.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded">
-          <xs:annotation>
-            <xs:documentation>Extensibility element.</xs:documentation>
-          </xs:annotation>
-        </xs:any>
-      
+      <xs:element name="title" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The title of the item.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="description" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The item synopsis.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="link" type="xs:anyURI" minOccurs="0">
+        <xs:annotation>
+          <!--          <xs:documentation>The URL of the item.</xs:documentation>-->
+        </xs:annotation>
+      </xs:element> 
+      <xs:element ref="dc:creator"></xs:element>
+      <!-- 
+        The value for "author" must be an e-mail, 
+        otherwise the rss-feed will not be validated.
+        Sunce we want to have just the author's name there, 
+        we must use the element
+        dc:creator
+        <xs:element name="author" type="xs:string" minOccurs="0" nillable="false">
+        <xs:annotation>
+          <xs:documentation>The name of the author of the item.</xs:documentation>
+        </xs:annotation>
+      </xs:element> -->
+      <xs:element name="category" type="Category" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Includes the item in one or more categories. </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="comments" type="xs:anyURI" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>URL of a page for comments relating to the item.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="enclosure" type="Enclosure" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Describes a media object that is attached to the item.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="guid" type="Guid" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>guid or permalink URL for this entry</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pubDate" type="Rfc822FormatDate" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Indicates when the item was published.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="source" type="Source" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The RSS channel that the item came from.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>Extensibility element.</xs:documentation>
+        </xs:annotation>
+      </xs:any>
     </xs:sequence>
     <xs:anyAttribute namespace="##any"/>
   </xs:complexType>
   <xs:complexType name="RssChannel">
     <xs:sequence>
-        <xs:element name="title" type="xs:string">
-          <xs:annotation>
-            <xs:documentation>The name of the channel. It's how people refer to your service. If you have an HTML website that contains the same information as your RSS file, the title of your channel should be the same as the title of your website.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="link" type="xs:anyURI">
-          <xs:annotation>
-            <xs:documentation>The URL to the HTML website corresponding to the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="description" type="xs:string">
-          <xs:annotation>
-            <xs:documentation>Phrase or sentence describing the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="language" type="xs:language" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The language the channel is written in. This allows aggregators to group all Italian language sites, for example, on a single page. A list of allowable values for this element, as provided by Netscape, is here. You may also use values defined by the W3C.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="copyright" type="xs:string" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Copyright notice for content in the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="managingEditor" type="EmailAddress" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Email address for person responsible for editorial content.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="webMaster" type="EmailAddress" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Email address for person responsible for technical issues relating to channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="pubDate" type="Rfc822FormatDate" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The publication date for the content in the channel. All date-times in RSS conform to the Date and Time Specification of RFC 822, with the exception that the year may be expressed with two characters or four characters (four preferred).</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="lastBuildDate" type="Rfc822FormatDate" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The last time the content of the channel changed.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="category" type="Category" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Specify one or more categories that the channel belongs to.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="generator" type="xs:string" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>A string indicating the program used to generate the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="docs" type="xs:anyURI" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>A URL that points to the documentation for the format used in the RSS file. It's probably a pointer to this page. It's for people who might stumble across an RSS file on a Web server 25 years from now and wonder what it is.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="cloud" type="Cloud" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Allows processes to register with a cloud to be notified of updates to the channel, implementing a lightweight publish-subscribe protocol for RSS feeds.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="ttl" type="xs:nonNegativeInteger" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>ttl stands for time to live. It's a number of minutes that indicates how long a channel can be cached before refreshing from the source.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="image" type="Image" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Specifies a GIF, JPEG or PNG image that can be displayed with the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="rating" type="xs:string" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>The PICS rating for the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="textInput" type="TextInput" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>Specifies a text input box that can be displayed with the channel.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="skipHours" type="SkipHoursList" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>A hint for aggregators telling them which hours they can skip.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="skipDays" type="SkipDaysList" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>A hint for aggregators telling them which days they can skip.</xs:documentation>
-          </xs:annotation>
-        </xs:element>
-      
+      <!-- <xs:element ref="atom:link" /> -->
+      <xs:element name="title" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>The name of the channel. It's how people refer to your service. If you have an HTML website that contains the same information as your RSS file, the title of your channel should be the same as the title of your website.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <!-- <xs:element name="link" type="xs:anyURI">
+        <xs:annotation>
+          <xs:documentation>The URL to the HTML website corresponding to the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element> -->
+      <xs:element name="description" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>Phrase or sentence describing the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="language" type="xs:language" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The language the channel is written in. This allows aggregators to group all Italian language sites, for example, on a single page. A list of allowable values for this element, as provided by Netscape, is here. You may also use values defined by the W3C.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="copyright" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Copyright notice for content in the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="managingEditor" type="EmailAddress" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Email address for person responsible for editorial content.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="webMaster" type="EmailAddress" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Email address for person responsible for technical issues relating to channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pubDate" type="Rfc822FormatDate" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The publication date for the content in the channel. All date-times in RSS conform to the Date and Time Specification of RFC 822, with the exception that the year may be expressed with two characters or four characters (four preferred).</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="lastBuildDate" type="Rfc822FormatDate" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The last time the content of the channel changed.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="category" type="Category" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Specify one or more categories that the channel belongs to.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="generator" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>A string indicating the program used to generate the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="docs" type="xs:anyURI" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>A URL that points to the documentation for the format used in the RSS file. It's probably a pointer to this page. It's for people who might stumble across an RSS file on a Web server 25 years from now and wonder what it is.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="cloud" type="Cloud" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Allows processes to register with a cloud to be notified of updates to the channel, implementing a lightweight publish-subscribe protocol for RSS feeds.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ttl" type="xs:nonNegativeInteger" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>ttl stands for time to live. It's a number of minutes that indicates how long a channel can be cached before refreshing from the source.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="image" type="Image" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Specifies a GIF, JPEG or PNG image that can be displayed with the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="rating" type="xs:string" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>The PICS rating for the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="textInput" type="TextInput" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Specifies a text input box that can be displayed with the channel.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="skipHours" type="SkipHoursList" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>A hint for aggregators telling them which hours they can skip.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="skipDays" type="SkipDaysList" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>A hint for aggregators telling them which days they can skip.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+
       <xs:element name="item" type="RssItem" minOccurs="1" maxOccurs="unbounded">
-         <!-- 
+        <!-- 
            HACK: According to the RSS 2.0 spec, it should strictly be possible to have zero item elements, 
                  but this makes the schema non-deterministic with regard to extensibility elements
                  so for the moment we undid bug-fix 10231 and set minOccurs=1 to work around this problem. 
          -->
       </xs:element>
+      <xs:element ref="atom:link" />
     </xs:sequence>
     <xs:anyAttribute namespace="##any"/>
   </xs:complexType>
@@ -375,7 +399,9 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
       <xs:documentation>Using the regexp definiton of E-Mail Address by Lucadean from the .NET RegExp Pattern Repository at http://www.3leaf.com/default/NetRegExpRepository.aspx </xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:string">
-      <xs:pattern value="([a-zA-Z0-9_\-])([a-zA-Z0-9_\-\.]*)@(\[((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}|((([a-zA-Z0-9\-]+)\.)+))([a-zA-Z]{2,}|(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\])"/>
+      <xs:pattern
+        value="([a-zA-Z0-9_\-])([a-zA-Z0-9_\-\.]*)@(\[((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\.){3}|((([a-zA-Z0-9\-]+)\.)+))([a-zA-Z]{2,}|(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\])"
+      />
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="Rfc822FormatDate">
@@ -384,7 +410,9 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
       <xs:documentation>Using the regexp definiton of rfc-822 date by Sam Ruby at http://www.intertwingly.net/blog/1360.html </xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:string">
-      <xs:pattern value="(((Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)), *)?\d\d? +((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec)) +\d\d(\d\d)? +\d\d:\d\d(:\d\d)? +(([+\-]?\d\d\d\d)|(UT)|(GMT)|(EST)|(EDT)|(CST)|(CDT)|(MST)|(MDT)|(PST)|(PDT)|\w)"/>
+      <xs:pattern
+        value="(((Mon)|(Tue)|(Wed)|(Thu)|(Fri)|(Sat)|(Sun)), *)?\d\d? +((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec)) +\d\d(\d\d)? +\d\d:\d\d(:\d\d)? +(([+\-]?\d\d\d\d)|(UT)|(GMT)|(EST)|(EDT)|(CST)|(CDT)|(MST)|(MDT)|(PST)|(PDT)|\w)"
+      />
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="Source">
@@ -423,7 +451,7 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
     </xs:simpleContent>
   </xs:complexType>
 
-<!--
+  <!--
 TODO:
 - Need to add regexp pattern for MIME media-type value of tEnclosure/type
 - Need to add regexp pattern for checking contents of guid is a URL when isPermaLink=true"
@@ -435,7 +463,7 @@ TODO:
   Need to reconsider the solution to bug-fix 10231.
 -->
 
-<!--
+  <!--
 Change Log:
 Date        Revision  Description
 31-Mar-2003   1       Initial version released for comment

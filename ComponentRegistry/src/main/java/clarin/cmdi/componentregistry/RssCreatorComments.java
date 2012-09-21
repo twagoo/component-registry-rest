@@ -30,15 +30,18 @@ public class RssCreatorComments extends RssCreator<Comment> {
 
        
         RssItem retval = new RssItem();
-
         
-        retval.setAuthor(comm.getUserName()); 
+        
+        
+        retval.setCreator(makeElementType(comm.getUserName())); 
+        
         // retval.setCategory(desc.???);
         //retval.setComments(comm.??);
         
         retval.setDescription(comm.getComment()); 
         //retval.setEnclosure(comm.???);
-        //retval.setGuid(desc.getId()); type mismatch
+        
+        retval.setGuid(makeGuid("The id of the comment is"+comm.getId()+"in the profile "+comm.getProfileDescriptionId()));
         //retval.setLink(com.???);
         
         retval.setPubDate(getRFCDateTime(comm.getCommentDate())); 

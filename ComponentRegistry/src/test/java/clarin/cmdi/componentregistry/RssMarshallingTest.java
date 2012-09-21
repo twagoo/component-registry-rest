@@ -40,7 +40,7 @@ public class RssMarshallingTest {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
 	MDMarshaller.marshal(rss, os);
 	String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
-		+ "<rss version=\"2.0\""
+		+ "<rss version=\"2.0\" xmlns:ns2=\"http://purl.org/dc/elements/1.1/\""
                 + ">\n"
 		+ "    <channel>\n"
 		+ "        <item>\n"

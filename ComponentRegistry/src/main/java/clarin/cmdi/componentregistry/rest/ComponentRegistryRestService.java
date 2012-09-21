@@ -981,6 +981,7 @@ public class ComponentRegistryRestService {
      private <T extends AbstractDescription> Rss getRss(boolean userspace,String limit, List<T> descs, String kindofdesc) throws ComponentRegistryException, ParseException {
 	
         RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
+        rssCreator.setVersion(2.0);
         int limitInt = Integer.parseInt(limit);
         
         if (descs.size()<limitInt) {limitInt = descs.size();};
@@ -1001,6 +1002,10 @@ public class ComponentRegistryRestService {
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	
         
+        
+        //http://www.clarin.eu/cmdi/components
+        
+        
       List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
       Rss rss = getRss(userspace, limit, components, "components");
         
@@ -1016,19 +1021,8 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	
-       // ?? How to get 
-        /* grabbing all registered profile names from the register and outputting them  on the Apachetomcat terminal */
-        List<ProfileDescription> lprf = getRegisteredProfiles(userspace, true);
-        
-        
-        for (ProfileDescription currentProfile : lprf){
-            
-           String currentProfileId =  currentProfile.getId();
-           System.out.println(currentProfileId);
-        
-        } 
-        /* end of grabbing */
-        
+        //http://www.clarin.eu/cmdi/profiles 
+       
         // ?? How to get rid of the deprecated stuff ??
        List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
        Rss rss = getRss(userspace, limit, profiles, "profiles");
@@ -1042,50 +1036,66 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException, IOException, JAXBException, ParseException {
+    public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
 	 
         
+        // ?? this is a testing version. But, anyway, how to get all the profiles without the need to type them in?
+        // what if a user do not remember his/her id of profile?
+        /* grabbing all registered profile names from the register and outputting them  on the tomcat terminal */
+        List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
+        
+        
+        for (ProfileDescription currentProfile : lprfaux){
+            
+           String currentProfileId =  currentProfile.getId();
+           System.out.println(currentProfileId);
+        
+        } 
+        /* end of grabbing */
+        
+        
+        // TODO: add sorting and limiting items per page!
         
 	final Principal principal = security.getUserPrincipal();
 	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
 	
+        int limitInt = Integer.parseInt(limit);
+        
+        if (comments.size()<limitInt) {limitInt = comments.size();};
+        List<Comment> sublist = comments.subList(0, limitInt);
+        
          
         RssCreatorComments instance = new RssCreatorComments();
         instance.setFlagIsFromProfile(true);
+        instance.setDescription("Update of comments for the profile "+profileId);
+        instance.setLink("http://www.clarin.eu/cmdi/profiles/"+profileId+"/comments/");
+        instance.setTitle("Comments feed for the profile"+profileId);
+        
+        
         
          //this is a testing piece testing piece: prints out on tomcat's output terminal the comments 
         // from  clarin.eu:cr1:p_1284723009187
-        if (profileId.equals("clarin.eu:cr1:p_1284723009187")) {
-        System.out.println(getRegistry(getStatus(userspace)).getName());    
-        for (Comment comment : comments){
+        if (profileId.equals("clarin.eu:cr1:p_1284723009187") || profileId.equals("clarin.eu:cr1:p_1347889257775")) {
+        ComponentRegistry registry = getRegistry(getStatus(userspace));
+        System.out.println("Name: "+ registry.getName());
+        System.out.println("Owner: "+ registry.getOwner());
+        for (Comment comment : sublist){
            System.out.println(comment.getComment());
            System.out.println(comment.getCommentDate());
+           System.out.println(comment.getComponentDescriptionId());
+           System.out.println(comment.getId());
+           System.out.println(comment.getProfileDescriptionId());
+           System.out.println(comment.getUserId());
+           System.out.println(comment.getUserName());
+          
             } 
         }
         // end of the testing piece
         
-        // this is another testng piece: gathers all the comments from all the profiles in clarin.eu:cr1:p_1347889257775
-        if (profileId.equals("clarin.eu:cr1:p_1347889257775")) {
-        List<ProfileDescription> lprf = getRegisteredProfiles(userspace, true);
-        for (ProfileDescription currentProfile : lprf){
-           String currentProfileId =  currentProfile.getId();
-           List<Comment> currcomments = getRegistry(getStatus(userspace)).getCommentsInProfile(currentProfileId, principal);
-	   comments.addAll(currcomments);
-           
-            } 
-          for (Comment comment : comments){
-           System.out.println(comment.getComment());
-           System.out.println(comment.getCommentDate());
-            }
-        }
-        // end of the testing piece 
-        
-       
-        
         
         Rss result = instance.makeRss(comments);
         
-        
+        // testing stuff
         String path=openTestDir("testRss");
         String os = MDMarshaller.marshalToString(result);
         writeStringToFile(os, path + "testRssResl.xml");
@@ -1093,7 +1103,8 @@ public class ComponentRegistryRestService {
         
         System.out.println(result.getVersion());
         System.out.println(result.getChannel().getItem().size());
-        
+        System.out.println(comments.size());
+        // end of testing stuff
         
 	return result;
     }

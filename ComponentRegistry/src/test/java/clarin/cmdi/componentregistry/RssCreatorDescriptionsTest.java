@@ -91,7 +91,7 @@ public class RssCreatorDescriptionsTest {
 
     //////////////////////////////////////
     private void compareRssVsValues(String creatorname, String description, String href, String date, String nametitle, RssItem item) {
-        assertEquals(creatorname, item.getAuthor());
+        assertEquals(creatorname, item.getCreator().getValue());
         assertEquals(description, item.getDescription());
         assertEquals(href, item.getLink());
         assertEquals(date, item.getPubDate());
