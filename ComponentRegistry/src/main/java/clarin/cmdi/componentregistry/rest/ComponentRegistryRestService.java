@@ -1067,8 +1067,8 @@ public class ComponentRegistryRestService {
          
         RssCreatorComments instance = new RssCreatorComments();
         instance.setFlagIsFromProfile(true);
-        instance.setDescription("Update of comments for the profile "+profileId);
-        instance.setLink("http://www.clarin.eu/cmdi/profiles/"+profileId+"/comments/");
+        instance.setDescription("Update of comments for current profile");
+        instance.setLink("http://www.clarin.eu/cmdi/profiles/");
         instance.setTitle("Comments feed for the profile"+profileId);
         
         
