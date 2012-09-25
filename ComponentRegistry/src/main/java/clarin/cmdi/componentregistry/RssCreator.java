@@ -2,10 +2,8 @@ package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
-import clarin.cmdi.componentregistry.rss.ElementType;
 import clarin.cmdi.componentregistry.rss.Guid;
 import clarin.cmdi.componentregistry.rss.Image;
-import clarin.cmdi.componentregistry.rss.Link;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssChannel;
 
@@ -29,7 +27,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
 
     // all the fields below are not mandatory, no crashes will happen if they are not set
     private String title;
-    private String href;
+    private String link;
     private String description;
     private String language;
     private String copyright;
@@ -78,7 +76,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setLink(String value) {
-        this.href = value;
+        this.link = value;
     }
 
     /**
@@ -269,7 +267,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
         channel.setImage(image);
         channel.setLanguage(language);
         channel.setLastBuildDate(lastBuildDate);
-        channel.setLink(makeLink(href));
+        channel.setLink(link);
         channel.setManagingEditor(managingEditor);
         channel.setPubDate(pubDate);
         channel.setRating(rating);
@@ -285,12 +283,6 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
 
         rss.setVersion(version);
 
-
-
-        // QName x= new QName("xmlns:dc");
-
-
-        // rss.getOtherAttributes().put(x, "http://purl.org/dc/elements/1.1");
 
 
 
@@ -317,6 +309,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     public Rss makeRss(List<T> objs) throws ParseException {
         return (makeRssChannel(makeListOfRssItems(objs)));
     }
+    
 
     protected String getRFCDateTime(String datestring) throws ParseException {
 
@@ -325,28 +318,12 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
         return RFC822DATEFORMAT.format(date);
     }
 
-    protected ElementType makeElementType(String username) {
-        ElementType result = new ElementType();
-        result.setValue(username);
-        result.setLang(null);
-        return result;
-    }
     
-    protected Guid makeGuid(String id){
+   protected Guid makeGuid(String id){
         Guid result = new Guid();
         result.setIsPermaLink(null);
         result.setValue(id);
         return result;
     }
     
-    protected Link makeLink(String href){
-        
-        Link lnk = new Link();
-        lnk.setHref(href);
-        //rel="self" type="application/rss+xml
-        lnk.setRel("self");
-        return lnk;
-        
-        
-    }
 }

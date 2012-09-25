@@ -46,28 +46,27 @@ public class RssCreatorDescriptionsTest {
     
 
     private void createTestDescription(AbstractDescription desc, int commentcount, String creatorname,
-            String description, String domainname, String groupname, String href,
-            String name, String uid, String date) {
+            String description, String domainname, String groupname, 
+            String name, String date, String href) {
 
         desc.setCommentsCount(commentcount);
         desc.setCreatorName(creatorname);
         desc.setDescription(description);
         desc.setDomainName(domainname);
         desc.setGroupName(groupname);
-        desc.setHref(href);
         desc.setName(name);
-        desc.setUserId(uid);
         desc.setRegistrationDate(date);
+        desc.setHref(href);
 
     }
 
     private ProfileDescription createTestProfileDescription(int commentcount, String creatorname,
-            String description, String domainname, String groupname, String href,
-            String name, boolean editorFlag, String uid, String date) {
+            String description, String domainname, String groupname, 
+            String name, boolean editorFlag, String date, String href) {
 
         ProfileDescription pdesc = ProfileDescription.createNewDescription();
 
-        createTestDescription(pdesc, commentcount, creatorname, description, domainname, groupname, href, name, uid, date);
+        createTestDescription(pdesc, commentcount, creatorname, description, domainname, groupname, name, date, href);
 
         pdesc.setShowInEditor(editorFlag);
 
@@ -77,12 +76,12 @@ public class RssCreatorDescriptionsTest {
     }
 
     private ComponentDescription createTestComponentDescription(int commentcount, String creatorname,
-            String description, String domainname, String groupname, String href,
-            String name, String uid, String date) {
+            String description, String domainname, String groupname, 
+            String name, String date, String href) {
 
         ComponentDescription cdesc = ComponentDescription.createNewDescription();
 
-        createTestDescription(cdesc, commentcount, creatorname, description, domainname, groupname, href, name, uid, date);
+        createTestDescription(cdesc, commentcount, creatorname, description, domainname, groupname, name, date, href);
 
         return cdesc;
 
@@ -90,12 +89,12 @@ public class RssCreatorDescriptionsTest {
     }
 
     //////////////////////////////////////
-    private void compareRssVsValues(String creatorname, String description, String href, String date, String nametitle, RssItem item) {
-        assertEquals(creatorname, item.getCreator().getValue());
+    private void compareRssVsValues(String description, String href, String date, String title, RssItem item) {
+       
         assertEquals(description, item.getDescription());
-        assertEquals(href, item.getLink());
+        assertEquals(href, item.getGuid().getValue()  );
         assertEquals(date, item.getPubDate());
-        assertEquals(nametitle, item.getTitle());
+        assertEquals(title, item.getTitle());
     }
 
     /**
@@ -105,16 +104,16 @@ public class RssCreatorDescriptionsTest {
     @Test
     public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
 
+        String href="http";
         
-        
-        ProfileDescription desc1 = createTestProfileDescription(23, "Joe Unit",
-                "description-1", "domainname-1", "groupname-1", "href-1", "titlename-1", true, "uid1", "2001-01-01");
+        ProfileDescription desc1 = createTestProfileDescription(23, "Creator 1",
+                "description-1", "domainname-1", "groupname-1", "name-1", true, "2001-01-01", href);
 
-        ProfileDescription desc2 = createTestProfileDescription(23, "Joe Unit",
-                "description-2", "domainname-2", "groupname-2", "href-2", "titlename-2", false, "uid-2", "2001-01-02");
+        ProfileDescription desc2 = createTestProfileDescription(23, "Creator 2",
+                "description-2", "domainname-2", "groupname-2", "name-2", false, "2001-01-02", href);
 
-        ProfileDescription desc3 = createTestProfileDescription(23, "Terminator",
-                "description-3", "domainname-3", "groupname-3", "href-3", "titlename-3", true, "uid-3", "2001-01-03");
+        ProfileDescription desc3 = createTestProfileDescription(23, "Creator 3",
+                "description-3", "domainname-3", "groupname-3", "name-3", true, "2001-01-03", href);
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
 
@@ -125,6 +124,7 @@ public class RssCreatorDescriptionsTest {
         
         instance.setVersion(2.0);
         
+        instance.setLink(href);
         instance.setCategory(null);
         instance.setCloud(null);
         instance.setCopyright("copyleft");
@@ -134,7 +134,6 @@ public class RssCreatorDescriptionsTest {
         instance.setImage(null);
         instance.setLanguage("engl");
         instance.setLastBuildDate("today");
-        instance.setLink("link");
         instance.setManagingEditor("twan");
         instance.setPubDate("publication date");
         instance.setRating("rating");
@@ -153,14 +152,14 @@ public class RssCreatorDescriptionsTest {
         assertEquals(3, result.getChannel().getItem().size());
 
         // String creatorname, String description, String href, String date, String nametitle, RssItem item
-        compareRssVsValues("Joe Unit",
-                "description-1", "href-1", "2001-01-01", "titlename-1", items.get(0));
+        compareRssVsValues("description-1", href, "2001-01-01", 
+                   instance.makeDescriptionTitle("name-1", "Creator-1", "groupname-1","domainname-1"), items.get(0));
 
-        compareRssVsValues("Joe Unit",
-                "description-2", "href-2", "2001-01-02", "titlename-2", items.get(1));
+        compareRssVsValues("description-2", href, "2001-01-02", 
+                instance.makeDescriptionTitle("name-2", "Creator-2", "groupname-2","domainname-2"), items.get(1));
 
-        compareRssVsValues("Terminator",
-                "description-3", "href-3", "2001-01-03", "titlename-3", items.get(2));
+        compareRssVsValues("description-3", href, "2001-01-03", 
+                instance.makeDescriptionTitle("name-3", "Creator-3", "groupname-3","domainname-3"), items.get(2));
 
         
         
@@ -175,7 +174,7 @@ public class RssCreatorDescriptionsTest {
         assertEquals(null, result.getChannel().getImage());
         assertEquals("engl", result.getChannel().getLanguage());
         assertEquals("today", result.getChannel().getLastBuildDate());
-        assertEquals("link", result.getChannel().getLink());
+        assertEquals(href, result.getChannel().getLink());
         assertEquals("twan", result.getChannel().getManagingEditor());
         assertEquals("publication date", result.getChannel().getPubDate());
         assertEquals("rating", result.getChannel().getRating());
@@ -191,40 +190,5 @@ public class RssCreatorDescriptionsTest {
         RegistryTestHelper.writeStringToFile(os, path + "testRss1.xml");
     }
     
-    
-    // the test below shows that if we do not set parameters for the channel or no version for Rss
-    // then nothing wrong happen, no null pointer exception, etc.
-    @Test
-    public void testMakeRssNoChannelSet() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
-
-       
-        ProfileDescription desc1 = createTestProfileDescription(23, "Joe Unit",
-                "description-1", "domainname-1", "groupname-1", "href-1", "titlename-1", true, "uid1", "2001-01-01");
-
-        List<ProfileDescription> descriptions = Arrays.asList(desc1);
-
-        RssCreatorDescriptions instance = new RssCreatorDescriptions();
-        Rss result = instance.makeRss(descriptions);
-        
-
-        List<RssItem> items = result.getChannel().getItem();
-
-        assertEquals(1, result.getChannel().getItem().size());
-
-        // String creatorname, String description, String href, String date, String nametitle, RssItem item
-        compareRssVsValues("Joe Unit",
-                "description-1", "href-1", "2001-01-01", "titlename-1", items.get(0));
-
-        
-        //write the Rss chaneel into the file, so you can see  how it looks like in the browser
-        String path=RegistryTestHelper.openTestDir("testRss");
-        String os = MDMarshaller.marshalToString(result);
-        RegistryTestHelper.writeStringToFile(os, path + "testRssNoChannelSet.xml");
-    }
-
-  
+   
 }
-// String comp1 = "Component1.xml";
-// String path = RegistryTestHelper.openTestDir("MyTestXmls");
-// FileInputStream is1 = new FileInputStream(path + comp1);
-// ComponentDescription desc1 = MDMarshaller.unmarshal(ComponentDescription.class, is1, null);

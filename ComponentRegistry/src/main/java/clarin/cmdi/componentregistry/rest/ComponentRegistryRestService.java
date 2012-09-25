@@ -6,6 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.ExtendedComment;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.RssCreatorComments;
@@ -982,6 +983,8 @@ public class ComponentRegistryRestService {
 	
         RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
         rssCreator.setVersion(2.0);
+        
+        
         int limitInt = Integer.parseInt(limit);
         
         if (descs.size()<limitInt) {limitInt = descs.size();};
@@ -1054,24 +1057,34 @@ public class ComponentRegistryRestService {
         /* end of grabbing */
         
         
-        // TODO: add sorting and limiting items per page!
+        // TODO: add sorting !
         
 	final Principal principal = security.getUserPrincipal();
 	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
-	
+
+        
         int limitInt = Integer.parseInt(limit);
         
         if (comments.size()<limitInt) {limitInt = comments.size();};
-        List<Comment> sublist = comments.subList(0, limitInt);
+        List<Comment> sublistAux = comments.subList(0, limitInt);
+        
+        String href = getRegistry(getStatus(userspace)).getProfileDescription(profileId).getHref();
+        
+        List<ExtendedComment> sublist = new ArrayList<ExtendedComment>();
+        for (Comment currentcom : sublistAux) {
+            ExtendedComment currentextcom = new ExtendedComment();
+            currentextcom.setCom(currentcom);
+            currentextcom.setHref(href);
+            sublist.add(currentextcom);
+        }
         
          
         RssCreatorComments instance = new RssCreatorComments();
         instance.setFlagIsFromProfile(true);
         instance.setDescription("Update of comments for current profile");
-        instance.setLink("http://www.clarin.eu/cmdi/profiles/");
-        instance.setTitle("Comments feed for the profile"+profileId);
+        instance.setTitle("Comments feed for the profile "+profileId);
         
-        
+        Rss result = instance.makeRss(sublist);
         
          //this is a testing piece testing piece: prints out on tomcat's output terminal the comments 
         // from  clarin.eu:cr1:p_1284723009187
@@ -1079,7 +1092,7 @@ public class ComponentRegistryRestService {
         ComponentRegistry registry = getRegistry(getStatus(userspace));
         System.out.println("Name: "+ registry.getName());
         System.out.println("Owner: "+ registry.getOwner());
-        for (Comment comment : sublist){
+        for (Comment comment : sublistAux){
            System.out.println(comment.getComment());
            System.out.println(comment.getCommentDate());
            System.out.println(comment.getComponentDescriptionId());
@@ -1093,7 +1106,7 @@ public class ComponentRegistryRestService {
         // end of the testing piece
         
         
-        Rss result = instance.makeRss(comments);
+        
         
         // testing stuff
         String path=openTestDir("testRss");

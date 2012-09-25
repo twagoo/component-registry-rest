@@ -5,7 +5,6 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.rss.ElementType;
 import clarin.cmdi.componentregistry.rss.RssItem;
 
 /**
@@ -22,28 +21,27 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
 
         RssItem retval = new RssItem();
         
-       
-        
-        retval.setCreator(makeElementType(desc.getCreatorName()));
-        // retval.setCategory(desc.???);
-        // retval.setComments(desc.???);
+        //Description (blah-blah)
         retval.setDescription(desc.getDescription());
-        //retval.setEnclosure(desc.???);
+       
+       
+        //guid
+        retval.setGuid(makeGuid(desc.getHref()));
         
-        String message ="The is of the";
-        if (desc.isProfile()) {message =  message +"profile is ";} 
-            else {message =  message +"component is ";} 
-        retval.setGuid(makeGuid(message+desc.getId()));
-        
-        retval.setLink(desc.getHref());
+        //time-date
         retval.setPubDate(desc.getRegistrationDate());
-        //retval.setSource(desc.???);
-        retval.setTitle(desc.getName());
+        
+        //Title
+        retval.setTitle(makeDescriptionTitle(desc.getName(),desc.getCreatorName(), desc.getGroupName(),desc.getDomainName()));
 
         
         return retval;
 
     }
 
-    
+    protected String makeDescriptionTitle(String name, String creatorname, String group, String domain){
+        String retval =  name+"by user"+creatorname+", group "+group+",domain "+domain;
+        
+        return retval;
+    }
 }

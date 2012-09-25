@@ -341,16 +341,7 @@
                             </schemaIncludes>
                             <!-- <bindingDirectory>${basedir}/src/generated/jaxb/rss</bindingDirectory> -->
                             <bindingDirectory>src/main/binding/rss</bindingDirectory>
-                            <bindingIncludes>
-                                <include>bindings.xml
-                                </include>
-                            </bindingIncludes>
                             
-                            <args>
-                                <arg>-extension</arg>
-                                <arg>-Xnamespace-prefix</arg>
-                            </args>
-                            <!-- <extension>true</extension> -->
                             <generateDirectory>${basedir}/src/generated/jaxb/rss</generateDirectory>
                             <generatePackage>clarin.cmdi.componentregistry.rss</generatePackage>
                             <catalog>src/main/resources/catalog.cat</catalog>
@@ -359,18 +350,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jvnet.jaxb2_commons</groupId>
-                        <artifactId>jaxb2-namespace-prefix</artifactId>
-                        <version>1.1</version>
-                    </dependency>
-                    <dependency>  
-                        <groupId>com.sun.xml.bind</groupId>  
-                        <artifactId>jaxb-impl</artifactId>  
-                        <version>2.2.6</version>  
-                    </dependency>  
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

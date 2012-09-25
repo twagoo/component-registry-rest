@@ -39,8 +39,6 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
 
 -->
 <xs:schema 
-    xmlns:dc="http://purl.org/dc/elements/1.1/" 
-    xmlns:atom="http://www.w3.org/2005/Atom"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     elementFormDefault="unqualified" 
     version="2.0.2.16">
@@ -56,17 +54,7 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
     </xs:annotation>
   
   
-    <xs:import  namespace="http://purl.org/dc/elements/1.1/"
-              schemaLocation="http://dublincore.org/schemas/xmls/simpledc20021212.xsd"/>
-  
-    <xs:import namespace="http://www.w3.org/2005/Atom" 
-             schemaLocation="http://dataconnector.eea.europa.eu/wise/bwqd/atom.xsd"/>
-    <!--   Possible schemaLocation for Atom: 
- "http://www.w3.org/2005/Atom http://www.openarchives.org/OAI/2.0/atom_entry.xsd" : was not found 
-  "http://dataconnector.eea.europa.eu/wise/bwqd/atom.xsd" - currently it is there 
-    http://dataconnector.eea.europa.eu/wise/bwqd/atom.xsd - not checked -->
-  
-  
+    
     <xs:element name="rss">
         <xs:complexType>
             <xs:sequence>
@@ -94,18 +82,6 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
             </xs:element>
             <xs:element name="link" type="xs:anyURI" minOccurs="0"> 
             </xs:element> 
-            <xs:element ref="dc:creator"></xs:element>
-            <!-- 
-              The value for "author" must be an e-mail, 
-              otherwise the rss-feed will not be validated.
-              Sunce we want to have just the author's name there, 
-              we must use the element
-              dc:creator
-              <xs:element name="author" type="xs:string" minOccurs="0" nillable="false">
-              <xs:annotation>
-                <xs:documentation>The name of the author of the item.</xs:documentation>
-              </xs:annotation>
-            </xs:element> -->
             <xs:element name="category" type="Category" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>Includes the item in one or more categories. </xs:documentation>
@@ -131,11 +107,6 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
                     <xs:documentation>Indicates when the item was published.</xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="source" type="Source" minOccurs="0">
-                <xs:annotation>
-                    <xs:documentation>The RSS channel that the item came from.</xs:documentation>
-                </xs:annotation>
-            </xs:element>
             <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
                     <xs:documentation>Extensibility element.</xs:documentation>
@@ -151,11 +122,11 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
                     <xs:documentation>The name of the channel. It's how people refer to your service. If you have an HTML website that contains the same information as your RSS file, the title of your channel should be the same as the title of your website.</xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <!-- <xs:element name="link" type="xs:anyURI">
+            <xs:element name="link" type="xs:anyURI">
                 <xs:annotation>
                     <xs:documentation>The URL to the HTML website corresponding to the channel.</xs:documentation>
                 </xs:annotation>
-            </xs:element> -->
+            </xs:element>
             <xs:element name="description" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>Phrase or sentence describing the channel.</xs:documentation>
@@ -241,7 +212,6 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
                     <xs:documentation>A hint for aggregators telling them which days they can skip.</xs:documentation>
                 </xs:annotation>
             </xs:element>  
-            <xs:element ref="atom:link" ></xs:element>
             <xs:element name="item" type="RssItem" minOccurs="1" maxOccurs="unbounded">
                 <!-- 
                   HACK: According to the RSS 2.0 spec, it should strictly be possible to have zero item elements, 
