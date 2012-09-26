@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.rest;
 
-
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -59,17 +59,18 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 @Path("/registry")
 public class ComponentRegistryRestService {
 
+    public static final String APPLICATION_BASE_URL_PARAM = "componentRegistryServiceRootUrl";
     @Context
     private UriInfo uriInfo;
     @Context
     private SecurityContext security;
     @Context
     private HttpServletRequest request;
+    @Context
+    private ServletContext servletContext;
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryRestService.class);
     public static final String DATA_FORM_FIELD = "data";
     public static final String NAME_FORM_FIELD = "name";
@@ -86,6 +87,7 @@ public class ComponentRegistryRestService {
      * Converts userspace boolean to component status. Temporary solution!!!
      *
      * TODO: Replace all calls to getRegistry that use this by calls using ComponentStatus
+     *
      * @param userSpace
      * @return
      * @deprecated All calls should go directly to {@link #getRegistry(clarin.cmdi.componentregistry.ComponentStatus)}
@@ -152,7 +154,6 @@ public class ComponentRegistryRestService {
     public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace,
 	    @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
-
 	List<ProfileDescription> profiles;
 	if (metadataEditor) {
 	    profiles = getRegistry(getStatus(userspace)).getProfileDescriptionsForMetadaEditor();
@@ -195,7 +196,6 @@ public class ComponentRegistryRestService {
 	    String fileName = desc.getName() + "." + rawType;
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -208,7 +208,6 @@ public class ComponentRegistryRestService {
 		};
 	    } else if ("xsd".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -630,7 +629,6 @@ public class ComponentRegistryRestService {
 
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -643,7 +641,6 @@ public class ComponentRegistryRestService {
 		};
 	    } else if ("xsd".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -807,25 +804,25 @@ public class ComponentRegistryRestService {
 	    response.setIsInUserSpace(userspace);
 	    validate(response, descriptionValidator, validator);
 	    if (response.getErrors().isEmpty()) {
-		
-                CMDComponentSpec spec = validator.getCMDComponentSpec();
-                
-                // Olha: removing filename from spec before it gets extended!!! recursion over all the components
-                setFileNamesFromListToNull(spec.getCMDComponent());
-               
-               
-                
+
+		CMDComponentSpec spec = validator.getCMDComponentSpec();
+
+		// Olha: removing filename from spec before it gets extended!!! recursion over all the components
+		setFileNamesFromListToNull(spec.getCMDComponent());
+
+
+
 		try {
-                       
-                    
+
+
 		    // Expand to check for recursion
 		    registry.getExpander().expandNestedComponent(spec.getCMDComponent(), desc.getId());
 
-                    
-                    
+
+
 		    // Add profile
-                    
-                    
+
+
 		    int returnCode = action.execute(desc, spec, response, registry);
 		    if (returnCode == 0) {
 			response.setRegistered(true);
@@ -912,14 +909,21 @@ public class ComponentRegistryRestService {
 	return desc;
     }
 
-    private Comment createNewComment() {
-	Comment com = Comment.createANewComment();
-	return com;
-    }
-
     private String createXlink(String id) {
 	URI uri = uriInfo.getRequestUriBuilder().path(id).build();
 	return uri.toString();
+    }
+
+    /**
+     *
+     * @return The application's base URI as configured in the "componentRegistryServiceRootUrl" context parameter.
+     * If correctly configured, it should look something like "http://catalog.clarin.eu/ds/ComponentRegistry".
+     * <em>Be aware that this can also be null if configured incorrectly!</em>
+     *
+     * @see #APPLICATION_BASE_URL_PARAM
+     */
+    private String getApplicationBaseURI() {
+	return servletContext.getInitParameter(APPLICATION_BASE_URL_PARAM);
     }
 
     private void validate(RegisterResponse response, Validator... validators) {
@@ -948,270 +952,260 @@ public class ComponentRegistryRestService {
     public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
 	this.componentRegistryFactory = componentRegistryFactory;
     }
-    
-    
+
     /// two muchually recursive methods below are used to set filenames of components (and their child components) to null
     /*
      * @param List<CMDComponentType> listofcomponents the list of components whose filenames (and the children's names) are to be set to null
      */
-    public void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents){ 
-     
-        for (CMDComponentType currentcomponent : listofcomponents) {
-                setFileNamesToNullCurrent(currentcomponent);
-                } 
-    
+    public void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents) {
+
+	for (CMDComponentType currentcomponent : listofcomponents) {
+	    setFileNamesToNullCurrent(currentcomponent);
+	}
+
     }
-    
+
     /*
      * @param CMDComponentType currentcomponent the component whose filename (and whose children filenames) is to be set to null
      */
-    
-    public void setFileNamesToNullCurrent(CMDComponentType currentcomponent){ 
-     
-      currentcomponent.setFilename(null);
-      setFileNamesFromListToNull(currentcomponent.getCMDComponent());
-    
+    public void setFileNamesToNullCurrent(CMDComponentType currentcomponent) {
+
+	currentcomponent.setFilename(null);
+	setFileNamesFromListToNull(currentcomponent.getCMDComponent());
+
     }
-    
+
     /*
      * generating rss: commom part for profile and component descriptions
      * 
      */
-    
-     private <T extends AbstractDescription> Rss getRss(boolean userspace,String limit, List<T> descs, String kindofdesc) throws ComponentRegistryException, ParseException {
-	
-        RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
-        rssCreator.setVersion(2.0);
-        
-        
-        int limitInt = Integer.parseInt(limit);
-        
-        if (descs.size()<limitInt) {limitInt = descs.size();};
-        List<T> sublist = descs.subList(0, limitInt);
-        Collections.sort(sublist, AbstractDescription.COMPARE_ON_DATE);
-        
-        
-        if (userspace)   {rssCreator.setTitle("Workspace "+kindofdesc);} 
-        else {rssCreator.setTitle("Public "+kindofdesc);}
-         
-        Rss rss =rssCreator.makeRss(sublist);
+    private <T extends AbstractDescription> Rss getRss(boolean userspace, String limit, List<T> descs, String kindofdesc) throws ComponentRegistryException, ParseException {
+
+	RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
+	rssCreator.setVersion(2.0);
+
+
+	int limitInt = Integer.parseInt(limit);
+
+	if (descs.size() < limitInt) {
+	    limitInt = descs.size();
+	};
+	List<T> sublist = descs.subList(0, limitInt);
+	Collections.sort(sublist, AbstractDescription.COMPARE_ON_DATE);
+
+
+	if (userspace) {
+	    rssCreator.setTitle("Workspace " + kindofdesc);
+	} else {
+	    rssCreator.setTitle("Public " + kindofdesc);
+	}
+
+	Rss rss = rssCreator.makeRss(sublist);
 	return rss;
     }
     ////////////////////////////////////////////////
+
     @GET
     @Path("/components/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
-	
-        
-        
-        //http://www.clarin.eu/cmdi/components
-        
-        
-      List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
-      Rss rss = getRss(userspace, limit, components, "components");
-        
-      LOG.info("Releasing " + limit + "most recent registered components into the world sorted by their registration date-and-time");
-	
-        
-       return rss;
+
+
+
+	//http://www.clarin.eu/cmdi/components
+
+
+	List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
+	Rss rss = getRss(userspace, limit, components, "components");
+
+	LOG.info("Releasing " + limit + "most recent registered components into the world sorted by their registration date-and-time");
+
+
+	return rss;
     }
-    
-     ////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////
     @GET
     @Path("/profiles/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
-	
-        //http://www.clarin.eu/cmdi/profiles 
-       
-        // ?? How to get rid of the deprecated stuff ??
-       List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
-       Rss rss = getRss(userspace, limit, profiles, "profiles");
-         
+
+	//http://www.clarin.eu/cmdi/profiles 
+
+	// ?? How to get rid of the deprecated stuff ??
+	List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
+	Rss rss = getRss(userspace, limit, profiles, "profiles");
+
 	LOG.info("Releasing " + limit + "most recent registered profiles into the world sorted by their registration date-and-time");
 	return rss;
-    }  
-    
-    
+    }
+
     ///////////////////////////////////////////////////////////
     @GET
     @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
-	 
-        
-        // ?? this is a testing version. But, anyway, how to get all the profiles without the need to type them in?
-        // what if a user do not remember his/her id of profile?
+
+
+	// ?? this is a testing version. But, anyway, how to get all the profiles without the need to type them in?
+	// what if a user do not remember his/her id of profile?
         /* grabbing all registered profile names from the register and outputting them  on the tomcat terminal */
-        List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
-        
-        
-        for (ProfileDescription currentProfile : lprfaux){
-            
-           String currentProfileId =  currentProfile.getId();
-           System.out.println(currentProfileId);
-        
-        } 
-        /* end of grabbing */
-        
-        
-        // TODO: add sorting !
-        
+	List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
+
+
+	for (ProfileDescription currentProfile : lprfaux) {
+
+	    String currentProfileId = currentProfile.getId();
+	    System.out.println(currentProfileId);
+
+	}
+	/* end of grabbing */
+
+
+	// TODO: add sorting !
+
 	final Principal principal = security.getUserPrincipal();
 	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
 
-        
-        int limitInt = Integer.parseInt(limit);
-        
-        if (comments.size()<limitInt) {limitInt = comments.size();};
-        List<Comment> sublist = comments.subList(0, limitInt);
-        
-        ProfileDescription desc = getRegistry(getStatus(userspace)).getProfileDescription(profileId);
-        
-        
-        
-         
-        RssCreatorComments instance = new RssCreatorComments(desc);
-        instance.setFlagIsFromProfile(true);
-        instance.setDescription("Update of comments for current profile");
-        instance.setTitle("Comments feed for the profile "+profileId);
-        
-        Rss result = instance.makeRss(sublist);
-        
-         //this is a testing piece: prints out on tomcat's output terminal the comments 
-        // from  clarin.eu:cr1:p_1284723009187
-        if (profileId.equals("clarin.eu:cr1:p_1284723009187")) {
-        ComponentRegistry registry = getRegistry(getStatus(userspace));
-        for (Comment comment : sublist){
-           System.out.println(comment.getComment());
-           System.out.println(comment.getCommentDate());
-           System.out.println(comment.getComponentDescriptionId());
-           System.out.println(comment.getId());
-           System.out.println(comment.getProfileDescriptionId());
-           System.out.println(comment.getUserId());
-           System.out.println(comment.getUserName());
-          
-            } 
-        }
-        // end of the testing piece
-        
-        
-        
-        
-        // testing stuff
-        String path=openTestDir("testRss");
-        String os = MDMarshaller.marshalToString(result);
-        writeStringToFile(os, path + "testRssResl.xml");
-        
-        
-        System.out.println(result.getVersion());
-        System.out.println(result.getChannel().getItem().size());
-        System.out.println(comments.size());
-        // end of testing stuff
-        
+
+	int limitInt = Integer.parseInt(limit);
+
+	if (comments.size() < limitInt) {
+	    limitInt = comments.size();
+	};
+	List<Comment> sublist = comments.subList(0, limitInt);
+
+	ProfileDescription desc = getRegistry(getStatus(userspace)).getProfileDescription(profileId);
+
+
+
+
+	RssCreatorComments instance = new RssCreatorComments(desc);
+	instance.setFlagIsFromProfile(true);
+	instance.setDescription("Update of comments for current profile");
+	instance.setTitle("Comments feed for the profile " + profileId);
+
+	Rss result = instance.makeRss(sublist);
+
+	//this is a testing piece: prints out on tomcat's output terminal the comments 
+	// from  clarin.eu:cr1:p_1284723009187
+	if (profileId.equals("clarin.eu:cr1:p_1284723009187")) {
+	    ComponentRegistry registry = getRegistry(getStatus(userspace));
+	    for (Comment comment : sublist) {
+		System.out.println(comment.getComment());
+		System.out.println(comment.getCommentDate());
+		System.out.println(comment.getComponentDescriptionId());
+		System.out.println(comment.getId());
+		System.out.println(comment.getProfileDescriptionId());
+		System.out.println(comment.getUserId());
+		System.out.println(comment.getUserName());
+
+	    }
+	}
+	// end of the testing piece
+
+
+
+
+	// testing stuff
+	String path = openTestDir("testRss");
+	String os = MDMarshaller.marshalToString(result);
+	writeStringToFile(os, path + "testRssResl.xml");
+
+
+	System.out.println(result.getVersion());
+	System.out.println(result.getChannel().getItem().size());
+	System.out.println(comments.size());
+	// end of testing stuff
+
 	return result;
     }
-    
-   
-   ////////////////////////////////////////////////////////
-    
-   // temporarily for rss-bug fixing
-    
-    
-     /**
-      * 
-      * @param bytes is an array of bytes to be written in the file filename (from scratch!)
-      * @param filename is the name of the file where the array "bytes" is to be written to
-      * @throws IOException
-      * @throws JAXBException 
-      */ 
-      public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
-                 
-        File file = new File(filename);
-        FileOutputStream fop = new FileOutputStream(file);
-        
-        fop.write(bytes);
-	
-        fop.flush();
+
+    ////////////////////////////////////////////////////////
+    // temporarily for rss-bug fixing
+    /**
+     *
+     * @param bytes is an array of bytes to be written in the file filename (from scratch!)
+     * @param filename is the name of the file where the array "bytes" is to be written to
+     * @throws IOException
+     * @throws JAXBException
+     */
+    public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
+
+	File file = new File(filename);
+	FileOutputStream fop = new FileOutputStream(file);
+
+	fop.write(bytes);
+
+	fop.flush();
 	fop.close();
- 
-        
-      }
-    
-    
-    
-      /**
-       * 
-       * @param str is a string which is to be written into the filename (from scratch!)
-       * @param filename is a filename where the string is to be written to
-       * @throws IOException
-       * @throws JAXBException 
-       */
-      public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
-          
-        writeBytesToFile(str.getBytes(), filename);
- 
-        
-      }
-      
+
+
+    }
+
     /**
-       * 
-       * @param os is an output stream which is to be written into the filename (from scratch!)
-       * @param filename is a filename where the stream is to be written to
-       * @throws IOException
-       * @throws JAXBException 
-       */
-      
-      public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
-          
-        writeBytesToFile(os.toByteArray(), filename);
- 
-        
-      }
-      
-    
+     *
+     * @param str is a string which is to be written into the filename (from scratch!)
+     * @param filename is a filename where the string is to be written to
+     * @throws IOException
+     * @throws JAXBException
+     */
+    public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
+
+	writeBytesToFile(str.getBytes(), filename);
+
+
+    }
+
     /**
-     * 
+     *
+     * @param os is an output stream which is to be written into the filename (from scratch!)
+     * @param filename is a filename where the stream is to be written to
+     * @throws IOException
+     * @throws JAXBException
+     */
+    public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
+
+	writeBytesToFile(os.toByteArray(), filename);
+
+
+    }
+
+    /**
+     *
      * @param cdesc is a component which is to be written into the filename (from scratch!)
      * @param filename is a filename where the component is to be written to
      * @throws IOException
-     * @throws JAXBException 
-     */  
+     * @throws JAXBException
+     */
     public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-        
-       
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+
+	ByteArrayOutputStream os = new ByteArrayOutputStream();
 	MDMarshaller.marshal(cdesc, os);
-        
-        writeStreamToFile(os, filename);
-       
+
+	writeStreamToFile(os, filename);
+
     }
-      
-      
-      
-      
-      /**
-       * opens a temporary sub-directory dirName in /target/
-       * @param dirName is the name of the temporary subdirectory which is to be opened
-       * @return the absolute part for this directory
-       */
-      public static String openTestDir(String dirName){
-      
-         File testDir = new File("target/" + dirName);
-         
-         
-         testDir.mkdir();
-         
-         System.out.println(dirName);
-         //String retval = new File(testDir, dirName).getAbsolutePath();
-         String retval = new File(testDir, "/").getAbsolutePath();
-        
-         return(retval);
-         
-      }
-    
-    
-    
-    
+
+    /**
+     * opens a temporary sub-directory dirName in /target/
+     *
+     * @param dirName is the name of the temporary subdirectory which is to be opened
+     * @return the absolute part for this directory
+     */
+    public static String openTestDir(String dirName) {
+
+	File testDir = new File("target/" + dirName);
+
+
+	testDir.mkdir();
+
+	System.out.println(dirName);
+	//String retval = new File(testDir, dirName).getAbsolutePath();
+	String retval = new File(testDir, "/").getAbsolutePath();
+
+	return (retval);
+
+    }
 }
