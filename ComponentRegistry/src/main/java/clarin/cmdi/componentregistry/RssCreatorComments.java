@@ -17,12 +17,10 @@ public class RssCreatorComments extends RssCreator<Comment> {
 
     
     private boolean isFromProfile;
-    private AbstractDescription desc;
     
-    public RssCreatorComments(AbstractDescription desc){
-        this.desc=desc;
+    public RssCreatorComments(String uri){
+        super(uri);
     }
-    
     
     // creator method, comment to rssItem, ovverrides the dummy method of the RssCreator class
     // ?? is there a better way than boolean flag to arrange switch beween comment for profiles and commentss for components
@@ -37,6 +35,7 @@ public class RssCreatorComments extends RssCreator<Comment> {
          
         RssItem retval = new RssItem();
         String hrefPostfix = "&view=comments";
+        String hrefInfix = "?item=";
         
         String descId;
         if (isFromProfile) {descId=comm.getProfileDescriptionId();} 
@@ -47,7 +46,8 @@ public class RssCreatorComments extends RssCreator<Comment> {
         
        
         //Guid
-        retval.setGuid(makeGuid(desc.getHref()+hrefPostfix));
+        retval.setGuid(makeGuid(uriForGuid+hrefInfix+descId+hrefPostfix));
+        
         
        
         //date-Time

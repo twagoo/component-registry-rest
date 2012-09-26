@@ -25,7 +25,10 @@ import javax.xml.bind.DatatypeConverter;
  */
 public abstract class RssCreator<T> { // extends nothing so far, throuw nothing // make it abstract
 
-    // all the fields below are not mandatory, no crashes will happen if they are not set
+   
+    protected String uriForGuid; // MUST
+   
+     // all the fields below are not mandatory, no crashes will happen if they are not set
     private String title;
     private String link;
     private String description;
@@ -46,6 +49,14 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     private SkipHoursList skipHours;
     private SkipDaysList skipDays;
     private double version = 2.0; // of an rss
+    
+    ////////////////////
+    
+    public RssCreator(String uri){
+        this.uriForGuid = uri;
+    }
+    
+    
 
     public double getVersion() {
         return (version);

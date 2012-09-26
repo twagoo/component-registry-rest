@@ -13,6 +13,10 @@ import clarin.cmdi.componentregistry.rss.RssItem;
  */
 public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssCreator<T> {
     
+    public RssCreatorDescriptions(String uri){
+        super(uri);
+    }
+    
     // creator method, desc to rssItem, ovverrides the dummy method of the RssCreatorClass
     @Override 
     protected RssItem fromArgToRssItem(T desc) {
@@ -20,13 +24,15 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
        
 
         RssItem retval = new RssItem();
-        
+         String hrefInfix = "?item=";
+         
         //Description (blah-blah)
         retval.setDescription(desc.getDescription());
        
        
         //guid
-        retval.setGuid(makeGuid(desc.getHref()));
+        //Guid
+        retval.setGuid(makeGuid(uriForGuid+hrefInfix+desc.getId()));
         
         //time-date
         retval.setPubDate(desc.getRegistrationDate());

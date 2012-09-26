@@ -60,7 +60,8 @@ public class RssCreatorCommentsTest {
     @Test
     public void testMakeRss() throws ParseException{
         
-        String hrefPrefix = "http://catalog.clarin.eu/ds/ComponentRegistry/?item=clarin.eu:cr1:";
+        String hrefPrefix = "http://catalog.clarin.eu/ds/ComponentRegistry/";
+        String hrefInfix="?item=";
         String hrefPostfix = "&view=comments";
         Boolean isFromProfile = true;
         
@@ -68,7 +69,6 @@ public class RssCreatorCommentsTest {
         ProfileDescription testPrf = new ProfileDescription();
         String testPrfId = "p_1234";
         testPrf.setId(testPrfId);
-        testPrf.setHref(hrefPrefix+testPrfId);
          
         Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", testPrf.getId(), 
              "userello");
@@ -88,7 +88,7 @@ public class RssCreatorCommentsTest {
         //one can get the list of comments from the profile
        
         
-        RssCreatorComments instance = new RssCreatorComments(testPrf);
+        RssCreatorComments instance = new RssCreatorComments(hrefPrefix);
         assertEquals(Double.toString(instance.getVersion()) , "2.0"); // check if the default version is set properly
         
         instance.setFlagIsFromProfile(isFromProfile);
@@ -103,12 +103,15 @@ public class RssCreatorCommentsTest {
         String rfcdate3 = instance.getRFCDateTime("2010-05-02T11:38:22+00:00");
         
         List<RssItem> resitems = result.getChannel().getItem();
-        compareInputsVsRssItems(testPrf.getHref()+hrefPostfix, "this is comment # 1", rfcdate1, 
+        
+        String checkUri =hrefPrefix+hrefInfix+testPrfId+hrefPostfix;
+        
+        compareInputsVsRssItems(checkUri, "this is comment # 1", rfcdate1, 
                  instance.makeCommentTitle("commentId1", "userello"), resitems.get(0));
-        compareInputsVsRssItems(testPrf.getHref()+hrefPostfix, "this is comment # 2", rfcdate2, 
+        compareInputsVsRssItems(checkUri, "this is comment # 2", rfcdate2, 
                 instance.makeCommentTitle("commentId2", "userino"),
                 resitems.get(1));
-        compareInputsVsRssItems(testPrf.getHref()+hrefPostfix, "this is comment # 3", rfcdate3,
+        compareInputsVsRssItems(checkUri, "this is comment # 3", rfcdate3,
                 instance.makeCommentTitle("commentId3", "userito")
                 , resitems.get(2));
         
