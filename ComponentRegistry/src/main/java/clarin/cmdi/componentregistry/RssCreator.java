@@ -319,10 +319,10 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     }
 
     
-   protected Guid makeGuid(String id){
+   protected Guid makeGuid(String href){
         Guid result = new Guid();
         result.setIsPermaLink(null);
-        result.setValue(id);
+        result.setValue(href);
         return result;
     }
     

@@ -5,6 +5,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.text.ParseException;
@@ -29,11 +30,13 @@ public class RssCreatorCommentsTest {
         comm.setCanDelete(canDelete);
         comm.setComment(comtext);
         comm.setCommentDate(date);
-        if (isFromProfile) {comm.setComponentDescriptionId(descrId);}
-                else {comm.setProfileDescriptionId(descrId);}
+        if (isFromProfile) {comm.setProfileDescriptionId(descrId);}
+                else {comm.setComponentDescriptionId(descrId);}
         comm.setId(commentId);
         comm.setUserName(userName);
         
+        
+         
         return comm;
         
     }
@@ -57,36 +60,41 @@ public class RssCreatorCommentsTest {
     @Test
     public void testMakeRss() throws ParseException{
         
-        String href = "http";
+        String hrefPrefix = "http://catalog.clarin.eu/ds/ComponentRegistry/?item=clarin.eu:cr1:";
+        String hrefPostfix = "&view=comments";
         Boolean isFromProfile = true;
+        
+        //making a test profile
+        ProfileDescription testPrf = new ProfileDescription();
+        String testPrfId = "p_1234";
+        testPrf.setId(testPrfId);
+        testPrf.setHref(hrefPrefix+testPrfId);
          
-        Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", "DescrId1", 
+        Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", testPrf.getId(), 
              "userello");
         
-        Comment comm2 = makeTestComment(false, isFromProfile, "this is comment # 2", "2011-04-02T11:38:22+00:00", "commentId2", "DescrId2", 
+        Comment comm2 = makeTestComment(false, isFromProfile, "this is comment # 2", "2011-04-02T11:38:22+00:00", "commentId2", testPrf.getId(), 
              "userino");
         
-         Comment comm3 = makeTestComment(true, isFromProfile, "this is comment # 3", "2010-05-02T11:38:22+00:00", "commentId3", "DescrId3", 
+         Comment comm3 = makeTestComment(true, isFromProfile, "this is comment # 3", "2010-05-02T11:38:22+00:00", "commentId3", testPrf.getId(), 
              "userito");
         
         Comment[] commar = {comm1, comm2, comm3};
         List<Comment> comms = new ArrayList<Comment>(Arrays.asList(commar));
         
-        List<ExtendedComment> extcomms = new ArrayList<ExtendedComment>();
-        for (Comment currentcom : comms){
-            ExtendedComment currentextcom = new ExtendedComment();
-            currentextcom.setCom(currentcom);
-            currentextcom.setHref(href);
-            extcomms.add(currentextcom);
-        }
+        testPrf.setCommentsCount(3);
+        // comments cannot be referred from the profile desc directly
+        // on needs to know componentregistry instance, and via this instance, given pofileId, 
+        //one can get the list of comments from the profile
+       
         
-        RssCreatorComments instance = new RssCreatorComments();
+        RssCreatorComments instance = new RssCreatorComments(testPrf);
         assertEquals(Double.toString(instance.getVersion()) , "2.0"); // check if the default version is set properly
         
         instance.setFlagIsFromProfile(isFromProfile);
         instance.setVersion(3.0); 
         
-        Rss result = instance.makeRss(extcomms);
+        Rss result = instance.makeRss(comms);
         
         assertEquals(Double.toString(result.getVersion()), "3.0"); // now, check if updating version has taken place
         
@@ -95,15 +103,25 @@ public class RssCreatorCommentsTest {
         String rfcdate3 = instance.getRFCDateTime("2010-05-02T11:38:22+00:00");
         
         List<RssItem> resitems = result.getChannel().getItem();
-        compareInputsVsRssItems(href, "this is comment # 1", rfcdate1, 
-                 instance.makeCommentTitle("commentId1", "descrId1", "userello"), resitems.get(0));
-        compareInputsVsRssItems(href, "this is comment # 2", rfcdate2, 
-                instance.makeCommentTitle("commentId2", "descrId2", "userino"),
+        compareInputsVsRssItems(testPrf.getHref()+hrefPostfix, "this is comment # 1", rfcdate1, 
+                 instance.makeCommentTitle("commentId1", "userello"), resitems.get(0));
+        compareInputsVsRssItems(testPrf.getHref()+hrefPostfix, "this is comment # 2", rfcdate2, 
+                instance.makeCommentTitle("commentId2", "userino"),
                 resitems.get(1));
-        compareInputsVsRssItems(href, "this is comment # 3", rfcdate3,
-                instance.makeCommentTitle("commentId3", "descrId3", "userito")
+        compareInputsVsRssItems(testPrf.getHref()+hrefPostfix, "this is comment # 3", rfcdate3,
+                instance.makeCommentTitle("commentId3", "userito")
                 , resitems.get(2));
         
+        System.out.println("  "); 
+        for (int i=0; i<3; i++) {
+            System.out.print("Rss-item for comment "); 
+            System.out.println(i);
+            System.out.println(resitems.get(i).getTitle());
+            System.out.println(resitems.get(i).getPubDate());
+            System.out.println(resitems.get(i).getDescription());
+            System.out.println(resitems.get(i).getGuid().getValue());
+            System.out.println("  "); 
+        }
         
         
     }

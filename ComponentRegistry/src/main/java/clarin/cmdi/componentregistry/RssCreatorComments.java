@@ -4,6 +4,7 @@
  */
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.text.ParseException;
@@ -16,6 +17,12 @@ public class RssCreatorComments extends RssCreator<Comment> {
 
     
     private boolean isFromProfile;
+    private AbstractDescription desc;
+    
+    public RssCreatorComments(AbstractDescription desc){
+        this.desc=desc;
+    }
+    
     
     // creator method, comment to rssItem, ovverrides the dummy method of the RssCreator class
     // ?? is there a better way than boolean flag to arrange switch beween comment for profiles and commentss for components
@@ -27,35 +34,37 @@ public class RssCreatorComments extends RssCreator<Comment> {
     @Override  
     protected RssItem fromArgToRssItem(Comment comm) throws ParseException{
 
-
-       
+         
         RssItem retval = new RssItem();
+        String hrefPostfix = "&view=comments";
         
+        String descId;
+        if (isFromProfile) {descId=comm.getProfileDescriptionId();} 
+        else{descId=comm.getComponentDescriptionId();};
         
-        
-        retval.setCreator(makeElementType(comm.getUserName())); 
-        
-        // retval.setCategory(desc.???);
-        //retval.setComments(comm.??);
-        
+                //The content 
         retval.setDescription(comm.getComment()); 
-        //retval.setEnclosure(comm.???);
         
-        retval.setGuid(makeGuid("The id of the comment is"+comm.getId()+"in the profile "+comm.getProfileDescriptionId()));
-        //retval.setLink(com.???);
+       
+        //Guid
+        retval.setGuid(makeGuid(desc.getHref()+hrefPostfix));
         
+       
+        //date-Time
         retval.setPubDate(getRFCDateTime(comm.getCommentDate())); 
-        // retval.setSource(comm.???);
         
-        if (isFromProfile) {retval.setTitle("The comment in "+comm.getProfileDescriptionId()+".");}
-        else {retval.setTitle("The comment in "+comm.getComponentDescriptionId()+".");};
-
-        
+        // Title
+        retval.setTitle(makeCommentTitle(comm.getId(), comm.getUserName()));
+       
         return retval;
         
         
     }
     
-    
+     protected String  makeCommentTitle(String commentId, String user){
+         
+        return("The comment "+commentId +" by "+user);
+           
+       }
     
 }

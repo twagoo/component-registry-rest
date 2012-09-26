@@ -6,7 +6,6 @@ import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
-import clarin.cmdi.componentregistry.ExtendedComment;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.RssCreatorComments;
@@ -1066,33 +1065,25 @@ public class ComponentRegistryRestService {
         int limitInt = Integer.parseInt(limit);
         
         if (comments.size()<limitInt) {limitInt = comments.size();};
-        List<Comment> sublistAux = comments.subList(0, limitInt);
+        List<Comment> sublist = comments.subList(0, limitInt);
         
-        String href = getRegistry(getStatus(userspace)).getProfileDescription(profileId).getHref();
+        ProfileDescription desc = getRegistry(getStatus(userspace)).getProfileDescription(profileId);
         
-        List<ExtendedComment> sublist = new ArrayList<ExtendedComment>();
-        for (Comment currentcom : sublistAux) {
-            ExtendedComment currentextcom = new ExtendedComment();
-            currentextcom.setCom(currentcom);
-            currentextcom.setHref(href);
-            sublist.add(currentextcom);
-        }
+        
         
          
-        RssCreatorComments instance = new RssCreatorComments();
+        RssCreatorComments instance = new RssCreatorComments(desc);
         instance.setFlagIsFromProfile(true);
         instance.setDescription("Update of comments for current profile");
         instance.setTitle("Comments feed for the profile "+profileId);
         
         Rss result = instance.makeRss(sublist);
         
-         //this is a testing piece testing piece: prints out on tomcat's output terminal the comments 
+         //this is a testing piece: prints out on tomcat's output terminal the comments 
         // from  clarin.eu:cr1:p_1284723009187
-        if (profileId.equals("clarin.eu:cr1:p_1284723009187") || profileId.equals("clarin.eu:cr1:p_1347889257775")) {
+        if (profileId.equals("clarin.eu:cr1:p_1284723009187")) {
         ComponentRegistry registry = getRegistry(getStatus(userspace));
-        System.out.println("Name: "+ registry.getName());
-        System.out.println("Owner: "+ registry.getOwner());
-        for (Comment comment : sublistAux){
+        for (Comment comment : sublist){
            System.out.println(comment.getComment());
            System.out.println(comment.getCommentDate());
            System.out.println(comment.getComponentDescriptionId());
