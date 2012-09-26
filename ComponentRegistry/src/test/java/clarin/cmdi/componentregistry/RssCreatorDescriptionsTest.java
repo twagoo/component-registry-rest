@@ -94,6 +94,7 @@ public class RssCreatorDescriptionsTest {
        
         assertEquals(description, item.getDescription());
         assertEquals(href, item.getGuid().getValue()  );
+        assertEquals(href, item.getLink());
         assertEquals(date, item.getPubDate());
         assertEquals(title, item.getTitle());
     }
@@ -190,10 +191,7 @@ public class RssCreatorDescriptionsTest {
         assertEquals("TITLE", result.getChannel().getTitle());
         assertEquals("webMaster", result.getChannel().getWebMaster());
         
-        //write the Rss chaneel into the file, so you can see  how it looks like in the browser
-        String path=RegistryTestHelper.openTestDir("testRss");
-        String os = MDMarshaller.marshalToString(result);
-        RegistryTestHelper.writeStringToFile(os, path + "testRss1.xml");
+        
     }
     
    

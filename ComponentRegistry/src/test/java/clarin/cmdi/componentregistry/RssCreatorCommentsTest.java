@@ -34,7 +34,7 @@ public class RssCreatorCommentsTest {
                 else {comm.setComponentDescriptionId(descrId);}
         comm.setId(commentId);
         comm.setUserName(userName);
-        
+       
         
          
         return comm;
@@ -49,10 +49,11 @@ public class RssCreatorCommentsTest {
         
         
         assertEquals(href, rssItem.getGuid().getValue());
+        assertEquals(href, rssItem.getLink());
         assertEquals(commtext, rssItem.getDescription());
         assertEquals(date, rssItem.getPubDate());
         assertEquals(title, rssItem.getTitle());
-       
+        
     }
             
             
@@ -62,7 +63,7 @@ public class RssCreatorCommentsTest {
         
         String hrefPrefix = "http://catalog.clarin.eu/ds/ComponentRegistry/";
         String hrefInfix="?item=";
-        String hrefPostfix = "&view=comments";
+        String hrefPostfix = "&view=comments&commentId=";
         Boolean isFromProfile = true;
         
         //making a test profile
@@ -106,12 +107,12 @@ public class RssCreatorCommentsTest {
         
         String checkUri =hrefPrefix+hrefInfix+testPrfId+hrefPostfix;
         
-        compareInputsVsRssItems(checkUri, "this is comment # 1", rfcdate1, 
+        compareInputsVsRssItems(checkUri+"commentId1", "this is comment # 1", rfcdate1, 
                  instance.makeCommentTitle("commentId1", "userello"), resitems.get(0));
-        compareInputsVsRssItems(checkUri, "this is comment # 2", rfcdate2, 
+        compareInputsVsRssItems(checkUri+"commentId2", "this is comment # 2", rfcdate2, 
                 instance.makeCommentTitle("commentId2", "userino"),
                 resitems.get(1));
-        compareInputsVsRssItems(checkUri, "this is comment # 3", rfcdate3,
+        compareInputsVsRssItems(checkUri+"commentId3", "this is comment # 3", rfcdate3,
                 instance.makeCommentTitle("commentId3", "userito")
                 , resitems.get(2));
         

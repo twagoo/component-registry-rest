@@ -24,15 +24,19 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
        
 
         RssItem retval = new RssItem();
-         String hrefInfix = "?item=";
+        String hrefInfix = "?item=";
+        String link =  uriForGuid+hrefInfix+desc.getId();
          
         //Description (blah-blah)
         retval.setDescription(desc.getDescription());
        
        
-        //guid
+        
         //Guid
-        retval.setGuid(makeGuid(uriForGuid+hrefInfix+desc.getId()));
+        retval.setGuid(makeGuid(link));
+        
+        // link
+        retval.setLink(link);
         
         //time-date
         retval.setPubDate(desc.getRegistrationDate());
