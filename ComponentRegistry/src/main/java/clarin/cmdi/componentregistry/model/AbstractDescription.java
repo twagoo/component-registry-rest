@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
+import javax.xml.bind.DatatypeConverter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -185,22 +186,15 @@ public abstract class AbstractDescription {
         
         //compare two components by the date of registration
         // the dates, which are strings accrording to  ISO 8601, compared lexicographically 
-        
+    @Override    
         public int compare(AbstractDescription o1, AbstractDescription o2) {
             
             int result = 0;
-             
-            DateFormat df = DateFormat.getDateTimeInstance();
             
-            try{
-            Date d1 = df.parse(o1.getRegistrationDate());
-            Date d2 = df.parse(o2.getRegistrationDate());
+            Date d1 = DatatypeConverter.parseDateTime(o1.getRegistrationDate()).getTime();
+            Date d2 = DatatypeConverter.parseDateTime(o2.getRegistrationDate()).getTime();
             
-            result = d1.compareTo(d2);
-            
-            } catch (ParseException pe)  {return 0;};
-            
-            
+            result = d2.compareTo(d1);
             
             return result;
         }

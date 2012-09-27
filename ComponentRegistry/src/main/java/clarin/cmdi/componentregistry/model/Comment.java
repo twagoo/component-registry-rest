@@ -1,7 +1,10 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.Comparator;
 import java.util.Date;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -131,4 +134,23 @@ public class Comment {
 	com.setCommentDate(createNewDate());
 	return com;
     }
+    
+    
+    public static final Comparator<Comment> COMPARE_ON_DATE = new Comparator<Comment>() {
+        
+        //compare two commments by the date of registration
+        // the dates, which are strings accrording to  ISO 8601, compared lexicographically 
+    @Override    
+    public int compare(Comment o1, Comment o2) {
+            
+            int result = 0;
+            
+            Date d1 = DatatypeConverter.parseDateTime(o1.getCommentDate()).getTime();
+            Date d2 = DatatypeConverter.parseDateTime(o2.getCommentDate()).getTime();
+            
+            result = d2.compareTo(d1);
+            
+            return result;
+        }
+    };
 }

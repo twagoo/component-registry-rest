@@ -75,13 +75,13 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
                     <xs:documentation>The title of the item.</xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element name="link" type="xs:anyURI" minOccurs="0"> 
+            </xs:element> 
             <xs:element name="description" type="xs:string" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>The item synopsis.</xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="link" type="xs:anyURI" minOccurs="0"> 
-            </xs:element> 
             <xs:element name="category" type="Category" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>Includes the item in one or more categories. </xs:documentation>
@@ -122,16 +122,19 @@ The terms "reproduce," "reproduction," "derivative works," and "distribution" ha
                     <xs:documentation>The name of the channel. It's how people refer to your service. If you have an HTML website that contains the same information as your RSS file, the title of your channel should be the same as the title of your website.</xs:documentation>
                 </xs:annotation>
             </xs:element>
+            
             <xs:element name="link" type="xs:anyURI">
                 <xs:annotation>
                     <xs:documentation>The URL to the HTML website corresponding to the channel.</xs:documentation>
                 </xs:annotation>
             </xs:element>
+            
             <xs:element name="description" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>Phrase or sentence describing the channel.</xs:documentation>
                 </xs:annotation>
             </xs:element>
+            
             <xs:element name="language" type="xs:language" minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>The language the channel is written in. This allows aggregators to group all Italian language sites, for example, on a single page. A list of allowable values for this element, as provided by Netscape, is here. You may also use values defined by the W3C.</xs:documentation>

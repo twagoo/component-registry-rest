@@ -123,6 +123,7 @@ public class RssCreatorCommentsTest {
             System.out.println(resitems.get(i).getTitle());
             System.out.println(resitems.get(i).getPubDate());
             System.out.println(resitems.get(i).getDescription());
+            System.out.println(resitems.get(i).getLink());
             System.out.println(resitems.get(i).getGuid().getValue());
             System.out.println("  "); 
         }

@@ -1042,43 +1042,49 @@ public class ComponentRegistryRestService {
 
 	// ?? this is for debugging. But, anyway, how to get all the profiles without the need to type them in?
 	// what if a user do not remember his/her id of profile?
-        /* grabbing all registered profile names from the register and outputting them  on the tomcat terminal */
-	List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
+        // grabbing all registered profile names from the register and outputting them  on the tomcat terminal */
+	/*List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
        
 	for (ProfileDescription currentProfile : lprfaux) {
             String currentProfileId = currentProfile.getId();
 	    LOG.debug(currentProfileId);
 	}
-	/* end of grabbing */
+        */
+	// end of grabbing */
 
 
-	// TODO: add sorting !
 
 	final Principal principal = security.getUserPrincipal();
 	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
 
         String baseUri = getApplicationBaseURI()+"/";
-        LOG.debug("Basis uri "+baseUri);
         
         
         int limitInt = Integer.parseInt(limit);
         
         if (comments.size()<limitInt) {limitInt = comments.size();};
         List<Comment> sublist = comments.subList(0, limitInt);
+        Collections.sort(sublist, Comment.COMPARE_ON_DATE);
         
-        
+        for (Comment comm: sublist){
+            LOG.debug(comm.getCommentDate());
+        }
          
         RssCreatorComments instance = new RssCreatorComments(baseUri);
         instance.setFlagIsFromProfile(true);
         instance.setDescription("Update of comments for current profile");
-        instance.setTitle("Comments feed for the profile \""+
+        
+        String hrefPostfix = "&view=comments";
+        String hrefInfix = "?item=";
+        instance.setLink(baseUri+hrefInfix+profileId+hrefPostfix);
+        
+        String title="Comments feed for the profile \""+
                 getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName()+
-                "\" ");
-        instance.setLink(baseUri+"profiles/rss");
+                "\" ";
+        instance.setTitle(title);
+        
         
         Rss result = instance.makeRss(sublist);
-        
-        
         
         // testing stuff
         String path=openTestDir("testRss");

@@ -80,6 +80,10 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
         this.title = value;
     }
 
+    public String getTitle(){
+        return this.title;
+    }
+    
     /**
      * Sets the value of the link property.
      *
@@ -90,6 +94,10 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
         this.link = value;
     }
 
+    public String getLink(){
+        return this.link;
+    }
+     
     /**
      * Sets the value of the description property.
      *
