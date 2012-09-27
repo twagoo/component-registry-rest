@@ -1008,7 +1008,7 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
     
-        List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
+       List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
       Rss rss = getRss(userspace, limit, components, "components");
         
       LOG.info("Releasing " + limit + "most recent registered components into the world sorted by their registration date-and-time");
@@ -1044,13 +1044,10 @@ public class ComponentRegistryRestService {
 	// what if a user do not remember his/her id of profile?
         /* grabbing all registered profile names from the register and outputting them  on the tomcat terminal */
 	List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
-
-
+       
 	for (ProfileDescription currentProfile : lprfaux) {
-
-	    String currentProfileId = currentProfile.getId();
+            String currentProfileId = currentProfile.getId();
 	    LOG.debug(currentProfileId);
-
 	}
 	/* end of grabbing */
 
@@ -1061,7 +1058,6 @@ public class ComponentRegistryRestService {
 	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
 
         String baseUri = getApplicationBaseURI()+"/";
-        
         LOG.debug("Basis uri "+baseUri);
         
         
@@ -1075,7 +1071,10 @@ public class ComponentRegistryRestService {
         RssCreatorComments instance = new RssCreatorComments(baseUri);
         instance.setFlagIsFromProfile(true);
         instance.setDescription("Update of comments for current profile");
-        instance.setTitle("Comments feed for the profile "+profileId);
+        instance.setTitle("Comments feed for the profile \""+
+                getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName()+
+                "\" ");
+        instance.setLink(baseUri+"profiles/rss");
         
         Rss result = instance.makeRss(sublist);
         
@@ -1085,12 +1084,12 @@ public class ComponentRegistryRestService {
         String path=openTestDir("testRss");
         String os = MDMarshaller.marshalToString(result);
         writeStringToFile(os, path + "testRssResl.xml");
+        //end of testing stuff
         
-        
-       
+        // debugging stuff
         LOG.debug("The amount of items: "+Integer.toString(result.getChannel().getItem().size()));
         LOG.debug("The amount of comments: "+Integer.toString(comments.size()));
-        // end of testing stuff
+        // end of debugging stuff
         
 
 	return result;
