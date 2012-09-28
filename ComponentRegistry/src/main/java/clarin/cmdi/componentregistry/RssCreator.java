@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry;
 
+import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
 import clarin.cmdi.componentregistry.rss.Guid;
@@ -15,6 +16,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.xml.bind.DatatypeConverter;
@@ -25,10 +27,7 @@ import javax.xml.bind.DatatypeConverter;
  */
 public abstract class RssCreator<T> { // extends nothing so far, throuw nothing // make it abstract
 
-   
-    protected String uriForGuid; // MUST
-   
-     // all the fields below are not mandatory, no crashes will happen if they are not set
+    
     private String title;
     private String link;
     private String description;
@@ -49,13 +48,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     private SkipHoursList skipHours;
     private SkipDaysList skipDays;
     private double version = 2.0; // of an rss
-    
-    ////////////////////
-    
-    public RssCreator(String uri){
-        this.uriForGuid = uri;
-    }
-    
+
     
 
     public double getVersion() {
@@ -80,10 +73,10 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
         this.title = value;
     }
 
-    public String getTitle(){
+    public String getTitle() {
         return this.title;
     }
-    
+
     /**
      * Sets the value of the link property.
      *
@@ -94,10 +87,10 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
         this.link = value;
     }
 
-    public String getLink(){
+    public String getLink() {
         return this.link;
     }
-     
+
     /**
      * Sets the value of the description property.
      *
@@ -328,21 +321,65 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     public Rss makeRss(List<T> objs) throws ParseException {
         return (makeRssChannel(makeListOfRssItems(objs)));
     }
-    
 
-    protected String getRFCDateTime(String datestring) throws ParseException {
-
-        Date date = DatatypeConverter.parseDateTime(datestring).getTime();
-        SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
-        return RFC822DATEFORMAT.format(date);
-    }
-
-    
-   protected Guid makeGuid(String href){
+    // Helping stuff 
+    protected Guid makeGuid(String href) {
         Guid result = new Guid();
         // result.setIsPermaLink(null);
         result.setValue(href);
         return result;
     }
+
+    /// Helping stuff: for working with dates
+    private static Date parseWorks(String dateString) {
+        Date d = null;
+        try {
+            d = AbstractDescription.getDate(dateString);
+        } catch (ParseException pe) {
+            return null;
+        };
+        return d;
+    }
+
+    protected String getRFCDateTime(String dateString) {
+
+        Date date = parseWorks(dateString);
+
+        if (date == null) {
+            return dateString;
+        } else {
+            SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+            return RFC822DATEFORMAT.format(date);
+        }
+    }
+
     
+    ///////
+    // returns 1 if ds1 is older (before) than ds2, returns -1 if ds1 is younger (after) than ds2
+    public static int compareDateStrings(String ds1, String ds2) {
+
+        int result = 0;
+
+        Date d1 = parseWorks(ds1);
+        Date d2 = parseWorks(ds2);
+
+        if (d1 == null) {
+            if (d2 == null) {
+                result = 0;
+            } else {
+                result = 1;
+            }
+        } else {
+            if (d2 == null) {
+                result = -1;
+            } else {
+                // cpmparteTo reurns:
+                // a value less than 0 if d2 is before d1 (d1 is younger than d2);
+                // a value greater than 0 if d2 is after  d1 (d1 is older than d2)
+                result = d2.compareTo(d1);
+            }
+
+        }
+        return result;
+    }
 }

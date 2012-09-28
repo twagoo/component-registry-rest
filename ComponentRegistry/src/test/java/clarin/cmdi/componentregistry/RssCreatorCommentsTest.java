@@ -89,10 +89,10 @@ public class RssCreatorCommentsTest {
         //one can get the list of comments from the profile
        
         
-        RssCreatorComments instance = new RssCreatorComments(hrefPrefix);
+        RssCreatorComments instance = new RssCreatorComments();
         assertEquals(Double.toString(instance.getVersion()) , "2.0"); // check if the default version is set properly
         
-        instance.setFlagIsFromProfile(isFromProfile);
+        
         instance.setVersion(3.0); 
         
         Rss result = instance.makeRss(comms);

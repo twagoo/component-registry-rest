@@ -13,10 +13,7 @@ import clarin.cmdi.componentregistry.rss.RssItem;
  */
 public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssCreator<T> {
     
-    public RssCreatorDescriptions(String uri){
-        super(uri);
-    }
-    
+ 
     // creator method, desc to rssItem, ovverrides the dummy method of the RssCreatorClass
     @Override 
     protected RssItem fromArgToRssItem(T desc) {
@@ -24,19 +21,17 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
        
 
         RssItem retval = new RssItem();
-        String hrefInfix = "?item=";
-        String link =  uriForGuid+hrefInfix+desc.getId();
-         
+        
         //Description (blah-blah)
         retval.setDescription(desc.getDescription());
        
        
         
         //Guid
-        retval.setGuid(makeGuid(link));
+        //retval.setGuid(makeGuid(link));
         
         // link
-        retval.setLink(link);
+        retval.setLink(super.getLink()+"?item="+desc.getId()+"#");
         
         //time-date
         retval.setPubDate(desc.getRegistrationDate());
@@ -50,7 +45,7 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
     }
 
     protected String makeDescriptionTitle(String name, String creatorname, String group, String domain){
-        String retval =  name+"by user"+creatorname+", group "+group+",domain "+domain;
+        String retval =  name+"by user "+creatorname+", group "+group+",domain "+domain;
         
         return retval;
     }
