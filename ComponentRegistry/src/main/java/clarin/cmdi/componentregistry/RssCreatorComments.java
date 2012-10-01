@@ -33,10 +33,10 @@ public class RssCreatorComments extends RssCreator<Comment> {
         
        
         //Guid
-        //retval.setGuid(makeGuid(link));
+        retval.setGuid(makeGuid(super.getLink()+"&commentId="+comm.getId()));
         
         // link
-        retval.setLink(super.getLink()+"&commentId="+comm.getId()+"#");
+        retval.setLink(super.getLink()+"&commentId="+comm.getId());
         
         
         
@@ -54,7 +54,7 @@ public class RssCreatorComments extends RssCreator<Comment> {
     
      protected String  makeCommentTitle(String commentId, String user){
          
-        return("The comment "+commentId +" by "+user+" ");
+        return("Comment "+commentId +"\n by "+user+" ");
            
        }
     

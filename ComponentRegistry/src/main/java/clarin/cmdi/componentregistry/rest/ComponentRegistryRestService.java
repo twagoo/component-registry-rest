@@ -986,12 +986,12 @@ public class ComponentRegistryRestService {
      * 
      */
     private <T extends AbstractDescription> Rss getRss(String limit, List<T> descs, 
-            String link, String description, String title) throws ComponentRegistryException, ParseException {
+            String description, String title) throws ComponentRegistryException, ParseException {
 
         
         RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
         
-        rssCreator.setLink(link);
+        rssCreator.setLink(getApplicationBaseURI() + "/");
         rssCreator.setDescription(description);
         rssCreator.setTitle(title);
 
@@ -1021,10 +1021,10 @@ public class ComponentRegistryRestService {
          if (userspace) { title= "Workspace components";}
          else {title= "Workspace components";
        }
-         String link= getApplicationBaseURI() + "/";
-         String description = "Updates for components";
+         
         
-        Rss rss = getRss(limit, components, link, description, title);
+        
+        Rss rss = getRss(limit, components,"Updates for components" , title);
 
         LOG.info("Releasing " + limit + "most recent registered components into the world sorted by their registration date-and-time");
 
@@ -1047,17 +1047,15 @@ public class ComponentRegistryRestService {
          if (userspace) { title= "Workspace profiles";}
          else {title= "Workspace profiles";
        }
-         String link= getApplicationBaseURI() + "/";
-         String description = "Updates for profiles";
-        
-        Rss rss = getRss(limit, profiles, link, description, title);
+       
+        Rss rss = getRss(limit, profiles, "Updates for profiles", title);
         
 
         LOG.info("Releasing " + limit + "most recent registered profiles into the world sorted by their registration date-and-time");
         return rss;
     }
 
-    /* auxiliary debigging piece of code for grabbing Id-s of profiles and comments
+    /* debugging-help piece of code for grabbing Id-s of profiles and comments
      * 
      List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
         
@@ -1079,9 +1077,14 @@ public class ComponentRegistryRestService {
      * 
         
      */
+    
+    
     ///////////////////////////////////////////////////////////
+    /*
+     * the  working-horse method for obtaing comment for a given profile or a component (via the corresponding Id)
+     */
     private Rss getRssOfComments(String limit, List<Comment> comments, String description,
-            String title, String link) throws ComponentRegistryException, ParseException, IOException, JAXBException {
+            String title, String id) throws ComponentRegistryException, ParseException, IOException, JAXBException {
 
         Collections.sort(comments, Comment.COMPARE_ON_DATE);
 
@@ -1092,7 +1095,7 @@ public class ComponentRegistryRestService {
         List<Comment> sublist = comments.subList(0, limitInt);
 
 
-        // debug stuff, to see if the dates are sorted with the latest on the top
+        // debugging stuff, to see if the dates are sorted with the latest on the top
         for (Comment comm : sublist) {
             String dt = comm.getCommentDate();
             LOG.debug(dt);
@@ -1103,8 +1106,11 @@ public class ComponentRegistryRestService {
 
         RssCreatorComments instance = new RssCreatorComments();
 
+        String baseUri = getApplicationBaseURI() + "/";
+      
+        
         instance.setDescription(description);
-        instance.setLink(link);
+        instance.setLink(baseUri + "?item=" + id + "&view=comments");
         instance.setTitle(title);
 
         Rss result = instance.makeRss(sublist);
@@ -1136,15 +1142,13 @@ public class ComponentRegistryRestService {
         final Principal principal = security.getUserPrincipal();
         List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
 
-        String baseUri = getApplicationBaseURI() + "/";
-        String link = baseUri + "?item=" + profileId + "&view=comments";
-
+        
         String title = "Comments feed for the profile \""
                 + getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName()
                 + "\" ";
 
         Rss result = getRssOfComments(limit, comments, "Update of comments for current profile",
-                title, link);
+                title, profileId);
 
        
         return result;
@@ -1167,17 +1171,16 @@ public class ComponentRegistryRestService {
         
         //end of debug 
 
+        // main part starts from here 
         final Principal principal = security.getUserPrincipal();
         List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
 
-        String baseUri = getApplicationBaseURI() + "/";
-        String link = baseUri + "?item=" + componentId + "&view=comments";
         String title = "Comments feed for the component \""
                 + getRegistry(getStatus(userspace)).getComponentDescription(componentId).getName()
                 + "\" ";
 
         Rss result = getRssOfComments(limit, comments, "Update of comments for current component",
-                title, link);
+                title, componentId);
 
 
 

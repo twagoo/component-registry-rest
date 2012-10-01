@@ -61,37 +61,29 @@ public class RssCreatorCommentsTest {
     @Test
     public void testMakeRss() throws ParseException{
         
-        String hrefPrefix = "http://catalog.clarin.eu/ds/ComponentRegistry/";
-        String hrefInfix="?item=";
-        String hrefPostfix = "&view=comments&commentId=";
+        String testPrfId = "p_1234";
+        String href = "http://catalog.clarin.eu/ds/ComponentRegistry/?item="+testPrfId+"&view=comments";
         Boolean isFromProfile = true;
         
-        //making a test profile
-        ProfileDescription testPrf = new ProfileDescription();
-        String testPrfId = "p_1234";
-        testPrf.setId(testPrfId);
+       
+        
          
-        Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", testPrf.getId(), 
+        Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", testPrfId, 
              "userello");
         
-        Comment comm2 = makeTestComment(false, isFromProfile, "this is comment # 2", "2011-04-02T11:38:22+00:00", "commentId2", testPrf.getId(), 
+        Comment comm2 = makeTestComment(false, isFromProfile, "this is comment # 2", "2011-04-02T11:38:22+00:00", "commentId2", testPrfId, 
              "userino");
         
-         Comment comm3 = makeTestComment(true, isFromProfile, "this is comment # 3", "2010-05-02T11:38:22+00:00", "commentId3", testPrf.getId(), 
+         Comment comm3 = makeTestComment(true, isFromProfile, "this is comment # 3", "2010-05-02T11:38:22+00:00", "commentId3", testPrfId, 
              "userito");
         
         Comment[] commar = {comm1, comm2, comm3};
         List<Comment> comms = new ArrayList<Comment>(Arrays.asList(commar));
         
-        testPrf.setCommentsCount(3);
-        // comments cannot be referred from the profile desc directly
-        // on needs to know componentregistry instance, and via this instance, given pofileId, 
-        //one can get the list of comments from the profile
-       
+        
         
         RssCreatorComments instance = new RssCreatorComments();
-        assertEquals(Double.toString(instance.getVersion()) , "2.0"); // check if the default version is set properly
-        
+        instance.setLink(href);
         
         instance.setVersion(3.0); 
         
@@ -105,14 +97,13 @@ public class RssCreatorCommentsTest {
         
         List<RssItem> resitems = result.getChannel().getItem();
         
-        String checkUri =hrefPrefix+hrefInfix+testPrfId+hrefPostfix;
         
-        compareInputsVsRssItems(checkUri+"commentId1", "this is comment # 1", rfcdate1, 
+        compareInputsVsRssItems(href+"&commentId=commentId1", "this is comment # 1", rfcdate1, 
                  instance.makeCommentTitle("commentId1", "userello"), resitems.get(0));
-        compareInputsVsRssItems(checkUri+"commentId2", "this is comment # 2", rfcdate2, 
+        compareInputsVsRssItems(href+"&commentId=commentId2", "this is comment # 2", rfcdate2, 
                 instance.makeCommentTitle("commentId2", "userino"),
                 resitems.get(1));
-        compareInputsVsRssItems(checkUri+"commentId3", "this is comment # 3", rfcdate3,
+        compareInputsVsRssItems(href+"&commentId=commentId3", "this is comment # 3", rfcdate3,
                 instance.makeCommentTitle("commentId3", "userito")
                 , resitems.get(2));
         

@@ -46,28 +46,27 @@ public class RssCreatorDescriptionsTest {
     
 
     private void createTestDescription(AbstractDescription desc, int commentcount, String creatorname,
-            String description, String domainname, String groupname, 
-            String name, String date, String href, String id) {
+            String description, String groupname, 
+            String name, String date, String link, String id) {
         
         desc.setId(id);
         desc.setCommentsCount(commentcount);
         desc.setCreatorName(creatorname);
         desc.setDescription(description);
-        desc.setDomainName(domainname);
         desc.setGroupName(groupname);
         desc.setName(name);
         desc.setRegistrationDate(date);
-        desc.setHref(href+id);
+        desc.setHref(link+"?item="+id);
 
     }
 
     private ProfileDescription createTestProfileDescription(int commentcount, String creatorname,
-            String description, String domainname, String groupname, 
+            String description, String groupname, 
             String name, boolean editorFlag, String date, String href, String id) {
 
         ProfileDescription pdesc = ProfileDescription.createNewDescription();
 
-        createTestDescription(pdesc, commentcount, creatorname, description, domainname, groupname, name, date, href, id);
+        createTestDescription(pdesc, commentcount, creatorname, description, groupname, name, date, href, id);
 
         pdesc.setShowInEditor(editorFlag);
 
@@ -77,12 +76,12 @@ public class RssCreatorDescriptionsTest {
     }
 
     private ComponentDescription createTestComponentDescription(int commentcount, String creatorname,
-            String description, String domainname, String groupname, 
+            String description, String groupname, 
             String name, String date, String href, String id) {
 
         ComponentDescription cdesc = ComponentDescription.createNewDescription();
 
-        createTestDescription(cdesc, commentcount, creatorname, description, domainname, groupname, name, date, href, id);
+        createTestDescription(cdesc, commentcount, creatorname, description, groupname, name, date, href, id);
 
         return cdesc;
 
@@ -107,17 +106,16 @@ public class RssCreatorDescriptionsTest {
     public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
 
         
-        String link = "http://catalog.clarin.eu/ds/ComponentRegistry/profiles";
-        String href =  link+"?item=";
+        String link = "http://catalog.clarin.eu/ds/ComponentRegistry/profiles/";
         
         ProfileDescription desc1 = createTestProfileDescription(23, "Useratti",
-                "description-1", "domainname-1", "groupname-1", "name-1", true, "2001-01-01", href,"p_1");
+                "description-1", "groupname-1", "name-1", true, "2001-01-01", link,"p_1");
 
         ProfileDescription desc2 = createTestProfileDescription(23, "Usereno",
-                "description-2", "domainname-2", "groupname-2", "name-2", false, "2001-01-02", href, "p_2");
+                "description-2", "groupname-2", "name-2", false, "2001-01-02", link, "p_2");
 
         ProfileDescription desc3 = createTestProfileDescription(23, "Userio",
-                "description-3", "domainname-3", "groupname-3", "name-3", true, "2001-01-03", href, "p_3");
+                "description-3", "groupname-3", "name-3", true, "2001-01-03", link, "p_3");
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
 
@@ -159,14 +157,14 @@ public class RssCreatorDescriptionsTest {
         
         
 
-        compareRssVsValues("description-1", href+"p_1", "2001-01-01", 
-                   instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1","domainname-1"), items.get(0));
+        compareRssVsValues("description-1", link+"?item=p_1", "2001-01-01", 
+                   instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1"), items.get(0));
 
-        compareRssVsValues("description-2", href+"p_2", "2001-01-02", 
-                instance.makeDescriptionTitle("name-2", "Usereno", "groupname-2","domainname-2"), items.get(1));
+        compareRssVsValues("description-2", link+"?item=p_2", "2001-01-02", 
+                instance.makeDescriptionTitle("name-2", "Usereno", "groupname-2"), items.get(1));
 
-        compareRssVsValues("description-3", href+"p_3", "2001-01-03", 
-                instance.makeDescriptionTitle("name-3", "Userio", "groupname-3","domainname-3"), items.get(2));
+        compareRssVsValues("description-3", link+"?item=p_3", "2001-01-03", 
+                instance.makeDescriptionTitle("name-3", "Userio", "groupname-3"), items.get(2));
 
         
         

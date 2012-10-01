@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.rest.ComponentRegistryRestService;
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
 import clarin.cmdi.componentregistry.rss.Guid;
@@ -20,6 +21,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.xml.bind.DatatypeConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *

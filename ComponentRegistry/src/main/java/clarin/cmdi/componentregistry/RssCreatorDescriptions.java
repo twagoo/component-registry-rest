@@ -6,6 +6,8 @@ package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.rss.RssItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,7 +15,7 @@ import clarin.cmdi.componentregistry.rss.RssItem;
  */
 public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssCreator<T> {
     
- 
+ private final static Logger LOG = LoggerFactory.getLogger(RssCreatorDescriptions.class);
     // creator method, desc to rssItem, ovverrides the dummy method of the RssCreatorClass
     @Override 
     protected RssItem fromArgToRssItem(T desc) {
@@ -28,25 +30,27 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
        
         
         //Guid
-        //retval.setGuid(makeGuid(link));
+        retval.setGuid(makeGuid(super.getLink()+"?item="+desc.getId()));
         
         // link
-        retval.setLink(super.getLink()+"?item="+desc.getId()+"#");
+        retval.setLink(super.getLink()+"?item="+desc.getId());
         
         //time-date
         retval.setPubDate(desc.getRegistrationDate());
         
         //Title
-        retval.setTitle(makeDescriptionTitle(desc.getName(),desc.getCreatorName(), desc.getGroupName(),desc.getDomainName()));
-
+        retval.setTitle(makeDescriptionTitle(desc.getName(),desc.getCreatorName(), desc.getGroupName()));
         
         return retval;
 
     }
 
-    protected String makeDescriptionTitle(String name, String creatorname, String group, String domain){
-        String retval =  name+"by user "+creatorname+", group "+group+",domain "+domain;
+    protected String makeDescriptionTitle(String name, String creatorname, String group){
         
-        return retval;
+        String help;
+        if (group==null) {help="is unspecified";} else {help=group;};
+         
+        return(name+" by user "+creatorname+", group "+help);
+       
     }
 }
