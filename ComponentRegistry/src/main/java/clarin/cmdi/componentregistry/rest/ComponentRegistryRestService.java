@@ -34,7 +34,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +55,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -982,16 +980,16 @@ public class ComponentRegistryRestService {
     }
 
     /*
-     * generating rss: commom part for profile and component descriptions
+     * a working-horse method called to generate Rss feed for both, profiles and components
      * 
      */
-    private <T extends AbstractDescription> Rss getRss(String limit, List<T> descs, 
-            String description, String title) throws ComponentRegistryException, ParseException {
+    protected <T extends AbstractDescription> Rss getRss(String limit, List<T> descs, 
+            String description, String title, String link) throws ComponentRegistryException, ParseException {
 
         
         RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
         
-        rssCreator.setLink(getApplicationBaseURI() + "/");
+        rssCreator.setLink(link);
         rssCreator.setDescription(description);
         rssCreator.setTitle(title);
 
@@ -1019,14 +1017,12 @@ public class ComponentRegistryRestService {
         
         String title;
          if (userspace) { title= "Workspace components";}
-         else {title= "Workspace components";
+         else {title= "Public components";
        }
-         
         
-        
-        Rss rss = getRss(limit, components,"Updates for components" , title);
+        Rss rss = getRss(limit, components,"Updates for components" , title, getApplicationBaseURI() + "/");
 
-        LOG.info("Releasing " + limit + "most recent registered components into the world sorted by their registration date-and-time");
+        LOG.info("Releasing " + limit + " most recent registered components into the world");
 
 
         return rss;
@@ -1038,53 +1034,30 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 
-        
-
+      
         // ?? How to get rid of the deprecated stuff ??
         List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
         
         String title;
          if (userspace) { title= "Workspace profiles";}
-         else {title= "Workspace profiles";
+         else {title= "Public profiles";
        }
        
-        Rss rss = getRss(limit, profiles, "Updates for profiles", title);
+        Rss rss = getRss(limit, profiles, "Updates for profiles", title, getApplicationBaseURI() + "/");
         
 
-        LOG.info("Releasing " + limit + "most recent registered profiles into the world sorted by their registration date-and-time");
+        LOG.info("Releasing " + limit + " most recent registered profiles into the world");
         return rss;
     }
 
-    /* debugging-help piece of code for grabbing Id-s of profiles and comments
-     * 
-     List<ProfileDescription> lprfaux = getRegisteredProfiles(userspace, true);
-        
-         
-     for (ProfileDescription currentProfile : lprfaux) {
-     String currentProfileId = currentProfile.getId();
-     LOG.debug(currentProfileId);
-	    
-     }
-     * 
-     List<ComponentDescription> lcmaux = getRegisteredProfiles(userspace, true);
-        
-         
-     for (ProfileDescription currentProfile : lprfaux) {
-     String currentProfileId = currentProfile.getId();
-     LOG.debug(currentProfileId);
-	    
-     }
-     * 
-        
-     */
-    
+   
     
     ///////////////////////////////////////////////////////////
     /*
-     * the  working-horse method for obtaing comment for a given profile or a component (via the corresponding Id)
+     * a  working-horse method for obtaing a comment for a given profile or a component (via the profile/component's and cpmment's Id)
      */
-    private Rss getRssOfComments(String limit, List<Comment> comments, String description,
-            String title, String id) throws ComponentRegistryException, ParseException, IOException, JAXBException {
+    protected Rss getRssOfComments(String limit, List<Comment> comments, String description,
+            String title, String id, String baseUri) throws ComponentRegistryException, ParseException, IOException, JAXBException {
 
         Collections.sort(comments, Comment.COMPARE_ON_DATE);
 
@@ -1096,38 +1069,19 @@ public class ComponentRegistryRestService {
 
 
         // debugging stuff, to see if the dates are sorted with the latest on the top
-        for (Comment comm : sublist) {
-            String dt = comm.getCommentDate();
-            LOG.debug(dt);
-        }
+       
         //
 
 
 
         RssCreatorComments instance = new RssCreatorComments();
-
-        String baseUri = getApplicationBaseURI() + "/";
       
         
         instance.setDescription(description);
-        instance.setLink(baseUri + "?item=" + id + "&view=comments");
+        instance.setLink(baseUri + "?item=" + id + "&browserview=comments");
         instance.setTitle(title);
 
         Rss result = instance.makeRss(sublist);
-        
-         // testing stuff
-        String path = openTestDir("testRss");
-        String os = MDMarshaller.marshalToString(result);
-        writeStringToFile(os, path + "testRssResl.xml");
-        //end of testing stuff
-
-        // debugging stuff
-        LOG.debug("The amount of items: " + Integer.toString(result.getChannel().getItem().size()));
-        LOG.debug("The amount of comments: " + Integer.toString(comments.size()));
-        // end of debugging stuff
-
-
-
         return result;
 
     }
@@ -1147,8 +1101,8 @@ public class ComponentRegistryRestService {
                 + getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName()
                 + "\" ";
 
-        Rss result = getRssOfComments(limit, comments, "Update of comments for current profile",
-                title, profileId);
+        Rss result = getRssOfComments(limit, comments, "Update of comments for the current profile",
+                title, profileId, getApplicationBaseURI() + "/");
 
        
         return result;
@@ -1160,18 +1114,7 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssOfCommentsFromComponent(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
 
-        //debigging piece 
-        List<ComponentDescription> lcmaux = getRegisteredComponents(userspace);
-
-
-        for (ComponentDescription current : lcmaux) {
-            String currentId = current.getId();
-            LOG.debug(currentId);
-        }
-        
-        //end of debug 
-
-        // main part starts from here 
+      
         final Principal principal = security.getUserPrincipal();
         List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
 
@@ -1179,105 +1122,13 @@ public class ComponentRegistryRestService {
                 + getRegistry(getStatus(userspace)).getComponentDescription(componentId).getName()
                 + "\" ";
 
-        Rss result = getRssOfComments(limit, comments, "Update of comments for current component",
-                title, componentId);
+        Rss result = getRssOfComments(limit, comments, "Update of comments for the current component",
+                title, componentId, getApplicationBaseURI() + "/");
 
 
 
         return result;
     }
 
-    ////////////////////////////////////////////////////////
-    // temporarily for rss-bug fixing
-    /**
-     *
-     * @param bytes is an array of bytes to be written in the file filename
-     * (from scratch!)
-     * @param filename is the name of the file where the array "bytes" is to be
-     * written to
-     * @throws IOException
-     * @throws JAXBException
-     */
-    public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
-
-        File file = new File(filename);
-        FileOutputStream fop = new FileOutputStream(file);
-
-        fop.write(bytes);
-
-        fop.flush();
-        fop.close();
-
-
-    }
-
-    /**
-     *
-     * @param str is a string which is to be written into the filename (from
-     * scratch!)
-     * @param filename is a filename where the string is to be written to
-     * @throws IOException
-     * @throws JAXBException
-     */
-    public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
-
-        writeBytesToFile(str.getBytes(), filename);
-
-
-    }
-
-    /**
-     *
-     * @param os is an output stream which is to be written into the filename
-     * (from scratch!)
-     * @param filename is a filename where the stream is to be written to
-     * @throws IOException
-     * @throws JAXBException
-     */
-    public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
-
-        writeBytesToFile(os.toByteArray(), filename);
-
-
-    }
-
-    /**
-     *
-     * @param cdesc is a component which is to be written into the filename
-     * (from scratch!)
-     * @param filename is a filename where the component is to be written to
-     * @throws IOException
-     * @throws JAXBException
-     */
-    public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-
-
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        MDMarshaller.marshal(cdesc, os);
-
-        writeStreamToFile(os, filename);
-
-    }
-
-    /**
-     * opens a temporary sub-directory dirName in /target/
-     *
-     * @param dirName is the name of the temporary subdirectory which is to be
-     * opened
-     * @return the absolute part for this directory
-     */
-    public static String openTestDir(String dirName) {
-
-        File testDir = new File("target/" + dirName);
-
-
-        testDir.mkdir();
-
-        System.out.println(dirName);
-        //String retval = new File(testDir, dirName).getAbsolutePath();
-        String retval = new File(testDir, "/").getAbsolutePath();
-
-        return (retval);
-
-    }
+    
 }
