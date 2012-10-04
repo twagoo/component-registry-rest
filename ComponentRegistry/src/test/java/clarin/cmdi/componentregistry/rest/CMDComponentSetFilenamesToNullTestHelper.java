@@ -17,7 +17,8 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author olhsha
+ * @author olhsha non-automated developers. test, with and input (a valid component/prifile  xml file and a path to it)
+ * and the output (the file where all filenames are set to null, in the same directory as the input file)
  */
 public class CMDComponentSetFilenamesToNullTestHelper {
 

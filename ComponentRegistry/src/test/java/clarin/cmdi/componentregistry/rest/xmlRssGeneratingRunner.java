@@ -25,7 +25,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
- * @author olhsha, non-aitomatised developer's test class
+ * @author olhsha, non-automatised developer's test class
+ * Main method generates an Rss xml-file to validate it later using one of the on-line rss-source validators
  */
 public class xmlRssGeneratingRunner {
       
@@ -75,22 +76,29 @@ public class xmlRssGeneratingRunner {
        
       ComponentRegistryRestService restService = new ComponentRegistryRestService();
       Rss rss = null;
-      String baseUri = "http://localhost:8080/ComponentRegistry/";
+      String baseUri = "http://localhost:8080/ComponentRegistry/"; // used only as a nice URi-example content for the "link"-field
+      // in this test we do not click on link, we just generate an Rss xml-file to validate it
+      // using one of the on-line rss-source vaidators
       
-      if (kind == 1){
+      if (kind == 1){ // testing Rss for profiles
       List<ProfileDescription> profs = registry.getProfileDescriptions();
+      
+      System.out.println(profs.size());
       Collections.sort(profs, AbstractDescription.COMPARE_ON_DATE);
+      System.out.println(profs.size());
       
       System.out.println("check if the profiles are sorted in a proper way, by the dates ");
         for (ProfileDescription pdesc : profs) {
             System.out.println(pdesc.getRegistrationDate()); 
         }
       
-      rss = restService.getRss("10", profs,"Updates for profiles" , "RSS for public profiles", baseUri);
+      rss = restService.getRss(Integer.toString(profs.size()), profs,"Updates for profiles" , "RSS for public profiles", baseUri);
+      System.out.println(rss.getChannel().getItem().size());
+      
       }
       
       
-      if (kind == 2){
+      if (kind == 2){ // testing rss for components
       List<ComponentDescription> comps = registry.getComponentDescriptions();
       
       Collections.sort(comps, AbstractDescription.COMPARE_ON_DATE);
@@ -99,10 +107,10 @@ public class xmlRssGeneratingRunner {
         for (ComponentDescription cdesc : comps) {
             System.out.println(cdesc.getRegistrationDate()); 
         }
-      rss = restService.getRss("10", comps,"Updates for components" , "RSS for public components", baseUri);
+      rss = restService.getRss(Integer.toString(comps.size()), comps,"Updates for components" , "RSS for public components", baseUri);
       }
       
-      if (kind == 3){
+      if (kind == 3){ // testing Rss comments for profiles
       String profileId = "clarin.eu:cr1:p_1284723009187";    
       List<Comment> comms = registry.getCommentsInProfile(profileId, null);
       
@@ -113,10 +121,10 @@ public class xmlRssGeneratingRunner {
             System.out.println(comm.getCommentDate());
         }
       
-      rss = restService.getRssOfComments("10", comms, "Updates for the profile " + profileId+" comments " , "RSS for profile comments", profileId, baseUri);
+      rss = restService.getRssOfComments(Integer.toString(comms.size()), comms, "Updates for the profile " + profileId+" comments " , "RSS for profile comments", profileId, baseUri);
       }
       
-      if (kind == 4){
+      if (kind == 4){ // testing rss comments for components
       String componentId = "clarin.eu:cr1:c_1288172614011";
       List<Comment> comms = registry.getCommentsInComponent(componentId, null);
       Collections.sort(comms, Comment.COMPARE_ON_DATE);
@@ -126,7 +134,7 @@ public class xmlRssGeneratingRunner {
             System.out.println(comm.getCommentDate());
         }
             
-      rss = restService.getRssOfComments("10", comms, "Updates for the component " +componentId+" comments", "RSS forcomponent comments", "clarin.eu:cr1:p_1284723009187", baseUri);
+      rss = restService.getRssOfComments("10", comms, "Updates for the component " +componentId+" comments", "RSS for component comments", "clarin.eu:cr1:p_1284723009187", baseUri);
       }
       
       printXmlRssToFile(rss);
