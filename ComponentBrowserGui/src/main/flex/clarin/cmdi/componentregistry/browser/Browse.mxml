@@ -52,6 +52,7 @@
 			[Bindable]
 			private var selectedComponentItem:ItemDescription;
 			private var startupItemId:String = null;
+			private var startupPanel:String = null;
 			
 			public function init():void {
 				profilesMenu = new BrowseContextMenu();
@@ -80,10 +81,12 @@
 			
 			public function loadStartup():void {
 				startupItemId = Config.instance.startupItem;
+				startupPanel = Config.instance.browserPanel;
 				if (startupItemId) { //only load this once on startup
 					componentsSrv.addEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
 					profilesSrv.addEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
 				}
+				
 				refresh();
 			}
 			
@@ -95,13 +98,17 @@
 			private function profilesLoaded(event:Event):void {
 				var item:ItemDescription = ProfileListService.findDescription(startupItemId);
 				loadStartupItem(item);
+				profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);				
 				profilesSrv.removeEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
 			}
 			
 			private function componentsLoaded(event:Event):void {
 				var item:ItemDescription = ComponentListService.findDescription(startupItemId);
-				loadStartupItem(item);
-				componentsSrv.removeEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
+				if(item != null){
+					loadStartupItem(item);
+					componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);				
+					componentsSrv.removeEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
+				}
 			}
 			
 			private function loadStartupItem(item:ItemDescription):void {
@@ -203,7 +210,9 @@
 							 height="100%"
 							 color="0x323232"
 							 y="59"
-							 borderStyle="outset">
+							 borderStyle="outset"
+							 creationPolicy="all"
+							 >
 				<mx:VDividedBox label="Profiles"
 								width="100%">
 					<browser:BrowserOverviewList id="profilesOverview"
@@ -225,7 +234,8 @@
 				</mx:VDividedBox>
 				
 				<mx:VDividedBox label="Components"
-								width="100%">
+								width="100%"
+								>
 					<browser:BrowserOverviewList id="componentsOverview"
 												 viewStack="{this.parent as RegistryViewStack}"
 												 browserColumns="{browserColumns.getComponentColumns()}"

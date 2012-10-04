@@ -42,11 +42,22 @@
 		<![CDATA[
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.services.CommentListService;
+			import clarin.cmdi.componentregistry.services.Config;
 			
 			import mx.events.FlexEvent;
 			
 			[Bindable]
 			private var _itemDescription:ItemDescription;
+			
+			public function setPanel(startupPanel:String):void {
+				if(startupPanel == Config.BROWSER_PANEL_VIEW){
+					infoViewStack.selectedChild = viewPanel;
+				} else if(startupPanel == Config.BROWSER_PANEL_XML) {					
+					infoViewStack.selectedChild = xmlPanel;
+				} else if(startupPanel == Config.BROWSER_PANEL_COMMENTS) {
+					infoViewStack.selectedChild = commentsPanel;
+				}
+			}
 			
 			public function set itemDescription(itemDescription:ItemDescription):void{
 				_itemDescription = itemDescription;
