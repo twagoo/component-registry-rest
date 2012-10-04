@@ -34,7 +34,7 @@
     This application uses Shibboleth authentication. Make sure that the URIs
     for login/logout are set correctly in WEB-INF/shhaa.xml. 
 -->
-<Context antiJARLocking="true" path="">
+<Context antiJARLocking="true" path="/ComponentRegistry">
     <!-- 
 	Passed to the Flex UI via index.jsp so that it can locate the 
 	ComponentRegistry REST service. Just supply the application root:
