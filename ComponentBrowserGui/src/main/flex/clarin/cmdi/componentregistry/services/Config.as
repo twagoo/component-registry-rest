@@ -13,6 +13,7 @@ package clarin.cmdi.componentregistry.services {
 		public static const CLARIN_REGISTER_URL:String = "http://www.clarin.eu/user/register";
 		public static const PARAM_USERSPACE:String = "userspace";
 		public static const REGISTRY_PARAM_VIEW:String = "view";
+		public static const REGISTRY_PARAM_BROWSER_VIEW:String = "browserview";
 		public static const REGISTRY_PARAM_ITEM:String = "item";
 		public static const REGISTRY_PARAM_SPACE:String = "space";
 		public static const REGISTRY_PARAM_DEBUG:String = "debug";
@@ -21,6 +22,10 @@ package clarin.cmdi.componentregistry.services {
 		public static const VIEW_BROWSE:String = "browse";
 		public static const VIEW_EDIT:String = "edit";
 		public static const VIEW_IMPORT:String = "import";
+		//Possible browser views to start with
+		public static const BROWSER_PANEL_VIEW:String = "view"; 
+		public static const BROWSER_PANEL_XML:String = "xml"; 
+		public static const BROWSER_PANEL_COMMENTS:String = "comments"; 
 		//Possible space to start with.
 		public static const SPACE_USER:String = "user";
 		public static const SPACE_PUBLIC:String = "public";
@@ -46,6 +51,7 @@ package clarin.cmdi.componentregistry.services {
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
 
 		private var _view:String = VIEW_BROWSE;
+		private var _browserPanel:String = BROWSER_PANEL_VIEW;
 		private var _space:String = SPACE_PUBLIC;
 		private var _userSpace:Boolean = false;
 		private var _debug:Boolean = false;
@@ -68,6 +74,10 @@ package clarin.cmdi.componentregistry.services {
 			var view:String = applicationParameters.view;
 			if (view) {
 				_view = view;
+			}
+			var browserPanel:String = applicationParameters.browserview;
+			if(browserPanel){
+				_browserPanel = browserPanel;
 			}
 			var space:String = applicationParameters.space;
 			if (space) {
@@ -153,6 +163,10 @@ package clarin.cmdi.componentregistry.services {
 
 		public function get view():String {
 			return _view;
+		}
+		
+		public function get browserPanel():String {
+			return _browserPanel;
 		}
 
 		public function get space():String {

@@ -46,17 +46,19 @@ package clarin.cmdi.componentregistry.browser
 		public function load():void{
 			removeAllChildren();
 			
-			// A box for the comments (will be loaded in callback but should be shown first)
-			commentsBox = new VBox();
-			addChild(commentsBox);
-			
-			// A panel for posting a comment (or a message 'login to post');
-			addPostPanel();
-			
-			// Do actual loading
-			service = new CommentListService(_itemDescription, _itemDescription.isInUserSpace);
-			service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
-			service.load();
+			if(_itemDescription != null) {
+				// A box for the comments (will be loaded in callback but should be shown first)
+				commentsBox = new VBox();
+				addChild(commentsBox);
+				
+				// A panel for posting a comment (or a message 'login to post');
+				addPostPanel();
+				
+				// Do actual loading
+				service = new CommentListService(_itemDescription, _itemDescription.isInUserSpace);
+				service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
+				service.load();
+			}
 		}
 		
 		private function addPostPanel():void{
