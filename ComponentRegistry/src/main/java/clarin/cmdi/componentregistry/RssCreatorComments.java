@@ -30,13 +30,13 @@ public class RssCreatorComments extends RssCreator<Comment> {
         
                 //The content 
         retval.setDescription(comm.getComment()); 
-        
+        String href = super.getLink()+"&commentId="+comm.getId();
        
         //Guid
-        retval.setGuid(makeGuid(super.getLink()+"&commentId="+comm.getId()));
+        retval.setGuid(makeGuid(href));
         
         // link
-        retval.setLink(super.getLink()+"&commentId="+comm.getId());
+        retval.setLink(href);
         
         
         

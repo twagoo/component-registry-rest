@@ -92,7 +92,7 @@ public class xmlRssGeneratingRunner {
             System.out.println(pdesc.getRegistrationDate()); 
         }
       
-      rss = restService.getRss(Integer.toString(profs.size()), profs,"Updates for profiles" , "RSS for public profiles", baseUri);
+      rss = restService.getRss(Integer.toString(profs.size()), profs,"Updates for profiles" , "RSS for public profiles", baseUri, false);
       System.out.println(rss.getChannel().getItem().size());
       
       }
@@ -107,7 +107,7 @@ public class xmlRssGeneratingRunner {
         for (ComponentDescription cdesc : comps) {
             System.out.println(cdesc.getRegistrationDate()); 
         }
-      rss = restService.getRss(Integer.toString(comps.size()), comps,"Updates for components" , "RSS for public components", baseUri);
+      rss = restService.getRss(Integer.toString(comps.size()), comps,"Updates for components" , "RSS for public components", baseUri, false);
       }
       
       if (kind == 3){ // testing Rss comments for profiles
@@ -121,7 +121,7 @@ public class xmlRssGeneratingRunner {
             System.out.println(comm.getCommentDate());
         }
       
-      rss = restService.getRssOfComments(Integer.toString(comms.size()), comms, "Updates for the profile " + profileId+" comments " , "RSS for profile comments", profileId, baseUri);
+      rss = restService.getRssOfComments(Integer.toString(comms.size()), comms, "Updates for the profile " + profileId+" comments " , "RSS for profile comments", profileId, baseUri, false);
       }
       
       if (kind == 4){ // testing rss comments for components
@@ -134,7 +134,7 @@ public class xmlRssGeneratingRunner {
             System.out.println(comm.getCommentDate());
         }
             
-      rss = restService.getRssOfComments("10", comms, "Updates for the component " +componentId+" comments", "RSS for component comments", "clarin.eu:cr1:p_1284723009187", baseUri);
+      rss = restService.getRssOfComments("10", comms, "Updates for the component " +componentId+" comments", "RSS for component comments", "clarin.eu:cr1:p_1284723009187", baseUri, false);
       }
       
       printXmlRssToFile(rss);

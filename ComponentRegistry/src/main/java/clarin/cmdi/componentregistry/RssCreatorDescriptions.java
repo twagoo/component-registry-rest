@@ -27,13 +27,16 @@ public class RssCreatorDescriptions<T extends AbstractDescription>  extends RssC
         //Description (blah-blah)
         retval.setDescription(desc.getDescription());
        
-       
+       String connectParam;
+       if (super.getUserspace()) {connectParam="&";} else {connectParam="?";}
+       String href = super.getLink()+connectParam+"item="+desc.getId();
         
         //Guid
-        retval.setGuid(makeGuid(super.getLink()+"?item="+desc.getId()));
+        retval.setGuid(makeGuid(href));
         
         // link
-        retval.setLink(super.getLink()+"?item="+desc.getId());
+        
+        retval.setLink(href);
         
         //time-date
         retval.setPubDate(desc.getRegistrationDate());

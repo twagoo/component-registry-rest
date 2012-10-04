@@ -33,6 +33,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     
     private String title;
     private String link;
+    private boolean userspace;
     private String description;
     private String language;
     private String copyright;
@@ -92,6 +93,13 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
 
     public String getLink() {
         return this.link;
+    }
+    
+    public boolean getUserspace(){
+        return userspace;
+    }
+    public void setUserspace(boolean userspace){
+        this.userspace = userspace;
     }
 
     /**

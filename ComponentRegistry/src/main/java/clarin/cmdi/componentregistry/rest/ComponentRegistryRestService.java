@@ -984,12 +984,16 @@ public class ComponentRegistryRestService {
      * 
      */
     protected <T extends AbstractDescription> Rss getRss(String limit, List<T> descs, 
-            String description, String title, String link) throws ComponentRegistryException, ParseException {
+            String description, String title, String link, boolean userspace) throws ComponentRegistryException, ParseException {
 
         
         RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
         
-        rssCreator.setLink(link);
+        String space= "";
+        if (userspace) {space="?space=user";};
+        rssCreator.setUserspace(userspace); 
+        
+        rssCreator.setLink(link+space);
         rssCreator.setDescription(description);
         rssCreator.setTitle(title);
 
@@ -1015,12 +1019,13 @@ public class ComponentRegistryRestService {
 
         List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
         
+        
         String title;
          if (userspace) { title= "Workspace components";}
          else {title= "Public components";
        }
         
-        Rss rss = getRss(limit, components,"Updates for components" , title, getApplicationBaseURI() + "/");
+        Rss rss = getRss(limit, components,"Updates for components" , title, getApplicationBaseURI() + "/", userspace);
 
         LOG.info("Releasing " + limit + " most recent registered components into the world");
 
@@ -1038,12 +1043,12 @@ public class ComponentRegistryRestService {
         // ?? How to get rid of the deprecated stuff ??
         List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
         
-        String title;
+        String title; 
          if (userspace) { title= "Workspace profiles";}
          else {title= "Public profiles";
        }
        
-        Rss rss = getRss(limit, profiles, "Updates for profiles", title, getApplicationBaseURI() + "/");
+        Rss rss = getRss(limit, profiles, "Updates for profiles", title, getApplicationBaseURI() + "/", userspace);
         
 
         LOG.info("Releasing " + limit + " most recent registered profiles into the world");
@@ -1057,7 +1062,7 @@ public class ComponentRegistryRestService {
      * a  working-horse method for obtaing a comment for a given profile or a component (via the profile/component's and cpmment's Id)
      */
     protected Rss getRssOfComments(String limit, List<Comment> comments, String description,
-            String title, String id, String baseUri) throws ComponentRegistryException, ParseException, IOException, JAXBException {
+            String title, String id, String baseUri, boolean userspace) throws ComponentRegistryException, ParseException, IOException, JAXBException {
 
         Collections.sort(comments, Comment.COMPARE_ON_DATE);
 
@@ -1067,18 +1072,14 @@ public class ComponentRegistryRestService {
         };
         List<Comment> sublist = comments.subList(0, limitInt);
 
-
-        // debugging stuff, to see if the dates are sorted with the latest on the top
-       
-        //
-
-
-
         RssCreatorComments instance = new RssCreatorComments();
-      
+        
+        String space= "";
+        if (userspace) {space="&space=user";};
+        instance.setUserspace(userspace);
         
         instance.setDescription(description);
-        instance.setLink(baseUri + "?item=" + id + "&browserview=comments");
+        instance.setLink(baseUri + "?item=" + id + space+ "&browserview=comments");
         instance.setTitle(title);
 
         Rss result = instance.makeRss(sublist);
@@ -1102,7 +1103,7 @@ public class ComponentRegistryRestService {
                 + "\" ";
 
         Rss result = getRssOfComments(limit, comments, "Update of comments for the current profile",
-                title, profileId, getApplicationBaseURI() + "/");
+                title, profileId, getApplicationBaseURI() + "/", userspace);
 
        
         return result;
@@ -1123,7 +1124,7 @@ public class ComponentRegistryRestService {
                 + "\" ";
 
         Rss result = getRssOfComments(limit, comments, "Update of comments for the current component",
-                title, componentId, getApplicationBaseURI() + "/");
+                title, componentId, getApplicationBaseURI() + "/", userspace);
 
 
 
