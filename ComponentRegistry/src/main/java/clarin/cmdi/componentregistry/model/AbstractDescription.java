@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
-import clarin.cmdi.componentregistry.RssCreator;
+import clarin.cmdi.componentregistry.rss.RssCreator;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;

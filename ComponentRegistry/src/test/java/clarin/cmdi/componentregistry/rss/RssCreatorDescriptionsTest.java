@@ -1,6 +1,7 @@
 
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.rss;
 
+import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -92,7 +93,7 @@ public class RssCreatorDescriptionsTest {
     private void compareRssVsValues(String description, String href, String date, String title, RssItem item) {
        
         assertEquals(description, item.getDescription());
-        //assertEquals(href, item.getGuid().getValue()  );
+        assertEquals(href, item.getGuid().getValue()  );
         assertEquals(href, item.getLink());
         assertEquals(date, item.getPubDate());
         assertEquals(title, item.getTitle());
@@ -104,90 +105,33 @@ public class RssCreatorDescriptionsTest {
      */
     @Test
     public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
-
-        
-        String link = "http://catalog.clarin.eu/ds/ComponentRegistry/profiles/";
-        
+        String link = "http://catalog.clarin.eu/ds/ComponentRegistry/profiles";
         ProfileDescription desc1 = createTestProfileDescription(23, "Useratti",
                 "description-1", "groupname-1", "name-1", true, "2001-01-01", link,"p_1");
-
         ProfileDescription desc2 = createTestProfileDescription(23, "Usereno",
                 "description-2", "groupname-2", "name-2", false, "2001-01-02", link, "p_2");
-
         ProfileDescription desc3 = createTestProfileDescription(23, "Userio",
                 "description-3", "groupname-3", "name-3", true, "2001-01-03", link, "p_3");
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
-
         RssCreatorDescriptions instance = new RssCreatorDescriptions();
-        
-        
-        
-        
-        instance.setVersion(2.0);
-        
-        instance.setLink(link);
-        instance.setCategory(null);
-        instance.setCloud(null);
-        instance.setCopyright("copyleft");
-        instance.setDescription("this is a test rss");
-        instance.setDocs("doc");
-        instance.setGenerator("generator");
-        instance.setImage(null);
-        instance.setLanguage("engl");
-        instance.setLastBuildDate("today");
-        instance.setManagingEditor("twan");
-        instance.setPubDate("publication date");
-        instance.setRating("rating");
-        instance.setSkipDays(null);
-        instance.setSkipHours(null);
-        instance.setTextInput(null);
-        instance.setTitle("TITLE");
-        instance.setWebMaster("webMaster");
-        
-        Rss result = instance.makeRss(descriptions);
-        assertEquals(Double.toString(result.getVersion()), "2.0");
-        
+        Rss result = instance.getRssDescriptions(descriptions, false, "profiles", "3", link);
         
         List<RssItem> items = result.getChannel().getItem();
-
         assertEquals(3, result.getChannel().getItem().size());
-
-        // String creatorname, String description, String href, String date, String nametitle, RssItem item
-        
-        
-
         compareRssVsValues("description-1", link+"?item=p_1", "2001-01-01", 
                    instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1"), items.get(0));
-
         compareRssVsValues("description-2", link+"?item=p_2", "2001-01-02", 
                 instance.makeDescriptionTitle("name-2", "Usereno", "groupname-2"), items.get(1));
-
         compareRssVsValues("description-3", link+"?item=p_3", "2001-01-03", 
                 instance.makeDescriptionTitle("name-3", "Userio", "groupname-3"), items.get(2));
 
         
         
         assertEquals("2.0", Double.toString(result.getVersion()));
-        
-        assertEquals(null, result.getChannel().getCategory());
-        assertEquals(null, result.getChannel().getCloud());
-        assertEquals("copyleft", result.getChannel().getCopyright());
-        assertEquals("this is a test rss", result.getChannel().getDescription());
-        assertEquals("doc", result.getChannel().getDocs());
-        assertEquals("generator", result.getChannel().getGenerator());
-        assertEquals(null, result.getChannel().getImage());
-        assertEquals("engl", result.getChannel().getLanguage());
-        assertEquals("today", result.getChannel().getLastBuildDate());
+        assertEquals("Updates for profiles", result.getChannel().getDescription());
         assertEquals(link, result.getChannel().getLink());
-        assertEquals("twan", result.getChannel().getManagingEditor());
-        assertEquals("publication date", result.getChannel().getPubDate());
-        assertEquals("rating", result.getChannel().getRating());
-        assertEquals(null , result.getChannel().getSkipDays());
-        assertEquals(null, result.getChannel().getSkipHours());
-        assertEquals(null, result.getChannel().getTextInput());
-        assertEquals("TITLE", result.getChannel().getTitle());
-        assertEquals("webMaster", result.getChannel().getWebMaster());
+        assertEquals("Public profiles", result.getChannel().getTitle());
         
         
     }

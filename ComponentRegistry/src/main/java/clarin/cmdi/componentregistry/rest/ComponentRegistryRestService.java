@@ -6,8 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.Owner;
-import clarin.cmdi.componentregistry.RssCreatorComments;
-import clarin.cmdi.componentregistry.RssCreatorDescriptions;
+import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -19,6 +18,7 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rss.Rss;
+import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
 import java.io.IOException;
@@ -964,140 +964,91 @@ public class ComponentRegistryRestService {
 	currentcomponent.setFilename(null);
 	setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     }
-
+    
     /**
-     * Generates RSS feeds for profile and component descriptions
-     *
-     * @param <T> type of description
-     * @param limit number of items to include in the RSS
-     * @param descriptions descriptions to include
-     * @param channelDescription channel description
-     * @param channelTitle channel title
-     * @param channelLink channel link
+     * 
+     * @param userspace
+     * @param limit
      * @return
      * @throws ComponentRegistryException
-     * @throws ParseException
+     * @throws ParseException 
      */
-    protected <T extends AbstractDescription> Rss getRss(String limit, List<T> descriptions,
-	    String channelDescription, String channelTitle, String channelLink, boolean userspace) throws ComponentRegistryException, ParseException {
-	RssCreatorDescriptions rssCreator = new RssCreatorDescriptions();
-
-	String space = "";
-	if (userspace) {
-	    space += "?space=user";
-	};
-	rssCreator.setUserspace(userspace);
-
-	rssCreator.setLink(channelLink + space);
-	rssCreator.setDescription(channelDescription);
-	rssCreator.setTitle(channelTitle);
-
-	Collections.sort(descriptions, AbstractDescription.COMPARE_ON_DATE);
-
-	int limitInt = Integer.parseInt(limit);
-
-	if (descriptions.size() < limitInt) {
-	    limitInt = descriptions.size();
-	}
-	List<T> sublist = descriptions.subList(0, limitInt);
-
-	Rss rss = rssCreator.makeRss(sublist);
-
-	return rss;
-    }
 
     @GET
     @Path("/components/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	final List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
-
-	final String title = userspace ? "Workspace components" : "Public components";
-	final Rss rss = getRss(limit, components, "Updates for components", title, getApplicationBaseURI() + "/", userspace);
+        final RssCreatorDescriptions instance = new RssCreatorDescriptions();
+        final Rss rss = instance.getRssDescriptions(components, userspace, "components", limit, getApplicationBaseURI());
 	LOG.info("Releasing RSS of " + limit + " most recently registered components");
-
-	return rss;
+        return rss;
     }
+    
+    /**
+     * 
+     * @param userspace
+     * @param limit
+     * @return
+     * @throws ComponentRegistryException
+     * @throws ParseException 
+     */
 
     @GET
     @Path("/profiles/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
-	// ?? How to get rid of the deprecated stuff ??
-	List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
-
-	final String title = userspace ? "Workspace profiles" : "Public profiles";
-	Rss rss = getRss(limit, profiles, "Updates for profiles", title, getApplicationBaseURI() + "/", userspace);
-	LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
+	final List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
+        final RssCreatorDescriptions instance = new RssCreatorDescriptions();
+	final Rss rss = instance.getRssDescriptions(profiles, userspace, "profiles", limit, getApplicationBaseURI());
+        LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
 	return rss;
     }
 
-    /**
-     * Obtains a comment for a given profile or a component (via the profile/component's and comment's Id)
-     *
-     * @param limit
-     * @param comments
-     * @param channelDescription
-     * @param channelTitle
-     * @param itemId
-     * @param baseUri
-     * @return
-     * @throws ComponentRegistryException
-     * @throws ParseException
-     * @throws IOException
-     * @throws JAXBException
-     */
-    protected Rss getRssOfComments(String limit, List<Comment> comments, String channelDescription,
-	    String channelTitle, String itemId, String baseUri, boolean userspace) throws ComponentRegistryException, ParseException, IOException, JAXBException {
-	Collections
-		.sort(comments, Comment.COMPARE_ON_DATE);
-
-	int limitInt = Integer.parseInt(limit);
-	if (comments.size() < limitInt) {
-	    limitInt = comments.size();
-	}
-	List<Comment> sublist = comments.subList(0, limitInt);
-	RssCreatorComments rssCreator = new RssCreatorComments();
-
-	String space = "";
-	if (userspace) {
-	    space = "&space=user";
-	}
-	rssCreator.setUserspace(userspace);
-	rssCreator.setDescription(channelDescription);
-	rssCreator.setLink(baseUri + "?item=" + itemId + space + "&browserview=comments");
-	rssCreator.setTitle(channelTitle);
-
-	return rssCreator.makeRss(sublist);
-    }
-
+   /**
+    * 
+    * @param profileId
+    * @param userspace
+    * @param limit
+    * @return
+    * @throws ComponentRegistryException
+    * @throws IOException
+    * @throws JAXBException
+    * @throws ParseException 
+    */
     @GET
     @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
 	final Principal principal = security.getUserPrincipal();
-	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
-
-	final String profileName = getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName();
-	final String title = String.format("Comments feed for the profile \"%1$s\"", profileName);
-	Rss result = getRssOfComments(limit, comments, "Update of comments for the current profile",
-		title, profileId, getApplicationBaseURI() + "/", userspace);
-
-	return result;
+	final List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
+        final String profileName = getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName();
+        final RssCreatorComments instance = new RssCreatorComments();
+        final Rss rss= instance.getRssComments(comments, profileName, "profile", userspace,getApplicationBaseURI(), profileId, limit);
+        return rss;
     }
 
+    /**
+     * 
+     * @param componentId
+     * @param userspace
+     * @param limit
+     * @return
+     * @throws ComponentRegistryException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws ParseException 
+     */
     @GET
     @Path("/components/{componentId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssOfCommentsFromComponent(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
 	final Principal principal = security.getUserPrincipal();
-	List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
+	final List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
+        final String componentName = getRegistry(getStatus(userspace)).getComponentDescription(componentId).getName();
+	final RssCreatorComments instance = new RssCreatorComments();
+        final Rss rss= instance.getRssComments(comments, componentName, "component", userspace,getApplicationBaseURI(), componentId, limit);
 
-	final String componentName = getRegistry(getStatus(userspace)).getComponentDescription(componentId).getName();
-	final String title = String.format("Comments feed for the component \"%1$s\" ", componentName);
-	Rss result = getRssOfComments(limit, comments, "Update of comments for the current component",
-		title, componentId, getApplicationBaseURI() + "/", userspace);
-
-	return result;
+	return rss;
     }
 }

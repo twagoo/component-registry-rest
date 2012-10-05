@@ -1,5 +1,6 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.rss;
 
+import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssItem;
@@ -50,7 +51,7 @@ public class RssCreatorCommentsTest {
     @Test
     public void testMakeRss() throws ParseException {
 	String testPrfId = "p_1234";
-	String href = "http://catalog.clarin.eu/ds/ComponentRegistry/?item=" + testPrfId + "&view=comments";
+	String href = "http://catalog.clarin.eu/ds/ComponentRegistry";
 	boolean isFromProfile = true;
 
 	Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", testPrfId,
@@ -61,25 +62,27 @@ public class RssCreatorCommentsTest {
 		"userito");
 	List<Comment> comms = new ArrayList<Comment>(Arrays.asList(comm1, comm2, comm3));
 
-	RssCreatorComments instance = new RssCreatorComments();
-	instance.setLink(href);
-	instance.setVersion(3.0);
-
-	Rss result = instance.makeRss(comms);
-
-	assertEquals(Double.toString(result.getVersion()), "3.0"); // now, check if updating version has taken place
-
+	RssCreatorComments instance = new RssCreatorComments(); 
+        instance.setVersion(3.0);
+        Rss result = instance.getRssComments(comms, "Test profile", "profile", false, href, testPrfId, "3");
+        
+	
 	String rfcdate1 = instance.getRFCDateTime("2012-04-02T11:38:23+00:00");
 	String rfcdate2 = instance.getRFCDateTime("2011-04-02T11:38:22+00:00");
 	String rfcdate3 = instance.getRFCDateTime("2010-05-02T11:38:22+00:00");
 
 	List<RssItem> resitems = result.getChannel().getItem();
-
-	compareInputsVsRssItems(href + "&commentId=commentId1", "this is comment # 1", rfcdate1,
+        String channelLink = href + "/?item="+testPrfId+"&browserview=comments";
+	compareInputsVsRssItems(channelLink + "&commentId=commentId1", "this is comment # 1", rfcdate1,
 		"Comment commentId1\nby userello", resitems.get(0));
-	compareInputsVsRssItems(href + "&commentId=commentId2", "this is comment # 2", rfcdate2,
+	compareInputsVsRssItems(channelLink + "&commentId=commentId2", "this is comment # 2", rfcdate2,
 		"Comment commentId2\nby userino", resitems.get(1));
-	compareInputsVsRssItems(href + "&commentId=commentId3", "this is comment # 3", rfcdate3,
+	compareInputsVsRssItems(channelLink + "&commentId=commentId3", "this is comment # 3", rfcdate3,
 		"Comment commentId3\nby userito", resitems.get(2));
+        
+        assertEquals("3.0", Double.toString(result.getVersion()));
+        assertEquals("Update of comments", result.getChannel().getDescription());
+        assertEquals(channelLink, result.getChannel().getLink());
+        assertEquals("Comments feed for the profile p_1234", result.getChannel().getTitle());
     }
 }

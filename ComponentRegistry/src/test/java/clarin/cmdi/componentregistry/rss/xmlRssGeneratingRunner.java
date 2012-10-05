@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.rss;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
@@ -8,7 +8,8 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.rss.Rss;
+import clarin.cmdi.componentregistry.rest.ComponentRegistryRestService;
+import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -62,10 +63,9 @@ public class xmlRssGeneratingRunner {
 
 	ApplicationContext applicationContext = new ClassPathXmlApplicationContext("/applicationContextJDBC.xml");
 	ComponentRegistry registry = ((ComponentRegistryFactory) applicationContext.getBean("componentRegistryFactory")).getPublicRegistry();
-
-	ComponentRegistryRestService restService = new ComponentRegistryRestService();
-	Rss rss = null;
-	String baseUri = "http://localhost:8080/ComponentRegistry/"; // used only as a nice URi-example content for the "link"-field
+        
+        Rss rss = null;
+	String baseUri = "http://localhost:8080/ComponentRegistry"; // used only as a nice URi-example content for the "link"-field
 	// in this test we do not click on link, we just generate an Rss xml-file to validate it
 	// using one of the on-line rss-source vaidators
 
@@ -81,8 +81,8 @@ public class xmlRssGeneratingRunner {
 		System.out.println(pdesc.getRegistrationDate());
 	    }
 
-	    rss = restService.getRss(Integer.toString(profs.size()), profs, "Updates for profiles", "RSS for public profiles", baseUri, false);
-	    System.out.println(rss.getChannel().getItem().size());
+            RssCreatorDescriptions instance = new RssCreatorDescriptions();
+	    rss = instance.getRssDescriptions(profs, false, "profiles", "10", baseUri);
 
 	}
 
@@ -96,10 +96,13 @@ public class xmlRssGeneratingRunner {
 	    for (ComponentDescription cdesc : comps) {
 		System.out.println(cdesc.getRegistrationDate());
 	    }
-	    rss = restService.getRss(Integer.toString(comps.size()), comps, "Updates for components", "RSS for public components", baseUri, false);
+            
+            RssCreatorDescriptions instance = new RssCreatorDescriptions();
+	    rss = instance.getRssDescriptions(comps, false, "profiles", "10", baseUri);
 	}
 
 	if (kind == 3) { // testing Rss comments for profiles
+            // ToDo make it inputtable by the tester
 	    String profileId = "clarin.eu:cr1:p_1284723009187";
 	    List<Comment> comms = registry.getCommentsInProfile(profileId, null);
 
@@ -109,11 +112,13 @@ public class xmlRssGeneratingRunner {
 	    for (Comment comm : comms) {
 		System.out.println(comm.getCommentDate());
 	    }
-
-	    rss = restService.getRssOfComments(Integer.toString(comms.size()), comms, "Updates for the profile " + profileId + " comments ", "RSS for profile comments", profileId, baseUri, false);
-	}
+            
+            RssCreatorComments instance = new RssCreatorComments();
+	    rss = instance.getRssComments(comms, "Test profile", "profile", false, baseUri, "10", profileId);
+        }
 
 	if (kind == 4) { // testing rss comments for components
+             // ToDo make it inputtable by the tester
 	    String componentId = "clarin.eu:cr1:c_1288172614011";
 	    List<Comment> comms = registry.getCommentsInComponent(componentId, null);
 	    Collections.sort(comms, Comment.COMPARE_ON_DATE);
@@ -123,8 +128,9 @@ public class xmlRssGeneratingRunner {
 		System.out.println(comm.getCommentDate());
 	    }
 
-	    rss = restService.getRssOfComments("10", comms, "Updates for the component " + componentId + " comments", "RSS for component comments", "clarin.eu:cr1:p_1284723009187", baseUri, false);
-	}
+	   RssCreatorComments instance = new RssCreatorComments();
+	   rss = instance.getRssComments(comms, "Test component", "profile", false, baseUri, "10", componentId);
+        }
 
 	printXmlRssToFile(rss);
     }
