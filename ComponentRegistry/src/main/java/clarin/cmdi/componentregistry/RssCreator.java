@@ -1,14 +1,12 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.rest.ComponentRegistryRestService;
 import clarin.cmdi.componentregistry.rss.Category;
 import clarin.cmdi.componentregistry.rss.Cloud;
 import clarin.cmdi.componentregistry.rss.Guid;
 import clarin.cmdi.componentregistry.rss.Image;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssChannel;
-
 import clarin.cmdi.componentregistry.rss.RssItem;
 import clarin.cmdi.componentregistry.rss.SkipDaysList;
 import clarin.cmdi.componentregistry.rss.SkipHoursList;
@@ -17,12 +15,8 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import javax.xml.bind.DatatypeConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -30,7 +24,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class RssCreator<T> { // extends nothing so far, throuw nothing // make it abstract
 
-    
     private String title;
     private String link;
     private boolean userspace;
@@ -53,10 +46,8 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
     private SkipDaysList skipDays;
     private double version = 2.0; // of an rss
 
-    
-
     public double getVersion() {
-        return (version);
+	return (version);
     }
 
     /**
@@ -64,7 +55,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      * @param version
      */
     public void setVersion(double version) {
-        this.version = version;
+	this.version = version;
     }
 
     /**
@@ -74,11 +65,11 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setTitle(String value) {
-        this.title = value;
+	this.title = value;
     }
 
     public String getTitle() {
-        return this.title;
+	return this.title;
     }
 
     /**
@@ -88,11 +79,11 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setLink(String value) {
-        this.link = value;
+	this.link = value;
     }
 
     public String getLink() {
-        return this.link;
+	return this.link;
     }
     
     public boolean getUserspace(){
@@ -109,7 +100,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setDescription(String value) {
-        this.description = value;
+	this.description = value;
     }
 
     /**
@@ -119,7 +110,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setLanguage(String value) {
-        this.language = value;
+	this.language = value;
     }
 
     /**
@@ -129,7 +120,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setCopyright(String value) {
-        this.copyright = value;
+	this.copyright = value;
     }
 
     /**
@@ -139,7 +130,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setManagingEditor(String value) {
-        this.managingEditor = value;
+	this.managingEditor = value;
     }
 
     /**
@@ -149,7 +140,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setWebMaster(String value) {
-        this.webMaster = value;
+	this.webMaster = value;
     }
 
     /**
@@ -159,7 +150,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setPubDate(String value) {
-        this.pubDate = value;
+	this.pubDate = value;
     }
 
     /**
@@ -169,7 +160,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setLastBuildDate(String value) {
-        this.lastBuildDate = value;
+	this.lastBuildDate = value;
     }
 
     /**
@@ -179,7 +170,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setCategory(Category value) {
-        this.category = value;
+	this.category = value;
     }
 
     /**
@@ -189,7 +180,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setGenerator(String value) {
-        this.generator = value;
+	this.generator = value;
     }
 
     /**
@@ -199,7 +190,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setDocs(String value) {
-        this.docs = value;
+	this.docs = value;
     }
 
     /**
@@ -209,7 +200,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setCloud(Cloud value) {
-        this.cloud = value;
+	this.cloud = value;
     }
 
     /**
@@ -219,7 +210,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setTtl(BigInteger value) {
-        this.ttl = value;
+	this.ttl = value;
     }
 
     /**
@@ -229,7 +220,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setImage(Image value) {
-        this.image = value;
+	this.image = value;
     }
 
     /**
@@ -239,7 +230,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setRating(String value) {
-        this.rating = value;
+	this.rating = value;
     }
 
     /**
@@ -249,7 +240,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setTextInput(TextInput value) {
-        this.textInput = value;
+	this.textInput = value;
     }
 
     /**
@@ -259,7 +250,7 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setSkipHours(SkipHoursList value) {
-        this.skipHours = value;
+	this.skipHours = value;
     }
 
     /**
@@ -269,128 +260,128 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      */
     public void setSkipDays(SkipDaysList value) {
-        this.skipDays = value;
+	this.skipDays = value;
     }
 
     // creator method,  to rssItem 
     protected abstract RssItem fromArgToRssItem(T obj) throws ParseException;
 
-    //makes (and returns ) an  rss out of a list of RssItems
+    /**
+     * Makes an rss out of a list of RssItems
+     *
+     * @param rssItems
+     * @return rss from the RssItems
+     */
     private Rss makeRssChannel(List<RssItem> rssItems) {
+	final Rss rss = new Rss();
+	final RssChannel channel = new RssChannel();
 
-        final Rss rss = new Rss();
-        final RssChannel channel = new RssChannel();
+	channel.setCategory(category);
+	channel.setCloud(cloud);
+	channel.setCopyright(copyright);
+	channel.setDescription(description);
+	channel.setDocs(docs);
+	channel.setGenerator(generator);
+	channel.setImage(image);
+	channel.setLanguage(language);
+	channel.setLastBuildDate(lastBuildDate);
+	channel.setLink(link);
+	channel.setManagingEditor(managingEditor);
+	channel.setPubDate(pubDate);
+	channel.setRating(rating);
+	channel.setSkipDays(skipDays);
+	channel.setSkipHours(skipHours);
+	channel.setTextInput(textInput);
+	channel.setTitle(title);
+	channel.setTtl(ttl);
+	channel.setWebMaster(webMaster);
 
-        channel.setCategory(category);
-        channel.setCloud(cloud);
-        channel.setCopyright(copyright);
-        channel.setDescription(description);
-        channel.setDocs(docs);
-        channel.setGenerator(generator);
-        channel.setImage(image);
-        channel.setLanguage(language);
-        channel.setLastBuildDate(lastBuildDate);
-        channel.setLink(link);
-        channel.setManagingEditor(managingEditor);
-        channel.setPubDate(pubDate);
-        channel.setRating(rating);
-        channel.setSkipDays(skipDays);
-        channel.setSkipHours(skipHours);
-        channel.setTextInput(textInput);
-        channel.setTitle(title);
-        channel.setTtl(ttl);
-        channel.setWebMaster(webMaster);
+	rss.setChannel(channel);
+	rss.setVersion(version);
 
+	for (RssItem currentItem : rssItems) {
+	    channel.getItem().add(currentItem);
+	}
 
-        rss.setChannel(channel);
-
-        rss.setVersion(version);
-
-
-
-
-        for (RssItem currentItem : rssItems) {
-            channel.getItem().add(currentItem);
-        }
-
-        return rss;
+	return rss;
     }
 
-    //makes (and returns) a list of items out a list of descriptions, return the pointer to the list of items
+    /**
+     * Makes a list of items out a list of descriptions, return the pointer to the list of items
+     *
+     * @param descriptions
+     * @return items out a list of descriptions
+     * @throws ParseException
+     */
     private List<RssItem> makeListOfRssItems(List<T> objs) throws ParseException {
-        List<RssItem> listOfItems = new ArrayList<RssItem>();
+	List<RssItem> listOfItems = new ArrayList<RssItem>();
 
         for (T currentObj : objs) {
-
             RssItem currentItem = fromArgToRssItem(currentObj);
-            listOfItems.add(currentItem);
-        }
+	    listOfItems.add(currentItem);
+	}
 
-        return listOfItems;
+	return listOfItems;
     }
 
     public Rss makeRss(List<T> objs) throws ParseException {
-        return (makeRssChannel(makeListOfRssItems(objs)));
+	return (makeRssChannel(makeListOfRssItems(objs)));
     }
 
     // Helping stuff 
     protected Guid makeGuid(String href) {
-        Guid result = new Guid();
-        // result.setIsPermaLink(null);
-        result.setValue(href);
-        return result;
+	Guid result = new Guid();
+	// result.setIsPermaLink(null);
+	result.setValue(href);
+	return result;
     }
 
     /// Helping stuff: for working with dates
     private static Date parseWorks(String dateString) {
-        Date d = null;
-        try {
-            d = AbstractDescription.getDate(dateString);
-        } catch (ParseException pe) {
-            return null;
-        };
-        return d;
+	try {
+	    return AbstractDescription.getDate(dateString);
+	} catch (ParseException pe) {
+	    return null;
+	}
     }
 
     protected String getRFCDateTime(String dateString) {
+	final Date date = parseWorks(dateString);
 
-        Date date = parseWorks(dateString);
-
-        if (date == null) {
-            return dateString;
-        } else {
-            SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
-            return RFC822DATEFORMAT.format(date);
-        }
+	if (date == null) {
+	    return dateString;
+	} else {
+	    SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+	    return RFC822DATEFORMAT.format(date);
+	}
     }
 
-    
-    ///////
-    // returns 1 if ds1 is older (before) than ds2, returns -1 if ds1 is younger (after) than ds2
-    public static int compareDateStrings(String ds1, String ds2) {
+    /**
+     * Compares two date strings
+     *
+     * @param date1
+     * @param date2
+     * @return 1 if date1 is older (before) than date2, returns -1 if date1 is younger (after) than date2, 0 if they are the same
+     */
+    public static int compareDateStrings(String date1, String date2) {
+	final Date d1 = parseWorks(date1);
+	final Date d2 = parseWorks(date2);
 
-        int result = 0;
-
-        Date d1 = parseWorks(ds1);
-        Date d2 = parseWorks(ds2);
-
-        if (d1 == null) {
-            if (d2 == null) {
-                result = 0;
-            } else {
-                result = 1;
-            }
-        } else {
-            if (d2 == null) {
-                result = -1;
-            } else {
-                // cpmparteTo reurns:
-                // a value less than 0 if d2 is before d1 (d1 is younger than d2);
-                // a value greater than 0 if d2 is after  d1 (d1 is older than d2)
-                result = d2.compareTo(d1);
-            }
-
-        }
-        return result;
+	if (d1 == null) {
+	    if (d2 == null) {
+		return 0;
+	    } else {
+		return 1;
+	    }
+	} else {
+	    if (d2 == null) {
+		return -1;
+	    } else {
+		// compareTo returns:
+		// a value less than 0 if d2 is before d1 (d1 is younger than d2);
+		// a value greater than 0 if d2 is after  d1 (d1 is older than d2)
+		return d2.compareTo(d1);
+	    }
+	}
     }
 }

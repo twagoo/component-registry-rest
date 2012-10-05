@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.rss.Rss;

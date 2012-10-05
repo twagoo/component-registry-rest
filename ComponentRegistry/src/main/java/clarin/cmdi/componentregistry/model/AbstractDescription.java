@@ -4,13 +4,11 @@ import clarin.cmdi.componentregistry.RssCreator;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -33,50 +31,49 @@ public abstract class AbstractDescription {
     private String href;
     private String groupName;
     private int commentsCount;
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractDescription.class);
 
     public void setId(String id) {
-        this.id = id;
+	this.id = id;
     }
 
     public String getId() {
-        return id;
+	return id;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+	this.description = description;
     }
 
     public String getDescription() {
-        return description;
+	return description;
     }
 
     public void setName(String name) {
-        this.name = name;
+	this.name = name;
     }
 
     public String getName() {
-        return name;
+	return name;
     }
 
     public void setRegistrationDate(String registrationDate) {
-        this.registrationDate = registrationDate;
+	this.registrationDate = registrationDate;
     }
 
     public String getRegistrationDate() {
-        return registrationDate;
+	return registrationDate;
     }
 
     public void setCreatorName(String creatorName) {
-        this.creatorName = creatorName;
+	this.creatorName = creatorName;
     }
 
     public String getCreatorName() {
-        return creatorName;
+	return creatorName;
     }
 
     public void setUserId(String userId) {
-        this.userId = userId;
+	this.userId = userId;
     }
 
     /**
@@ -84,66 +81,66 @@ public abstract class AbstractDescription {
      * userId can be the email address which we don't want to make public.
      */
     public String getUserId() {
-        return userId;
+	return userId;
     }
 
     public void setDomainName(String domainName) {
-        this.domainName = domainName;
+	this.domainName = domainName;
     }
 
     public String getDomainName() {
-        return domainName;
+	return domainName;
     }
 
     public void setHref(String href) {
-        this.href = href;
+	this.href = href;
     }
 
     public String getHref() {
-        return href;
+	return href;
     }
 
     public void setGroupName(String groupName) {
-        this.groupName = groupName;
+	this.groupName = groupName;
     }
 
     public String getGroupName() {
-        return groupName;
+	return groupName;
     }
 
     /**
      * @return the number of comments posted on this component
      */
     public int getCommentsCount() {
-        return commentsCount;
+	return commentsCount;
     }
 
     /**
      * @param commentsCount the number of comments posted on this component
      */
     public void setCommentsCount(int commentsCount) {
-        this.commentsCount = commentsCount;
+	this.commentsCount = commentsCount;
     }
 
     @Override
     public String toString() {
-        return "Name=" + getName() + ", id=" + getId() + ", creatorName=" + getCreatorName() + ", userId=" + getUserId();
+	return "Name=" + getName() + ", id=" + getId() + ", creatorName=" + getCreatorName() + ", userId=" + getUserId();
     }
 
     public boolean isProfile() {
-        return this instanceof ProfileDescription;
+	return this instanceof ProfileDescription;
     }
 
     public String getType() {
-        return isProfile() ? "profile" : "component";
+	return isProfile() ? "profile" : "component";
     }
 
     public static String createNewDate() {
-        return createNewDate(new Date().getTime());
+	return createNewDate(new Date().getTime());
     }
 
     public static String createNewDate(long time) {
-        return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
+	return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
     /**
@@ -153,44 +150,51 @@ public abstract class AbstractDescription {
      * the md5 hash of the stored userId
      */
     public boolean isThisTheOwner(String userId) {
-        String userHash = DigestUtils.md5Hex(userId);
-        return userHash.equals(getUserId());
+	String userHash = DigestUtils.md5Hex(userId);
+	return userHash.equals(getUserId());
     }
 
     public static Date getDate(String registrationDate) throws ParseException {
-        return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
+	return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
     }
-
+    
     public static String createPublicHref(String href) {
-        String result = href;
-        if (href != null) {
-            int index = href.indexOf("?");
-            if (index != -1) { //strip off query params the rest should be the public href.
-                result = href.substring(0, index);
-            }
-        }
-        return result;
+	String result = href;
+	if (href != null) {
+	    int index = href.indexOf("?");
+	    if (index != -1) { //strip off query params the rest should be the public href.
+		result = href.substring(0, index);
+	    }
+	}
+	return result;
     }
+    /**
+     * Compares two descriptions by the their value as returned by {@link AbstractDescription#getName() }
+     */
     public static final Comparator<? super AbstractDescription> COMPARE_ON_NAME = new Comparator<AbstractDescription>() {
-        @Override
-        public int compare(AbstractDescription o1, AbstractDescription o2) {
-            int result = 0;
-            if (o1.getName() != null && o2.getName() != null) {
-                result = o1.getName().compareToIgnoreCase(o2.getName());
-            }
-            if (o1.getId() != null && result == 0) {
-                result = o1.getId().compareTo(o2.getId());
-            }
-            return result;
-        }
+	@Override
+	public int compare(AbstractDescription o1, AbstractDescription o2) {
+	    int result = 0;
+	    if (o1.getName() != null && o2.getName() != null) {
+		result = o1.getName().compareToIgnoreCase(o2.getName());
+	    }
+	    if (o1.getId() != null && result == 0) {
+		result = o1.getId().compareTo(o2.getId());
+	    }
+	    return result;
+	}
     };
+    /**
+     * Compares two descriptions by the their value as returned by {@link AbstractDescription#getRegistrationDate() () }
+     */
     public static final Comparator<? super AbstractDescription> COMPARE_ON_DATE = new Comparator<AbstractDescription>() {
-        //compare two components by the date of registration
-        // returns 1 if o11 is older than o2, returns -1 if o1 is younger than o2
-        @Override
-        public int compare(AbstractDescription o1, AbstractDescription o2) {
+	/**
+	 * @returns 1 if o11 is older than o2, returns -1 if o1 is younger than o2
+	 */
+	@Override
+	public int compare(AbstractDescription o1, AbstractDescription o2) {
 
-            return (RssCreator.compareDateStrings(o1.getRegistrationDate(), o2.getRegistrationDate()));
-        }
+	    return (RssCreator.compareDateStrings(o1.getRegistrationDate(), o2.getRegistrationDate()));
+	}
     };
 }

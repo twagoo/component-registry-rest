@@ -1,10 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.text.ParseException;
@@ -15,47 +10,23 @@ import java.text.ParseException;
  */
 public class RssCreatorComments extends RssCreator<Comment> {
 
-   
-    // creator method, comment to rssItem, ovverrides the dummy method of the RssCreator class
-    // ?? is there a better way than boolean flag to arrange switch beween comment for profiles and commentss for components
-    
-   
-    
-    @Override  
-    protected RssItem fromArgToRssItem(Comment comm) throws ParseException{
+    /**
+     * creator method, comment to rssItem, overrides the dummy method of the RssCreator class
+     *
+     * @param comm
+     * @return
+     * @throws ParseException
+     */
+    @Override
+    protected RssItem fromArgToRssItem(Comment comm) throws ParseException {
+	final String href = super.getLink() + "&commentId=" + comm.getId();
 
-         
-        RssItem retval = new RssItem();
-        
-        
-                //The content 
-        retval.setDescription(comm.getComment()); 
-        String href = super.getLink()+"&commentId="+comm.getId();
-       
-        //Guid
-        retval.setGuid(makeGuid(href));
-        
-        // link
-        retval.setLink(href);
-        
-        
-        
-       
-        //date-Time
-        retval.setPubDate(getRFCDateTime(comm.getCommentDate())); 
-        
-        // Title
-        retval.setTitle(makeCommentTitle(comm.getId(), comm.getUserName()));
-       
-        return retval;
-        
-        
+	RssItem retval = new RssItem();
+	retval.setDescription(comm.getComment());
+	retval.setGuid(makeGuid(href));
+	retval.setLink(href);
+	retval.setPubDate(getRFCDateTime(comm.getCommentDate()));
+	retval.setTitle(String.format("Comment %1$s\nby %2$s", comm.getId(), comm.getUserName()));
+	return retval;
     }
-    
-     protected String  makeCommentTitle(String commentId, String user){
-         
-        return("Comment "+commentId +"\n by "+user+" ");
-           
-       }
-    
 }
