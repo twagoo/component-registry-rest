@@ -979,8 +979,8 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	final List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
-        final RssCreatorDescriptions instance = new RssCreatorDescriptions();
-        final Rss rss = instance.getRssDescriptions(components, userspace, "components", limit, getApplicationBaseURI());
+        final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "components", Integer.parseInt(limit), components, AbstractDescription.COMPARE_ON_NAME);
+	final Rss rss = instance.getRss();
 	LOG.info("Releasing RSS of " + limit + " most recently registered components");
         return rss;
     }
@@ -999,8 +999,8 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	final List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
-        final RssCreatorDescriptions instance = new RssCreatorDescriptions();
-	final Rss rss = instance.getRssDescriptions(profiles, userspace, "profiles", limit, getApplicationBaseURI());
+        final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "profiles", Integer.parseInt(limit), profiles, AbstractDescription.COMPARE_ON_NAME);
+	final Rss rss = instance.getRss();
         LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
 	return rss;
     }
@@ -1023,8 +1023,8 @@ public class ComponentRegistryRestService {
 	final Principal principal = security.getUserPrincipal();
 	final List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
         final String profileName = getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName();
-        final RssCreatorComments instance = new RssCreatorComments();
-        final Rss rss= instance.getRssComments(comments, profileName, "profile", userspace,getApplicationBaseURI(), profileId, limit);
+        final RssCreatorComments instance = new RssCreatorComments(userspace, getApplicationBaseURI(), Integer.parseInt(limit), profileId, profileName, "profile", comments, Comment.COMPARE_ON_DATE); 
+        final Rss rss = instance.getRss();
         return rss;
     }
 
@@ -1046,9 +1046,8 @@ public class ComponentRegistryRestService {
 	final Principal principal = security.getUserPrincipal();
 	final List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
         final String componentName = getRegistry(getStatus(userspace)).getComponentDescription(componentId).getName();
-	final RssCreatorComments instance = new RssCreatorComments();
-        final Rss rss= instance.getRssComments(comments, componentName, "component", userspace,getApplicationBaseURI(), componentId, limit);
-
+	final RssCreatorComments instance = new RssCreatorComments(userspace, getApplicationBaseURI(), Integer.parseInt(limit), componentId, componentName, "component", comments, Comment.COMPARE_ON_DATE); 
+        final Rss rss = instance.getRss();
 	return rss;
     }
 }

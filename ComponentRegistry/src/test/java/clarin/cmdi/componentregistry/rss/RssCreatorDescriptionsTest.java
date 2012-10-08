@@ -1,13 +1,9 @@
 
 package clarin.cmdi.componentregistry.rss;
 
-import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
-import clarin.cmdi.componentregistry.rss.Rss;
-import clarin.cmdi.componentregistry.rss.RssItem;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -16,10 +12,6 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import javax.xml.bind.JAXBException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 
 /**
  *
@@ -27,74 +19,46 @@ import org.junit.BeforeClass;
  */
 public class RssCreatorDescriptionsTest {
 
-    @BeforeClass
-    public static void setUpClass() throws Exception {
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    
     
 
-    private void createTestDescription(AbstractDescription desc, int commentcount, String creatorname,
+    private void createTestDescription(AbstractDescription desc, String creatorname,
             String description, String groupname, 
-            String name, String date, String link, String id) {
+            String name, String date, String id) {
         
         desc.setId(id);
-        desc.setCommentsCount(commentcount);
+        desc.setName(name);
         desc.setCreatorName(creatorname);
         desc.setDescription(description);
         desc.setGroupName(groupname);
-        desc.setName(name);
         desc.setRegistrationDate(date);
-        desc.setHref(link+"?item="+id);
 
     }
 
-    private ProfileDescription createTestProfileDescription(int commentcount, String creatorname,
+    private ProfileDescription createTestProfileDescription(String creatorname,
             String description, String groupname, 
-            String name, boolean editorFlag, String date, String href, String id) {
+            String name, boolean editorFlag, String date, String id) {
 
         ProfileDescription pdesc = ProfileDescription.createNewDescription();
-
-        createTestDescription(pdesc, commentcount, creatorname, description, groupname, name, date, href, id);
-
+        createTestDescription(pdesc, creatorname, description, groupname, name, date, id);
         pdesc.setShowInEditor(editorFlag);
-
         return pdesc;
+}
 
-
-    }
-
-    private ComponentDescription createTestComponentDescription(int commentcount, String creatorname,
+    private ComponentDescription createTestComponentDescription(String creatorname,
             String description, String groupname, 
-            String name, String date, String href, String id) {
+            String name, String date, String id) {
 
         ComponentDescription cdesc = ComponentDescription.createNewDescription();
-
-        createTestDescription(cdesc, commentcount, creatorname, description, groupname, name, date, href, id);
-
+        createTestDescription(cdesc, creatorname, description, groupname, name, date, id);
         return cdesc;
-
-
     }
 
     //////////////////////////////////////
-    private void compareRssVsValues(String description, String href, String date, String title, RssItem item) {
+    private void compareRssVsValues(String description, String itemLink, String date, String title, RssItem item) {
        
         assertEquals(description, item.getDescription());
-        assertEquals(href, item.getGuid().getValue()  );
-        assertEquals(href, item.getLink());
+        assertEquals(itemLink, item.getGuid().getValue()  );
+        assertEquals(itemLink, item.getLink());
         assertEquals(date, item.getPubDate());
         assertEquals(title, item.getTitle());
     }
@@ -105,36 +69,34 @@ public class RssCreatorDescriptionsTest {
      */
     @Test
     public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
-        String link = "http://catalog.clarin.eu/ds/ComponentRegistry/profiles";
-        ProfileDescription desc1 = createTestProfileDescription(23, "Useratti",
-                "description-1", "groupname-1", "name-1", true, "2001-01-01", link,"p_1");
-        ProfileDescription desc2 = createTestProfileDescription(23, "Usereno",
-                "description-2", "groupname-2", "name-2", false, "2001-01-02", link, "p_2");
-        ProfileDescription desc3 = createTestProfileDescription(23, "Userio",
-                "description-3", "groupname-3", "name-3", true, "2001-01-03", link, "p_3");
+        String baseURI = "http://catalog.clarin.eu/ds/ComponentRegistry";
+        String channelLink = baseURI + "/profiles";
+        boolean userspace=false;
+        
+        ProfileDescription desc1 = createTestProfileDescription("Useratti",
+                "description-1", "groupname-1", "name-1", true, "2001-01-01", "p_1");
+        ProfileDescription desc2 = createTestProfileDescription("Usereno",
+                "description-2", "groupname-2", "name-2", false, "2001-01-02", "p_2");
+        ProfileDescription desc3 = createTestProfileDescription("Userio",
+                "description-3", "groupname-3", "name-3", true, "2001-01-03", "p_3");
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
-        RssCreatorDescriptions instance = new RssCreatorDescriptions();
-        Rss result = instance.getRssDescriptions(descriptions, false, "profiles", "3", link);
+       
+        RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, baseURI, "profiles", 3, descriptions, AbstractDescription.COMPARE_ON_DATE);
+        Rss result = instance.getRss();
         
         List<RssItem> items = result.getChannel().getItem();
         assertEquals(3, result.getChannel().getItem().size());
-        compareRssVsValues("description-1", link+"?item=p_1", "2001-01-01", 
+        compareRssVsValues("description-1", channelLink+"?item=p_1", instance.getRFCDateTime("2001-01-01"), 
                    instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1"), items.get(0));
-        compareRssVsValues("description-2", link+"?item=p_2", "2001-01-02", 
+        compareRssVsValues("description-2", channelLink+"?item=p_2", instance.getRFCDateTime("2001-01-02"), 
                 instance.makeDescriptionTitle("name-2", "Usereno", "groupname-2"), items.get(1));
-        compareRssVsValues("description-3", link+"?item=p_3", "2001-01-03", 
+        compareRssVsValues("description-3", channelLink+"?item=p_3", instance.getRFCDateTime("2001-01-03"), 
                 instance.makeDescriptionTitle("name-3", "Userio", "groupname-3"), items.get(2));
 
-        
-        
         assertEquals("2.0", Double.toString(result.getVersion()));
-        assertEquals("Updates for profiles", result.getChannel().getDescription());
-        assertEquals(link, result.getChannel().getLink());
+        assertEquals("News feed for the profiles", result.getChannel().getDescription());
+        assertEquals(channelLink, result.getChannel().getLink());
         assertEquals("Public profiles", result.getChannel().getTitle());
-        
-        
-    }
-    
-   
+    } 
 }

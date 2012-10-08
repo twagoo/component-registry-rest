@@ -14,68 +14,66 @@ import java.util.List;
  *
  * @author olhsha
  */
-public abstract class RssCreator<T> { // extends nothing so far, throuw nothing // make it abstract
+public abstract class RssCreator<T> {
 
-    
-    private double version = 2.0; // of an rss
-    protected String link;
-    
-   
-    
-    public double getVersion() {
-	return (version);
+    public static final double RSS_VERSION = 2.0;
+    private final String baseURI;
+    protected String channelLink;
+    protected String channelDescription;
+    protected String channelTitle;
+    protected Comparator<T> comparator;
+    protected final boolean userspace;
+    private List<T> objs;
+    private int limit;
+
+    public RssCreator(boolean userspace, String baseURI, int limit, List<T> objs) {
+        this.userspace = userspace;
+        this.baseURI = baseURI;
+        this.limit = limit;
+        this.objs = objs;
     }
 
-    /**
-     *
-     * @param version
-     */
-    public void setVersion(double version) {
-	this.version = version;
-    }
-    
     protected abstract RssItem fromArgToRssItem(T obj);
 
-  
     /**
-     * Makes a list of items out a list of descriptions, return the pointer to the list of items
+     * Makes a list of items out a list of descriptions, return the pointer to
+     * the list of items
      *
      * @param descriptions
      * @return items out a list of descriptions
      * @throws ParseException
      */
-    private List<RssItem> makeListOfRssItems(List<T> objs) throws ParseException {
-	List<RssItem> listOfItems = new ArrayList<RssItem>();
-        for (T currentObj : objs) {
+    private List<RssItem> makeListOfRssItems(List<T> objSublist) throws ParseException {
+        List<RssItem> listOfItems = new ArrayList<RssItem>();
+        for (T currentObj : objSublist) {
             RssItem currentItem = fromArgToRssItem(currentObj);
-	    listOfItems.add(currentItem);
-	}
+            listOfItems.add(currentItem);
+        }
         return listOfItems;
     }
 
-  
-     /**
-    * 
-    * @param channelLink
-    * @param channelDescription
-    * @param channelTitle
-    * @param obj
-    * @return
-    * @throws ParseException 
-    */
-    private Rss makeRssChannel(String channelLink, String channelDescription, String channelTitle, List<T> obj) throws ParseException{
-	final Rss rss = new Rss();
-        rss.setVersion(version);
-	final RssChannel channel = new RssChannel();
+    /**
+     *
+     * @param channelLink
+     * @param channelDescription
+     * @param channelTitle
+     * @param obj
+     * @return
+     * @throws ParseException
+     */
+    private Rss makeRssChannel(List<T> objSublist) throws ParseException {
+        final Rss rss = new Rss();
+        rss.setVersion(RSS_VERSION);
+        final RssChannel channel = new RssChannel();
         channel.setDescription(channelDescription);
-	channel.setLink(channelLink);
-	channel.setTitle(channelTitle);
-        channel.getItem().addAll(makeListOfRssItems(obj));
+        channel.setLink(channelLink);
+        channel.setTitle(channelTitle);
+        channel.getItem().addAll(makeListOfRssItems(objSublist));
         rss.setChannel(channel);
-	return rss;
+        return rss;
     }
 
-     /**
+    /**
      * Generates RSS feeds for profile and component descriptions
      *
      * @param <T> type of description
@@ -88,46 +86,43 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      * @throws ComponentRegistryException
      * @throws ParseException
      */
-    
-    protected Rss getRss(int limit, List<T> objects, String channelDescription, String channelTitle, String channelLink, Comparator<T> comparator) throws ParseException{
-        link=channelLink;
-        Collections.sort(objects, comparator);
-        final int length = (objects.size() < limit) ? objects.size() : limit;
-        List<T> sublist = objects.subList(0, length);
-        return (makeRssChannel(channelLink, channelDescription, channelTitle, sublist));
+    public Rss getRss() throws ParseException {
+        Collections.sort(objs, comparator);
+        final int length = (objs.size() < limit) ? objs.size() : limit;
+        List<T> sublist = objs.subList(0, length);
+        return (makeRssChannel(sublist));
     }
 
-    
     /* Helping stuff
      * 
-     */ 
+     */
     protected Guid makeGuid(String href) {
-	Guid result = new Guid();
-	// result.setIsPermaLink(null);
-	result.setValue(href);
-	return result;
+        Guid result = new Guid();
+        // result.setIsPermaLink(null);
+        result.setValue(href);
+        return result;
     }
 
     /* Helping stuff: for working with dates
      * 
      */
     private static Date parseWorks(String dateString) {
-	try {
-	    return AbstractDescription.getDate(dateString);
-	} catch (ParseException pe) {
-	    return null;
-	}
+        try {
+            return AbstractDescription.getDate(dateString);
+        } catch (ParseException pe) {
+            return null;
+        }
     }
 
     protected String getRFCDateTime(String dateString) {
-	final Date date = parseWorks(dateString);
+        final Date date = parseWorks(dateString);
 
-	if (date == null) {
-	    return dateString;
-	} else {
-	    SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
-	    return RFC822DATEFORMAT.format(date);
-	}
+        if (date == null) {
+            return dateString;
+        } else {
+            SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+            return RFC822DATEFORMAT.format(date);
+        }
     }
 
     /**
@@ -135,27 +130,28 @@ public abstract class RssCreator<T> { // extends nothing so far, throuw nothing 
      *
      * @param date1
      * @param date2
-     * @return 1 if date1 is older (before) than date2, returns -1 if date1 is younger (after) than date2, 0 if they are the same
+     * @return 1 if date1 is older (before) than date2, returns -1 if date1 is
+     * younger (after) than date2, 0 if they are the same
      */
     public static int compareDateStrings(String date1, String date2) {
-	final Date d1 = parseWorks(date1);
-	final Date d2 = parseWorks(date2);
+        final Date d1 = parseWorks(date1);
+        final Date d2 = parseWorks(date2);
 
-	if (d1 == null) {
-	    if (d2 == null) {
-		return 0;
-	    } else {
-		return 1;
-	    }
-	} else {
-	    if (d2 == null) {
-		return -1;
-	    } else {
-		// compareTo returns:
-		// a value less than 0 if d2 is before d1 (d1 is younger than d2);
-		// a value greater than 0 if d2 is after  d1 (d1 is older than d2)
-		return d2.compareTo(d1);
-	    }
-	}
+        if (d1 == null) {
+            if (d2 == null) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            if (d2 == null) {
+                return -1;
+            } else {
+                // compareTo returns:
+                // a value less than 0 if d2 is before d1 (d1 is younger than d2);
+                // a value greater than 0 if d2 is after  d1 (d1 is older than d2)
+                return d2.compareTo(d1);
+            }
+        }
     }
 }
