@@ -9,9 +9,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import javax.xml.bind.JAXBException;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -70,7 +70,7 @@ public class RssCreatorDescriptionsTest {
     @Test
     public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException{
         String baseURI = "http://catalog.clarin.eu/ds/ComponentRegistry";
-        String channelLink = baseURI + "/profiles";
+        String channelLink = baseURI + "/";
         boolean userspace=false;
         
         ProfileDescription desc1 = createTestProfileDescription("Useratti",
@@ -87,11 +87,11 @@ public class RssCreatorDescriptionsTest {
         
         List<RssItem> items = result.getChannel().getItem();
         assertEquals(3, result.getChannel().getItem().size());
-        compareRssVsValues("description-1", channelLink+"?item=p_1", instance.getRFCDateTime("2001-01-01"), 
+        compareRssVsValues("description-1", baseURI+"?item=p_1", instance.getRFCDateTime("2001-01-01"), 
                    instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1"), items.get(0));
-        compareRssVsValues("description-2", channelLink+"?item=p_2", instance.getRFCDateTime("2001-01-02"), 
+        compareRssVsValues("description-2", baseURI+"?item=p_2", instance.getRFCDateTime("2001-01-02"), 
                 instance.makeDescriptionTitle("name-2", "Usereno", "groupname-2"), items.get(1));
-        compareRssVsValues("description-3", channelLink+"?item=p_3", instance.getRFCDateTime("2001-01-03"), 
+        compareRssVsValues("description-3", baseURI+"?item=p_3", instance.getRFCDateTime("2001-01-03"), 
                 instance.makeDescriptionTitle("name-3", "Userio", "groupname-3"), items.get(2));
 
         assertEquals("2.0", Double.toString(result.getVersion()));

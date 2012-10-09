@@ -20,17 +20,17 @@ public class RssCreatorComments extends RssCreator<Comment> {
     public RssCreatorComments(boolean userspace, String baseURI, int limit, 
             String descriptionId, String descriptionName, String descriptionType, List<Comment> comms, Comparator<Comment> comparator) {
         super(userspace, baseURI, limit, comms);
-        this.channelLink= baseURI + "?item=" + descriptionId + ((userspace) ? "&space=user" : "") + "&browserview=comments";
-        this.channelTitle = (userspace ? "Your workspace " : "Public ") + descriptionType+"s";
-        this.channelDescription = String.format("Comments feed for the %s \"%s\"", descriptionType, descriptionName);;
-        this.comparator = comparator;
+        setChannelLink(baseURI + "?item=" + descriptionId + ((userspace) ? "&space=user" : "") + "&browserview=comments");
+        setChannelTitle((userspace ? "Your workspace " : "Public ") + descriptionType+" \""+descriptionName+"\"");
+        setChannelDescription(String.format("Comments feed for the %s \"%s\"", descriptionType, descriptionName));
+        setComparator(comparator);
    }
     
     
     
     @Override
     protected RssItem fromArgToRssItem(Comment comm)  {
-	final String itemLink = channelLink + "&commentId=" + comm.getId();
+	final String itemLink = getChannelLink() + "&commentId=" + comm.getId();
         RssItem retval = new RssItem();
 	retval.setDescription(comm.getComment());
 	retval.setGuid(makeGuid(itemLink));

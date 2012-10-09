@@ -5,8 +5,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -76,7 +76,7 @@ public class RssCreatorCommentsTest {
 		"Comment commentId3\nby userito", resitems.get(2));
         
         assertEquals("2.0", Double.toString(result.getVersion()));
-        assertEquals("Public profiles", result.getChannel().getTitle());
+        assertEquals("Public profile \"Test Profile\"", result.getChannel().getTitle());
         assertEquals(channelLink, result.getChannel().getLink());
         assertEquals("Comments feed for the profile \"Test Profile\"", result.getChannel().getDescription());
     }

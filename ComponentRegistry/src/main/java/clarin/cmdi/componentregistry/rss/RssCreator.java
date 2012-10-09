@@ -18,10 +18,10 @@ public abstract class RssCreator<T> {
 
     public static final double RSS_VERSION = 2.0;
     private final String baseURI;
-    protected String channelLink;
-    protected String channelDescription;
-    protected String channelTitle;
-    protected Comparator<T> comparator;
+    private String channelLink;
+    private String channelDescription;
+    private String channelTitle;
+    private Comparator<T> comparator;
     protected final boolean userspace;
     private List<T> objs;
     private int limit;
@@ -153,5 +153,41 @@ public abstract class RssCreator<T> {
                 return d2.compareTo(d1);
             }
         }
+    }
+
+    /**
+     * @param channelLink the channelLink to set
+     */
+    protected void setChannelLink(String channelLink) {
+        this.channelLink = channelLink;
+    }
+
+    /**
+     * @param channelDescription the channelDescription to set
+     */
+    protected void setChannelDescription(String channelDescription) {
+        this.channelDescription = channelDescription;
+    }
+
+    /**
+     * @param channelTitle the channelTitle to set
+     */
+    protected void setChannelTitle(String channelTitle) {
+        this.channelTitle = channelTitle;
+    }
+
+    /**
+     * @param comparator the comparator to set
+     */
+    protected void setComparator(Comparator<T> comparator) {
+        this.comparator = comparator;
+    }
+    
+    protected String getChannelLink(){
+        return channelLink;
+    }
+    
+    protected String getBaseURI(){
+        return baseURI;
     }
 }

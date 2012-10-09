@@ -13,10 +13,10 @@ public class RssCreatorDescriptions<T extends AbstractDescription> extends RssCr
      public RssCreatorDescriptions(boolean userspace, String baseURI, String descriptionType, 
              int limit, List<T> descriptions, Comparator<T> comparator) {
         super(userspace, baseURI, limit, descriptions);
-        this.channelLink= baseURI + "/"+ descriptionType + ((userspace) ? "?space=user" : "");
-        this.channelTitle = (userspace ? "Your workspace " : "Public ") + descriptionType;
-        this.channelDescription = String.format("News feed for the %s", descriptionType);
-        this.comparator = comparator;
+        setChannelLink(baseURI + "/");
+        setChannelTitle((userspace ? "Your workspace " : "Public ") + descriptionType);
+        setChannelDescription(String.format("News feed for the %s", descriptionType));
+        setComparator(comparator);
    }
     
     
@@ -28,7 +28,7 @@ public class RssCreatorDescriptions<T extends AbstractDescription> extends RssCr
      */
     @Override
     protected RssItem fromArgToRssItem(T desc) {
-        String href = channelLink + (userspace ? "&item=" : "?item=") + desc.getId();
+        String href = getBaseURI() + "?item=" + desc.getId()+(userspace ? "&space=user" : "");
         RssItem retval = new RssItem();
 	retval.setDescription(desc.getDescription());
 	retval.setGuid(makeGuid(href));
