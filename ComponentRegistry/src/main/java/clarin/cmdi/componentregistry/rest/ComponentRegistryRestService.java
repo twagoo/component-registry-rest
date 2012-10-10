@@ -944,11 +944,11 @@ public class ComponentRegistryRestService {
 	this.componentRegistryFactory = componentRegistryFactory;
     }
 
-    /*
-     * Two muchually recursive methods below are used to set filenames of components (and their child components) to null
-     * @param List<CMDComponentType> listofcomponents the list of components whose filenames (and the children's names) are to be set to null
-     */
-    public void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents) {
+   /**
+    * 
+    * @param listofcomponents a list of components whose file-names and whose childrens' filenames are to be set to null
+    */
+    protected void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents) {
 
 	for (CMDComponentType currentcomponent : listofcomponents) {
 	    setFileNamesToNullCurrent(currentcomponent);
@@ -956,19 +956,22 @@ public class ComponentRegistryRestService {
 
     }
 
-    /*
-     * @param CMDComponentType currentcomponent the component whose filename (and whose children filenames) is to be set to null
+    /**
+     * 
+     * @param currentcomponent a component whose file-name and whose children filenames are to be set to null 
      */
-    public void setFileNamesToNullCurrent(CMDComponentType currentcomponent) {
+    protected void setFileNamesToNullCurrent(CMDComponentType currentcomponent) {
 	currentcomponent.setFilename(null);
 	setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     }
     
+   
+    
     /**
      * 
-     * @param userspace
-     * @param limit
-     * @return
+     * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+     * @param limit the number of items to be displayed 
+     * @return rss for the components in the database to which we are currently connected
      * @throws ComponentRegistryException
      * @throws ParseException 
      */
@@ -986,9 +989,9 @@ public class ComponentRegistryRestService {
     
     /**
      * 
-     * @param userspace
-     * @param limit
-     * @return
+     * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+     * @param limit the number of items to be displayed 
+     * @return rss for the profiles in the database to which we are currently connected
      * @throws ComponentRegistryException
      * @throws ParseException 
      */
@@ -998,25 +1001,31 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	final List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
-        LOG.debug("passed getting profile description");
+        // LOG.debug("passed getting profile description");
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "profiles", Integer.parseInt(limit), profiles, AbstractDescription.COMPARE_ON_NAME);
-	LOG.debug("passed constructing Rss creator");
+	// LOG.debug("passed constructing Rss creator");
         final Rss rss = instance.getRss();
-        LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
+        // int limitInt = Integer.parseInt(limit);
+        // int length = ( limitInt< profiles.size()) ? limitInt : profiles.size();
+        //LOG.debug("userspace= "+userspace);
+        //LOG.debug("Releasing RSS of " + Integer.toString(length) + " most recently registered profiles");
 	return rss;
     }
-
+    
+    
    /**
     * 
-    * @param profileId
-    * @param userspace
-    * @param limit
-    * @return
+    * @param profileId the Id of a profile whose comments are to be rss-ed
+    * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+    * @param limit the number of items to be displayed 
+    * @return rss of the comments for a chosen profile 
     * @throws ComponentRegistryException
     * @throws IOException
     * @throws JAXBException
     * @throws ParseException 
     */
+    
+   
     @GET
     @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -1029,17 +1038,19 @@ public class ComponentRegistryRestService {
         return rss;
     }
 
-    /**
-     * 
-     * @param componentId
-     * @param userspace
-     * @param limit
-     * @return
-     * @throws ComponentRegistryException
-     * @throws IOException
-     * @throws JAXBException
-     * @throws ParseException 
-     */
+    
+     /**
+    * 
+    * @param componentId the Id of a component whose comments are to be rss-ed
+    * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+    * @param limit the number of items to be displayed 
+    * @return rss of the comments for a chosen component
+    * @throws ComponentRegistryException
+    * @throws IOException
+    * @throws JAXBException
+    * @throws ParseException 
+    */
+    
     @GET
     @Path("/components/{componentId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})

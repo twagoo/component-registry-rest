@@ -12,152 +12,133 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import javax.xml.bind.JAXBException;
-
 import static org.junit.Assert.*;
 
 /**
  *
- * @author olhsha non-automated developers. test, with and input (a valid component/prifile  xml file and a path to it)
- * and the output (the file where all filenames are set to null, in the same directory as the input file)
+ * @author olhsha non-automated developers. test, with and input (a valid
+ * component/prifile xml file and a path to it) and the output (the file where
+ * all filenames are set to null, in the same directory as the input file)
  */
-public class CMDComponentSetFilenamesToNullTestHelper {
+public class CMDComponentSetFilenamesToNullTestRunner {
 
     /**
      *
      * @author olhsha
      */
-/**
- * makes a new component (with filled-in filename)
- * @param filename is assigned to the filed "filename"  of the new component
- * @param childcomponents is assigned to the list of child components of the new component
- * @return the reference to the new component 
- */
-    public CMDComponentType makeTestComponent(String filename, List<CMDComponentType> childcomponents) {
+    /**
+     * makes a new component (with filled-in filename)
+     *
+     * @param filename is assigned to the filed "filename" of the new component
+     * @param childcomponents is assigned to the list of child components of the
+     * new component
+     * @return the reference to the new component
+     */
+    protected CMDComponentType makeTestComponent(String filename, List<CMDComponentType> childcomponents) {
 
-        CMDComponentType component = new CMDComponentType(); 
-
+        CMDComponentType component = new CMDComponentType();
         component.setFilename(filename);
-        
-        List<CMDComponentType> kids=component.getCMDComponent(); 
-        assertFalse(kids==null);
+        List<CMDComponentType> kids = component.getCMDComponent();
+        assertFalse(kids == null);
         assertEquals(kids.size(), 0);
-        
-        if (childcomponents != null) { kids.addAll(childcomponents);};
-
+        if (childcomponents != null) {
+            kids.addAll(childcomponents);
+        };
         return component;
     }
 
-    /////////////////////////////////////////////
-    // checks if all the filenames related to the component are nulls
+    /* checks if all the filenames related to the component are nulls
+     */
     private void checkNullnessOfFilenamesInComponent(CMDComponentType component) {
-
-
         assertEquals(component.getFilename(), null);
         checkNullnessOfFilenamesInListOfComponents(component.getCMDComponent());
-
-
     }
 
-    ///////////////////////////////
-    // checks if all the filenames related to the list of component are nulls
+    /* checks if all the filenames related to the list of component are nulls
+     * 
+     */
     private void checkNullnessOfFilenamesInListOfComponents(List<CMDComponentType> listofcomponents) {
-
-
         for (CMDComponentType currentcomponent : listofcomponents) {
             checkNullnessOfFilenamesInComponent(currentcomponent);
         }
-
     }
 
-    /////////////////////////////////////////////////
-    // returns true if all the filenames related to the input component are not null
+    /* returns true if all the filenames related to the input component are not null
+     * 
+     */
     private boolean checkNonNullnessOfFilenamesInComponent(CMDComponentType component) {
 
         String filename = component.getFilename();
         System.out.println(filename);
         boolean check = (filename == null);
-
         if (check) {
             return false;
         }
-
         return checkNonNullnessOfFilenamesInListOfComponents(component.getCMDComponent());
     }
 
-    ////////////////// /////////////
-    // returns true if all the filenames related to the list of components are not null
+    /* returns true if all the filenames related to the list of components are not null
+     * 
+     */
     private boolean checkNonNullnessOfFilenamesInListOfComponents(List<CMDComponentType> listofcomponents) {
-
         boolean check;
-
         for (CMDComponentType currentcomponent : listofcomponents) {
             check = checkNonNullnessOfFilenamesInComponent(currentcomponent);
             if (!check) {
                 return false;
             }
         }
-
         return true;
     }
 
-    // adding dummy filenames to a component
+    /* adding dummy filenames to a component
+     * 
+     */
     private void addDummyFilenamesToComponent(CMDComponentType component) {
-
-
         if (component != null) {
             component.setFilename("Dummy");
-
             List<CMDComponentType> listofcomponents = component.getCMDComponent();
             addDummyFilenamesToListOfComponents(listofcomponents);
-
         }
     }
 
-    // adding dummy filenames to the list of  components
+    /* adding dummy filenames to the list of  components
+     * 
+     */
     private void addDummyFilenamesToListOfComponents(List<CMDComponentType> listofcomponents) {
-
-
         for (CMDComponentType currentcomponent : listofcomponents) {
             addDummyFilenamesToComponent(currentcomponent);
         }
-
-
-
     }
 
-    // adds dummy filenames to the content of largeProfile.XML  
+    /* adds dummy filenames to the content of largeProfile.XML 
+     * 
+     */
     private CMDComponentSpec makeTestFromFile(String filename) throws IOException, JAXBException {
-
         FileInputStream is = new FileInputStream(filename);
-
         String profilestring = RegistryTestHelper.getStringFromStream(is);
         CMDComponentSpec compspec = RegistryTestHelper.getComponentFromString(profilestring); // calling unmarchaller
-
         List<CMDComponentType> listofcomponents = compspec.getCMDComponent();
         addDummyFilenamesToListOfComponents(listofcomponents);
-
         assertTrue(checkNonNullnessOfFilenamesInListOfComponents(listofcomponents));
-
         return compspec;
-
     }
 
-    // creating the profile with filenames filled by "Dummy" and writing it into the file 
+    /* creating the profile with filenames filled by "Dummy" and writing it into the file 
+     * 
+     */
     private void writeDummiedXML(String filenamein, String filenameout) throws IOException, JAXBException {
-
         CMDComponentSpec compspec = makeTestFromFile(filenamein);
-
         String os = RegistryTestHelper.getXml(compspec);
-
         RegistryTestHelper.writeStringToFile(os, filenameout);
     }
 
-    // generic test-from-file read/write
+    /*generic test-from-file read/write
+     * 
+     */
     private void setFileNamesToNullInFile(String dirName, String fileNameInit, String fileNameDummied, String fileNameUnDummied) throws IOException, JAXBException {
 
         String path = RegistryTestHelper.openTestDir(dirName);
-
-        // make a file with a lot of "Dummy" filenames
         writeDummiedXML(path + fileNameInit, path + fileNameDummied);
 
         FileInputStream is = new FileInputStream(path + fileNameDummied);
@@ -172,18 +153,14 @@ public class CMDComponentSetFilenamesToNullTestHelper {
 
         String os = RegistryTestHelper.getXml(compspec);
         RegistryTestHelper.writeStringToFile(os, path + fileNameUnDummied);
-
-
     }
 
     /*
      * developer test method: nulling  filenames in an arbitrary (component) file
      * user's input: the name of the file, together with the sub-directory inside target/
-    */
-    
+     */
     public static void main(String args[])
             throws java.io.IOException, JAXBException {
-
 
         BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
 
@@ -205,12 +182,10 @@ public class CMDComponentSetFilenamesToNullTestHelper {
         String fileNameDummied = "Dummied" + fileName;
         String fileNameUnDummied = "Nulled" + fileName;
 
-        CMDComponentSetFilenamesToNullTestHelper helper = new CMDComponentSetFilenamesToNullTestHelper();
+        CMDComponentSetFilenamesToNullTestRunner helper = new CMDComponentSetFilenamesToNullTestRunner();
 
         helper.setFileNamesToNullInFile(dirName, fileName, fileNameDummied, fileNameUnDummied);
 
         System.out.println("Now look up the directory target/" + dirName);
-
-
     }
 }

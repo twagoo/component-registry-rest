@@ -26,7 +26,7 @@ public abstract class RssCreator<T> {
     private List<T> objs;
     private int limit;
 
-    public RssCreator(boolean userspace, String baseURI, int limit, List<T> objs) {
+    protected RssCreator(boolean userspace, String baseURI, int limit, List<T> objs) {
         this.userspace = userspace;
         this.baseURI = baseURI;
         this.limit = limit;
@@ -76,8 +76,9 @@ public abstract class RssCreator<T> {
     /**
      * Generates RSS feeds for profile and component descriptions
      *
-     * @param <T> type of description
-     * @param limit number of items to include in the RSS
+     * @param <T> type of the object for which an rss item will be created
+     * (either profile/component description, or a comment)
+     * @param limit number of items to include in the RSS-channel
      * @param descriptions descriptions to include
      * @param channelDescription channel description
      * @param channelTitle channel title
@@ -101,58 +102,6 @@ public abstract class RssCreator<T> {
         // result.setIsPermaLink(null);
         result.setValue(href);
         return result;
-    }
-
-    /* Helping stuff: for working with dates
-     * 
-     */
-    private static Date parseWorks(String dateString) {
-        try {
-            return AbstractDescription.getDate(dateString);
-        } catch (ParseException pe) {
-            return null;
-        }
-    }
-
-    protected String getRFCDateTime(String dateString) {
-        final Date date = parseWorks(dateString);
-
-        if (date == null) {
-            return dateString;
-        } else {
-            SimpleDateFormat RFC822DATEFORMAT = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
-            return RFC822DATEFORMAT.format(date);
-        }
-    }
-
-    /**
-     * Compares two date strings
-     *
-     * @param date1
-     * @param date2
-     * @return 1 if date1 is older (before) than date2, returns -1 if date1 is
-     * younger (after) than date2, 0 if they are the same
-     */
-    public static int compareDateStrings(String date1, String date2) {
-        final Date d1 = parseWorks(date1);
-        final Date d2 = parseWorks(date2);
-
-        if (d1 == null) {
-            if (d2 == null) {
-                return 0;
-            } else {
-                return 1;
-            }
-        } else {
-            if (d2 == null) {
-                return -1;
-            } else {
-                // compareTo returns:
-                // a value less than 0 if d2 is before d1 (d1 is younger than d2);
-                // a value greater than 0 if d2 is after  d1 (d1 is older than d2)
-                return d2.compareTo(d1);
-            }
-        }
     }
 
     /**
@@ -182,12 +131,12 @@ public abstract class RssCreator<T> {
     protected void setComparator(Comparator<T> comparator) {
         this.comparator = comparator;
     }
-    
-    protected String getChannelLink(){
+
+    protected String getChannelLink() {
         return channelLink;
     }
-    
-    protected String getBaseURI(){
+
+    protected String getBaseURI() {
         return baseURI;
     }
 }

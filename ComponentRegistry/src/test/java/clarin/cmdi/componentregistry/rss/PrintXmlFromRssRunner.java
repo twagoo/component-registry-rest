@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.rss;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -19,9 +20,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
- * @author olhsha, non-automatised developer's test class Main method generates
- * an Rss xml-file to validate it later using one of the on-line rss-source
- * validators
+ * non-automatised developer's test class Main method generates an Rss xml-file
+ * to validate it later using one of the on-line rss-source validators
  */
 public class PrintXmlFromRssRunner {
 
@@ -47,7 +47,9 @@ public class PrintXmlFromRssRunner {
 
         System.out.println("check if the descriptions are sorted in a proper way, by the dates ");
         for (AbstractDescription desc : descriptions) {
-            System.out.println(desc.getRegistrationDate());
+            String date = desc.getRegistrationDate();
+            System.out.println(date + ", formatted: " + AbstractDescription.getDate(date)
+                    + ", Rss=formatted: " + DatesHelper.getRFCDateTime(date));
         }
 
         RssCreatorDescriptions instance = new RssCreatorDescriptions(false, baseUri, (kind == 1) ? "profiles" : "components", limit, descriptions, AbstractDescription.COMPARE_ON_DATE);
@@ -72,6 +74,9 @@ public class PrintXmlFromRssRunner {
         return result;
     }
 
+    /*
+     * input: sort of rss -- profiles, or comopnents, or comments (see below the prompt string)
+     */
     public static void main(String args[]) throws ComponentRegistryException, ParseException, IOException, JAXBException {
 
         System.out.println("Type 1 or 2, or 3, or 4, \n "
@@ -94,20 +99,20 @@ public class PrintXmlFromRssRunner {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("/applicationContextJDBC.xml");
         ComponentRegistry registry = ((ComponentRegistryFactory) applicationContext.getBean("componentRegistryFactory")).getPublicRegistry();
 
-        Rss rss=null;
+        Rss rss = null;
         String baseUri = "http://localhost:8080/ComponentRegistry"; /* used only as a nice URi-example content for the "link"-field
          in this test we do not click on link, we just generate an Rss xml-file to validate it
          using one of the on-line rss-source vaidators */
-        
+
         if (kind == 1 || kind == 2) { // testing Rss for profiles/components
             List<? extends AbstractDescription> descriptions =
-                (kind == 1) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
+                    (kind == 1) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
             rss = makeRssForDescriptions(descriptions, kind, baseUri, 10);
         };
 
         if (kind == 3 || kind == 4) { // testing Rss comments
             List<? extends AbstractDescription> descriptions =
-                (kind == 3) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
+                    (kind == 3) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
             printIds(descriptions);
             System.out.println("Pick up and input one of the description id above");// "clarin.eu:cr1:p_1284723009187" "clarin.eu:cr1:c_1288172614011"
             try {
@@ -124,5 +129,3 @@ public class PrintXmlFromRssRunner {
         printXmlRssToFile(rss);
     }
 }
-
-
