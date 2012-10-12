@@ -1,6 +1,33 @@
 CLARIN COMPONENT REGISTRY
 =========================
 
+What is it?
+-----------
+The Component Registry stores CMDI metadata components and profiles and
+offers a service to list and retrieve them. The BrowserGui is a web
+application displaying available components in the component registry in the
+correct context: application domain, creator, creation date, version, etc.
+The registry offers a hierarchical structure for browsing the components. 
+
+The componentRegistry is set up as a Flex Gui frontend communicating with a
+Java based backend (REST service).
+
+The ComponentRegistry is a central software component to the Clarin MetaData
+Infrastructure (CMDI). For more information on CMDI, see
+<http://www.clarin.eu/cmdi>.
+
+Documentation
+-------------
+- A set of TRAC pages for developers has been setup on the Clarin.eu TRAC at
+<http://trac.clarin.eu/wiki/ComponentRegistryAndEditor>. You will need a
+login to access these pages. To request one, contact <clarin@clarin.eu>.
+
+- The REST interface is documented at <http://www.clarin.eu/node/3248>.
+
+- Documentation for users is available at <http://www.clarin.eu/node/3223>.
+
+Project structure
+-----
 This project contains two modules:
 
 - 'ComponentRegistry', a Java project that implements the Component Registry
@@ -8,4 +35,46 @@ This project contains two modules:
 - 'ComponentBrowserGui', a Flex project that implements a client for the
   Component Registry REST service.
 
-For more information, see ComponentRegistry/README.
+How to set up for development/building from source
+--------------------------------------------------
+* Creating initial setup files:
+
+ - in ComponentBrowserGui: mvn flexmojos:flexbuilder (to generate project files for Flex Builder)
+ - in ComponentRegistry: mvn eclipse:eclipse  (generates eclipse config)
+
+When using FlashBuilder to develop, make sure to configure the correct Flex SDK. It should
+be version 3.6, which you can download for free at <http://www.adobe.com/cfusion/entitlement/index.cfm?e=flex3sdk>.
+
+* Creating war artifact for local deployment:
+
+ - in ComponentBrowserGui: mvn install
+ - in ComponentRegistry: mvn package
+ 
+The ComponentRegistry war will include the flex swf file needed to start the application. 
+So deploying the resulting war will be enough to start the application.
+
+* Building for specific deployment environment
+By default the application is set to work when deployed on localhost. If you want to change that 
+change the serverRootUrl property in the pom.xml of ComponentRegistry. There are already build
+profiles for lux16.mpi.nl and catalog.clarin.eu that set these correctly. You can trigger
+these by providing the -Plux16 or -Pclarin options to mvn respectively.
+
+The rest service relies on a Component Registry database, for which a create script can be found in 
+the src/sql directory. For configuration instructions, see the comments in context.xml.
+
+* NOTE on generating java classes from general-component-schema.xsd.
+The ComponentRegistry needs the general-component-schema.xsd, which should be found at:
+1) ComponentRegistry/src/main/binding/ -> that directory has a svn:externals property pointing to the schema.
+Do a 'svn propget svn:externals' to see the property. Results in: 'http://svn.clarin.eu/metadata/trunk/toolkit/general-component-schema.xsd general-component-schema.xsd'
+
+* Missing some artifacts for Maven?:
+The ComponentBrowserGui project needs some swf files which are not in any maven repository I could find. 
+So install them manually: go to ComponentBrowserGui/libs/ and run the commands in maveninstalllib.txt
+ 
+Installation
+------------
+Please see the file called INSTALL
+
+Upgrading
+---------
+Please see the file called UPDATE
