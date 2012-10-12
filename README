@@ -44,6 +44,8 @@ How to set up for development/building from source
 
 When using FlashBuilder to develop, make sure to configure the correct Flex SDK. It should
 be version 3.6, which you can download for free at <http://www.adobe.com/cfusion/entitlement/index.cfm?e=flex3sdk>.
+In addition, you should configure the project to build for Flash player 10.0.0 (instead of default minimum version
+provided by SDK).
 
 * Creating war artifact for local deployment:
 
