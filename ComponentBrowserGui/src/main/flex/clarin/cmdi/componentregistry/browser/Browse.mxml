@@ -192,6 +192,7 @@
 			  >
 		
 		
+		
 		<mx:Box paddingTop="5" paddingLeft="5"
 				top="-5"
 				horizontalCenter="-110"
@@ -215,6 +216,13 @@
 							 >
 				<mx:VDividedBox label="Profiles"
 								width="100%">
+					
+					<mx:HBox>
+						<mx:Label text = "The uri for an RSS-reader: "/>
+						<mx:Text text="{Config.getRssUriDescriptions('profiles')}"/>	
+					</mx:HBox>
+					
+					
 					<browser:BrowserOverviewList id="profilesOverview"
 												 viewStack="{this.parent as RegistryViewStack}"
 												 browserColumns="{browserColumns.getProfileColumns()}"
@@ -234,8 +242,13 @@
 				</mx:VDividedBox>
 				
 				<mx:VDividedBox label="Components"
-								width="100%"
-								>
+								width="100%">
+					<mx:HBox>
+						<mx:Label text = "The uri for an RSS-reader: "/>
+						<mx:Text text="{Config.getRssUriDescriptions('components')}"/>	
+					</mx:HBox>
+					
+				
 					<browser:BrowserOverviewList id="componentsOverview"
 												 viewStack="{this.parent as RegistryViewStack}"
 												 browserColumns="{browserColumns.getComponentColumns()}"

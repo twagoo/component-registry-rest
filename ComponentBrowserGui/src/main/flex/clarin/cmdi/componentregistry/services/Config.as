@@ -194,6 +194,23 @@ package clarin.cmdi.componentregistry.services {
 		public static function get instance():Config {
 			return _instance;
 		}
-
+		
+		
+		public static function getRssUriDescriptions(typeOfDescription:String):String {
+			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
+			var result:String=baseUri+"/rest/registry/"+typeOfDescription+"/rss";
+			if (Config.instance._userSpace) result=result+"?userspace=true";
+			return result;
+		}
+		
+		public static function getRssUriComments(item:ItemDescription):String {
+			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
+			var typeOfDescription:String; 
+			if (item.isProfile) {typeOfDescription="profiles/";}
+			else typeOfDescription="components/";
+			var result:String=baseUri+"/rest/registry/"+typeOfDescription+item.id+"/comments/rss";
+			if (item.isInUserSpace) result=result+"?userspace=true";
+			return result;
+		}
 	}
 }

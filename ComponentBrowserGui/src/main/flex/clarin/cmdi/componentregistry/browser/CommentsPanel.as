@@ -1,17 +1,20 @@
-package clarin.cmdi.componentregistry.browser
+ package clarin.cmdi.componentregistry.browser
 {
 	import clarin.cmdi.componentregistry.common.Comment;
 	import clarin.cmdi.componentregistry.common.Credentials;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.services.CommentListService;
 	import clarin.cmdi.componentregistry.services.CommentPostService;
+	import clarin.cmdi.componentregistry.services.Config;
 	import clarin.cmdi.componentregistry.services.DeleteService;
 	
 	import flash.events.Event;
 	
+	import mx.containers.HBox;
 	import mx.containers.VBox;
 	import mx.controls.HRule;
 	import mx.controls.Label;
+	import mx.controls.Text;
 	
 	[Event(name="commentsLoaded",type="flash.events.Event")]
 	public class CommentsPanel extends VBox
@@ -31,6 +34,7 @@ package clarin.cmdi.componentregistry.browser
 			_itemDescription = itemDescription;
 		}
 		
+		
 		public function CommentsPanel()
 		{ 
 			this.setStyle("paddingLeft", 5);
@@ -43,10 +47,28 @@ package clarin.cmdi.componentregistry.browser
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
+		private function makeRssBox():HBox{
+			var rssBox:HBox = new HBox();
+			
+			var label:Label = new Label();
+			label.text = "The uri for an RSS-reader: ";
+			rssBox.addChild(label);
+			
+			var txt:Text = new Text();
+			txt.text = Config.getRssUriComments(_itemDescription);
+			rssBox.addChild(txt); 
+			
+			return rssBox;
+		}
+		
 		public function load():void{
 			removeAllChildren();
 			
 			if(_itemDescription != null) {
+				
+				var rssBox:HBox = makeRssBox();
+				addChild(rssBox);
+				
 				// A box for the comments (will be loaded in callback but should be shown first)
 				commentsBox = new VBox();
 				addChild(commentsBox);
