@@ -12,24 +12,26 @@
 	</mx:Metadata>
 
 	<mx:Array id="browserColumns"/>
-
-
+	
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.Config;
 			
 			import mx.collections.ArrayCollection;
-
+			import mx.controls.Text;
+			
 			private var defaultColor:Object;
 			private var currentSelectedItem:ItemDescription;
 			[Bindable]
 			private var menu:BrowseContextMenu;
 
 			private var _itemToScrollTo:ItemDescription;
+			
+			[Bindable]
+			public var rssUri:String;
 			
 			[Bindable]
 			public var viewStack:RegistryViewStack;
@@ -103,9 +105,19 @@
 			private function dispatchCreateNewEvent():void{
 				dispatchEvent(new CreateNewComponentEvent());
 			}
+			
+			private function copyRssLink():void {
+				System.setClipboard(rssLink.text);
+			}
 		]]>
 	</mx:Script>
-
+	
+	<mx:HBox>
+		<mx:Label text="RSS feed: "/>
+		<comp:LinkRenderer id="rssLink" text="{rssUri}"/>
+		<mx:Button label="copy to clipboard" toolTip="Click here to copy the uri to your clipboard" click="copyRssLink();" />
+	</mx:HBox>
+	
 	<mx:HBox paddingLeft="5" 
 			 paddingRight="5"
 			 width="100%">
@@ -119,8 +131,8 @@
 		<mx:HBox horizontalAlign="left"
 				 verticalAlign="middle"
 				 width="70%"
-				 visible="{buttonsEnabled}"
-				 >
+				 visible="{buttonsEnabled}">
+			
 			
 			<mx:Button label="Create new" 
 					   toolTip="Create a new item in the private workspace"

@@ -13,9 +13,7 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
-			import clarin.cmdi.componentregistry.common.Login;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.BrowserService;
@@ -26,7 +24,7 @@
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileListService;
 			
-			import mx.collections.ArrayCollection;
+			import mx.controls.Text;
 			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
@@ -53,6 +51,8 @@
 			private var selectedComponentItem:ItemDescription;
 			private var startupItemId:String = null;
 			private var startupPanel:String = null;
+			 
+			
 			
 			public function init():void {
 				profilesMenu = new BrowseContextMenu();
@@ -62,16 +62,24 @@
 				componentsMenu.viewStack = this.parent as RegistryViewStack;
 				componentsMenu.deleteService = deleteSrv;
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
+				
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 				
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setUserSpace);
+				
+				profilesOverview.rssUri = Config.getRssUriDescriptions("profiles");
+				componentsOverview.rssUri = Config.getRssUriDescriptions("components");
+				
 				setUserSpace();
+				
 			}
 			
 			private function toggleUserSpace(event:Event):void {
 				var userSpace:Boolean = Config.instance.userSpace;
 				componentsSrv = ComponentListService.getInstance(userSpace);
 				profilesSrv = ProfileListService.getInstance(userSpace);
+				profilesOverview.rssUri = Config.getRssUriDescriptions("profiles");
+				componentsOverview.rssUri = Config.getRssUriDescriptions("components");
 				refresh();
 			}
 			
@@ -175,6 +183,8 @@
 					userSpaceCB.selectedIndex = 0;
 				}
 			}
+			
+			
 		]]>
 	</mx:Script>
 	
@@ -217,12 +227,6 @@
 				<mx:VDividedBox label="Profiles"
 								width="100%">
 					
-					<mx:HBox>
-						<mx:Label text = "The uri for an RSS-reader: "/>
-						<mx:Text text="{Config.getRssUriDescriptions('profiles')}"/>	
-					</mx:HBox>
-					
-					
 					<browser:BrowserOverviewList id="profilesOverview"
 												 viewStack="{this.parent as RegistryViewStack}"
 												 browserColumns="{browserColumns.getProfileColumns()}"
@@ -243,11 +247,7 @@
 				
 				<mx:VDividedBox label="Components"
 								width="100%">
-					<mx:HBox>
-						<mx:Label text = "The uri for an RSS-reader: "/>
-						<mx:Text text="{Config.getRssUriDescriptions('components')}"/>	
-					</mx:HBox>
-					
+				
 				
 					<browser:BrowserOverviewList id="componentsOverview"
 												 viewStack="{this.parent as RegistryViewStack}"

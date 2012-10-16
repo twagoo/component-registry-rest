@@ -7,6 +7,7 @@ package clarin.cmdi.componentregistry.services {
 	
 	import mx.rpc.events.ResultEvent;
 	
+	
 	[Event(name="itemsLoaded", type="flash.events.Event")]
 	public class BrowserService extends ComponentRegistryService {
         public static const ITEMS_LOADED:String = "itemsLoaded";
@@ -59,6 +60,8 @@ package clarin.cmdi.componentregistry.services {
 			}
 			return null;
 		}
+		
+		
 	}
 }
 

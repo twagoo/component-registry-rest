@@ -12,6 +12,7 @@ package clarin.cmdi.componentregistry.common.components {
 	
 	import mx.controls.Alert;
 	import mx.controls.DataGrid;
+	import mx.controls.Text;
 	import mx.events.CloseEvent;
 	import mx.managers.PopUpManager;
 
@@ -28,7 +29,8 @@ package clarin.cmdi.componentregistry.common.components {
 
 		[Bindable]
 		private var _dataGrid:DataGrid;
-
+		
+		
 		private var saveItemDialog:SaveItemDialog = new SaveItemDialog();
 		private var isComponent:Boolean = false;
 		

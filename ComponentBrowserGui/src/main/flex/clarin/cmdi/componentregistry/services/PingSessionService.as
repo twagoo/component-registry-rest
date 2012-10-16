@@ -64,10 +64,5 @@ package clarin.cmdi.componentregistry.services {
 			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
 			Alert.show(errorMessage);
 		}
-
-
-
-
-
 	}
 }

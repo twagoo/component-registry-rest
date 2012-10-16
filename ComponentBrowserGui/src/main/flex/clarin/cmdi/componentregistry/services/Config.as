@@ -199,7 +199,7 @@ package clarin.cmdi.componentregistry.services {
 		public static function getRssUriDescriptions(typeOfDescription:String):String {
 			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
 			var result:String=baseUri+"/rest/registry/"+typeOfDescription+"/rss";
-			if (Config.instance._userSpace) result=result+"?userspace=true";
+			if (Config.instance.userSpace) result=result+"?userspace=true";
 			return result;
 		}
 		
