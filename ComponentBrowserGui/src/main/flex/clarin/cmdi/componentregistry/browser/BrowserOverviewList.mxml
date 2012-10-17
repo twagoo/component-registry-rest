@@ -15,6 +15,7 @@
 	
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.common.components.RssContextMenu;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
@@ -27,11 +28,14 @@
 			private var currentSelectedItem:ItemDescription;
 			[Bindable]
 			private var menu:BrowseContextMenu;
+			
+			[Bindable]
+			public var rssLinkMenu:RssContextMenu;
 
 			private var _itemToScrollTo:ItemDescription;
 			
-			[Bindable]
-			public var rssUri:String;
+			//[Bindable]
+			//public var rssUri:String;
 			
 			[Bindable]
 			public var viewStack:RegistryViewStack;
@@ -106,17 +110,19 @@
 				dispatchEvent(new CreateNewComponentEvent());
 			}
 			
-			private function copyRssLink():void {
-				System.setClipboard(rssLink.text);
-			}
+			
+			
 		]]>
 	</mx:Script>
 	
-	<mx:HBox>
-		<mx:Label text="RSS feed: "/>
-		<comp:LinkRenderer id="rssLink" text="{rssUri}"/>
-		<mx:Button label="copy to clipboard" toolTip="Click here to copy the uri to your clipboard" click="copyRssLink();" />
-	</mx:HBox>
+	<mx:VBox id="linkToFeed"
+			 contextMenu="{rssLinkMenu.cm}"
+			 >
+		<mx:Label text ="Feed"/>
+		<comp:LinkRenderer text = "{rssLinkMenu.rssUri}" />
+	</mx:VBox>
+	
+	
 	
 	<mx:HBox paddingLeft="5" 
 			 paddingRight="5"
