@@ -15,27 +15,31 @@
 	
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.common.components.RssContextMenu;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+			import clarin.cmdi.componentregistry.common.components.RssContextMenu;
+			import clarin.cmdi.componentregistry.common.components.LabelButton;
 			import clarin.cmdi.componentregistry.services.Config;
+			
+			import flash.events.ContextMenuEvent;
+			import flash.ui.ContextMenu;
+			import flash.ui.ContextMenuItem;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Text;
+			import mx.core.UIComponent;
 			
 			private var defaultColor:Object;
 			private var currentSelectedItem:ItemDescription;
+			
 			[Bindable]
 			private var menu:BrowseContextMenu;
 			
-			[Bindable]
-			public var rssLinkMenu:RssContextMenu;
-
 			private var _itemToScrollTo:ItemDescription;
 			
 			//[Bindable]
-			//public var rssUri:String;
+			public var typeOfDescription:String;
 			
 			[Bindable]
 			public var viewStack:RegistryViewStack;
@@ -90,6 +94,9 @@
 				this.menu = browseMenu;
 				menu.dataGrid = dataGrid;
 			}
+			
+			
+
 
 			private function handleKeyUp(event:KeyboardEvent):void {
 				if (event.keyCode == Keyboard.DELETE) {
@@ -111,17 +118,18 @@
 			}
 			
 			
-			
+			private function goToFeed():void{
+				var request:URLRequest = new URLRequest(Config.getRssUriDescriptions(typeOfDescription));
+				navigateToURL(request, "_blank");
+			}
 		]]>
 	</mx:Script>
 	
-	<mx:VBox id="linkToFeed"
-			 contextMenu="{rssLinkMenu.cm}"
-			 >
-		<mx:Label text ="Feed"/>
-		<comp:LinkRenderer text = "{rssLinkMenu.rssUri}" />
-	</mx:VBox>
-	
+	<mx:HBox contextMenu="{(new RssContextMenu(typeOfDescription)).cm}">
+		<mx:Button id="rssLabelButton"
+				   label="Feed"
+				   click="goToFeed()"/>
+	</mx:HBox>
 	
 	
 	<mx:HBox paddingLeft="5" 

@@ -15,7 +15,7 @@
 		<![CDATA[
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
-			import clarin.cmdi.componentregistry.common.components.RssContextMenu;
+			//import clarin.cmdi.componentregistry.common.components.RssContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.BrowserService;
 			import clarin.cmdi.componentregistry.services.ComponentInfoService;
@@ -53,10 +53,6 @@
 			private var startupItemId:String = null;
 			private var startupPanel:String = null;
 			 
-			[Bindable]
-			private var rssProfilesMenu:RssContextMenu;
-			[Bindable]
-			private var rssComponentsMenu:RssContextMenu;
 			
 			
 			public function init():void {
@@ -69,15 +65,8 @@
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
 				
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
-				
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setUserSpace);
-				
-				//profilesOverview.rssUri = Config.getRssUriDescriptions("profiles");
-				//componentsOverview.rssUri = Config.getRssUriDescriptions("components");
-				
-				rssProfilesMenu = new RssContextMenu(Config.getRssUriDescriptions("profiles"));
-				rssComponentsMenu = new RssContextMenu(Config.getRssUriDescriptions("components"));
-				
+			
 				setUserSpace();
 				
 			}
@@ -87,12 +76,7 @@
 				componentsSrv = ComponentListService.getInstance(userSpace);
 				profilesSrv = ProfileListService.getInstance(userSpace);
 				
-				//profilesOverview.rssUri = Config.getRssUriDescriptions("profiles");
-			    //componentsOverview.rssUri = Config.getRssUriDescriptions("components");
-				
-				rssProfilesMenu.rssUri = Config.getRssUriDescriptions("profiles");
-				rssComponentsMenu.rssUri=Config.getRssUriDescriptions("components");
-				
+			
 				refresh();
 			}
 			
@@ -249,7 +233,7 @@
 												 width="100%"
 												 height="70%"
 												 browseMenu="{profilesMenu}"
-												 rssLinkMenu = "{rssProfilesMenu}"
+												 typeOfDescription = "profiles"
 												 createNew="createNewProfile(event)"
 												 />
 					<browser:ProfileInfoPage id="profileInfoPage"
@@ -272,6 +256,7 @@
 												 width="100%"
 												 height="70%"
 												 browseMenu="{componentsMenu}"
+												 typeOfDescription= "components"
 												 createNew="createNewComponent(event)"
 												 />
 					<browser:ComponentInfoPage id="componentInfoPage"
