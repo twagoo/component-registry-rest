@@ -7,14 +7,19 @@
 	import clarin.cmdi.componentregistry.services.CommentPostService;
 	import clarin.cmdi.componentregistry.services.Config;
 	import clarin.cmdi.componentregistry.services.DeleteService;
+	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.common.components.RssCommentsContextMenu;
 	
 	import flash.events.Event;
+	import flash.events.MouseEvent;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	
-	import mx.containers.HBox;
 	import mx.containers.VBox;
+	import mx.containers.HBox;
+	import mx.controls.Image;
 	import mx.controls.HRule;
 	import mx.controls.Label;
-	import mx.controls.Text;
 	
 	[Event(name="commentsLoaded",type="flash.events.Event")]
 	public class CommentsPanel extends VBox
@@ -47,18 +52,18 @@
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
-		private function makeRssBox():HBox{
-			var rssBox:HBox = new HBox();
-			
-			var label:Label = new Label();
-			label.text = "The uri for an RSS-reader: ";
-			rssBox.addChild(label);
-			
-			var txt:Text = new Text();
-			txt.text = Config.getRssUriComments(_itemDescription);
-			rssBox.addChild(txt); 
-			
-			return rssBox;
+		private function makeRssImage():Image{
+			var rssImage:Image = new Image();
+			rssImage.setStyle("horizontalAlign", "right");
+			rssImage.source=StyleConstants.rssIcon;
+			rssImage.toolTip = "Linking to the RSS feed";
+			rssImage.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
+			rssImage.addEventListener(MouseEvent.CLICK,  goToFeed);
+			return rssImage;
+		}
+		
+		private function goToFeed(event:MouseEvent):void{
+			navigateToURL(new URLRequest(Config.getRssUriComments(_itemDescription)), "_blank");
 		}
 		
 		public function load():void{
@@ -66,8 +71,9 @@
 			
 			if(_itemDescription != null) {
 				
-				var rssBox:HBox = makeRssBox();
-				addChild(rssBox);
+				// Rss feed "button"
+				var rssImage:Image = makeRssImage();
+				addChild(rssImage);
 				
 				// A box for the comments (will be loaded in callback but should be shown first)
 				commentsBox = new VBox();

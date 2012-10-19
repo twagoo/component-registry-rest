@@ -15,7 +15,6 @@
 		<![CDATA[
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
-			//import clarin.cmdi.componentregistry.common.components.RssContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.BrowserService;
 			import clarin.cmdi.componentregistry.services.ComponentInfoService;
@@ -76,7 +75,6 @@
 				componentsSrv = ComponentListService.getInstance(userSpace);
 				profilesSrv = ProfileListService.getInstance(userSpace);
 				
-			
 				refresh();
 			}
 			

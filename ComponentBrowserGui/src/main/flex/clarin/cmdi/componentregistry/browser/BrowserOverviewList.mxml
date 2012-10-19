@@ -18,10 +18,10 @@
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
-			import clarin.cmdi.componentregistry.common.components.RssContextMenu;
-			import clarin.cmdi.componentregistry.common.components.LabelButton;
+			import clarin.cmdi.componentregistry.common.components.RssDescriptionsContextMenu;
 			import clarin.cmdi.componentregistry.services.Config;
-			
+			import clarin.cmdi.componentregistry.common.StyleConstants;
+		
 			import flash.events.ContextMenuEvent;
 			import flash.ui.ContextMenu;
 			import flash.ui.ContextMenuItem;
@@ -38,7 +38,6 @@
 			
 			private var _itemToScrollTo:ItemDescription;
 			
-			//[Bindable]
 			public var typeOfDescription:String;
 			
 			[Bindable]
@@ -125,12 +124,6 @@
 		]]>
 	</mx:Script>
 	
-	<mx:HBox contextMenu="{(new RssContextMenu(typeOfDescription)).cm}">
-		<mx:Button id="rssLabelButton"
-				   label="Feed"
-				   click="goToFeed()"/>
-	</mx:HBox>
-	
 	
 	<mx:HBox paddingLeft="5" 
 			 paddingRight="5"
@@ -167,6 +160,7 @@
 			<mx:Button label="Import"
 					   toolTip="Import an item from a local file"
 					   click="importItem()" />
+			
 		</mx:HBox>
 		
 		<mx:HBox horizontalAlign="right"
@@ -176,6 +170,12 @@
 			<rictus:SearchBox id="searchBox"
 							  label="filter..."/>
 			<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
+			
+			<mx:Image source="{StyleConstants.rssIcon}"
+					  toolTip = "Linking to the RSS feed"
+					  contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
+					  click="goToFeed()"
+					  />	
 		</mx:HBox>
 	</mx:HBox>
 

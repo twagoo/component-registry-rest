@@ -18,5 +18,7 @@ package clarin.cmdi.componentregistry.common {
 		public static const downIcon:Class;
 		[Embed(source='/assets/images/layer-raise-3.png')]
 		public static const upIcon:Class;
+		[Embed(source='/assets/images/rss_icon_glass_gray16.png')]
+		public static const rssIcon:Class;
 	}
 }
