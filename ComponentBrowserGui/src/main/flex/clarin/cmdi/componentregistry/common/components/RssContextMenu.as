@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.common.components
 {
 	import clarin.cmdi.componentregistry.services.Config;
 	
+	import flash.events.Event;
 	import flash.events.ContextMenuEvent;
 	import flash.geom.Point;
 	import flash.system.System;
@@ -15,8 +16,7 @@ package clarin.cmdi.componentregistry.common.components
 		public var cm:ContextMenu;
 		
 		private var _copyRssLinkMenuItem:ContextMenuItem;
-		private var _showRssLinkMenuItem:ContextMenuItem;
-		
+		protected var _showRssLinkMenuItem:ContextMenuItem;
 		
 		
 		public function RssContextMenu()
@@ -24,21 +24,21 @@ package clarin.cmdi.componentregistry.common.components
 			cm = new ContextMenu();
 			cm.hideBuiltInItems();
 			cm.customItems = createMenuItems();
-			
+			cm.addEventListener(ContextMenuEvent.MENU_SELECT, menuUpdateCaption);
 		}
 		
 		private function createMenuItems():Array {
 			var result:Array = new Array();
 			
-			_copyRssLinkMenuItem = new ContextMenuItem("Copy the link to the clipboard");
-			_copyRssLinkMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copyRssLink);
-			_copyRssLinkMenuItem.visible = true;
-			result.push(_copyRssLinkMenuItem);
-			
-			_showRssLinkMenuItem = new ContextMenuItem("Show link to the RSS feed");
+			_showRssLinkMenuItem = new ContextMenuItem(" ");
 			_showRssLinkMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showRssLink);
 			_showRssLinkMenuItem.visible = true;
 			result.push(_showRssLinkMenuItem);
+			
+			_copyRssLinkMenuItem = new ContextMenuItem("Copy Rss link to clipboard");
+			_copyRssLinkMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, copyRssLink);
+			_copyRssLinkMenuItem.visible = true;
+			result.push(_copyRssLinkMenuItem);
 			
 			return result;
 		}
@@ -50,12 +50,9 @@ package clarin.cmdi.componentregistry.common.components
 		protected function showRssLink(event:ContextMenuEvent):void{
 		}
 		
-		protected function positioning(xShift:int, event:ContextMenuEvent):Point{
-			var point:Point = new Point();
-			point.x = event.mouseTarget.mouseX;
-			point.y = event.mouseTarget.mouseY;
-			point = event.mouseTarget.localToGlobal(point);			
-			return (new Point(point.x-xShift, point.y));
+		protected function menuUpdateCaption(event:ContextMenuEvent):void{
 		}
+		
+		
 	}
 }

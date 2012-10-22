@@ -1,13 +1,15 @@
 package clarin.cmdi.componentregistry.common.components
 {
-	import clarin.cmdi.componentregistry.common.RssLinkPopUp;
+	
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.services.Config;
 	
-	import flash.geom.Point;
+	import flash.events.Event;
 	import flash.events.ContextMenuEvent;
-	import mx.managers.PopUpManager;
+	import flash.ui.ContextMenuItem;
 	import flash.system.System;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	
 	public class RssCommentsContextMenu extends RssContextMenu
 	{
@@ -18,23 +20,17 @@ package clarin.cmdi.componentregistry.common.components
 			_itemDescription = itemDescription;
 		}
 		
-		
 		override protected function copyRssLink(event:ContextMenuEvent):void {
 			System.setClipboard(Config.getRssUriComments(_itemDescription));
 		}
 		
-		
 		override protected function showRssLink(event:ContextMenuEvent):void{
-			
-			var rssLinkPanel:RssLinkPopUp = new RssLinkPopUp();
-			rssLinkPanel.uri=Config.getRssUriComments(_itemDescription);
-			
-			var xShift:int = 0;
-			var position:Point = positioning(xShift, event);
-			rssLinkPanel.x = position.x;
-			rssLinkPanel.y=  position.y;
-			
-			PopUpManager.addPopUp(rssLinkPanel, event.mouseTarget);
+			navigateToURL(new URLRequest(Config.getRssUriComments(_itemDescription)), "_blank");
 		}
+		
+		override protected function menuUpdateCaption(event:ContextMenuEvent):void {
+			_showRssLinkMenuItem.caption = Config.getRssUriComments(_itemDescription);
+		}
+		
 	}
 }

@@ -9,6 +9,7 @@
 	import clarin.cmdi.componentregistry.services.DeleteService;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.common.components.RssCommentsContextMenu;
+	import clarin.cmdi.componentregistry.common.components.RssLinkButton;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -52,14 +53,11 @@
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
-		private function makeRssImage():Image{
-			var rssImage:Image = new Image();
-			rssImage.setStyle("horizontalAlign", "right");
-			rssImage.source=StyleConstants.rssIcon;
-			rssImage.toolTip = "Linking to the RSS feed";
-			rssImage.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
-			rssImage.addEventListener(MouseEvent.CLICK,  goToFeed);
-			return rssImage;
+		private function makeRssLinkButton():RssLinkButton{
+			var rssButton:RssLinkButton = new RssLinkButton();
+			rssButton.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
+			rssButton.addEventListener(MouseEvent.CLICK,  goToFeed);
+			return rssButton;
 		}
 		
 		private function goToFeed(event:MouseEvent):void{
@@ -72,8 +70,8 @@
 			if(_itemDescription != null) {
 				
 				// Rss feed "button"
-				var rssImage:Image = makeRssImage();
-				addChild(rssImage);
+				var rssButton:RssLinkButton = makeRssLinkButton();
+				addChild(rssButton);
 				
 				// A box for the comments (will be loaded in callback but should be shown first)
 				commentsBox = new VBox();

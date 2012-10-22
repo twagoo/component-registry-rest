@@ -124,7 +124,6 @@
 		]]>
 	</mx:Script>
 	
-	
 	<mx:HBox paddingLeft="5" 
 			 paddingRight="5"
 			 width="100%">
@@ -171,8 +170,8 @@
 							  label="filter..."/>
 			<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
 			
-			<mx:Image source="{StyleConstants.rssIcon}"
-					  toolTip = "Linking to the RSS feed"
+			
+			<comp:RssLinkButton 
 					  contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
 					  click="goToFeed()"
 					  />	
