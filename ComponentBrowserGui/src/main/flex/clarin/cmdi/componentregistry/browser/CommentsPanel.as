@@ -53,11 +53,18 @@
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
-		private function makeRssLinkButton():RssLinkButton{
+		private function makeRssLinkButton():HBox{
+			var result:HBox = new HBox();
+			result.setStyle("horizontalAlign", "right");
+			result.percentWidth=100;
+			this.setStyle("paddingRight", 5);
+			
 			var rssButton:RssLinkButton = new RssLinkButton();
 			rssButton.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
 			rssButton.addEventListener(MouseEvent.CLICK,  goToFeed);
-			return rssButton;
+			
+			result.addChild(rssButton);
+			return result;
 		}
 		
 		private function goToFeed(event:MouseEvent):void{
@@ -70,7 +77,7 @@
 			if(_itemDescription != null) {
 				
 				// Rss feed "button"
-				var rssButton:RssLinkButton = makeRssLinkButton();
+				var rssButton:HBox = makeRssLinkButton();
 				addChild(rssButton);
 				
 				// A box for the comments (will be loaded in callback but should be shown first)

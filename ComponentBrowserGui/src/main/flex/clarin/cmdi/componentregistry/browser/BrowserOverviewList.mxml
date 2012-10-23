@@ -169,13 +169,11 @@
 			<rictus:SearchBox id="searchBox"
 							  label="filter..."/>
 			<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
-			
-			
-			<comp:RssLinkButton 
-					  contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
-					  click="goToFeed()"
-					  />	
-		</mx:HBox>
+	   </mx:HBox>
+		<comp:RssLinkButton 
+			contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
+			click="goToFeed()"
+			/>	
 	</mx:HBox>
 
 	<comp:FilteringDataGrid id="dataGrid"
