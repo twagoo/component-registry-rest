@@ -61,6 +61,10 @@ package clarin.cmdi.componentregistry.services {
 				throw new Error("Config can only be accessed through Config.instance");
 			}
 		}
+		
+		public static function get instance():Config {
+			return _instance;
+		}
 
 		private function init(applicationParameters:Object):void {
 			var serviceRootUrl:String = applicationParameters.serviceRootUrl;
@@ -186,16 +190,6 @@ package clarin.cmdi.componentregistry.services {
 			return uri.toString();
 		}
 		
-		public static function getXsdLink(item:ItemDescription):String {
-			var uri:URI = new URI(item.dataUrl+"/xsd");
-			return uri.toString();
-		}
-
-		public static function get instance():Config {
-			return _instance;
-		}
-		
-		
 		public static function getRssUriDescriptions(typeOfDescription:String):String {
 			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
 			var result:String=baseUri+"/rest/registry/"+typeOfDescription+"/rss";
@@ -211,6 +205,11 @@ package clarin.cmdi.componentregistry.services {
 			var result:String=baseUri+"/rest/registry/"+typeOfDescription+item.id+"/comments/rss";
 			if (item.isInUserSpace) result=result+"?userspace=true";
 			return result;
+		}
+		
+		public static function getXsdLink(item:ItemDescription):String {
+			var uri:URI = new URI(item.dataUrl+"/xsd");
+			return uri.toString();
 		}
 	}
 }
