@@ -5,6 +5,7 @@
 		   >
 	<mx:Script>	
 		<![CDATA[
+			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.common.StyleConstants;
 			
 			private const OUT_FOCUS_BORDER_COLOR:String="white";
@@ -29,5 +30,5 @@
 	  mouseOver = "focusBorder()"
 	  mouseOut = "unFocusBorder()"
 	  />
-</mx:Canvas>
+</mx:Canvas >
 

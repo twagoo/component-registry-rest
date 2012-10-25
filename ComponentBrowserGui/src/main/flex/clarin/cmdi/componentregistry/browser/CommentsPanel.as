@@ -3,34 +3,38 @@
 	import clarin.cmdi.componentregistry.common.Comment;
 	import clarin.cmdi.componentregistry.common.Credentials;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.common.components.RssCommentsContextMenu;
+	import clarin.cmdi.componentregistry.common.components.RssLinkButton;
 	import clarin.cmdi.componentregistry.services.CommentListService;
 	import clarin.cmdi.componentregistry.services.CommentPostService;
 	import clarin.cmdi.componentregistry.services.Config;
 	import clarin.cmdi.componentregistry.services.DeleteService;
-	import clarin.cmdi.componentregistry.common.StyleConstants;
-	import clarin.cmdi.componentregistry.common.components.RssCommentsContextMenu;
-	import clarin.cmdi.componentregistry.common.components.RssLinkButton;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
 	
-	import mx.containers.VBox;
+	import mx.containers.Canvas;
 	import mx.containers.HBox;
-	import mx.controls.Image;
+	import mx.containers.VBox;
 	import mx.controls.HRule;
+	import mx.controls.Image;
 	import mx.controls.Label;
 	
 	[Event(name="commentsLoaded",type="flash.events.Event")]
-	public class CommentsPanel extends VBox
+	public class CommentsPanel extends Canvas
 	{
 		public static const COMMENTS_LOADED:String = "commentsLoaded";
 		
 		[Bindable]
 		private var _itemDescription:ItemDescription;
 		private var service:CommentListService;
+		
 		private var commentsBox:VBox;
+		private const hPadding:int = 5;
+		private const vPadding:int = 5;
 		
 		public function get commentListService():CommentListService {
 			return service;
@@ -42,10 +46,9 @@
 		
 		
 		public function CommentsPanel()
-		{ 
-			this.setStyle("paddingLeft", 5);
-			this.setStyle("paddingTop", 5);
-			this.setStyle("paddingBottom", 5);
+		{  
+
+			this.setStyle("layout", "absolute");
 			
 			// this is for responding to the deletion of comments. At this point there is no way to distinghuish between item and component deletion
 			// and that probably is fine since they mostly require the same response. It does mean that this component will also reload when a
@@ -54,17 +57,17 @@
 		}
 		
 		private function makeRssLinkButton():HBox{
-			var result:HBox = new HBox();
-			result.setStyle("horizontalAlign", "right");
-			result.percentWidth=100;
-			this.setStyle("paddingRight", 5);
+			var rssHBox:HBox = new HBox();
 			
-			var rssButton:RssLinkButton = new RssLinkButton();
-			rssButton.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
-			rssButton.addEventListener(MouseEvent.CLICK,  goToFeed);
+			var rssButtonTmp:RssLinkButton = new RssLinkButton();
+			rssButtonTmp.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
+			rssButtonTmp.addEventListener(MouseEvent.CLICK,  goToFeed);
+			rssHBox.addChild(rssButtonTmp);
 			
-			result.addChild(rssButton);
-			return result;
+			rssHBox.setStyle("horizontalAlign", "right");
+			rssHBox.setStyle("top", vPadding);
+			rssHBox.setStyle("right", hPadding*4);
+			return rssHBox;
 		}
 		
 		private function goToFeed(event:MouseEvent):void{
@@ -76,21 +79,24 @@
 			
 			if(_itemDescription != null) {
 				
-				// Rss feed "button"
-				var rssButton:HBox = makeRssLinkButton();
-				addChild(rssButton);
+			 				// Rss feed "button"
+				if (! _itemDescription.isInUserSpace){
+					var rssButton:HBox  = makeRssLinkButton();
+					addChild(rssButton);
+				}
 				
 				// A box for the comments (will be loaded in callback but should be shown first)
 				commentsBox = new VBox();
+				commentsBox.setStyle("top", vPadding);
+				commentsBox.setStyle("left", hPadding);
 				addChild(commentsBox);
-				
-				// A panel for posting a comment (or a message 'login to post');
-				addPostPanel();
 				
 				// Do actual loading
 				service = new CommentListService(_itemDescription, _itemDescription.isInUserSpace);
 				service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
 				service.load();
+				
+				
 			}
 		}
 		
@@ -99,12 +105,12 @@
 				var postPanel:commentPostPanel = new commentPostPanel();
 				postPanel.itemDescription = _itemDescription;
 				postPanel.commentPostService.addEventListener(CommentPostService.POST_COMPLETE, postCompleteHandler);
-				addChild(postPanel);
+				commentsBox.addChild(postPanel);
 			} else{
 				var loginToPostLabel:Label = new Label();
 				loginToPostLabel.setStyle("fontWeight","bold");
 				loginToPostLabel.text = "Login to leave a comment!";
-				addChild(loginToPostLabel);
+				commentsBox.addChild(loginToPostLabel);
 			}
 		}
 		
@@ -129,6 +135,9 @@
 				}
 			}
 			dispatchEvent(new Event(COMMENTS_LOADED));
+			
+			// A panel for posting a comment (or a message 'login to post');
+			addPostPanel();
 		}
 		
 		private function postCompleteHandler(event:Event):void{

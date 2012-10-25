@@ -35,9 +35,9 @@
 			[Bindable]
 			private var profilesSrv:ProfileListService = ProfileListService.getInstance(Config.instance.userSpace);
 			[Bindable]
-			private var profileSrv:ProfileInfoService = new ProfileInfoService();
+			private var selectedProfileSrv:ProfileInfoService = new ProfileInfoService();
 			[Bindable]
-			private var componentSrv:ComponentInfoService = new ComponentInfoService();
+			private var selectedComponentSrv:ComponentInfoService = new ComponentInfoService();
 			
 			private var deleteSrv:DeleteService = DeleteService.instance;
 			
@@ -74,7 +74,6 @@
 				var userSpace:Boolean = Config.instance.userSpace;
 				componentsSrv = ComponentListService.getInstance(userSpace);
 				profilesSrv = ProfileListService.getInstance(userSpace);
-				
 				refresh();
 			}
 			
@@ -89,13 +88,15 @@
 					componentsSrv.addEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
 					profilesSrv.addEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
 				}
-				
 				refresh();
 			}
 			
 			public function refresh():void {
 				componentsSrv.load();
 				profilesSrv.load();
+				
+				selectedComponentSrv = new ComponentInfoService();
+				selectedProfileSrv = new ProfileInfoService();
 			}
 			
 			private function profilesLoaded(event:Event):void {
@@ -126,22 +127,22 @@
 			}
 			
 			private function loadProfileInfoPage(event:BrowserSelectionEvent):void {
-				profileSrv.load(event.itemDescription);
+				selectedProfileSrv.load(event.itemDescription);
 			}
 			
 			private function loadComponentInfoPage(event:BrowserSelectionEvent):void {
-				componentSrv.load(event.itemDescription);
+				selectedComponentSrv.load(event.itemDescription);
 			}
 			
 			public function setSelectedDescription(desc:ItemDescription):void {
 				if (desc.isProfile) {
 					tabnav.selectedIndex = 0;
 					this.selectedProfileItem = desc;
-					profileSrv.load(desc);
+					selectedProfileSrv.load(desc);
 				} else {
 					tabnav.selectedIndex = 1;
 					this.selectedComponentItem = desc;
-					componentSrv.load(desc);
+					selectedComponentSrv.load(desc);
 				}
 			}
 			
@@ -235,7 +236,7 @@
 												 createNew="createNewProfile(event)"
 												 />
 					<browser:ProfileInfoPage id="profileInfoPage"
-											 profile="{profileSrv.profile}"
+											 profile="{selectedProfileSrv.profile}"
 											 width="100%"
 											 height="50%"
 											 contextMenu="{profilesMenu.cm}"/>
@@ -258,7 +259,7 @@
 												 createNew="createNewComponent(event)"
 												 />
 					<browser:ComponentInfoPage id="componentInfoPage"
-											   component="{componentSrv.component}"
+											   component="{selectedComponentSrv.component}"
 											   width="100%"
 											   height="50%"
 											   contextMenu="{componentsMenu.cm}"/>
