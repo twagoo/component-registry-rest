@@ -22,6 +22,7 @@
 	import mx.controls.HRule;
 	import mx.controls.Image;
 	import mx.controls.Label;
+	import mx.controls.scrollClasses.ScrollBar;
 	
 	[Event(name="commentsLoaded",type="flash.events.Event")]
 	public class CommentsPanel extends Canvas
@@ -36,6 +37,7 @@
 		private const hPadding:int = 5;
 		private const vPadding:int = 5;
 		
+		
 		public function get commentListService():CommentListService {
 			return service;
 		}
@@ -49,6 +51,7 @@
 		{  
 
 			this.setStyle("layout", "absolute");
+			this.verticalScrollPolicy = "on";
 			
 			// this is for responding to the deletion of comments. At this point there is no way to distinghuish between item and component deletion
 			// and that probably is fine since they mostly require the same response. It does mean that this component will also reload when a
@@ -56,18 +59,16 @@
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
-		private function makeRssLinkButton():HBox{
-			var rssHBox:HBox = new HBox();
+	
+		
+		private function makeRssLinkButton():RssLinkButton{
 			
 			var rssButtonTmp:RssLinkButton = new RssLinkButton();
 			rssButtonTmp.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
 			rssButtonTmp.addEventListener(MouseEvent.CLICK,  goToFeed);
-			rssHBox.addChild(rssButtonTmp);
-			
-			rssHBox.setStyle("horizontalAlign", "right");
-			rssHBox.setStyle("top", vPadding);
-			rssHBox.setStyle("right", hPadding*4);
-			return rssHBox;
+			rssButtonTmp.setStyle("top", vPadding);
+			rssButtonTmp.setStyle("right", hPadding);
+			return rssButtonTmp;
 		}
 		
 		private function goToFeed(event:MouseEvent):void{
@@ -78,12 +79,6 @@
 			removeAllChildren();
 			
 			if(_itemDescription != null) {
-				
-			 				// Rss feed "button"
-				if (! _itemDescription.isInUserSpace){
-					var rssButton:HBox  = makeRssLinkButton();
-					addChild(rssButton);
-				}
 				
 				// A box for the comments (will be loaded in callback but should be shown first)
 				commentsBox = new VBox();
@@ -96,6 +91,12 @@
 				service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
 				service.load();
 				
+				
+				// Rss feed "button"
+				if (! _itemDescription.isInUserSpace){
+					var rssButton:RssLinkButton  = makeRssLinkButton();
+					addChild(rssButton);
+				}
 				
 			}
 		}
