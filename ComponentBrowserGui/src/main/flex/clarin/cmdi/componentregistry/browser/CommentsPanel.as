@@ -24,10 +24,17 @@
 	import mx.controls.Label;
 	import mx.controls.scrollClasses.ScrollBar;
 	
+	
+	
 	[Event(name="commentsLoaded",type="flash.events.Event")]
 	public class CommentsPanel extends Canvas
 	{
 		public static const COMMENTS_LOADED:String = "commentsLoaded";
+		
+		
+		public static const SCROLL_BAR_SWITCHED_EVENT:String = "verticalScrollBarSwitched";
+		[Bindable]
+		private var _vScrollBarVisibility:Boolean;
 		
 		[Bindable]
 		private var _itemDescription:ItemDescription;
@@ -52,14 +59,24 @@
 
 			this.setStyle("layout", "absolute");
 			this.verticalScrollPolicy = "on";
-			
+			this.addEventListener(SCROLL_BAR_SWITCHED_EVENT, vScrollBarSwitchedHandler);
 			// this is for responding to the deletion of comments. At this point there is no way to distinghuish between item and component deletion
 			// and that probably is fine since they mostly require the same response. It does mean that this component will also reload when a
 			// component gets deleted, which is a bit superfluous.
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
-	
+	    private function vScrollBarSwitchedHandler(e:Event):void{
+			this.verticalScrollBar.visible = _vScrollBarVisibility;
+		}
+		
+		// where to put this dispatcher, where the panel is redrawn/made a displayObject? where is it?
+		public function vScrollBarDispatcher():void {
+			if (_vScrollBarVisibility != this.verticalScrollBar.accessibilityEnabled) {
+				_vScrollBarVisibility = this.verticalScrollBar.accessibilityEnabled;
+				dispatchEvent(new Event(SCROLL_BAR_SWITCHED_EVENT));
+			}
+		}
 		
 		private function makeRssLinkButton():RssLinkButton{
 			
