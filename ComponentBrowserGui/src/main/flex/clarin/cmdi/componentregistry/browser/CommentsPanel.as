@@ -22,28 +22,24 @@
 	import mx.controls.HRule;
 	import mx.controls.Image;
 	import mx.controls.Label;
+	import mx.controls.Spacer;
 	import mx.controls.scrollClasses.ScrollBar;
 	
 	
 	
 	[Event(name="commentsLoaded",type="flash.events.Event")]
-	public class CommentsPanel extends Canvas
+	public class CommentsPanel extends HBox
 	{
 		public static const COMMENTS_LOADED:String = "commentsLoaded";
-		
-		
-		public static const SCROLL_BAR_SWITCHED_EVENT:String = "verticalScrollBarSwitched";
-		[Bindable]
-		private var _vScrollBarVisibility:Boolean;
 		
 		[Bindable]
 		private var _itemDescription:ItemDescription;
 		private var service:CommentListService;
 		
 		private var commentsBox:VBox;
+		
 		private const hPadding:int = 5;
 		private const vPadding:int = 5;
-		
 		
 		public function get commentListService():CommentListService {
 			return service;
@@ -56,35 +52,23 @@
 		
 		public function CommentsPanel()
 		{  
-
-			this.setStyle("layout", "absolute");
-			this.verticalScrollPolicy = "on";
-			this.addEventListener(SCROLL_BAR_SWITCHED_EVENT, vScrollBarSwitchedHandler);
+			this.setStyle("paddingLeft", 5);
+			this.setStyle("paddingTop", 5);
+			this.setStyle("paddingRight", 5);
+			
 			// this is for responding to the deletion of comments. At this point there is no way to distinghuish between item and component deletion
 			// and that probably is fine since they mostly require the same response. It does mean that this component will also reload when a
 			// component gets deleted, which is a bit superfluous.
 			DeleteService.instance.addEventListener(DeleteService.ITEM_DELETED, commentDeletedHandler);
 		}
 		
-	    private function vScrollBarSwitchedHandler(e:Event):void{
-			this.verticalScrollBar.visible = _vScrollBarVisibility;
-		}
-		
-		// where to put this dispatcher, where the panel is redrawn/made a displayObject? where is it?
-		public function vScrollBarDispatcher():void {
-			if (_vScrollBarVisibility != this.verticalScrollBar.accessibilityEnabled) {
-				_vScrollBarVisibility = this.verticalScrollBar.accessibilityEnabled;
-				dispatchEvent(new Event(SCROLL_BAR_SWITCHED_EVENT));
-			}
-		}
+	   
 		
 		private function makeRssLinkButton():RssLinkButton{
 			
 			var rssButtonTmp:RssLinkButton = new RssLinkButton();
 			rssButtonTmp.contextMenu = (new RssCommentsContextMenu(_itemDescription)).cm;
 			rssButtonTmp.addEventListener(MouseEvent.CLICK,  goToFeed);
-			rssButtonTmp.setStyle("top", vPadding);
-			rssButtonTmp.setStyle("right", hPadding);
 			return rssButtonTmp;
 		}
 		
@@ -95,12 +79,11 @@
 		public function load():void{
 			removeAllChildren();
 			
+			
 			if(_itemDescription != null) {
 				
 				// A box for the comments (will be loaded in callback but should be shown first)
 				commentsBox = new VBox();
-				commentsBox.setStyle("top", vPadding);
-				commentsBox.setStyle("left", hPadding);
 				addChild(commentsBox);
 				
 				// Do actual loading
@@ -109,8 +92,12 @@
 				service.load();
 				
 				
+				
 				// Rss feed "button"
 				if (! _itemDescription.isInUserSpace){
+					var spacer:Spacer = new Spacer();
+					spacer.percentWidth=100;
+					addChild(spacer);
 					var rssButton:RssLinkButton  = makeRssLinkButton();
 					addChild(rssButton);
 				}
@@ -156,6 +143,8 @@
 			
 			// A panel for posting a comment (or a message 'login to post');
 			addPostPanel();
+			
+			
 		}
 		
 		private function postCompleteHandler(event:Event):void{

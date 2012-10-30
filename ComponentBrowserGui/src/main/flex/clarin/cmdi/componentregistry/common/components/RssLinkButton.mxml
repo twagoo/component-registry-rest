@@ -2,6 +2,7 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
 		   cornerRadius="5"
 		   borderStyle="solid"
+		   width = "18"
 		   >
 	<mx:Script>	
 		<![CDATA[
@@ -30,5 +31,5 @@
 	  mouseOver = "focusBorder()"
 	  mouseOut = "unFocusBorder()"
 	  />
-</mx:Canvas >
+</mx:Canvas>
 
