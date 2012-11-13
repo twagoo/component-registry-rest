@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MDValidator implements Validator {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(MDValidator.class);
     static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
@@ -42,6 +42,7 @@ public class MDValidator implements Validator {
     static final Collection<String> ILLEGAL_ATTRIBUTE_NAMES = Collections.unmodifiableCollection(Arrays.asList("ref", "ComponentId"));
     private List<String> errorMessages = new ArrayList<String>();
     private CMDComponentSpec spec = null;
+    private byte[] originalSpecBytes;
     private final InputStream input;
     private final AbstractDescription description;
     private final ComponentRegistry registry;
@@ -64,20 +65,20 @@ public class MDValidator implements Validator {
 	this.userRegistry = userRegistry;
 	this.publicRegistry = publicRegistry;
     }
-    
+
     @Override
     public List<String> getErrorMessages() {
 	return errorMessages;
     }
-    
+
     @Override
     public boolean validate() {
 	try {
 	    clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
 	    validator.setResourceResolver(new ComponentRegistryResourceResolver());
 	    // We may need to reuse the input stream, so save it to a byte array first
-	    byte[] inputBytes = getBytesFromInputStream();
-	    StreamSource source = new StreamSource(new ByteArrayInputStream(inputBytes));
+	    originalSpecBytes = getBytesFromInputStream();
+	    StreamSource source = new StreamSource(new ByteArrayInputStream(originalSpecBytes));
 	    if (!validator.validateProfile(source)) {
 		final List<Message> validatorMessages = validator.getMessages();
 		if (validatorMessages.size() > 0) {
@@ -88,7 +89,7 @@ public class MDValidator implements Validator {
 		    errorMessages.add(PARSE_ERROR + UNKNOWN_VALIDATION_ERROR);
 		}
 	    } else {
-		spec = MDMarshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
+		spec = unmarshalSpec(originalSpecBytes);
 		if (spec.isIsProfile() != description.isProfile()) {
 		    errorMessages.add(MISMATCH_ERROR);
 		}
@@ -112,30 +113,30 @@ public class MDValidator implements Validator {
 	}
 	return errorMessages.isEmpty();
     }
-    
+
     private byte[] getBytesFromInputStream() throws IOException {
 	int len;
 	byte[] b = new byte[4096];
 	final ByteArrayOutputStream bOS = new ByteArrayOutputStream();
-	
+
 	while ((len = input.read(b)) > 0) {
 	    bOS.write(b, 0, len);
 	}
-	
+
 	return bOS.toByteArray();
     }
-    
+
     private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
 	for (CMDComponentType cmdComponentType : cmdComponents) {
 	    validateDescribedComponents(cmdComponentType);
 	    validateComponents(cmdComponentType.getCMDComponent());//Recursion
 	}
     }
-    
+
     private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	checkPublicComponents(cmdComponentType);
     }
-    
+
     private void checkPublicComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
 	if (isDefinedInSeparateFile(cmdComponentType)) {
 	    String id = cmdComponentType.getComponentId();
@@ -160,16 +161,41 @@ public class MDValidator implements Validator {
 			errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
 		    }
 		}
-		
+
 	    }
 	}
     }
-    
+
     private boolean isDefinedInSeparateFile(CMDComponentType cmdComponentType) {
 	return cmdComponentType.getName() == null;
     }
-    
+
+    /**
+     * Do not call before having called {@link #validate() }!
+     *
+     * @return the spec unmarshalled during {@link #validate() }. If this has not been called, returns null.
+     */
     public CMDComponentSpec getCMDComponentSpec() {
 	return spec;
+    }
+
+    /**
+     * Creates a fresh (re-unmarshalled) copy of the specification this instance has validated. If you are not going to alter this copy,
+     * you can re-use and share the copy used during validation by getting it from {@link #getCMDComponentSpec() }.
+     * <em>Do not call before having called {@link #validate() }!</em>
+     *
+     * @return a freshly unmarshalled copy of the spec based on the bytes collected from the input stream passed to {@link #validate() }.
+     * If this has not been called, returns null.
+     * @throws JAXBException exception occurred while marshalling from the input bytes
+     * @see #validate()
+     * @see #getCMDComponentSpec()
+     */
+    public CMDComponentSpec getCopyOfCMDComponentSpec() throws JAXBException {
+	// Re-unmarshall original bytes
+	return unmarshalSpec(originalSpecBytes);
+    }
+
+    private static CMDComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
+	return MDMarshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
     }
 }
