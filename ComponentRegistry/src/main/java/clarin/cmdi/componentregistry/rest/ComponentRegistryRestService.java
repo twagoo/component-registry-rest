@@ -44,6 +44,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
+import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,7 @@ public class ComponentRegistryRestService {
      * Converts userspace boolean to component status. Temporary solution!!!
      *
      * TODO: Replace all calls to getRegistry that use this by calls using ComponentStatus
+     *
      * @param userSpace
      * @return
      * @deprecated All calls should go directly to {@link #getRegistry(clarin.cmdi.componentregistry.ComponentStatus)}
@@ -180,7 +182,6 @@ public class ComponentRegistryRestService {
 	    String fileName = desc.getName() + "." + rawType;
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -193,7 +194,6 @@ public class ComponentRegistryRestService {
 		};
 	    } else if ("xsd".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -615,7 +615,6 @@ public class ComponentRegistryRestService {
 
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -628,7 +627,6 @@ public class ComponentRegistryRestService {
 		};
 	    } else if ("xsd".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
-
 		    @Override
 		    public void write(OutputStream output) throws IOException, WebApplicationException {
 			try {
@@ -794,8 +792,7 @@ public class ComponentRegistryRestService {
 	    if (response.getErrors().isEmpty()) {
 		CMDComponentSpec spec = validator.getCMDComponentSpec();
 		try {
-		    // Expand to check for recursion
-		    registry.getExpander().expandNestedComponent(spec.getCMDComponent(), desc.getId());
+		    checkForRecursion(validator, registry, desc);
 
 		    // Add profile
 		    int returnCode = action.execute(desc, spec, response, registry);
@@ -823,6 +820,24 @@ public class ComponentRegistryRestService {
 	    } catch (IOException e) {
 		LOG.error("Error when closing inputstream: ", e);
 	    }
+	}
+    }
+
+    /**
+     *
+     * @param validator
+     * @param registry
+     * @param desc
+     * @throws ComponentRegistryException if recursion is detected or something goes wrong while trying to detect recursion
+     */
+    private void checkForRecursion(MDValidator validator, ComponentRegistry registry, AbstractDescription desc) throws ComponentRegistryException {
+	try {
+	    // Expand to check for recursion. Operate on copy so that original does not get expanded.
+	    final CMDComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
+	    // In case of recursion, the following will throw a ComponentRegistryException
+	    registry.getExpander().expandNestedComponent(specCopy.getCMDComponent(), desc.getId());
+	} catch (JAXBException ex) {
+	    throw new ComponentRegistryException("Unmarshalling failed while preparing recursion detection", ex);
 	}
     }
 

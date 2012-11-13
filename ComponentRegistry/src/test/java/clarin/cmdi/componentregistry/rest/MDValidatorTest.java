@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -36,23 +37,7 @@ public class MDValidatorTest {
 
     @Test
     public void testValidateSucces() {
-	String profileContent = "";
-	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-	profileContent += "    <Header />\n";
-	profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-	profileContent += "        <CMD_Element name=\"Age\">\n";
-	profileContent += "            <ValueScheme>\n";
-	profileContent += "                <pattern>[23][0-9]</pattern>\n";
-	profileContent += "            </ValueScheme>\n";
-	profileContent += "        </CMD_Element>\n";
-	profileContent += "    </CMD_Component>\n";
-	profileContent += "</CMD_ComponentSpec>\n";
-	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
-
-	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = getValidProfileValidator();
 	assertTrue(validator.validate());
     }
 
@@ -221,6 +206,62 @@ public class MDValidatorTest {
 	validator = new MDValidator(new ByteArrayInputStream(content.getBytes()), desc, publicRegistry, null, publicRegistry);
 	assertTrue(validator.validate());
 	assertEquals(0, validator.getErrorMessages().size());
+    }
 
+    /**
+     * Test of getCMDComponentSpec method, of class MDValidator.
+     */
+    @Test
+    public void testGetCMDComponentSpec() throws Exception {
+	String profileContent = getValidProfileString();
+	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
+
+	ProfileDescription desc = ProfileDescription.createNewDescription();
+	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+
+	// Spec is created during validation, before it should be null
+	assertNull(validator.getCMDComponentSpec());
+	validator.validate();
+
+	// Get spec created during validation
+	final CMDComponentSpec cmdComponentSpec = validator.getCMDComponentSpec();
+	assertNotNull(cmdComponentSpec);
+
+	// Spec content should match XML
+	assertTrue(cmdComponentSpec.isIsProfile());
+	assertEquals("Actor", cmdComponentSpec.getCMDComponent().get(0).getName());
+
+	// Spec copy should be a freshly unmarshalled copy
+	final CMDComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
+	assertNotSame(cmdComponentSpec, specCopy);
+
+	// Content should still match XML
+	assertTrue(specCopy.isIsProfile());
+	assertEquals("Actor", specCopy.getCMDComponent().get(0).getName());
+    }
+
+    private MDValidator getValidProfileValidator() {
+	final String profileContent = getValidProfileString();
+	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
+	ProfileDescription desc = ProfileDescription.createNewDescription();
+	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+	return validator;
+    }
+
+    private String getValidProfileString() {
+	String profileContent = "";
+	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	profileContent += "    <Header />\n";
+	profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+	profileContent += "        <CMD_Element name=\"Age\">\n";
+	profileContent += "            <ValueScheme>\n";
+	profileContent += "                <pattern>[23][0-9]</pattern>\n";
+	profileContent += "            </ValueScheme>\n";
+	profileContent += "        </CMD_Element>\n";
+	profileContent += "    </CMD_Component>\n";
+	profileContent += "</CMD_ComponentSpec>\n";
+	return profileContent;
     }
 }

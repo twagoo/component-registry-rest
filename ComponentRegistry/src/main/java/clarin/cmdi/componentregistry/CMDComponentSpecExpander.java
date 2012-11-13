@@ -27,10 +27,6 @@ public abstract class CMDComponentSpecExpander {
 	expandNestedComponent(cmdComponents, new HashSet<String>(Collections.singleton(id)));
     }
 
-    public void expandNestedComponent(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
-	expandNestedComponent(cmdComponents, new HashSet<String>());
-    }
-
     private void expandNestedComponent(List<CMDComponentType> cmdComponents, Collection<String> path) throws ComponentRegistryException {
 	List<CMDComponentType> expanded = new ArrayList<CMDComponentType>();
 	for (CMDComponentType cmdComponentType : cmdComponents) {
