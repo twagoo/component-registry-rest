@@ -9,7 +9,7 @@ package clarin.cmdi.componentregistry.common.components {
 
 	import mx.controls.Label;
 
-	public class UserSettingsLabelButton extends Label {
+	public class UserSettingsLabelButton extends LabelButton {
 
 		[Bindable]
 		public var viewType:String;
@@ -19,12 +19,8 @@ package clarin.cmdi.componentregistry.common.components {
 		public var itemId:String;
 
 		public function UserSettingsLabelButton() {
-			super();
-			text = "settings";
+			super(handleClick, "settings");
 			toolTip = "Click for user settings";
-			setStyle("color", "green");
-			setStyle("textDecoration", "underline")
-			addEventListener(MouseEvent.CLICK, handleClick);
 		}
 
 		private function handleClick(event:MouseEvent):void {

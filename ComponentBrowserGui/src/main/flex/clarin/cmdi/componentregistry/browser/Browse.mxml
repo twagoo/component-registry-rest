@@ -24,8 +24,6 @@
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileListService;
 			
-			import mx.controls.Text;
-			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
 			private var startupItemLoaded:Boolean = false;
@@ -52,7 +50,8 @@
 			private var startupItemId:String = null;
 			private var startupPanel:String = null;
 			 
-			
+			private const padding:int = 5;
+			private const bigPadding:int =10;
 			
 			public function init():void {
 				profilesMenu = new BrowseContextMenu();
@@ -179,10 +178,10 @@
 					userSpaceCB.selectedIndex = 0;
 				}
 			}
-			
-			
 		]]>
 	</mx:Script>
+	
+	
 	
 	<browser:BrowserColumns id="browserColumns"/>
 	
@@ -199,15 +198,14 @@
 		
 		
 		
-		<mx:Box paddingTop="5" paddingLeft="5"
-				top="-5"
+		<mx:Box paddingTop="{padding}" paddingLeft="{padding}"
 				horizontalCenter="-110"
 				>
 			<components:SpaceSwitch id="userSpaceCB" width="110" />
 		</mx:Box>
 		
 		<mx:VBox left="0"
-				 top="5"
+				 paddingTop="{bigPadding}"
 				 borderStyle="none"
 				 height="100%"
 				 width="100%">

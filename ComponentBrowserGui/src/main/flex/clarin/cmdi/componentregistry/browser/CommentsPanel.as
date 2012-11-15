@@ -52,9 +52,10 @@
 		
 		public function CommentsPanel()
 		{  
-			this.setStyle("paddingLeft", 5);
-			this.setStyle("paddingTop", 5);
-			this.setStyle("paddingRight", 5);
+			this.setStyle("paddingLeft", vPadding);
+			this.setStyle("paddingTop", hPadding);
+			this.setStyle("paddingRight", vPadding);
+			this.setStyle("paddingBottom", hPadding);
 			
 			// this is for responding to the deletion of comments. At this point there is no way to distinghuish between item and component deletion
 			// and that probably is fine since they mostly require the same response. It does mean that this component will also reload when a

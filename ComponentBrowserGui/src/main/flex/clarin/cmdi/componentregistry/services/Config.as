@@ -42,7 +42,6 @@ package clarin.cmdi.componentregistry.services {
 		private static const COMMENTS_URL_PATH:String = "/comments/";
 		private static const ISOCAT_SERVLET:String = "/isocat";
 
-
 		private static var _instance:Config = new Config();
 
 		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
@@ -211,5 +210,7 @@ package clarin.cmdi.componentregistry.services {
 			var uri:URI = new URI(item.dataUrl+"/xsd");
 			return uri.toString();
 		}
+		
+		
 	}
 }

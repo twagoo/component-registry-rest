@@ -9,7 +9,7 @@ package clarin.cmdi.componentregistry.common.components {
 
 	import mx.controls.Label;
 
-	public class LoginLabelButton extends Label {
+	public class LoginLabelButton extends LabelButton {
 
 		[Bindable]
 		public var viewType:String;
@@ -19,12 +19,8 @@ package clarin.cmdi.componentregistry.common.components {
 		public var itemId:String;
 
 		public function LoginLabelButton() {
-			super();
-			text = "login";
+			super(handleLogin, "login");
 			toolTip = "Click to login";
-			setStyle("color", "green");
-			setStyle("textDecoration", "underline")
-			addEventListener(MouseEvent.CLICK, handleLogin);
 		}
 
 		private function handleLogin(event:MouseEvent):void {

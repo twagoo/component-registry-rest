@@ -121,6 +121,7 @@
 				var request:URLRequest = new URLRequest(Config.getRssUriDescriptions(typeOfDescription));
 				navigateToURL(request, "_blank");
 			}
+			
 		]]>
 	</mx:Script>
 	
