@@ -1080,4 +1080,5 @@ public class ComponentRegistryRestService {
         final Rss rss = instance.getRss();
 	return rss;
     }
+    
 }
