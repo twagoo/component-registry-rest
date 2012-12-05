@@ -156,6 +156,7 @@ package clarin.cmdi.componentregistry.editor {
 			
 			var popup:ValueSchemePopUp = new ValueSchemePopUp();
 			popup.valueSchemeInput = this;
+			
 			if (this.elementTypesService.allowedTypes == null) {
 				this.elementTypesService.load();
 			}

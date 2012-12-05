@@ -24,6 +24,10 @@
 			
 			private var isocatPopup:IsocatSearchPopUp;
 			
+			/*public function ValueSchemePopUp(valueSchemeInputParent:ValueSchemeInput){
+				valueSchemeInput = valueSchemeInputParent;
+			}*/
+			
 			private function setType():void {
 				valueSchemeInput.valueSchemeSimple = (simpleValueSchemeBox.selectedItem == null) ? 
 					DEFAULT_VALUE : simpleValueSchemeBox.selectedItem.data;
