@@ -6,12 +6,14 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.editor.model.AttributeContainer;
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
+	import clarin.cmdi.componentregistry.services.ElementTypesListService;
+	
+	import mx.binding.utils.ChangeWatcher;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
 	import mx.binding.utils.BindingUtils;
-	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
 	import mx.containers.Form;
 	import mx.containers.FormItem;
@@ -42,6 +44,8 @@ package clarin.cmdi.componentregistry.editor {
 			noAttributesLabel.text = "No Attributes";
 			BindingUtils.bindProperty(noAttributesLabel, "visible", this, "hasNoAttributes");
 			noAttributesLabel.styleName = StyleConstants.XMLBROWSER_FIELD_VALUE;
+			
+			
 		}
 
 
@@ -76,15 +80,16 @@ package clarin.cmdi.componentregistry.editor {
 		private function createAttributeBox(attribute:CMDAttribute):Form {
 			var attributeBox:Form = new Form();
 			attributeBox.styleName = StyleConstants.XMLBROWSER;
-			addEditBar(attribute, attributeBox);
-			attributeBox.addChild(createAndAddValueScheme(attribute));
-			
+		    addEditBar(attribute, attributeBox);
+			attributeBox.addChild(ValueSchemeInput.makeValueSchemeInputFromValueScheme(attribute));
 			attributeBox.addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, attribute.conceptLink, function(val:String):void {
 				attribute.conceptLink = val;
 			}));
 			
 			return attributeBox;
 		}
+		
+		
 
 		private function addAttribute(attributeBox:Form):void {
 			if (!addAttributeLabelButton) {
@@ -96,10 +101,14 @@ package clarin.cmdi.componentregistry.editor {
 		}
 
 		/**
-		 * Public utility method to create ValueScheme Component. By lack of better placed put in this class
+		 * Turned into the constructor of ValueSchemeInput
 		 **/
+		
+		/*
 		public static function createAndAddValueScheme(valueScheme:ValueSchemeInterface):UIComponent {
+			
 			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput(LabelConstants.VALUESCHEME);
+			
 			if (valueScheme.valueSchemeEnumeration == null) {
 				if (valueScheme.valueSchemePattern) {
 					valueSchemeInput.valueSchemePattern = valueScheme.valueSchemePattern;
@@ -109,16 +118,19 @@ package clarin.cmdi.componentregistry.editor {
 			} else {
 				valueSchemeInput.valueSchemeEnumeration = valueScheme.valueSchemeEnumeration;
 			}
+			
 			ChangeWatcher.watch(valueSchemeInput, "valueSchemeSimple", function(e:PropertyChangeEvent):void {
 					valueScheme.valueSchemeSimple = e.newValue as String;
 					valueScheme.valueSchemePattern = "";
 					valueScheme.valueSchemeEnumeration = null;
 				});
+			
 			ChangeWatcher.watch(valueSchemeInput, "valueSchemePattern", function(e:PropertyChangeEvent):void {
 					valueScheme.valueSchemePattern = e.newValue as String;
 					valueScheme.valueSchemeEnumeration = null;
 					valueScheme.valueSchemeSimple = "";
 				});
+			
 			ChangeWatcher.watch(valueSchemeInput, "valueSchemeEnumeration", function(e:PropertyChangeEvent):void {
 					valueScheme.valueSchemeEnumeration = e.newValue as ArrayCollection;
 					valueScheme.valueSchemeSimple = "";
@@ -126,7 +138,9 @@ package clarin.cmdi.componentregistry.editor {
 				});
 			return valueSchemeInput;
 		}
+		*/
 
+		
 		private function addEditBar(attribute:CMDAttribute, attributeBox:Form):void {
 			var name:NameInputLine = new NameInputLine(attribute.name, function(val:String):void {
 					attribute.name = val;

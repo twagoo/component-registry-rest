@@ -88,10 +88,13 @@ package clarin.cmdi.componentregistry.editor {
 			}, _element, "multilingual");
 			addToHideableForm(cardinalityMaxInput);
 			
-			addToHideableForm(AttributeListEdit.createAndAddValueScheme(_element));
+			//  Editing "Type" in the form
+			addToHideableForm(ValueSchemeInput.makeValueSchemeInputFromValueScheme(_element));
+			
 			var multiLingualCheck:CheckboxInput = new CheckboxInput(LabelConstants.MULTILINGUAL, _element.multilingual == "true", function(val:Boolean):void {
 					_element.multilingual = String(val);
 				});
+			
 			multiLingualCheck.toolTip = "Can the value of this element be in multiple languages? Setting this will cause \"Max occurences\" to be always unbounded.";
 			BindingUtils.bindSetter(function(val:String):void {
 					var show:Boolean = "string" == val;
@@ -103,6 +106,7 @@ package clarin.cmdi.componentregistry.editor {
 				}, _element, "valueSchemeSimple");
 			
 			addToHideableForm(multiLingualCheck);
+			
 			handleCMDAttributeList();
 		}
 

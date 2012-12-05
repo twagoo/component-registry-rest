@@ -53,6 +53,7 @@
 			private const padding:int = 5;
 			private const bigPadding:int =10;
 			
+			
 			public function init():void {
 				profilesMenu = new BrowseContextMenu();
 				profilesMenu.viewStack = this.parent as RegistryViewStack;

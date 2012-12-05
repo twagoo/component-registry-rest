@@ -5,6 +5,8 @@ package clarin.cmdi.componentregistry.services {
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
+	import mx.controls.List;
 
 	[Event(name="userSpaceToggle", type="flash.events.Event")]
 	public final class Config extends EventDispatcher {
@@ -211,6 +213,10 @@ package clarin.cmdi.componentregistry.services {
 			return uri.toString();
 		}
 		
+		public static  function getUriAllowedElementTypes():String{
+			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
+			return (baseUri+"/rest/registry/AllowedTypes");
+		}
 		
 	}
 }
