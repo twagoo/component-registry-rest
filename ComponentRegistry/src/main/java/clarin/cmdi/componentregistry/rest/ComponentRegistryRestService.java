@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -1079,6 +1080,13 @@ public class ComponentRegistryRestService {
 	final RssCreatorComments instance = new RssCreatorComments(userspace, getApplicationBaseURI(), Integer.parseInt(limit), componentId, componentName, "component", comments, Comment.COMPARE_ON_DATE); 
         final Rss rss = instance.getRss();
 	return rss;
+    }
+    
+    @GET
+    @Path("/AllowedTypes")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public  AllowedAttributetypesXML  getAllowedAttributeTypes() throws ComponentRegistryException, IOException, JAXBException, ParseException {
+	return (new AllowedAttributetypesXML());
     }
     
 }
