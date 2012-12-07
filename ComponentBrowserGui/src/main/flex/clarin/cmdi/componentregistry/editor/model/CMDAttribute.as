@@ -3,7 +3,8 @@ package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
-	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
+	//import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
+	import clarin.cmdi.componentregistry.editor.ValueSchemePopUpNew;
 	
 	import mx.collections.ArrayCollection;
 
@@ -25,7 +26,7 @@ package clarin.cmdi.componentregistry.editor.model {
 
 		public static function createEmptyAttribute():CMDAttribute {
 			var result:CMDAttribute = new CMDAttribute();
-			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+			result.valueSchemeSimple = ValueSchemePopUpNew.DEFAULT_VALUE;
 			return result;
 		}
 		

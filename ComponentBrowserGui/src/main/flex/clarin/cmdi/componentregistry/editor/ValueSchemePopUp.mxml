@@ -16,7 +16,7 @@
 			import mx.managers.PopUpManager;
 			
 
-			//Stores the result
+			
 			[Bindable]
 			public var valueSchemeInput:ValueSchemeInput;
 			

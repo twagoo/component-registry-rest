@@ -3,7 +3,8 @@ package clarin.cmdi.componentregistry.editor.model {
 	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.common.XmlAble;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
-	import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
+	//import clarin.cmdi.componentregistry.editor.ValueSchemePopUp;
+	import clarin.cmdi.componentregistry.editor.ValueSchemePopUpNew;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
@@ -72,7 +73,7 @@ package clarin.cmdi.componentregistry.editor.model {
 		
 		public static function createEmptyElement():CMDComponentElement {
 			var result:CMDComponentElement = new CMDComponentElement();
-			result.valueSchemeSimple = ValueSchemePopUp.DEFAULT_VALUE;
+			result.valueSchemeSimple = ValueSchemePopUpNew.DEFAULT_VALUE;
 			return result;
 		}
 		

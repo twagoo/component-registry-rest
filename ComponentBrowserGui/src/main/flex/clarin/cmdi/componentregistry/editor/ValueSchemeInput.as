@@ -1,25 +1,24 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.browser.XMLBrowserValueSchemeLine;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
+	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
 	import clarin.cmdi.componentregistry.services.ElementTypesListService;
 	
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
 	import mx.controls.TextInput;
+	import mx.core.UIComponent;
 	import mx.events.ValidationResultEvent;
 	import mx.managers.PopUpManager;
 	import mx.validators.Validator;
-	
-	import mx.binding.utils.ChangeWatcher;
-	import mx.core.UIComponent;
-	
-	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
-	import clarin.cmdi.componentregistry.common.LabelConstants;
 	
 	public class ValueSchemeInput extends FormItem implements CMDValidator {
 
@@ -32,7 +31,6 @@ package clarin.cmdi.componentregistry.editor {
 		private var _validator:Validator = InputValidators.getIsRequiredValidator();
 		
 		
-		[Bindable]
 		public  var elementTypesService:ElementTypesListService;
 		
 		public function ValueSchemeInput(name:String, required:Boolean = true) {
@@ -46,6 +44,7 @@ package clarin.cmdi.componentregistry.editor {
 			textField.editable = false;
 			enumeration = createEnumeration();
 			elementTypesService = new ElementTypesListService();
+			elementTypesService.addEventListener(ElementTypesListService.ALLOWED_TYPES_LOADED, makeTypeEditPopUpHandler);	
 		}
 		
 		public static function makeValueSchemeInputFromValueScheme(valueScheme:ValueSchemeInterface):UIComponent{
@@ -153,15 +152,21 @@ package clarin.cmdi.componentregistry.editor {
 		
 
 		private function handleButtonClick(event:MouseEvent):void {
-			
-			var popup:ValueSchemePopUp = new ValueSchemePopUp();
-			popup.valueSchemeInput = this;
-			
-			if (this.elementTypesService.allowedTypes == null) {
-				this.elementTypesService.load();
+			if (elementTypesService.allowedTypes == null) {
+				elementTypesService.load();
 			}
-			
+			else { 
+				makeTypeEditPopUp();
+			}
+		}
+		
+		private function makeTypeEditPopUp():void {
+			var popup:ValueSchemePopUpNew = new ValueSchemePopUpNew(this);
 			PopUpManager.addPopUp(popup, this.parent, false);
+		}
+		
+		private function makeTypeEditPopUpHandler(allowedTypesLoaded:Event):void {
+			makeTypeEditPopUp();
 		}
 
 		public function validate():Boolean {
