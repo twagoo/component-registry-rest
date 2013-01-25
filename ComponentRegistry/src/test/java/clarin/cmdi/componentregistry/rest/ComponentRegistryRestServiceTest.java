@@ -120,7 +120,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 	assertEquals("Get public components", 2, response.size());
 	ClientResponse cResponse = getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true").accept(
 		MediaType.APPLICATION_JSON).get(ClientResponse.class);
-	assertEquals("Trying to get userspace without credentials", 500, cResponse.getStatus());
+	assertEquals("Trying to get userspace without credentials", 401, cResponse.getStatus());
     }
 
     @Test
