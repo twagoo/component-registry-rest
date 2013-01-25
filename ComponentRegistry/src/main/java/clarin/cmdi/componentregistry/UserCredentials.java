@@ -67,4 +67,8 @@ public class UserCredentials {
         return result;
     }
 
+    @Override
+    public String toString() {
+	return getPrincipal().toString();
+    }
 }
