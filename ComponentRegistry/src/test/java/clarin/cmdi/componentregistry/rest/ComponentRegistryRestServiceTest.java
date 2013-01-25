@@ -112,15 +112,15 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testGetUserComponents() throws Exception {
-        fillUp();
-        List<ComponentDescription> response = getUserComponents();
-        assertEquals(0, response.size());
-        response = getAuthenticatedResource(getResource().path("/registry/components")).accept(MediaType.APPLICATION_JSON).get(
-                COMPONENT_LIST_GENERICTYPE);
-        assertEquals("Get public components", 2, response.size());
-        ClientResponse cResponse = getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true").accept(
-                MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals("Trying to get userspace without credentials", 500, cResponse.getStatus());
+	fillUp();
+	List<ComponentDescription> response = getUserComponents();
+	assertEquals(0, response.size());
+	response = getAuthenticatedResource(getResource().path("/registry/components")).accept(MediaType.APPLICATION_JSON).get(
+		COMPONENT_LIST_GENERICTYPE);
+	assertEquals("Get public components", 2, response.size());
+	ClientResponse cResponse = getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true").accept(
+		MediaType.APPLICATION_JSON).get(ClientResponse.class);
+	assertEquals("Trying to get userspace without credentials", 401, cResponse.getStatus());
     }
 
     @Test

@@ -79,7 +79,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 		    throw ex;
 		}
 	    } else {
-		throw new IllegalArgumentException("No user credentials available cannot load userspace.");
+		throw new UserUnauthorizedException("No user credentials available cannot load userspace.");
 	    }
 	} else {
 	    // TODO: Support group owners
