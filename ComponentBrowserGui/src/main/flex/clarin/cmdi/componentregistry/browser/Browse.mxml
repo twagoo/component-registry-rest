@@ -13,9 +13,7 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
-			import clarin.cmdi.componentregistry.common.Login;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.services.BrowserService;
@@ -26,8 +24,6 @@
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileListService;
 			
-			import mx.collections.ArrayCollection;
-			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
 			private var startupItemLoaded:Boolean = false;
@@ -37,9 +33,9 @@
 			[Bindable]
 			private var profilesSrv:ProfileListService = ProfileListService.getInstance(Config.instance.userSpace);
 			[Bindable]
-			private var profileSrv:ProfileInfoService = new ProfileInfoService();
+			private var selectedProfileSrv:ProfileInfoService = new ProfileInfoService();
 			[Bindable]
-			private var componentSrv:ComponentInfoService = new ComponentInfoService();
+			private var selectedComponentSrv:ComponentInfoService = new ComponentInfoService();
 			
 			private var deleteSrv:DeleteService = DeleteService.instance;
 			
@@ -53,6 +49,9 @@
 			private var selectedComponentItem:ItemDescription;
 			private var startupItemId:String = null;
 			private var startupPanel:String = null;
+
+			private const padding:int = 5;
+			private const bigPadding:int =10;
 			
 			public function init():void {
 				profilesMenu = new BrowseContextMenu();
@@ -62,10 +61,12 @@
 				componentsMenu.viewStack = this.parent as RegistryViewStack;
 				componentsMenu.deleteService = deleteSrv;
 				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
-				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 				
+				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setUserSpace);
+			
 				setUserSpace();
+				
 			}
 			
 			private function toggleUserSpace(event:Event):void {
@@ -93,6 +94,9 @@
 			public function refresh():void {
 				componentsSrv.load();
 				profilesSrv.load();
+				
+				selectedComponentSrv = new ComponentInfoService();
+				selectedProfileSrv = new ProfileInfoService();
 			}
 			
 			private function profilesLoaded(event:Event):void {
@@ -123,22 +127,22 @@
 			}
 			
 			private function loadProfileInfoPage(event:BrowserSelectionEvent):void {
-				profileSrv.load(event.itemDescription);
+				selectedProfileSrv.load(event.itemDescription);
 			}
 			
 			private function loadComponentInfoPage(event:BrowserSelectionEvent):void {
-				componentSrv.load(event.itemDescription);
+				selectedComponentSrv.load(event.itemDescription);
 			}
 			
 			public function setSelectedDescription(desc:ItemDescription):void {
 				if (desc.isProfile) {
 					tabnav.selectedIndex = 0;
 					this.selectedProfileItem = desc;
-					profileSrv.load(desc);
+					selectedProfileSrv.load(desc);
 				} else {
 					tabnav.selectedIndex = 1;
 					this.selectedComponentItem = desc;
-					componentSrv.load(desc);
+					selectedComponentSrv.load(desc);
 				}
 			}
 			
@@ -178,6 +182,8 @@
 		]]>
 	</mx:Script>
 	
+	
+	
 	<browser:BrowserColumns id="browserColumns"/>
 	
 	<mx:Panel width="100%" 
@@ -192,15 +198,15 @@
 			  >
 		
 		
-		<mx:Box paddingTop="5" paddingLeft="5"
-				top="-5"
+		
+		<mx:Box paddingTop="{padding}" paddingLeft="{padding}"
 				horizontalCenter="-110"
 				>
 			<components:SpaceSwitch id="userSpaceCB" width="110" />
 		</mx:Box>
 		
 		<mx:VBox left="0"
-				 top="5"
+				 paddingTop="{bigPadding}"
 				 borderStyle="none"
 				 height="100%"
 				 width="100%">
@@ -215,6 +221,7 @@
 							 >
 				<mx:VDividedBox label="Profiles"
 								width="100%">
+					
 					<browser:BrowserOverviewList id="profilesOverview"
 												 viewStack="{this.parent as RegistryViewStack}"
 												 browserColumns="{browserColumns.getProfileColumns()}"
@@ -224,10 +231,11 @@
 												 width="100%"
 												 height="70%"
 												 browseMenu="{profilesMenu}"
+												 typeOfDescription = "profiles"
 												 createNew="createNewProfile(event)"
 												 />
 					<browser:ProfileInfoPage id="profileInfoPage"
-											 profile="{profileSrv.profile}"
+											 profile="{selectedProfileSrv.profile}"
 											 width="100%"
 											 height="50%"
 											 contextMenu="{profilesMenu.cm}"/>
@@ -245,10 +253,11 @@
 												 width="100%"
 												 height="70%"
 												 browseMenu="{componentsMenu}"
+												 typeOfDescription= "components"
 												 createNew="createNewComponent(event)"
 												 />
 					<browser:ComponentInfoPage id="componentInfoPage"
-											   component="{componentSrv.component}"
+											   component="{selectedComponentSrv.component}"
 											   width="100%"
 											   height="50%"
 											   contextMenu="{componentsMenu.cm}"/>

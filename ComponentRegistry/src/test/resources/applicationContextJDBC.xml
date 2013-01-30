@@ -7,8 +7,8 @@
     <context:annotation-config />
 
     <import resource="spring-config/component-registry.xml"/>
-<!--    <import resource="spring-config/datasource-jdbc.xml"/>-->
-    <import resource="spring-config/datasource-hsqldb.xml"/>
+    <import resource="spring-config/datasource-jdbc.xml"/>
+    <!-- <import resource="spring-config/datasource-hsqldb.xml"/> -->
     <import resource="spring-config/database-impl.xml"/>
     
 

@@ -5,6 +5,8 @@ package clarin.cmdi.componentregistry.services {
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
+	import mx.controls.List;
 
 	[Event(name="userSpaceToggle", type="flash.events.Event")]
 	public final class Config extends EventDispatcher {
@@ -42,7 +44,6 @@ package clarin.cmdi.componentregistry.services {
 		private static const COMMENTS_URL_PATH:String = "/comments/";
 		private static const ISOCAT_SERVLET:String = "/isocat";
 
-
 		private static var _instance:Config = new Config();
 
 		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
@@ -60,6 +61,10 @@ package clarin.cmdi.componentregistry.services {
 			if (_instance != null) {
 				throw new Error("Config can only be accessed through Config.instance");
 			}
+		}
+		
+		public static function get instance():Config {
+			return _instance;
 		}
 
 		private function init(applicationParameters:Object):void {
@@ -186,14 +191,32 @@ package clarin.cmdi.componentregistry.services {
 			return uri.toString();
 		}
 		
+		public static function getRssUriDescriptions(typeOfDescription:String):String {
+			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
+			var result:String=baseUri+"/rest/registry/"+typeOfDescription+"/rss";
+			if (Config.instance.userSpace) result=result+"?userspace=true";
+			return result;
+		}
+		
+		public static function getRssUriComments(item:ItemDescription):String {
+			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
+			var typeOfDescription:String; 
+			if (item.isProfile) {typeOfDescription="profiles/";}
+			else typeOfDescription="components/";
+			var result:String=baseUri+"/rest/registry/"+typeOfDescription+item.id+"/comments/rss";
+			if (item.isInUserSpace) result=result+"?userspace=true";
+			return result;
+		}
+		
 		public static function getXsdLink(item:ItemDescription):String {
 			var uri:URI = new URI(item.dataUrl+"/xsd");
 			return uri.toString();
 		}
-
-		public static function get instance():Config {
-			return _instance;
+		
+		public static  function getUriAllowedElementTypes():String{
+			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
+			return (baseUri+"/rest/registry/AllowedTypes");
 		}
-
+		
 	}
 }

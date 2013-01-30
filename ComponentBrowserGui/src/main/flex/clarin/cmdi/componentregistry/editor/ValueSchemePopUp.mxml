@@ -8,38 +8,29 @@
 
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.common.ComponentMD;
 			import clarin.cmdi.componentregistry.services.IsocatService;
 			
 			import mx.collections.ArrayCollection;
-			import mx.collections.XMLListCollection;
 			import mx.controls.TextInput;
 			import mx.core.Container;
 			import mx.managers.PopUpManager;
+			
 
-			//Stores the result
+			
 			[Bindable]
 			public var valueSchemeInput:ValueSchemeInput;
-
+			
 			public static const DEFAULT_VALUE:String = "string";
-			//Taken from http://www.clarin.eu/cmd/general-component-schema.xsd (allowed_attributetypes_type)
-			[Bindable]
-			private var simpleValueSchemeDataProvider:ArrayCollection = new ArrayCollection([{label: "anyURI", data: "anyURI"},
-				{label: "boolean", data: "boolean"},
-				{label: "date", data: "date"},
-				{label: "time", data: "time"},
-				{label: "decimal", data: "decimal"},
-				{label: "float", data: "float"},
-				{label: "gDay", data: "gDay"},
-				{label: "gMonth", data: "gMonth"},
-				{label: "gYear", data: "gYear"},
-				{label: "string", data: "string"},
-				{label: "dateTime", data: "dateTime"},]);
-
+			
 			private var isocatPopup:IsocatSearchPopUp;
-
+			
+			/*public function ValueSchemePopUp(valueSchemeInputParent:ValueSchemeInput){
+				valueSchemeInput = valueSchemeInputParent;
+			}*/
+			
 			private function setType():void {
-				valueSchemeInput.valueSchemeSimple = simpleValueSchemeBox.selectedItem.data;
+				valueSchemeInput.valueSchemeSimple = (simpleValueSchemeBox.selectedItem == null) ? 
+					DEFAULT_VALUE : simpleValueSchemeBox.selectedItem.data;
 				cleanUp();
 			}
 
@@ -90,6 +81,7 @@
 				}
 				return typeTab;
 			}
+			
 		]]>
 	</mx:Script>
 
@@ -113,7 +105,7 @@
 				<mx:ComboBox id="simpleValueSchemeBox"
 							 selectedItem="{valueSchemeInput.valueSchemeSimple}"
 							 prompt="{valueSchemeInput.valueSchemeSimple}"
-							 dataProvider="{simpleValueSchemeDataProvider}">
+							 dataProvider="{valueSchemeInput.elementTypesService.allowedTypes}">
 				</mx:ComboBox>
 				<mx:Spacer width="100%"/>
 				<mx:Button label="Use Type"

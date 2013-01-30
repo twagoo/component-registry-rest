@@ -237,6 +237,7 @@
 	<isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
 	<ComponentRegistrySwfName>${pom.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
 	<flexDebug>0</flexDebug>
+	<netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
 
     <profiles>

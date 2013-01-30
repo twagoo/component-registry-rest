@@ -46,8 +46,7 @@ context:
         name="componentRegistryAdminUsers" 
 	value="joe.admin@mpi.nl someone.else@clarin.eu"/>
 
+- Documentation url: The application expects a context parameter 'componentRegistryDocumentationUrl' to be set. The application redirects to this page when the user browses to /documentation.jsp or clicks the 'help' link in the GUI.
+
 - Shibboleth authentication. ComponentRegistry uses the SHHAA filter, which
   is configured in WEB-INF/shhaa.xml. Make sure SSO and SLO URL's are correct.
-
-- Misc configuration including admin users (has sensible defaults for
-  catalog server): WEB-INF/spring-config/component-registry.xml

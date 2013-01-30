@@ -289,6 +289,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 		
 		public function addElement(element:CMDComponentElement):void {
+			trace("ComponentEdit's addElement is called");
 			var elem:Container = new ElementEdit(element, this, _component);
 			elem.setStyle("paddingLeft", "50");
 			elem.addEventListener(ElementEdit.REMOVE_ELEMENT_EVENT, removeElement);

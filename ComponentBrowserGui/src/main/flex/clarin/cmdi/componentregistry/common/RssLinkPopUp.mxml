@@ -1,0 +1,21 @@
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:common="clarin.cmdi.componentregistry.common.components.*"
+				showCloseButton="true"
+				close="cleanUp();"
+				backgroundColor="#DDE3EF">
+	
+	<mx:Script>
+		<![CDATA[
+			import clarin.cmdi.componentregistry.services.Config;
+			import mx.managers.PopUpManager;
+			
+			public var uri:String;
+			
+			private function cleanUp():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</mx:Script>
+		<common:LinkRenderer id="link" text="{uri}"/>
+</mx:TitleWindow>

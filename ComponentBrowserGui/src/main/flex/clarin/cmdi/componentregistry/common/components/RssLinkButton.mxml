@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+		   cornerRadius="5"
+		   borderStyle="solid"
+		   width = "18"
+		   >
+	<mx:Script>	
+		<![CDATA[
+			import clarin.cmdi.componentregistry.services.Config;
+			import clarin.cmdi.componentregistry.common.StyleConstants;
+			
+			private const OUT_FOCUS_BORDER_COLOR:String="white";
+			private const IN_FOCUS_BORDER_COLOR:String = "haloBlue";
+			
+			private function focusBorder():void{
+				setStyle("borderColor", IN_FOCUS_BORDER_COLOR);
+				
+			}
+			
+			private function unFocusBorder():void{
+				setStyle("borderColor", OUT_FOCUS_BORDER_COLOR);
+			}
+		]]>
+	</mx:Script>
+	
+  <mx:Image id="pict"
+	  source="{StyleConstants.rssIcon}"
+	  toolTip = "RSS feed"
+	  useHandCursor="true" 
+	  buttonMode="true"
+	  mouseOver = "focusBorder()"
+	  mouseOut = "unFocusBorder()"
+	  />
+</mx:Canvas>
+

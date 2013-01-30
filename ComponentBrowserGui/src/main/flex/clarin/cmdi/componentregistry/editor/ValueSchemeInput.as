@@ -1,19 +1,25 @@
 package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.browser.XMLBrowserValueSchemeLine;
+	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
-
+	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
+	import clarin.cmdi.componentregistry.services.ElementTypesListService;
+	
+	import flash.events.Event;
 	import flash.events.MouseEvent;
-
+	
+	import mx.binding.utils.ChangeWatcher;
 	import mx.collections.ArrayCollection;
 	import mx.containers.FormItem;
 	import mx.containers.FormItemDirection;
 	import mx.controls.Button;
 	import mx.controls.ComboBox;
 	import mx.controls.TextInput;
+	import mx.core.UIComponent;
 	import mx.events.ValidationResultEvent;
 	import mx.managers.PopUpManager;
 	import mx.validators.Validator;
-
+	
 	public class ValueSchemeInput extends FormItem implements CMDValidator {
 
 		private var textField:TextInput = new TextInput();
@@ -23,7 +29,10 @@ package clarin.cmdi.componentregistry.editor {
 		private var _valueSchemePattern:String = "";
 		private var _valueSchemeSimple:String = "";
 		private var _validator:Validator = InputValidators.getIsRequiredValidator();
-
+		
+		
+		public  var elementTypesService:ElementTypesListService;
+		
 		public function ValueSchemeInput(name:String, required:Boolean = true) {
 			super();
 			direction = FormItemDirection.HORIZONTAL;
@@ -34,8 +43,44 @@ package clarin.cmdi.componentregistry.editor {
 			textField.width = 300;
 			textField.editable = false;
 			enumeration = createEnumeration();
+			elementTypesService = new ElementTypesListService();
+			elementTypesService.addEventListener(ElementTypesListService.ALLOWED_TYPES_LOADED, makeTypeEditPopUpHandler);	
 		}
-
+		
+		public static function makeValueSchemeInputFromValueScheme(valueScheme:ValueSchemeInterface):UIComponent{
+			var valueSchemeInput:ValueSchemeInput = new ValueSchemeInput(LabelConstants.VALUESCHEME); 
+			if (valueScheme.valueSchemeEnumeration == null) {
+				if (valueScheme.valueSchemePattern) {
+					valueSchemeInput.valueSchemePattern = valueScheme.valueSchemePattern;
+				} else {
+					valueSchemeInput.valueSchemeSimple = valueScheme.valueSchemeSimple;
+				}
+			} else {
+				valueSchemeInput.valueSchemeEnumeration = valueScheme.valueSchemeEnumeration;
+			}
+			
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemeSimple", function(e:PropertyChangeEvent):void {
+				valueScheme.valueSchemeSimple = e.newValue as String;
+				valueScheme.valueSchemePattern = "";
+				valueScheme.valueSchemeEnumeration = null;
+			});
+			
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemePattern", function(e:PropertyChangeEvent):void {
+				valueScheme.valueSchemePattern = e.newValue as String;
+				valueScheme.valueSchemeEnumeration = null;
+				valueScheme.valueSchemeSimple = "";
+			});
+			
+			ChangeWatcher.watch(valueSchemeInput, "valueSchemeEnumeration", function(e:PropertyChangeEvent):void {
+				valueScheme.valueSchemeEnumeration = e.newValue as ArrayCollection;
+				valueScheme.valueSchemeSimple = "";
+				valueScheme.valueSchemePattern = "";
+			});
+			
+			return valueSchemeInput;
+		}
+		
+		
 		protected override function createChildren():void {
 			super.createChildren();
 			addChild(valueSchemeButton);
@@ -104,11 +149,24 @@ package clarin.cmdi.componentregistry.editor {
 			valueSchemeButton.label = "Edit...";
 			valueSchemeButton.addEventListener(MouseEvent.CLICK, handleButtonClick);
 		}
+		
 
 		private function handleButtonClick(event:MouseEvent):void {
-			var popup:ValueSchemePopUp = new ValueSchemePopUp();
-			popup.valueSchemeInput = this;
+			if (elementTypesService.allowedTypes == null) {
+				elementTypesService.load();
+			}
+			else { 
+				makeTypeEditPopUp();
+			}
+		}
+		
+		private function makeTypeEditPopUp():void {
+			var popup:ValueSchemePopUpNew = new ValueSchemePopUpNew(this);
 			PopUpManager.addPopUp(popup, this.parent, false);
+		}
+		
+		private function makeTypeEditPopUpHandler(allowedTypesLoaded:Event):void {
+			makeTypeEditPopUp();
 		}
 
 		public function validate():Boolean {
@@ -120,5 +178,7 @@ package clarin.cmdi.componentregistry.editor {
 			}
 			return result.type == ValidationResultEvent.VALID;
 		}
+		
+		
 	}
 }

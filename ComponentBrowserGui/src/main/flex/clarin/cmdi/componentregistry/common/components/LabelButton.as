@@ -9,6 +9,7 @@ package clarin.cmdi.componentregistry.common.components {
 			if(text != null){
 				this.text = text;
 			}
+			setStyle("color", "green");
 			addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
 				event.currentTarget.setStyle("textDecoration", "underline");
 			});

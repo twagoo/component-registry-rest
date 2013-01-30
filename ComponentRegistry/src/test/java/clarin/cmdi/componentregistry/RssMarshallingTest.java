@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssChannel;
 import clarin.cmdi.componentregistry.rss.RssItem;
 import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -22,9 +17,10 @@ public class RssMarshallingTest {
     @Test
     public void testMarshall() throws Exception {
 	final Rss rss = new Rss();
+        
+        rss.setVersion(2.0);
 
 	final RssChannel channel = new RssChannel();
-	rss.setVersion(BigDecimal.valueOf(2.0));
 	rss.setChannel(channel);
 
 	final RssItem item1 = new RssItem();
@@ -40,7 +36,8 @@ public class RssMarshallingTest {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
 	MDMarshaller.marshal(rss, os);
 	String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
-		+ "<rss version=\"2.0\">\n"
+		+ "<rss version=\"2.0\""
+                + ">\n"
 		+ "    <channel>\n"
 		+ "        <item>\n"
 		+ "            <title>Item 1</title>\n"

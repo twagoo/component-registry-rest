@@ -21,6 +21,13 @@ Procedure for updating
 
 Version specific issues
 -----------------------
+=== 1.13 ===
+- The following should be added to the context fragment for the Component
+  Registry:
+
+    <Parameter
+	name="componentRegistryDocumentationUrl" 
+	value="http://www.clarin.eu/cmdi" />
 
 === 1.x -> 1.11 ==
 

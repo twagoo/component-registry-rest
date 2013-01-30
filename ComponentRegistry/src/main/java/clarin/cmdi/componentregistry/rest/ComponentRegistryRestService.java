@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -9,12 +10,16 @@ import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
+import clarin.cmdi.componentregistry.rss.Rss;
+import clarin.cmdi.componentregistry.rss.RssCreatorComments;
+import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
 import java.io.IOException;
@@ -22,9 +27,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.security.Principal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -50,13 +57,16 @@ import org.slf4j.LoggerFactory;
 
 @Path("/registry")
 public class ComponentRegistryRestService {
-    
+
+    public static final String APPLICATION_BASE_URL_PARAM = "componentRegistryServiceRootUrl";
     @Context
     private UriInfo uriInfo;
     @Context
     private SecurityContext security;
     @Context
     private HttpServletRequest request;
+    @Context
+    private ServletContext servletContext;
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryRestService.class);
     public static final String DATA_FORM_FIELD = "data";
     public static final String NAME_FORM_FIELD = "name";
@@ -65,17 +75,22 @@ public class ComponentRegistryRestService {
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String USERSPACE_PARAM = "userspace";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
+    public static final String NUMBER_OF_RSSITEMS = "limit";
     @Inject(value = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
 
     /**
      * Converts userspace boolean to component status. Temporary solution!!!
      *
-     * TODO: Replace all calls to getRegistry that use this by calls using ComponentStatus
+     * TODO: Replace all calls to getRegistry that use this by calls using
+     * ComponentStatus
+     *
+     *
      *
      * @param userSpace
      * @return
-     * @deprecated All calls should go directly to {@link #getRegistry(clarin.cmdi.componentregistry.ComponentStatus)}
+     * @deprecated All calls should go directly to
+     * {@link #getRegistry(clarin.cmdi.componentregistry.ComponentStatus)}
      */
     @Deprecated
     private static ComponentStatus getStatus(boolean userSpace) {
@@ -85,13 +100,13 @@ public class ComponentRegistryRestService {
 	    return ComponentStatus.PUBLIC;
 	}
     }
-    
+
     private ComponentRegistry getRegistry(ComponentStatus status) {
 	Principal userPrincipal = security.getUserPrincipal();
 	UserCredentials userCredentials = getUserCredentials(userPrincipal);
 	return getRegistry(status, null, userCredentials);
     }
-    
+
     private ComponentRegistry getRegistry(ComponentStatus status, Owner owner, UserCredentials userCredentials) {
 	try {
 	    return componentRegistryFactory.getComponentRegistry(status, owner, userCredentials);
@@ -114,7 +129,7 @@ public class ComponentRegistryRestService {
 	}
 	return principal;
     }
-    
+
     private UserCredentials getUserCredentials(Principal userPrincipal) {
 	UserCredentials userCredentials = null;
 	if (userPrincipal != null) {
@@ -122,7 +137,7 @@ public class ComponentRegistryRestService {
 	}
 	return userCredentials;
     }
-    
+
     @GET
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -133,26 +148,26 @@ public class ComponentRegistryRestService {
 		+ " millisecs)");
 	return components;
     }
-    
+
     @GET
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<ProfileDescription> getRegisteredProfiles(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace,
 	    @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor) throws ComponentRegistryException {
 	long start = System.currentTimeMillis();
-	
+
 	List<ProfileDescription> profiles;
 	if (metadataEditor) {
 	    profiles = getRegistry(getStatus(userspace)).getProfileDescriptionsForMetadaEditor();
 	} else {
 	    profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
 	}
-	
+
 	LOG.info("Releasing " + profiles.size() + " registered profiles into the world (" + (System.currentTimeMillis() - start)
 		+ " millisecs)");
 	return profiles;
     }
-    
+
     @GET
     @Path("/components/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -166,7 +181,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok(mdComponent).build();
 	}
     }
-    
+
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
@@ -203,7 +218,7 @@ public class ComponentRegistryRestService {
 			    LOG.info("Could not retrieve component", e);
 			    throw new WebApplicationException(e, Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build());
 			}
-			
+
 		    }
 		};
 	    } else {
@@ -216,7 +231,7 @@ public class ComponentRegistryRestService {
 	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 	}
     }
-    
+
     public ComponentRegistry findRegistry(String id, RegistryClosure<? extends AbstractDescription> clos) throws ComponentRegistryException {
 	AbstractDescription desc = null;
 	ComponentRegistry result = getRegistry(getStatus(false));
@@ -233,7 +248,7 @@ public class ComponentRegistryRestService {
 	}
 	return result;
     }
-    
+
     @GET
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -247,7 +262,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok(mdProfile).build();
 	}
     }
-    
+
     @GET
     @Path("/components/usage/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -257,21 +272,21 @@ public class ComponentRegistryRestService {
 	    ComponentRegistry registry = getRegistry(getStatus(userspace));
 	    List<ComponentDescription> components = registry.getUsageInComponents(componentId);
 	    List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
-	    
+
 	    LOG.info("Found " + components.size() + " components and " + profiles.size() + " profiles that use component " + componentId
 		    + " (" + (System.currentTimeMillis() - start) + " millisecs)");
-	    
+
 	    List<AbstractDescription> usages = new ArrayList<AbstractDescription>(components.size() + profiles.size());
 	    usages.addAll(components);
 	    usages.addAll(profiles);
-	    
+
 	    return usages;
 	} catch (ComponentRegistryException e) {
 	    LOG.info("Could not retrieve profile usage", e);
 	    throw e;
 	}
     }
-    
+
     @GET
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -283,7 +298,7 @@ public class ComponentRegistryRestService {
 		+ " millisecs)");
 	return comments;
     }
-    
+
     @GET
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -295,7 +310,7 @@ public class ComponentRegistryRestService {
 		+ " millisecs)");
 	return comments;
     }
-    
+
     @GET
     @Path("/profiles/{profileId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -304,7 +319,7 @@ public class ComponentRegistryRestService {
 	final Principal principal = security.getUserPrincipal();
 	return getRegistry(getStatus(userspace)).getSpecifiedCommentInProfile(profileId, commentId, principal);
     }
-    
+
     @GET
     @Path("/components/{componentId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -316,8 +331,8 @@ public class ComponentRegistryRestService {
 
     /**
      *
-     * Purely helper method for my front-end (FLEX) which only does post/get requests. The query param is checked and the "proper" method is
-     * called.
+     * Purely helper method for my front-end (FLEX) which only does post/get
+     * requests. The query param is checked and the "proper" method is called.
      *
      * @param profileId
      * @param method
@@ -333,7 +348,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
     public Response manipulateCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId, @FormParam("method") String method,
@@ -344,7 +359,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
     public Response manipulateCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("commentId") String commentId, @FormParam("method") String method,
@@ -355,7 +370,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/publish")
     @Consumes("multipart/form-data")
@@ -379,7 +394,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/update")
     @Consumes("multipart/form-data")
@@ -404,13 +419,13 @@ public class ComponentRegistryRestService {
 	} catch (UserUnauthorizedException ex) {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
-	
+
     }
 
     /**
      *
-     * Purely helper method for my front-end (FLEX) which van only do post/get requests. The query param is checked and the "proper" method
-     * is called.
+     * Purely helper method for my front-end (FLEX) which van only do post/get
+     * requests. The query param is checked and the "proper" method is called.
      *
      * @param componentId
      * @param method
@@ -426,7 +441,7 @@ public class ComponentRegistryRestService {
 	    return Response.ok().build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/publish")
     @Consumes("multipart/form-data")
@@ -452,7 +467,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/update")
     @Consumes("multipart/form-data")
@@ -477,7 +492,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     private void updateDescription(AbstractDescription desc, String name, String description, String domainName, String group) {
 	desc.setName(name);
 	desc.setDescription(description);
@@ -485,7 +500,7 @@ public class ComponentRegistryRestService {
 	desc.setGroupName(group);
 	desc.setRegistrationDate(AbstractDescription.createNewDate());
     }
-    
+
     @DELETE
     @Path("/components/{componentId}")
     public Response deleteRegisteredComponent(@PathParam("componentId") String componentId,
@@ -511,7 +526,7 @@ public class ComponentRegistryRestService {
 	LOG.info("Component with id: " + componentId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @DELETE
     @Path("/profiles/{profileId}")
     public Response deleteRegisteredProfile(@PathParam("profileId") String profileId,
@@ -536,7 +551,7 @@ public class ComponentRegistryRestService {
 	LOG.info("Profile with id: " + profileId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @DELETE
     @Path("/profiles/{profileId}/comments/{commentId}")
     public Response deleteCommentFromProfile(@PathParam("profileId") String profileId, @PathParam("commentId") String commentId,
@@ -567,7 +582,7 @@ public class ComponentRegistryRestService {
 	LOG.info("Comment with id: " + commentId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @DELETE
     @Path("/components/{componentId}/comments/{commentId}")
     public Response deleteCommentFromComponent(@PathParam("componentId") String componentId, @PathParam("commentId") String commentId,
@@ -598,7 +613,7 @@ public class ComponentRegistryRestService {
 	LOG.info("Comment with id: " + commentId + " deleted.");
 	return Response.ok().build();
     }
-    
+
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
@@ -613,7 +628,7 @@ public class ComponentRegistryRestService {
 	    ProfileDescription desc = registry.getProfileDescription(profileId);
 	    checkAndThrowDescription(desc, profileId);
 	    String fileName = desc.getName() + "." + rawType;
-	    
+
 	    if ("xml".equalsIgnoreCase(rawType)) {
 		result = new StreamingOutput() {
 		    @Override
@@ -648,21 +663,21 @@ public class ComponentRegistryRestService {
 	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 	}
     }
-    
+
     private void checkAndThrowDescription(AbstractDescription desc, String id) {
 	if (desc == null) {
 	    throw new WebApplicationException(Response.serverError().entity("Incorrect id:" + id + "cannot handle request").build());
 	}
     }
-    
+
     private Response createDownloadResponse(StreamingOutput result, String fileName) {
 	//Making response so it triggers browsers native save as dialog.
 	Response response = Response.ok().type("application/x-download").header("Content-Disposition",
 		"attachment; filename=\"" + fileName + "\"").entity(result).build();
 	return response;
-	
+
     }
-    
+
     @POST
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -686,7 +701,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -710,7 +725,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -737,7 +752,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @POST
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -764,7 +779,7 @@ public class ComponentRegistryRestService {
 	    return Response.status(Status.UNAUTHORIZED).entity(ex.getMessage()).build();
 	}
     }
-    
+
     @GET
     @Path("/pingSession")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -779,7 +794,7 @@ public class ComponentRegistryRestService {
 	}
 	return Response.ok().entity("<session stillActive=\"" + stillActive + "\"/>").build();
     }
-    
+
     private Response register(InputStream input, AbstractDescription desc, UserCredentials userCredentials, boolean userspace,
 	    RegisterAction action) {
 	try {
@@ -791,7 +806,12 @@ public class ComponentRegistryRestService {
 	    response.setIsInUserSpace(userspace);
 	    validate(response, descriptionValidator, validator);
 	    if (response.getErrors().isEmpty()) {
+
 		CMDComponentSpec spec = validator.getCMDComponentSpec();
+
+		// removing filename from spec before it gets extended. recursion over all the components
+		setFileNamesFromListToNull(spec.getCMDComponent());
+
 		try {
 		    checkForRecursion(validator, registry, desc);
 
@@ -841,7 +861,7 @@ public class ComponentRegistryRestService {
 	    throw new ComponentRegistryException("Unmarshalling failed while preparing recursion detection", ex);
 	}
     }
-    
+
     private Response registerComment(InputStream input, ComponentRegistry registry, boolean userspace,
 	    AbstractDescription description, Principal principal, UserCredentials userCredentials) {
 	try {
@@ -861,7 +881,7 @@ public class ComponentRegistryRestService {
 			com.setUserName(principal.getName());
 		    }
 		}
-		
+
 		int returnCode = registry.registerComment(com, principal.getName());
 		if (returnCode == 0) {
 		    response.setRegistered(true);
@@ -887,29 +907,43 @@ public class ComponentRegistryRestService {
 	    }
 	}
     }
-    
+
     private ComponentDescription createNewComponentDescription() {
 	ComponentDescription desc = ComponentDescription.createNewDescription();
 	desc.setHref(createXlink(desc.getId()));
 	return desc;
     }
-    
+
     private ProfileDescription createNewProfileDescription() {
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	desc.setHref(createXlink(desc.getId()));
 	return desc;
     }
-    
+
     private Comment createNewComment() {
 	Comment com = Comment.createANewComment();
 	return com;
     }
-    
+
     private String createXlink(String id) {
 	URI uri = uriInfo.getRequestUriBuilder().path(id).build();
 	return uri.toString();
     }
-    
+
+    /**
+     *
+     * @return The application's base URI as configured in the
+     * "componentRegistryServiceRootUrl" context parameter. If correctly
+     * configured, it should look something like
+     * "http://catalog.clarin.eu/ds/ComponentRegistry". <em>Be aware that this
+     * can also be null if configured incorrectly!</em>
+     *
+     * @see #APPLICATION_BASE_URL_PARAM
+     */
+    private String getApplicationBaseURI() {
+	return servletContext.getInitParameter(APPLICATION_BASE_URL_PARAM);
+    }
+
     private void validate(RegisterResponse response, Validator... validators) {
 	for (Validator validator : validators) {
 	    if (!validator.validate()) {
@@ -919,7 +953,7 @@ public class ComponentRegistryRestService {
 	    }
 	}
     }
-    
+
     private void validateComment(CommentResponse response, Validator... validators) {
 	for (Validator validator : validators) {
 	    if (!validator.validate()) {
@@ -935,5 +969,122 @@ public class ComponentRegistryRestService {
      */
     public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
 	this.componentRegistryFactory = componentRegistryFactory;
+    }
+
+    /**
+     *
+     * @param listofcomponents a list of components whose file-names and whose childrens' filenames are to be set to null
+     */
+    protected void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents) {
+
+	for (CMDComponentType currentcomponent : listofcomponents) {
+	    setFileNamesToNullCurrent(currentcomponent);
+	}
+
+    }
+
+    /**
+     *
+     * @param currentcomponent a component whose file-name and whose children filenames are to be set to null
+     */
+    protected void setFileNamesToNullCurrent(CMDComponentType currentcomponent) {
+	currentcomponent.setFilename(null);
+	setFileNamesFromListToNull(currentcomponent.getCMDComponent());
+    }
+
+    /**
+     *
+     * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+     * @param limit the number of items to be displayed
+     * @return rss for the components in the database to which we are currently connected
+     * @throws ComponentRegistryException
+     * @throws ParseException
+     */
+    @GET
+    @Path("/components/rss")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
+	final List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
+	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "components", Integer.parseInt(limit), components, AbstractDescription.COMPARE_ON_NAME);
+	final Rss rss = instance.getRss();
+	LOG.info("Releasing RSS of " + limit + " most recently registered components");
+	return rss;
+    }
+
+    /**
+     *
+     * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+     * @param limit the number of items to be displayed
+     * @return rss for the profiles in the database to which we are currently connected
+     * @throws ComponentRegistryException
+     * @throws ParseException
+     */
+    @GET
+    @Path("/profiles/rss")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
+	final List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
+	// LOG.debug("passed getting profile description");
+	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "profiles", Integer.parseInt(limit), profiles, AbstractDescription.COMPARE_ON_NAME);
+	// LOG.debug("passed constructing Rss creator");
+	final Rss rss = instance.getRss();
+	// int limitInt = Integer.parseInt(limit);
+	// int length = ( limitInt< profiles.size()) ? limitInt : profiles.size();
+	//LOG.debug("userspace= "+userspace);
+	//LOG.debug("Releasing RSS of " + Integer.toString(length) + " most recently registered profiles");
+	return rss;
+    }
+
+    /**
+     *
+     * @param profileId the Id of a profile whose comments are to be rss-ed
+     * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+     * @param limit the number of items to be displayed
+     * @return rss of the comments for a chosen profile
+     * @throws ComponentRegistryException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws ParseException
+     */
+    @GET
+    @Path("/profiles/{profileId}/comments/rss")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Rss getRssOfCommentsFromProfile(@PathParam("profileId") String profileId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
+	final Principal principal = security.getUserPrincipal();
+	final List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInProfile(profileId, principal);
+	final String profileName = getRegistry(getStatus(userspace)).getProfileDescription(profileId).getName();
+	final RssCreatorComments instance = new RssCreatorComments(userspace, getApplicationBaseURI(), Integer.parseInt(limit), profileId, profileName, "profile", comments, Comment.COMPARE_ON_DATE);
+	final Rss rss = instance.getRss();
+	return rss;
+    }
+
+    /**
+     *
+     * @param componentId the Id of a component whose comments are to be rss-ed
+     * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
+     * @param limit the number of items to be displayed
+     * @return rss of the comments for a chosen component
+     * @throws ComponentRegistryException
+     * @throws IOException
+     * @throws JAXBException
+     * @throws ParseException
+     */
+    @GET
+    @Path("/components/{componentId}/comments/rss")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Rss getRssOfCommentsFromComponent(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, IOException, JAXBException, ParseException {
+	final Principal principal = security.getUserPrincipal();
+	final List<Comment> comments = getRegistry(getStatus(userspace)).getCommentsInComponent(componentId, principal);
+	final String componentName = getRegistry(getStatus(userspace)).getComponentDescription(componentId).getName();
+	final RssCreatorComments instance = new RssCreatorComments(userspace, getApplicationBaseURI(), Integer.parseInt(limit), componentId, componentName, "component", comments, Comment.COMPARE_ON_DATE);
+	final Rss rss = instance.getRss();
+	return rss;
+    }
+
+    @GET
+    @Path("/AllowedTypes")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public AllowedAttributetypesXML getAllowedAttributeTypes() throws ComponentRegistryException, IOException, JAXBException, ParseException {
+	return (new AllowedAttributetypesXML());
     }
 }

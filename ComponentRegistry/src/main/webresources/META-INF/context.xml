@@ -41,8 +41,15 @@
 	the '/rest/registry' part will be added by the application.
     -->
     <Parameter name="componentRegistryServiceRootUrl" value="${serviceRootUrl}" />
+    
+    <!--
+	Location that gets redirected to from /documentation.jsp, which in turn is linked to
+	from the Flex application through the 'Help' link button.
+    -->
+    <Parameter name="componentRegistryDocumentationUrl" value="http://www.clarin.eu/cmdi" />
+    
     <!--
 	Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
-    <Parameter name="componentRegistryAdminUsers" value="twagoo@mpi.nl twan.goosen@mpi.nl guisil@mpi.nl guilherme.silva@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl" />
+    <Parameter name="componentRegistryAdminUsers" value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl" />
 </Context>

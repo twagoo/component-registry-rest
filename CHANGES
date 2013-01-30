@@ -1,5 +1,10 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.13.0 (É)
+- Added RSS feeds for public profiles, components, and comments. https://trac.clarin.eu/ticket/180
+- Added help link to UI. https://trac.clarin.eu/ticket/222
+- Fixed superfluous expansion of components and profiles on save. https://trac.clarin.eu/ticket/223
+
 Release ComponentRegistry-1.12.0 (21 august 2012):
 - REST service produces 404 status when component requested that does not exist.
 - Users can delete their own comments from the Flex UI. http://trac.clarin.eu/ticket/185

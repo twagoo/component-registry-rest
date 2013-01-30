@@ -36,7 +36,7 @@ public class CommentValidatorTest {
     }
 
     /**
-     * Fully successfull comment validation
+     * Fully successful comment validation
      */
     @Test
     public void testValidateSucces() {

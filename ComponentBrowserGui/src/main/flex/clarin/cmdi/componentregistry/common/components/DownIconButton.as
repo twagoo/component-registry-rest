@@ -12,6 +12,5 @@ package clarin.cmdi.componentregistry.common.components {
 			height = 0;
 			toolTip = "move down";
 		}
-
 	}
 }

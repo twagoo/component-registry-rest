@@ -1,6 +1,8 @@
 package clarin.cmdi.componentregistry.model;
 
+import clarin.cmdi.componentregistry.DatesHelper;
 import java.text.ParseException;
+import java.util.Comparator;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -29,51 +31,51 @@ public class Comment {
     private String userId;
 
     public void setComment(String comment) {
-	this.comments = comment;
+        this.comments = comment;
     }
 
     public String getComment() {
-	return comments;
+        return comments;
     }
 
     public void setCommentDate(String commentDate) {
-	this.commentDate = commentDate;
+        this.commentDate = commentDate;
     }
 
     public String getCommentDate() {
-	return commentDate;
+        return commentDate;
     }
 
     public void setId(String commentId) {
-	this.id = commentId;
+        this.id = commentId;
     }
 
     public String getId() {
-	return id;
+        return id;
     }
 
     public String getComponentDescriptionId() {
-	return componentDescriptionId;
+        return componentDescriptionId;
     }
 
     public void setComponentDescriptionId(String ComponentDescriptionId) {
-	this.componentDescriptionId = ComponentDescriptionId;
+        this.componentDescriptionId = ComponentDescriptionId;
     }
 
     public void setProfileDescriptionId(String profileDescriptionId) {
-	this.profileDescriptionId = profileDescriptionId;
+        this.profileDescriptionId = profileDescriptionId;
     }
 
     public String getProfileDescriptionId() {
-	return profileDescriptionId;
+        return profileDescriptionId;
     }
 
     public void setUserId(String userId) {
-	this.userId = userId;
+        this.userId = userId;
     }
 
     public String getUserId() {
-	return userId;
+        return userId;
     }
 
     /**
@@ -81,39 +83,39 @@ public class Comment {
      * @return userName, that is the user's 'real' name, not login name
      */
     public String getUserName() {
-	return userName;
+        return userName;
     }
 
     /**
      * @param userName the user's 'real' name, not login name
      */
     public void setUserName(String userName) {
-	this.userName = userName;
+        this.userName = userName;
     }
 
     /**
      * @return whether comment can be deleted
      */
     public boolean isCanDelete() {
-	return canDelete;
+        return canDelete;
     }
 
     /**
      * @param canDelete whether comment can be deleted
      */
     public void setCanDelete(boolean canDelete) {
-	this.canDelete = canDelete;
+        this.canDelete = canDelete;
     }
 
     public static Date getDate(String registrationDate) throws ParseException {
-	return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
+        return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
     }
 
     /*
      * Helper method to set the Date
      */
     public static String createNewDate() {
-	return createNewDate(new Date().getTime());
+        return createNewDate(new Date().getTime());
     }
 
     /*
@@ -121,12 +123,27 @@ public class Comment {
      * @param time, long that contains the time to be set
      */
     public static String createNewDate(long time) {
-	return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
+        return DateFormatUtils.formatUTC(time, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
     }
 
     public static Comment createANewComment() {
-	Comment com = new Comment();
-	com.setCommentDate(createNewDate());
-	return com;
+        Comment com = new Comment();
+        com.setCommentDate(createNewDate());
+        return com;
     }
+    /**
+     * Compares two comments by their value as returned by {@link Comment#getCommentDate()
+     * }
+     */
+    public static final Comparator<Comment> COMPARE_ON_DATE = new Comparator<Comment>() {
+        /**
+         * @return 1 if o11 is older than o2, returns -1 if o1 is younger than
+         * o2
+         */
+        @Override
+        public int compare(Comment o1, Comment o2) {
+
+            return (DatesHelper.compareDateStrings(o1.getCommentDate(), o2.getCommentDate()));
+        }
+    };
 }
