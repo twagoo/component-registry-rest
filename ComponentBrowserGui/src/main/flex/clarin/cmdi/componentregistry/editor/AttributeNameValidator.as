@@ -25,13 +25,10 @@ package clarin.cmdi.componentregistry.editor
 			expression = "^[A-Za-z0-9_\-]+$";
 			required = true;
 			noMatchError = "Name can only contain A-Z, a-z, 0-9, or _";
-			
-			//TODO: Always fails for component attributes, find out why...
 		}
 		
 		override protected function doValidation(value:Object):Array{
-			var validatorResults:Array;// = new Array();
-			validatorResults = super.doValidation(value);
+			var validatorResults:Array = super.doValidation(value);
 			
 			this.unique = true;
 			this.nameAllowed = true;
