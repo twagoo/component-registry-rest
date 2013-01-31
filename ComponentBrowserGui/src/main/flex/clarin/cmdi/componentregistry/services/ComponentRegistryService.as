@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.services
+package clarin.cmdi.componentregistry.services //trunk 
 {
 	import com.adobe.net.URI;
 	

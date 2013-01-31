@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.services
+package clarin.cmdi.componentregistry.services //trunk
 {
     import flash.events.Event;
     import flash.events.MouseEvent;
@@ -11,7 +11,7 @@ package clarin.cmdi.componentregistry.services
 		
 		public var allowedTypes:ArrayCollection=null;
 		
-		public static const ALLOWED_TYPES_LOADED:String = "allowed_element_types_loaded";
+		public static const ALLOWED_TYPES_LOADED:String = "allowed_element_types_loaded"; 
 		
 		public function ElementTypesListService()
 		{ 

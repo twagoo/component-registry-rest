@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.editor {
+package clarin.cmdi.componentregistry.editor { // trunk version
 	import clarin.cmdi.componentregistry.browser.XMLBrowserValueSchemeLine;
 	import clarin.cmdi.componentregistry.common.LabelConstants;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
@@ -161,7 +161,8 @@ package clarin.cmdi.componentregistry.editor {
 		}
 		
 		private function makeTypeEditPopUp():void {
-			var popup:ValueSchemePopUpNew = new ValueSchemePopUpNew(this);
+			var popup:ValueSchemePopUp = new ValueSchemePopUp();
+			popup.setParentValueScheme(this);
 			PopUpManager.addPopUp(popup, this.parent, false);
 		}
 		
