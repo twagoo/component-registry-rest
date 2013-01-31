@@ -10,14 +10,17 @@ package clarin.cmdi.componentregistry.editor {
 	import mx.containers.FormItemDirection;
 	import mx.controls.Button;
 	import mx.controls.TextInput;
+	import mx.events.ValidationResultEvent;
 	import mx.managers.PopUpManager;
+	import mx.validators.Validator;
 	
-	public class ConceptLinkInput extends FormItem {
+	public class ConceptLinkInput extends FormItem implements CMDValidator {
 		
 		private var editField:TextInput = new TextInput();
 		private var searchConceptLink:Button = new Button();
 		private var isocatPopup:IsocatSearchPopUp;
 		private var conceptType:String;
+		private var validator:Validator = InputValidators.getConceptLinkValidator();
 		
 		public function ConceptLinkInput(name:String, value:String, bindingFunction:Function, conceptType:String = null) {
 			super();
@@ -32,7 +35,13 @@ package clarin.cmdi.componentregistry.editor {
 			editField.addEventListener(Event.CHANGE, function():void {
 				editField.toolTip = null
 			});
-			this.conceptType = conceptType;
+			validator.listener = this.editField;
+			this.conceptType = conceptType;			
+		}
+		
+		public function validate():Boolean {
+			var result:ValidationResultEvent = validator.validate(this.editField.text);
+			return result.type == ValidationResultEvent.VALID;
 		}
 		
 		protected override function createChildren():void {

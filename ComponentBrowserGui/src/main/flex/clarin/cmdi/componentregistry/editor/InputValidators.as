@@ -15,6 +15,15 @@ package clarin.cmdi.componentregistry.editor {
 			return result;
 		}
 		
+		public static function getConceptLinkValidator():RegExpValidator {
+			var result:RegExpValidator = new RegExpValidator();
+			// Concept link must be a valid absolute URI
+			result.expression = "^([^:/?#]+):(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?$";
+			result.required = false;
+			result.noMatchError = "Concept link must be a valid absolute URI";
+			return result;
+		}
+		
 		public static function getIsRequiredValidator():Validator {
 			var result:Validator = new Validator();
 			result.required = true;
