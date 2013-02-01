@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 @Path("/registry")
 public class ComponentRegistryRestService {
 
-    public static final String APPLICATION_BASE_URL_PARAM = "componentRegistryServiceRootUrl";
+    public static final String APPLICATION_BASE_URL_PARAM = "eu.clarin.cmdi.componentregistry.serviceRootUrl";
     @Context
     private UriInfo uriInfo;
     @Context
@@ -933,7 +933,7 @@ public class ComponentRegistryRestService {
     /**
      *
      * @return The application's base URI as configured in the
-     * "componentRegistryServiceRootUrl" context parameter. If correctly
+     * {@link #APPLICATION_BASE_URL_PARAM} context parameter. If correctly
      * configured, it should look something like
      * "http://catalog.clarin.eu/ds/ComponentRegistry". <em>Be aware that this
      * can also be null if configured incorrectly!</em>

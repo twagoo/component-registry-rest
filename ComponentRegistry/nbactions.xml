@@ -8,7 +8,7 @@
             <properties>
                 <netbeans.deploy>true</netbeans.deploy>
                 <skipTests>true</skipTests>
-                <netbeans.deploy.clientUrlPart>/ComponentRegistry</netbeans.deploy.clientUrlPart>
+                <netbeans.deploy.clientUrlPart></netbeans.deploy.clientUrlPart>
             </properties>
         </action>
         <action>
@@ -20,7 +20,7 @@
                 <netbeans.deploy.debugmode>true</netbeans.deploy.debugmode>
                 <netbeans.deploy>true</netbeans.deploy>
                 <skipTests>true</skipTests>
-                <netbeans.deploy.clientUrlPart>/ComponentRegistry</netbeans.deploy.clientUrlPart>
+                <netbeans.deploy.clientUrlPart></netbeans.deploy.clientUrlPart>
             </properties>
         </action>
         <action>
@@ -31,7 +31,7 @@
             <properties>
                 <netbeans.deploy>true</netbeans.deploy>
                 <netbeans.deploy.profilemode>true</netbeans.deploy.profilemode>
-                <netbeans.deploy.clientUrlPart>/ComponentRegistry</netbeans.deploy.clientUrlPart>
+                <netbeans.deploy.clientUrlPart></netbeans.deploy.clientUrlPart>
             </properties>
         </action>
     </actions>

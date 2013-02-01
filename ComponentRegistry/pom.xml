@@ -316,6 +316,10 @@
 		    <webXml>${webXmlPath}</webXml>
 		    <webResources>
 			<resource>
+			    <directory>src/main/webapp</directory>
+			    <filtering>true</filtering>
+			</resource>
+			<resource>
 			    <directory>src/main/webresources</directory>
 			    <filtering>true</filtering>
 			    <includes>
@@ -323,7 +327,6 @@
 				<include>WEB-INF/shhaa.xml</include>
 				<include>WEB-INF/applicationContext.xml</include>
 				<include>WEB-INF/spring-config/**</include>
-				<include>META-INF/context.xml</include>
 			    </includes>
 			</resource>
 		    </webResources>
