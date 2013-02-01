@@ -40,23 +40,30 @@ package clarin.cmdi.componentregistry.editor {
 		public static const DRAG_NEW_COMPONENT:String = "newComponent";
 		public static const DRAG_NEW_ELEMENT:String = "newElement";
 		public static const DRAG_NEW_ATTRIBUTE:String = "newAttribute";
-		private static const DRAG_ITEMS:String = "items";
+		//private static const DRAG_ITEMS:String = "items";
 		
 		public static const EDITOR_CHANGE_EVENT:String = "editorChange";
 		
 		private var _spec:CMDSpec;
 		private var _firstComponent:CMDComponent;
-		private var addComponentLabel:Label
-		private var addElementLabel:Label
+		
+		/*[Bindable]
+		private var addComponentLabel:Label;*/
+		
+		/*private var addElementLabel:Label;*/
+		
+		private var _editComponentBasics:ComponentEditorBasic;
 		
 		public function CMDComponentXMLEditor() {
 			super();
+			_editComponentBasics = new ComponentEditorBasic(this, _firstComponent);
 			focusEnabled = true;
 			tabEnabled = true;
 			styleName = StyleConstants.XMLBROWSER;
-			addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
+			_editComponentBasics.addDragEventListenersAndProcessors();
+			/*addEventListener(DragEvent.DRAG_ENTER, dragEnterHandler);
 			addEventListener(DragEvent.DRAG_OVER, dragOverHandler);
-			addEventListener(DragEvent.DRAG_DROP, dragDropHandler);
+			addEventListener(DragEvent.DRAG_DROP, dragDropHandler);*/
 			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, dispatchEditorChangeEvent);
 			addEventListener(ChildExistenceChangedEvent.CHILD_REMOVE, dispatchEditorChangeEvent);
 		}
@@ -116,21 +123,22 @@ package clarin.cmdi.componentregistry.editor {
 			return result;
 		}
 		
-		private function dragEnterHandler(event:DragEvent):void {
+		/* private function dragEnterHandler(event:DragEvent):void {
+		
 			DragManager.acceptDragDrop(event.currentTarget as UIComponent);
-			UIComponent(event.currentTarget).drawFocus(true);
-		}
+			UIComponent(event.currentTarget).drawFocus(true);*
+		} */
 		
 		
-		private function dragOverHandler(event:DragEvent):void {
+		/*private function dragOverHandler(event:DragEvent):void {
 			if (event.dragSource.hasFormat(DRAG_ITEMS)) {
 				DragManager.showFeedback(DragManager.COPY);
 			} else {
 				DragManager.showFeedback(DragManager.NONE);
 			}
-		}
+		}*/
 		
-		private function dragDropHandler(event:DragEvent):void {
+		/*private function dragDropHandler(event:DragEvent):void {
 			if (event.dragSource.hasFormat(DRAG_ITEMS)) {
 				var items:Array = event.dragSource.dataForFormat(DRAG_ITEMS) as Array;
 				for each (var item:ItemDescription in items) {
@@ -140,7 +148,7 @@ package clarin.cmdi.componentregistry.editor {
 					addComponent(comp);
 				}
 			}
-		}
+		}*/
 		
 		public function set cmdSpec(cmdSpec:CMDSpec):void {
 			_spec = cmdSpec;
@@ -159,18 +167,18 @@ package clarin.cmdi.componentregistry.editor {
 		
 		private function createNewEditor():void {
 			var start:int = getTimer();
-			addComponentLabel = null
-			addElementLabel = null
+			_editComponentBasics.addComponentLabel = null;
+			_editComponentBasics.addElementLabel = null
 			removeAllChildren();
 			checkFirstDefiningComponent(_spec.cmdComponents);
 			handleHeader(_spec);
 			
 			addChild(createCollapseExpandBox());
 			
-			handleElements(_firstComponent.cmdElements);
-			addElementAddButton();
-			handleComponents(_firstComponent.cmdComponents);
-			addComponentAddButton();
+			_editComponentBasics.handleElements(_firstComponent.cmdElements);
+			_editComponentBasics.addElementAddButton();
+			_editComponentBasics.handleComponents(_firstComponent.cmdComponents);
+			_editComponentBasics.addComponentAddButton();
 			
 			addChild(createCollapseExpandBox());
 
@@ -324,12 +332,12 @@ package clarin.cmdi.componentregistry.editor {
 			addChild(new AttributeListEdit(_firstComponent, this))
 		}
 		
-		private function addComponentAddButton():void {
+		/*private function addComponentAddButton():void {
 			addComponentLabel = new AddComponentLabelButton();
 			addComponentLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
 				var comp:CMDComponent = CMDComponent.createEmptyComponent();
 				_firstComponent.cmdComponents.addItem(comp);
-				addComponent(comp);
+				_editComponentBasics.addComponent(comp);
 				
 			});
 			addComponentLabel.addEventListener(MouseEvent.MOUSE_OVER, function(event:MouseEvent):void {
@@ -339,9 +347,9 @@ package clarin.cmdi.componentregistry.editor {
 				drawFocus(false);
 			});
 			addChild(addComponentLabel);
-		}
+		} */
 		
-		private function addElementAddButton():void {
+		/*private function addElementAddButton():void {
 			addElementLabel = new AddElementLabelButton();
 			addElementLabel.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void {
 				var element:CMDComponentElement = CMDComponentElement.createEmptyElement();
@@ -356,9 +364,9 @@ package clarin.cmdi.componentregistry.editor {
 				drawFocus(false);
 			});
 			addChild(addElementLabel);
-		}
+		}*/
 		
-		/* private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
+		/* Not Olha: private function createOptionalGroupNameInput(spec:CMDSpec):FormItem {
 		var result:FormItemInputLine = new FormItemInputLine(LabelConstants.GROUP_NAME, spec.groupName, function(val:String):void {
 		spec.groupName = val;
 		}, true, InputValidators.getIsRequiredValidator());
@@ -368,13 +376,13 @@ package clarin.cmdi.componentregistry.editor {
 		return result;
 		}  */
 		
-		private function handleComponents(components:ArrayCollection):void {
+		/*private function handleComponents(components:ArrayCollection):void {
 			for each (var component:CMDComponent in components) {
-				addComponent(component);
+				_editComponentBasics.addComponent(component);
 			}
-		}
+		}*/
 		
-		public function addComponent(component:CMDComponent):void {
+		/*public function addComponent(component:CMDComponent):void {
 			var comp:Container = new ComponentEdit(component, this, _firstComponent);
 			comp.addEventListener(ComponentEdit.REMOVE_COMPONENT_EVENT, removeComponent);
 			if (!addComponentLabel) {
@@ -382,16 +390,16 @@ package clarin.cmdi.componentregistry.editor {
 			} else {
 				addChildAt(comp, getChildIndex(addComponentLabel)); //Add components at the place of the button so button moves down
 			}
-		}
+		}*/
 		
-		private function removeComponent(event:Event):void {
+		/* private function removeComponent(event:Event):void {
 			var comp:CMDComponent = ComponentEdit(event.currentTarget).component;
 			_firstComponent.removeComponent(comp);
 			removeChild(event.currentTarget as DisplayObject);
-		}
+		}*/
 		
 		
-		private function handleElements(elements:ArrayCollection):void {
+		/*private function handleElements(elements:ArrayCollection):void {
 			for each (var element:CMDComponentElement in elements) {
 				addElement(element);
 			}
@@ -412,6 +420,6 @@ package clarin.cmdi.componentregistry.editor {
 			var elem:CMDComponentElement = ElementEdit(event.currentTarget).element;
 			_firstComponent.removeElement(elem);
 			removeChild(event.currentTarget as DisplayObject);
-		}
+		}*/
 	}
 }

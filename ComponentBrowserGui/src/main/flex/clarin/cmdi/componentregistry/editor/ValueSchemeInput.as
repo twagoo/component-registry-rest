@@ -30,7 +30,7 @@ package clarin.cmdi.componentregistry.editor { // trunk version
 		private var _valueSchemeSimple:String = "";
 		private var _validator:Validator = InputValidators.getIsRequiredValidator();
 		
-		
+		[Bindable]
 		public  var elementTypesService:ElementTypesListService;
 		
 		public function ValueSchemeInput(name:String, required:Boolean = true) {

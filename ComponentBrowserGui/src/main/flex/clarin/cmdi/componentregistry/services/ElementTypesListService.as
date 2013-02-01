@@ -8,7 +8,7 @@ package clarin.cmdi.componentregistry.services //trunk
 	
 	public class ElementTypesListService extends ComponentRegistryService
 	{ 
-		
+		[Bindable]
 		public var allowedTypes:ArrayCollection=null;
 		
 		public static const ALLOWED_TYPES_LOADED:String = "allowed_element_types_loaded"; 
