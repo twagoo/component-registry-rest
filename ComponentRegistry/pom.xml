@@ -319,16 +319,6 @@
 			    <directory>src/main/webapp</directory>
 			    <filtering>true</filtering>
 			</resource>
-			<resource>
-			    <directory>src/main/webresources</directory>
-			    <filtering>true</filtering>
-			    <includes>
-				<include>index.jsp</include>
-				<include>WEB-INF/shhaa.xml</include>
-				<include>WEB-INF/applicationContext.xml</include>
-				<include>WEB-INF/spring-config/**</include>
-			    </includes>
-			</resource>
 		    </webResources>
 		    <archive>
 			<manifest>

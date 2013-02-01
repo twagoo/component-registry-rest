@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:/org/springframework/beans/factory/xml/spring-beans-2.5.xsd">
+	   
+    <!-- 
+	Property placeholder that allows init parameters defined in servlet context to be used as property values
+	(in this case admin users list)
+    -->
+    <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">
+    </bean>
+
+    <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" factory-method="getInstance">
+	<!-- Read admin users from init param -->
+	<property name="adminUsersList" value="${eu.clarin.cmdi.componentregistry.adminUsers}" />
+	<property name="generalComponentSchema" value="https://www.clarin.eu/cmd/general-component-schema.xsd" />
+	<property name="component2SchemaXsl" value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
+	<property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" />
+	<!-- TODO: Read the following from a context parameter -->
+	<property name="isocatRestUrl" value="https://catalog.clarin.eu/isocat/rest/" />
+    <!-- Extra attribute keys that are passed in a shibboleth authenticated request principal.
+         You need to configure the shhaa.xml file to enable the extra attributes.
+     -->
+	<property name="displayNameShibbolethKeys">
+	    <list>
+		<value>displayName</value>
+		<value>commonName</value>
+	    </list>
+	</property>
+    </bean>
+</beans>
