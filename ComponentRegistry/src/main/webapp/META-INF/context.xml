@@ -52,4 +52,13 @@
 	Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
     <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl" />
+
+    <Parameter name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" value="https://www.clarin.eu/cmd/general-component-schema.xsd" />
+    
+    <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" />
+
+    <Parameter name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" />
+
+    <Parameter name="eu.clarin.cmdi.componentregistry.isocatRestUrl" value="https://catalog.clarin.eu/isocat/rest/" />
+
 </Context>

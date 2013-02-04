@@ -13,11 +13,10 @@
     <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" factory-method="getInstance">
 	<!-- Read admin users from init param -->
 	<property name="adminUsersList" value="${eu.clarin.cmdi.componentregistry.adminUsers}" />
-	<property name="generalComponentSchema" value="https://www.clarin.eu/cmd/general-component-schema.xsd" />
-	<property name="component2SchemaXsl" value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
-	<property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" />
-	<!-- TODO: Read the following from a context parameter -->
-	<property name="isocatRestUrl" value="https://catalog.clarin.eu/isocat/rest/" />
+	<property name="generalComponentSchema" value="${eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl}" />
+	<property name="component2SchemaXsl" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}"/>
+	<property name="componentSpecSchemaLocation" value="${eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation}" />
+	<property name="isocatRestUrl" value="${eu.clarin.cmdi.componentregistry.isocatRestUrl}" />
     <!-- Extra attribute keys that are passed in a shibboleth authenticated request principal.
          You need to configure the shhaa.xml file to enable the extra attributes.
      -->
