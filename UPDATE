@@ -19,17 +19,44 @@ Procedure for updating
 
 - Then redeploy the WAR and start the application
 
-Version specific issues
------------------------
+Version specific update instructions
+-------------------------------------
 === 1.13 ===
+
+- The following context fragment have been renamed, and should be updated
+  in the context fragment for the Component Registry:
+  
+  componentRegistryServiceRootUrl -> eu.clarin.cmdi.componentregistry.serviceRootUrl
+  componentRegistryAdminUsers -> eu.clarin.cmdi.componentregistry.adminUsers
+  
+  The results should look something like:
+  <Parameter 
+  		name="eu.clarin.cmdi.componentregistry.serviceRootUrl" 
+  		value="http://catalog.clarin.eu/ds/ComponentRegistry" /> 
+  <Parameter 
+  		name="eu.clarin.cmdi.componentregistry.adminUsers" 
+  		value="admin1@clarin.eu admin2@clarin.eu" />
+
 - The following should be added to the context fragment for the Component
   Registry:
 
-    <Parameter
-	name="componentRegistryDocumentationUrl" 
-	value="http://www.clarin.eu/cmdi" />
-
-=== 1.x -> 1.11 ==
+	<Parameter
+			name="eu.clarin.cmdi.componentregistry.documentationUrl" 
+			value="http://www.clarin.eu/cmdi" /> 
+	<Parameter 
+			name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" 
+			value="https://www.clarin.eu/cmd/general-component-schema.xsd" /> 
+	<Parameter 
+			name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" 
+			value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" /> 
+	<Parameter 
+			name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" 
+			value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" /> 
+	<Parameter 
+			name="eu.clarin.cmdi.componentregistry.isocatRestUrl" 
+			value="https://catalog.clarin.eu/isocat/rest/" /> 
+			
+=== 1.11 ==
 
 - The following should be added to the context fragment for the Component
   Registry:
