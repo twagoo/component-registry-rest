@@ -1005,7 +1005,7 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssComponent(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	final List<ComponentDescription> components = getRegistry(getStatus(userspace)).getComponentDescriptions();
-	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "components", Integer.parseInt(limit), components, AbstractDescription.COMPARE_ON_NAME);
+	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "components", Integer.parseInt(limit), components, AbstractDescription.COMPARE_ON_DATE);
 	final Rss rss = instance.getRss();
 	LOG.info("Releasing RSS of " + limit + " most recently registered components");
 	return rss;
@@ -1024,14 +1024,9 @@ public class ComponentRegistryRestService {
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace, @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit) throws ComponentRegistryException, ParseException {
 	final List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
-	// LOG.debug("passed getting profile description");
-	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "profiles", Integer.parseInt(limit), profiles, AbstractDescription.COMPARE_ON_NAME);
-	// LOG.debug("passed constructing Rss creator");
+	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "profiles", Integer.parseInt(limit), profiles, AbstractDescription.COMPARE_ON_DATE);
 	final Rss rss = instance.getRss();
-	// int limitInt = Integer.parseInt(limit);
-	// int length = ( limitInt< profiles.size()) ? limitInt : profiles.size();
-	//LOG.debug("userspace= "+userspace);
-	//LOG.debug("Releasing RSS of " + Integer.toString(length) + " most recently registered profiles");
+        LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
 	return rss;
     }
 
