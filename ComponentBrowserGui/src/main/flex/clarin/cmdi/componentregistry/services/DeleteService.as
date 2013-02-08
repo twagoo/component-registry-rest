@@ -14,16 +14,16 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
-
+	
 	[Event(name="itemDeleted", type="flash.events.Event")]
-
+	
 	public class DeleteService extends EventDispatcher {
 		public static const ITEM_DELETED:String = "itemDeleted";
 		private var service:HTTPService;
 		private static const DELETE_METHOD:Object = {"method": "delete"};
-
+		
 		private static var _instance:DeleteService = new DeleteService();
-
+		
 		public function DeleteService() {
 			if (_instance != null) {
 				throw new Error("DeleteService should only be accessed through DeleteService.instance");
@@ -33,14 +33,34 @@ package clarin.cmdi.componentregistry.services {
 			service.addEventListener(ResultEvent.RESULT, handleResult);
 			service.method = HTTPRequestMessage.POST_METHOD;
 		}
-
+		
 		public function deleteItem(item:ItemDescription):void {
 			CursorManager.setBusyCursor();
-			var url:URI = new URI(item.dataUrl);
+			
+			var deleteUrl:URI = new URI(item.dataUrl);
 			if (item.isInUserSpace) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
+				deleteUrl.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
-			sendDelete(url);
+			
+			var  usageService:ComponentUsageService = new ComponentUsageService(item, item.isInUserSpace);
+			usageService.addEventListener(ComponentUsageCheckEvent.COMPONENT_IN_USE, 
+				function (event:ComponentUsageCheckEvent):void{
+					if(event.isComponentInUse){
+						onComponentInUse(event);
+					} else {
+						sendDelete(deleteUrl);
+					}
+				});
+			usageService.checkUsage();
+		}
+		
+		public function onComponentInUse(event:ComponentUsageCheckEvent):void{
+			var messageBody:String = "The component cannot be deleted because it is used by the following component(s) and/or profile(s):\n\n";
+			for each(var name:String in event.itemUsingComponent){
+				messageBody += " - " + name + "\n";
+			}
+			CursorManager.removeBusyCursor();
+			Alert.show(messageBody,"Component is used");
 		}
 		
 		public function deleteComment(comment:Comment):void {
@@ -60,7 +80,7 @@ package clarin.cmdi.componentregistry.services {
 			service.url = url.toString();
 			service.send(DELETE_METHOD);
 		}
-
+		
 		private function handleResult(resultEvent:ResultEvent):void {
 			CursorManager.removeBusyCursor();
 			if (resultEvent.statusCode >= 200 && resultEvent.statusCode < 300) {
@@ -69,7 +89,7 @@ package clarin.cmdi.componentregistry.services {
 				Alert.show("Unexpected error, server returned status: " + resultEvent.statusCode + "\n Message = ");
 			}
 		}
-
+		
 		public function handleError(faultEvent:FaultEvent):void {
 			CursorManager.removeBusyCursor();
 			if (faultEvent.statusCode == 401) { //Apparrently depending on browser status codes and errormessages are sometimes not passed along to flash.
@@ -80,7 +100,7 @@ package clarin.cmdi.componentregistry.services {
 				Alert.show("Item not deleted: Item is either public or in the case of a component still referenced by other components/profiles.");
 			}
 		}
-
+		
 		public static function get instance():DeleteService {
 			return _instance;
 		}
