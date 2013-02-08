@@ -347,6 +347,42 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
     }
 
+    @Test(expected=DeleteFailedException.class)
+    public void testDoNotDeleteUsedComponent() throws Exception {
+	RegistryUser user = createUser();
+	ComponentRegistry register = getComponentRegistryForUser(null);
+
+	String comp1Id = "component1";
+	String comp2Id = "component2";
+
+	String comp1Content = "";
+	comp1Content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	comp1Content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	comp1Content += "    <Header/>\n";
+	comp1Content += "    <CMD_Component name=\"Recursion\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	comp1Content += "       <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	comp1Content += "    </CMD_Component>\n";
+	comp1Content += "</CMD_ComponentSpec>\n";
+
+	ComponentDescription comp1Desc = RegistryTestHelper.addComponent(register, comp1Id, comp1Content);
+
+	// Component2 references component1
+
+	String comp2Content = "";
+	comp2Content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	comp2Content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	comp2Content += "    <Header/>\n";
+	comp2Content += "    <CMD_Component name=\"Recursion\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	comp2Content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	comp2Content += "	 <CMD_Component ComponentId=\"" + comp1Desc.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"5\"/>\n";
+	comp2Content += "    </CMD_Component>\n";
+	comp2Content += "</CMD_ComponentSpec>\n";
+
+	RegistryTestHelper.addComponent(register, comp2Id, comp2Content);
+
+	register.deleteMDComponent(comp1Desc.getId(), PRINCIPAL_ADMIN, false);
+    }
+
     private ComponentDescription createComponent(ComponentRegistry registry) throws Exception {
 	ComponentDescription description = getComponentDesc();
 	CMDComponentSpec testComp = RegistryTestHelper.getTestComponent();

@@ -351,7 +351,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ClientResponse response = getAuthenticatedResource("/registry/components/" + compDesc1.getId()).delete(ClientResponse.class);
         assertEquals(Status.FORBIDDEN.getStatusCode(), response.getStatus());
         assertEquals(
-                "Still used by the following profiles: \n - TestProfile3\nStill used by the following components: \n - YYY1\nTry to change above mentioned references first.",
+                "Component is still in use by other components or profiles. Request component usage for details.",
                 response.getEntity(String.class));
 
         components = getResource().path("/registry/components").get(COMPONENT_LIST_GENERICTYPE);

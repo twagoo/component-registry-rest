@@ -266,7 +266,7 @@ public class ComponentRegistryRestService {
     @GET
     @Path("/components/usage/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public List<AbstractDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("true") boolean userspace) throws ComponentRegistryException {
+    public List<AbstractDescription> getComponentUsage(@PathParam("componentId") String componentId, @QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace) throws ComponentRegistryException {
 	try {
 	    final long start = System.currentTimeMillis();
 	    ComponentRegistry registry = getRegistry(getStatus(userspace));
@@ -511,7 +511,8 @@ public class ComponentRegistryRestService {
 	    LOG.info("Component with id: " + componentId + " set for deletion.");
 	    registry.deleteMDComponent(componentId, principal, false);
 	} catch (DeleteFailedException e) {
-	    LOG.info("Component with id: " + componentId + " deletion failed.", e);
+	    LOG.info("Component with id: " + componentId + " deletion failed. Reason: " + e.getMessage());
+	    LOG.debug("Deletion failure details:", e);
 	    return Response.status(Status.FORBIDDEN).entity("" + e.getMessage()).build();
 	} catch (ComponentRegistryException e) {
 	    LOG.info("Component with id: " + componentId + " deletion failed.", e);
@@ -521,6 +522,7 @@ public class ComponentRegistryRestService {
 	    return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
 	} catch (UserUnauthorizedException e) {
 	    LOG.info("Component with id: " + componentId + " deletion failed: " + e.getMessage());
+	    LOG.debug("Deletion failure details:", e);
 	    return Response.serverError().status(Status.UNAUTHORIZED).entity("" + e.getMessage()).build();
 	}
 	LOG.info("Component with id: " + componentId + " deleted.");
@@ -1026,7 +1028,7 @@ public class ComponentRegistryRestService {
 	final List<ProfileDescription> profiles = getRegistry(getStatus(userspace)).getProfileDescriptions();
 	final RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, getApplicationBaseURI(), "profiles", Integer.parseInt(limit), profiles, AbstractDescription.COMPARE_ON_DATE);
 	final Rss rss = instance.getRss();
-        LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
+	LOG.info("Releasing RSS of " + limit + " most recently registered profiles");
 	return rss;
     }
 
