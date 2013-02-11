@@ -64,14 +64,14 @@
     -->
     <Parameter 
 	name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" 
-	value="https://www.clarin.eu/cmd/general-component-schema.xsd" />
+	value="https://infra.clarin.eu/cmd/general-component-schema.xsd" />
     
     <!--
 	Location of the stylesheet that transforms component specifications into XML schema documents
     -->
     <Parameter 
 	name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" 
-	value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" />
+	value="https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" />
 
     <!-- 
         Schema location that will go into xsi:schemaLocation attribute of component specification. Beware this should follow
@@ -79,7 +79,7 @@
     -->
     <Parameter 
 	name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" 
-	value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" />
+	value="http://www.clarin.eu/cmd https://infra.clarin.eu/cmd/general-component-schema.xsd" />
 
     <!--
 	Base location of the ISOcat service

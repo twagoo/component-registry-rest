@@ -45,13 +45,13 @@ Version specific update instructions
 			value="http://www.clarin.eu/cmdi" /> 
 	<Parameter 
 			name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" 
-			value="https://www.clarin.eu/cmd/general-component-schema.xsd" /> 
+			value="https://infra.clarin.eu/cmd/general-component-schema.xsd" /> 
 	<Parameter 
 			name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" 
-			value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" /> 
+			value="https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" /> 
 	<Parameter 
 			name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" 
-			value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" /> 
+			value="http://www.clarin.eu/cmd https://infra.clarin.eu/cmd/general-component-schema.xsd" /> 
 	<Parameter 
 			name="eu.clarin.cmdi.componentregistry.isocatRestUrl" 
 			value="https://catalog.clarin.eu/isocat/rest/" /> 
