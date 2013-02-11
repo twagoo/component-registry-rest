@@ -613,9 +613,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, null);
 
 	    } catch (JAXBException ex) {
-		LOG.error(null, ex);
+		LOG.error("Error while unmarshalling", ex);
 	    } catch (UnsupportedEncodingException ex) {
-		LOG.error(null, ex);
+		LOG.error("Exception while reading XML from database", ex);
 	    }
 	}
 	return null;

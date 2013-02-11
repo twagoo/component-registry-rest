@@ -79,37 +79,39 @@ public class Configuration {
     }
 
     /**
-     * 
+     *
      * @param adminUsers Whitespace-separated list of admin users
      */
     public void setAdminUsersList(String adminUsersList) {
-	LOG.debug("Setting adminUsersList to {}", adminUsersList);
 	String[] adminUsersArray = adminUsersList.trim().split("\\s+");
+	if (LOG.isDebugEnabled()) {
+	    LOG.info("Setting adminUsersList to {}", Arrays.toString(adminUsersArray));
+	}
 	setAdminUsers(Arrays.asList(adminUsersArray));
     }
 
     public void setComponent2SchemaXsl(String component2SchemaXsl) {
-	LOG.debug("Setting component2SchemaXsl to {}", component2SchemaXsl);
+	LOG.info("Setting component2SchemaXsl to {}", component2SchemaXsl);
 	this.component2SchemaXsl = component2SchemaXsl;
     }
 
     public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {
-	LOG.debug("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
+	LOG.info("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
 	schemaLocations.put(CMDComponentSpec.class.getName(), componentSpecSchemaLocation);
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {
-	LOG.debug("Setting displayNameShibbolethKeys to {}", displayNameShibbolethKeys);
+	LOG.info("Setting displayNameShibbolethKeys to {}", displayNameShibbolethKeys);
 	this.displayNameShibbolethKeys = displayNameShibbolethKeys;
     }
 
     public void setGeneralComponentSchema(String generalComponentSchema) {
-	LOG.debug("Setting generalComponentSchema to {}", generalComponentSchema);
+	LOG.info("Setting generalComponentSchema to {}", generalComponentSchema);
 	this.generalComponentSchema = generalComponentSchema;
     }
 
     public void setIsocatRestUrl(String isocatRestUrl) {
-	LOG.debug("Setting isocatRestUrl to {}", isocatRestUrl);
+	LOG.info("Setting isocatRestUrl to {}", isocatRestUrl);
 	this.isocatRestUrl = isocatRestUrl;
     }
 

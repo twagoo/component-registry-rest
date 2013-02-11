@@ -11,27 +11,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public abstract class CMDComponentSpecExpander {
-
+    
     private final static Logger LOG = LoggerFactory.getLogger(CMDComponentSpecExpander.class);
     protected final ComponentRegistry registry;
-
+    
     public CMDComponentSpecExpander(ComponentRegistry registry) {
 	this.registry = registry;
     }
-
+    
     public void expandNestedComponent(List<CMDComponentType> cmdComponents, String id) throws ComponentRegistryException {
 	expandNestedComponent(cmdComponents, new HashSet<String>(Collections.singleton(id)));
     }
-
+    
     private void expandNestedComponent(List<CMDComponentType> cmdComponents, Collection<String> path) throws ComponentRegistryException {
 	List<CMDComponentType> expanded = new ArrayList<CMDComponentType>();
 	for (CMDComponentType cmdComponentType : cmdComponents) {
 	    String componentId = cmdComponentType.getComponentId();
 	    if (componentId != null) {
+		if (LOG.isDebugEnabled()) {
+		    LOG.debug("[Level {}] Expanding {}", path.size(), componentId);
+		}
 		if (path.contains(componentId)) {
 		    throw new ComponentRegistryException("Detected recursion in component specification: " + path.toString() + " already contains " + componentId);
 		} else {
@@ -60,7 +63,7 @@ public abstract class CMDComponentSpecExpander {
 	cmdComponents.clear();
 	cmdComponents.addAll(expanded);
     }
-
+    
     private CMDComponentType getComponentTypeOfAComponent(CMDComponentSpec result) {
 	List<CMDComponentType> cmdComponents = result.getCMDComponent();
 	if (cmdComponents.size() != 1) {
@@ -87,7 +90,7 @@ public abstract class CMDComponentSpecExpander {
 	}
 	nested.setComponentId(referenceDeclaration.getComponentId()); // Setting componentId for better xsd generation.
     }
-
+    
     protected CMDComponentSpec expandComponent(String componentId) throws ComponentRegistryException {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedComponent(componentId);//registry.getUncachedComponent(componentId);
@@ -95,7 +98,7 @@ public abstract class CMDComponentSpecExpander {
 	expandNestedComponent(cmdComponentType.getCMDComponent(), componentId);
 	return result;
     }
-
+    
     protected CMDComponentSpec expandProfile(String profileId) throws ComponentRegistryException {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedProfile(profileId);//registry.getUncachedProfile(profileId);
@@ -112,10 +115,11 @@ public abstract class CMDComponentSpecExpander {
 //    }
     /**
      * Get uncached component from "this" registry and possibly from public registry. Note: "this" registry can be a user registry.
+     *
      * @param componentId
      */
     protected abstract CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException;
-
+    
     protected abstract CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException;
 //    protected abstract CMDComponentSpec getUncachedComment(String commentId) throws ComponentRegistryException;
 }

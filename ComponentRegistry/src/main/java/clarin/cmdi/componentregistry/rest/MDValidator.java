@@ -95,13 +95,16 @@ public class MDValidator implements Validator {
 		}
 	    }
 	} catch (MalformedURLException e) {
-	    errorMessages.add(SCHEMA_ERROR + e);
+	    errorMessages.add(SCHEMA_ERROR + e.getMessage());
+	    LOG.error(SCHEMA_ERROR, e);
 	} catch (JAXBException e) {
-	    errorMessages.add(PARSE_ERROR + e);
+	    errorMessages.add(PARSE_ERROR + e.getMessage());
+	    LOG.error(PARSE_ERROR, e);
 	} catch (ValidatorException e) {
-	    errorMessages.add(PARSE_ERROR + e);
+	    errorMessages.add(PARSE_ERROR + e.getMessage());
+	    LOG.error(PARSE_ERROR, e);
 	} catch (IOException e) {
-	    errorMessages.add(IO_ERROR + e);
+	    errorMessages.add(IO_ERROR + e.getMessage());
 	    LOG.error(IO_ERROR, e);
 	}
 	if (errorMessages.isEmpty()) {

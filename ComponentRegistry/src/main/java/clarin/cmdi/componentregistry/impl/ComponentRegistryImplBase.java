@@ -27,28 +27,32 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public abstract class ComponentRegistryImplBase implements ComponentRegistry {
-
+    
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImplBase.class);
-
+    
     @Override
     public List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException {
+	LOG.debug("Checking usage of component {} in components", componentId);
 	List<ComponentDescription> result = new ArrayList<ComponentDescription>();
 	List<ComponentDescription> descs = getComponentDescriptions();
 	for (ComponentDescription desc : descs) {
 	    CMDComponentSpec spec = getMDComponent(desc.getId());
 	    if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
+		LOG.debug("Component {} used in component {}", componentId, spec.getHeader().getID());
 		result.add(desc);
 	    }
 	}
 	return result;
     }
-
+    
     @Override
     public List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException {
+	LOG.debug("Checking usage of component {} in profiles", componentId);
 	List<ProfileDescription> result = new ArrayList<ProfileDescription>();
 	for (ProfileDescription profileDescription : getProfileDescriptions()) {
 	    CMDComponentSpec profile = getMDProfile(profileDescription.getId());
 	    if (profile != null && findComponentId(componentId, profile.getCMDComponent())) {
+		LOG.debug("Component {} used in profile {}", componentId, profile.getHeader().getID());
 		result.add(profileDescription);
 	    }
 	}
@@ -81,7 +85,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     protected static String stripRegistryId(String id) {
 	return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
     }
-
+    
     protected static void enrichSpecHeader(CMDComponentSpec spec, AbstractDescription description) {
 	Header header = spec.getHeader();
 	header.setID(description.getId());
@@ -92,7 +96,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	    header.setDescription(description.getDescription());
 	}
     }
-
+    
     protected static boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
 	for (CMDComponentType cmdComponent : componentReferences) {
 	    if (componentId.equals(cmdComponent.getComponentId())) {
@@ -103,11 +107,11 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	}
 	return false;
     }
-
+    
     protected static void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
 	MDMarshaller.generateXsd(expandedSpec, outputStream);
     }
-
+    
     protected static void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
 	try {
 	    MDMarshaller.marshal(spec, outputStream);
@@ -117,19 +121,23 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	    LOG.error("Cannot marshall spec: " + spec, e);
 	}
     }
-
+    
     protected void checkStillUsed(String componentId) throws DeleteFailedException, ComponentRegistryException {
 	for (ProfileDescription profileDescription : getProfileDescriptions()) {
 	    CMDComponentSpec spec = getMDProfile(profileDescription.getId());
 	    if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
+		LOG.warn("Cannot delete component {}, still used in profile {} and possibly other profiles and/or components", componentId, spec.getHeader().getID());
 		// Profile match - throw
 		throw new DeleteFailedException("Component is still in use by other components or profiles. Request component usage for details.");
 	    }
 	}
-
+	
+	LOG.debug("Component {} is not used in any profiles", componentId);
+	
 	for (ComponentDescription desc : getComponentDescriptions()) {
 	    CMDComponentSpec spec = getMDComponent(desc.getId());
 	    if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
+		LOG.warn("Cannot delete component {}, still used in component {} and possibly other components", componentId, spec.getHeader().getID());
 		// Component match -> throw
 		throw new DeleteFailedException("Component is still in use by one or more other components. Request component usage for details.");
 	    }
