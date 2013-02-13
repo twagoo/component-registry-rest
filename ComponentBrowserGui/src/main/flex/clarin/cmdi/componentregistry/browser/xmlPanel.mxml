@@ -13,7 +13,7 @@
 	
 	<mx:Script>
 		<!-- 
-			The code below assures lazy loading of the component XML into the scrollable text area. 
+			The code below ensures lazy loading of the component XML into the scrollable text area. 
 			Large component specifications can cause the application to hang or even crash the browser, 
 			see <https://trac.clarin.eu/ticket/268>
 		-->
