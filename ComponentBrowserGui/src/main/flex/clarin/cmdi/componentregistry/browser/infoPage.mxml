@@ -22,15 +22,19 @@
 	<mx:ViewStack id="infoViewStack"
 				  height="100%"
 				  width="100%"
-				  styleName="borderStyles">
+				  styleName="borderStyles"
+				  change="infoViewStack_changeHandler(event)"
+				  >
 
 		<browser:xmlBrowsePanel id="viewPanel"
 								label="view"
 								cmdComponent="{cmdComponent}"
 								itemDescription="{_itemDescription}"/>
+		
 		<browser:xmlPanel id="xmlPanel"
 						  label="xml"
 						  cmdComponent="{cmdComponent}"/>
+		
 		<browser:CommentsPanel id="commentsPanel"
 							   label="{commentsLabel}"
 							   itemDescription="{_itemDescription}" 
@@ -45,6 +49,8 @@
 			import clarin.cmdi.componentregistry.services.Config;
 			
 			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.messaging.SubscriptionInfo;
 			
 			[Bindable]
 			private var _itemDescription:ItemDescription;
@@ -53,7 +59,7 @@
 				if(startupPanel == Config.BROWSER_PANEL_VIEW){
 					infoViewStack.selectedChild = viewPanel;
 				} else if(startupPanel == Config.BROWSER_PANEL_XML) {					
-					infoViewStack.selectedChild = xmlPanel;
+					//infoViewStack.selectedChild = xmlPanel;
 				} else if(startupPanel == Config.BROWSER_PANEL_COMMENTS) {
 					infoViewStack.selectedChild = commentsPanel;
 				}
@@ -74,6 +80,11 @@
 			private function commentsLoadedHandler(event:Event):void {
 				// After loading, re-create string for comments label because number of comments might have changed (e.g. after a post)
 				commentsPanel.label = commentsLabel;
+			}
+
+			protected function infoViewStack_changeHandler(event:IndexChangedEvent):void
+			{
+				xmlPanel.updateCmdComponentText();
 			}
 
 		]]>
