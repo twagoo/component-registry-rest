@@ -31,6 +31,7 @@ package clarin.cmdi.componentregistry.browser {
 			columns.push(createColumn("description", "Description"));
 			columns.push(createDateColumn());
 			columns.push(createCommentsColumn());
+			columns.push(createHiddenIdColumn());
 			return columns;
 		}
 		
@@ -80,6 +81,13 @@ package clarin.cmdi.componentregistry.browser {
 			c.width = 75;
 			c.sortCompareFunction = compareCommentsCount;
 			return c;
+		}
+		
+		private function createHiddenIdColumn():DataGridColumn {
+			// Hidden ID column is added so that one can use the search filter to find a component by Id
+			var idColumn:DataGridColumn = createColumn("id","Id");
+			idColumn.visible = false;
+			return idColumn;
 		}
 		
 		private static function compareCommentsCount(objectA:Object, objectB:Object):int {
