@@ -5,6 +5,7 @@ Release ComponentRegistry-1.13.0 (É)
 - Added help link to UI. https://trac.clarin.eu/ticket/222
 - Fixed superfluous expansion of components and profiles on save. https://trac.clarin.eu/ticket/223
 - Better handling of large specifications, fixed hangs and crashes due to lengthy XML. https://trac.clarin.eu/ticket/268
+- Profiles and components in the Component Browser can be filtered by id. https://trac.clarin.eu/ticket/225
 
 Release ComponentRegistry-1.12.0 (21 august 2012):
 - REST service produces 404 status when component requested that does not exist.
