@@ -88,7 +88,7 @@
 				addChild(commentsBox);
 				
 				// A panel for posting a comment (or a message 'login to post');
-				addPostPanel();
+				// duplication addPostPanel();
 				
 				// Do actual loading
 				service = new CommentListService(_itemDescription, _itemDescription.isInUserSpace);
