@@ -74,6 +74,7 @@
 			}
 			
 			private function get commentsLabel():String{
+				if (_itemDescription == null) {return "info panel has been reloaded";};
 				return "Comments (" + _itemDescription.commentsCount + ")";
 			}
 			
