@@ -19,8 +19,15 @@ package clarin.cmdi.componentregistry.services {
 	
 	public class DeleteService extends EventDispatcher {
 		public static const ITEM_DELETED:String = "itemDeleted";
+		public static const COMMENT_DELETED:String = "commentDeleted";
 		private var service:HTTPService;
 		private static const DELETE_METHOD:Object = {"method": "delete"};
+		
+		
+		// the item to be deleted can be either a comment, or profile/component
+		// depending on int, different events should be issues because different processing will take place
+		// default value is false
+		private var _isComment:Boolean=false;
 		
 		private static var _instance:DeleteService = new DeleteService();
 		
@@ -33,6 +40,7 @@ package clarin.cmdi.componentregistry.services {
 			service.addEventListener(ResultEvent.RESULT, handleResult);
 			service.method = HTTPRequestMessage.POST_METHOD;
 		}
+		
 		
 		public function deleteItem(item:ItemDescription):void {
 			CursorManager.setBusyCursor();
@@ -64,10 +72,8 @@ package clarin.cmdi.componentregistry.services {
 		}
 		
 		public function deleteComment(comment:Comment):void {
-			// Deletion of comments triggers the same response as deletion of items (which was there first). This is suboptimal
-			// but will do for now. E.g. the error messages refer to items but that is generic enough to work in the context of comment deletion. 
-			// Also there is just one event, splitting this out is trivial but a bit messy.
-			
+			// mark the moment that we want to delete a comment but not rofile/component
+			_isComment = true;
 			CursorManager.setBusyCursor();
 			var url:URI = new URI(comment.dataUrl);
 			if (comment.itemDescription.isInUserSpace) {
@@ -84,13 +90,21 @@ package clarin.cmdi.componentregistry.services {
 		private function handleResult(resultEvent:ResultEvent):void {
 			CursorManager.removeBusyCursor();
 			if (resultEvent.statusCode >= 200 && resultEvent.statusCode < 300) {
-				dispatchEvent(new Event(ITEM_DELETED));
+				if (_isComment) {
+					dispatchEvent(new Event(COMMENT_DELETED));
+					// do not forget to reset the value back to false when a comment is deleated
+					_isComment=false;
+				}
+				else  {
+					dispatchEvent(new Event(ITEM_DELETED));
+				}
 			} else {
 				Alert.show("Unexpected error, server returned status: " + resultEvent.statusCode + "\n Message = ");
 			}
 		}
 		
 		public function handleError(faultEvent:FaultEvent):void {
+			_isComment = false;
 			CursorManager.removeBusyCursor();
 			if (faultEvent.statusCode == 401) { //Apparrently depending on browser status codes and errormessages are sometimes not passed along to flash.
 				Alert.show("Item not deleted:" + faultEvent.message.body);
