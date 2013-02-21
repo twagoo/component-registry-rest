@@ -20,11 +20,13 @@ package clarin.cmdi.componentregistry.browser
 		private var dateLabel:Label = new Label();
 		private var commentText:Text = new Text();
 		private var comment:Comment;
+		private var _deleteSrvOfCommentsPanel:DeleteService;
 		
-		public function CommentPanel(comment:Comment)
+		public function CommentPanel(comment:Comment, deleteSrvOfCommentsPanel:DeleteService)
 		{
 			super();
 			this.comment = comment;
+			this._deleteSrvOfCommentsPanel = deleteSrvOfCommentsPanel;
 			
 			initLayout();
 			setValues();
@@ -74,7 +76,7 @@ package clarin.cmdi.componentregistry.browser
 		
 		private function deleteHandler(event:CloseEvent):void {
 			if(event.detail == Alert.OK){
-				DeleteService.instance.deleteComment(comment);
+				_deleteSrvOfCommentsPanel.deleteComment(comment);
 			}	
 		}
 	}

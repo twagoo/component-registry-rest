@@ -35,8 +35,9 @@
 		
 		[Bindable]
 		private var _itemDescription:ItemDescription;
-		private var service:CommentListService;
 		
+		private var service:CommentListService;
+		private var _deleteSrvComments:DeleteService;
 		private var commentsBox:VBox;
 		
 		private const hPadding:int = 5;
@@ -58,7 +59,8 @@
 			this.setStyle("paddingRight", vPadding);
 			this.setStyle("paddingBottom", hPadding);
 			
-			DeleteService.instance.addEventListener(DeleteService.COMMENT_DELETED, commentDeletedHandler);
+			_deleteSrvComments=new DeleteService();
+			_deleteSrvComments.addEventListener(_deleteSrvComments.COMMENT_DELETED, commentDeletedHandler);
 		}
 		
 	   
@@ -125,7 +127,7 @@
 				
 				if(commentsCount > 0) {
 					for each(var comment:Comment in service.comments) {
-						var panel:CommentPanel = new CommentPanel(comment);
+						var panel:CommentPanel = new CommentPanel(comment, _deleteSrvComments);
 						commentsBox.addChild(panel);
 					}
 				} else {

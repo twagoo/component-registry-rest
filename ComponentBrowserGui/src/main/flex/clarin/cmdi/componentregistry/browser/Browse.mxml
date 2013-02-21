@@ -37,7 +37,8 @@
 			[Bindable]
 			private var selectedComponentSrv:ComponentInfoService = new ComponentInfoService();
 			
-			private var deleteSrv:DeleteService = DeleteService.instance;
+			private var _deleteSrvProfiles:DeleteService;
+			private var _deleteSrvComponents:DeleteService;
 			
 			[Bindable]
 			private var profilesMenu:BrowseContextMenu;
@@ -54,13 +55,19 @@
 			private const bigPadding:int =10;
 			
 			public function init():void {
+				
+				_deleteSrvProfiles=new DeleteService();
+				_deleteSrvComponents=new DeleteService();
+				
 				profilesMenu = new BrowseContextMenu();
 				profilesMenu.viewStack = this.parent as RegistryViewStack;
-				profilesMenu.deleteService = deleteSrv;
+				profilesMenu.deleteService = _deleteSrvProfiles;
 				componentsMenu = new BrowseContextMenu(true);
 				componentsMenu.viewStack = this.parent as RegistryViewStack;
-				componentsMenu.deleteService = deleteSrv;
-				deleteSrv.addEventListener(DeleteService.ITEM_DELETED, handleItemDeleted);
+				componentsMenu.deleteService = _deleteSrvProfiles;
+				
+				_deleteSrvProfiles.addEventListener(_deleteSrvProfiles.ITEM_DELETED, handleItemDeleted);
+				_deleteSrvComponents.addEventListener(_deleteSrvComponents.ITEM_DELETED, handleItemDeleted);
 				
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setUserSpace);
