@@ -60,7 +60,7 @@
 			this.setStyle("paddingBottom", hPadding);
 			
 			_deleteSrvComments=new DeleteService();
-			_deleteSrvComments.addEventListener(_deleteSrvComments.COMMENT_DELETED, commentDeletedHandler);
+			_deleteSrvComments.addEventListener(_deleteSrvComments.ITEM_DELETED, commentDeletedHandler);
 		}
 		
 	   

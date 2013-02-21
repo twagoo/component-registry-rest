@@ -19,7 +19,6 @@ package clarin.cmdi.componentregistry.services {
 	
 	public class DeleteService extends EventDispatcher {
 		public const ITEM_DELETED:String = "itemDeleted";
-		public const COMMENT_DELETED:String = "commentDeleted";
 
 		private var service:HTTPService;
 		private const DELETE_METHOD:Object = {"method": "delete"};
