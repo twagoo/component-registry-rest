@@ -87,11 +87,11 @@ package clarin.cmdi.componentregistry.services {
 		public function handleError(faultEvent:FaultEvent):void {
 			CursorManager.removeBusyCursor();
 			if (faultEvent.statusCode == 401) { //Apparrently depending on browser status codes and errormessages are sometimes not passed along to flash.
-				Alert.show("Item not deleted:" + faultEvent.message.body);
+				Alert.show("Item not deleted. Authentication failed. " + faultEvent.message.body);
 			} else if (faultEvent.statusCode == 403) {
-				Alert.show("Item not deleted:" + faultEvent.message.body);
+				Alert.show("Item not deleted. Deletion not allowed. " + faultEvent.message.body);
 			} else {
-				Alert.show("Item not deleted: Item is either public or in the case of a component still referenced by other components/profiles.");
+				Alert.show("Item not deleted: Item could be public or in the case of a component still referenced by other components/profiles.");
 			}
 		}
 		
