@@ -1,6 +1,6 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.13.0 (É)
+Release ComponentRegistry-1.13.0 (25 February 2013)
 - Added RSS feeds for public profiles, components, and comments. https://trac.clarin.eu/ticket/180
 - Added help link to UI. https://trac.clarin.eu/ticket/222
 - Fixed superfluous expansion of components and profiles on save. https://trac.clarin.eu/ticket/223
@@ -8,7 +8,7 @@ Release ComponentRegistry-1.13.0 (É)
 - Profiles and components in the Component Browser can be filtered by id. https://trac.clarin.eu/ticket/225
 - Concept link URIs get validated in the Component Editor. https://trac.clarin.eu/ticket/249
 
-Release ComponentRegistry-1.12.0 (21 august 2012):
+Release ComponentRegistry-1.12.0 (21 August 2012):
 - REST service produces 404 status when component requested that does not exist.
 - Users can delete their own comments from the Flex UI. http://trac.clarin.eu/ticket/185
 - Attribute name uniqueness check in editor of Flex UI. http://trac.clarin.eu/ticket/184
@@ -22,11 +22,11 @@ Release ComponentRegistry-1.12.0 (21 august 2012):
 - Made elements and components in component editor collapsable. http://trac.clarin.eu/ticket/217
 - Removed top-level tabs in the Flex UI, added buttons to browser, editor and import for navigation. http://trac.clarin.eu/ticket/218
 
-Release ComponentRegistry-1.11.1 (10 april 2012):
+Release ComponentRegistry-1.11.1 (10 April 2012):
 - Fixed caching of w3c xml.xsd schema in validator
 - Fixes issue with user settings page users without user entry in database
 
-Release ComponentRegistry-1.11.0 (3 april 2012):
+Release ComponentRegistry-1.11.0 (3 April 2012):
 - Upgraded to Saxon-HE 9.4
 - Validation of component specifications now also supports schematron rules in the general component schema.
 - Flex component editor does client side checks for duplicate component names.
@@ -36,7 +36,7 @@ Release ComponentRegistry-1.11.0 (3 april 2012):
 - Users can set their display name through a web form linked from the Flex UI. http://trac.clarin.eu/ticket/156
 - 'Save' button in editor is only enabled when editing existing components/profiles from workspace. http://trac.clarin.eu/ticket/165
 
-Release ComponentRegistry-1.10.0 (4 november 2011):
+Release ComponentRegistry-1.10.0 (4 November 2011):
 - Attributes can be added and edited on components. http://trac.clarin.eu/ticket/125
 - ConceptLinks can be assigned to attributes of components and elements. http://trac.clarin.eu/ticket/125#comment:3
 - ConceptLinks are enabled for Components. The search is filtered to show 'container' type concepts only. http://trac.clarin.eu/ticket/141
@@ -44,13 +44,13 @@ Release ComponentRegistry-1.10.0 (4 november 2011):
 - Added the mdEditor parameter to registry/profiles REST call to filter on profiles that should appear in e.g. Arbil. http://trac.clarin.eu/ticket/160
 - An 'about' screen can be triggered from the context menu that shows some info including the application version. http://trac.clarin.eu/ticket/106
 
-Release ComponentRegistry-1.9.1 (29 september 2011):
+Release ComponentRegistry-1.9.1 (29 September 2011):
 - When recursion is detected while expanding (for XML or XSD), an exception is thrown, which will lead to an error response to the user rather than an infinite loop and no response. http://trac.clarin.eu/ticket/148
 
-Release ComponentRegistry-1.9 (22 september 2011):
+Release ComponentRegistry-1.9 (22 September 2011):
 - Save private components works even when component is used, warning message is shown in Flex UI http://trac.clarin.eu/ticket/134
 
-Release ComponentRegistry-1.8.1 (29 june 2011):
+Release ComponentRegistry-1.8.1 (29 June 2011):
 - Fixed some issues with UTF-8 handling http://trac.clarin.eu/ticket/133
 
 Release ComponentRegistry-1.8 (8 June 2011):
