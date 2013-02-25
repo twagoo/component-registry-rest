@@ -18,7 +18,7 @@
 				var APPINFO:Namespace = new Namespace("APPINFO");
 				if(APPINFO != null){
 					try{
-						version = APPINFO::version;
+						version = APPINFO::version + " (r" + APPINFO::revision + ")";
 					} catch(err:ReferenceError){
 						// Version set at compilation
 						version = "?";
