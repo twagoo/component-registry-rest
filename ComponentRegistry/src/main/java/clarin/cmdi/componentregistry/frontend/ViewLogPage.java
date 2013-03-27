@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -20,6 +21,8 @@ import org.apache.wicket.model.Model;
  * @author paucas
  */
 public class ViewLogPage extends SecureAdminWebPage {
+
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(ViewLogPage.class);
 
     public ViewLogPage(final PageParameters pageParameters) {
 	super(pageParameters);
@@ -45,20 +48,26 @@ public class ViewLogPage extends SecureAdminWebPage {
 	final File logFile = getLogFile();
 	if (logFile != null) {
 	    try {
-		final RandomAccessFile raLogFile = geFileTail(logFile, tailSize);
+		RandomAccessFile raLogFile = null;
 		try {
+		    raLogFile = geFileTail(logFile, tailSize);
 		    final String content = getLogFileContent(raLogFile);
 
 		    add(new Label("logLabel", String.format("Showing final %s bytes (or less) of total %s in %s:", numberFormat.format(tailSize), numberFormat.format(raLogFile.length()), logFile)));
 		    add(new TextArea("logText", new Model(content)));
 
 		    add(new DownloadLink("logDownloadLink", logFile));
+		} catch (IOException ioEx) {
+		    add(new Label("logLabel", "Could not read from log file. See error message below."));
+		    add(new TextArea("logText", new Model(ioEx.getMessage())));
+		    throw (ioEx);
 		} finally {
-		    raLogFile.close();
+		    if (raLogFile != null) {
+			raLogFile.close();
+		    }
 		}
 	    } catch (IOException ioEx) {
-		add(new Label("logLabel", "Could not read from log file. See error message below."));
-		add(new TextArea("logText", new Model(ioEx.getMessage())));
+		logger.error("Error in reading log file", ioEx);
 	    }
 	}
     }
