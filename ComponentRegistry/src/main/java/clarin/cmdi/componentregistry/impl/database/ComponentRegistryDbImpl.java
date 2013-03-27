@@ -241,7 +241,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    return result;
 	} else {
 	    // May exist, but not in this workspace
-	    LOG.warn("Could not find profile '{}' in registry '{}'", new Object[]{id, this.toString()});
+	    LOG.debug("Could not find profile '{}' in registry '{}'", new Object[]{id, this.toString()});
 	    return null;
 	}
     }
@@ -265,7 +265,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	    return result;
 	} else {
 	    // May exist, but not in this workspace
-	    LOG.warn("Could not find component '{}' was in registry '{}'", new Object[]{id, this.toString()});
+	    LOG.info("Could not find component '{}' was in registry '{}'", new Object[]{id, this.toString()});
 	    return null;
 	}
     }
