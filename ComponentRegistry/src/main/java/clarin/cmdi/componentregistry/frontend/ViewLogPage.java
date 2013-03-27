@@ -46,12 +46,16 @@ public class ViewLogPage extends SecureAdminWebPage {
 	if (logFile != null) {
 	    try {
 		final RandomAccessFile raLogFile = geFileTail(logFile, tailSize);
-		final String content = getLogFileContent(raLogFile);
+		try {
+		    final String content = getLogFileContent(raLogFile);
 
-		add(new Label("logLabel", String.format("Showing final %s bytes (or less) of total %s in %s:", numberFormat.format(tailSize), numberFormat.format(raLogFile.length()), logFile)));
-		add(new TextArea("logText", new Model(content)));
+		    add(new Label("logLabel", String.format("Showing final %s bytes (or less) of total %s in %s:", numberFormat.format(tailSize), numberFormat.format(raLogFile.length()), logFile)));
+		    add(new TextArea("logText", new Model(content)));
 
-		add(new DownloadLink("logDownloadLink", logFile));
+		    add(new DownloadLink("logDownloadLink", logFile));
+		} finally {
+		    raLogFile.close();
+		}
 	    } catch (IOException ioEx) {
 		add(new Label("logLabel", "Could not read from log file. See error message below."));
 		add(new TextArea("logText", new Model(ioEx.getMessage())));
