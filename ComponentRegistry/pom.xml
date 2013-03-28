@@ -232,7 +232,7 @@
 	<!-- Properties to configure ComponentRegistry override on commandline with -D or change here -->
 	<serviceRootUrl>http://localhost:8080/${project.artifactId}</serviceRootUrl>
 	<!-- Will be inserted in context.xml -->
-	<webXmlPath>src/main/webapp/WEB-INF/web.xml</webXmlPath>
+	<webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
 	<!-- non-shib web.xml -->
 	<isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
 	<ComponentRegistrySwfName>${project.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
