@@ -9,6 +9,8 @@ div.container {
 div.treeView {
     float: left;
     width: 300px;
+    max-height: 700px;
+    overflow: auto;
 }
 
 div.infoView {
