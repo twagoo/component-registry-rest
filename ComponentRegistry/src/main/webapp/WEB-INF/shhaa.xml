@@ -5,7 +5,8 @@
 
 	<authentication>
 	    <shibheader>
-		<username>eduPersonPrincipalName</username>
+		<username>oid:eduPersonPrincipalName</username>
+		<username>mace:eduPersonPrincipalName</username>
 		<username>eduPersonTargetedID</username>
 		<session>Shib-Session-ID</session>
 		<idp>Shib-Identity-Provider</idp>
