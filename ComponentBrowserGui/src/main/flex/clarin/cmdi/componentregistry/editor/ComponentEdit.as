@@ -10,6 +10,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.components.UpIconButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
+	import clarin.cmdi.componentregistry.services.IsocatService;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -172,7 +173,7 @@ package clarin.cmdi.componentregistry.editor {
 		private function addConceptLink():void {
 			addToHideableForm(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _component.conceptLink, function(val:String):void {
 				_component.conceptLink = val;
-			}));
+			}, IsocatService.TYPE_CONTAINER));
 		}
 		
 		private function addRuler():void {

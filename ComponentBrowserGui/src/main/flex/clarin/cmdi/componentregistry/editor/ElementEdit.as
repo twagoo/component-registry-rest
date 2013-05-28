@@ -6,6 +6,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.common.components.UpIconButton;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
+	import clarin.cmdi.componentregistry.services.IsocatService;
 	
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -66,7 +67,7 @@ package clarin.cmdi.componentregistry.editor {
 			addToHideableForm(createNameInput());
 			addToHideableForm(new ConceptLinkInput(LabelConstants.CONCEPTLINK, _element.conceptLink, function(val:String):void {
 					_element.conceptLink = val;
-				}));
+				}, IsocatService.TYPE_COMPLEX));
 			addToHideableForm(new FormItemInputLine(LabelConstants.DOCUMENTATION, _element.documentation, function(val:String):void {
 					_element.documentation = val;
 				}));
