@@ -39,8 +39,12 @@ How to set up for development/building from source
 --------------------------------------------------
 * Creating initial setup files:
 
- - in ComponentBrowserGui: `mvn buildnumber:create flexmojos:flexbuilder` (to generate project files for Flex Builder)
- - in ComponentRegistry: `mvn eclipse:eclipse`  (generates eclipse config)
+ - in ComponentBrowserGui: `mvn buildnumber:create flexmojos:flexbuilder` 
+	- This generates project files for Flash Builder. Open in FB using 
+	  File > Import Flex Project and use the 'Project Folder' option.
+ - in ComponentRegistry: `mvn eclipse:eclipse`  
+	- Generates eclipse configuration
+	- For NetBeans, simply open the POM as a project
 
 When using FlashBuilder to develop, make sure to configure the correct Flex SDK. It should
 be version 3.6, which you can download for free at <http://www.adobe.com/cfusion/entitlement/index.cfm?e=flex3sdk>.
