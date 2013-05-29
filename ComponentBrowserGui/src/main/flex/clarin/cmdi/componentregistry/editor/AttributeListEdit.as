@@ -7,6 +7,7 @@ package clarin.cmdi.componentregistry.editor {
 	import clarin.cmdi.componentregistry.editor.model.CMDAttribute;
 	import clarin.cmdi.componentregistry.editor.model.ValueSchemeInterface;
 	import clarin.cmdi.componentregistry.services.ElementTypesListService;
+	import clarin.cmdi.componentregistry.services.IsocatService;
 	
 	import mx.binding.utils.ChangeWatcher;
 	
@@ -83,8 +84,7 @@ package clarin.cmdi.componentregistry.editor {
 		    addEditBar(attribute, attributeBox);
 			attributeBox.addChild(ValueSchemeInput.makeValueSchemeInputFromValueScheme(attribute));
 			attributeBox.addChild(new ConceptLinkInput(LabelConstants.CONCEPTLINK, attribute.conceptLink, function(val:String):void {
-				attribute.conceptLink = val;
-			}));
+				attribute.conceptLink = val;}, IsocatService.TYPE_COMPLEX));
 			
 			return attributeBox;
 		}
