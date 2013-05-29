@@ -121,7 +121,14 @@
 		
 		private function commentsLoaded(event:Event):void{
 			if(service) {
-				var commentsCount:int = service.comments.length;
+				var commentsCount:int;
+				
+				if (service.comments) {
+					commentsCount=service.comments.length;
+				}
+				else {
+					commentsCount=0;
+				}
 				
 				if (_itemDescription != null) {_itemDescription.commentsCount = commentsCount;}
 				

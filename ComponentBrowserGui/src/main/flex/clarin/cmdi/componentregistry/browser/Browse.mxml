@@ -186,6 +186,28 @@
 					userSpaceCB.selectedIndex = 0;
 				}
 			}
+			
+			private function getSelectedIndex():int{
+				trace(Config.instance.startupItem);
+				if (isComponentId(Config.instance.startupItem)) {
+					trace("1");
+					return 1;
+				} else {
+					trace("0");
+					return 0;
+				}
+			}
+			
+			private function isComponentId(id:String):Boolean{
+				if (id==null) {return false;}
+				var index:int=id.search("c_");
+				if (index>-1) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+			
 		]]>
 	</mx:Script>
 	
@@ -219,6 +241,7 @@
 				 width="100%">
 			
 			<mx:TabNavigator id="tabnav"
+							 selectedIndex="{getSelectedIndex()}"
 							 width="100%"
 							 height="100%"
 							 color="0x323232"
