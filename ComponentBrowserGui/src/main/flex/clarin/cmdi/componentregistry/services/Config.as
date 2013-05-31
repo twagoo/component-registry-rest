@@ -19,6 +19,15 @@ package clarin.cmdi.componentregistry.services {
 		public static const REGISTRY_PARAM_ITEM:String = "item";
 		public static const REGISTRY_PARAM_SPACE:String = "space";
 		public static const REGISTRY_PARAM_DEBUG:String = "debug";
+		
+		// REGISTRY_ID, COMPONENT_PREFIX, and PROFILE_PREFIX must be the same as on the server!
+		// REGISTRY_ID isdefined in ComponentRegistry
+		// COMPONENT_PREFIX is defined in ComponentDescription
+		// PROFILE_PREFIX is defined in ProfileDescription
+		private static const REGISTRY_ID="clarin.eu:cr1:";
+		private static const COMPONENT_PREFIX=REGISTRY_ID+"c_";
+		private static const PROFILE_PREFIX=REGISTRY_ID+"p_";
+		
 
 		//Possible views to start with.
 		public static const VIEW_BROWSE:String = "browse";
@@ -31,7 +40,7 @@ package clarin.cmdi.componentregistry.services {
 		//Possible space to start with.
 		public static const SPACE_USER:String = "user";
 		public static const SPACE_PUBLIC:String = "public";
-
+		
 		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
 		private static const COMPONENT_USAGE_URL:String = "/rest/registry/components/usage/";
@@ -43,8 +52,12 @@ package clarin.cmdi.componentregistry.services {
 		private static const USER_SETTINGS_URL:String = "/admin/userSettings";
 		private static const COMMENTS_URL_PATH:String = "/comments/";
 		private static const ISOCAT_SERVLET:String = "/isocat";
-
-		private static var _instance:Config = new Config();
+		
+		
+		
+		public static var _instance:Config = new Config();
+		public static var COMPONENT_PREFIX;
+		public static var PROFILE_PREFIX;
 
 		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
 		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";

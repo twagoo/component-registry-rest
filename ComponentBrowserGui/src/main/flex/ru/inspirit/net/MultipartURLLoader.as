@@ -295,7 +295,6 @@
 			}
 			
 			addListener();
-			
 			_loader.load(urlRequest);
 		}
 		
