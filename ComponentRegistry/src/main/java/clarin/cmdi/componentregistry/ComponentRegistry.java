@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface ComponentRegistry {
 
+    // Attention! REGISTRY_ID here and the client's Config.REGISTRY_ID must be the same 
+    // If you change REGISTRY_ID here, then change the client's  Config.REGISTRY_ID
     public static final String REGISTRY_ID = "clarin.eu:cr1:";
     public static final String PUBLIC_NAME = "Public Registry";
 

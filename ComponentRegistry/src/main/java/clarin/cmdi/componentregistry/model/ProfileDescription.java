@@ -10,11 +10,15 @@ import clarin.cmdi.componentregistry.IdSequence;
 @XmlRootElement(name = "profileDescription")
 public class ProfileDescription extends AbstractDescription implements Serializable {
 
+    // Attention! PROFILE_PREFIX here and the client's Config.PROFILE_PREFIX must be the same 
+    // If you change PROFILE_PREFIX here, then the client's  Config.PROFILE_PREFIX
+    public static final String PROFILE_PREFIX = ComponentRegistry.REGISTRY_ID + "p_";
+    
     private static final long serialVersionUID = 1L;
     private boolean showInEditor = true;
 
     public static ProfileDescription createNewDescription() {
-	String id = ComponentRegistry.REGISTRY_ID + "p_" + IdSequence.get();
+	String id = PROFILE_PREFIX + IdSequence.get();
 	ProfileDescription desc = new ProfileDescription();
 	desc.setId(id);
 	desc.setRegistrationDate(createNewDate());

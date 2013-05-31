@@ -9,7 +9,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "componentDescription")
 public class ComponentDescription extends AbstractDescription implements Serializable {
 
+    
+    
+    // Attention! COMPONENT_PREFIX here and the client's Config.COMPONENT_PREFIX must be the same 
+    // If you change COMPONENT_PREFIX here, then change the client's  config.COMPONENT_PREFIX
+    public static final String COMPONENT_PREFIX = ComponentRegistry.REGISTRY_ID + "c_";
+    
     private static final long serialVersionUID = 1L;
+    
     public static final Comparator<? super ComponentDescription> COMPARE_ON_GROUP_AND_NAME = new Comparator<ComponentDescription>() {
 	@Override
 	public int compare(ComponentDescription o1, ComponentDescription o2) {
@@ -29,7 +36,7 @@ public class ComponentDescription extends AbstractDescription implements Seriali
     };
 
     public static ComponentDescription createNewDescription() {
-	String id = ComponentRegistry.REGISTRY_ID + "c_" + IdSequence.get();
+	String id = COMPONENT_PREFIX + IdSequence.get();
 	ComponentDescription desc = new ComponentDescription();
 	desc.setId(id);
 	desc.setRegistrationDate(createNewDate());
