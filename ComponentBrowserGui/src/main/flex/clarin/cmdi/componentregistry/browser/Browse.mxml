@@ -198,7 +198,7 @@
 			private function isComponentId(id:String):Boolean{
 				if (id==null) {return false;}
 				var index:int=id.search(Config.COMPONENT_PREFIX);
-				if (index!=0) {
+				if (index>=0) {
 					return true;
 				} else {
 					return false;

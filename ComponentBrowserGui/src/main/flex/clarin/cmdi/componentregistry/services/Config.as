@@ -24,9 +24,9 @@ package clarin.cmdi.componentregistry.services {
 		// REGISTRY_ID isdefined in ComponentRegistry
 		// COMPONENT_PREFIX is defined in ComponentDescription
 		// PROFILE_PREFIX is defined in ProfileDescription
-		private static const REGISTRY_ID="clarin.eu:cr1:";
-		private static const COMPONENT_PREFIX=REGISTRY_ID+"c_";
-		private static const PROFILE_PREFIX=REGISTRY_ID+"p_";
+		private static const REGISTRY_ID:String="clarin.eu:cr1:";
+		public static const COMPONENT_PREFIX:String=REGISTRY_ID+"c_";
+		public static const PROFILE_PREFIX:String=REGISTRY_ID+"p_";
 		
 
 		//Possible views to start with.
@@ -56,9 +56,7 @@ package clarin.cmdi.componentregistry.services {
 		
 		
 		public static var _instance:Config = new Config();
-		public static var COMPONENT_PREFIX;
-		public static var PROFILE_PREFIX;
-
+		
 		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
 		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
