@@ -97,7 +97,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		// TODO: support other status types
 		case PRIVATE:
 		    if (registryOwner == null) {
-			throw new ComponentRegistryException("Development workspace without owner!");
+			throw new ComponentRegistryException("Private workspace without owner!");
 		    }
 		    // TODO: Support group space
 		    return profileDescriptionDao.getUserspaceDescriptions(registryOwner.getId());

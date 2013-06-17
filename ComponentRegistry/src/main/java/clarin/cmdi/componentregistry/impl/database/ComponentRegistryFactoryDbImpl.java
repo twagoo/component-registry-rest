@@ -55,7 +55,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     public ComponentRegistry getComponentRegistry(ComponentStatus status, Owner owner, UserCredentials credentials) throws UserUnauthorizedException {
 	switch (status) {
 	    case PRIVATE:
-		return getDevelopmentRegistry(owner, credentials);
+		return getPrivateRegistry(owner, credentials);
 	    case PUBLISHED:
 		return getPublicRegistry();
 	    default:
@@ -64,12 +64,12 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	}
     }
 
-    private ComponentRegistry getDevelopmentRegistry(Owner owner, UserCredentials credentials) throws IllegalArgumentException, DataAccessException, UserUnauthorizedException {
+    private ComponentRegistry getPrivateRegistry(Owner owner, UserCredentials credentials) throws IllegalArgumentException, DataAccessException, UserUnauthorizedException {
 	if (owner == null || owner instanceof OwnerUser) {
 	    RegistryUser user = getOrCreateUser(credentials);
 	    if (user != null) {
 		if (owner != null && !user.getId().equals(owner.getId())) {
-		    throw new UserUnauthorizedException("User cannot access other user's development registry");
+		    throw new UserUnauthorizedException("User cannot access other user's private registry");
 		}
 
 		try {
