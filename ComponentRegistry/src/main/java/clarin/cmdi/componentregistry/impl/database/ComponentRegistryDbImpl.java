@@ -74,7 +74,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * @see setUser
      */
     public ComponentRegistryDbImpl() {
-	this.registryStatus = ComponentStatus.PUBLIC;
+	this.registryStatus = ComponentStatus.PUBLISHED;
     }
 
     /**
@@ -95,13 +95,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	try {
 	    switch (registryStatus) {
 		// TODO: support other status types
-		case DEVELOPMENT:
+		case PRIVATE:
 		    if (registryOwner == null) {
 			throw new ComponentRegistryException("Development workspace without owner!");
 		    }
 		    // TODO: Support group space
 		    return profileDescriptionDao.getUserspaceDescriptions(registryOwner.getId());
-		case PUBLIC:
+		case PUBLISHED:
 		    return profileDescriptionDao.getPublicProfileDescriptions();
 		default:
 		    throw new ComponentRegistryException("Unsupported status type" + registryStatus);
@@ -506,12 +506,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     /**
      *
      * @return whether this is the public registry
-     * @deprecated use {@link #getStatus() } to check if this is the {@link ComponentStatus#PUBLIC public registry}
+     * @deprecated use {@link #getStatus() } to check if this is the {@link ComponentStatus#PUBLISHED public registry}
      */
     @Override
     @Deprecated
     public boolean isPublic() {
-	return registryStatus == ComponentStatus.PUBLIC;
+	return registryStatus == ComponentStatus.PUBLISHED;
     }
 
     /**

@@ -75,7 +75,7 @@ public class AdminRegistryTest {
 	adminReg.setProfileDescriptionDao(profileDescriptionDao);
 	CMDItemInfo fileInfo = new CMDItemInfo();
 	fileInfo.setForceUpdate(false);
-	fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, ComponentStatus.PUBLIC));
+	fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, ComponentStatus.PUBLISHED));
 	fileInfo.setContent(content1);
 	try {
 	    adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN);
@@ -100,7 +100,7 @@ public class AdminRegistryTest {
 
 	assertEquals(1, testRegistry.getProfileDescriptions().size());
 	fileInfo.setForceUpdate(false);
-	fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), false, profileDesc, ComponentStatus.PUBLIC));
+	fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), false, profileDesc, ComponentStatus.PUBLISHED));
 	adminReg.delete(fileInfo, PRINCIPAL_ADMIN); //Profile do not need to be forced they cannot be used by other profiles
 	assertEquals(0, testRegistry.getProfileDescriptions().size());
     }

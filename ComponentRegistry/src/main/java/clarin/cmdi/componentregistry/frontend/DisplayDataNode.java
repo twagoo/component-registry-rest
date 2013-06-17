@@ -15,7 +15,7 @@ public class DisplayDataNode implements Serializable {
 
     public DisplayDataNode(String name, boolean isDeleted) {
 	// TODO: what is sensible default status?
-	this(name, isDeleted, null, ComponentStatus.DEVELOPMENT);
+	this(name, isDeleted, null, ComponentStatus.PRIVATE);
     }
 
     public DisplayDataNode(String name, boolean isDeleted, AbstractDescription desc, ComponentStatus status) {

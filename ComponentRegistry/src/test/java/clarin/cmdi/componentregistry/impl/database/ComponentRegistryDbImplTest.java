@@ -413,7 +413,7 @@ public class ComponentRegistryDbImplTest {
     private ComponentRegistry getComponentRegistryForUser(Number userId) {
 	ComponentRegistryDbImpl componentRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
 	if (userId != null) {
-	    componentRegistry.setStatus(ComponentStatus.DEVELOPMENT, new OwnerUser(userId));
+	    componentRegistry.setStatus(ComponentStatus.PRIVATE, new OwnerUser(userId));
 	}
 	return componentRegistry;
     }
@@ -818,45 +818,45 @@ public class ComponentRegistryDbImplTest {
     @Test
     public void testGetStatus() {
 	ComponentRegistry register = new ComponentRegistryDbImpl();
-	assertEquals(ComponentStatus.PUBLIC, register.getStatus());
-	register = new ComponentRegistryDbImpl(ComponentStatus.DEVELOPMENT, null);
-	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	assertEquals(ComponentStatus.PUBLISHED, register.getStatus());
+	register = new ComponentRegistryDbImpl(ComponentStatus.PRIVATE, null);
+	assertEquals(ComponentStatus.PRIVATE, register.getStatus());
     }
 
     @Test
     public void testGetOwner() {
 	ComponentRegistry register = new ComponentRegistryDbImpl();
 	assertNull(register.getOwner());
-	register = new ComponentRegistryDbImpl(ComponentStatus.DEVELOPMENT, new OwnerUser(101));
+	register = new ComponentRegistryDbImpl(ComponentStatus.PRIVATE, new OwnerUser(101));
 	assertEquals(new OwnerUser(101), register.getOwner());
 
-	register = new ComponentRegistryDbImpl(ComponentStatus.DEVELOPMENT, new OwnerGroup(101));
+	register = new ComponentRegistryDbImpl(ComponentStatus.PRIVATE, new OwnerGroup(101));
 	assertEquals(new OwnerGroup(101), register.getOwner());
     }
 
     @Test
     public void testSetStatus() throws Exception {
 	// Construct with an owner
-	ComponentRegistryDbImpl register = new ComponentRegistryDbImpl(ComponentStatus.PUBLIC, new OwnerUser(101));
-	register.setStatus(ComponentStatus.DEVELOPMENT);
-	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	ComponentRegistryDbImpl register = new ComponentRegistryDbImpl(ComponentStatus.PUBLISHED, new OwnerUser(101));
+	register.setStatus(ComponentStatus.PRIVATE);
+	assertEquals(ComponentStatus.PRIVATE, register.getStatus());
 	// Owner should remain unchanged
 	assertEquals(new OwnerUser(101), register.getOwner());
 
 	// Construct with no owner
-	register = new ComponentRegistryDbImpl(ComponentStatus.PUBLIC, null);
-	register.setStatus(ComponentStatus.DEVELOPMENT);
-	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	register = new ComponentRegistryDbImpl(ComponentStatus.PUBLISHED, null);
+	register.setStatus(ComponentStatus.PRIVATE);
+	assertEquals(ComponentStatus.PRIVATE, register.getStatus());
 	// Owner should remain unchanged
 	assertNull(register.getOwner());
     }
 
     @Test
     public void testSetStatusAndOwner() throws Exception {
-	ComponentRegistryDbImpl register = new ComponentRegistryDbImpl(ComponentStatus.PUBLIC, new OwnerUser(101));
+	ComponentRegistryDbImpl register = new ComponentRegistryDbImpl(ComponentStatus.PUBLISHED, new OwnerUser(101));
 
-	register.setStatus(ComponentStatus.DEVELOPMENT, new OwnerGroup(102));
-	assertEquals(ComponentStatus.DEVELOPMENT, register.getStatus());
+	register.setStatus(ComponentStatus.PRIVATE, new OwnerGroup(102));
+	assertEquals(ComponentStatus.PRIVATE, register.getStatus());
 	assertEquals(new OwnerGroup(102), register.getOwner());
     }
 }

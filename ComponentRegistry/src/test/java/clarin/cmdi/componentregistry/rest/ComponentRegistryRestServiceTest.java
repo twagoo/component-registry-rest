@@ -690,7 +690,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testRegisterWithUserComponents() throws Exception {
-        ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, DummyPrincipal.DUMMY_CREDENTIALS);
+        ComponentRegistry userRegistry = componentRegistryFactory.getComponentRegistry(ComponentStatus.PRIVATE, null, DummyPrincipal.DUMMY_CREDENTIALS);
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";

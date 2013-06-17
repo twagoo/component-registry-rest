@@ -54,9 +54,9 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     @Override
     public ComponentRegistry getComponentRegistry(ComponentStatus status, Owner owner, UserCredentials credentials) throws UserUnauthorizedException {
 	switch (status) {
-	    case DEVELOPMENT:
+	    case PRIVATE:
 		return getDevelopmentRegistry(owner, credentials);
-	    case PUBLIC:
+	    case PUBLISHED:
 		return getPublicRegistry();
 	    default:
 		// TODO: Add support for other status types
@@ -126,7 +126,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	if (userId != null) {
 	    // Null means public registry
 	    // TODO: Make this more explicit
-	    componentRegistry.setStatus(ComponentStatus.DEVELOPMENT, new OwnerUser(userId));
+	    componentRegistry.setStatus(ComponentStatus.PRIVATE, new OwnerUser(userId));
 	}
 	return componentRegistry;
     }

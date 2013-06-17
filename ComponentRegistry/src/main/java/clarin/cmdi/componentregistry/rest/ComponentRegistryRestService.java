@@ -95,9 +95,9 @@ public class ComponentRegistryRestService {
     @Deprecated
     private static ComponentStatus getStatus(boolean userSpace) {
 	if (userSpace) {
-	    return ComponentStatus.DEVELOPMENT;
+	    return ComponentStatus.PRIVATE;
 	} else {
-	    return ComponentStatus.PUBLIC;
+	    return ComponentStatus.PUBLISHED;
 	}
     }
 

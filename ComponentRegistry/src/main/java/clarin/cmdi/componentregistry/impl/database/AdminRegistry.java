@@ -120,7 +120,7 @@ public class AdminRegistry {
     private ComponentRegistry getRegistry(Principal userPrincipal, AbstractDescription desc, CMDItemInfo info) {
 	ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
 	//TODO: More generic check
-	if (info.getStatus() == ComponentStatus.DEVELOPMENT /* || info.getStatus() == ComponentStatus.PRIVATE */) {
+	if (info.getStatus() == ComponentStatus.PRIVATE /* || info.getStatus() == ComponentStatus.DEVELOPMENT */) {
 	    registry = componentRegistryFactory.getOtherUserComponentRegistry(userPrincipal, info.getStatus(), new OwnerUser(Integer.parseInt(desc.getUserId())));
 	}
 	return registry;

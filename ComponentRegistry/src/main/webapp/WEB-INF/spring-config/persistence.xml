@@ -15,10 +15,12 @@
     <bean id="componentDescriptionDao" class="clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao">
 	<property name="dataSource" ref="dataSource"/>
     </bean>
+    
     <bean id="userDao" class="clarin.cmdi.componentregistry.impl.database.UserDao">
 	<property name="dataSource" ref="dataSource"/>
     </bean>
-        <bean id="commentsDao" class="clarin.cmdi.componentregistry.impl.database.CommentsDao">
+    
+    <bean id="commentsDao" class="clarin.cmdi.componentregistry.impl.database.CommentsDao">
 	<property name="dataSource" ref="dataSource"/>
     </bean>
 

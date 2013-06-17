@@ -54,22 +54,22 @@ public class ComponentRegistryFactoryDbImplTest {
     @Test
     public void getComponentRegistry() throws UserUnauthorizedException {
 	// Get public
-	assertNotNull(componentRegistryFactory.getComponentRegistry(ComponentStatus.PUBLIC, null, null));
+	assertNotNull(componentRegistryFactory.getComponentRegistry(ComponentStatus.PUBLISHED, null, null));
 
 	// Get for non-existing user
 	final RegistryUser testUser = UserDaoTest.createTestUser();
 	UserCredentials credentials = new DummyPrincipal(testUser.getPrincipalName()).getCredentials();
 
-	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, credentials);
+	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.PRIVATE, null, credentials);
 	assertNotNull(cr1);
 	// Get for existing user
-	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, credentials);;
+	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.PRIVATE, null, credentials);;
 	assertNotNull(cr2);
 	assertEquals(cr1.getOwner(), cr2.getOwner());
 
 	// Get for another new user
 	UserCredentials credentials2 = new DummyPrincipal(testUser.getPrincipalName() + "2").getCredentials();
-	ComponentRegistryDbImpl cr3 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, credentials2);
+	ComponentRegistryDbImpl cr3 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.PRIVATE, null, credentials2);
 	assertNotNull(cr3);
 	assertNotSame(cr1.getOwner(), cr3.getOwner());
     }
@@ -79,19 +79,19 @@ public class ComponentRegistryFactoryDbImplTest {
 	UserCredentials userCredentials = DummyPrincipal.DUMMY_PRINCIPAL.getCredentials();
 
 	// Create registry for new user
-	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.DEVELOPMENT, null, userCredentials);
+	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory.getComponentRegistry(ComponentStatus.PRIVATE, null, userCredentials);
 
 	Number id = cr1.getOwner().getId();
 
 	// Get it as admin
-	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, ComponentStatus.DEVELOPMENT, new OwnerUser(id));
+	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, ComponentStatus.PRIVATE, new OwnerUser(id));
 	assertNotNull(cr2);
 	// Should be this user's registry
 	assertEquals(cr1.getOwner(), cr2.getOwner());
 
 	// Try get it as non-admin
 	try {
-	    componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_PRINCIPAL, ComponentStatus.DEVELOPMENT, new OwnerUser(id));
+	    componentRegistryFactory.getOtherUserComponentRegistry(DummyPrincipal.DUMMY_PRINCIPAL, ComponentStatus.PRIVATE, new OwnerUser(id));
 	    fail("Non-admin can get other user's component registry");
 	} catch (Exception ex) {
 	    // Exception should occur

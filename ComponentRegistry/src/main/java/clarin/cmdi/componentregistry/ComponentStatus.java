@@ -6,11 +6,22 @@ package clarin.cmdi.componentregistry;
  */
 public enum ComponentStatus {
 
-    DEVELOPMENT(true, true),
-    PUBLIC(true, false);
-    // TODO: Add status types
-    //    PRIVATE(false, true),
-    //    DEPRECATED(true, false);
+    /**
+     * Private mode, editable non-public
+     */
+    PRIVATE(false, true),
+    /**
+     * Development mode, editable and publicly visible
+     */
+    DEVELOPMENT(false, true),
+    /**
+     * Published mode, non-editable and publicly visible
+     */
+    PUBLISHED(true, false),
+    /**
+     * Deprecated mode, non-editable and not publicly listed
+     */
+    DEPRECATED(false, false);
     final boolean publiclyListable;
     final boolean editable;
 
