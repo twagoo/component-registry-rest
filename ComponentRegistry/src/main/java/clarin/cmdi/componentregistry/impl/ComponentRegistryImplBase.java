@@ -30,6 +30,8 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImplBase.class);
     
+    protected abstract MDMarshaller getMarshaller();
+    
     @Override
     public List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException {
 	LOG.debug("Checking usage of component {} in components", componentId);
@@ -108,13 +110,13 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	return false;
     }
     
-    protected static void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
-	MDMarshaller.generateXsd(expandedSpec, outputStream);
+    protected void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
+	getMarshaller().generateXsd(expandedSpec, outputStream);
     }
     
-    protected static void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
+    protected void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
 	try {
-	    MDMarshaller.marshal(spec, outputStream);
+	    getMarshaller().marshal(spec, outputStream);
 	} catch (UnsupportedEncodingException e) {
 	    LOG.error("Error in encoding: ", e);
 	} catch (JAXBException e) {

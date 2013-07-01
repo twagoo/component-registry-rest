@@ -11,9 +11,18 @@ import javax.xml.bind.JAXBException;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
+import javax.xml.transform.TransformerException;
+import org.junit.Before;
 
 public class ComponentDescriptionTest {
 
+    private MDMarshaller marshaller;
+
+    @Before
+    public void setUp() throws TransformerException {
+	marshaller = new MDMarshaller();
+    }
+    
     @Test
     public void testComponentToXml() throws JAXBException, UnsupportedEncodingException {
         ComponentDescription desc = new ComponentDescription();
@@ -28,7 +37,7 @@ public class ComponentDescriptionTest {
         desc.setDomainName("Linguistics");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        MDMarshaller.marshal(desc, out);
+        marshaller.marshal(desc, out);
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<componentDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -45,7 +54,7 @@ public class ComponentDescriptionTest {
         expected += "</componentDescription>\n";
         assertEquals(expected, out.toString());
 
-        ComponentDescription pd = MDMarshaller.unmarshal(ComponentDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
+        ComponentDescription pd = marshaller.unmarshal(ComponentDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
         assertEquals(desc.getId(), pd.getId());
     }
 

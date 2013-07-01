@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import javax.xml.transform.TransformerException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,8 +32,11 @@ public class CommentValidatorTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private MDMarshaller marshaller;
+
     @Before
-    public void init() {
+    public void setUp() throws TransformerException {
+	marshaller = new MDMarshaller();
 	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
     }
 
@@ -51,7 +56,7 @@ public class CommentValidatorTest {
 	comContent += "    <id>1</id>\n";
 	comContent += "</comment>\n";
 	InputStream input = new ByteArrayInputStream(comContent.getBytes());
-	CommentValidator validator = new CommentValidator(input, description);
+	CommentValidator validator = new CommentValidator(input, description, marshaller);
 	assertTrue(validator.validate());
     }
 
@@ -71,7 +76,7 @@ public class CommentValidatorTest {
 	comContent += "    <id>1</id>\n";
 	comContent += "</comment>\n";
 	InputStream input = new ByteArrayInputStream(comContent.getBytes());
-	CommentValidator validator = new CommentValidator(input, desc);
+	CommentValidator validator = new CommentValidator(input, desc, marshaller);
 	assertFalse(validator.validate());// missing componentId will return an error
 	assertEquals(validator.getErrorMessages().size(), 1);
 	assertTrue(validator.getErrorMessages().get(0).startsWith(CommentValidator.COMMENT_SPECIFICATION_ERROR));
@@ -86,7 +91,7 @@ public class CommentValidatorTest {
 	commentContent += "    <id>1</id>\n";
 	commentContent += "</comment>\n";
 	input = new ByteArrayInputStream(commentContent.getBytes());
-	validator = new CommentValidator(input, desc);
+	validator = new CommentValidator(input, desc, marshaller);
 	assertTrue(validator.validate()); // componentId valid, validation complete
     }
 
@@ -106,7 +111,7 @@ public class CommentValidatorTest {
 	comContent += "    <id>1</id>\n";
 	comContent += "</comment>\n";
 	InputStream input = new ByteArrayInputStream(comContent.getBytes());
-	CommentValidator validator = new CommentValidator(input, desc);
+	CommentValidator validator = new CommentValidator(input, desc, marshaller);
 	assertFalse(validator.validate());// missing profileId will return an error
 	assertEquals(validator.getErrorMessages().size(), 1);
 	assertTrue(validator.getErrorMessages().get(0).startsWith(CommentValidator.COMMENT_SPECIFICATION_ERROR));
@@ -121,7 +126,7 @@ public class CommentValidatorTest {
 	commentContent += "    <id>1</id>\n";
 	commentContent += "</comment>\n";
 	input = new ByteArrayInputStream(commentContent.getBytes());
-	validator = new CommentValidator(input, desc);
+	validator = new CommentValidator(input, desc, marshaller);
 	assertTrue(validator.validate()); // profileId valid, validation complete
     }
 
@@ -142,7 +147,7 @@ public class CommentValidatorTest {
 	commentContent += "    <id>1</id>\n";
 	commentContent += "</comment>\n";
 	InputStream input = new ByteArrayInputStream(commentContent.getBytes());
-	CommentValidator validator = new CommentValidator(input, desc);
+	CommentValidator validator = new CommentValidator(input, desc, marshaller);
 	assertFalse(validator.validate()); // missing content will return an error
 	assertTrue(validator.getErrorMessages().get(0).startsWith(CommentValidator.COMMENT_SPECIFICATION_ERROR));
 
@@ -156,7 +161,7 @@ public class CommentValidatorTest {
 	comContent += "    <id>1</id>\n";
 	comContent += "</comment>\n";
 	input = new ByteArrayInputStream(comContent.getBytes());
-	validator = new CommentValidator(input, desc);
+	validator = new CommentValidator(input, desc, marshaller);
 	assertTrue(validator.validate());// content comments is fill in, validation complete
 
     }

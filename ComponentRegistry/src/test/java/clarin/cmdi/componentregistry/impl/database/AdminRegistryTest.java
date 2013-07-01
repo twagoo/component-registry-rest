@@ -18,6 +18,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.DisplayDataNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
@@ -39,6 +40,8 @@ public class AdminRegistryTest {
     private static final Principal PRINCIPAL_ADMIN = DummyPrincipal.DUMMY_ADMIN_PRINCIPAL;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private MDMarshaller marshaller;
 
     @Before
     public void init() {
@@ -73,7 +76,8 @@ public class AdminRegistryTest {
 	adminReg.setComponentRegistryFactory(componentRegistryFactory);
 	adminReg.setComponentDescriptionDao(componentDescriptionDao);
 	adminReg.setProfileDescriptionDao(profileDescriptionDao);
-	CMDItemInfo fileInfo = new CMDItemInfo();
+	adminReg.setMarshaller(marshaller);
+	CMDItemInfo fileInfo = new CMDItemInfo(new MDMarshaller());
 	fileInfo.setForceUpdate(false);
 	fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, ComponentStatus.PUBLISHED));
 	fileInfo.setContent(content1);

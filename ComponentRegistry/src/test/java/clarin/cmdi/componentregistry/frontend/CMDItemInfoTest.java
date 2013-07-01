@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -14,7 +15,7 @@ public class CMDItemInfoTest {
 
     @Test
     public void testGetUserDir() throws Exception {
-	CMDItemInfo info = new CMDItemInfo();
+	CMDItemInfo info = new CMDItemInfo(new MDMarshaller());
 	//info.setDataNode(new FileNode(createFile("users/user1/components/c_123/description.xml"), false));
 	info.setDataNode(new DisplayDataNode("test", false, createDescription(), ComponentStatus.PRIVATE));
 	assertTrue(info.isDeletable());

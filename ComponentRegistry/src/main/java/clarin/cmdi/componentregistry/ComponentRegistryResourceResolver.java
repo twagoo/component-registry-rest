@@ -4,6 +4,9 @@
  */
 package clarin.cmdi.componentregistry;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
 import org.apache.xml.resolver.tools.CatalogResolver;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -15,7 +18,7 @@ import org.xml.sax.InputSource;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class ComponentRegistryResourceResolver implements LSResourceResolver {
+public class ComponentRegistryResourceResolver implements LSResourceResolver, URIResolver {
 
     private CatalogResolver catRes = new CatalogResolver();
 
@@ -37,8 +40,13 @@ public class ComponentRegistryResourceResolver implements LSResourceResolver {
 	}
 	LSInput lsInput = domImplementation.createLSInput();
 	lsInput.setEncoding("UTF-8");
-	lsInput.setByteStream(resolveEntity.getByteStream());
+	    lsInput.setByteStream(resolveEntity.getByteStream());
 	lsInput.setCharacterStream(resolveEntity.getCharacterStream());
 	return lsInput;
+    }
+
+    @Override
+    public Source resolve(String href, String base) throws TransformerException {
+	return catRes.resolve(href, base);
     }
 }

@@ -18,12 +18,13 @@ public class MDMarshallerTest {
     
     @Test
     public void testMarshalToString() throws Exception {
+	MDMarshaller instance = new MDMarshaller();
 	AbstractDescription desc = ComponentDescription.createNewDescription();
 	desc.setName("Test \u00CA test");
-	String test = MDMarshaller.marshalToString(desc);
+	String test = instance.marshalToString(desc);
 	logger.info(test);
 	Assert.assertTrue(test.contains("Test \u00CA test"));
-	AbstractDescription result = MDMarshaller.unmarshal(ComponentDescription.class, new ByteArrayInputStream(test.getBytes("UTF-8")), null);
+	AbstractDescription result = instance.unmarshal(ComponentDescription.class, new ByteArrayInputStream(test.getBytes("UTF-8")), null);
 	logger.info(result.getName());
 	Assert.assertEquals(desc.getName(), result.getName());
     }

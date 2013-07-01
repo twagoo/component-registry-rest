@@ -14,46 +14,54 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.Test;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
+import javax.xml.transform.TransformerException;
+import org.junit.Before;
 
 public class ProfileDescriptionTest {
 
-    @Test
-    public void testProfileToXml() throws JAXBException, UnsupportedEncodingException {
-        ProfileDescription desc = new ProfileDescription();
-        desc.setName("Name");
-        desc.setId("myId");
-        desc.setCreatorName("myC");
-        desc.setUserId(DigestUtils.md5Hex("user1"));
-        desc.setDescription("myD");
-        desc.setRegistrationDate("myDate");
-        desc.setDomainName("Linguistics");
-        desc.setHref("linkToMyProfile");
-        desc.setGroupName("MyGroup");
-	desc.setCommentsCount(2);
+    private MDMarshaller marshaller;
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        MDMarshaller.marshal(desc, out);
-        String expected = "";
-        expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-        expected += "<profileDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
-        expected += "    <id>myId</id>\n";
-        expected += "    <description>myD</description>\n";
-        expected += "    <name>Name</name>\n";
-        expected += "    <registrationDate>myDate</registrationDate>\n";
-        expected += "    <creatorName>myC</creatorName>\n";
-        expected += "    <userId>"+DigestUtils.md5Hex("user1")+"</userId>\n";
-        expected += "    <domainName>Linguistics</domainName>\n";
-        expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
-        expected += "    <groupName>MyGroup</groupName>\n";
-        expected += "    <commentsCount>2</commentsCount>\n";
-        expected += "    <showInEditor>true</showInEditor>\n";
-	expected += "</profileDescription>\n";
-        assertEquals(expected, out.toString());
-
-        ProfileDescription pd = MDMarshaller.unmarshal(ProfileDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
-        assertEquals(desc.getId(), pd.getId());
-        assertTrue(desc.isThisTheOwner("user1"));
-        assertFalse(desc.isThisTheOwner("aap"));
+    @Before
+    public void setUp() throws TransformerException {
+	marshaller = new MDMarshaller();
     }
 
+    @Test
+    public void testProfileToXml() throws JAXBException, UnsupportedEncodingException {
+	ProfileDescription desc = new ProfileDescription();
+	desc.setName("Name");
+	desc.setId("myId");
+	desc.setCreatorName("myC");
+	desc.setUserId(DigestUtils.md5Hex("user1"));
+	desc.setDescription("myD");
+	desc.setRegistrationDate("myDate");
+	desc.setDomainName("Linguistics");
+	desc.setHref("linkToMyProfile");
+	desc.setGroupName("MyGroup");
+	desc.setCommentsCount(2);
+
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	marshaller.marshal(desc, out);
+	String expected = "";
+	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
+	expected += "<profileDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+	expected += "    <id>myId</id>\n";
+	expected += "    <description>myD</description>\n";
+	expected += "    <name>Name</name>\n";
+	expected += "    <registrationDate>myDate</registrationDate>\n";
+	expected += "    <creatorName>myC</creatorName>\n";
+	expected += "    <userId>" + DigestUtils.md5Hex("user1") + "</userId>\n";
+	expected += "    <domainName>Linguistics</domainName>\n";
+	expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
+	expected += "    <groupName>MyGroup</groupName>\n";
+	expected += "    <commentsCount>2</commentsCount>\n";
+	expected += "    <showInEditor>true</showInEditor>\n";
+	expected += "</profileDescription>\n";
+	assertEquals(expected, out.toString());
+
+	ProfileDescription pd = marshaller.unmarshal(ProfileDescription.class, new ByteArrayInputStream(expected.getBytes()), null);
+	assertEquals(desc.getId(), pd.getId());
+	assertTrue(desc.isThisTheOwner("user1"));
+	assertFalse(desc.isThisTheOwner("aap"));
+    }
 }

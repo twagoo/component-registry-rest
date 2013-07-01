@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import javax.xml.transform.TransformerException;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -14,6 +16,13 @@ import org.junit.Test;
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
 public class CommentResponseTest {
+
+    private MDMarshaller marshaller;
+
+    @Before
+    public void setUp() throws TransformerException {
+	marshaller = new MDMarshaller();
+    }
 
     /**
      * Test with no validate attribute should return errors
@@ -28,7 +37,7 @@ public class CommentResponseTest {
 	resp.addError("Error 1");
 	resp.addError("Error 2, <!-- to be escaped -->");
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	MDMarshaller.marshal(resp, out);
+	marshaller.marshal(resp, out);
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	expected += "<commentResponse isInUserSpace=\"true\" registered=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -39,7 +48,7 @@ public class CommentResponseTest {
 	expected += "</commentResponse>\n";
 	assertEquals(expected, out.toString());
 
-	CommentResponse rr = MDMarshaller.unmarshal(CommentResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
+	CommentResponse rr = marshaller.unmarshal(CommentResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertFalse(rr.isRegistered());
 	assertEquals(2, rr.getErrors().size());
     }
@@ -56,7 +65,7 @@ public class CommentResponseTest {
 	resp.setIsInUserSpace(false);
 	resp.setComment(getComment());
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	MDMarshaller.marshal(resp, out);
+	marshaller.marshal(resp, out);
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	expected += "<commentResponse isInUserSpace=\"false\" registered=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -72,7 +81,7 @@ public class CommentResponseTest {
 	expected += "</commentResponse>\n";
 	assertEquals(expected, out.toString());
 
-	CommentResponse rr = MDMarshaller.unmarshal(CommentResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
+	CommentResponse rr = marshaller.unmarshal(CommentResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertTrue(rr.isRegistered());
 	assertEquals("myId", rr.getComment().getId());
     }

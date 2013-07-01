@@ -29,6 +29,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
 import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
 import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
@@ -41,7 +42,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     private static final long serialVersionUID = 1L;
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
-    private final CMDItemInfo info = new CMDItemInfo();
+    private final CMDItemInfo info;
     private final LinkTree tree;
     private transient AdminRegistry adminRegistry = new AdminRegistry();
     @SpringBean(name = "componentRegistryFactory")
@@ -50,12 +51,16 @@ public class AdminHomePage extends SecureAdminWebPage {
     private ProfileDescriptionDao profileDescriptionDao;
     @SpringBean
     private ComponentDescriptionDao componentDescriptionDao;
+    @SpringBean
+    private MDMarshaller marshaller;
 
     public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException {
 	super(parameters);
 	adminRegistry.setComponentRegistryFactory(componentRegistryFactory);
 	adminRegistry.setProfileDescriptionDao(profileDescriptionDao);
 	adminRegistry.setComponentDescriptionDao(componentDescriptionDao);
+	adminRegistry.setMarshaller(marshaller);
+	info = new CMDItemInfo(marshaller);
 	addLinks();
 	final FeedbackPanel feedback = new FeedbackPanel("feedback");
 	feedback.setOutputMarkupId(true);

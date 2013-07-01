@@ -48,6 +48,7 @@ public class MDValidator implements Validator {
     private final ComponentRegistry registry;
     private final ComponentRegistry userRegistry;
     private final ComponentRegistry publicRegistry;
+    private final MDMarshaller marshaller;
 
     /**
      *
@@ -58,12 +59,13 @@ public class MDValidator implements Validator {
      * @param userRegistry can be null, We get user registry as well so we can give nice error messages if needed. Can be the same as
      * @param registry
      */
-    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry) {
+    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry, MDMarshaller marshaller) {
 	this.input = input;
 	this.description = description;
 	this.registry = registry;
 	this.userRegistry = userRegistry;
 	this.publicRegistry = publicRegistry;
+	this.marshaller = marshaller;
     }
 
     @Override
@@ -198,7 +200,7 @@ public class MDValidator implements Validator {
 	return unmarshalSpec(originalSpecBytes);
     }
 
-    private static CMDComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
+    private CMDComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
+	return marshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
     }
 }

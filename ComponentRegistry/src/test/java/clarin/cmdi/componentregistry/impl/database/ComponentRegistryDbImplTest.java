@@ -347,7 +347,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(0, registry.getProfileDescriptions().size());
     }
 
-    @Test(expected=DeleteFailedException.class)
+    @Test(expected = DeleteFailedException.class)
     public void testDoNotDeleteUsedComponent() throws Exception {
 	RegistryUser user = createUser();
 	ComponentRegistry register = getComponentRegistryForUser(null);
@@ -816,7 +816,7 @@ public class ComponentRegistryDbImplTest {
     }
 
     @Test
-    public void testGetStatus() {
+    public void testGetStatus() throws Exception {
 	ComponentRegistry register = new ComponentRegistryDbImpl();
 	assertEquals(ComponentStatus.PUBLISHED, register.getStatus());
 	register = new ComponentRegistryDbImpl(ComponentStatus.PRIVATE, null);
@@ -824,7 +824,7 @@ public class ComponentRegistryDbImplTest {
     }
 
     @Test
-    public void testGetOwner() {
+    public void testGetOwner()  throws Exception {
 	ComponentRegistry register = new ComponentRegistryDbImpl();
 	assertNull(register.getOwner());
 	register = new ComponentRegistryDbImpl(ComponentStatus.PRIVATE, new OwnerUser(101));

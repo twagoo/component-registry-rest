@@ -6,6 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.Owner;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -20,6 +21,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
+import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.inject.Inject;
 import java.io.IOException;
@@ -76,8 +78,10 @@ public class ComponentRegistryRestService {
     public static final String USERSPACE_PARAM = "userspace";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
     public static final String NUMBER_OF_RSSITEMS = "limit";
-    @Inject(value = "componentRegistryFactory")
+    @InjectParam(value = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
+    @InjectParam(value = "mdMarshaller")
+    private MDMarshaller marshaller;
 
     /**
      * Converts userspace boolean to component status. Temporary solution!!!
@@ -818,7 +822,7 @@ public class ComponentRegistryRestService {
 	    // TODO: Add user/group param
 	    ComponentRegistry registry = getRegistry(getStatus(userspace), null, userCredentials);
 	    DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-	    MDValidator validator = new MDValidator(input, desc, registry, getRegistry(getStatus(true)), componentRegistryFactory.getPublicRegistry());
+	    MDValidator validator = new MDValidator(input, desc, registry, getRegistry(getStatus(true)), componentRegistryFactory.getPublicRegistry(), marshaller);
 	    RegisterResponse response = new RegisterResponse();
 	    response.setIsInUserSpace(userspace);
 	    validate(response, descriptionValidator, validator);
@@ -883,7 +887,7 @@ public class ComponentRegistryRestService {
     private Response registerComment(InputStream input, ComponentRegistry registry, boolean userspace,
 	    AbstractDescription description, Principal principal, UserCredentials userCredentials) {
 	try {
-	    CommentValidator validator = new CommentValidator(input, description);
+	    CommentValidator validator = new CommentValidator(input, description, marshaller);
 	    CommentResponse response = new CommentResponse();
 	    response.setIsInUserSpace(userspace);
 	    validateComment(response, validator);

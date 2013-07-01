@@ -31,6 +31,7 @@ public class AdminRegistry {
     private ComponentRegistryFactory componentRegistryFactory;
     private ProfileDescriptionDao profileDescriptionDao;
     private ComponentDescriptionDao componentDescriptionDao;
+    private MDMarshaller marshaller;
 
     public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
 	this.componentRegistryFactory = componentRegistryFactory;
@@ -44,18 +45,22 @@ public class AdminRegistry {
 	this.componentDescriptionDao = componentDescriptionDao;
     }
 
+    public void setMarshaller(MDMarshaller marshaller) {
+	this.marshaller = marshaller;
+    }
+
     public void submitFile(CMDItemInfo info, Principal userPrincipal) throws SubmitFailedException {
 	try {
 	    AbstractDescription originalDescription = info.getDataNode().getDescription();
 	    AbstractDescription description = null;
 	    CMDComponentSpec spec = null;
 	    if (originalDescription.isProfile()) {
-		description = MDMarshaller.unmarshal(ProfileDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"), null);
+		description = marshaller.unmarshal(ProfileDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"), null);
 	    } else {
-		description = MDMarshaller.unmarshal(ComponentDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"),
+		description = marshaller.unmarshal(ComponentDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"),
 			null);
 	    }
-	    spec = MDMarshaller.unmarshal(CMDComponentSpec.class, IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
+	    spec = marshaller.unmarshal(CMDComponentSpec.class, IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
 	    checkId(originalDescription.getId(), description.getId());
 
 	    int result = getRegistry(userPrincipal, originalDescription, info).update(description, spec, userPrincipal, info.isForceUpdate());

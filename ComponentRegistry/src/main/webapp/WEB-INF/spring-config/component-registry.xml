@@ -9,6 +9,8 @@
     -->
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">
     </bean>
+    
+    <bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller" />
 
     <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" factory-method="getInstance">
 	<!-- Read admin users from init param -->

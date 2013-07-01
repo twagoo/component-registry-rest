@@ -24,14 +24,16 @@ class CommentValidator implements Validator {
     private Comment com = null;
     private final InputStream input;
     private final AbstractDescription description;
+    private final MDMarshaller marshaller;
 
     /*
      * @param input In order to validate the input is consumed. So use @see getCommentSpec to get the parsed CommentSpec.
      * @param description use to validate the comment with the appropriate description (profile or a component)
      */
-    public CommentValidator(InputStream input, AbstractDescription description) {
+    public CommentValidator(InputStream input, AbstractDescription description, MDMarshaller marshaller) {
 	this.input = input;
 	this.description = description;
+	this.marshaller = marshaller;
     }
 
     @Override
@@ -42,7 +44,7 @@ class CommentValidator implements Validator {
     @Override
     public boolean validate() {
 	try {
-	    com = MDMarshaller.unmarshal(Comment.class, input, null);
+	    com = marshaller.unmarshal(Comment.class, input, null);
 	} catch (JAXBException e) {
 	    errorMessages.add(PARSE_ERROR + e);
 	}

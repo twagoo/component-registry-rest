@@ -22,6 +22,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import javax.xml.transform.TransformerException;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 /**
  * Static helper methods to be used in tests
@@ -29,9 +32,14 @@ import java.io.InputStreamReader;
  */
 public final class RegistryTestHelper {
 
-    
+    private static MDMarshaller marshaller;
 
-    private RegistryTestHelper() {
+    static {
+	try {
+	    marshaller = new MDMarshaller();
+	} catch (TransformerException ex) {
+	    throw new RuntimeException(ex);
+	}
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
@@ -52,7 +60,7 @@ public final class RegistryTestHelper {
 	desc.setDescription("Test Description");
 	desc.setId(ComponentRegistry.REGISTRY_ID + id);
 	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
-	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
+	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
     }
@@ -114,13 +122,13 @@ public final class RegistryTestHelper {
 	desc.setDescription("Test Description");
 	desc.setId(ComponentRegistry.REGISTRY_ID + id);
 	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
-	CMDComponentSpec spec = MDMarshaller.unmarshal(CMDComponentSpec.class, content, MDMarshaller.getCMDComponentSchema());
+	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
     }
 
     public static CMDComponentSpec getTestProfile() throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), MDMarshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), marshaller.getCMDComponentSchema());
     }
 
     public static String getComponentTestContentString() {
@@ -156,35 +164,29 @@ public final class RegistryTestHelper {
 	return compContent;
     }
 
-    
     public static String getStringFromStream(InputStream largeProfileStream) throws IOException {
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
-            StringBuilder profileStringBuilder = new StringBuilder();
-            String line;
-            while (null != (line = bufferedReader.readLine())) {
-                profileStringBuilder.append(line);
-            }
-            return profileStringBuilder.toString();
-        } finally {
-            largeProfileStream.close();
-        }
+	try {
+	    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
+	    StringBuilder profileStringBuilder = new StringBuilder();
+	    String line;
+	    while (null != (line = bufferedReader.readLine())) {
+		profileStringBuilder.append(line);
+	    }
+	    return profileStringBuilder.toString();
+	} finally {
+	    largeProfileStream.close();
+	}
     }
     ///////////////////////////////////////////////////////
-    
+
     public static String getLargeProfileContent() throws IOException {
 	InputStream largeProfileStream = RegistryTestHelper.class.getResourceAsStream("/xml/largeProfile.xml");
-        return getStringFromStream(largeProfileStream);
+	return getStringFromStream(largeProfileStream);
     }
-    
-    
-    
 
     //////////////////////
-    
-    
     public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentContent(contentString), MDMarshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentContent(contentString), marshaller.getCMDComponentSchema());
     }
 
     public static InputStream getComponentContent(String content) {
@@ -196,16 +198,16 @@ public final class RegistryTestHelper {
     }
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), MDMarshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), marshaller.getCMDComponentSchema());
     }
 
     public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
-	return MDMarshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), MDMarshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), marshaller.getCMDComponentSchema());
     }
 
     public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
-	MDMarshaller.marshal(componentSpec, os);
+	marshaller.marshal(componentSpec, os);
 	String xml = os.toString();
 	try {
 	    os.close();
@@ -221,7 +223,7 @@ public final class RegistryTestHelper {
     private static Comment addComment(ComponentRegistry testRegistry, InputStream content, String principal) throws ParseException,
 	    JAXBException,
 	    ComponentRegistryException {
-	Comment spec = MDMarshaller.unmarshal(Comment.class, content, null);
+	Comment spec = marshaller.unmarshal(Comment.class, content, null);
 	testRegistry.registerComment(spec, principal);
 	return spec;
     }
@@ -275,98 +277,90 @@ public final class RegistryTestHelper {
 	Matcher matcher = pattern.matcher(xsd);
 	return matcher.find() && !matcher.find(); //find only one
     }
-    
-    
-     /**
-      * 
-      * @param bytes is an array of bytes to be written in the file filename (from scratch!)
-      * @param filename is the name of the file where the array "bytes" is to be written to
-      * @throws IOException
-      * @throws JAXBException 
-      */ 
-      public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
-                 
-        File file = new File(filename);
-        FileOutputStream fop = new FileOutputStream(file);
-        
-        fop.write(bytes);
-	
-        fop.flush();
+
+    /**
+     *
+     * @param bytes is an array of bytes to be written in the file filename (from scratch!)
+     * @param filename is the name of the file where the array "bytes" is to be written to
+     * @throws IOException
+     * @throws JAXBException
+     */
+    public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
+
+	File file = new File(filename);
+	FileOutputStream fop = new FileOutputStream(file);
+
+	fop.write(bytes);
+
+	fop.flush();
 	fop.close();
- 
-        
-      }
-    
-    
-    
-      /**
-       * 
-       * @param str is a string which is to be written into the filename (from scratch!)
-       * @param filename is a filename where the string is to be written to
-       * @throws IOException
-       * @throws JAXBException 
-       */
-      public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
-          
-        writeBytesToFile(str.getBytes(), filename);
- 
-        
-      }
-      
+
+
+    }
+
     /**
-       * 
-       * @param os is an output stream which is to be written into the filename (from scratch!)
-       * @param filename is a filename where the stream is to be written to
-       * @throws IOException
-       * @throws JAXBException 
-       */
-      
-      public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
-          
-        writeBytesToFile(os.toByteArray(), filename);
- 
-        
-      }
-      
-    
+     *
+     * @param str is a string which is to be written into the filename (from scratch!)
+     * @param filename is a filename where the string is to be written to
+     * @throws IOException
+     * @throws JAXBException
+     */
+    public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
+
+	writeBytesToFile(str.getBytes(), filename);
+
+
+    }
+
     /**
-     * 
+     *
+     * @param os is an output stream which is to be written into the filename (from scratch!)
+     * @param filename is a filename where the stream is to be written to
+     * @throws IOException
+     * @throws JAXBException
+     */
+    public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
+
+	writeBytesToFile(os.toByteArray(), filename);
+
+
+    }
+
+    /**
+     *
      * @param cdesc is a component which is to be written into the filename (from scratch!)
      * @param filename is a filename where the component is to be written to
      * @throws IOException
-     * @throws JAXBException 
-     */  
+     * @throws JAXBException
+     */
     public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-        
-       
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-	MDMarshaller.marshal(cdesc, os);
-        
-        writeStreamToFile(os, filename);
-       
+
+
+	ByteArrayOutputStream os = new ByteArrayOutputStream();
+	marshaller.marshal(cdesc, os);
+
+	writeStreamToFile(os, filename);
+
     }
-      
-      
-      
-      
-      /**
-       * opens a temporary sub-directory dirName in /target/
-       * @param dirName is the name of the temporary subdirectory which is to be opened
-       * @return the absolute part for this directory
-       */
-      public static String openTestDir(String dirName){
-      
-         File testDir = new File("target/" + dirName);
-         
-         
-         testDir.mkdir();
-         
-         System.out.println(dirName);
-         //String retval = new File(testDir, dirName).getAbsolutePath();
-         String retval = new File(testDir, "/").getAbsolutePath();
-        
-         return(retval);
-         
-      }
-      
+
+    /**
+     * opens a temporary sub-directory dirName in /target/
+     *
+     * @param dirName is the name of the temporary subdirectory which is to be opened
+     * @return the absolute part for this directory
+     */
+    public static String openTestDir(String dirName) {
+
+	File testDir = new File("target/" + dirName);
+
+
+	testDir.mkdir();
+
+	System.out.println(dirName);
+	//String retval = new File(testDir, dirName).getAbsolutePath();
+	String retval = new File(testDir, "/").getAbsolutePath();
+
+	return (retval);
+
+    }
 }

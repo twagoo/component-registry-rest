@@ -9,10 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -30,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-public class MDMarshaller {
+public class MDMarshaller implements Serializable {
 
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
     /**
@@ -39,15 +41,20 @@ public class MDMarshaller {
      * @see XMLConstants there is a conflict between stax-api and java5.
      */
     private static final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
-    private static Schema generalComponentSchema;
+    private Schema generalComponentSchema;
+    private final Templates componentToSchemaTemplates;
+    private final ComponentRegistryResourceResolver resourceResolver;
 
-    private MDMarshaller() {
+    public MDMarshaller() throws TransformerException {
+	resourceResolver = new ComponentRegistryResourceResolver();
+	final TransformerFactory transformerFactory = TransformerFactory.newInstance(net.sf.saxon.TransformerFactoryImpl.class.getName(), null);
+	componentToSchemaTemplates = transformerFactory.newTemplates(resourceResolver.resolve(Configuration.getInstance().getComponent2SchemaXsl(), null));
     }
 
     /**
      * Helper method that logs errors and returns null if unmarshal failed
      */
-    public static <T> T unmarshal(Class<T> docClass, File file, Schema schema) {
+    public <T> T unmarshal(Class<T> docClass, File file, Schema schema) {
 	T result = null;
 	try {
 	    result = unmarshal(docClass, new FileInputStream(file), schema);
@@ -67,7 +74,7 @@ public class MDMarshaller {
      * @return
      * @throws JAXBException
      */
-    public static <T> T unmarshal(Class<T> docClass, InputStream inputStream, Schema schema) throws JAXBException {
+    public <T> T unmarshal(Class<T> docClass, InputStream inputStream, Schema schema) throws JAXBException {
 	String packageName = docClass.getPackage().getName();
 	JAXBContext jc = JAXBContext.newInstance(packageName);
 	Unmarshaller u = jc.createUnmarshaller();
@@ -83,7 +90,7 @@ public class MDMarshaller {
     /**
      * Will wrap the Outputstream in a OutputStreamWriter with encoding set to UTF-8. This to make sure profiles are stored correctly.
      */
-    public static <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
+    public <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
 	String packageName = marshallableObject.getClass().getPackage().getName();
 	JAXBContext jc = JAXBContext.newInstance(packageName);
 
@@ -97,7 +104,7 @@ public class MDMarshaller {
 	m.marshal(marshallableObject, writer);
     }
 
-    public static synchronized Schema getCMDComponentSchema() {
+    public synchronized Schema getCMDComponentSchema() {
 	if (generalComponentSchema == null) {
 	    try {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
@@ -112,20 +119,11 @@ public class MDMarshaller {
 	return generalComponentSchema;
     }
 
-    public static void generateXsd(CMDComponentSpec spec, OutputStream outputStream) {
-	Templates componentToSchemaTemplates;
-	try {
-	    System.setProperty("javax.xml.transform.TransformerFactory", net.sf.saxon.TransformerFactoryImpl.class.getName());
-	    componentToSchemaTemplates = TransformerFactory.newInstance().newTemplates(
-		    new StreamSource(Configuration.getInstance().getComponent2SchemaXsl()));
-	} catch (TransformerConfigurationException e) {
-	    LOG.error("Cannot create Template", e);
-	    return;
-	}
+    public void generateXsd(CMDComponentSpec spec, OutputStream outputStream) {
 	try {
 	    Transformer transformer = componentToSchemaTemplates.newTransformer();
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-	    MDMarshaller.marshal(spec, out);
+	    marshal(spec, out);
 	    ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
 	    transformer.transform(new StreamSource(input), new StreamResult(outputStream));
 	} catch (TransformerConfigurationException e) {
@@ -139,7 +137,7 @@ public class MDMarshaller {
 	}
     }
 
-    private static String getSpecId(CMDComponentSpec spec) {
+    private String getSpecId(CMDComponentSpec spec) {
 	String result = "";
 	if (spec != null && spec.getHeader() != null) {
 	    result = spec.getHeader().getID();
@@ -152,7 +150,7 @@ public class MDMarshaller {
      * @return the xml representation of the marshallableObject
      * @throws jaxb exceptions are wrapped in RuntimeExceptions
      */
-    public static <T> String marshalToString(T marshallableObject) {
+    public <T> String marshalToString(T marshallableObject) {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	try {
 	    marshal(marshallableObject, out);

@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.xml.bind.JAXBException;
+import javax.xml.transform.TransformerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private UserDao userDao;
     @Autowired
     private CommentsDao commentsDao;
+    @Autowired
+    private MDMarshaller marshaller;
 
     /**
      * Default constructor, to use this as a (spring) bean. The public registry by default.
@@ -73,7 +76,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      *
      * @see setUser
      */
-    public ComponentRegistryDbImpl() {
+    public ComponentRegistryDbImpl() throws TransformerException {
 	this.registryStatus = ComponentStatus.PUBLISHED;
     }
 
@@ -600,7 +603,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     private String componentSpecToString(CMDComponentSpec spec) throws UnsupportedEncodingException, JAXBException {
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
-	MDMarshaller.marshal(spec, os);
+	getMarshaller().marshal(spec, os);
 	String xml = os.toString("UTF-8");
 	return xml;
     }
@@ -610,7 +613,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	if (xml != null) {
 	    try {
 		InputStream is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-		return MDMarshaller.unmarshal(CMDComponentSpec.class, is, null);
+		return getMarshaller().unmarshal(CMDComponentSpec.class, is, null);
 
 	    } catch (JAXBException ex) {
 		LOG.error("Error while unmarshalling", ex);
@@ -719,6 +722,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public CMDComponentSpecExpander getExpander() {
 	return new CMDComponentSpecExpanderDbImpl(this);
+    }
+
+    @Override
+    protected MDMarshaller getMarshaller() {
+	return marshaller;
     }
 
     @Override

@@ -3,12 +3,14 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import javax.xml.transform.TransformerException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,9 +30,11 @@ public class MDValidatorTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private ComponentRegistry publicRegistry;
+    private MDMarshaller marshaller;
 
     @Before
-    public void init() {
+    public void setUp() throws TransformerException {
+	marshaller = new MDMarshaller();
 	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
 	publicRegistry = componentRegistryFactory.getPublicRegistry();
     }
@@ -83,7 +87,7 @@ public class MDValidatorTest {
 	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
 
 	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertEquals(4, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.PARSE_ERROR));
@@ -102,7 +106,7 @@ public class MDValidatorTest {
 	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
 
 	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
     }
@@ -125,7 +129,7 @@ public class MDValidatorTest {
 
 	// Ids not registered will return two errors. One for each id
 	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertEquals(2, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
@@ -133,14 +137,14 @@ public class MDValidatorTest {
 
 	// id1 will be added and therefore only id2 is not registered
 	RegistryTestHelper.addComponent(publicRegistry, id1);
-	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
+	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertEquals(1, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
 	// id2 is added, no more errors shoud be return
 	RegistryTestHelper.addComponent(publicRegistry, id2);
-	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
+	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry, marshaller);
 	assertTrue("component is registered should be valid now", validator.validate());
 	assertEquals(0, validator.getErrorMessages().size());
     }
@@ -163,7 +167,7 @@ public class MDValidatorTest {
 	profileContent += "</CMD_ComponentSpec>";
 
 	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, userRegistry, userRegistry, publicRegistry);
+	MDValidator validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, userRegistry, userRegistry, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertEquals(2, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
@@ -171,12 +175,12 @@ public class MDValidatorTest {
 
 	RegistryTestHelper.addComponent(userRegistry, id1);
 	RegistryTestHelper.addComponent(publicRegistry, id2);
-	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry);
+	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, publicRegistry, null, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertEquals(1, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
-	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, userRegistry, userRegistry, publicRegistry);
+	validator = new MDValidator(new ByteArrayInputStream(profileContent.getBytes()), desc, userRegistry, userRegistry, publicRegistry, marshaller);
 	assertTrue(validator.validate());
 	assertEquals(0, validator.getErrorMessages().size());
     }
@@ -197,13 +201,13 @@ public class MDValidatorTest {
 	content += "</CMD_ComponentSpec>\n";
 
 	ComponentDescription desc = ComponentDescription.createNewDescription();
-	MDValidator validator = new MDValidator(new ByteArrayInputStream(content.getBytes()), desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = new MDValidator(new ByteArrayInputStream(content.getBytes()), desc, publicRegistry, null, publicRegistry, marshaller);
 	assertFalse(validator.validate());
 	assertEquals(1, validator.getErrorMessages().size());
 	assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR));
 
 	RegistryTestHelper.addComponent(publicRegistry, id1);
-	validator = new MDValidator(new ByteArrayInputStream(content.getBytes()), desc, publicRegistry, null, publicRegistry);
+	validator = new MDValidator(new ByteArrayInputStream(content.getBytes()), desc, publicRegistry, null, publicRegistry, marshaller);
 	assertTrue(validator.validate());
 	assertEquals(0, validator.getErrorMessages().size());
     }
@@ -217,7 +221,7 @@ public class MDValidatorTest {
 	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
 
 	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry, marshaller);
 
 	// Spec is created during validation, before it should be null
 	assertNull(validator.getCMDComponentSpec());
@@ -244,7 +248,7 @@ public class MDValidatorTest {
 	final String profileContent = getValidProfileString();
 	InputStream input = new ByteArrayInputStream(profileContent.getBytes());
 	ProfileDescription desc = ProfileDescription.createNewDescription();
-	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry);
+	MDValidator validator = new MDValidator(input, desc, publicRegistry, null, publicRegistry, marshaller);
 	return validator;
     }
 

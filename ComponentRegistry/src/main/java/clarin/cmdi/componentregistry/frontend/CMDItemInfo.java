@@ -10,6 +10,7 @@ public class CMDItemInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private final MDMarshaller marshaller;
     private String description;
     private String content;
     private String name;
@@ -22,6 +23,10 @@ public class CMDItemInfo implements Serializable {
 
     private boolean editable = false;
 
+    public CMDItemInfo(MDMarshaller marshaller) {
+	this.marshaller = marshaller;
+    }
+    
     public void setDescription(String descriptionText) {
         this.description = descriptionText;
     }
@@ -55,8 +60,8 @@ public class CMDItemInfo implements Serializable {
         if (dataNode != null) {
             AbstractDescription desc = dataNode.getDescription();
             if (desc != null) {
-                String content = MDMarshaller.marshalToString(desc);
-                setDescription(content);
+                String contentDescr = marshaller.marshalToString(desc);
+                setDescription(contentDescr);
                 setEditable(true);
                 if (dataNode.isDeleted()) {
                     setUndeletable(true);
