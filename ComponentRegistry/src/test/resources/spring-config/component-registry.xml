@@ -3,6 +3,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:/org/springframework/beans/factory/xml/spring-beans-2.5.xsd">
 
+    <bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller" />
+    
     <bean id="configuration" class="clarin.cmdi.componentregistry.Configuration" factory-method="getInstance">
 	<property name="adminUsersList" value="JUnit.Admin@test.com" />
 

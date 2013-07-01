@@ -1,0 +1,4 @@
+REWRITE_SYSTEM "http://www.w3.org/2005/08/" "."
+REWRITE_URI "https://infra.clarin.eu/cmd/" "./clarin_catalog/"
+REWRITE_URI "http://infra.clarin.eu/cmd/" "./clarin_catalog/"
+URI "http://lux16.mpi.nl/general-component-schema.xsd" "./clarin_catalog/general-component-schema.xsd"
