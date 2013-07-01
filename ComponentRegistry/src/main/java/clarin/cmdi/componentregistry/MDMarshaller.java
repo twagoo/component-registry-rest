@@ -48,6 +48,7 @@ public class MDMarshaller implements Serializable {
     public MDMarshaller() throws TransformerException {
 	resourceResolver = new ComponentRegistryResourceResolver();
 	final TransformerFactory transformerFactory = TransformerFactory.newInstance(net.sf.saxon.TransformerFactoryImpl.class.getName(), null);
+	transformerFactory.setURIResolver(resourceResolver);
 	componentToSchemaTemplates = transformerFactory.newTemplates(resourceResolver.resolve(Configuration.getInstance().getComponent2SchemaXsl(), null));
     }
 
