@@ -53,21 +53,6 @@ public class MDMarshaller implements Serializable {
     }
 
     /**
-     * Helper method that logs errors and returns null if unmarshal failed
-     */
-    public <T> T unmarshal(Class<T> docClass, File file, Schema schema) {
-	T result = null;
-	try {
-	    result = unmarshal(docClass, new FileInputStream(file), schema);
-	} catch (JAXBException e) {
-	    LOG.error("Cannot unmarshal xml file: " + file, e);
-	} catch (IOException e) {
-	    LOG.error("Cannot retrieve content from file: " + file, e);
-	}
-	return result;
-    }
-
-    /**
      *
      * @param docClass
      * @param inputStream
