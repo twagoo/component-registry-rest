@@ -12,7 +12,7 @@
 <!--	<property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd https://www.clarin.eu/cmd/general-component-schema.xsd" />-->
 	<property name="componentSpecSchemaLocation" value="http://www.clarin.eu/cmd http://lux16.mpi.nl/general-component-schema.xsd" />
 
-	<property name="component2SchemaXsl" value="https://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
+	<property name="component2SchemaXsl" value="https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
 
 	<property name="isocatRestUrl" value="http://www.isocat.org/rest/" />
     <!-- Extra attribute keys that are passed in a shibboleth authenticated request principal.

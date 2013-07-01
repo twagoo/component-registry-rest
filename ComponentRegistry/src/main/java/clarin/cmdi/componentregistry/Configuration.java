@@ -20,8 +20,8 @@ public class Configuration {
 
     private static Logger LOG = LoggerFactory.getLogger(Configuration.class);
     //NOTE: Default values, can be overwritten in applicationContext.xml
-    private String generalComponentSchema = "http://www.clarin.eu/cmd/general-component-schema.xsd";
-    private String component2SchemaXsl = "http://www.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
+    private String generalComponentSchema = "http://infra.clarin.eu/cmd/general-component-schema.xsd";
+    private String component2SchemaXsl = "http://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
     private String isocatRestUrl = "http://www.isocat.org/rest/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
@@ -34,7 +34,7 @@ public class Configuration {
 
     {//Default values
 	schemaLocations.put(CMDComponentSpec.class.getName(),
-		"http://www.clarin.eu/cmd/ http://www.clarin.eu/cmd/general-component-schema.xsd");
+		"http://www.clarin.eu/cmd/ http://infra.clarin.eu/cmd/general-component-schema.xsd");
     }
     private final static Configuration INSTANCE = new Configuration();
 
