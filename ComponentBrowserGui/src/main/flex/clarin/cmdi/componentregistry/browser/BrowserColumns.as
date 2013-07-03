@@ -19,6 +19,7 @@ package clarin.cmdi.componentregistry.browser {
 			columns.push(createColumn("description", "Description"));
 			columns.push(createDateColumn());
 			columns.push(createCommentsColumn());
+			columns.push(createHiddenIdColumn());
 			return columns;
 		}
 		
