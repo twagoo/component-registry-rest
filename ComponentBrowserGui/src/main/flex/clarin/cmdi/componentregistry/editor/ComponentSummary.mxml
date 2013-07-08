@@ -7,6 +7,7 @@
 		<![CDATA[
 			import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 			import clarin.cmdi.componentregistry.services.ComponentListService;
+			import clarin.cmdi.componentregistry.services.Config;
 			
 			[Bindable]
 			public var component:CMDComponent;
@@ -27,7 +28,7 @@
 				 includeInLayout="{component.componentId != null &amp;&amp; component.componentId != ''}"
 				 >			
 			<mx:Label text="ComponentId: " fontWeight="bold"/>
-			<mx:Label text="{ComponentListService.findDescription(component.componentId).name}" />
+			<mx:Label text="{Config.instance.getComponentsSrv(Config.instance.userSpace).findDescription(component.componentId).name}" />
 		</mx:HBox>
 		
 		<mx:HBox minWidth="160">

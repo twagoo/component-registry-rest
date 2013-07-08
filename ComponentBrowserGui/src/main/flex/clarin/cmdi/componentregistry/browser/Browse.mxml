@@ -31,9 +31,9 @@
 			private var startupItemLoaded:Boolean = false;
 			
 			[Bindable]
-			private var componentsSrv:ComponentListService = ComponentListService.getInstance(Config.instance.userSpace);
+			private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv(Config.instance.userSpace);
 			[Bindable]
-			private var profilesSrv:ProfileListService = ProfileListService.getInstance(Config.instance.userSpace);
+			private var profilesSrv:ProfileListService = Config.instance.getProfilesSrv(Config.instance.userSpace);
 			[Bindable]
 			private var selectedProfileSrv:ProfileInfoService = new ProfileInfoService();
 			[Bindable]
@@ -80,8 +80,8 @@
 			
 			private function toggleUserSpace(event:Event):void {
 				var userSpace:Boolean = Config.instance.userSpace;
-				componentsSrv = ComponentListService.getInstance(userSpace);
-				profilesSrv = ProfileListService.getInstance(userSpace);
+				componentsSrv = Config.instance.getComponentsSrv(userSpace);
+				profilesSrv = Config.instance.getProfilesSrv(userSpace);
 				refresh();
 			}
 			
@@ -119,14 +119,14 @@
 			private function componentsLoaded(event:Event):void {					
 				componentsSrv.removeEventListener(ComponentListService.COMPONENTS_LOADED, componentsLoaded);
 				
-				var item:ItemDescription = ProfileListService.findDescription(startupItemId);
+				var item:ItemDescription = profilesSrv.findDescription(startupItemId);
 				if(item != null){ 					
 					selectedProfileSrv = new ProfileInfoService();
 					loadStartupItem(item);
 					profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
 				}
 				
-				item = ComponentListService.findDescription(startupItemId);
+				item = componentsSrv.findDescription(startupItemId);
 				if(item != null){					
 					selectedComponentSrv = new ComponentInfoService();
 					loadStartupItem(item);

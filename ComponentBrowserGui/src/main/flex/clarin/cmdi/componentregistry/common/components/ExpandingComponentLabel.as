@@ -8,7 +8,8 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
-
+	import clarin.cmdi.componentregistry.services.Config;
+	
 	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
 
@@ -32,8 +33,11 @@ package clarin.cmdi.componentregistry.common.components {
 		public function ExpandingComponentLabel(componentId:String, editable:Boolean = false) {
 			super();
 			this.editable = editable;
-			this.componentId = componentId;
-			this.item = ComponentListService.findDescription(componentId);
+			this.componentId = componentId;			
+			this.item = Config.instance.getComponentsSrv(false).findDescription(componentId);
+			if (this.item==null) {
+				this.item = Config.instance.getComponentsSrv(true).findDescription(componentId);
+			}
 			styleName = StyleConstants.EXPANDING_COMPONENT;
 			if (item && item.isInUserSpace) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);

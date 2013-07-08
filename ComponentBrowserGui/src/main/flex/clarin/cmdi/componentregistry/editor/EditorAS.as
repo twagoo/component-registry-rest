@@ -25,7 +25,7 @@ private var componentSrv:ComponentInfoService = new ComponentInfoService();
 private var itemDescription:ItemDescription;
 
 [Bindable]
-private var componentsSrv:ComponentListService = ComponentListService.getInstance(Config.instance.userSpace);
+private var componentsSrv:ComponentListService = new ComponentListService(Config.instance.userSpace);
 
 [Bindable]
 public var cmdComponent:XML;
@@ -53,7 +53,7 @@ public function init():void {
 }
 
 private function toggleUserSpace(event:Event):void {
-	componentsSrv = ComponentListService.getInstance(Config.instance.userSpace);
+	componentsSrv = new ComponentListService(Config.instance.userSpace);
 }
 
 private function determineSaveButtonEnabled():void {

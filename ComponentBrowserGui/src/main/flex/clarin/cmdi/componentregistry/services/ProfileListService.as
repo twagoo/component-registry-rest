@@ -10,15 +10,12 @@ package clarin.cmdi.componentregistry.services {
 	[Event(name="profilesLoaded", type="flash.events.Event")]
 	public class ProfileListService extends BrowserService {
 		
-		private static var _instance:ProfileListService = new ProfileListService();
-		private static var _userSpaceInstance:ProfileListService = new ProfileListService(true);
-
 		public static const PROFILES_LOADED:String = "profilesLoaded";
 		
 		public function ProfileListService(userSpace:Boolean=false) {
 			super(Config.instance.profileListUrl, userSpace);
 		}
-
+		
 		override protected function result(resultEvent:ResultEvent):void {
 			var resultXml:XML = resultEvent.result as XML;
 			var nodes:XMLList = resultXml.profileDescription;
@@ -30,27 +27,9 @@ package clarin.cmdi.componentregistry.services {
 			}
 			tempArray.sort = BrowserColumns.getInitialSortForProfiles();
 			tempArray.refresh();
-			setItemDescriptions(new ArrayCollection(tempArray.toArray()));			
-			trace(itemDescriptions.length + " profiles are loaded");
+			setItemDescriptions(new ArrayCollection(tempArray.toArray()));	
 			dispatchEvent(new Event(PROFILES_LOADED));
-		    //super.result(resultEvent);
-		}
-
-		public static function getInstance(userSpace:Boolean):ProfileListService {
-			if (userSpace) {
-				return _userSpaceInstance;
-			} else {
-				return _instance;
-			}
 		}
 		
-		public static function findDescription(profileId:String):ItemDescription {
-			var result:ItemDescription = getInstance(true).lookUpDescription(profileId);
-			if (result == null) {
-				result = getInstance(false).lookUpDescription(profileId);
-			}
-			return result
-		}
-
 	}
 }

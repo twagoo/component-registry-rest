@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import clarin.cmdi.componentregistry.common.Profile;
 	
 	import com.adobe.net.URI;
 	
@@ -67,6 +68,12 @@ package clarin.cmdi.componentregistry.services {
 		private var _space:String = SPACE_PUBLIC;
 		private var _userSpace:Boolean = false;
 		private var _debug:Boolean = false;
+		
+		private var publicComponentsSrv:ComponentListService;
+		private var publicProfilesSrv:ProfileListService;
+		private var userComponentsSrv:ComponentListService;
+		private var userProfilesSrv:ProfileListService;
+
 
 		public function Config() {
 			if (_instance != null) {
@@ -103,8 +110,31 @@ package clarin.cmdi.componentregistry.services {
 			if(debug) {
 				_debug = Boolean(debug);
 			}
+			
+			publicProfilesSrv = new ProfileListService(false);
+			userProfilesSrv = new ProfileListService(true);
+			publicComponentsSrv = new ComponentListService(false);
+			userComponentsSrv = new ComponentListService(true);
 		}
 
+		public function getProfilesSrv(userSpace:Boolean):ProfileListService{
+			if (userSpace) {
+				return userProfilesSrv;
+			}
+			else {
+				return publicProfilesSrv;
+			}
+		}
+		
+		public function getComponentsSrv(userSpace:Boolean):ComponentListService{
+			if (userSpace) {
+				return userComponentsSrv;
+			}
+			else {
+				return publicComponentsSrv;
+			}
+		}
+		
 		public static function create(applicationParameters:Object):void {
 			_instance.init(applicationParameters);
 		}
