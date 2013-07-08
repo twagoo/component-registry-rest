@@ -3,13 +3,18 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
 	import mx.collections.ArrayCollection;
-	import mx.rpc.events.ResultEvent;
-
+	import mx.rpc.events.ResultEvent;	
+	import flash.events.Event;
+	
+	
+	[Event(name="profilesLoaded", type="flash.events.Event")]
 	public class ProfileListService extends BrowserService {
 		
 		private static var _instance:ProfileListService = new ProfileListService();
 		private static var _userSpaceInstance:ProfileListService = new ProfileListService(true);
 
+		public static const PROFILES_LOADED:String = "profilesLoaded";
+		
 		public function ProfileListService(userSpace:Boolean=false) {
 			super(Config.instance.profileListUrl, userSpace);
 		}
@@ -25,8 +30,10 @@ package clarin.cmdi.componentregistry.services {
 			}
 			tempArray.sort = BrowserColumns.getInitialSortForProfiles();
 			tempArray.refresh();
-			setItemDescriptions(new ArrayCollection(tempArray.toArray()));
-		    super.result(resultEvent);
+			setItemDescriptions(new ArrayCollection(tempArray.toArray()));			
+			trace(itemDescriptions.length + " profiles are loaded");
+			dispatchEvent(new Event(PROFILES_LOADED));
+		    //super.result(resultEvent);
 		}
 
 		public static function getInstance(userSpace:Boolean):ProfileListService {

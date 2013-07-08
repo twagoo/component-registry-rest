@@ -16,13 +16,15 @@
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
-			import clarin.cmdi.componentregistry.services.BrowserService;
 			import clarin.cmdi.componentregistry.services.ComponentInfoService;
 			import clarin.cmdi.componentregistry.services.ComponentListService;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.DeleteService;
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileListService;
+			
+			//debug
+			import clarin.cmdi.componentregistry.common.Profile;
 			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
@@ -90,35 +92,45 @@
 			public function loadStartup():void {
 				startupItemId = Config.instance.startupItem;
 				startupPanel = Config.instance.browserPanel;
-				if (startupItemId) { //only load this once on startup
-					componentsSrv.addEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
-					profilesSrv.addEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
+				if (startupItemId) { //only load this once on startup					
+					profilesSrv.addEventListener(ProfileListService.PROFILES_LOADED, profilesLoaded);
+					componentsSrv.addEventListener(ComponentListService.COMPONENTS_LOADED, componentsLoaded);					
+					profilesSrv.load();
 				}
-				
-				refresh();
+				else{
+					refresh();
+				}
 			}
 			
 			public function refresh():void {
 				componentsSrv.load();
-				profilesSrv.load();
-				
+				profilesSrv.load();				
 				selectedComponentSrv = new ComponentInfoService();
 				selectedProfileSrv = new ProfileInfoService();
 			}
 			
-			private function profilesLoaded(event:Event):void {
-				var item:ItemDescription = ProfileListService.findDescription(startupItemId);
-				loadStartupItem(item);
-				profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);				
-				profilesSrv.removeEventListener(BrowserService.ITEMS_LOADED, profilesLoaded);
+			
+			
+			private function profilesLoaded(event:Event):void {				
+				profilesSrv.removeEventListener(ProfileListService.PROFILES_LOADED, profilesLoaded);
+				componentsSrv.load();	
 			}
 			
-			private function componentsLoaded(event:Event):void {
-				var item:ItemDescription = ComponentListService.findDescription(startupItemId);
-				if(item != null){
+			private function componentsLoaded(event:Event):void {					
+				componentsSrv.removeEventListener(ComponentListService.COMPONENTS_LOADED, componentsLoaded);
+				
+				var item:ItemDescription = ProfileListService.findDescription(startupItemId);
+				if(item != null){ 					
+					selectedProfileSrv = new ProfileInfoService();
 					loadStartupItem(item);
-					componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);				
-					componentsSrv.removeEventListener(BrowserService.ITEMS_LOADED, componentsLoaded);
+					profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
+				}
+				
+				item = ComponentListService.findDescription(startupItemId);
+				if(item != null){					
+					selectedComponentSrv = new ComponentInfoService();
+					loadStartupItem(item);
+					componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
 				}
 			}
 			
@@ -203,6 +215,11 @@
 				} else {
 					return false;
 				}
+			}
+			
+			private function debugProfile():Profile{
+				trace("in mxml: "+selectedProfileSrv.profile.components.length + "components for the given profile");
+				return selectedProfileSrv.profile;
 			}
 			
 		]]>

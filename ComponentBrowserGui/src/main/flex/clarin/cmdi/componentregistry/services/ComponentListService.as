@@ -4,9 +4,13 @@ package clarin.cmdi.componentregistry.services {
 	
 	import mx.collections.ArrayCollection;
 	import mx.rpc.events.ResultEvent;
+	import flash.events.Event;
 
+	[Event(name="componentsLoaded", type="flash.events.Event")]
 	public class ComponentListService extends BrowserService {
 
+		public static const COMPONENTS_LOADED:String = "componentsLoaded";
+		
 		private static var _instance:ComponentListService = new ComponentListService();
 		private static var _userSpaceInstance:ComponentListService = new ComponentListService(true);
 
@@ -27,7 +31,9 @@ package clarin.cmdi.componentregistry.services {
 			tempArray.sort = BrowserColumns.getInitialSortForComponents();
 			tempArray.refresh();
             setItemDescriptions(new ArrayCollection(tempArray.toArray()));
-		    super.result(resultEvent);
+			trace(itemDescriptions.length + " components are loaded");
+			dispatchEvent(new Event(COMPONENTS_LOADED));
+		    // super.result(resultEvent);
 		}
 
 		public static function getInstance(userSpace:Boolean):ComponentListService {

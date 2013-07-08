@@ -8,9 +8,9 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.events.ResultEvent;
 	
 	
-	[Event(name="itemsLoaded", type="flash.events.Event")]
+	// [Event(name="itemsLoaded", type="flash.events.Event")]
 	public class BrowserService extends ComponentRegistryService {
-        public static const ITEMS_LOADED:String = "itemsLoaded";
+        // public static const ITEMS_LOADED:String = "itemsLoaded";
 
 		/**
 		 * Typed ArrayCollection publicly available for outside code to bind to and watch.
@@ -38,7 +38,7 @@ package clarin.cmdi.componentregistry.services {
 		 * Override in concrete subclasses
 		 */
 		override protected function result(resultEvent:ResultEvent):void {
-			dispatchEvent(new Event(ITEMS_LOADED));
+			//dispatchEvent(new Event(ITEMS_LOADED));
 		}
 
 		protected function setItemDescriptions(items:ArrayCollection):void {
