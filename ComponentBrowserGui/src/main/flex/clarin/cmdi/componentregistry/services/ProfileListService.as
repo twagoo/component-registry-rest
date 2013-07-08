@@ -27,7 +27,7 @@ package clarin.cmdi.componentregistry.services {
 			}
 			tempArray.sort = BrowserColumns.getInitialSortForProfiles();
 			tempArray.refresh();
-			setItemDescriptions(new ArrayCollection(tempArray.toArray()));	
+			itemDescriptions = new ArrayCollection(tempArray.toArray());	
 			dispatchEvent(new Event(PROFILES_LOADED));
 		}
 		

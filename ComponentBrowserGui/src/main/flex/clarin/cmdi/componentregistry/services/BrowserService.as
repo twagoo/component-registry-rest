@@ -34,10 +34,7 @@ package clarin.cmdi.componentregistry.services {
 		override protected function result(resultEvent:ResultEvent):void {
 		}
 
-		protected function setItemDescriptions(items:ArrayCollection):void {
-			itemDescriptions = items;
-		}
-
+		
 				
 		public function findDescription(id:String):ItemDescription {			
 			for each (var item:ItemDescription in itemDescriptions) {
