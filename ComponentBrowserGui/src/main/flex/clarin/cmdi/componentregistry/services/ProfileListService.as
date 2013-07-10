@@ -7,10 +7,9 @@ package clarin.cmdi.componentregistry.services {
 	import flash.events.Event;
 	
 	
-	[Event(name="profilesLoaded", type="flash.events.Event")]
 	public class ProfileListService extends BrowserService {
 		
-		public static const PROFILES_LOADED:String = "profilesLoaded";
+		public const PROFILES_LOADED:String = "profilesLoaded";
 		
 		public function ProfileListService(userSpace:Boolean=false) {
 			super(Config.instance.profileListUrl, userSpace);
@@ -27,9 +26,9 @@ package clarin.cmdi.componentregistry.services {
 			}
 			tempArray.sort = BrowserColumns.getInitialSortForProfiles();
 			tempArray.refresh();
-			itemDescriptions = new ArrayCollection(tempArray.toArray());	
-			dispatchEvent(new Event(PROFILES_LOADED));
-		}
-		
+			itemDescriptions = new ArrayCollection(tempArray.toArray());
+			trace(itemDescriptions.length);
+			dispatchEvent(new Event(this.PROFILES_LOADED));
+		}		
 	}
 }

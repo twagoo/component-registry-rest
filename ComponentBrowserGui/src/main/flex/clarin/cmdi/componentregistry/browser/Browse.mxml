@@ -29,6 +29,7 @@
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
 			private var startupItemLoaded:Boolean = false;
+			private var _userSpace:Boolean = false;
 			
 			[Bindable]
 			private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv(Config.instance.userSpace);
@@ -79,9 +80,9 @@
 			}
 			
 			private function toggleUserSpace(event:Event):void {
-				var userSpace:Boolean = Config.instance.userSpace;
-				componentsSrv = Config.instance.getComponentsSrv(userSpace);
-				profilesSrv = Config.instance.getProfilesSrv(userSpace);
+				_userSpace = Config.instance.userSpace;
+				componentsSrv = Config.instance.getComponentsSrv(_userSpace);
+				profilesSrv = Config.instance.getProfilesSrv(_userSpace);
 				refresh();
 			}
 			
@@ -91,10 +92,12 @@
 			
 			public function loadStartup():void {
 				startupItemId = Config.instance.startupItem;
-				startupPanel = Config.instance.browserPanel;
-				if (startupItemId) { //only load this once on startup					
-					profilesSrv.addEventListener(ProfileListService.PROFILES_LOADED, profilesLoaded);
-					componentsSrv.addEventListener(ComponentListService.COMPONENTS_LOADED, componentsLoaded);					
+				startupPanel = Config.instance.browserPanel;		
+				
+				trace(startupItemId);
+				if (startupItemId) { //only load this once on startup
+					profilesSrv.addEventListener(profilesSrv.PROFILES_LOADED, profilesLoaded);				
+					trace("1");
 					profilesSrv.load();
 				}
 				else{
@@ -111,26 +114,30 @@
 			
 			
 			
-			private function profilesLoaded(event:Event):void {				
-				profilesSrv.removeEventListener(ProfileListService.PROFILES_LOADED, profilesLoaded);
-				componentsSrv.load();	
+			private function profilesLoaded(event:Event):void {	
+				trace("2");
+				profilesSrv.removeEventListener(profilesSrv.PROFILES_LOADED, profilesLoaded);
+				componentsSrv.addEventListener(componentsSrv.COMPONENTS_LOADED, componentsLoaded);	
+				componentsSrv.load();
 			}
 			
-			private function componentsLoaded(event:Event):void {					
-				componentsSrv.removeEventListener(ComponentListService.COMPONENTS_LOADED, componentsLoaded);
+			private function componentsLoaded(event:Event):void {	
+				trace("3");
+				componentsSrv.removeEventListener(componentsSrv.COMPONENTS_LOADED, componentsLoaded);
 				
 				var item:ItemDescription = profilesSrv.findDescription(startupItemId);
 				if(item != null){ 					
 					selectedProfileSrv = new ProfileInfoService();
 					loadStartupItem(item);
 					profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
-				}
-				
-				item = componentsSrv.findDescription(startupItemId);
-				if(item != null){					
-					selectedComponentSrv = new ComponentInfoService();
-					loadStartupItem(item);
-					componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
+				}				
+				else {
+					item = componentsSrv.findDescription(startupItemId);
+					if(item != null){					
+						selectedComponentSrv = new ComponentInfoService();
+						loadStartupItem(item);
+						componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
+					}
 				}
 			}
 			
@@ -192,6 +199,7 @@
 			}
 			
 			private function setUserSpace(event:Event = null):void {
+				_userSpace=Config.instance.userSpace;
 				if (Config.instance.userSpace) {
 					userSpaceCB.selectedIndex = 1;
 				} else {
@@ -217,10 +225,7 @@
 				}
 			}
 			
-			private function debugProfile():Profile{
-				trace("in mxml: "+selectedProfileSrv.profile.components.length + "components for the given profile");
-				return selectedProfileSrv.profile;
-			}
+			
 			
 		]]>
 	</mx:Script>
