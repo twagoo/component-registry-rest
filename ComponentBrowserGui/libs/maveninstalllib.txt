@@ -1,1 +1,0 @@
-mvn install:install-file -DgroupId=com.adobe -DartifactId=as3corelib -Dversion=0.92.1 -Dpackaging=swc -Dfile=as3corelib-0.92.1.swc -DgeneratePom=true
