@@ -3,8 +3,7 @@ package clarin.cmdi.componentregistry.services {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
 	import mx.collections.ArrayCollection;
-	import mx.rpc.events.ResultEvent;	
-	import flash.events.Event;
+	import com.adobe.net.URI;
 	
 	
 	public class ProfileListService extends BrowserService {
@@ -12,11 +11,10 @@ package clarin.cmdi.componentregistry.services {
 		public const PROFILES_LOADED:String = "profilesLoaded";
 		
 		public function ProfileListService(userSpace:Boolean=false) {
-			super(Config.instance.profileListUrl, userSpace);
+			super(PROFILES_LOADED, new URI(Config.instance.profileListUrl), userSpace);
 		}
 		
-		override protected function result(resultEvent:ResultEvent):void {
-			var resultXml:XML = resultEvent.result as XML;
+		override protected function handleXmlResult(resultXml:XML):void{
 			var nodes:XMLList = resultXml.profileDescription;
 			var tempArray:ArrayCollection = new ArrayCollection();
 			for each (var node:XML in nodes) {
@@ -27,8 +25,6 @@ package clarin.cmdi.componentregistry.services {
 			tempArray.sort = BrowserColumns.getInitialSortForProfiles();
 			tempArray.refresh();
 			itemDescriptions = new ArrayCollection(tempArray.toArray());
-			trace(itemDescriptions.length);
-			dispatchEvent(new Event(this.PROFILES_LOADED));
 		}		
 	}
 }

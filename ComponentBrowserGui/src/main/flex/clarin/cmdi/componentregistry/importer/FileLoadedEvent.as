@@ -1,5 +1,4 @@
 package clarin.cmdi.componentregistry.importer {
-	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
 	import flash.events.Event;
 	import flash.net.FileReference;

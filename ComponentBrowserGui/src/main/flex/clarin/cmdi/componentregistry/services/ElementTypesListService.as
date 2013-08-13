@@ -1,10 +1,9 @@
 package clarin.cmdi.componentregistry.services //trunk
 {
-    import flash.events.Event;
-    import flash.events.MouseEvent;
+    
+    import com.adobe.net.URI;
     
     import mx.collections.ArrayCollection;
-    import mx.rpc.events.ResultEvent;
 	
 	public class ElementTypesListService extends ComponentRegistryService
 	{ 
@@ -15,20 +14,17 @@ package clarin.cmdi.componentregistry.services //trunk
 		
 		public function ElementTypesListService()
 		{ 
-		  super(Config.getUriAllowedElementTypes());
+		  super(ALLOWED_TYPES_LOADED, new URI(Config.getUriAllowedElementTypes()));
 		}
 		
 		
-		// called by load()
-		override protected function result(resultEvent:ResultEvent):void {
-			var resultXml:XML = resultEvent.result as XML;
+		override protected function handleXmlResult(resultXml:XML):void{
 			allowedTypes= new ArrayCollection();
 			var currentValue:String;
 			for each (var description:XML in resultXml.children()) {
 				currentValue=description.valueOf().toString();
 				allowedTypes.addItem({label: currentValue, data: currentValue});
 			}
-			dispatchEvent(new Event(ALLOWED_TYPES_LOADED));
 		}
 		
 	}

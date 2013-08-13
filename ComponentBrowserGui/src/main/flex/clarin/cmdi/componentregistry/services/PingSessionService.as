@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.services {
 
-	import clarin.cmdi.componentregistry.common.Credentials;
+	import com.adobe.net.URI;
 	
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
@@ -13,9 +13,11 @@ package clarin.cmdi.componentregistry.services {
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	import mx.utils.StringUtil;
+	
+	import clarin.cmdi.componentregistry.common.Credentials;
 
 
-	public class PingSessionService {
+	public class PingSessionService extends BaseRemoteService{
 
 		[Bindable]
 		public var stillActive:Boolean
@@ -23,15 +25,12 @@ package clarin.cmdi.componentregistry.services {
 		public static const INSTANCE:PingSessionService = new PingSessionService();
         private static const PING_INTERVAL:int = 1000 * 60 * 5; //5 minutes
 		private var timer:Timer = new Timer(PING_INTERVAL, 0);
-		private var service:HTTPService;
 
 		/**
 		 * Use INSTANCE field
 		 */
 		function PingSessionService() {
-			this.service = new HTTPService();
-			this.service.method = HTTPRequestMessage.GET_METHOD;
-			this.service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
+			super("PingOk");
 		}
 
 		public function startPinging():void {
@@ -45,24 +44,21 @@ package clarin.cmdi.componentregistry.services {
 
 		private function pingSession():void {
 		    if (Credentials.instance.isLoggedIn()) {
-    			service.url = Config.instance.pingSessionUrl;
-    			var token:AsyncToken = service.send();
-    			token.addResponder(new Responder(result, fault));
+				dispatchRequest(new URI(Config.instance.pingSessionUrl));
 		    }
 		}
 
-		private function result(resultEvent:ResultEvent):void {
-			stillActive = resultEvent.result.@stillActive == "true";
+		override protected function handleXmlResult(resultXml:XML):void{
+			stillActive = resultXml.@stillActive == "true";
 			if (!stillActive) {
 			    Alert.show("Your session has expired, please reload the application to refresh the session.");
 			    timer.stop(); 
 			}
 		}
 
-		public function fault(faultEvent:FaultEvent):void {
+		override protected function requestCallbackFailed(faultEvent:FaultEvent):void {
 			timer.stop(); // We stop to bother the user with more errors. Somethings is wrong user needs probably to reload which will start the timer again.
-			var errorMessage:String = StringUtil.substitute("Error in {0}: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			Alert.show(errorMessage);
+			super.requestCallbackFailed(faultEvent);
 		}
 	}
 }

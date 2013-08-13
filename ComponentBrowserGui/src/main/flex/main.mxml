@@ -8,16 +8,17 @@
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
+			import com.flexspy.FlexSpy;
+			
+			import mx.controls.Button;
+			import mx.managers.PopUpManager;
+			
 			import clarin.cmdi.componentregistry.common.AboutPopup;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.components.HelpLabelButton;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.PingSessionService;
-			
-			import com.flexspy.FlexSpy;
-			
-			import mx.controls.Button;
-			import mx.managers.PopUpManager;
+			import clarin.cmdi.componentregistry.services.remote.ClientServiceFactoryImpl;
 			
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 			

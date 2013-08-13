@@ -2,56 +2,28 @@ package clarin.cmdi.componentregistry.services //trunk
 {
 	import com.adobe.net.URI;
 	
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	
-	import mx.controls.Alert;
-	import mx.messaging.messages.HTTPRequestMessage;
-	import mx.rpc.AsyncToken;
-	import mx.rpc.Responder;
-	import mx.rpc.events.FaultEvent;
-	import mx.rpc.events.ResultEvent;
-	import mx.rpc.http.HTTPService;
-	import mx.utils.StringUtil;
-	
-	public class ComponentRegistryService extends EventDispatcher {
-		private var service:HTTPService;
+	public class ComponentRegistryService extends BaseRemoteService {
 		
-		private var serviceUrl:String;
+		protected var serviceUrl:URI;
+		protected var userSpace:Boolean;
 		
-		public function ComponentRegistryService(restUrl:String) {
-			this.serviceUrl = restUrl;
-			service = new HTTPService();
-			service.method = HTTPRequestMessage.GET_METHOD;
-			service.resultFormat = HTTPService.RESULT_FORMAT_E4X;
+		public function ComponentRegistryService(successEvent:String, serviceUrl:URI) {
+			super(successEvent);
+			this.serviceUrl = serviceUrl;
 		}
 		
-		private function initService():void {
-			var url:URI = new URI(serviceUrl);
+		override protected function dispatchRequest(url:URI):void {
 			url.setQueryValue("unique", new Date().getTime().toString());
-			initServiceUrl(url);
-			service.url = url.toString();
+			if (userSpace) {
+				url.setQueryValue(Config.PARAM_USERSPACE, "true");
+			} else
+				url.setQueryValue(Config.PARAM_USERSPACE, null);
+			super.dispatchRequest(url);
 		}
 		
 		public function load():void {
-			initService();
-			var token:AsyncToken = this.service.send();
-			token.addResponder(new Responder(result, fault));
+			dispatchRequest(serviceUrl);
 		}
 		
-		/**
-		 * Override in concrete subclasses
-		 */
-		protected function result(resultEvent:ResultEvent):void {
-		}
-		
-		public function fault(faultEvent:FaultEvent):void {
-			var errorMessage:String = StringUtil.substitute("Error in {0}: \n Fault: {1} - {2}", this, faultEvent.fault.faultString, faultEvent.fault.faultDetail);
-			trace(errorMessage);
-			Alert.show("Internal Server error cannot process the data, try reloading the application.");
-		}
-		
-		protected function initServiceUrl(url:URI):void{
-		};
 	}
 }

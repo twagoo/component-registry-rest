@@ -1,5 +1,4 @@
 package clarin.cmdi.componentregistry.editor.model {
-	import clarin.cmdi.componentregistry.common.ComponentMD;
 	import clarin.cmdi.componentregistry.editor.ValueSchemeItem;
 	
 	import flexunit.framework.TestCase;

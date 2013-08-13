@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import com.adobe.net.URI;
 	
-	import com.adobe.net.URI;	
-	import mx.collections.ArrayCollection;	
-	import mx.rpc.events.ResultEvent;
+	import mx.collections.ArrayCollection;
+	
+	import clarin.cmdi.componentregistry.common.ItemDescription;	
 	
 	public class BrowserService extends ComponentRegistryService {
 
@@ -14,28 +14,18 @@ package clarin.cmdi.componentregistry.services {
 		[ArrayElementType("ItemDescription")]
 		public var itemDescriptions:ArrayCollection;
 
-		// Not bindable needed for lookups over the whole collections of itemDescriptions
-		protected var userSpace:Boolean;
-
-		public function BrowserService(restUrl:String, userSpace:Boolean) {
-			super(restUrl);
+		public function BrowserService(successEvent:String, restUrl:URI, userSpace:Boolean) {
+			super(successEvent, restUrl);
 			this.userSpace = userSpace;
 		}
 		
-		override protected function initServiceUrl(url:URI):void{
+		override protected function dispatchRequest(url:URI):void {
 			if (userSpace) {
 				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
+			super.dispatchRequest(url);
 		}
 		
-		/**
-		 * Override in concrete subclasses
-		 */
-		override protected function result(resultEvent:ResultEvent):void {
-		}
-
-		
-				
 		public function findDescription(id:String):ItemDescription {			
 			for each (var item:ItemDescription in itemDescriptions) {
 				if (item.id == id) {

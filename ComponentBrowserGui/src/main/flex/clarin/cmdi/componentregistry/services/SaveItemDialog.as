@@ -1,10 +1,9 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.common.ItemDescription;
-
-	import com.adobe.net.URI;
 
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
+	import com.adobe.net.URI;
 
 	public class SaveItemDialog {
 

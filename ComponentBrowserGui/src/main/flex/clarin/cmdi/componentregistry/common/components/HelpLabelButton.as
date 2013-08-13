@@ -1,9 +1,5 @@
 package clarin.cmdi.componentregistry.common.components
 {
-	import clarin.cmdi.componentregistry.services.Config;
-	
-	import com.adobe.net.URI;
-	
 	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;

@@ -1,17 +1,14 @@
 package clarin.cmdi.componentregistry.services {
-	import clarin.cmdi.componentregistry.common.Comment;
-	import clarin.cmdi.componentregistry.common.ItemDescription;
-	
 	import com.adobe.net.URI;
 	
 	import mx.collections.ArrayCollection;
-	import mx.rpc.events.ResultEvent;
+	
+	import clarin.cmdi.componentregistry.common.Comment;
+	import clarin.cmdi.componentregistry.common.ItemDescription;
 	
 	[Event(name="CommentsLoaded", type="flash.events.Event")]
 	public class CommentListService extends ComponentRegistryService {
 		public static const COMMENTS_LOADED:String = "CommentsLoaded";
-		;
-		private var userSpace:Boolean;
 		private var itemDescription:ItemDescription;
 		
 		/**
@@ -28,20 +25,13 @@ package clarin.cmdi.componentregistry.services {
 			} else{
 				url = Config.instance.getComponentCommentsPath(itemDescription.id);
 			}
-			super(url);
+			super(COMMENTS_LOADED, new URI(url));
 			
 			this.itemDescription = itemDescription;
 			this.userSpace = userSpace;
 		}
 		
-		override protected function initServiceUrl(url:URI):void{
-			if (userSpace) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
-			}
-		}
-		
-		override protected function result(resultEvent:ResultEvent):void {
-			var resultXml:XML = resultEvent.result as XML;
+		override protected function handleXmlResult(resultXml:XML):void{
 			var nodes:XMLList = resultXml.comment;
 			
 			comments = new ArrayCollection();
@@ -51,7 +41,6 @@ package clarin.cmdi.componentregistry.services {
 				comments.addItem(comment);
 			}
 			comments.refresh();
-			dispatchEvent(new Event(COMMENTS_LOADED));
 		}
 	}
 }

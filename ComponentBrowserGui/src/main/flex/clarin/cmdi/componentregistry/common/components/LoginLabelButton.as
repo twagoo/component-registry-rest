@@ -7,7 +7,6 @@ package clarin.cmdi.componentregistry.common.components {
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
 
-	import mx.controls.Label;
 
 	public class LoginLabelButton extends LabelButton {
 
@@ -26,7 +25,7 @@ package clarin.cmdi.componentregistry.common.components {
 		private function handleLogin(event:MouseEvent):void {
 			var req:URLRequest = new URLRequest();
 
-			var uri:URI = new URI(Config.instance.serviceRootUrl);
+			var uri:URI  = new URI(Config.instance.serviceRootUrl);
 			uri.setQueryValue("shhaaDo", "lI");
 			if (viewType) {
 				uri.setQueryValue(Config.REGISTRY_PARAM_VIEW, viewType);
