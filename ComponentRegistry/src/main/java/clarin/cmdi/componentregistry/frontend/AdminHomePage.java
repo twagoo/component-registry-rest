@@ -32,6 +32,8 @@ import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
 import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.impl.database.IComponentDescriptionDao;
+import clarin.cmdi.componentregistry.impl.database.IProfileDescriptionDAO;
 import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -48,9 +50,9 @@ public class AdminHomePage extends SecureAdminWebPage {
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     @SpringBean
-    private ProfileDescriptionDao profileDescriptionDao;
+    private IProfileDescriptionDAO profileDescriptionDao;
     @SpringBean
-    private ComponentDescriptionDao componentDescriptionDao;
+    private IComponentDescriptionDao componentDescriptionDao;
     @SpringBean
     private MDMarshaller marshaller;
 

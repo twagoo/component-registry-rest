@@ -2,18 +2,23 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.collections.ListUtils;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
-public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescription> {
+@Repository
+public class ProfileDescriptionDao extends AbstractDescriptionDao<ProfileDescription> implements IProfileDescriptionDAO{
 
     public ProfileDescriptionDao() {
 	super(ProfileDescription.class);

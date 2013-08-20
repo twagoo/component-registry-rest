@@ -1,106 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-        Configuration file for ComponentRegistry in NON-SHIBBOLIZED context,
-	i.e. development or testing environments.
--->
+<!-- Configuration file for ComponentRegistry in NON-SHIBBOLIZED context, 
+	i.e. development or testing environments. -->
 
-<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
-    <display-name>ComponentRegistry</display-name>
-    <description>Clarin Metadata Component Registry</description>
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    <filter>
-        <filter-name>characterEncodingFilter</filter-name>
-        <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>
-        <init-param>
-            <param-name>encoding</param-name>
-            <param-value>UTF-8</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>characterEncodingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    <filter>
-        <filter-name>wicket.componentregistry</filter-name>
-        <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
-        <init-param>
-            <param-name>applicationClassName</param-name>
-            <param-value>clarin.cmdi.componentregistry.frontend.AdminApp</param-value>
-        </init-param>
-        <init-param>
-            <param-name>configuration</param-name>
-            <!--      <param-value>development</param-value>-->
-            <param-value>deployment</param-value>
-            <!-- you can override with -Dwicket.configuration=development -->
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>wicket.componentregistry</filter-name>
-        <url-pattern>/admin/*</url-pattern>
-    </filter-mapping>
-    <servlet>
-        <servlet-name>ComponentRegistry Web Application</servlet-name>
-        <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-        <init-param>
-            <param-name>com.sun.jersey.config.property.resourceConfigClass</param-name>
-            <param-value>com.sun.jersey.api.core.ClassNamesResourceConfig</param-value>
-        </init-param>
-        <init-param>
-            <param-name>com.sun.jersey.config.property.classnames</param-name>
-            <param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider;clarin.cmdi.componentregistry.rest.ComponentRegistryRestService</param-value>
-        </init-param>
-        <!--    <init-param>-->
-        <!--      <param-name>com.sun.jersey.config.property.packages</param-name>-->
-        <!--      <param-value>clarin.cmdi.componentregistry.rest</param-value>-->
-        <!--    </init-param>-->
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ComponentRegistry Web Application</servlet-name>
-        <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>Isocat Servlet</servlet-name>
-        <servlet-class>clarin.cmdi.componentregistry.servlet.IsocatServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Isocat Servlet</servlet-name>
-        <url-pattern>/isocat/*</url-pattern>
-    </servlet-mapping>
-    <security-constraint>
-        <display-name>ComponentRegistry web service</display-name>
-        <web-resource-collection>
-            <web-resource-name>ComponentRegistry edit</web-resource-name>
-            <description/>
-            <url-pattern>/rest/*</url-pattern>
-            <http-method>DELETE</http-method>
-            <http-method>PUT</http-method>
-            <http-method>POST</http-method>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>tomcat</role-name>
-        </auth-constraint>
-    </security-constraint>
-    <security-constraint>
-        <display-name>ComponentRegistry SWF GET</display-name>
-        <web-resource-collection>
-            <web-resource-name>ComponentRegistry access</web-resource-name>
-            <description/>
-            <url-pattern>/*</url-pattern>
-            <http-method>GET</http-method>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>tomcat</role-name>
-        </auth-constraint>
-    </security-constraint>
-    <login-config>
-        <auth-method>BASIC</auth-method>
-    </login-config>
-    <security-role>
-        <description> The role that is required to log in to the Application </description>
-        <role-name>tomcat</role-name>
-    </security-role>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>ComponentRegistry</display-name>
+	<description>Clarin Metadata Component Registry</description>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring-config/applicationContext.xml,classpath:spring-config/container-environment.xml
+		</param-value>
+	</context-param>
+
+	<filter>
+		<filter-name>characterEncodingFilter</filter-name>
+		<filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>characterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter>
+		<filter-name>wicket.componentregistry</filter-name>
+		<filter-class>org.apache.wicket.protocol.http.WicketFilter
+		</filter-class>
+		<init-param>
+			<param-name>applicationClassName</param-name>
+			<param-value>clarin.cmdi.componentregistry.frontend.AdminApp
+			</param-value>
+		</init-param>
+		<init-param>
+			<param-name>configuration</param-name>
+			<!-- <param-value>development</param-value> -->
+			<param-value>deployment</param-value>
+			<!-- you can override with -Dwicket.configuration=development -->
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>wicket.componentregistry</filter-name>
+		<url-pattern>/admin/*</url-pattern>
+	</filter-mapping>
+	<servlet>
+		<servlet-name>ComponentRegistry Web Application</servlet-name>
+		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+		<!-- init-param>
+			<param-name>com.sun.jersey.config.property.resourceConfigClass
+			</param-name>
+			<param-value>com.sun.jersey.api.core.ClassNamesResourceConfig
+			</param-value>
+		</init-param-->
+		<!-- <init-param> <param-name>com.sun.jersey.config.property.classnames</param-name> 
+			<param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider</param-value> 
+			</init-param> -->
+		<init-param>
+			<param-name>com.sun.jersey.config.property.packages</param-name>
+			<param-value>com.sun.jersey.multipart.impl</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ComponentRegistry Web Application</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>Isocat Servlet</servlet-name>
+		<servlet-class>clarin.cmdi.componentregistry.servlet.IsocatServlet
+		</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Isocat Servlet</servlet-name>
+		<url-pattern>/isocat/*</url-pattern>
+	</servlet-mapping>
+	<security-constraint>
+		<display-name>ComponentRegistry web service</display-name>
+		<web-resource-collection>
+			<web-resource-name>ComponentRegistry edit</web-resource-name>
+			<description />
+			<url-pattern>/rest/*</url-pattern>
+			<http-method>DELETE</http-method>
+			<http-method>PUT</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>tomcat</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<display-name>ComponentRegistry SWF GET</display-name>
+		<web-resource-collection>
+			<web-resource-name>ComponentRegistry access</web-resource-name>
+			<description />
+			<url-pattern>/*</url-pattern>
+			<http-method>GET</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>tomcat</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<login-config>
+		<auth-method>BASIC</auth-method>
+	</login-config>
+	<security-role>
+		<description> The role that is required to log in to the Application
+		</description>
+		<role-name>tomcat</role-name>
+	</security-role>
 </web-app>

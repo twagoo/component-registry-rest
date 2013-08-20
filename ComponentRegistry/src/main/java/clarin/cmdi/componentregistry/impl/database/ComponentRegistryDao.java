@@ -1,25 +1,24 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcDaoSupport;
 
 /**
  * Logic and constants shared by the dao's of the DB implementation
- *
- * TODO: For future extensions we may want to use {@link org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport}
- *
+ * 
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
- * @param <T> Type the dao maps to
+ * @author George.Georgovassilis@mpi.nl
+ * @param <T>
+ *            Type the dao maps to
  */
-public abstract class ComponentRegistryDao<T> extends SimpleJdbcDaoSupport {
-
-    public final static String TABLE_COMMENTS = "comments";
-    public final static String TABLE_COMPONENT_DESCRIPTION = "component_description";
-    public final static String TABLE_PROFILE_DESCRIPTION = "profile_description";
-    public final static String TABLE_XML_CONTENT = "xml_content";
-    public final static String TABLE_REGISTRY_USER = "registry_user";
-    public final static String COLUMN_ID = "id";
+public abstract class ComponentRegistryDao<T> extends
+	NamedParameterJdbcDaoSupport implements IComponentRegistryDao<T> {
 
     public ComponentRegistryDao() {
     }
@@ -42,11 +41,18 @@ public abstract class ComponentRegistryDao<T> extends SimpleJdbcDaoSupport {
     }
 
     protected List<T> getList(String selectQuery, Object... args) {
-	return getSimpleJdbcTemplate().query(selectQuery, getRowMapper(), args);
+	return getJdbcTemplate().query(selectQuery, getRowMapper(), args);
     }
 
     /**
      * @return the rowMapper
      */
     protected abstract ParameterizedRowMapper<T> getRowMapper();
+
+    @Override
+    @Autowired
+    public void setDatasourceProperty(DataSource ds) {
+	super.setDataSource(ds);
+    }
+
 }

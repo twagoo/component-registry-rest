@@ -8,29 +8,22 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 
 /**
- * 
+ * Base test class for concrete tests to profile and component DAOs
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "/applicationContext.xml" })
-public abstract class AbstractDescriptionDaoTest {
+public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Autowired
-    protected JdbcTemplate jdbcTemplate;
+    private IUserDAO userDao;
 
-    @Autowired
-    private UserDao userDao;
-
-    protected abstract AbstractDescriptionDao getDao();
+    protected abstract IAbstractDescriptionDao getDao();
 
     @Test
     public void testInjection() {
@@ -53,7 +46,8 @@ public abstract class AbstractDescriptionDaoTest {
 	description.setRegistrationDate(regDate);
 
 	String testComponent = getContentString();
-	Number newId = getDao().insertDescription(description, testComponent, true, null);
+	Number newId = getDao().insertDescription(description, testComponent,
+		true, null);
 	assertNotNull(newId);
 	AbstractDescription descr = getDao().getById(newId);
 	assertNotNull(descr);
@@ -63,8 +57,10 @@ public abstract class AbstractDescriptionDaoTest {
 	assertEquals("MyGroup", descr.getGroupName());
 	assertEquals("MyDomain \u00CA", descr.getDomainName());
 	assertEquals("http://MyHref", descr.getHref());
-	assertEquals(AbstractDescription.getDate(regDate), AbstractDescription.getDate(descr.getRegistrationDate()));
-	assertEquals(testComponent, getDao().getContent(false, description.getId()));
+	assertEquals(AbstractDescription.getDate(regDate),
+		AbstractDescription.getDate(descr.getRegistrationDate()));
+	assertEquals(testComponent,
+		getDao().getContent(false, description.getId()));
     }
 
     @Test
@@ -73,26 +69,29 @@ public abstract class AbstractDescriptionDaoTest {
 	insert("A", true, null);
 	insert("B", true, null);
 	insert("a", true, null);
-	
-	List<AbstractDescription> descs = getDao().getPublicDescriptions(); 
+
+	List<AbstractDescription> descs = getDao().getPublicDescriptions();
 	assertEquals(4, descs.size());
-	assertEquals("a", descs.get(0).getName()); //ordered by name case insensitive then by cmdId
+	assertEquals("a", descs.get(0).getName()); // ordered by name case
+						   // insensitive then by cmdId
 	assertEquals("A", descs.get(1).getName());
 	assertEquals("a", descs.get(2).getName());
 	assertTrue(descs.get(1).getId().compareTo(descs.get(2).getId()) < 0);
 	assertEquals("B", descs.get(3).getName());
-	
+
     }
-    
+
     @Test
     public void testGetPublicComponents() throws Exception {
-	List<AbstractDescription> descriptions = getDao().getPublicDescriptions();
+	List<AbstractDescription> descriptions = getDao()
+		.getPublicDescriptions();
 	assertNotNull(descriptions);
     }
 
     @Test
     public void testGetUserspaceDescriptions() throws Exception {
-	List<AbstractDescription> descriptions = getDao().getUserspaceDescriptions(-1);
+	List<AbstractDescription> descriptions = getDao()
+		.getUserspaceDescriptions(-1);
 	assertEquals(0, descriptions.size());
     }
 
@@ -130,7 +129,8 @@ public abstract class AbstractDescriptionDaoTest {
 	description.setHref("http://MyHref");
 
 	String testComponent = getContentString();
-	Number newId = getDao().insertDescription(description, testComponent, true, null);
+	Number newId = getDao().insertDescription(description, testComponent,
+		true, null);
 
 	// Change values
 	description.setName("Noot");
@@ -155,7 +155,8 @@ public abstract class AbstractDescriptionDaoTest {
 	String testContent2 = "<test>Test content</test>";
 	getDao().updateDescription(newId, null, testContent2);
 	// Test if new content is there
-	assertEquals(testContent2, getDao().getContent(false, description.getId()));
+	assertEquals(testContent2,
+		getDao().getContent(false, description.getId()));
 
 	// Update both
 	description.setName("Mies");
@@ -170,7 +171,8 @@ public abstract class AbstractDescriptionDaoTest {
 	assertEquals("Mies", description.getName());
 	assertEquals("YetAnotherDescription", description.getDescription());
 	// Test if new content is there
-	assertEquals(testContent3, getDao().getContent(false, description.getId()));
+	assertEquals(testContent3,
+		getDao().getContent(false, description.getId()));
     }
 
     @Test
@@ -179,15 +181,15 @@ public abstract class AbstractDescriptionDaoTest {
 	AbstractDescription publicDesc = insert(true, null);
 	assertTrue(getDao().isPublic(publicDesc.getId()));
 	assertFalse(getDao().isInUserSpace(publicDesc.getId(), userId));
-	
+
 	AbstractDescription privateDesc = insert(false, userId);
 	assertFalse(getDao().isPublic(privateDesc.getId()));
 	assertTrue(getDao().isInUserSpace(privateDesc.getId(), userId));
-	
+
 	getDao().setDeleted(publicDesc, true);
 	assertTrue(getDao().isPublic(publicDesc.getId()));
 	assertFalse(getDao().isInUserSpace(publicDesc.getId(), userId));
-	
+
 	getDao().setDeleted(privateDesc, true);
 	assertFalse(getDao().isPublic(privateDesc.getId()));
 	assertTrue(getDao().isInUserSpace(privateDesc.getId(), userId));
@@ -196,8 +198,9 @@ public abstract class AbstractDescriptionDaoTest {
     private AbstractDescription insert(boolean isPublic, Number userId) {
 	return insert("Aap", isPublic, userId);
     }
-    
-    private AbstractDescription insert(String name, boolean isPublic, Number userId) {
+
+    private AbstractDescription insert(String name, boolean isPublic,
+	    Number userId) {
 	AbstractDescription desc = createNewDescription();
 	desc.setName(name);
 	desc.setDescription("MyDescription");

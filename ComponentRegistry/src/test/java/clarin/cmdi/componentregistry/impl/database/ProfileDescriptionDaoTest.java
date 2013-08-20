@@ -9,13 +9,14 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- *
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
 public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
 
     @Autowired
-    ProfileDescriptionDao profileDescriptionDao;
+    IProfileDescriptionDAO profileDescriptionDao;
 
     @Before
     public void init() {
@@ -27,7 +28,7 @@ public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
     }
 
     @Override
-    protected AbstractDescriptionDao getDao() {
+    protected IAbstractDescriptionDao getDao() {
 	return profileDescriptionDao;
     }
 
@@ -35,7 +36,7 @@ public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
     protected AbstractDescription createNewDescription() {
 	return ProfileDescription.createNewDescription();
     }
-    
+
     @Override
     protected String getContentString() {
 	return RegistryTestHelper.getProfileTestContentString();

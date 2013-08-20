@@ -14,28 +14,33 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
+
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.multipart.FormDataMultiPart;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
+
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.Assert;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext.xml"})
+/**
+ * Launches a servlet container environment and performs HTTP calls to the {@link ComponentRegistryRestService}
+ * @author george.georgovassilis@mpi.nl
+ *
+ */
 public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Autowired
@@ -54,11 +59,6 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         testRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
     }
 
-    @Override
-    protected String getApplicationContextFile() {
-        return "classpath:applicationContext.xml";
-    }
-
     private ComponentRegistry getTestRegistry() {
         return testRegistry;
     }
@@ -73,13 +73,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegistryTestHelper.addComponent(getTestRegistry(), "component2");
         RegistryTestHelper.addComponent(getTestRegistry(), "component1");
         RegistryTestHelper.addComment(getTestRegistry(), "comment2", "clarin.eu:cr1:profile1", "JUnit@test.com");
-        Thread.sleep(1000); // wait so order becomes predictable
         RegistryTestHelper.addComment(getTestRegistry(), "comment1", "clarin.eu:cr1:profile1", "JUnit@test.com");
-        Thread.sleep(1000); // wait so order becomes predictable
         RegistryTestHelper.addComment(getTestRegistry(), "comment3", "clarin.eu:cr1:component1", "JUnit@test.com");
-        Thread.sleep(1000); // wait so order becomes predictable
         RegistryTestHelper.addComment(getTestRegistry(), "comment4", "clarin.eu:cr1:component1", "JUnit@test.com");
-        Thread.sleep(1000); // wait so order becomes predictable
     }
 
     @Test
@@ -524,12 +520,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getTestProfileContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getTestProfileContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(response.isProfile());
@@ -680,11 +676,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     private FormDataMultiPart createFormData(Object content, String description) {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, description);
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, description);
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
         return form;
     }
 
@@ -959,12 +955,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterComponent() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "ComponentTest1");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Component");
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
         RegisterResponse response = getAuthenticatedResource("/registry/components").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(response.isRegistered());
@@ -987,7 +983,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterComment() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         fillUp();
         CommentResponse response = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile1/comments").type(MediaType.MULTIPART_FORM_DATA).post(
@@ -1008,7 +1004,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterCommentToNonExistent() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         fillUp();
         ClientResponse cResponse = getAuthenticatedResource("/registry/profiles/clarin.eu:cr1:profile99/comments").type(MediaType.MULTIPART_FORM_DATA).post(
@@ -1019,7 +1015,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterCommentUnauthenticated() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getCommentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         fillUp();
         ClientResponse cResponse = getResource().path("/registry/profiles/clarin.eu:cr1:profile1/comments").type(MediaType.MULTIPART_FORM_DATA).post(
@@ -1031,12 +1027,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     public void testRegisterProfileInvalidData() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
         String notAValidProfile = "<CMD_ComponentSpec> </CMD_ComponentSpec>";
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, new ByteArrayInputStream(notAValidProfile.getBytes()),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, new ByteArrayInputStream(notAValidProfile.getBytes()),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "Domain");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "Group");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "Domain");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "Group");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
         RegisterResponse postResponse = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(postResponse.isProfile());
@@ -1072,12 +1068,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         profileContent += "        </CMD_Element>\n";
         profileContent += "    </CMD_Component>\n";
         profileContent += "</CMD_ComponentSpec>\n";
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentContent(profileContent),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentContent(profileContent),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertFalse("Subsequent elements should not be allowed to have the same name", response.isRegistered());
@@ -1114,12 +1110,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterLargeProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getLargeProfileContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getLargeProfileContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "ProfileTest1");
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "TestDomain");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test Profile");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "My Test Group");
         ClientResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 ClientResponse.class, form);
         assertEquals(200, response.getStatus());
@@ -1128,12 +1124,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterComponentAsProfile() throws Exception {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, RegistryTestHelper.getComponentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "t");
-        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "domain");
-        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
-        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "My Group");
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "t");
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "domain");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, "My Test");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "My Group");
         RegisterResponse response = getAuthenticatedResource("/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertFalse(response.isRegistered());

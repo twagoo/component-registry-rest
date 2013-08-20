@@ -6,9 +6,11 @@ package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.database.UserDao;
+import clarin.cmdi.componentregistry.impl.database.IUserDAO;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+
 import java.security.Principal;
+
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.markup.html.WebPage;
@@ -29,7 +31,7 @@ import org.springframework.dao.DataAccessException;
 public class UserSettingsPage extends WebPage {
 
     @SpringBean
-    private UserDao userDao;
+    private IUserDAO userDao;
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     private RegistryUser registryUser;

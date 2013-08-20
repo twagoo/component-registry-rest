@@ -1,31 +1,31 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+
 import java.util.List;
-import org.junit.runner.RunWith;
+
 import org.junit.Test;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 
+import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- *
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext.xml"})
-public class UserDaoTest {
+public class UserDaoTest extends BaseUnitTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private UserDao userDao;
+    private IUserDAO userDao;
 
     @Before
     public void init() {
@@ -85,6 +85,7 @@ public class UserDaoTest {
 
 	assertEquals("I. Changed", userDao.getById(id).getName());
     }
+
     public final static String TEST_USER_NAME = "Aap";
     public final static String TEST_USER_PRINCIPAL_NAME = "aap@clarin.eu";
 }

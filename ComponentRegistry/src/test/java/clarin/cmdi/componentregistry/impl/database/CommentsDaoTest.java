@@ -1,31 +1,31 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.Comment;
+
 import java.util.List;
-import org.junit.runner.RunWith;
+
 import org.junit.Test;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 
+import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  *
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext.xml"})
-public class CommentsDaoTest {
+public class CommentsDaoTest extends BaseUnitTest{
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private CommentsDao commentsDao;
+    private ICommentsDao commentsDao;
 
     @Before
     public void init() {

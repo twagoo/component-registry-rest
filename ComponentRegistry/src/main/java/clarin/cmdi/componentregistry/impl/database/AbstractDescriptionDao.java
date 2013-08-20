@@ -12,37 +12,37 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ProfileDescription;
+
 import java.util.Arrays;
 import java.util.Collection;
+
 import org.apache.commons.collections.ListUtils;
 
 /**
- * 
+ * Base DAO which can be extended to serve {@link ComponentDescription}s and {@link ProfileDescription}s
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
-public abstract class AbstractDescriptionDao<T extends AbstractDescription> extends ComponentRegistryDao<T> {
+public abstract class AbstractDescriptionDao<T extends AbstractDescription>
+	extends ComponentRegistryDao<T> implements IAbstractDescriptionDao<T> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractDescriptionDao.class);
-    @Autowired
-    private PlatformTransactionManager txManager;
-    @Autowired
-    private TransactionDefinition txDefinition;
+    private final static Logger LOG = LoggerFactory
+	    .getLogger(AbstractDescriptionDao.class);
 
     protected abstract String getTableName();
 
     protected abstract String getCMDIdColumn();
 
     protected abstract String getCommentsForeignKeyColumn();
+
     /**
      * Class object required to instantiate new description domain objects
      */
@@ -58,11 +58,13 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            CMD id
      * @return Whether the specified item is in the public space
      */
+    @Override
     public boolean isPublic(String cmdId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
 	query.append(getTableName());
-	query.append(" WHERE is_public = true AND ").append(getCMDIdColumn()).append(" = ?");
-	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId));
+	query.append(" WHERE is_public = true AND ").append(getCMDIdColumn())
+		.append(" = ?");
+	return (0 < getJdbcTemplate().queryForInt(query.toString(), cmdId));
     }
 
     /**
@@ -73,11 +75,14 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            User db id of workspace owner
      * @return Whether the specified item is in the specified user's workspace
      */
+    @Override
     public boolean isInUserSpace(String cmdId, Number userId) {
 	StringBuilder query = new StringBuilder("SELECT COUNT(*) FROM ");
 	query.append(getTableName());
-	query.append(" WHERE is_public = false AND user_id = ? AND ").append(getCMDIdColumn()).append(" = ?");
-	return (0 < getSimpleJdbcTemplate().queryForInt(query.toString(), userId, cmdId));
+	query.append(" WHERE is_public = false AND user_id = ? AND ")
+		.append(getCMDIdColumn()).append(" = ?");
+	return (0 < getJdbcTemplate().queryForInt(query.toString(), userId,
+		cmdId));
     }
 
     /**
@@ -86,8 +91,10 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            CMD id
      * @param userId
      *            User db id of workspace owner, null for public registry
-     * @return Whether the specified item is in the specified workspace (user or public)
+     * @return Whether the specified item is in the specified workspace (user or
+     *         public)
      */
+    @Override
     public boolean isInRegistry(String cmdId, Number userId) {
 	if (userId == null) {
 	    return isPublic(cmdId);
@@ -102,12 +109,18 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Profile or component Id (not primary key)
      * @return String value of XML content for profile or component
      */
-    public String getContent(boolean isDeleted, String cmdId) throws DataAccessException {
-	String select = "SELECT content FROM " + TABLE_XML_CONTENT + " JOIN " + getTableName() + " ON " + TABLE_XML_CONTENT + "."
-		+ COLUMN_ID + " = " + getTableName() + ".content_id" + " WHERE is_deleted = ? AND " + getTableName() + "."
+    @Override
+    public String getContent(boolean isDeleted, String cmdId)
+	    throws DataAccessException {
+	String select = "SELECT content FROM " + TABLE_XML_CONTENT + " JOIN "
+		+ getTableName() + " ON " + TABLE_XML_CONTENT + "." + COLUMN_ID
+		+ " = " + getTableName() + ".content_id"
+		+ " WHERE is_deleted = ? AND " + getTableName() + "."
 		+ getCMDIdColumn() + " = ?";
 
-	List<String> result = getSimpleJdbcTemplate().query(select, new ParameterizedSingleColumnRowMapper<String>(), isDeleted, cmdId);
+	List<String> result = getJdbcTemplate().query(select,
+		new ParameterizedSingleColumnRowMapper<String>(), isDeleted,
+		cmdId);
 	if (result.size() > 0) {
 	    return result.get(0);
 	} else {
@@ -122,37 +135,43 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-    public Number insertDescription(AbstractDescription description, String content, boolean isPublic, Number userId)
+    @Override
+    public Number insertDescription(AbstractDescription description,
+	    String content, boolean isPublic, Number userId)
 	    throws DataAccessException {
 
-	TransactionStatus transaction = getTransaction();
-	try {
-	    SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource()).withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
-		    COLUMN_ID);
-	    Number contentId = insert.executeAndReturnKey(Collections.singletonMap("content", (Object) content));
+	SimpleJdbcInsert insert = new SimpleJdbcInsert(getJdbcTemplate())
+		.withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
+			COLUMN_ID);
+	Number contentId = insert.executeAndReturnKey(Collections.singletonMap(
+		"content", (Object) content));
 
-	    SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(getDataSource()).withTableName(getTableName()).usingGeneratedKeyColumns(COLUMN_ID);
-	    Map<String, Object> params = new HashMap<String, Object>();
-	    putInsertParameters(params, description, contentId, userId, isPublic);
+	SimpleJdbcInsert insertDescription = new SimpleJdbcInsert(
+		getJdbcTemplate()).withTableName(getTableName())
+		.usingGeneratedKeyColumns(COLUMN_ID);
+	Map<String, Object> params = new HashMap<String, Object>();
+	putInsertParameters(params, description, contentId, userId, isPublic);
 
-	    Number id = insertDescription.executeAndReturnKey(params);
-	    txManager.commit(transaction);
-	    return id;
-	} catch (DataAccessException ex) {
-	    txManager.rollback(transaction);
-	    throw ex;
-	}
+	Number id = insertDescription.executeAndReturnKey(params);
+	return id;
     }
 
     private Timestamp extractTimestamp(AbstractDescription description) {
 	if (description.getRegistrationDate() != null) {
 	    try {
-		Date date = AbstractDescription.getDate(description.getRegistrationDate());
+		Date date = AbstractDescription.getDate(description
+			.getRegistrationDate());
 		return new Timestamp(date.getTime());
 	    } catch (ParseException ex) {
-		LOG.warn("Could not convert registration date " + description.getRegistrationDate() + " to date", ex);
+		LOG.warn(
+			"Could not convert registration date "
+				+ description.getRegistrationDate()
+				+ " to date", ex);
 	    } catch (IllegalArgumentException ex) {
-		LOG.warn("Could not convert registration date " + description.getRegistrationDate() + " to timestamp", ex);
+		LOG.warn(
+			"Could not convert registration date "
+				+ description.getRegistrationDate()
+				+ " to timestamp", ex);
 	    }
 	}
 	return null;
@@ -168,31 +187,32 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * @param content
      *            New content for description (leave null to not change)
      */
-    public void updateDescription(Number id, AbstractDescription description, String content) {
-	TransactionStatus transaction = getTransaction();
-	try {
-	    if (description != null) {
-		// Update description
-		StringBuilder updateDescription = new StringBuilder();
-		updateDescription.append("UPDATE ").append(getTableName());
-		appendUpdateColumnsStatement(updateDescription);
-		updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
-		Collection updateParams = ListUtils.union(getUpdateParameterValues(description), Collections.singletonList(id));
-		getSimpleJdbcTemplate().update(updateDescription.toString(), updateParams.toArray());
-	    }
+    @Override
+    public void updateDescription(Number id, AbstractDescription description,
+	    String content) {
+	if (description != null) {
+	    // Update description
+	    StringBuilder updateDescription = new StringBuilder();
+	    updateDescription.append("UPDATE ").append(getTableName());
+	    appendUpdateColumnsStatement(updateDescription);
+	    updateDescription.append(" WHERE " + COLUMN_ID + " = ?");
+	    Collection updateParams = ListUtils.union(
+		    getUpdateParameterValues(description),
+		    Collections.singletonList(id));
+	    getJdbcTemplate().update(updateDescription.toString(),
+		    updateParams.toArray());
+	}
 
-	    if (content != null) {
-		// Update content
-		StringBuilder updateContent = new StringBuilder();
-		updateContent.append("UPDATE " + TABLE_XML_CONTENT + " SET content = ? WHERE " + COLUMN_ID + " = ");
-		updateContent.append("(SELECT content_id FROM ").append(getTableName()).append(" WHERE " + COLUMN_ID + "= ?)");
+	if (content != null) {
+	    // Update content
+	    StringBuilder updateContent = new StringBuilder();
+	    updateContent.append("UPDATE " + TABLE_XML_CONTENT
+		    + " SET content = ? WHERE " + COLUMN_ID + " = ");
+	    updateContent.append("(SELECT content_id FROM ")
+		    .append(getTableName())
+		    .append(" WHERE " + COLUMN_ID + "= ?)");
 
-		getSimpleJdbcTemplate().update(updateContent.toString(), content, id);
-	    }
-	    txManager.commit(transaction);
-	} catch (DataAccessException ex) {
-	    txManager.rollback(transaction);
-	    throw ex;
+	    getJdbcTemplate().update(updateContent.toString(), content, id);
 	}
     }
 
@@ -203,8 +223,10 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Description key
      * @return The description, if it exists; null otherwise
      */
+    @Override
     public T getById(Number id) throws DataAccessException {
-	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND id = ?"), id);
+	return getFirstOrNull(
+		getSelectStatement("WHERE is_deleted = false AND id = ?"), id);
     }
 
     /**
@@ -214,8 +236,11 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Full component id
      * @return The description, if it exists; null otherwise
      */
+    @Override
     public T getByCmdId(String id) throws DataAccessException {
-	return getFirstOrNull(getSelectStatement("WHERE is_deleted = false AND " + getCMDIdColumn() + " = ?"), id);
+	return getFirstOrNull(
+		getSelectStatement("WHERE is_deleted = false AND "
+			+ getCMDIdColumn() + " = ?"), id);
     }
 
     /**
@@ -227,12 +252,19 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Db id of user for workspace; null for public space
      * @return The description, if it exists; null otherwise
      */
+    @Override
     public T getByCmdId(String id, Number userId) throws DataAccessException {
-	StringBuilder query = new StringBuilder("WHERE is_deleted = false AND ").append(getCMDIdColumn()).append(" = ?");
+	StringBuilder query = new StringBuilder("WHERE is_deleted = false AND ")
+		.append(getCMDIdColumn()).append(" = ?");
 	if (userId == null) {
-	    return getFirstOrNull(getSelectStatement(query.append(" AND is_public = true").toString()), id);
+	    return getFirstOrNull(
+		    getSelectStatement(query.append(" AND is_public = true")
+			    .toString()), id);
 	} else {
-	    return getFirstOrNull(getSelectStatement(query.append(" AND is_public = false AND user_id = ?").toString()), id, userId);
+	    return getFirstOrNull(
+		    getSelectStatement(query.append(
+			    " AND is_public = false AND user_id = ?")
+			    .toString()), id, userId);
 	}
     }
 
@@ -242,30 +274,41 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            CMD Id of description
      * @return Database id for description record
      */
+    @Override
     public Number getDbId(String cmdId) {
-	StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID + " FROM ").append(getTableName());
+	StringBuilder query = new StringBuilder("SELECT " + COLUMN_ID
+		+ " FROM ").append(getTableName());
 	query.append(" WHERE ").append(getCMDIdColumn()).append(" = ?");
-	return getSimpleJdbcTemplate().queryForInt(query.toString(), cmdId);
+	return getJdbcTemplate().queryForInt(query.toString(), cmdId);
     }
 
     /**
      * 
      * @return All descriptions in the public space
      */
+    @Override
     public List<T> getPublicDescriptions() throws DataAccessException {
-	return getList(getSelectStatement(" WHERE is_deleted = false AND is_public = true ").append(getOrderByClause()));
+	return getList(getSelectStatement(
+		" WHERE is_deleted = false AND is_public = true ").append(
+		getOrderByClause()));
     }
 
     /**
-     * @return List of deleted descriptions in user space or in public when userId=null
+     * @return List of deleted descriptions in user space or in public when
+     *         userId=null
      * @param userId
      */
+    @Override
     public List<T> getDeletedDescriptions(Number userId) {
 	if (userId != null) {
-	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = false AND user_id = ?").append(getOrderByClause()).toString();
+	    String select = getSelectStatement()
+		    .append(" WHERE is_deleted = true AND is_public = false AND user_id = ?")
+		    .append(getOrderByClause()).toString();
 	    return getList(select, userId);
 	} else {
-	    String select = getSelectStatement().append(" WHERE is_deleted = true AND is_public = true").append(getOrderByClause()).toString();
+	    String select = getSelectStatement()
+		    .append(" WHERE is_deleted = true AND is_public = true")
+		    .append(getOrderByClause()).toString();
 	    return getList(select);
 	}
     }
@@ -274,26 +317,32 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      * 
      * @return All the user's descriptions not in the public space
      */
-    public List<T> getUserspaceDescriptions(Number userId) throws DataAccessException {
-	String select = getSelectStatement().append(" WHERE is_deleted = false AND is_public = false AND user_id = ?").append(getOrderByClause()).toString();
+    @Override
+    public List<T> getUserspaceDescriptions(Number userId)
+	    throws DataAccessException {
+	String select = getSelectStatement()
+		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ?")
+		.append(getOrderByClause()).toString();
 	return getList(select, userId);
     }
 
-    public void setDeleted(AbstractDescription desc, boolean isDeleted) throws DataAccessException {
-	TransactionStatus transaction = getTransaction();
+    @Override
+    public void setDeleted(AbstractDescription desc, boolean isDeleted)
+	    throws DataAccessException {
 	Number dbId = getDbId(desc.getId());
-	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
-	update.append(" SET is_deleted = ").append(Boolean.toString(isDeleted)).append(" WHERE " + COLUMN_ID + " = ?");
-	getSimpleJdbcTemplate().update(update.toString(), dbId);
-	txManager.commit(transaction);
+	StringBuilder update = new StringBuilder("UPDATE ")
+		.append(getTableName());
+	update.append(" SET is_deleted = ").append(Boolean.toString(isDeleted))
+		.append(" WHERE " + COLUMN_ID + " = ?");
+	getJdbcTemplate().update(update.toString(), dbId);
     }
 
+    @Override
     public void setPublished(Number id, boolean published) {
-	TransactionStatus transaction = getTransaction();
-	StringBuilder update = new StringBuilder("UPDATE ").append(getTableName());
+	StringBuilder update = new StringBuilder("UPDATE ")
+		.append(getTableName());
 	update.append(" SET is_public = ? WHERE " + COLUMN_ID + " = ?");
-	getSimpleJdbcTemplate().update(update.toString(), published, id);
-	txManager.commit(transaction);
+	getJdbcTemplate().update(update.toString(), published, id);
     }
 
     /**
@@ -302,12 +351,15 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
      *            Id of description record
      * @return Principal name of description's owner, if any. Otherwise, null.
      */
+    @Override
     public String getOwnerPrincipalName(Number id) {
-	StringBuilder select = new StringBuilder("SELECT principal_name FROM " + TABLE_REGISTRY_USER);
+	StringBuilder select = new StringBuilder("SELECT principal_name FROM "
+		+ TABLE_REGISTRY_USER);
 	select.append(" JOIN ").append(getTableName());
 	select.append(" ON user_id = " + TABLE_REGISTRY_USER + ".id ");
 	select.append(" WHERE ").append(getTableName()).append(".id = ?");
-	List<String> owner = getSimpleJdbcTemplate().query(select.toString(), new ParameterizedSingleColumnRowMapper<String>(), id);
+	List<String> owner = getJdbcTemplate().query(select.toString(),
+		new ParameterizedSingleColumnRowMapper<String>(), id);
 	if (owner.isEmpty()) {
 	    return null;
 	} else {
@@ -325,13 +377,16 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     /**
      * Inserts parameters int <column, value> parameters map
+     * 
      * @param params
      * @param description
      * @param contentId
      * @param userId
-     * @param isPublic 
+     * @param isPublic
      */
-    protected void putInsertParameters(Map<String, Object> params, AbstractDescription description, Number contentId, Number userId, boolean isPublic) {
+    protected void putInsertParameters(Map<String, Object> params,
+	    AbstractDescription description, Number contentId, Number userId,
+	    boolean isPublic) {
 	params.put("content_id", contentId);
 	params.put("user_id", userId);
 	params.put("is_public", isPublic);
@@ -348,16 +403,23 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 
     /**
      * Sets values on a new description object from specified ResultSet
-     * @param rs ResultSet from database query
-     * @param newDescription Newly created description object to be filled
-     * @throws SQLException 
+     * 
+     * @param rs
+     *            ResultSet from database query
+     * @param newDescription
+     *            Newly created description object to be filled
+     * @throws SQLException
      */
-    protected void setDescriptionValuesFromResultSet(ResultSet rs, AbstractDescription newDescription) throws SQLException {
+    protected void setDescriptionValuesFromResultSet(ResultSet rs,
+	    AbstractDescription newDescription) throws SQLException {
 	Timestamp registrationDate = rs.getTimestamp("registration_date");
 	newDescription.setName(rs.getString("name"));
 	newDescription.setDescription(rs.getString("description"));
 	newDescription.setId(rs.getString(getCMDIdColumn()));
-	newDescription.setRegistrationDate(registrationDate == null ? null : AbstractDescription.createNewDate(registrationDate.getTime()));
+	newDescription
+		.setRegistrationDate(registrationDate == null ? null
+			: AbstractDescription.createNewDate(registrationDate
+				.getTime()));
 	newDescription.setCreatorName(rs.getString("creator_name"));
 	newDescription.setDomainName(rs.getString("domain_name"));
 	newDescription.setGroupName(rs.getString("group_name"));
@@ -371,21 +433,26 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     protected void appendUpdateColumnsStatement(StringBuilder updateDescription) {
-	updateDescription.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
+	updateDescription
+		.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
     }
 
     protected List getUpdateParameterValues(AbstractDescription description) {
-	List updateParams = Arrays.asList(description.getName(), description.getDescription(),
-		extractTimestamp(description), description.getCreatorName(), description.getDomainName(),
+	List updateParams = Arrays.asList(description.getName(),
+		description.getDescription(), extractTimestamp(description),
+		description.getCreatorName(), description.getDomainName(),
 		description.getGroupName(), description.getHref());
 	return updateParams;
     }
+
     /*
      * DAO HELPER METHODS
      */
 
-    private StringBuilder getSelectStatement(String... where) throws DataAccessException {
-	StringBuilder select = new StringBuilder("SELECT ").append(getDescriptionColumnList());
+    private StringBuilder getSelectStatement(String... where)
+	    throws DataAccessException {
+	StringBuilder select = new StringBuilder("SELECT ")
+		.append(getDescriptionColumnList());
 	select.append(" FROM ").append(getTableName());
 	if (where.length > 0) {
 	    select.append(" ");
@@ -406,7 +473,9 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	sb.append(getOrderByColumn());
 	sb.append(",description,registration_date,creator_name,domain_name,group_name,href,user_id,");
 	sb.append(getCMDIdColumn());
-	sb.append(", (SELECT COUNT(*) FROM comments WHERE ").append(getCommentsForeignKeyColumn()).append(" = ").append(getCMDIdColumn()).append(") AS columns_count");
+	sb.append(", (SELECT COUNT(*) FROM comments WHERE ")
+		.append(getCommentsForeignKeyColumn()).append(" = ")
+		.append(getCMDIdColumn()).append(") AS columns_count");
 	return sb;
     }
 
@@ -415,14 +484,17 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
     }
 
     private String getOrderByClause() {
-	return " order by upper(" + getOrderByColumn() + "), " + getCMDIdColumn() + " asc ";
+	return " order by upper(" + getOrderByColumn() + "), "
+		+ getCMDIdColumn() + " asc ";
     }
+
     private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
 
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 	    try {
-		AbstractDescription newDescription = (AbstractDescription) _class.newInstance();
+		AbstractDescription newDescription = (AbstractDescription) _class
+			.newInstance();
 		setDescriptionValuesFromResultSet(rs, newDescription);
 		return (T) newDescription;
 	    } catch (InstantiationException ex) {
@@ -434,7 +506,4 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription> exte
 	}
     };
 
-    private TransactionStatus getTransaction() {
-	return txManager.getTransaction(txDefinition);
-    }
 }

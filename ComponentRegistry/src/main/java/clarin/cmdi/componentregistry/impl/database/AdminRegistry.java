@@ -25,23 +25,32 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
+/**
+ * 
+ * @author george.georgovassilis@mpi.nl
+ *
+ */
 public class AdminRegistry {
 
-    private final static Logger LOG = LoggerFactory.getLogger(AdminRegistry.class);
+    private final static Logger LOG = LoggerFactory
+	    .getLogger(AdminRegistry.class);
     private ComponentRegistryFactory componentRegistryFactory;
-    private ProfileDescriptionDao profileDescriptionDao;
-    private ComponentDescriptionDao componentDescriptionDao;
+    private IProfileDescriptionDAO profileDescriptionDao;
+    private IComponentDescriptionDao componentDescriptionDao;
     private MDMarshaller marshaller;
 
-    public void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory) {
+    public void setComponentRegistryFactory(
+	    ComponentRegistryFactory componentRegistryFactory) {
 	this.componentRegistryFactory = componentRegistryFactory;
     }
 
-    public void setProfileDescriptionDao(ProfileDescriptionDao profileDescriptionDao) {
+    public void setProfileDescriptionDao(
+	    IProfileDescriptionDAO profileDescriptionDao) {
 	this.profileDescriptionDao = profileDescriptionDao;
     }
 
-    public void setComponentDescriptionDao(ComponentDescriptionDao componentDescriptionDao) {
+    public void setComponentDescriptionDao(
+	    IComponentDescriptionDao componentDescriptionDao) {
 	this.componentDescriptionDao = componentDescriptionDao;
     }
 
@@ -49,23 +58,32 @@ public class AdminRegistry {
 	this.marshaller = marshaller;
     }
 
-    public void submitFile(CMDItemInfo info, Principal userPrincipal) throws SubmitFailedException {
+    public void submitFile(CMDItemInfo info, Principal userPrincipal)
+	    throws SubmitFailedException {
 	try {
-	    AbstractDescription originalDescription = info.getDataNode().getDescription();
+	    AbstractDescription originalDescription = info.getDataNode()
+		    .getDescription();
 	    AbstractDescription description = null;
 	    CMDComponentSpec spec = null;
 	    if (originalDescription.isProfile()) {
-		description = marshaller.unmarshal(ProfileDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"), null);
+		description = marshaller.unmarshal(ProfileDescription.class,
+			IOUtils.toInputStream(info.getDescription(), "UTF-8"),
+			null);
 	    } else {
-		description = marshaller.unmarshal(ComponentDescription.class, IOUtils.toInputStream(info.getDescription(), "UTF-8"),
+		description = marshaller.unmarshal(ComponentDescription.class,
+			IOUtils.toInputStream(info.getDescription(), "UTF-8"),
 			null);
 	    }
-	    spec = marshaller.unmarshal(CMDComponentSpec.class, IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
+	    spec = marshaller.unmarshal(CMDComponentSpec.class,
+		    IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
 	    checkId(originalDescription.getId(), description.getId());
 
-	    int result = getRegistry(userPrincipal, originalDescription, info).update(description, spec, userPrincipal, info.isForceUpdate());
+	    int result = getRegistry(userPrincipal, originalDescription, info)
+		    .update(description, spec, userPrincipal,
+			    info.isForceUpdate());
 	    if (result < 0) {
-		throw new SubmitFailedException("Problem occured while registering, please check the tomcat logs for errors.");
+		throw new SubmitFailedException(
+			"Problem occured while registering, please check the tomcat logs for errors.");
 	    }
 	} catch (JAXBException e) {
 	    throw new SubmitFailedException(e);
@@ -76,7 +94,9 @@ public class AdminRegistry {
 
     private void checkId(String id, String id2) throws SubmitFailedException {
 	if (id == null || id2 == null || !id.equals(id2)) {
-	    throw new SubmitFailedException("Id's do not match up, you cannot edit id's: id1=" + id + ", id2=" + id2);
+	    throw new SubmitFailedException(
+		    "Id's do not match up, you cannot edit id's: id1=" + id
+			    + ", id2=" + id2);
 	}
     }
 
@@ -93,7 +113,8 @@ public class AdminRegistry {
 	}
     }
 
-    public void delete(CMDItemInfo info, Principal userPrincipal) throws SubmitFailedException {
+    public void delete(CMDItemInfo info, Principal userPrincipal)
+	    throws SubmitFailedException {
 	String id = info.getName();
 	AbstractDescription desc = info.getDataNode().getDescription();
 	try {
@@ -111,22 +132,32 @@ public class AdminRegistry {
 
     }
 
-    private void deleteFromRegistry(Principal userPrincipal, AbstractDescription desc, CMDItemInfo info) throws IOException,
+    private void deleteFromRegistry(Principal userPrincipal,
+	    AbstractDescription desc, CMDItemInfo info) throws IOException,
 	    UserUnauthorizedException, ComponentRegistryException {
 	ComponentRegistry registry = getRegistry(userPrincipal, desc, info);
 	LOG.info("Deleting item: " + desc);
 	if (desc.isProfile()) {
 	    registry.deleteMDProfile(desc.getId(), userPrincipal);
 	} else {
-	    registry.deleteMDComponent(desc.getId(), userPrincipal, info.isForceUpdate());
+	    registry.deleteMDComponent(desc.getId(), userPrincipal,
+		    info.isForceUpdate());
 	}
     }
 
-    private ComponentRegistry getRegistry(Principal userPrincipal, AbstractDescription desc, CMDItemInfo info) {
-	ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
-	//TODO: More generic check
-	if (info.getStatus() == ComponentStatus.PRIVATE /* || info.getStatus() == ComponentStatus.DEVELOPMENT */) {
-	    registry = componentRegistryFactory.getOtherUserComponentRegistry(userPrincipal, info.getStatus(), new OwnerUser(Integer.parseInt(desc.getUserId())));
+    private ComponentRegistry getRegistry(Principal userPrincipal,
+	    AbstractDescription desc, CMDItemInfo info) {
+	ComponentRegistry registry = componentRegistryFactory
+		.getPublicRegistry();
+	// TODO: More generic check
+	if (info.getStatus() == ComponentStatus.PRIVATE /*
+							 * || info.getStatus()
+							 * == ComponentStatus.
+							 * DEVELOPMENT
+							 */) {
+	    registry = componentRegistryFactory.getOtherUserComponentRegistry(
+		    userPrincipal, info.getStatus(),
+		    new OwnerUser(Integer.parseInt(desc.getUserId())));
 	}
 	return registry;
     }

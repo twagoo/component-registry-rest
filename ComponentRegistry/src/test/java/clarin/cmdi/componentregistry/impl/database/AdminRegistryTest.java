@@ -8,12 +8,9 @@ import java.security.Principal;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
@@ -27,19 +24,20 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/applicationContext.xml"})
-public class AdminRegistryTest {
+/**
+ * 
+ * @author george.georgovassilis@mpi.nl
+ *
+ */
+public class AdminRegistryTest extends BaseUnitTest{
 
     @Autowired
-    private ComponentDescriptionDao componentDescriptionDao;
+    private IComponentDescriptionDao componentDescriptionDao;
     @Autowired
-    private ProfileDescriptionDao profileDescriptionDao;
+    private IProfileDescriptionDAO profileDescriptionDao;
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
     private static final Principal PRINCIPAL_ADMIN = DummyPrincipal.DUMMY_ADMIN_PRINCIPAL;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @Autowired
     private MDMarshaller marshaller;
 

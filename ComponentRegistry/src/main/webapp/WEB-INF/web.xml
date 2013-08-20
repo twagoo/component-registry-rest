@@ -10,6 +10,12 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+    
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring-config/applicationContext.xml</param-value>
+    </context-param>
+    
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
         <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>

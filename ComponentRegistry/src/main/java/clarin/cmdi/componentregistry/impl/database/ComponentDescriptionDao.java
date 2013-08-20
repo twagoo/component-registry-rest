@@ -1,13 +1,20 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 /**
- *
+ * Serves components
  * @author Twan Goosen <twan.goosen@mpi.nl>
+ * @author George.Georgovassilis@mpi.nl
  */
-public class ComponentDescriptionDao extends AbstractDescriptionDao<ComponentDescription> {
+@Repository
+public class ComponentDescriptionDao extends
+	AbstractDescriptionDao<ComponentDescription> implements
+	IComponentDescriptionDao {
 
     public ComponentDescriptionDao() {
 	super(ComponentDescription.class);
