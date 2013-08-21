@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
  *
  * @param <T>
  */
-public interface IAbstractDescriptionDao<T extends AbstractDescription> {
+public interface AbstractDescriptionDao<T extends AbstractDescription> {
 
 	/**
 	 * 

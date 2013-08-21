@@ -21,6 +21,8 @@ import clarin.cmdi.componentregistry.frontend.DisplayDataNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
@@ -32,9 +34,9 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 public class AdminRegistryTest extends BaseUnitTest{
 
     @Autowired
-    private IComponentDescriptionDao componentDescriptionDao;
+    private ComponentDescriptionDao componentDescriptionDao;
     @Autowired
-    private IProfileDescriptionDAO profileDescriptionDao;
+    private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
     private static final Principal PRINCIPAL_ADMIN = DummyPrincipal.DUMMY_ADMIN_PRINCIPAL;

@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.persistence.CommentsDao;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private ICommentsDao commentsDao;
+    private CommentsDao commentsDao;
 
     @Before
     public void init() {

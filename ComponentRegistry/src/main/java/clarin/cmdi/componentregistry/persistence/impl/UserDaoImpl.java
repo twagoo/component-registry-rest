@@ -1,6 +1,7 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence.impl;
 
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.UserDao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Repository;
  * @author George.Georgovassilis@mpi.nl
  */
 @Repository
-public class UserDao extends ComponentRegistryDao<RegistryUser> implements IUserDAO{
+public class UserDaoImpl extends ComponentRegistryDaoImpl<RegistryUser> implements UserDao{
 
 	private final static String SELECT_BASE = "SELECT " + COLUMN_ID
 			+ ", name, principal_name FROM " + TABLE_REGISTRY_USER;

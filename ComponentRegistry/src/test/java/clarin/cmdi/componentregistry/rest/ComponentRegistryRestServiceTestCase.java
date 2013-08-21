@@ -4,11 +4,11 @@ import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 
-import clarin.cmdi.componentregistry.impl.database.IUserDAO;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.UserDao;
 
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
@@ -78,7 +78,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     }
 
     @Autowired
-    private IUserDAO userDao;
+    private UserDao userDao;
 
     protected String getApplicationContextFile() {
 	// sorry for the duplication, but JerseyTest is not aware of
@@ -128,7 +128,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 	userDao.insertUser(user);
     }
 
-    protected IUserDAO getUserDao() {
+    protected UserDao getUserDao() {
 	return userDao;
     }
 

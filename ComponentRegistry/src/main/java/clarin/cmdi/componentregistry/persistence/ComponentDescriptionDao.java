@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
  * @author george.georgovassilis@mpi.nl
  *
  */
-public interface IComponentDescriptionDao extends IAbstractDescriptionDao<ComponentDescription>{
+public interface ComponentDescriptionDao extends AbstractDescriptionDao<ComponentDescription>{
 
 	List<ComponentDescription> getPublicComponentDescriptions();
 

@@ -3,6 +3,8 @@ package clarin.cmdi.componentregistry.impl.database;
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase.*;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
 import org.junit.Before;
@@ -16,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
 
     @Autowired
-    IProfileDescriptionDAO profileDescriptionDao;
+    ProfileDescriptionDao profileDescriptionDao;
 
     @Before
     public void init() {
@@ -28,7 +30,7 @@ public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
     }
 
     @Override
-    protected IAbstractDescriptionDao getDao() {
+    protected AbstractDescriptionDao getDao() {
 	return profileDescriptionDao;
     }
 

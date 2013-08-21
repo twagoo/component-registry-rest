@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence.impl;
 
 import java.util.List;
 
@@ -7,6 +7,8 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
+
+import clarin.cmdi.componentregistry.persistence.ComponentRegistryDao;
 
 /**
  * Logic and constants shared by the dao's of the DB implementation
@@ -17,10 +19,10 @@ import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
  * @param <T>
  *            Type the dao maps to
  */
-public abstract class ComponentRegistryDao<T> extends
-	NamedParameterJdbcDaoSupport implements IComponentRegistryDao<T> {
+public abstract class ComponentRegistryDaoImpl<T> extends
+	NamedParameterJdbcDaoSupport implements ComponentRegistryDao<T> {
 
-    public ComponentRegistryDao() {
+    public ComponentRegistryDaoImpl() {
     }
 
     protected T getFirstOrNull(StringBuilder selectQuery, Object... args) {

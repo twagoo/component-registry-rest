@@ -15,10 +15,17 @@
         <param-name>ShhaaConfigLocation</param-name>
         <param-value>/WEB-INF/shhaa.xml</param-value>
     </context-param>
+    <context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:spring-config/applicationContext.xml,classpath:spring-config/container-environment.xml
+		</param-value>
+	</context-param>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+    
+    
 
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
@@ -65,23 +72,14 @@
         <filter-name>wicket.componentregistry</filter-name>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
-    <servlet>
-        <servlet-name>ComponentRegistry Web Application</servlet-name>
-        <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-        <init-param>
-            <param-name>com.sun.jersey.config.property.resourceConfigClass</param-name>
-            <param-value>com.sun.jersey.api.core.ClassNamesResourceConfig</param-value>
-        </init-param>
-        <init-param>
-            <param-name>com.sun.jersey.config.property.classnames</param-name>
-            <param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider;clarin.cmdi.componentregistry.rest.ComponentRegistryRestService</param-value>
-        </init-param>
-        <!--    <init-param>-->
-        <!--      <param-name>com.sun.jersey.config.property.packages</param-name>-->
-        <!--      <param-value>clarin.cmdi.componentregistry.rest</param-value>-->
-        <!--    </init-param>-->
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+	<servlet>
+		<servlet-name>ComponentRegistry Web Application</servlet-name>
+		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+		<init-param> <param-name>com.sun.jersey.config.property.classnames</param-name> 
+			<param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider</param-value> 
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
     <servlet-mapping>
         <servlet-name>ComponentRegistry Web Application</servlet-name>
         <url-pattern>/rest/*</url-pattern>

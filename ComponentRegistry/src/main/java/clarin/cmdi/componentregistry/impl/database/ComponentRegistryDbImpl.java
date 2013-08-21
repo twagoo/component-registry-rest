@@ -18,6 +18,12 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.CommentsDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.UserDao;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,8 +37,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +71,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     private CMDComponentSpecCache profilesCache;
     // DAO's
     @Autowired
-    private IProfileDescriptionDAO profileDescriptionDao;
+    private ProfileDescriptionDao profileDescriptionDao;
     @Autowired
-    private IComponentDescriptionDao componentDescriptionDao;
+    private ComponentDescriptionDao componentDescriptionDao;
     @Autowired
-    private IUserDAO userDao;
+    private UserDao userDao;
     @Autowired
-    private ICommentsDao commentsDao;
+    private CommentsDao commentsDao;
     @Autowired
     private MDMarshaller marshaller;
 
@@ -476,7 +484,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	    if (!forceUpdate && this.isPublic() && !description.isProfile()) {
 		checkStillUsed(description.getId());
 	    }
-	    IAbstractDescriptionDao<?> dao = getDaoForDescription(description);
+	    AbstractDescriptionDao<?> dao = getDaoForDescription(description);
 	    dao.updateDescription(getIdForDescription(description),
 		    description, componentSpecToString(spec));
 	    invalidateCache(description);
@@ -506,7 +514,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     public int publish(AbstractDescription desc, CMDComponentSpec spec,
 	    Principal principal) {
 	int result = 0;
-	IAbstractDescriptionDao<?> dao = getDaoForDescription(desc);
+	AbstractDescriptionDao<?> dao = getDaoForDescription(desc);
 	if (!isPublic()) { // if already in public workspace there is nothing
 			   // todo
 	    desc.setHref(AbstractDescription.createPublicHref(desc.getHref()));
@@ -674,7 +682,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	}
     }
 
-    private IAbstractDescriptionDao<?> getDaoForDescription(
+    private AbstractDescriptionDao<?> getDaoForDescription(
 	    AbstractDescription description) {
 	return description.isProfile() ? profileDescriptionDao
 		: componentDescriptionDao;
@@ -693,7 +701,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     private Number getIdForDescription(AbstractDescription description)
 	    throws IllegalArgumentException {
 	Number dbId = null;
-	IAbstractDescriptionDao<?> dao = getDaoForDescription(description);
+	AbstractDescriptionDao<?> dao = getDaoForDescription(description);
 	try {
 	    dbId = dao.getDbId(description.getId());
 	} catch (DataAccessException ex) {
@@ -718,7 +726,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     }
 
     private CMDComponentSpec getUncachedMDComponent(String id,
-	    IAbstractDescriptionDao dao) {
+	    AbstractDescriptionDao dao) {
 	String xml = dao.getContent(false, id);
 	if (xml != null) {
 	    try {
@@ -794,7 +802,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	}
     }
 
-    private boolean inWorkspace(IAbstractDescriptionDao<?> dao, String cmdId) {
+    private boolean inWorkspace(AbstractDescriptionDao<?> dao, String cmdId) {
 	if (isPublic()) {
 	    return dao.isPublic(cmdId);
 	} else {

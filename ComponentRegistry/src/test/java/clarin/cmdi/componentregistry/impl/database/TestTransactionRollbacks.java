@@ -13,6 +13,7 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
 
 /**
  * Test transactionality on comments
@@ -25,7 +26,7 @@ public class TestTransactionRollbacks extends BaseUnitTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
     @Autowired
-    IComponentDescriptionDao componentDescriptionDao;
+    ComponentDescriptionDao componentDescriptionDao;
 
     @Test
     public void test01() {

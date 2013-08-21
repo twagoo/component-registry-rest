@@ -9,9 +9,12 @@ import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.UserDao;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +37,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     @Autowired
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
-    private IUserDAO userDao;
+    private UserDao userDao;
     private ComponentRegistry publicComponentRegistry = null;
 
     @Override

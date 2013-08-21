@@ -31,13 +31,13 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
-import clarin.cmdi.componentregistry.impl.database.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.impl.database.IComponentDescriptionDao;
-import clarin.cmdi.componentregistry.impl.database.IProfileDescriptionDAO;
-import clarin.cmdi.componentregistry.impl.database.ProfileDescriptionDao;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.impl.ComponentDescriptionDaoImpl;
+import clarin.cmdi.componentregistry.persistence.impl.ProfileDescriptionDaoImpl;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -50,9 +50,9 @@ public class AdminHomePage extends SecureAdminWebPage {
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     @SpringBean
-    private IProfileDescriptionDAO profileDescriptionDao;
+    private ProfileDescriptionDao profileDescriptionDao;
     @SpringBean
-    private IComponentDescriptionDao componentDescriptionDao;
+    private ComponentDescriptionDao componentDescriptionDao;
     @SpringBean
     private MDMarshaller marshaller;
 

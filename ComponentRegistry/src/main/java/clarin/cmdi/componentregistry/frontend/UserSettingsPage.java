@@ -6,8 +6,8 @@ package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.UserCredentials;
-import clarin.cmdi.componentregistry.impl.database.IUserDAO;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.UserDao;
 
 import java.security.Principal;
 
@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
 public class UserSettingsPage extends WebPage {
 
     @SpringBean
-    private IUserDAO userDao;
+    private UserDao userDao;
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     private RegistryUser registryUser;

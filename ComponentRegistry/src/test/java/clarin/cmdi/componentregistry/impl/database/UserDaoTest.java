@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.UserDao;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class UserDaoTest extends BaseUnitTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private IUserDAO userDao;
+    private UserDao userDao;
 
     @Before
     public void init() {

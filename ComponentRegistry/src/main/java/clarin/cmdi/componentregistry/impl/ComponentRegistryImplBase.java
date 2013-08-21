@@ -68,7 +68,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
      */
     @Override
     public List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException {
-	// TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDao, should have better performance
+	// TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDaoImpl, should have better performance
 
 	// Get all profile descriptions
 	List<ProfileDescription> descriptionsCollection = getProfileDescriptions();

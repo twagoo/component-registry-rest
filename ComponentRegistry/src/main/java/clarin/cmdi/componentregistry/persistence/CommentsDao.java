@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import clarin.cmdi.componentregistry.model.Comment;
  * @author george.georgovassilis@mpi.nl
  *
  */
-public interface ICommentsDao extends IComponentRegistryDao<Comment>{
+public interface CommentsDao extends ComponentRegistryDao<Comment>{
 
 	/**
 	 * Get the list of all the comments available in the database The

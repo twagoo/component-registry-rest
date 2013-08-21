@@ -25,11 +25,11 @@ public class MassMigratePage extends SecureAdminWebPage {
     private final static Logger LOG = LoggerFactory.getLogger(MassMigratePage.class);
     private FeedbackPanel feedback;
 //    @SpringBean
-//    private ComponentDescriptionDao componentDescriptionDao;
+//    private ComponentDescriptionDaoImpl componentDescriptionDao;
 //    @SpringBean
-//    private ProfileDescriptionDao profileDescriptionDao;
+//    private ProfileDescriptionDaoImpl profileDescriptionDao;
 //    @SpringBean
-//    private UserDao userDao;
+//    private UserDaoImpl userDao;
 
     public MassMigratePage(final PageParameters pageParameters) {
 	super(pageParameters);

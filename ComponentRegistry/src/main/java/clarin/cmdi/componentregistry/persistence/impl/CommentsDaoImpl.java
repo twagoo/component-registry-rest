@@ -1,6 +1,7 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence.impl;
 
 import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.persistence.CommentsDao;
 
 import java.util.Date;
 import java.sql.ResultSet;
@@ -25,11 +26,11 @@ import org.springframework.stereotype.Repository;
  * @author George.Georgovassilis@mpi.nl
  */
 @Repository
-public class CommentsDao extends ComponentRegistryDao<Comment> implements
-	ICommentsDao {
+public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implements
+	CommentsDao {
 
     private final static Logger LOG = LoggerFactory
-	    .getLogger(CommentsDao.class);
+	    .getLogger(CommentsDaoImpl.class);
     private final static String SELECT_BASE = "SELECT "
 	    + COLUMN_ID
 	    + ", comments, comment_date, user_id, "

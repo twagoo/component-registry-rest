@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,11 +32,11 @@ import org.apache.commons.collections.ListUtils;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author George.Georgovassilis@mpi.nl
  */
-public abstract class AbstractDescriptionDao<T extends AbstractDescription>
-	extends ComponentRegistryDao<T> implements IAbstractDescriptionDao<T> {
+public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
+	extends ComponentRegistryDaoImpl<T> implements AbstractDescriptionDao<T> {
 
     private final static Logger LOG = LoggerFactory
-	    .getLogger(AbstractDescriptionDao.class);
+	    .getLogger(AbstractDescriptionDaoImpl.class);
 
     protected abstract String getTableName();
 
@@ -48,7 +49,7 @@ public abstract class AbstractDescriptionDao<T extends AbstractDescription>
      */
     private final Class<T> _class;
 
-    protected AbstractDescriptionDao(Class<T> _class) {
+    protected AbstractDescriptionDaoImpl(Class<T> _class) {
 	this._class = _class;
     }
 

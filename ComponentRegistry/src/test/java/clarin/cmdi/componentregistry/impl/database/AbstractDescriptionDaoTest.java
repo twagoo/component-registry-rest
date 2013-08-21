@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.UserDao;
 
 /**
  * Base test class for concrete tests to profile and component DAOs
@@ -21,9 +23,9 @@ import clarin.cmdi.componentregistry.model.AbstractDescription;
 public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Autowired
-    private IUserDAO userDao;
+    private UserDao userDao;
 
-    protected abstract IAbstractDescriptionDao getDao();
+    protected abstract AbstractDescriptionDao getDao();
 
     @Test
     public void testInjection() {

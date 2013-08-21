@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence;
 
 import javax.sql.DataSource;
 
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @param <T>
  */
-public interface IComponentRegistryDao<T> {
+public interface ComponentRegistryDao<T> {
 
 	public final static String TABLE_COMMENTS = "comments";
 	public final static String TABLE_COMPONENT_DESCRIPTION = "component_description";

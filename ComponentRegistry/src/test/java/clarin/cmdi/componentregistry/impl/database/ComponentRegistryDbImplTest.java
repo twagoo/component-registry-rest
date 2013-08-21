@@ -14,13 +14,16 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.UserDao;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +51,7 @@ public class ComponentRegistryDbImplTest {
     @Autowired
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
-    private IUserDAO userDao;
+    private UserDao userDao;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

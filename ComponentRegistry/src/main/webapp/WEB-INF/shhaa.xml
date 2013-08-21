@@ -8,6 +8,9 @@
 		<username>oid:eduPersonPrincipalName</username>
 		<username>mace:eduPersonPrincipalName</username>
 		<username>eduPersonTargetedID</username>
+        <username>eduPersonPrincipalName</username>
+        <username>eppn</username>
+
 		<session>Shib-Session-ID</session>
 		<idp>Shib-Identity-Provider</idp>
 		<timestamp>Shib-Authentication-Instant</timestamp>

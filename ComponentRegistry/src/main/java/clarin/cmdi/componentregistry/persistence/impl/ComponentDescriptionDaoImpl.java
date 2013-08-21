@@ -1,6 +1,7 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence.impl;
 
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
 
 import java.util.List;
 
@@ -12,11 +13,11 @@ import org.springframework.stereotype.Repository;
  * @author George.Georgovassilis@mpi.nl
  */
 @Repository
-public class ComponentDescriptionDao extends
-	AbstractDescriptionDao<ComponentDescription> implements
-	IComponentDescriptionDao {
+public class ComponentDescriptionDaoImpl extends
+	AbstractDescriptionDaoImpl<ComponentDescription> implements
+	ComponentDescriptionDao {
 
-    public ComponentDescriptionDao() {
+    public ComponentDescriptionDaoImpl() {
 	super(ComponentDescription.class);
     }
 

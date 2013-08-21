@@ -24,6 +24,8 @@ import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
 
 /**
  * 
@@ -35,8 +37,8 @@ public class AdminRegistry {
     private final static Logger LOG = LoggerFactory
 	    .getLogger(AdminRegistry.class);
     private ComponentRegistryFactory componentRegistryFactory;
-    private IProfileDescriptionDAO profileDescriptionDao;
-    private IComponentDescriptionDao componentDescriptionDao;
+    private ProfileDescriptionDao profileDescriptionDao;
+    private ComponentDescriptionDao componentDescriptionDao;
     private MDMarshaller marshaller;
 
     public void setComponentRegistryFactory(
@@ -45,12 +47,12 @@ public class AdminRegistry {
     }
 
     public void setProfileDescriptionDao(
-	    IProfileDescriptionDAO profileDescriptionDao) {
+	    ProfileDescriptionDao profileDescriptionDao) {
 	this.profileDescriptionDao = profileDescriptionDao;
     }
 
     public void setComponentDescriptionDao(
-	    IComponentDescriptionDao componentDescriptionDao) {
+	    ComponentDescriptionDao componentDescriptionDao) {
 	this.componentDescriptionDao = componentDescriptionDao;
     }
 

@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry.persistence;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
  * @author george.georgovassilis@mpi.nl
  *
  */
-public interface IUserDAO {
+public interface UserDao {
 
 	List<RegistryUser> getAllUsers() throws DataAccessException;
 
