@@ -7,9 +7,11 @@
 	    <shibheader>
 		<username>oid:eduPersonPrincipalName</username>
 		<username>mace:eduPersonPrincipalName</username>
+		<username>eduPersonPrincipalName</username>
+		
+		<username>oid:eduPersonTargetedID</username>
+		<username>mace:eduPersonTargetedID</username>
 		<username>eduPersonTargetedID</username>
-        <username>eduPersonPrincipalName</username>
-        <username>eppn</username>
 
 		<session>Shib-Session-ID</session>
 		<idp>Shib-Identity-Provider</idp>
@@ -42,9 +44,9 @@
 		<location target="/img/*" />
 	    </ignore>
 		
-		<!-- configures the view-control targets -->
+	    <!-- configures the view-control targets -->
 	    <pages>
-           <!--  <info action="dI">/protected/info.jsp</info> -->
+		<!--  <info action="dI">/protected/info.jsp</info> -->
 		<denied action="dD">pages/noaccess.jsp</denied> 
 	    </pages>
 		
