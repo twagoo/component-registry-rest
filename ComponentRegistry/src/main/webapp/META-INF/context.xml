@@ -87,5 +87,11 @@
     <Parameter 
 	name="eu.clarin.cmdi.componentregistry.isocatRestUrl" 
 	value="https://catalog.clarin.eu/isocat/rest/" />
+	
+    <Parameter 
+	name="eu.clarin.cmdi.componentregistry.jpaDialect" 
+	value="org.hibernate.dialect.PostgreSQL82Dialect" />
+
+	
 
 </Context>

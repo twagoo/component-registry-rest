@@ -13,10 +13,16 @@
 
     <!-- Using the Datasource JNDI defined in the servlet container. See below for a sample Tomcat datasource configuration -->
 
-    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-	<property name="jndiName" value="java:comp/env/jdbc/ComponentRegistry"/>   
-	<property name="resourceRef" value="true" />
-    </bean>
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+		<property name="targetDataSource">
+		    <bean class="org.springframework.jndi.JndiObjectFactoryBean">
+				<property name="jndiName" value="java:comp/env/jdbc/ComponentRegistry"/>   
+				<property name="resourceRef" value="true" />
+    		</bean>
+		</property>
+	</bean>
+
     
     <!-- SAMPLE TOMCAT DATASOURCE CONFIGURATION: -->
     <!--

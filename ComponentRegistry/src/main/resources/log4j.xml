@@ -26,7 +26,10 @@
         <level value="warn"/>
     </logger>
     <logger name="org.springframework">
-        <level value="warn"/>
+        <level value="debug"/>
+    </logger>
+    <logger name="org.springframework.transaction">
+        <level value="debug"/>
     </logger>
     <logger name="org.springframework.web.context.ContextLoader">
         <level value="info"/>

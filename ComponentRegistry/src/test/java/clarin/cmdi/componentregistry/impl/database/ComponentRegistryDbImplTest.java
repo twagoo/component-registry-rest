@@ -783,7 +783,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(1, comments.size());
 
 	comment = comments.get(0);
-	assertEquals("0", comment.getUserId());
+	assertEquals("1", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
 
 	// Should not be allowed to delete, not authenticated
@@ -821,7 +821,7 @@ public class ComponentRegistryDbImplTest {
 	assertEquals(1, comments.size());
 
 	comment = comments.get(0);
-	assertEquals("0", comment.getUserId());
+	assertEquals("1", comment.getUserId());
 	assertEquals(USER_CREDS.getDisplayName(), comment.getUserName());
 
 	description = register.getProfileDescription(description.getId());

@@ -41,8 +41,7 @@ import org.springframework.web.context.request.RequestContextListener;
 @ContextConfiguration(locations = {
 	"classpath:spring-config/applicationContext.xml",
 	"classpath:spring-config/datasource-hsqldb.xml" })
-@TransactionConfiguration(defaultRollback = true)
-@Transactional
+//Important: these tests can not be configured with @Transactional because it spawns two (mutually deadlocking) transactions: the test itself and jersey services
 public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     // CommandLine test e.g.: curl -i -H "Accept:application/json" -X GET
     // http://localhost:8080/ComponentRegistry/rest/registry/profiles

@@ -12,10 +12,12 @@ import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rss.Rss;
@@ -59,12 +61,15 @@ import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Handles CRUD operations on {@link ComponentDescription}, {@link ProfileDescription} and {@link Comment}s
+ * @author twago@mpi.nl
+ * @author olsha@mpi.nl
  * @author george.georgovassilis@mpi.nl
  *
  */
@@ -87,6 +92,9 @@ public class ComponentRegistryRestService implements
 	private ComponentRegistryFactory componentRegistryFactory;
 	@InjectParam(value = "mdMarshaller")
 	private MDMarshaller marshaller;
+	
+	@Autowired
+	private GroupService groupService;
 
 	/**
 	 * Converts userspace boolean to component status. Temporary solution!!!
@@ -1520,5 +1528,16 @@ public class ComponentRegistryRestService implements
 			throws ComponentRegistryException, IOException, JAXBException,
 			ParseException {
 		return (new AllowedAttributetypesXML());
+	}
+
+	@Override
+	@GET
+	@Path("/groups/usermembership")
+	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+			MediaType.APPLICATION_JSON })
+	public List<Group> getGroupsTheCurrentUserOwns() {
+	    Principal principal = security.getUserPrincipal();
+	    List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
+	    return groups;
 	}
 }

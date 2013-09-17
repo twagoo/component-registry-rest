@@ -19,6 +19,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.rss.Rss;
 
@@ -26,6 +27,8 @@ import com.sun.jersey.spi.resource.Singleton;
 
 /**
  * 
+ * @author twago@mpi.nl
+ * @author olsha@mpi.nl
  * @author george.georgovassilis@mpi.nl
  *
  */
@@ -213,6 +216,12 @@ public interface IComponentRegistryRestService {
 			ParseException;
 	
 	void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents);
+	
+	/**
+	 * 
+	 * @return
+	 */
+	List<Group> getGroupsTheCurrentUserOwns();
 
 
 }
