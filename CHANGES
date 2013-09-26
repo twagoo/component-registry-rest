@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.14.0 (???)
+-
+
 Release ComponentRegistry-1.13.0 (25 February 2013)
 - Added RSS feeds for public profiles, components, and comments. https://trac.clarin.eu/ticket/180
 - Added help link to UI. https://trac.clarin.eu/ticket/222
