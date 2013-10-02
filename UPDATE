@@ -21,6 +21,20 @@ Procedure for updating
 
 Version specific update instructions
 -------------------------------------
+=== 1.14.0 ===
+
+- Servlet container will require jmx registry. For tomcat, that is enabled with JVM arguments like these:
+
+   -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
+
+- Execute DB update script upgrade-1.14.sql
+
+- The application requires a JNDI server-managed datasource over the database under the namespace java:comp/env/jdbc/ComponentRegistry. I.e. in tomcat, edit /config/context.xml:
+
+  <Resource auth="Container" driverClassName="org.postgresql.Driver" maxActive="10" name="jdbc/ComponentRegistry" password="password" type="javax.sql.DataSource" url="jdbc:postgresql:ComponentRegistry" username="compreg"/>
+
+
+
 === 1.13 ===
 
 - The following context fragment have been renamed, and should be updated
