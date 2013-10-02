@@ -130,7 +130,7 @@ public interface AbstractDescriptionDao<T extends AbstractDescription> {
 
 	/**
 	 * 
-	 * @return All the user's descriptions not in the public space
+	 * @return All the user's descriptions not in the public space and are also not part of any group
 	 */
 	List<T> getUserspaceDescriptions(Number userId) throws DataAccessException;
 

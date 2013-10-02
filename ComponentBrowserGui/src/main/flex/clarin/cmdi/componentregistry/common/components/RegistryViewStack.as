@@ -65,10 +65,10 @@ package clarin.cmdi.componentregistry.common.components {
 		
 		public function switchToBrowse(itemDescription:ItemDescription):void {
 			if (itemDescription != null) {
-				if (Config.instance.userSpace == itemDescription.isInUserSpace) {
+				if (Config.instance.space == itemDescription.space) {
 					browse.refresh();
 				} else {
-					Config.instance.userSpace = itemDescription.isInUserSpace;
+					Config.instance.userSpace = itemDescription.space;
 				}
 				browse.setSelectedDescription(itemDescription);
 			}

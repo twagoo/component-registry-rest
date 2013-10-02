@@ -18,11 +18,18 @@ public interface ComponentRegistry {
     public static final String PUBLIC_NAME = "Public Registry";
 
     /**
-     *
      * @return List of component descriptions ordered by name ascending
      * @throws ComponentRegistryException
      */
     List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException;
+
+    /**
+     * @param principalName
+     * @param groupId
+     * @return List of component descriptions ordered by name ascending
+     * @throws ComponentRegistryException
+     */
+    List<ComponentDescription> getComponentDescriptionsInGroup(String principalName, String groupId) throws ComponentRegistryException;
 
     ComponentDescription getComponentDescription(String id) throws ComponentRegistryException;
 
@@ -34,13 +41,27 @@ public interface ComponentRegistry {
     List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException;
 
     /**
+    * @param groupId
+    * @return List of profile descriptions ordered by name ascending
+    * @throws ComponentRegistryException
+    */
+   List<ProfileDescription> getProfileDescriptionsInGroup(String groupId) throws ComponentRegistryException;
+
+   /**
      *
      * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
      * @throws ComponentRegistryException
      */
     List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException;
 
-    ProfileDescription getProfileDescription(String id) throws ComponentRegistryException;
+    /**
+    * @param groupId
+    * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
+    * @throws ComponentRegistryException
+    */
+   List<ProfileDescription> getProfileDescriptionsForMetadaEditor(String groupId) throws ComponentRegistryException;
+
+   ProfileDescription getProfileDescription(String id) throws ComponentRegistryException;
 
     CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException;
 

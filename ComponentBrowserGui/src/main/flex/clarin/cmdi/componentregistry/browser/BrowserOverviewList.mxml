@@ -4,7 +4,7 @@
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:rictus="com.rictus.controls.*"
-		 creationComplete="scrollToSelected()">
+		 creationComplete="init()">
 
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
@@ -25,6 +25,7 @@
 			import flash.events.ContextMenuEvent;
 			import flash.ui.ContextMenu;
 			import flash.ui.ContextMenuItem;
+			import mx.controls.Alert;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Text;
@@ -72,6 +73,15 @@
 			public function set itemToScrollTo(itemToScrollTo:ItemDescription):void {
 				_itemToScrollTo = itemToScrollTo;
 				scrollToSelected();
+			}
+			
+			private function init():void{
+				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, onSpaceChanged);
+				scrollToSelected();
+			}
+			
+			private function onSpaceChanged(event:Event):void{
+				createNewButton.enabled = (!Config.instance.selectedGroup);
 			}
 
 			private function scrollToSelected():void {
@@ -141,21 +151,23 @@
 				 visible="{buttonsEnabled}">
 			
 			
-			<mx:Button label="Create new" 
+			<mx:Button 
+				       id="createNewButton"
+					   label="Create new" 
 					   toolTip="Create a new item in the private workspace"
 					   click="dispatchCreateNewEvent()"
 					   />
 			<mx:Button label="Edit"
 					   toolTip="Edit the selected item in the editor"
-					   visible="{Config.instance.userSpace}" 
-					   includeInLayout="{Config.instance.userSpace}"
-					   enabled="{Config.instance.userSpace &amp;&amp; dataGrid.selectedItem != null}" 
+					   visible="{Config.instance.space == Config.SPACE_USER}" 
+					   includeInLayout="{Config.instance.space == Config.SPACE_USER}"
+					   enabled="{Config.instance.space == Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
 			<mx:Button label="Edit as new"   
 					   toolTip="Edit the selected item as a new item in the private workspace"
-					   visible="{!Config.instance.userSpace}" 
-					   includeInLayout="{!Config.instance.userSpace}"
-					   enabled="{!Config.instance.userSpace &amp;&amp; dataGrid.selectedItem != null}" 
+					   visible="{Config.instance.space != Config.SPACE_USER}" 
+					   includeInLayout="{Config.instance.space != Config.SPACE_USER}"
+					   enabled="{Config.instance.space != Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
 			<mx:Button label="Import"
 					   toolTip="Import an item from a local file"
@@ -172,8 +184,8 @@
 			<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
 	   </mx:HBox>
 		<comp:RssLinkButton 
-			enabled ="{! Config.instance.userSpace}"
-			visible="{! Config.instance.userSpace}"
+			enabled ="{Config.instance.space != Config.SPACE_USER}"
+			visible="{Config.instance.space != Config.SPACE_USER}"
 			contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
 			click="goToFeed()"
 			/>	

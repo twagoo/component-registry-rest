@@ -89,12 +89,12 @@
 				
 				
 				// Do actual loading
-				service = new CommentListService(_itemDescription, _itemDescription.isInUserSpace);
+				service = new CommentListService(_itemDescription, _itemDescription.space);
 				service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
 				service.load();
 				
 				// Rss feed "button"
-				if (! _itemDescription.isInUserSpace){
+				if  (_itemDescription.space != Config.SPACE_USER){
 					var spacer:Spacer = new Spacer();
 					spacer.percentWidth=100;
 					addChild(spacer);

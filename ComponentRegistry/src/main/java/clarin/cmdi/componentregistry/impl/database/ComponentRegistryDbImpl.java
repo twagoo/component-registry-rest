@@ -8,7 +8,6 @@ import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.Owner;
-import clarin.cmdi.componentregistry.OwnerGroup;
 import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
@@ -32,6 +31,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -80,6 +80,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     private CommentsDao commentsDao;
     @Autowired
     private MDMarshaller marshaller;
+    @Autowired
+    private GroupService groupService;
 
     /**
      * Default constructor, to use this as a (spring) bean. The public registry
@@ -636,17 +638,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	}
     }
 
-    /**
-     * @return The group id, or null if there is no owner or it is not a group.
-     */
-    private Number getGroupId() {
-	if (registryOwner instanceof OwnerGroup) {
-	    return registryOwner.getId();
-	} else {
-	    return null;
-	}
-    }
-
     @Override
     public Owner getOwner() {
 	return registryOwner;
@@ -876,5 +867,42 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     @Override
     public String toString() {
 	return getName();
+    }
+
+    @Override
+    public List<ComponentDescription> getComponentDescriptionsInGroup(
+	    String principalName, String groupId) throws ComponentRegistryException {
+	List<String> componentIds = groupService.getComponentIdsInGroup(Long.parseLong(groupId));
+	List<ComponentDescription> components = new ArrayList<ComponentDescription>();
+	for (String id:componentIds) {
+	    ComponentDescription componentDescription = getComponentDescription(id);
+	    //minor robustness consideration: if, for whatever reason, the component for an ownership has been removed, don't return a null but just skip it
+	    if (componentDescription!=null)
+		components.add(componentDescription);
+	}
+	return components;
+    }
+
+    @Override
+    public List<ProfileDescription> getProfileDescriptionsForMetadaEditor(
+	    String groupId) throws ComponentRegistryException {
+	List<String> componentIds = groupService.getProfileIdsInGroup(Long.parseLong(groupId));
+	List<ProfileDescription> profiles = new ArrayList<ProfileDescription>();
+	for (String id:componentIds) {
+	    ProfileDescription profile = getProfileDescription(id);
+	    if (profile!=null)
+		profiles.add(profile);
+	}
+	return profiles;
+    }
+
+    @Override
+    public List<ProfileDescription> getProfileDescriptionsInGroup(String groupId)
+	    throws ComponentRegistryException {
+	List<String> componentIds = groupService.getProfileIdsInGroup(Long.parseLong(groupId));
+	List<ProfileDescription> profiles = new ArrayList<ProfileDescription>();
+	for (String id:componentIds)
+	    profiles.add(getProfileDescription(id));
+	return profiles;
     }
 }

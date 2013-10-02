@@ -7,8 +7,9 @@ package clarin.cmdi.componentregistry.services {
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
+	import mx.controls.Alert;
 	import mx.controls.List;
-
+ 
 	[Event(name="userSpaceToggle", type="flash.events.Event")]
 	public final class Config extends EventDispatcher {
 		public static const USER_SPACE_TOGGLE_EVENT:String = "userSpaceToggle";
@@ -53,10 +54,12 @@ package clarin.cmdi.componentregistry.services {
 		private static const USER_SETTINGS_URL:String = "/admin/userSettings";
 		private static const COMMENTS_URL_PATH:String = "/comments/";
 		private static const ISOCAT_SERVLET:String = "/isocat";
+		private static const USER_GROUPS_MEMBERSHIP_URL:String = "/rest/registry/groups/usermembership";
 		
 		
 		
 		public static var _instance:Config = new Config();
+		
 		
 		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
 		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";
@@ -66,15 +69,16 @@ package clarin.cmdi.componentregistry.services {
 		private var _view:String = VIEW_BROWSE;
 		private var _browserPanel:String = BROWSER_PANEL_VIEW;
 		private var _space:String = SPACE_PUBLIC;
-		private var _userSpace:Boolean = false;
+		private var _selectedGroup:String = "";
 		private var _debug:Boolean = false;
 		
 		private var publicComponentsSrv:ComponentListService;
 		private var publicProfilesSrv:ProfileListService;
 		private var userComponentsSrv:ComponentListService;
 		private var userProfilesSrv:ProfileListService;
-
-
+		private var listUserGroupsMembershipService:ListUserGroupsMembershipService;
+		private var listGroupsOfItemService:ListGroupsOfItemService;
+		
 		public function Config() {
 			if (_instance != null) {
 				throw new Error("Config can only be accessed through Config.instance");
@@ -83,6 +87,14 @@ package clarin.cmdi.componentregistry.services {
 		
 		public static function get instance():Config {
 			return _instance;
+		}
+		
+		public function set selectedGroup(value:String):void{
+			_selectedGroup=value;
+		}
+
+		public function get selectedGroup():String{
+			return _selectedGroup;
 		}
 
 		private function init(applicationParameters:Object):void {
@@ -111,28 +123,44 @@ package clarin.cmdi.componentregistry.services {
 				_debug = Boolean(debug);
 			}
 			
-			publicProfilesSrv = new ProfileListService(false);
-			userProfilesSrv = new ProfileListService(true);
-			publicComponentsSrv = new ComponentListService(false);
-			userComponentsSrv = new ComponentListService(true);
-		}
-
-		public function getProfilesSrv(userSpace:Boolean):ProfileListService{
-			if (userSpace) {
-				return userProfilesSrv;
-			}
-			else {
-				return publicProfilesSrv;
-			}
+			publicProfilesSrv = new ProfileListService(SPACE_PUBLIC);
+			userProfilesSrv = new ProfileListService(SPACE_USER);
+			publicComponentsSrv = new ComponentListService(SPACE_PUBLIC);
+			userComponentsSrv = new ComponentListService(SPACE_USER);
+			listUserGroupsMembershipService = new ListUserGroupsMembershipService();
+			listGroupsOfItemService = new ListGroupsOfItemService();
 		}
 		
-		public function getComponentsSrv(userSpace:Boolean):ComponentListService{
-			if (userSpace) {
+		public function getListUserGroupsMembershipService():ListUserGroupsMembershipService{
+			return listUserGroupsMembershipService;
+		}
+
+		public function getProfilesSrv(userSpace:String):ProfileListService{
+			if (userSpace == SPACE_USER) {
+				userProfilesSrv.setGroupId(_selectedGroup);
+				return userProfilesSrv;
+			}
+			else
+			if (userSpace == SPACE_PUBLIC) {
+				return publicProfilesSrv;
+			}
+			else throw "No selection";
+		}
+		
+		public function getComponentsSrv(userSpace:String):ComponentListService{
+			if (userSpace == SPACE_USER) {
+				userComponentsSrv.setGroupId(_selectedGroup);
 				return userComponentsSrv;
 			}
-			else {
+			else
+			if (userSpace == SPACE_PUBLIC) {
 				return publicComponentsSrv;
 			}
+			else throw "unknown component server";
+		}
+		
+		public function getListGroupsOfItemService():ListGroupsOfItemService{
+			return listGroupsOfItemService;
 		}
 		
 		public static function create(applicationParameters:Object):void {
@@ -157,6 +185,15 @@ package clarin.cmdi.componentregistry.services {
 		
 		public function getProfileCommentsPath(id:String):String{
 			return profileInfoUrl + id + COMMENTS_URL_PATH;
+		}
+
+		public function getGroupsOfItemPath(itemId:String):String{
+			return _serviceRootUrl + "/rest/registry/items/"+itemId+"/groups";
+		}
+
+		
+		public function getListGroupsOfUserPath():String{
+			return _serviceRootUrl + USER_GROUPS_MEMBERSHIP_URL;
 		}
 
 		public function getComponentCommentsPath(id:String):String{
@@ -190,17 +227,17 @@ package clarin.cmdi.componentregistry.services {
 		public function get userSettingsUrl():String{
 			return _serviceRootUrl + USER_SETTINGS_URL;
 		}
-
-		public function set userSpace(userSpace:Boolean):void {
-			if (_userSpace != userSpace) {
-				_userSpace = userSpace;
-				dispatchEvent(new Event(USER_SPACE_TOGGLE_EVENT));
-			}
+		
+		public function getTransferItemOwnershipUrl(itemId:String,groupId:String):String{
+			return _serviceRootUrl + "/rest/registry/items/"+itemId+"/transferownership?groupId="+groupId;
 		}
 
-		[Bindable(event="userSpaceToggle")]
-		public function get userSpace():Boolean {
-			return _userSpace;
+		public function set userSpace(userSpace:String):void {
+			_space = userSpace;
+			if (userSpace == Config.SPACE_PUBLIC){
+				_selectedGroup = "";
+			}
+			dispatchEvent(new Event(USER_SPACE_TOGGLE_EVENT));
 		}
 
 		public function get startupItem():String {
@@ -215,6 +252,7 @@ package clarin.cmdi.componentregistry.services {
 			return _browserPanel;
 		}
 
+		[Bindable(event="userSpaceToggle")]
 		public function get space():String {
 			return _space;
 		}
@@ -226,7 +264,7 @@ package clarin.cmdi.componentregistry.services {
 		public static function getBookmarkUrl(item:ItemDescription):String {
 			var uri:URI = new URI(Config.instance.serviceRootUrl);
 		    uri.setQueryValue(REGISTRY_PARAM_ITEM, item.id);
-			if (item.isInUserSpace) {
+			if (item.space == Config.SPACE_USER) {
 				uri.setQueryValue(REGISTRY_PARAM_SPACE, SPACE_USER);
 			}
 			return uri.toString();
@@ -235,7 +273,7 @@ package clarin.cmdi.componentregistry.services {
 		public static function getRssUriDescriptions(typeOfDescription:String):String {
 			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
 			var result:String=baseUri+"/rest/registry/"+typeOfDescription+"/rss";
-			if (Config.instance.userSpace) result=result+"?userspace=true";
+			if (Config.instance.space == SPACE_USER) result=result+"?userspace=true";
 			return result;
 		}
 		
@@ -245,7 +283,7 @@ package clarin.cmdi.componentregistry.services {
 			if (item.isProfile) {typeOfDescription="profiles/";}
 			else typeOfDescription="components/";
 			var result:String=baseUri+"/rest/registry/"+typeOfDescription+item.id+"/comments/rss";
-			if (item.isInUserSpace) result=result+"?userspace=true";
+			if (item.space == Config.SPACE_USER) result=result+"?userspace=true";
 			return result;
 		}
 		

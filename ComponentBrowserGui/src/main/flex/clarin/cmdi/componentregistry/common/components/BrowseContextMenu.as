@@ -76,8 +76,8 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		private function setItemStates(event:Event = null):void {
-			editMenuItem.visible = Config.instance.userSpace;
-			editAsNewMenuItem.visible = !Config.instance.userSpace;
+			editMenuItem.visible = Config.instance.space == Config.SPACE_USER;
+			editAsNewMenuItem.visible = (Config.instance.space!= Config.SPACE_USER);
 		}
 
 		public function set dataGrid(dataGrid:DataGrid):void {

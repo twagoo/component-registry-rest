@@ -20,14 +20,14 @@ public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
     @Autowired
     ProfileDescriptionDao profileDescriptionDao;
 
-    @Before
-    public void init() {
-	resetDatabase(jdbcTemplate);
-	createTableProfileDescription(jdbcTemplate);
-	createTableXmlContent(jdbcTemplate);
-	createTableRegistryUser(jdbcTemplate);
-	createTableComments(jdbcTemplate);
-    }
+//    @Before
+//    public void init() {
+//	resetDatabase(jdbcTemplate);
+//	createTableProfileDescription(jdbcTemplate);
+//	createTableXmlContent(jdbcTemplate);
+//	createTableRegistryUser(jdbcTemplate);
+//	createTableComments(jdbcTemplate);
+//    }
 
     @Override
     protected AbstractDescriptionDao getDao() {

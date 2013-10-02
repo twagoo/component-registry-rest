@@ -28,7 +28,7 @@
 				 includeInLayout="{component.componentId != null &amp;&amp; component.componentId != ''}"
 				 >			
 			<mx:Label text="ComponentId: " fontWeight="bold"/>
-			<mx:Label text="{Config.instance.getComponentsSrv(Config.instance.userSpace).findDescription(component.componentId).name}" />
+			<mx:Label text="{Config.instance.getComponentsSrv(Config.instance.space).findDescription(component.componentId).name}" />
 		</mx:HBox>
 		
 		<mx:HBox minWidth="160">

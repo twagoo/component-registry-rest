@@ -43,6 +43,8 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
     protected abstract String getCMDIdColumn();
 
     protected abstract String getCommentsForeignKeyColumn();
+    
+    protected abstract boolean isProfile();
 
     /**
      * Class object required to instantiate new description domain objects
@@ -321,8 +323,11 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
     @Override
     public List<T> getUserspaceDescriptions(Number userId)
 	    throws DataAccessException {
+	String itemTable = isProfile()?"profile_description":"component_description";
+	String ownershipId = isProfile()?"profileid":"componentid";
+	String itemId = isProfile()?"profile_id":"component_id";
 	String select = getSelectStatement()
-		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ?")
+		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND not exists (select 1 from ownership where ownership."+ownershipId+" = "+itemTable+"."+itemId+")")
 		.append(getOrderByClause()).toString();
 	return getList(select, userId);
     }

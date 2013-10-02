@@ -1,11 +1,12 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedOperationParameter;
@@ -14,7 +15,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
@@ -112,10 +112,11 @@ public class GroupServiceImpl implements GroupService {
 		ownership.getProfileId());
 	if (o != null)
 	    throw new ValidationException("Ownership exists");
-	o = ownershipDao.findOwnershipByUserAndComponent(ownership.getUserId(),
-		ownership.getComponentId());
-	if (o != null)
-	    throw new ValidationException("Ownership exists");
+	// o =
+	// ownershipDao.findOwnershipByUserAndComponent(ownership.getUserId(),
+	// ownership.getComponentId());
+	// if (o != null)
+	// throw new ValidationException("Ownership exists");
     }
 
     @Override
@@ -193,8 +194,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @ManagedOperation(description = "Mage a user member of a group")
     @ManagedOperationParameters({
-	@ManagedOperationParameter(name = "principalName", description = "Principal name of the user to make a member") ,
-    	@ManagedOperationParameter(name = "groupName", description = "Name of the group")})
+	    @ManagedOperationParameter(name = "principalName", description = "Principal name of the user to make a member"),
+	    @ManagedOperationParameter(name = "groupName", description = "Name of the group") })
     public long makeMember(String userPrincipalName, String groupName) {
 	RegistryUser user = userDao.getByPrincipalName(userPrincipalName);
 	Group group = groupDao.findGroupByName(groupName);
@@ -242,13 +243,11 @@ public class GroupServiceImpl implements GroupService {
 	    boolean isProfile) {
 	RegistryUser user = userDao.getByPrincipalName(principal);
 	Group group = groupDao.findGroupByName(groupName);
-	Ownership ownership = isProfile ? ownershipDao
-		.findOwnershipByUserAndProfile(user.getId().longValue(),
-			descriptionId) : ownershipDao
-		.findOwnershipByUserAndComponent(user.getId().longValue(),
-			descriptionId);
-	if (ownership != null)
-	    ownershipDao.delete(ownership);
+	Ownership ownership = null;
+	List<Ownership> oldOwnerships = isProfile ? ownershipDao
+		.findOwnershipByProfileId(descriptionId) : ownershipDao
+		.findOwnershipByComponentId(descriptionId);
+	ownershipDao.delete(oldOwnerships);
 	ownership = new Ownership();
 	if (isProfile)
 	    ownership.setProfileId(descriptionId);
@@ -258,6 +257,11 @@ public class GroupServiceImpl implements GroupService {
 	addOwnership(ownership);
     }
 
+    @ManagedOperation(description = "Make a component owned by a group instead of a user")
+    @ManagedOperationParameters({
+	    @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the component"),
+	    @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to"),
+	    @ManagedOperationParameter(name = "componentId", description = "Id of component") })
     @Override
     public void transferComponentOwnershipFromUserToGroup(String principal,
 	    String groupName, String componentId) {
@@ -265,6 +269,11 @@ public class GroupServiceImpl implements GroupService {
 		groupName, componentId, false);
     }
 
+    @ManagedOperation(description = "Make a profile owned by a group instead of a user")
+    @ManagedOperationParameters({
+	    @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the profile"),
+	    @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the profile to"),
+	    @ManagedOperationParameter(name = "componentId", description = "Id of profile") })
     @Override
     public void transferProfileOwnershipFromUserToGroup(String principal,
 	    String groupName, String profileId) {
@@ -281,6 +290,75 @@ public class GroupServiceImpl implements GroupService {
 	for (GroupMembership m : memberships)
 	    groups.add(groupDao.findOne(m.getGroupId()));
 	return groups;
+    }
+
+    @Override
+    public List<String> getComponentIdsInGroup(long groupId) {
+	List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
+	Set<String> componentIds = new HashSet<String>();
+	for (Ownership o : ownerships)
+	    if (o.getComponentId() != null)
+		componentIds.add(o.getComponentId());
+	List<String> idsList = new ArrayList<String>(componentIds);
+	Collections.sort(idsList);
+	return idsList;
+    }
+
+    @Override
+    public List<String> getProfileIdsInGroup(long groupId) {
+	List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
+	Set<String> profileIds = new HashSet<String>();
+	for (Ownership o : ownerships)
+	    if (o.getProfileId() != null)
+		profileIds.add(o.getProfileId());
+	List<String> idsList = new ArrayList<String>(profileIds);
+	Collections.sort(idsList);
+	return idsList;
+    }
+
+    @Override
+    public List<Group> getGroupsTheItemIsAMemberOf(String itemId) {
+	Set<Ownership> ownerships = new HashSet<Ownership>();
+	ownerships.addAll(ownershipDao.findOwnershipByProfileId(itemId));
+	ownerships.addAll(ownershipDao.findOwnershipByComponentId(itemId));
+	Set<Group> groups = new HashSet<Group>();
+	for (Ownership ownership : ownerships)
+	    groups.add(groupDao.findOne(ownership.getGroupId()));
+	List<Group> groupList = new ArrayList<Group>(groups);
+	Collections.sort(groupList, new Comparator<Group>() {
+
+	    @Override
+	    public int compare(Group g1, Group g2) {
+		return (int) (g1.getId() - g2.getId());
+	    }
+	});
+	return groupList;
+    }
+
+    @Override
+    public void transferItemOwnershipFromUserToGroup(String principal,
+	    long groupId, String itemId) {
+
+	AbstractDescription item = null;
+	item = profileDescriptionDao.getByCmdId(itemId);
+	boolean isProfile = true;
+	if (item == null) {
+	    item = componentDescriptionDao.getByCmdId(itemId);
+	    isProfile = false;
+	}
+	if (item == null)
+	    throw new ValidationException(
+		    "No profile or component found with ID " + itemId);
+	Group group = groupDao.findOne(groupId);
+	if (group == null)
+	    throw new ValidationException("No group found with ID " + groupId);
+	String groupName = group.getName();
+	if (isProfile)
+	    transferProfileOwnershipFromUserToGroup(principal, groupName,
+		    item.getId());
+	else
+	    transferComponentOwnershipFromUserToGroup(principal, groupName,
+		    item.getId());
     }
 
 }

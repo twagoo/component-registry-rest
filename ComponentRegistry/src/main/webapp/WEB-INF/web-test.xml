@@ -107,4 +107,9 @@
 		</description>
 		<role-name>tomcat</role-name>
 	</security-role>
+	
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	
 </web-app>

@@ -39,4 +39,9 @@ public class ComponentDescriptionDaoImpl extends
     public List<ComponentDescription> getPublicComponentDescriptions() {
 	return getPublicDescriptions();
     }
+
+    @Override
+    protected boolean isProfile() {
+	return false;
+    }
 }

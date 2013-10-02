@@ -92,6 +92,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Test
     public void testGetUserspaceDescriptions() throws Exception {
+	//TODO: test queries empty database and is happy that no results are returned. Should also test the case where there are userspace descriptions
 	List<AbstractDescription> descriptions = getDao()
 		.getUserspaceDescriptions(-1);
 	assertEquals(0, descriptions.size());

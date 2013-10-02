@@ -34,12 +34,12 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;			
-			this.item = Config.instance.getComponentsSrv(false).findDescription(componentId);
+			this.item = Config.instance.getComponentsSrv(Config.SPACE_USER).findDescription(componentId);
 			if (this.item==null) {
-				this.item = Config.instance.getComponentsSrv(true).findDescription(componentId);
+				this.item = Config.instance.getComponentsSrv(Config.SPACE_PUBLIC).findDescription(componentId);
 			}
 			styleName = StyleConstants.EXPANDING_COMPONENT;
-			if (item && item.isInUserSpace) {
+			if (item && item.space == Config.SPACE_USER) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
 		}

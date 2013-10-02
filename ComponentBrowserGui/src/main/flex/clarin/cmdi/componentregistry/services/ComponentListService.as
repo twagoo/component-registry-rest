@@ -12,8 +12,8 @@ package clarin.cmdi.componentregistry.services {
 		
 		public  const COMPONENTS_LOADED:String = "componentsLoaded";
 		
-		public function ComponentListService(userSpace:Boolean = false) {
-			super(COMPONENTS_LOADED, new URI(Config.instance.componentListUrl), userSpace);
+		public function ComponentListService(space:String) {
+			super(COMPONENTS_LOADED, new URI(Config.instance.componentListUrl), space);
 		}
 		
 		override protected function handleXmlResult(resultXml:XML):void{
@@ -22,7 +22,7 @@ package clarin.cmdi.componentregistry.services {
 			var tempArray:ArrayCollection = new ArrayCollection();
 			for each (var node:XML in nodes) {
 				var item:ItemDescription = new ItemDescription();
-				item.createComponent(node, userSpace);
+				item.createComponent(node, space);
 				tempArray.addItem(item);
 			}
 			tempArray.sort = BrowserColumns.getInitialSortForComponents();

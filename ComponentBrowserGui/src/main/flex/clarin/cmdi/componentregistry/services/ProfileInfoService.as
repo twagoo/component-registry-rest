@@ -22,7 +22,7 @@ package clarin.cmdi.componentregistry.services {
 			profile = new Profile();
 			profile.description = item;
 			var url:URI = new URI(item.dataUrl);
-			if (item.isInUserSpace) {
+			if (item.space == Config.SPACE_USER) {
 				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 			super.dispatchRequest(url);

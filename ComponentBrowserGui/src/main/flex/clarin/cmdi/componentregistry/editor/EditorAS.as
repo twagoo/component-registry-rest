@@ -1,7 +1,10 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
+import clarin.cmdi.componentregistry.browser.GroupSelectionEvent;
+import clarin.cmdi.componentregistry.common.Group;
 import clarin.cmdi.componentregistry.common.ItemDescription;
 import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
+import clarin.cmdi.componentregistry.common.components.UserSettingsLabelButton;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
@@ -10,14 +13,17 @@ import clarin.cmdi.componentregistry.services.ComponentListService;
 import clarin.cmdi.componentregistry.services.ComponentUsageCheckEvent;
 import clarin.cmdi.componentregistry.services.ComponentUsageService;
 import clarin.cmdi.componentregistry.services.Config;
+import clarin.cmdi.componentregistry.services.ListGroupsOfItemService;
 import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
 
+import mx.collections.ArrayCollection;
 import mx.controls.Alert;
 import mx.events.CloseEvent;
 import mx.managers.CursorManager;
+import mx.rpc.events.ResultEvent;
 
 
 private var profileSrv:ProfileInfoService = new ProfileInfoService();
@@ -25,7 +31,7 @@ private var componentSrv:ComponentInfoService = new ComponentInfoService();
 private var itemDescription:ItemDescription;
 
 [Bindable]
-private var componentsSrv:ComponentListService = new ComponentListService(Config.instance.userSpace);
+private var componentsSrv:ComponentListService = new ComponentListService(Config.instance.space);
 
 [Bindable]
 public var cmdComponent:XML;
@@ -50,14 +56,16 @@ public function init():void {
 	uploadService.init(uploadProgress);
 	Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 	viewStack = this.parent as RegistryViewStack;
+	Config.instance.getListGroupsOfItemService().addEventListener(ListGroupsOfItemService.GROUPS_LOADED, onGroupsLoaded);
 }
 
+
 private function toggleUserSpace(event:Event):void {
-	componentsSrv = new ComponentListService(Config.instance.userSpace);
+	componentsSrv = new ComponentListService(Config.instance.space);
 }
 
 private function determineSaveButtonEnabled():void {
-	buttonBar.saveBtn.enabled = (itemDescription != null && itemDescription.isInUserSpace && null != itemDescription.id && null != xmlEditor.cmdSpec.headerId); 
+	buttonBar.saveBtn.enabled = (itemDescription != null && itemDescription.space == Config.SPACE_USER && null != itemDescription.id && null != xmlEditor.cmdSpec.headerId); 
 }
 
 private function profileLoaded(event:Event):void {
@@ -65,6 +73,7 @@ private function profileLoaded(event:Event):void {
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
 	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
+	Config.instance.getListGroupsOfItemService().loadGroupsForItem(itemDescription.id);
 	CursorManager.removeBusyCursor();
 }
 
@@ -74,6 +83,7 @@ private function componentLoaded(event:Event):void {
 	// Track changes for components being edited
 	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
+	Config.instance.getListGroupsOfItemService().loadGroupsForItem(itemDescription.id);
 	CursorManager.removeBusyCursor();
 }
 
@@ -105,12 +115,12 @@ private function publishSpec():void {
 
 private function handlePublishAlert(event:CloseEvent):void {
 	if (event.detail == Alert.OK) {
-		saveSpec(false, UploadService.PUBLISH);
+		saveSpec(Config.SPACE_PUBLIC, UploadService.PUBLISH);
+		Config.instance.userSpace = Config.SPACE_PUBLIC;
 	}
 }
 
-private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
-	//	Alert.show(xmlEditor.cmdSpec.toXml());
+private function saveSpec(space:String, uploadAction:int):void {
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
 		item.description = xmlEditor.cmdSpec.headerDescription;
@@ -118,14 +128,14 @@ private function saveSpec(inUserSpace:Boolean, uploadAction:int):void {
 		item.isProfile = xmlEditor.cmdSpec.isProfile;
 		item.groupName = xmlEditor.cmdSpec.groupName;
 		item.domainName = xmlEditor.cmdSpec.domainName;
-		item.isInUserSpace = inUserSpace;
-		if (itemDescription && itemDescription.isInUserSpace) {
+		item.space = space;
+		if (itemDescription && itemDescription.space == Config.SPACE_USER) {
 			item.id = xmlEditor.cmdSpec.headerId;
 		}
 		
 		// Private components that are in updated require usage check call. If in use, the user can choose whether or not to save the changes .
-		if(inUserSpace && uploadAction == UploadService.UPDATE && !item.isProfile){
-			checkUsage(item, inUserSpace);
+		if(space == Config.SPACE_USER && uploadAction == UploadService.UPDATE && !item.isProfile){
+			checkUsage(item, space);
 		}else{
 			doUpload(uploadAction,item);
 		}
@@ -150,8 +160,8 @@ private function cancel():void {
 /**
  * Calls usage check for the specified component. If in use, asks user whether to proceed; if positive, initiates update.
  */
-private function checkUsage(item:ItemDescription, inUserSpace:Boolean = true, uploadAction:int = UploadService.UPDATE):void{
-	var componentUsageService:ComponentUsageService = new ComponentUsageService(item,inUserSpace);
+private function checkUsage(item:ItemDescription, space:String, uploadAction:int = UploadService.UPDATE):void{
+	var componentUsageService:ComponentUsageService = new ComponentUsageService(item,space);
 	componentUsageService.addEventListener(ComponentUsageCheckEvent.COMPONENT_IN_USE, 
 		function (event:ComponentUsageCheckEvent):void{
 			if(event.isComponentInUse){
@@ -198,4 +208,42 @@ private function initPaletteOverview():void {
 
 public function getType():String {
 	return Config.VIEW_EDIT;
+}
+
+public function onGroupSelected(event:GroupSelectionEvent):void{
+	//Some handler already moved the group for us
+	if (event.groupWasMoved)
+		return;
+	if (!event.getGroupId()){
+		// we don't want items to be moved from groups into void, thus object this selection event
+		event.stopPropagation();
+		event.stopImmediatePropagation();
+		event.preventDefault();
+	} else{
+		var groupId:String = event.getGroupId();
+		var itemId:String = itemDescription.id;
+		Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
+			if (nestedCloseEvent.detail == Alert.YES) {
+				Config.instance.getListGroupsOfItemService().transferOwnership(itemId, groupId, itemTransferToGroupComplete);
+			}
+		});
+	}
+	event.groupWasMoved = true;
+}
+
+protected function itemTransferToGroupComplete(resultEvent:ResultEvent):void {
+	viewStack.switchToBrowse(itemDescription);
+}
+
+
+private function onGroupsLoaded(event:Event):void{
+	var groups:ArrayCollection = Config.instance.getListGroupsOfItemService().groups;
+	//buttonBar.groupPanel.visible = (Config.instance.space != Config.SPACE_PUBLIC) && Config.instance.getListUserGroupsMembershipService().groups.length>0;
+	if (groups.length < 1)
+		buttonBar.selectGroup(null);
+	else{
+		var groupId:String = groups.getItemAt(0).id;
+		var itemId:String = itemDescription.id;
+		buttonBar.selectGroup(groupId);
+	}
 }

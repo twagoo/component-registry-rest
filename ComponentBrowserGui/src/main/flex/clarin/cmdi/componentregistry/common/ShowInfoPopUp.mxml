@@ -42,7 +42,7 @@
 			}
 			
 			private function getBookmarkText():String {
-			    if (item.isInUserSpace) {
+			    if (item.space == Config.SPACE_USER) {
 			        return "Bookmark link (requires login):";
 			    } else {
 			        return "Bookmark link:";

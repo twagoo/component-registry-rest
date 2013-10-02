@@ -61,7 +61,7 @@
 				sessionPinger = PingSessionService.INSTANCE
 				sessionPinger.startPinging();
 				if (Credentials.instance.isLoggedIn() && (Config.instance.space == Config.SPACE_USER)) {
-					Config.instance.userSpace = true;
+					Config.instance.userSpace = Config.SPACE_USER;
 				}
 				viewStack.loadStartup();
 				

@@ -4,10 +4,8 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
-import clarin.cmdi.componentregistry.model.GroupMembership;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -117,4 +115,34 @@ public interface GroupService {
      * @param profileId
      */
     void transferProfileOwnershipFromUserToGroup(String principal, String groupName, String profileId);
+    
+    /**
+     * Move ownership of a component or profile from a user to a group
+     * @param principal
+     * @param groupId
+     * @param componentId
+     */
+    void transferItemOwnershipFromUserToGroup(String principal, long groupId, String componentId);
+
+    /**
+     * Get component IDs in a group
+     * @param groupId
+     * @return
+     */
+    List<String> getComponentIdsInGroup(long groupId);
+
+    /**
+     * Get profile IDs in a group
+     * @param groupId
+     * @return
+     */
+    List<String> getProfileIdsInGroup(long groupId);
+    
+    /**
+     * Get a list of groups the item is a member of. While it's technically possible for an item to belong to none, one or multiple groups, the transferXOwnerwhip methods make sure
+     * an item belongs only to a single group at most, thus this method returns at most a single group for all practical purposes.
+     * @param itemId
+     * @return List of groups
+     */
+    List<Group> getGroupsTheItemIsAMemberOf(String itemId);
 }

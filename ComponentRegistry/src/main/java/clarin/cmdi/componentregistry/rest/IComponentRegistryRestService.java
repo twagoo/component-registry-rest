@@ -44,14 +44,15 @@ public interface IComponentRegistryRestService {
 	public static final String GROUP_FORM_FIELD = "group";
 	public static final String DOMAIN_FORM_FIELD = "domainName";
 	public static final String USERSPACE_PARAM = "userspace";
+	public static final String GROUPID_PARAM = "groupid";
 	public static final String METADATA_EDITOR_PARAM = "mdEditor";
 	public static final String NUMBER_OF_RSSITEMS = "limit";
 
-	List<ComponentDescription> getRegisteredComponents(boolean userspace)
+	List<ComponentDescription> getRegisteredComponents(boolean userspace, String groupId)
 			throws ComponentRegistryException;
 
 	List<ProfileDescription> getRegisteredProfiles(boolean userspace,
-			boolean metadataEditor) throws ComponentRegistryException;
+			boolean metadataEditor, String groupId) throws ComponentRegistryException;
 
 	Response getRegisteredComponent(String componentId, boolean userspace)
 			throws ComponentRegistryException;
@@ -218,10 +219,23 @@ public interface IComponentRegistryRestService {
 	void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents);
 	
 	/**
-	 * 
+	 * Get a list of groups the user is a member of
 	 * @return
 	 */
-	List<Group> getGroupsTheCurrentUserOwns();
+	List<Group> getGroupsTheCurrentUserIsAMemberOf();
 
+	/**
+	 * Get a list of groups the item is available to. For all practical reasons, this will return either 0 or 1 groups
+	 * @param itemId ID of component or profile. This is not the DB id but the logical ID which is unique across components and profiles
+	 * @return List of groups
+	 */
+	List<Group> getGroupsTheItemIsAMemberOf(String itemId);
+	
+	/**
+	 * Transfer ownership of an item (group/profile) to a group
+	 * @param itemId
+	 * @param groupId
+	 */
+	void transferItemOwnershipToGroup(String itemId, long groupId);
 
 }

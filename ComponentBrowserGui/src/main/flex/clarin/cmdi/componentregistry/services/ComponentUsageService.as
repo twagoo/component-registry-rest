@@ -26,10 +26,10 @@ package clarin.cmdi.componentregistry.services
 	{
 		private var service:HTTPService;
 		
-		public function ComponentUsageService(itemDescription:ItemDescription, userSpace:Boolean)
+		public function ComponentUsageService(itemDescription:ItemDescription, space:String)
 		{
 			var url:URI = new URI(Config.instance.componentUsageUrl + itemDescription.id);
-			if (userSpace) {
+			if (space == Config.SPACE_USER) {
 				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 

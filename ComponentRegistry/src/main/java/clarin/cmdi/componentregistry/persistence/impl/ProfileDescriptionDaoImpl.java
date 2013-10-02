@@ -74,4 +74,9 @@ public class ProfileDescriptionDaoImpl extends AbstractDescriptionDaoImpl<Profil
 		// Add value for 'shown_in_editor' to abstract description
 		Collections.singletonList(((ProfileDescription) description).isShowInEditor()));
     }
+
+    @Override
+    protected boolean isProfile() {
+	return true;
+    }
 }

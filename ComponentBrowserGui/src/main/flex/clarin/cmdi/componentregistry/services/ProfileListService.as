@@ -10,8 +10,8 @@ package clarin.cmdi.componentregistry.services {
 		
 		public const PROFILES_LOADED:String = "profilesLoaded";
 		
-		public function ProfileListService(userSpace:Boolean=false) {
-			super(PROFILES_LOADED, new URI(Config.instance.profileListUrl), userSpace);
+		public function ProfileListService(space:String) {
+			super(PROFILES_LOADED, new URI(Config.instance.profileListUrl), space);
 		}
 		
 		override protected function handleXmlResult(resultXml:XML):void{
@@ -19,7 +19,7 @@ package clarin.cmdi.componentregistry.services {
 			var tempArray:ArrayCollection = new ArrayCollection();
 			for each (var node:XML in nodes) {
 				var item:ItemDescription = new ItemDescription();
-				item.createProfile(node, userSpace);
+				item.createProfile(node, space);
 				tempArray.addItem(item);
 			}
 			tempArray.sort = BrowserColumns.getInitialSortForProfiles();

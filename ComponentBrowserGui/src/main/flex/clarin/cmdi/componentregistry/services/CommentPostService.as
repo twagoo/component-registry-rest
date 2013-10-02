@@ -43,11 +43,11 @@ package clarin.cmdi.componentregistry.services {
 		 */
 		public function upload(comment:Comment, itemDescription:ItemDescription):void {
 			createAndInitRequest();
-			var uri:URI = createUri(comment,itemDescription.isInUserSpace);
+			var uri:URI = createUri(comment,itemDescription.space);
 			submit(createByteArray(comment.toXml()), uri);
 		}
 		
-		private function createUri(comment:Comment, userSpace:Boolean):URI {
+		private function createUri(comment:Comment, userSpace:String):URI {
 			var uri:URI = null;
 			if (comment.profileDescriptionId) {
 				uri = new URI(Config.instance.getProfileCommentsPath(comment.profileDescriptionId));
@@ -56,7 +56,7 @@ package clarin.cmdi.componentregistry.services {
 			} else{
 				return null;
 			}
-			if (userSpace){
+			if (userSpace == Config.SPACE_USER){
 				uri.setQueryValue(Config.PARAM_USERSPACE, "true");
 			}
 			return uri;

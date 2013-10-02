@@ -18,7 +18,7 @@ package clarin.cmdi.componentregistry.services {
 		[ArrayElementType("Comment")]
 		public var comments:ArrayCollection;
 		
-		public function CommentListService(itemDescription:ItemDescription, userSpace:Boolean) {
+		public function CommentListService(itemDescription:ItemDescription, userSpace:String) {
 			var url:String;
 			if(itemDescription.isProfile){
 				url = Config.instance.getProfileCommentsPath(itemDescription.id);
@@ -28,7 +28,7 @@ package clarin.cmdi.componentregistry.services {
 			super(COMMENTS_LOADED, new URI(url));
 			
 			this.itemDescription = itemDescription;
-			this.userSpace = userSpace;
+			this.space = userSpace;
 		}
 		
 		override protected function handleXmlResult(resultXml:XML):void{

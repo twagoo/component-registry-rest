@@ -20,15 +20,6 @@ public class ComponentDescriptionDaoTest extends AbstractDescriptionDaoTest {
     @Autowired
     ComponentDescriptionDao componentDescriptionDao;
 
-    @Before
-    public void init() {
-	resetDatabase(jdbcTemplate);
-	createTableComponentDescription(jdbcTemplate);
-	createTableXmlContent(jdbcTemplate);
-	createTableRegistryUser(jdbcTemplate);
-	createTableComments(jdbcTemplate);
-    }
-
     @Override
     protected AbstractDescriptionDao getDao() {
 	return componentDescriptionDao;

@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
+import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.AbstractDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
@@ -62,7 +63,6 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +75,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Path("/registry")
 @Service
+@Transactional(rollbackFor= {Exception.class, ValidationException.class})
 public class ComponentRegistryRestService implements
 		IComponentRegistryRestService {
 
@@ -166,11 +167,21 @@ public class ComponentRegistryRestService implements
 	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
 			MediaType.APPLICATION_JSON })
 	public List<ComponentDescription> getRegisteredComponents(
-			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace)
+			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace,
+			@QueryParam(GROUPID_PARAM) String groupId)
 			throws ComponentRegistryException {
 		long start = System.currentTimeMillis();
-		List<ComponentDescription> components = getRegistry(
-				getStatus(userspace)).getComponentDescriptions();
+		
+		List<ComponentDescription> components = null;
+		ComponentRegistry cr = getRegistry(getStatus(userspace));
+		if (groupId == null||groupId.isEmpty())
+		    components = cr.getComponentDescriptions();
+		else {
+		    Principal principal = security.getUserPrincipal();
+		    UserCredentials credentials = getUserCredentials(principal);
+ 		    components = cr.getComponentDescriptionsInGroup(principal.getName(), groupId);
+
+		}
 		LOG.debug(
 				"Releasing {} registered components into the world ({} millisecs)",
 				components.size(), (System.currentTimeMillis() - start));
@@ -184,17 +195,24 @@ public class ComponentRegistryRestService implements
 			MediaType.APPLICATION_JSON })
 	public List<ProfileDescription> getRegisteredProfiles(
 			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace,
-			@QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor)
+			@QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
+			@QueryParam(GROUPID_PARAM) String groupId
+			)
 			throws ComponentRegistryException {
 		long start = System.currentTimeMillis();
 
 		List<ProfileDescription> profiles;
+		ComponentRegistry cr = getRegistry(getStatus(userspace));
 		if (metadataEditor) {
-			profiles = getRegistry(getStatus(userspace))
-					.getProfileDescriptionsForMetadaEditor();
+		    if (groupId == null || groupId.isEmpty())
+			profiles = cr.getProfileDescriptionsForMetadaEditor();
+		    else
+			profiles = cr.getProfileDescriptionsForMetadaEditor(groupId);
 		} else {
-			profiles = getRegistry(getStatus(userspace))
-					.getProfileDescriptions();
+		    if (groupId == null || groupId.isEmpty())
+			profiles = cr.getProfileDescriptions();
+		    else
+			profiles = cr.getProfileDescriptionsInGroup(groupId);
 		}
 
 		LOG.debug(
@@ -210,7 +228,8 @@ public class ComponentRegistryRestService implements
 			MediaType.APPLICATION_JSON })
 	public Response getRegisteredComponent(
 			@PathParam("componentId") String componentId,
-			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace)
+			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace
+			)
 			throws ComponentRegistryException {
 		LOG.debug("Component with id: {} is requested.", componentId);
 		CMDComponentSpec mdComponent = getRegistry(getStatus(userspace))
@@ -1535,9 +1554,31 @@ public class ComponentRegistryRestService implements
 	@Path("/groups/usermembership")
 	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
 			MediaType.APPLICATION_JSON })
-	public List<Group> getGroupsTheCurrentUserOwns() {
+	public List<Group> getGroupsTheCurrentUserIsAMemberOf() {
 	    Principal principal = security.getUserPrincipal();
+	    if (principal == null)
+		return new ArrayList<Group>();
 	    List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
 	    return groups;
 	}
+
+	@Override
+	@GET
+	@Path("/items/{itemId}/groups")
+	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+			MediaType.APPLICATION_JSON })
+	public List<Group> getGroupsTheItemIsAMemberOf(@PathParam("itemId") String itemId) {
+	    return groupService.getGroupsTheItemIsAMemberOf(itemId);
+	}
+	
+	@Override
+	@POST
+	@Path("/items/{itemId}/transferownership")
+	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+			MediaType.APPLICATION_JSON })
+	public void transferItemOwnershipToGroup(@PathParam("itemId") String itemId, @QueryParam("groupId") long groupId) {
+	    Principal principal = security.getUserPrincipal();
+	    groupService.transferItemOwnershipFromUserToGroup(principal.getName(), groupId, itemId);
+	}
+
 }

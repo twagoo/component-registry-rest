@@ -1,11 +1,15 @@
 package clarin.cmdi.componentregistry.services //trunk 
 {
+	import clarin.cmdi.componentregistry.services.remote.RemoteService;
+	
 	import com.adobe.net.URI;
+	
+	import mx.rpc.http.HTTPService;
 	
 	public class ComponentRegistryService extends BaseRemoteService {
 		
 		protected var serviceUrl:URI;
-		protected var userSpace:Boolean;
+		protected var space:String;
 		
 		public function ComponentRegistryService(successEvent:String, serviceUrl:URI) {
 			super(successEvent);
@@ -14,7 +18,7 @@ package clarin.cmdi.componentregistry.services //trunk
 		
 		override protected function dispatchRequest(url:URI):void {
 			url.setQueryValue("unique", new Date().getTime().toString());
-			if (userSpace) {
+			if (space == Config.SPACE_USER) {
 				url.setQueryValue(Config.PARAM_USERSPACE, "true");
 			} else
 				url.setQueryValue(Config.PARAM_USERSPACE, null);
