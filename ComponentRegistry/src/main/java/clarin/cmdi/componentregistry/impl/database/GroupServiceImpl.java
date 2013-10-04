@@ -284,6 +284,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public List<Group> getGroupsOfWhichUserIsAMember(String principal) {
 	RegistryUser user = userDao.getByPrincipalName(principal);
+	if (user == null || user.getId() ==null)
+	    return new ArrayList<Group>();
 	List<GroupMembership> memberships = groupMembershipDao
 		.findGroupsTheUserIsAmemberOf(user.getId().longValue());
 	List<Group> groups = new ArrayList<Group>();

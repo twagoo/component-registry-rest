@@ -90,7 +90,7 @@
 	
     <Parameter 
 	name="eu.clarin.cmdi.componentregistry.jpaDialect" 
-	value="org.hibernate.dialect.PostgreSQL82Dialect" />
+	value="org.hibernate.dialect.PostgreSQLDialect" />
 
 	
 

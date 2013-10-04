@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
@@ -55,10 +56,14 @@ public abstract class ComponentRegistryDaoImpl<T> extends
      */
     protected abstract ParameterizedRowMapper<T> getRowMapper();
 
-    @Override
     @Autowired
+    public void setNonFinalJdbcTemplate(JdbcTemplate jdbcTemplate) {
+	super.setJdbcTemplate(jdbcTemplate);
+    }
+    
+    @Override
     public void setDatasourceProperty(DataSource ds) {
 	super.setDataSource(ds);
     }
-
+    
 }
