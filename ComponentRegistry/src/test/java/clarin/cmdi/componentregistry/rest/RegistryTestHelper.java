@@ -58,8 +58,8 @@ public final class RegistryTestHelper {
 	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
 	desc.setName(id);
 	desc.setDescription("Test Description");
-	desc.setId(ComponentRegistry.REGISTRY_ID + id);
-	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
+	desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
+	desc.setHref("link:" + desc.getId());
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
@@ -120,8 +120,8 @@ public final class RegistryTestHelper {
 	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
 	desc.setName(id);
 	desc.setDescription("Test Description");
-	desc.setId(ComponentRegistry.REGISTRY_ID + id);
-	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
+	desc.setId(ProfileDescription.PROFILE_PREFIX + id);
+	desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
@@ -234,7 +234,7 @@ public final class RegistryTestHelper {
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>" + commentName + "</comments>\n";
 	comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
-	comContent += "    <profileDescriptionId>" + profileId + "</profileDescriptionId>\n";
+	comContent += "    <componentId>" + profileId + "</componentId>\n";
 	comContent += "    <userName>J. Unit</userName>\n";
 	comContent += "</comment>\n";
 	return comContent;
@@ -246,7 +246,7 @@ public final class RegistryTestHelper {
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>" + commentName + "</comments>\n";
 	comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
-	comContent += "     <componentDescriptionId>" + componentId + "</componentDescriptionId>";
+	comContent += "     <componentId>" + componentId + "</componentId>";
 	comContent += "    <userName>J. Unit</userName>\n";
 	comContent += "</comment>\n";
 	return comContent;
@@ -265,7 +265,7 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getCommentTestContent() {
-	return getTestCommentContent("Actual", "clarin.eu:cr1:profile1");
+	return getTestCommentContent("Actual", ProfileDescription.PROFILE_PREFIX+"profile1");
     }
 
     /**

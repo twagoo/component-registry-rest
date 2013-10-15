@@ -1,13 +1,17 @@
 package clarin.cmdi.componentregistry.model;
 
 import clarin.cmdi.componentregistry.DatesHelper;
+
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 
@@ -22,8 +26,7 @@ public class Comment {
 
     private String comments;
     private String commentDate;
-    private String componentDescriptionId;
-    private String profileDescriptionId;
+    private String componentId;
     private String id;
     private String userName;
     private boolean canDelete;
@@ -54,20 +57,12 @@ public class Comment {
         return id;
     }
 
-    public String getComponentDescriptionId() {
-        return componentDescriptionId;
+    public String getComponentId() {
+        return componentId;
     }
 
-    public void setComponentDescriptionId(String ComponentDescriptionId) {
-        this.componentDescriptionId = ComponentDescriptionId;
-    }
-
-    public void setProfileDescriptionId(String profileDescriptionId) {
-        this.profileDescriptionId = profileDescriptionId;
-    }
-
-    public String getProfileDescriptionId() {
-        return profileDescriptionId;
+    public void setComponentId(String componentDescriptionId) {
+        this.componentId = componentDescriptionId;
     }
 
     public void setUserId(String userId) {

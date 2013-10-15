@@ -15,16 +15,14 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.GroupMembership;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
-import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.persistence.UserDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupMembershipDao;
@@ -50,9 +48,7 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private OwnershipDao ownershipDao;
     @Autowired
-    private ProfileDescriptionDao profileDescriptionDao;
-    @Autowired
-    private ComponentDescriptionDao componentDescriptionDao;
+    private ComponentDao componentDao;
     @Autowired
     private UserDao userDao;
 
@@ -84,14 +80,8 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private void checkOwnership(Ownership ownership) {
-	if (ownership.getComponentId() == null
-		&& ownership.getProfileId() == null)
-	    throw new RuntimeException(
-		    "Ownership needs either a componentId or a profileId");
-	if (ownership.getComponentId() != null
-		&& ownership.getProfileId() != null)
-	    throw new RuntimeException(
-		    "Ownership has both a componentId and a profileId");
+	if (ownership.getComponentId() == null)
+	    throw new RuntimeException("Ownership needs a componentId");
 	if (ownership.getUserId() == 0 && ownership.getGroupId() == 0)
 	    throw new RuntimeException("Ownership needs a groupId or userId");
 	if (ownership.getUserId() != 0 && ownership.getGroupId() != 0)
@@ -104,19 +94,6 @@ public class GroupServiceImpl implements GroupService {
 		ownership.getGroupId(), ownership.getComponentId());
 	if (o != null)
 	    throw new ValidationException("Ownership exists");
-	o = ownershipDao.findOwnershipByGroupAndProfile(ownership.getGroupId(),
-		ownership.getProfileId());
-	if (o != null)
-	    throw new ValidationException("Ownership exists");
-	o = ownershipDao.findOwnershipByUserAndProfile(ownership.getUserId(),
-		ownership.getProfileId());
-	if (o != null)
-	    throw new ValidationException("Ownership exists");
-	// o =
-	// ownershipDao.findOwnershipByUserAndComponent(ownership.getUserId(),
-	// ownership.getComponentId());
-	// if (o != null)
-	// throw new ValidationException("Ownership exists");
     }
 
     @Override
@@ -132,24 +109,20 @@ public class GroupServiceImpl implements GroupService {
     }
 
     protected boolean canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(
-	    RegistryUser user, AbstractDescription description) {
+	    RegistryUser user, BaseComponent description) {
 	// TODO make some joins and multi-id queries to speed the entire method
 	// up
 	boolean isProfile = (description instanceof ProfileDescription);
-	AbstractDescriptionDao<? extends AbstractDescription> dao = isProfile ? profileDescriptionDao
-		: componentDescriptionDao;
 	long userId = user.getId().longValue();
 	// anyone can access public profile
-	if (dao.isPublic(description.getId()))
+	if (componentDao.isPublic(description.getId()))
 	    return true;
 	// the creator can also access any profile
 	if (description.getUserId().equals(user.getId() + ""))
 	    return true;
 
 	// a co-ownership on the profile also allows access
-	Ownership ownership = isProfile ? ownershipDao
-		.findOwnershipByUserAndProfile(userId, description.getId())
-		: ownershipDao.findOwnershipByUserAndComponent(userId,
+	Ownership ownership = ownershipDao.findOwnershipByUserAndComponent(userId,
 			description.getId());
 	if (ownership != null)
 	    return true;
@@ -166,11 +139,8 @@ public class GroupServiceImpl implements GroupService {
 	    groupIds.add(gm.getGroupId());
 
 	for (Long groupId : groupIds) {
-	    ownership = isProfile ? ownershipDao
-		    .findOwnershipByGroupAndProfile(groupId,
-			    description.getId()) : ownershipDao
-		    .findOwnershipByGroupAndComponent(groupId,
-			    description.getId());
+	    ownership = ownershipDao.findOwnershipByGroupAndComponent(groupId,
+		    description.getId());
 	    if (ownership != null)
 		return true;
 	}
@@ -178,15 +148,8 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public boolean canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
-	    RegistryUser user, ProfileDescription profile) {
-	return canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(
-		user, profile);
-    }
-
-    @Override
     public boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
-	    RegistryUser user, ComponentDescription component) {
+	    RegistryUser user, BaseComponent component) {
 	return canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(
 		user, component);
     }
@@ -238,53 +201,10 @@ public class GroupServiceImpl implements GroupService {
 	return groupNames;
     }
 
-    protected void transferAbstractDescriptionOwnershipFromUserToGroup(
-	    String principal, String groupName, String descriptionId,
-	    boolean isProfile) {
-	RegistryUser user = userDao.getByPrincipalName(principal);
-	Group group = groupDao.findGroupByName(groupName);
-	Ownership ownership = null;
-	List<Ownership> oldOwnerships = isProfile ? ownershipDao
-		.findOwnershipByProfileId(descriptionId) : ownershipDao
-		.findOwnershipByComponentId(descriptionId);
-	ownershipDao.delete(oldOwnerships);
-	ownership = new Ownership();
-	if (isProfile)
-	    ownership.setProfileId(descriptionId);
-	else
-	    ownership.setComponentId(descriptionId);
-	ownership.setGroupId(group.getId());
-	addOwnership(ownership);
-    }
-
-    @ManagedOperation(description = "Make a component owned by a group instead of a user")
-    @ManagedOperationParameters({
-	    @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the component"),
-	    @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to"),
-	    @ManagedOperationParameter(name = "componentId", description = "Id of component") })
-    @Override
-    public void transferComponentOwnershipFromUserToGroup(String principal,
-	    String groupName, String componentId) {
-	transferAbstractDescriptionOwnershipFromUserToGroup(principal,
-		groupName, componentId, false);
-    }
-
-    @ManagedOperation(description = "Make a profile owned by a group instead of a user")
-    @ManagedOperationParameters({
-	    @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the profile"),
-	    @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the profile to"),
-	    @ManagedOperationParameter(name = "componentId", description = "Id of profile") })
-    @Override
-    public void transferProfileOwnershipFromUserToGroup(String principal,
-	    String groupName, String profileId) {
-	transferAbstractDescriptionOwnershipFromUserToGroup(principal,
-		groupName, profileId, true);
-    }
-
     @Override
     public List<Group> getGroupsOfWhichUserIsAMember(String principal) {
 	RegistryUser user = userDao.getByPrincipalName(principal);
-	if (user == null || user.getId() ==null)
+	if (user == null || user.getId() == null)
 	    return new ArrayList<Group>();
 	List<GroupMembership> memberships = groupMembershipDao
 		.findGroupsTheUserIsAmemberOf(user.getId().longValue());
@@ -299,7 +219,7 @@ public class GroupServiceImpl implements GroupService {
 	List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
 	Set<String> componentIds = new HashSet<String>();
 	for (Ownership o : ownerships)
-	    if (o.getComponentId() != null)
+	    if (ComponentUtils.isComponentId(o.getComponentId()))
 		componentIds.add(o.getComponentId());
 	List<String> idsList = new ArrayList<String>(componentIds);
 	Collections.sort(idsList);
@@ -311,8 +231,8 @@ public class GroupServiceImpl implements GroupService {
 	List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
 	Set<String> profileIds = new HashSet<String>();
 	for (Ownership o : ownerships)
-	    if (o.getProfileId() != null)
-		profileIds.add(o.getProfileId());
+	    if (ComponentUtils.isProfileId(o.getComponentId()))
+		profileIds.add(o.getComponentId());
 	List<String> idsList = new ArrayList<String>(profileIds);
 	Collections.sort(idsList);
 	return idsList;
@@ -321,7 +241,6 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public List<Group> getGroupsTheItemIsAMemberOf(String itemId) {
 	Set<Ownership> ownerships = new HashSet<Ownership>();
-	ownerships.addAll(ownershipDao.findOwnershipByProfileId(itemId));
 	ownerships.addAll(ownershipDao.findOwnershipByComponentId(itemId));
 	Set<Group> groups = new HashSet<Group>();
 	for (Ownership ownership : ownerships)
@@ -337,30 +256,42 @@ public class GroupServiceImpl implements GroupService {
 	return groupList;
     }
 
+    @ManagedOperation(description = "Make a component owned by a group instead of a user")
+    @ManagedOperationParameters({
+	    @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the component"),
+	    @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to"),
+	    @ManagedOperationParameter(name = "componentId", description = "Id of component") })
     @Override
     public void transferItemOwnershipFromUserToGroup(String principal,
-	    long groupId, String itemId) {
+	    String groupName, String itemId) {
 
-	AbstractDescription item = null;
-	item = profileDescriptionDao.getByCmdId(itemId);
-	boolean isProfile = true;
-	if (item == null) {
-	    item = componentDescriptionDao.getByCmdId(itemId);
-	    isProfile = false;
-	}
+	BaseComponent item = null;
+	item = componentDao.getByCmdId(itemId);
 	if (item == null)
 	    throw new ValidationException(
 		    "No profile or component found with ID " + itemId);
+	Group group = groupDao.findGroupByName(groupName);
+	if (group == null)
+	    throw new ValidationException("No group found with name "
+		    + groupName);
+	Ownership ownership = null;
+	List<Ownership> oldOwnerships = ownershipDao
+		.findOwnershipByComponentId(itemId);
+	ownershipDao.delete(oldOwnerships);
+	ownership = new Ownership();
+	ownership.setComponentId(itemId);
+	ownership.setGroupId(group.getId());
+	addOwnership(ownership);
+    }
+
+    @Override
+    public void transferItemOwnershipFromUserToGroupId(String principal,
+	    long groupId, String componentId) {
 	Group group = groupDao.findOne(groupId);
 	if (group == null)
-	    throw new ValidationException("No group found with ID " + groupId);
-	String groupName = group.getName();
-	if (isProfile)
-	    transferProfileOwnershipFromUserToGroup(principal, groupName,
-		    item.getId());
-	else
-	    transferComponentOwnershipFromUserToGroup(principal, groupName,
-		    item.getId());
+	    throw new ValidationException("No group found with id " + groupId);
+	transferItemOwnershipFromUserToGroup(principal, group.getName(),
+		componentId);
     }
 
 }

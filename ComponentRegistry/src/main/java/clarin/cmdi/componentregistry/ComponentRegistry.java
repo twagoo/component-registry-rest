@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -71,7 +71,7 @@ public interface ComponentRegistry {
      *
      * @return -1 if profile could not be registered
      */
-    int register(AbstractDescription desc, CMDComponentSpec spec);
+    int register(BaseComponent desc, CMDComponentSpec spec);
 
     /**
      *
@@ -84,14 +84,14 @@ public interface ComponentRegistry {
      *
      * @return -1 if component could not be updated
      */
-    int update(AbstractDescription description, CMDComponentSpec spec, Principal principal, boolean forceUpdate);
+    int update(BaseComponent description, CMDComponentSpec spec, Principal principal, boolean forceUpdate);
 
     /**
      *
      * @return -1 if component could not be published. Published means move from
      * current (private) workspace to public workspace.
      */
-    int publish(AbstractDescription desc, CMDComponentSpec spec, Principal principal);
+    int publish(BaseComponent desc, CMDComponentSpec spec, Principal principal);
 
     void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException;
 

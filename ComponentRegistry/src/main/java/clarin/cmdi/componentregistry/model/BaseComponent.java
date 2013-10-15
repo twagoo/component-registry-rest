@@ -1,22 +1,39 @@
 package clarin.cmdi.componentregistry.model;
 
 import clarin.cmdi.componentregistry.DatesHelper;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
+
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 
+/**
+ * The BaseComponent (formally AbstractDescription) models profiles and components alike by containing <strong>all</strong> their persistent attributes.
+ * It is meant to serve as a base for XML generation and JPA persistence. Extending classes are not allowed to model any persistent attributes.
+ * @author george.georgovassilis@mpi.nl
+ *
+ */
 @XmlRootElement(name = "description")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({ComponentDescription.class, ProfileDescription.class})
-public abstract class AbstractDescription {
+public class BaseComponent {
 
     private String id;
     private String description;
@@ -29,9 +46,31 @@ public abstract class AbstractDescription {
     private String href;
     private String groupName;
     private int commentsCount;
+    @XmlTransient
+    private boolean shownInEditor = true;
+
+    /**
+     * Whether this profile should be shown in metadata editor (e.g. Arbil)
+     *
+     * @return the value of showInEditor
+     */
+    public boolean isShowInEditor() {
+	return shownInEditor;
+    }
+
+    /**
+     * Gets whether this profile should be shown in metadata editor (e.g. Arbil)
+     *
+     * @param showInEditor new value of showInEditor
+     */
+    public void setShowInEditor(boolean showInEditor) {
+	this.shownInEditor = showInEditor;
+    }
 
     public void setId(String id) {
-        this.id = id;
+	if (id!=null && !ComponentUtils.isComponentId(id) && !ComponentUtils.isProfileId(id))
+	    throw new IllegalArgumentException("ID doesn't follow the naming schema for components or profiles "+id);
+	this.id = id;
     }
 
     public String getId() {
@@ -152,49 +191,4 @@ public abstract class AbstractDescription {
         return userHash.equals(getUserId());
     }
 
-    public static Date getDate(String registrationDate) throws ParseException {
-        return DateUtils.parseDate(registrationDate, new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()});
-    }
-
-    public static String createPublicHref(String href) {
-        String result = href;
-        if (href != null) {
-            int index = href.indexOf("?");
-            if (index != -1) { //strip off query params the rest should be the public href.
-                result = href.substring(0, index);
-            }
-        }
-        return result;
-    }
-    /**
-     * Compares two descriptions by the their value as returned by {@link AbstractDescription#getName()
-     * }
-     */
-    public static final Comparator<? super AbstractDescription> COMPARE_ON_NAME = new Comparator<AbstractDescription>() {
-        @Override
-        public int compare(AbstractDescription o1, AbstractDescription o2) {
-            int result = 0;
-            if (o1.getName() != null && o2.getName() != null) {
-                result = o1.getName().compareToIgnoreCase(o2.getName());
-            }
-            if (o1.getId() != null && result == 0) {
-                result = o1.getId().compareTo(o2.getId());
-            }
-            return result;
-        }
-    };
-    /**
-     * Compares two descriptions by the their value as returned by {@link AbstractDescription#getRegistrationDate() ()
-     * }
-     */
-    public static final Comparator<? super AbstractDescription> COMPARE_ON_DATE = new Comparator<AbstractDescription>() {
-        /**
-         * @returns 1 if o11 is older than o2, returns -1 if o1 is younger than
-         * o2
-         */
-        @Override
-        public int compare(AbstractDescription o1, AbstractDescription o2) {
-            return (DatesHelper.compareDateStrings(o1.getRegistrationDate(), o2.getRegistrationDate()));
-        }
-    };
 }

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @param <T>
  */
-public interface ComponentRegistryDao<T> {
+public interface ComponentRegistryDao {
 
 	public final static String TABLE_COMMENTS = "comments";
 	public final static String TABLE_COMPONENT_DESCRIPTION = "component_description";

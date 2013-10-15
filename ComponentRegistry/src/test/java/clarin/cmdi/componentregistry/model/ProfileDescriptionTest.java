@@ -30,7 +30,7 @@ public class ProfileDescriptionTest {
     public void testProfileToXml() throws JAXBException, UnsupportedEncodingException {
 	ProfileDescription desc = new ProfileDescription();
 	desc.setName("Name");
-	desc.setId("myId");
+	desc.setId(ProfileDescription.PROFILE_PREFIX+"myId");
 	desc.setCreatorName("myC");
 	desc.setUserId(DigestUtils.md5Hex("user1"));
 	desc.setDescription("myD");
@@ -45,7 +45,7 @@ public class ProfileDescriptionTest {
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	expected += "<profileDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
-	expected += "    <id>myId</id>\n";
+	expected += "    <id>clarin.eu:cr1:p_myId</id>\n";
 	expected += "    <description>myD</description>\n";
 	expected += "    <name>Name</name>\n";
 	expected += "    <registrationDate>myDate</registrationDate>\n";

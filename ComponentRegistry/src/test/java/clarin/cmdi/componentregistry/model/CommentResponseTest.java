@@ -73,7 +73,7 @@ public class CommentResponseTest {
 	expected += "    <comment>\n";
 	expected += "        <comments>Name</comments>\n";
 	expected += "        <commentDate>myDate</commentDate>\n";
-	expected += "        <profileDescriptionId>myD</profileDescriptionId>\n";
+	expected += "        <componentId>myD</componentId>\n";
 	expected += "        <id>myId</id>\n";
 	expected += "        <userName>J. Unit</userName>\n";
 	expected += "        <canDelete>false</canDelete>\n";
@@ -91,7 +91,7 @@ public class CommentResponseTest {
 	com.setComment("Name");
 	com.setId("myId");
 	com.setUserId("myU");
-	com.setProfileDescriptionId("myD");
+	com.setComponentId("myD");
 	com.setCommentDate("myDate");
 	com.setUserName("J. Unit");
 	return com;

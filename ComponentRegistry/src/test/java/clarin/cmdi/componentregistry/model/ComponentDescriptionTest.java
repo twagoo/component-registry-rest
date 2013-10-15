@@ -27,7 +27,7 @@ public class ComponentDescriptionTest {
     public void testComponentToXml() throws JAXBException, UnsupportedEncodingException {
         ComponentDescription desc = new ComponentDescription();
         desc.setName("Name");
-        desc.setId("myId");
+        desc.setId(ComponentDescription.COMPONENT_PREFIX+"myId");
         desc.setCreatorName("myC");
         desc.setUserId("user1");
         desc.setDescription("myD");
@@ -41,7 +41,7 @@ public class ComponentDescriptionTest {
         String expected = "";
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<componentDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
-        expected += "    <id>myId</id>\n";
+        expected += "    <id>clarin.eu:cr1:c_myId</id>\n";
         expected += "    <description>myD</description>\n";
         expected += "    <name>Name</name>\n";
         expected += "    <registrationDate>myDate</registrationDate>\n";

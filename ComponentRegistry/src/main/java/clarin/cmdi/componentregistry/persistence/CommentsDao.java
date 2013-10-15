@@ -11,7 +11,7 @@ import clarin.cmdi.componentregistry.model.Comment;
  * @author george.georgovassilis@mpi.nl
  *
  */
-public interface CommentsDao extends ComponentRegistryDao<Comment>{
+public interface CommentsDao extends ComponentRegistryDao{
 
 	/**
 	 * Get the list of all the comments available in the database The

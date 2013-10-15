@@ -4,7 +4,9 @@
  */
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
+import clarin.cmdi.componentregistry.model.BaseComponent;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,7 +23,7 @@ public class DatesHelper {
      */
     public static Date parseWorks(String dateString) {
         try {
-            return AbstractDescription.getDate(dateString);
+            return ComponentUtils.getDate(dateString);
         } catch (ParseException pe) {
             return null;
         }

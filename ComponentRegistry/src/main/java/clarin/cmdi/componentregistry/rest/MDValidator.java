@@ -7,7 +7,7 @@ import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.schema.cmd.Validator.Message;
 import clarin.cmdi.schema.cmd.ValidatorException;
@@ -44,7 +44,7 @@ public class MDValidator implements Validator {
     private CMDComponentSpec spec = null;
     private byte[] originalSpecBytes;
     private final InputStream input;
-    private final AbstractDescription description;
+    private final BaseComponent description;
     private final ComponentRegistry registry;
     private final ComponentRegistry userRegistry;
     private final ComponentRegistry publicRegistry;
@@ -59,7 +59,7 @@ public class MDValidator implements Validator {
      * @param userRegistry can be null, We get user registry as well so we can give nice error messages if needed. Can be the same as
      * @param registry
      */
-    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry, MDMarshaller marshaller) {
+    public MDValidator(InputStream input, BaseComponent description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry, MDMarshaller marshaller) {
 	this.input = input;
 	this.description = description;
 	this.registry = registry;

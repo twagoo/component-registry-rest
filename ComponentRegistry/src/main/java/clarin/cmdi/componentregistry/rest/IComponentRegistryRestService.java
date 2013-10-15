@@ -16,7 +16,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
@@ -60,13 +60,13 @@ public interface IComponentRegistryRestService {
 	Response getRegisteredComponentRawType(String componentId, String rawType);
 
 	ComponentRegistry findRegistry(String id,
-			RegistryClosure<? extends AbstractDescription> clos)
+			RegistryClosure<? extends BaseComponent> clos)
 			throws ComponentRegistryException;
 
 	Response getRegisteredProfile(String profileId, boolean userspace)
 			throws ComponentRegistryException;
 
-	List<AbstractDescription> getComponentUsage(String componentId,
+	List<BaseComponent> getComponentUsage(String componentId,
 			boolean userspace) throws ComponentRegistryException;
 
 	List<Comment> getCommentsFromProfile(String profileId, boolean userspace)

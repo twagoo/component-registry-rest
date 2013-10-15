@@ -16,11 +16,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,31 +30,30 @@ import java.util.Collection;
 import org.apache.commons.collections.ListUtils;
 
 /**
- * Base DAO which can be extended to serve {@link ComponentDescription}s and {@link ProfileDescription}s
+ * Base DAO which can be extended to serve {@link ComponentDescription}s and
+ * {@link ProfileDescription}s
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author George.Georgovassilis@mpi.nl
  */
-public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
-	extends ComponentRegistryDaoImpl<T> implements AbstractDescriptionDao<T> {
+
+@Repository
+public class AbstractDescriptionDaoImpl extends ComponentRegistryDaoImpl
+	implements ComponentDao {
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(AbstractDescriptionDaoImpl.class);
 
-    protected abstract String getTableName();
+    protected String getTableName() {
+	return "persistentcomponents";
+    };
 
-    protected abstract String getCMDIdColumn();
+    protected String getCMDIdColumn() {
+	return "component_id";
+    }
 
-    protected abstract String getCommentsForeignKeyColumn();
-    
-    protected abstract boolean isProfile();
-
-    /**
-     * Class object required to instantiate new description domain objects
-     */
-    private final Class<T> _class;
-
-    protected AbstractDescriptionDaoImpl(Class<T> _class) {
-	this._class = _class;
+    protected String getCommentsForeignKeyColumn() {
+	return "component_id";
     }
 
     /**
@@ -139,9 +140,8 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return Id of newly inserted description
      */
     @Override
-    public Number insertDescription(AbstractDescription description,
-	    String content, boolean isPublic, Number userId)
-	    throws DataAccessException {
+    public Number insertDescription(BaseComponent description, String content,
+	    boolean isPublic, Number userId) throws DataAccessException {
 
 	SimpleJdbcInsert insert = new SimpleJdbcInsert(getJdbcTemplate())
 		.withTableName(TABLE_XML_CONTENT).usingGeneratedKeyColumns(
@@ -159,10 +159,10 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
 	return id;
     }
 
-    private Timestamp extractTimestamp(AbstractDescription description) {
+    private Timestamp extractTimestamp(BaseComponent description) {
 	if (description.getRegistrationDate() != null) {
 	    try {
-		Date date = AbstractDescription.getDate(description
+		Date date = ComponentUtils.getDate(description
 			.getRegistrationDate());
 		return new Timestamp(date.getTime());
 	    } catch (ParseException ex) {
@@ -191,7 +191,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      *            New content for description (leave null to not change)
      */
     @Override
-    public void updateDescription(Number id, AbstractDescription description,
+    public void updateDescription(Number id, BaseComponent description,
 	    String content) {
 	if (description != null) {
 	    // Update description
@@ -227,7 +227,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return The description, if it exists; null otherwise
      */
     @Override
-    public T getById(Number id) throws DataAccessException {
+    public BaseComponent getById(Number id) throws DataAccessException {
 	return getFirstOrNull(
 		getSelectStatement("WHERE is_deleted = false AND id = ?"), id);
     }
@@ -240,7 +240,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return The description, if it exists; null otherwise
      */
     @Override
-    public T getByCmdId(String id) throws DataAccessException {
+    public BaseComponent getByCmdId(String id) throws DataAccessException {
 	return getFirstOrNull(
 		getSelectStatement("WHERE is_deleted = false AND "
 			+ getCMDIdColumn() + " = ?"), id);
@@ -256,7 +256,8 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return The description, if it exists; null otherwise
      */
     @Override
-    public T getByCmdId(String id, Number userId) throws DataAccessException {
+    public BaseComponent getByCmdId(String id, Number userId)
+	    throws DataAccessException {
 	StringBuilder query = new StringBuilder("WHERE is_deleted = false AND ")
 		.append(getCMDIdColumn()).append(" = ?");
 	if (userId == null) {
@@ -290,7 +291,8 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return All descriptions in the public space
      */
     @Override
-    public List<T> getPublicDescriptions() throws DataAccessException {
+    public List<BaseComponent> getPublicDescriptions()
+	    throws DataAccessException {
 	return getList(getSelectStatement(
 		" WHERE is_deleted = false AND is_public = true ").append(
 		getOrderByClause()));
@@ -302,7 +304,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @param userId
      */
     @Override
-    public List<T> getDeletedDescriptions(Number userId) {
+    public List<BaseComponent> getDeletedDescriptions(Number userId) {
 	if (userId != null) {
 	    String select = getSelectStatement()
 		    .append(" WHERE is_deleted = true AND is_public = false AND user_id = ?")
@@ -321,19 +323,16 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return All the user's descriptions not in the public space
      */
     @Override
-    public List<T> getUserspaceDescriptions(Number userId)
+    public List<BaseComponent> getUserspaceDescriptions(Number userId)
 	    throws DataAccessException {
-	String itemTable = isProfile()?"profile_description":"component_description";
-	String ownershipId = isProfile()?"profileid":"componentid";
-	String itemId = isProfile()?"profile_id":"component_id";
 	String select = getSelectStatement()
-		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND not exists (select 1 from ownership where ownership."+ownershipId+" = "+itemTable+"."+itemId+")")
+		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND not exists (select 1 from ownership where ownership.componentid = persistentcomponents.component_id)")
 		.append(getOrderByClause()).toString();
 	return getList(select, userId);
     }
 
     @Override
-    public void setDeleted(AbstractDescription desc, boolean isDeleted)
+    public void setDeleted(BaseComponent desc, boolean isDeleted)
 	    throws DataAccessException {
 	Number dbId = getDbId(desc.getId());
 	StringBuilder update = new StringBuilder("UPDATE ")
@@ -341,6 +340,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
 	update.append(" SET is_deleted = ").append(Boolean.toString(isDeleted))
 		.append(" WHERE " + COLUMN_ID + " = ?");
 	getJdbcTemplate().update(update.toString(), dbId);
+	
     }
 
     @Override
@@ -348,7 +348,10 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
 	StringBuilder update = new StringBuilder("UPDATE ")
 		.append(getTableName());
 	update.append(" SET is_public = ? WHERE " + COLUMN_ID + " = ?");
-	getJdbcTemplate().update(update.toString(), published, id);
+	int count = getJdbcTemplate().update(update.toString(), published, id);
+	if (count < 1)
+	    throw new IllegalArgumentException(
+		    "Did not find a profile or component with db ID " + id);
     }
 
     /**
@@ -377,7 +380,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @return the rowMapper
      */
     @Override
-    protected ParameterizedRowMapper<T> getRowMapper() {
+    protected ParameterizedRowMapper<BaseComponent> getRowMapper() {
 	return rowMapper;
     }
 
@@ -391,7 +394,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @param isPublic
      */
     protected void putInsertParameters(Map<String, Object> params,
-	    AbstractDescription description, Number contentId, Number userId,
+	    BaseComponent description, Number contentId, Number userId,
 	    boolean isPublic) {
 	params.put("content_id", contentId);
 	params.put("user_id", userId);
@@ -405,6 +408,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
 	params.put("domain_name", description.getDomainName());
 	params.put("href", description.getHref());
 	params.put("registration_date", extractTimestamp(description));
+	params.put("show_in_editor", true);
     }
 
     /**
@@ -417,15 +421,13 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
      * @throws SQLException
      */
     protected void setDescriptionValuesFromResultSet(ResultSet rs,
-	    AbstractDescription newDescription) throws SQLException {
+	    BaseComponent newDescription) throws SQLException {
 	Timestamp registrationDate = rs.getTimestamp("registration_date");
 	newDescription.setName(rs.getString("name"));
 	newDescription.setDescription(rs.getString("description"));
 	newDescription.setId(rs.getString(getCMDIdColumn()));
-	newDescription
-		.setRegistrationDate(registrationDate == null ? null
-			: AbstractDescription.createNewDate(registrationDate
-				.getTime()));
+	newDescription.setRegistrationDate(registrationDate == null ? null
+		: BaseComponent.createNewDate(registrationDate.getTime()));
 	newDescription.setCreatorName(rs.getString("creator_name"));
 	newDescription.setDomainName(rs.getString("domain_name"));
 	newDescription.setGroupName(rs.getString("group_name"));
@@ -443,7 +445,7 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
 		.append(" SET name = ?, description = ?, registration_date=?, creator_name=?, domain_name=?, group_name=?, href=?");
     }
 
-    protected List getUpdateParameterValues(AbstractDescription description) {
+    protected List getUpdateParameterValues(BaseComponent description) {
 	List updateParams = Arrays.asList(description.getName(),
 		description.getDescription(), extractTimestamp(description),
 		description.getCreatorName(), description.getDomainName(),
@@ -494,22 +496,34 @@ public abstract class AbstractDescriptionDaoImpl<T extends AbstractDescription>
 		+ getCMDIdColumn() + " asc ";
     }
 
-    private final ParameterizedRowMapper<T> rowMapper = new ParameterizedRowMapper<T>() {
+    private final ParameterizedRowMapper<BaseComponent> rowMapper = new ParameterizedRowMapper<BaseComponent>() {
 
 	@Override
-	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
-	    try {
-		AbstractDescription newDescription = (AbstractDescription) _class
-			.newInstance();
-		setDescriptionValuesFromResultSet(rs, newDescription);
-		return (T) newDescription;
-	    } catch (InstantiationException ex) {
-		LOG.error("Error in row mapping", ex);
-	    } catch (IllegalAccessException ex) {
-		LOG.error("Error in row mapping", ex);
-	    }
-	    return null;
+	public BaseComponent mapRow(ResultSet rs, int rowNumber)
+		throws SQLException {
+	    BaseComponent newDescription = new BaseComponent();
+	    setDescriptionValuesFromResultSet(rs, newDescription);
+	    return (BaseComponent) newDescription;
 	}
     };
+
+    @Override
+    public List<BaseComponent> getPublicComponentDescriptions() {
+	String sql = getSelectStatement(
+		"WHERE is_public = true and is_deleted = false and component_id like '"
+			+ ComponentDescription.COMPONENT_PREFIX + "%'")
+		.toString() + getOrderByClause();
+	List<BaseComponent> list = getJdbcTemplate().query(sql, rowMapper);
+	return list;
+    }
+
+    @Override
+    public List<BaseComponent> getPublicProfileDescriptions() {
+	String sql = getSelectStatement(
+		"WHERE is_public = true and is_deleted = false and component_id like '"
+			+ ProfileDescription.PROFILE_PREFIX + "%'").toString() + getOrderByClause();
+	List<BaseComponent> list = getJdbcTemplate().query(sql, rowMapper);
+	return list;
+    }
 
 }

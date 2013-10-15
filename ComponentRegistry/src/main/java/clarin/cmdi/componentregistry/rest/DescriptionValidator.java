@@ -5,14 +5,14 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 
 public class DescriptionValidator implements Validator {
 
-    private final AbstractDescription desc;
+    private final BaseComponent desc;
     private List<String> errorMessages = new ArrayList<String>();
 
-    public DescriptionValidator(AbstractDescription desc) {
+    public DescriptionValidator(BaseComponent desc) {
         this.desc = desc;
     }
     

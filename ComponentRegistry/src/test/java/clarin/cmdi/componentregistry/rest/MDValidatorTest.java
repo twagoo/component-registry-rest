@@ -140,10 +140,10 @@ public class MDValidatorTest extends BaseUnitTest {
 	profileContent += "    <Header />";
 	profileContent += "    <CMD_Component name=\"Test\">";
 	profileContent += "	<CMD_Component ComponentId=\""
-		+ ComponentRegistry.REGISTRY_ID + id1 + "\"/>"; // id not
+		+ ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>"; // id not
 								// registered
 	profileContent += "	<CMD_Component ComponentId=\""
-		+ ComponentRegistry.REGISTRY_ID + id2 + "\"/>"; // id not
+		+ ComponentDescription.COMPONENT_PREFIX + id2 + "\"/>"; // id not
 								// registered
 	profileContent += "    </CMD_Component>";
 	profileContent += "</CMD_ComponentSpec>";
@@ -201,10 +201,10 @@ public class MDValidatorTest extends BaseUnitTest {
 	profileContent += "    <Header />";
 	profileContent += "    <CMD_Component name=\"Test\">";
 	profileContent += "	<CMD_Component ComponentId=\""
-		+ ComponentRegistry.REGISTRY_ID + id1 + "\"/>"; // id not
+		+ ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>"; // id not
 								// registered
 	profileContent += "	<CMD_Component ComponentId=\""
-		+ ComponentRegistry.REGISTRY_ID + id2 + "\"/>"; // id not
+		+ ComponentDescription.COMPONENT_PREFIX + id2 + "\"/>"; // id not
 								// registered
 	profileContent += "    </CMD_Component>";
 	profileContent += "</CMD_ComponentSpec>";
@@ -251,7 +251,7 @@ public class MDValidatorTest extends BaseUnitTest {
 	content += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
 	content += "        <CMD_Element name=\"Name\" ValueScheme=\"string\" />\n";
 	content += "      <CMD_Component ComponentId=\""
-		+ ComponentRegistry.REGISTRY_ID + id1 + "\"/>\n"; // id not
+		+ ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>\n"; // id not
 								  // registered
 	content += "    </CMD_Component>\n";
 	content += "</CMD_ComponentSpec>\n";

@@ -31,13 +31,10 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.impl.ComponentDescriptionDaoImpl;
-import clarin.cmdi.componentregistry.persistence.impl.ProfileDescriptionDaoImpl;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -50,17 +47,14 @@ public class AdminHomePage extends SecureAdminWebPage {
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     @SpringBean
-    private ProfileDescriptionDao profileDescriptionDao;
-    @SpringBean
-    private ComponentDescriptionDao componentDescriptionDao;
+    private ComponentDao componentDao;
     @SpringBean
     private MDMarshaller marshaller;
 
     public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException {
 	super(parameters);
 	adminRegistry.setComponentRegistryFactory(componentRegistryFactory);
-	adminRegistry.setProfileDescriptionDao(profileDescriptionDao);
-	adminRegistry.setComponentDescriptionDao(componentDescriptionDao);
+	adminRegistry.setComponentDao(componentDao);
 	adminRegistry.setMarshaller(marshaller);
 	info = new CMDItemInfo(marshaller);
 	addLinks();
@@ -229,14 +223,9 @@ public class AdminHomePage extends SecureAdminWebPage {
 		}
 		DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
 		info.setDataNode(dn);
-		AbstractDescription desc = dn.getDescription();
+		BaseComponent desc = dn.getDescription();
 		if (desc != null) {
-		    String content;
-		    if (desc.isProfile()) {
-			content = profileDescriptionDao.getContent(dn.isDeleted(), desc.getId());
-		    } else {
-			content = componentDescriptionDao.getContent(dn.isDeleted(), desc.getId());
-		    }
+		    String content = componentDao.getContent(dn.isDeleted(), desc.getId());
 		    info.setContent(content);
 		}
 		if (target != null) {
@@ -300,8 +289,8 @@ public class AdminHomePage extends SecureAdminWebPage {
 	add(deletedProfNode, deletedProfileDescriptions, true, registry.getStatus());
     }
 
-    private void add(DefaultMutableTreeNode parent, List<? extends AbstractDescription> descs, boolean isDeleted, ComponentStatus status) {
-	for (AbstractDescription desc : descs) {
+    private void add(DefaultMutableTreeNode parent, List<? extends BaseComponent> descs, boolean isDeleted, ComponentStatus status) {
+	for (BaseComponent desc : descs) {
 	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, status));
 	    parent.add(child);
 	}

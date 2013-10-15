@@ -28,12 +28,6 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Autowired
     private CommentsDao commentsDao;
 
-    @Before
-    public void init() {
-	ComponentRegistryTestDatabase.resetDatabase(jdbcTemplate);
-	ComponentRegistryTestDatabase.createTableComments(jdbcTemplate);
-    }
-
     @Test
     public void testInjection() {
 	assertNotNull(jdbcTemplate);
@@ -43,7 +37,7 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Test
     public void testInsertProfileComment() {
 	Comment comment = createTestComment();
-	comment.setProfileDescriptionId(TEST_COMMENT_PROFILE_ID);
+	comment.setComponentId(TEST_COMMENT_PROFILE_ID);
 
 	assertEquals(0, commentsDao.getAllComments().size());
 	Number newId = commentsDao.insertComment(comment, TEST_COMMENT_USER_ID);
@@ -54,7 +48,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	assertEquals(1, comments.size());
 
 	assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
-	assertEquals(TEST_COMMENT_PROFILE_ID, comments.get(0).getProfileDescriptionId());
+	assertEquals(TEST_COMMENT_PROFILE_ID, comments.get(0).getComponentId());
 	assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
 	assertEquals(TEST_COMMENT_USER_NAME, comments.get(0).getUserName());
 	assertEquals(Integer.toString(TEST_COMMENT_USER_ID), comments.get(0).getUserId());
@@ -63,7 +57,7 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Test
     public void testInsertComponentComment() {
 	Comment comment = createTestComment();
-	comment.setComponentDescriptionId(TEST_COMMENT_COMPONENT_ID);
+	comment.setComponentId(TEST_COMMENT_COMPONENT_ID);
 
 	assertEquals(0, commentsDao.getAllComments().size());
 	Number newId = commentsDao.insertComment(comment, TEST_COMMENT_USER_ID);
@@ -74,7 +68,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	assertEquals(1, comments.size());
 
 	assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
-	assertEquals(TEST_COMMENT_COMPONENT_ID, comments.get(0).getComponentDescriptionId());
+	assertEquals(TEST_COMMENT_COMPONENT_ID, comments.get(0).getComponentId());
 	assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
 	assertEquals(TEST_COMMENT_USER_NAME, comments.get(0).getUserName());
 	assertEquals(Integer.toString(TEST_COMMENT_USER_ID), comments.get(0).getUserId());
@@ -83,10 +77,10 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Test
     public void testGetById() {
 	Comment comment1 = createTestComment();
-	comment1.setProfileDescriptionId(TEST_COMMENT_PROFILE_ID);
+	comment1.setComponentId(TEST_COMMENT_PROFILE_ID);
 	Number commentId = commentsDao.insertComment(comment1, TEST_COMMENT_USER_ID);
 	Comment commentById = commentsDao.getById(commentId);
-	assertEquals(TEST_COMMENT_PROFILE_ID, commentById.getProfileDescriptionId());
+	assertEquals(TEST_COMMENT_PROFILE_ID, commentById.getComponentId());
 	assertEquals(TEST_COMMENT_NAME, commentById.getComment());
     }
 
@@ -97,14 +91,14 @@ public class CommentsDaoTest extends BaseUnitTest{
 
 	int size = descriptions.size();
 	Comment comment1 = createTestComment();
-	comment1.setProfileDescriptionId(TEST_COMMENT_PROFILE_ID);
+	comment1.setComponentId(TEST_COMMENT_PROFILE_ID);
 	commentsDao.insertComment(comment1, TEST_COMMENT_USER_ID);
 
 	descriptions = commentsDao.getCommentsFromProfile(TEST_COMMENT_PROFILE_ID);
 	assertEquals(size + 1, descriptions.size());
 
 	Comment comment2 = createTestComment();
-	comment2.setProfileDescriptionId(TEST_COMMENT_PROFILE_ID);
+	comment2.setComponentId(TEST_COMMENT_PROFILE_ID);
 	commentsDao.insertComment(comment2, TEST_COMMENT_USER_ID);
 
 	descriptions = commentsDao.getCommentsFromProfile(TEST_COMMENT_PROFILE_ID);
@@ -118,14 +112,14 @@ public class CommentsDaoTest extends BaseUnitTest{
 
 	int size = descriptions.size();
 	Comment comment1 = createTestComment();
-	comment1.setComponentDescriptionId(TEST_COMMENT_COMPONENT_ID);
+	comment1.setComponentId(TEST_COMMENT_COMPONENT_ID);
 	commentsDao.insertComment(comment1, TEST_COMMENT_USER_ID);
 
 	descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_COMPONENT_ID);
 	assertEquals(size + 1, descriptions.size());
 
 	Comment comment2 = createTestComment();
-	comment2.setComponentDescriptionId(TEST_COMMENT_COMPONENT_ID);
+	comment2.setComponentId(TEST_COMMENT_COMPONENT_ID);
 	commentsDao.insertComment(comment2, TEST_COMMENT_USER_ID);
 
 	descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_COMPONENT_ID);

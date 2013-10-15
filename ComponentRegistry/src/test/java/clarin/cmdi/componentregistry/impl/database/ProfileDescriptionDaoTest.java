@@ -1,13 +1,10 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase.*;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.persistence.AbstractDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
-import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -18,24 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ProfileDescriptionDaoTest extends AbstractDescriptionDaoTest {
 
     @Autowired
-    ProfileDescriptionDao profileDescriptionDao;
-
-//    @Before
-//    public void init() {
-//	resetDatabase(jdbcTemplate);
-//	createTableProfileDescription(jdbcTemplate);
-//	createTableXmlContent(jdbcTemplate);
-//	createTableRegistryUser(jdbcTemplate);
-//	createTableComments(jdbcTemplate);
-//    }
+    ComponentDao profileDescriptionDao;
 
     @Override
-    protected AbstractDescriptionDao getDao() {
+    protected ComponentDao getDao() {
 	return profileDescriptionDao;
     }
 
     @Override
-    protected AbstractDescription createNewDescription() {
+    protected BaseComponent createNewDescription() {
 	return ProfileDescription.createNewDescription();
     }
 

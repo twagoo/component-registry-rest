@@ -12,30 +12,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 /**
  * Serves comments for profiles and components
+ * 
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
  * @author George.Georgovassilis@mpi.nl
  */
 @Repository
-public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implements
-	CommentsDao {
+public class CommentsDaoImpl extends JdbcDaoSupport implements CommentsDao {
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(CommentsDaoImpl.class);
-    private final static String SELECT_BASE = "SELECT "
-	    + COLUMN_ID
+
+    private final static String SELECT_BASE = "SELECT id, component_id"
 	    + ", comments, comment_date, user_id, "
-	    + "component_description_id, profile_description_id, user_name FROM "
-	    + TABLE_COMMENTS;
+	    + "component_id, user_name FROM comments";
 
     protected String getTableName() {
 	return TABLE_COMMENTS;
@@ -49,11 +53,14 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      * Get the list of all the comments available in the database The
      * distinction between profile or component is not treated in this method
      * 
+     * used only in tests
+     * 
      * @return list of Comments
      */
     @Override
     public List<Comment> getAllComments() throws DataAccessException {
-	return getList(SELECT_BASE);
+	return getJdbcTemplate().query("select * from comments order by id",
+		rowMapper);
     }
 
     /**
@@ -66,7 +73,9 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      */
     @Override
     public Comment getById(Number id) throws DataAccessException {
-	return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", id);
+	return getJdbcTemplate().queryForObject(
+		SELECT_BASE + " WHERE " + COLUMN_ID + " = ?",
+		new Object[] { id }, rowMapper);
     }
 
     /**
@@ -79,10 +88,10 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
     @Override
     public List<Comment> getCommentsFromProfile(String profileId)
 	    throws DataAccessException {
-	return getList(
-		(SELECT_BASE + " WHERE profile_description_id = ?")
-			.concat(getOrderByDate()),
-		profileId);
+	return getJdbcTemplate().query(
+		SELECT_BASE + " WHERE component_id = ?"
+			+ getOrderByDate(), new Object[] { profileId },
+		rowMapper);
     }
 
     /**
@@ -95,8 +104,9 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      */
     public Comment getSpecifiedCommentFromProfile(String commentId)
 	    throws DataAccessException {
-	return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?",
-		Integer.parseInt(commentId));
+	return getJdbcTemplate().queryForObject(
+		SELECT_BASE + " WHERE " + COLUMN_ID + " = ?",
+		new Object[] { commentId }, rowMapper);
     }
 
     /**
@@ -109,10 +119,11 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      */
     public List<Comment> getCommentsFromComponent(String componentId)
 	    throws DataAccessException {
-	return getList(
-		(SELECT_BASE + " WHERE component_description_id = ?")
-			.concat(getOrderByDate()),
-		componentId);
+	return getJdbcTemplate()
+		.query(
+			(SELECT_BASE + " WHERE component_id = ?")
+				.concat(getOrderByDate()),
+			new Object[] { componentId }, rowMapper);
     }
 
     /**
@@ -125,8 +136,8 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      */
     public Comment getSpecifiedCommentFromComponent(String commentId)
 	    throws DataAccessException {
-	return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " =  ?",
-		Integer.parseInt(commentId));
+	return getJdbcTemplate().queryForObject(SELECT_BASE + " WHERE " + COLUMN_ID + " =  ?",
+		new Object[] {commentId}, rowMapper);
     }
 
     /**
@@ -186,16 +197,10 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
 	    Comment comment, Number userId) throws DataAccessException {
 	params.put("comments", comment.getComment());
 	params.put("comment_date", extractTimestamp(comment));
-	params.put("component_description_id",
-		comment.getComponentDescriptionId());
-	params.put("profile_description_id", comment.getProfileDescriptionId());
+	params.put("component_id",
+		comment.getComponentId());
 	params.put("user_id", userId);
 	params.put("user_name", comment.getUserName());
-    }
-
-    @Override
-    protected ParameterizedRowMapper<Comment> getRowMapper() {
-	return rowMapper;
     }
 
     private final ParameterizedRowMapper<Comment> rowMapper = new ParameterizedRowMapper<Comment>() {
@@ -206,10 +211,8 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
 	    Timestamp commentDate = rs.getTimestamp("comment_date");
 	    comment.setId(rs.getString(COLUMN_ID));
 	    comment.setComment(rs.getString("comments"));
-	    comment.setComponentDescriptionId(rs
-		    .getString("component_description_id"));
-	    comment.setProfileDescriptionId(rs
-		    .getString("profile_description_id"));
+	    comment.setComponentId(rs
+		    .getString("component_id"));
 	    comment.setUserId(rs.getString("user_id"));
 	    comment.setUserName(rs.getString("user_name"));
 	    comment.setCommentDate(commentDate == null ? null : Comment
@@ -260,7 +263,11 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      * @throws DataAccessException
      */
     public Comment getByComment(String aComment) throws DataAccessException {
-	return getFirstOrNull(SELECT_BASE + " WHERE comments = ?", aComment);
+	
+	List<Comment> list = getJdbcTemplate().query(SELECT_BASE + " WHERE comments = ?", new Object[] {aComment}, rowMapper);
+	if (list.isEmpty())
+	    return null;
+	return list.get(0);
     }
 
     /**
@@ -269,6 +276,12 @@ public class CommentsDaoImpl extends ComponentRegistryDaoImpl<Comment> implement
      * @return
      */
     private String getOrderByDate() {
-	return " order by comment_date asc, " + COLUMN_ID + " asc";
+	return " order by comment_date asc, id asc";
+    }
+
+    @Override
+    @Resource(name="dataSource")
+    public void setDatasourceProperty(DataSource ds) {
+	super.setDataSource(ds);
     }
 }

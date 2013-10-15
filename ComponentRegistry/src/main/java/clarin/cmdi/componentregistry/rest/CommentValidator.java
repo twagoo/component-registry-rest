@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.Comment;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,14 +23,14 @@ class CommentValidator implements Validator {
     private List<String> errorMessages = new ArrayList<String>();
     private Comment com = null;
     private final InputStream input;
-    private final AbstractDescription description;
+    private final BaseComponent description;
     private final MDMarshaller marshaller;
 
     /*
      * @param input In order to validate the input is consumed. So use @see getCommentSpec to get the parsed CommentSpec.
      * @param description use to validate the comment with the appropriate description (profile or a component)
      */
-    public CommentValidator(InputStream input, AbstractDescription description, MDMarshaller marshaller) {
+    public CommentValidator(InputStream input, BaseComponent description, MDMarshaller marshaller) {
 	this.input = input;
 	this.description = description;
 	this.marshaller = marshaller;
@@ -63,11 +63,11 @@ class CommentValidator implements Validator {
 	    errorMessages.add(COMMENT_SPECIFICATION_ERROR + "comment has to be filled in");
 	}
 	if (description.isProfile()) {
-	    if (comment.getProfileDescriptionId() == null || comment.getProfileDescriptionId().isEmpty()) {
+	    if (comment.getComponentId() == null || comment.getComponentId().isEmpty()) {
 		errorMessages.add(COMMENT_SPECIFICATION_ERROR + "profileId could not be found");
 	    }
 	} else {
-	    if (comment.getComponentDescriptionId() == null || comment.getComponentDescriptionId().isEmpty()) {
+	    if (comment.getComponentId() == null || comment.getComponentId().isEmpty()) {
 		errorMessages.add(COMMENT_SPECIFICATION_ERROR + "componentId could not be found");
 	    }
 	}

@@ -12,8 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
 /**
  * Test transactionality on comments
@@ -26,7 +27,7 @@ public class TestTransactionRollbacks extends BaseUnitTest {
     @Autowired
     JdbcTemplate jdbcTemplate;
     @Autowired
-    ComponentDescriptionDao componentDescriptionDao;
+    ComponentDao componentDescriptionDao;
 
     @Test
     public void test01() {
@@ -35,10 +36,10 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Test(expected = DataAccessException.class)
     public void test02() {
-	ComponentDescription cd1 = componentDescriptionDao.getByCmdId("c1");
+	BaseComponent cd1 = componentDescriptionDao.getByCmdId("c1");
 	assertNull(cd1);
 
-	ComponentDescription cd = new ComponentDescription();
+	BaseComponent cd = new BaseComponent();
 	cd.setCreatorName("user 123");
 	cd.setDescription("description");
 	cd.setDomainName("domain name");
@@ -48,10 +49,10 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 	cd.setRegistrationDate(DateFormatUtils.format(new Date(),
 		DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()));
 	cd.setUserId("123");
-	cd.setId("c1");
+	cd.setId(ComponentDescription.COMPONENT_PREFIX+"c1");
 	componentDescriptionDao.insertDescription(cd, "Content 1", false, 123);
 
-	cd1 = componentDescriptionDao.getByCmdId("c1");
+	cd1 = componentDescriptionDao.getByCmdId(ComponentDescription.COMPONENT_PREFIX+"c1");
 	assertNotNull(cd1);
 	componentDescriptionDao.insertDescription(cd, "Content 1", false, 123);
 	fail("Expected second insert to fail");
@@ -59,7 +60,7 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Test
     public void test03() {
-	ComponentDescription cd1 = componentDescriptionDao.getByCmdId("c1");
+	BaseComponent cd1 = componentDescriptionDao.getByCmdId("c1");
 	assertNull(cd1);
     }
 

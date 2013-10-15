@@ -22,11 +22,7 @@ public class RssCreatorCommentsTest {
         comm.setCanDelete(canDelete);
         comm.setComment(comtext);
         comm.setCommentDate(date);
-        if (isFromProfile) {
-            comm.setProfileDescriptionId(descrId);
-        } else {
-            comm.setComponentDescriptionId(descrId);
-        }
+        comm.setComponentId(descrId);
         comm.setId(commentId);
         comm.setUserName(userName);
 

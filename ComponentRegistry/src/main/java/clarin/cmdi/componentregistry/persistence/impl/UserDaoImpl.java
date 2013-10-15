@@ -9,9 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.DaoSupport;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -20,88 +27,109 @@ import org.springframework.stereotype.Repository;
  * @author George.Georgovassilis@mpi.nl
  */
 @Repository
-public class UserDaoImpl extends ComponentRegistryDaoImpl<RegistryUser> implements UserDao{
+public class UserDaoImpl extends JdbcDaoSupport implements UserDao {
 
-	private final static String SELECT_BASE = "SELECT " + COLUMN_ID
-			+ ", name, principal_name FROM " + TABLE_REGISTRY_USER;
+    private final static String SELECT_BASE = "SELECT id, name, principal_name FROM registry_user";
 
-	public List<RegistryUser> getAllUsers() throws DataAccessException {
-		return getList(SELECT_BASE);
-	}
-
-	/**
-	 * 
-	 * @param principalName
-	 *            User's principal name
-	 * @return User, if it exists
-	 * @throws DataAccessException
-	 */
-	public RegistryUser getByPrincipalName(String principalName)
-			throws DataAccessException {
-		return getFirstOrNull(SELECT_BASE + " WHERE principal_name = ?",
-				principalName);
-	}
-
-	/**
-	 * 
-	 * @param id
-	 *            Database record id (key)
-	 * @return User, if it exists
-	 * @throws DataAccessException
-	 */
-	public RegistryUser getById(Number id) throws DataAccessException {
-		return getFirstOrNull(SELECT_BASE + " WHERE " + COLUMN_ID + " = ?", id);
-	}
-
-	/**
-	 * 
-	 * @param user
-	 * @return Record id of the inserted user
-	 * @throws DataAccessException
-	 */
-	public Number insertUser(RegistryUser user) throws DataAccessException {
-		SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource())
-				.withTableName(TABLE_REGISTRY_USER).usingGeneratedKeyColumns(
-						COLUMN_ID);
-
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("name", user.getName());
-		params.put("principal_name", user.getPrincipalName());
-		return insert.executeAndReturnKey(params);
-	}
-
-	/**
-	 * Updates some data stored about the user. At this point only the display
-	 * name will be updated. ID is taken from 'id' parameter, not user object.
-	 * 
-	 * @param id
-	 *            ID of user to update
-	 * @param user
-	 *            object containing new info
-	 */
-	public void updateUser(Number id, RegistryUser user)
-			throws DataAccessException {
-		String updateString = String.format(
-				"UPDATE %1$s SET name = ? WHERE %2$s = ?", TABLE_REGISTRY_USER,
-				COLUMN_ID);
-		getJdbcTemplate().update(updateString, user.getName(), id);
-	}
+    private RowMapper<RegistryUser> userRowMapper = new RowMapper<RegistryUser>() {
 
 	@Override
-	protected ParameterizedRowMapper<RegistryUser> getRowMapper() {
-		return rowMapper;
+	public RegistryUser mapRow(ResultSet rs, int rowNum)
+		throws SQLException {
+	    RegistryUser user = new RegistryUser();
+	    user.setId(rs.getLong("id"));
+	    user.setName(rs.getString("name"));
+	    user.setPrincipalName(rs.getString("principal_name"));
+	    return user;
 	}
+    };
 
-	private final ParameterizedRowMapper<RegistryUser> rowMapper = new ParameterizedRowMapper<RegistryUser>() {
+    public List<RegistryUser> getAllUsers() throws DataAccessException {
+	return getJdbcTemplate().query(
+		"select * from registry_user order by id", userRowMapper);
+    }
 
-		@Override
-		public RegistryUser mapRow(ResultSet rs, int rowNumber)
-				throws SQLException {
-			RegistryUser user = new RegistryUser();
-			user.setId(rs.getInt(COLUMN_ID));
-			user.setName(rs.getString("name"));
-			user.setPrincipalName(rs.getString("principal_name"));
-			return user;
-		}
-	};
+    /**
+     * 
+     * @param principalName
+     *            User's principal name
+     * @return User, if it exists
+     * @throws DataAccessException
+     */
+    public RegistryUser getByPrincipalName(String principalName)
+	    throws DataAccessException {
+	List<RegistryUser> list = getJdbcTemplate()
+		.query(
+			"select * from registry_user where principal_name = ? order by id",
+			new Object[] { principalName }, userRowMapper);
+	if (list.isEmpty())
+	    return null;
+	return list.get(0);
+    }
+
+    /**
+     * 
+     * @param id
+     *            Database record id (key)
+     * @return User, if it exists
+     * @throws DataAccessException
+     */
+    public RegistryUser getById(Number id) throws DataAccessException {
+	return (RegistryUser) getJdbcTemplate()
+		.queryForObject(
+			"select * from registry_user where id = ? order by id",
+			new Object[] { id }, userRowMapper);
+    }
+
+    /**
+     * 
+     * @param user
+     * @return Record id of the inserted user
+     * @throws DataAccessException
+     */
+    public Number insertUser(RegistryUser user) throws DataAccessException {
+	SimpleJdbcInsert insert = new SimpleJdbcInsert(getDataSource())
+		.withTableName("registry_user").usingGeneratedKeyColumns(
+			"id");
+
+	Map<String, Object> params = new HashMap<String, Object>();
+	params.put("name", user.getName());
+	params.put("principal_name", user.getPrincipalName());
+	return insert.executeAndReturnKey(params);
+    }
+
+    /**
+     * Updates some data stored about the user. At this point only the display
+     * name will be updated. ID is taken from 'id' parameter, not user object.
+     * 
+     * @param id
+     *            ID of user to update
+     * @param user
+     *            object containing new info
+     */
+    public void updateUser(Number id, RegistryUser user)
+	    throws DataAccessException {
+	String updateString = String.format(
+		"UPDATE %1$s SET name = ? WHERE %2$s = ?", "registry_user",
+		"id");
+	getJdbcTemplate().update(updateString, user.getName(), id);
+    }
+
+    private final ParameterizedRowMapper<RegistryUser> rowMapper = new ParameterizedRowMapper<RegistryUser>() {
+
+	@Override
+	public RegistryUser mapRow(ResultSet rs, int rowNumber)
+		throws SQLException {
+	    RegistryUser user = new RegistryUser();
+	    user.setId(rs.getInt("id"));
+	    user.setName(rs.getString("name"));
+	    user.setPrincipalName(rs.getString("principal_name"));
+	    return user;
+	}
+    };
+
+    @Resource(name="dataSource")
+    public void setDataSourceProperty(DataSource ds) {
+	super.setDataSource(ds);
+    }
 }

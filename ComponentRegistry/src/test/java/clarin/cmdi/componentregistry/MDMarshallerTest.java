@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import java.io.ByteArrayInputStream;
 import junit.framework.Assert;
@@ -19,12 +19,12 @@ public class MDMarshallerTest {
     @Test
     public void testMarshalToString() throws Exception {
 	MDMarshaller instance = new MDMarshaller();
-	AbstractDescription desc = ComponentDescription.createNewDescription();
+	BaseComponent desc = ComponentDescription.createNewDescription();
 	desc.setName("Test \u00CA test");
 	String test = instance.marshalToString(desc);
 	logger.info(test);
 	Assert.assertTrue(test.contains("Test \u00CA test"));
-	AbstractDescription result = instance.unmarshal(ComponentDescription.class, new ByteArrayInputStream(test.getBytes("UTF-8")), null);
+	BaseComponent result = instance.unmarshal(ComponentDescription.class, new ByteArrayInputStream(test.getBytes("UTF-8")), null);
 	logger.info(result.getName());
 	Assert.assertEquals(desc.getName(), result.getName());
     }

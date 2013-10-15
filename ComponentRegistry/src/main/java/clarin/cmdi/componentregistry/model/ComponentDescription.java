@@ -7,7 +7,7 @@ import java.util.Comparator;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "componentDescription")
-public class ComponentDescription extends AbstractDescription implements Serializable {
+public class ComponentDescription extends BaseComponent implements Serializable {
 
     
     

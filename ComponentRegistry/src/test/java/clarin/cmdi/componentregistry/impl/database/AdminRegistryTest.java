@@ -21,8 +21,7 @@ import clarin.cmdi.componentregistry.frontend.DisplayDataNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
@@ -34,9 +33,7 @@ import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 public class AdminRegistryTest extends BaseUnitTest{
 
     @Autowired
-    private ComponentDescriptionDao componentDescriptionDao;
-    @Autowired
-    private ProfileDescriptionDao profileDescriptionDao;
+    private ComponentDao componentDao;
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
     private static final Principal PRINCIPAL_ADMIN = DummyPrincipal.DUMMY_ADMIN_PRINCIPAL;
@@ -74,8 +71,7 @@ public class AdminRegistryTest extends BaseUnitTest{
 
 	AdminRegistry adminReg = new AdminRegistry();
 	adminReg.setComponentRegistryFactory(componentRegistryFactory);
-	adminReg.setComponentDescriptionDao(componentDescriptionDao);
-	adminReg.setProfileDescriptionDao(profileDescriptionDao);
+	adminReg.setComponentDao(componentDao);
 	adminReg.setMarshaller(marshaller);
 	CMDItemInfo fileInfo = new CMDItemInfo(new MDMarshaller());
 	fileInfo.setForceUpdate(false);

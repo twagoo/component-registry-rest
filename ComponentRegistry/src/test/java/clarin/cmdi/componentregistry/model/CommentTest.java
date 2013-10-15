@@ -28,7 +28,7 @@ public class CommentTest {
 	comment1.setCommentDate("myDate");
 	comment1.setComment("tester");
 	comment1.setId("1");
-	comment1.setProfileDescriptionId("clarin.eu:cr1:p_1297242111880");
+	comment1.setComponentId("clarin.eu:cr1:p_1297242111880");
 	comment1.setUserId("8");
 	comment1.setUserName("J. Unit");
 
@@ -39,7 +39,7 @@ public class CommentTest {
 	expected += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <comments>tester</comments>\n";
 	expected += "    <commentDate>myDate</commentDate>\n";
-	expected += "    <profileDescriptionId>clarin.eu:cr1:p_1297242111880</profileDescriptionId>\n";
+	expected += "    <componentId>clarin.eu:cr1:p_1297242111880</componentId>\n";
 	expected += "    <id>1</id>\n";
 	expected += "    <userName>J. Unit</userName>\n";
 	expected += "    <canDelete>false</canDelete>\n";
@@ -48,7 +48,7 @@ public class CommentTest {
 
 	Comment comment = marshaller.unmarshal(Comment.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertEquals(comment1.getId(), comment.getId());
-	assertEquals(comment1.getProfileDescriptionId(), comment.getProfileDescriptionId());
+	assertEquals(comment1.getComponentId(), comment.getComponentId());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class CommentTest {
 	comment1.setCommentDate("myDate");
 	comment1.setComment("tester");
 	comment1.setId("1");
-	comment1.setComponentDescriptionId("clarin.eu:cr1:c_1297242111880");
+	comment1.setComponentId("clarin.eu:cr1:c_1297242111880");
 	comment1.setUserId("8");
 	comment1.setUserName("J. Unit");
 
@@ -68,7 +68,7 @@ public class CommentTest {
 	expected += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <comments>tester</comments>\n";
 	expected += "    <commentDate>myDate</commentDate>\n";
-	expected += "    <componentDescriptionId>clarin.eu:cr1:c_1297242111880</componentDescriptionId>\n";
+	expected += "    <componentId>clarin.eu:cr1:c_1297242111880</componentId>\n";
 	expected += "    <id>1</id>\n";
 	expected += "    <userName>J. Unit</userName>\n";
 	expected += "    <canDelete>false</canDelete>\n";
@@ -77,6 +77,6 @@ public class CommentTest {
 
 	Comment comment = marshaller.unmarshal(Comment.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertEquals(comment1.getId(), comment.getId());
-	assertEquals(comment1.getComponentDescriptionId(), comment.getComponentDescriptionId());
+	assertEquals(comment1.getComponentId(), comment.getComponentId());
     }
 }
