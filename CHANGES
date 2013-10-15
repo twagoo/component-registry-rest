@@ -1,7 +1,13 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.14.0 (????)
--
+Release ComponentRegistry-1.15.0 ()
+- Merged profiles and components on persistence level into BaseComponent
+- Only one component DAO left: ComponentDao
+- DB upgrade script which migrates profiles into components
+- Rest service XML using uniform element "componentId" in comments instead of "componentDescriptionId" or "profileDescriptionId"
+
+Release ComponentRegistry-1.14.0 (7 October 2013)
+- Implemented groups
 
 Release ComponentRegistry-1.13.0 (25 February 2013)
 - Added RSS feeds for public profiles, components, and comments. https://trac.clarin.eu/ticket/180
