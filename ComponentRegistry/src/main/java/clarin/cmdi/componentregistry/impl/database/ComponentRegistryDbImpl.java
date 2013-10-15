@@ -118,7 +118,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 		}
 		// TODO: Support group space
 		return ComponentUtils.toProfiles(componentDao
-			.getUserspaceDescriptions(registryOwner.getId()));
+			.getUserspaceProfiles(registryOwner.getId()));
 	    case PUBLISHED:
 		return ComponentUtils.toProfiles(componentDao
 			.getPublicProfileDescriptions());
@@ -155,7 +155,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 			.getPublicComponentDescriptions());
 	    } else {
 		return ComponentUtils.toComponents(componentDao
-			.getUserspaceDescriptions(getUserId()));
+			.getUserspaceComponents(getUserId()));
 	    }
 	} catch (DataAccessException ex) {
 	    throw new ComponentRegistryException(

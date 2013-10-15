@@ -34,8 +34,8 @@ public class ConcurrentRestServiceTest extends
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(ConcurrentRestServiceTest.class);
-    private int NR_OF_PROFILES = 20;
-    private int NR_OF_COMPONENTS = 20;
+    private final int NR_OF_PROFILES = 2;
+    private final int NR_OF_COMPONENTS = 2;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -50,27 +50,27 @@ public class ConcurrentRestServiceTest extends
 	List<String> errors = new ArrayList<String>();
 	List<Thread> ts = new ArrayList<Thread>();
 
-	registerProfiles(ts, NR_OF_PROFILES, errors, "false");
-	registerProfiles(ts, NR_OF_PROFILES, errors, "true");
+	registerProfiles(ts, NR_OF_PROFILES, errors, false);
+	registerProfiles(ts, NR_OF_PROFILES, errors, true);
 
-	registerComponents(ts, NR_OF_COMPONENTS, errors, "false");
-	registerComponents(ts, NR_OF_COMPONENTS, errors, "true");
+	registerComponents(ts, NR_OF_COMPONENTS, errors, false);
+	registerComponents(ts, NR_OF_COMPONENTS, errors, true);
 	runAllThreads(ts);
 	if (errors.size() > 0) {
 	    System.out.println(Arrays.toString(errors.toArray()));
 	    fail();
 	}
-	assertProfiles(NR_OF_PROFILES, "false");
-	assertProfiles(NR_OF_PROFILES, "true");
+	assertProfiles(NR_OF_PROFILES, false);
+	assertProfiles(NR_OF_PROFILES, true);
 
-	assertComponents(NR_OF_COMPONENTS, "false");
-	assertComponents(NR_OF_COMPONENTS, "true");
+	assertComponents(NR_OF_COMPONENTS, false);
+	assertComponents(NR_OF_COMPONENTS, true);
     }
 
-    private void assertProfiles(int nrOfProfiles, String userSpace) {
+    private void assertProfiles(int nrOfProfiles, boolean userSpace) {
 	List<ProfileDescription> response = getAuthenticatedResource(
 		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, userSpace)).accept(
+			USERSPACE_PARAM, ""+userSpace)).accept(
 		MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
 	Collections.sort(response, descriptionComparator);
 	assertEquals("half should be deleted", nrOfProfiles / 2,
@@ -91,10 +91,10 @@ public class ConcurrentRestServiceTest extends
 	}
     };
 
-    private void assertComponents(int nrOfComponents, String userSpace) {
+    private void assertComponents(int nrOfComponents, boolean userSpace) {
 	List<ComponentDescription> cResponse = getAuthenticatedResource(
 		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, userSpace)).accept(
+			USERSPACE_PARAM, ""+userSpace)).accept(
 		MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
 	Collections.sort(cResponse, descriptionComparator);
 	assertEquals("half should be deleted", nrOfComponents / 2,
@@ -118,14 +118,14 @@ public class ConcurrentRestServiceTest extends
     }
 
     private void registerProfiles(List<Thread> ts, int size,
-	    final List<String> errors, String userSpace)
+	    final List<String> errors, boolean userSpace)
 	    throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
 	    LOG.debug("Profile {} should be registered in {} and {}",
 		    new Object[] {
 			    i + 1000,
-			    Boolean.parseBoolean(userSpace) ? "user space"
+			    userSpace ? "user space"
 				    : "public space",
 			    shouldDelete ? "ALSO DELETED" : "not deleted" });
 	    Thread thread = createThread("/registry/profiles/", userSpace,
@@ -136,14 +136,14 @@ public class ConcurrentRestServiceTest extends
     }
 
     private void registerComponents(List<Thread> ts, int size,
-	    final List<String> errors, String userSpace)
+	    final List<String> errors, boolean userSpace)
 	    throws InterruptedException {
 	for (int i = 0; i < size; i++) {
 	    final boolean shouldDelete = (i % 2) == 1;
 	    LOG.debug("Component {} should be registered in {} and {}",
 		    new Object[] {
 			    i + 1000,
-			    Boolean.parseBoolean(userSpace) ? "user space"
+			    userSpace ? "user space"
 				    : "public space",
 			    shouldDelete ? "ALSO DELETED" : "not deleted" });
 	    Thread thread = createThread("/registry/components/", userSpace,
@@ -153,7 +153,7 @@ public class ConcurrentRestServiceTest extends
 	}
     }
 
-    private Thread createThread(final String path, final String userSpace,
+    private Thread createThread(final String path, final boolean userSpace,
 	    final String name, final boolean alsoDelete, InputStream content,
 	    final List<String> errors) throws InterruptedException {
 	final FormDataMultiPart form = new FormDataMultiPart();
@@ -169,7 +169,7 @@ public class ConcurrentRestServiceTest extends
 		// System.out.println("THREAD STARTED"+Thread.currentThread().getName());
 		RegisterResponse registerResponse = getAuthenticatedResource(
 			getResource().path(path).queryParam(USERSPACE_PARAM,
-				userSpace)).type(MediaType.MULTIPART_FORM_DATA)
+				""+userSpace)).type(MediaType.MULTIPART_FORM_DATA)
 			.post(RegisterResponse.class, form);
 		if (!registerResponse.isRegistered()) {
 		    errors.add("Failed to register "
@@ -192,7 +192,7 @@ public class ConcurrentRestServiceTest extends
 				    path
 					    + registerResponse.getDescription()
 						    .getId()).queryParam(
-				    USERSPACE_PARAM, userSpace)).delete(
+				    USERSPACE_PARAM, ""+userSpace)).delete(
 			    ClientResponse.class);
 		    if (response.getStatus() != 200) {
 			errors.add("Failed to delete "

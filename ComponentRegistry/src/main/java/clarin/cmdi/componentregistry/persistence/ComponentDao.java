@@ -142,10 +142,18 @@ public interface ComponentDao {
 
     /**
      * 
-     * @return All the user's descriptions not in the public space and are also
+     * @return All the user's components not in the public space and are also
      *         not part of any group
      */
-    List<BaseComponent> getUserspaceDescriptions(Number userId)
+    List<BaseComponent> getUserspaceComponents(Number userId)
+	    throws DataAccessException;
+
+    /**
+     * 
+     * @return All the user's profiles not in the public space and are also
+     *         not part of any group
+     */
+    List<BaseComponent> getUserspaceProfiles(Number userId)
 	    throws DataAccessException;
 
     void setDeleted(BaseComponent desc, boolean isDeleted)

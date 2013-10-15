@@ -323,13 +323,23 @@ public class AbstractDescriptionDaoImpl extends ComponentRegistryDaoImpl
      * @return All the user's descriptions not in the public space
      */
     @Override
-    public List<BaseComponent> getUserspaceDescriptions(Number userId)
+    public List<BaseComponent> getUserspaceComponents(Number userId)
 	    throws DataAccessException {
 	String select = getSelectStatement()
-		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND not exists (select 1 from ownership where ownership.componentid = persistentcomponents.component_id)")
+		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND component_id like '"+ComponentDescription.COMPONENT_PREFIX+"%' AND not exists (select 1 from ownership where ownership.componentid = persistentcomponents.component_id)")
 		.append(getOrderByClause()).toString();
 	return getList(select, userId);
     }
+    
+    @Override
+    public List<BaseComponent> getUserspaceProfiles(Number userId)
+	    throws DataAccessException {
+	String select = getSelectStatement()
+		.append(" WHERE is_deleted = false AND is_public = false AND user_id = ? AND component_id like '"+ProfileDescription.PROFILE_PREFIX+"%' AND not exists (select 1 from ownership where ownership.componentid = persistentcomponents.component_id)")
+		.append(getOrderByClause()).toString();
+	return getList(select, userId);
+    }
+
 
     @Override
     public void setDeleted(BaseComponent desc, boolean isDeleted)
@@ -339,8 +349,7 @@ public class AbstractDescriptionDaoImpl extends ComponentRegistryDaoImpl
 		.append(getTableName());
 	update.append(" SET is_deleted = ").append(Boolean.toString(isDeleted))
 		.append(" WHERE " + COLUMN_ID + " = ?");
-	getJdbcTemplate().update(update.toString(), dbId);
-	
+	int count = getJdbcTemplate().update(update.toString(), dbId);
     }
 
     @Override
