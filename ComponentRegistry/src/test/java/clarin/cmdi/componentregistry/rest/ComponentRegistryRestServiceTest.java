@@ -5,10 +5,9 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -445,7 +444,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertTrue(response.isProfile());
         assertEquals(1, getUserProfiles().size());
-        BaseComponent desc = response.getDescription();
+        Component desc = response.getDescription();
         String profile = getResource().path("/registry/profiles/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
         assertTrue(profile.endsWith("</xs:schema>"));
@@ -457,7 +456,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertFalse(response.isProfile());
         assertEquals(1, getUserComponents().size());
-        BaseComponent desc = response.getDescription();
+        Component desc = response.getDescription();
         String profile = getResource().path("/registry/components/" + desc.getId() + "/xsd").accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(profile.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
         assertTrue(profile.endsWith("</xs:schema>"));
@@ -562,7 +561,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         FormDataMultiPart form = createFormData(RegistryTestHelper.getTestProfileContent(), "Unpublished");
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertTrue(response.isProfile());
-        BaseComponent desc = response.getDescription();
+        Component desc = response.getDescription();
         assertEquals("Unpublished", desc.getDescription());
         assertEquals(1, getUserProfiles().size());
         assertEquals(0, getPublicProfiles().size());
@@ -582,7 +581,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
     }
 
-    private CMDComponentSpec getPublicSpec(BaseComponent desc) {
+    private CMDComponentSpec getPublicSpec(Component desc) {
         if (desc.isProfile()) {
             return getResource().path("/registry/profiles/" + desc.getId()).get(CMDComponentSpec.class);
         } else {
@@ -597,7 +596,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         FormDataMultiPart form = createFormData(RegistryTestHelper.getComponentTestContent(), "Unpublished");
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
         assertFalse(response.isProfile());
-        BaseComponent desc = response.getDescription();
+        Component desc = response.getDescription();
         assertEquals("Unpublished", desc.getDescription());
         assertEquals(1, getUserComponents().size());
         assertEquals(0, getPublicComponents().size());
@@ -863,7 +862,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
         assertEquals("My Test", desc.getDescription());
-        Date firstDate = ComponentUtils.getDate(desc.getRegistrationDate());
+        Date firstDate = desc.getRegistrationDate();
         CMDComponentSpec spec = getUserComponent(desc);
         assertNotNull(spec);
         assertEquals("Access", spec.getCMDComponent().get(0).getName());
@@ -885,7 +884,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
         assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
-        Date secondDate = ComponentUtils.getDate(desc.getRegistrationDate());
+        Date secondDate = desc.getRegistrationDate();
         assertTrue(firstDate.before(secondDate) || firstDate.equals(secondDate));
 
         spec = getUserComponent(desc);
@@ -914,7 +913,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Test1", desc.getName());
         assertEquals("My Test", desc.getDescription());
         assertEquals("TestGroup", desc.getGroupName());
-        Date firstDate = ComponentUtils.getDate(desc.getRegistrationDate());
+        Date firstDate = desc.getRegistrationDate();
         CMDComponentSpec spec = getUserProfile(desc);
         assertNotNull(spec);
         assertEquals("Actor", spec.getCMDComponent().get(0).getName());
@@ -936,7 +935,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
         assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
-        Date secondDate = ComponentUtils.getDate(desc.getRegistrationDate());
+        Date secondDate = desc.getRegistrationDate();
         assertTrue(firstDate.before(secondDate) || firstDate.equals(secondDate));
 
         spec = getUserProfile(desc);

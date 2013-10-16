@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -11,7 +12,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.IdSequence;
 
 @XmlRootElement(name = "profileDescription")
-public class ProfileDescription extends BaseComponent implements Serializable {
+public class ProfileDescription extends Component implements Serializable {
 
     // Attention! PROFILE_PREFIX here and the client's Config.PROFILE_PREFIX must be the same 
     // If you change PROFILE_PREFIX here, then the client's  Config.PROFILE_PREFIX
@@ -23,7 +24,7 @@ public class ProfileDescription extends BaseComponent implements Serializable {
 	String id = PROFILE_PREFIX + IdSequence.get();
 	ProfileDescription desc = new ProfileDescription();
 	desc.setId(id);
-	desc.setRegistrationDate(createNewDate());
+	desc.setRegistrationDate(new Date());
 	return desc;
     }
     

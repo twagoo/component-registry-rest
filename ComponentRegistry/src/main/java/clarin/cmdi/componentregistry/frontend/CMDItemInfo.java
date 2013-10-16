@@ -4,7 +4,7 @@ import clarin.cmdi.componentregistry.ComponentStatus;
 import java.io.Serializable;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 
 public class CMDItemInfo implements Serializable {
 
@@ -58,7 +58,7 @@ public class CMDItemInfo implements Serializable {
         setDescription("");
         setContent("");
         if (dataNode != null) {
-            BaseComponent desc = dataNode.getDescription();
+            Component desc = dataNode.getDescription();
             if (desc != null) {
                 String contentDescr = marshaller.marshalToString(desc);
                 setDescription(contentDescr);

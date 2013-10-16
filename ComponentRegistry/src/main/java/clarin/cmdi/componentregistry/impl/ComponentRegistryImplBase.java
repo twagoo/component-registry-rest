@@ -18,7 +18,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -88,7 +88,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
     }
     
-    protected static void enrichSpecHeader(CMDComponentSpec spec, BaseComponent description) {
+    protected static void enrichSpecHeader(CMDComponentSpec spec, Component description) {
 	Header header = spec.getHeader();
 	header.setID(description.getId());
 	if (StringUtils.isEmpty(header.getName())) {

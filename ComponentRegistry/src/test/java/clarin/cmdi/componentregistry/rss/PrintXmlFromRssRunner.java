@@ -6,7 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
@@ -38,7 +39,7 @@ public class PrintXmlFromRssRunner {
 	marshaller = new MDMarshaller();
     }
 
-    public static <T extends BaseComponent> void printIds(List<T> desc) {
+    public static <T extends Component> void printIds(List<T> desc) {
 	for (T current : desc) {
 	    String currentId = current.getId();
 	    System.out.println(currentId);
@@ -53,15 +54,15 @@ public class PrintXmlFromRssRunner {
 
     }
 
-    private static Rss makeRssForDescriptions(List<? extends BaseComponent> descriptions, int kind, String baseUri, int limit) throws ParseException {
+    private static Rss makeRssForDescriptions(List<? extends Component> descriptions, int kind, String baseUri, int limit) throws ParseException {
 	System.out.println(descriptions.size());
 	Collections.sort(descriptions, ComponentUtils.COMPARE_ON_DATE);
 	System.out.println(descriptions.size());
 
 	System.out.println("check if the descriptions are sorted in a proper way, by the dates ");
-	for (BaseComponent desc : descriptions) {
-	    String date = desc.getRegistrationDate();
-	    System.out.println(date + ", formatted: " + ComponentUtils.getDate(date)
+	for (Component desc : descriptions) {
+	    Date date = desc.getRegistrationDate();
+	    System.out.println(date + ", formatted: " + date
 		    + ", Rss=formatted: " + DatesHelper.getRFCDateTime(date));
 	}
 
@@ -118,13 +119,13 @@ public class PrintXmlFromRssRunner {
 	 using one of the on-line rss-source vaidators */
 
 	if (kind == 1 || kind == 2) { // testing Rss for profiles/components
-	    List<? extends BaseComponent> descriptions =
+	    List<? extends Component> descriptions =
 		    (kind == 1) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
 	    rss = makeRssForDescriptions(descriptions, kind, baseUri, 10);
 	};
 
 	if (kind == 3 || kind == 4) { // testing Rss comments
-	    List<? extends BaseComponent> descriptions =
+	    List<? extends Component> descriptions =
 		    (kind == 3) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
 	    printIds(descriptions);
 	    System.out.println("Pick up and input one of the description id above");// "clarin.eu:cr1:p_1284723009187" "clarin.eu:cr1:c_1288172614011"

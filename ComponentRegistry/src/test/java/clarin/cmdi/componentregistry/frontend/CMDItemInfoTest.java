@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 public class CMDItemInfoTest {
@@ -56,7 +56,7 @@ public class CMDItemInfoTest {
 	assertEquals("", info.getDescription());
     }
 
-    private BaseComponent createDescription() {
+    private Component createDescription() {
 	return ProfileDescription.createNewDescription();
     }
 }

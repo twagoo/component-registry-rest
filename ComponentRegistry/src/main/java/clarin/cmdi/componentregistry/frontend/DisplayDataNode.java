@@ -3,14 +3,14 @@ package clarin.cmdi.componentregistry.frontend;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import java.io.Serializable;
 
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 
 public class DisplayDataNode implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final String name;
     private final boolean isDeleted;
-    private BaseComponent desc;
+    private Component desc;
     private final ComponentStatus status;
 
     public DisplayDataNode(String name, boolean isDeleted) {
@@ -18,7 +18,7 @@ public class DisplayDataNode implements Serializable {
 	this(name, isDeleted, null, ComponentStatus.PRIVATE);
     }
 
-    public DisplayDataNode(String name, boolean isDeleted, BaseComponent desc, ComponentStatus status) {
+    public DisplayDataNode(String name, boolean isDeleted, Component desc, ComponentStatus status) {
 	this.name = name;
 	this.isDeleted = isDeleted;
 	this.desc = desc;
@@ -30,7 +30,7 @@ public class DisplayDataNode implements Serializable {
      *
      * @return
      */
-    public BaseComponent getDescription() {
+    public Component getDescription() {
 	return desc;
     }
 

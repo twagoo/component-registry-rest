@@ -5,14 +5,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 
 public class DescriptionValidatorTest {
 
     @Test
     public void testValidate() {
-        BaseComponent desc = ComponentDescription.createNewDescription();
+        Component desc = ComponentDescription.createNewDescription();
         DescriptionValidator validator = new DescriptionValidator(desc);
         assertFalse(validator.validate());
 

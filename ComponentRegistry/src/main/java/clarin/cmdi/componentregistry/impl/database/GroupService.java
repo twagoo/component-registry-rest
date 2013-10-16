@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -78,7 +78,7 @@ public interface GroupService {
      * @param component
      * @return
      */
-    boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(RegistryUser user, BaseComponent component);
+    boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(RegistryUser user, Component component);
 
     /**
      * Make a user a mamber of a group

@@ -15,7 +15,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -37,6 +37,7 @@ import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -320,9 +321,9 @@ public class ComponentRegistryRestService implements
 
 	@Override
 	public ComponentRegistry findRegistry(String id,
-			RegistryClosure<? extends BaseComponent> clos)
+			RegistryClosure<? extends Component> clos)
 			throws ComponentRegistryException {
-		BaseComponent desc = null;
+		Component desc = null;
 		ComponentRegistry result = getRegistry(getStatus(false));
 		desc = clos.getDescription(result, id);
 		if (desc == null) {
@@ -363,7 +364,7 @@ public class ComponentRegistryRestService implements
 	@Path("/components/usage/{componentId}")
 	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
 			MediaType.APPLICATION_JSON })
-	public List<BaseComponent> getComponentUsage(
+	public List<Component> getComponentUsage(
 			@PathParam("componentId") String componentId,
 			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace)
 			throws ComponentRegistryException {
@@ -380,7 +381,7 @@ public class ComponentRegistryRestService implements
 					components.size(), profiles.size(), componentId,
 					(System.currentTimeMillis() - start));
 
-			List<BaseComponent> usages = new ArrayList<BaseComponent>(
+			List<Component> usages = new ArrayList<Component>(
 					components.size() + profiles.size());
 			usages.addAll(components);
 			usages.addAll(profiles);
@@ -696,13 +697,13 @@ public class ComponentRegistryRestService implements
 		}
 	}
 
-	private void updateDescription(BaseComponent desc, String name,
+	private void updateDescription(Component desc, String name,
 			String description, String domainName, String group) {
 		desc.setName(name);
 		desc.setDescription(description);
 		desc.setDomainName(domainName);
 		desc.setGroupName(group);
-		desc.setRegistrationDate(BaseComponent.createNewDate());
+		desc.setRegistrationDate(new Date());
 	}
 
 	@Override
@@ -944,7 +945,7 @@ public class ComponentRegistryRestService implements
 		}
 	}
 
-	private void checkAndThrowDescription(BaseComponent desc, String id) {
+	private void checkAndThrowDescription(Component desc, String id) {
 		if (desc == null) {
 			throw new WebApplicationException(Response.serverError()
 					.entity("Incorrect id:" + id + "cannot handle request")
@@ -1152,7 +1153,7 @@ public class ComponentRegistryRestService implements
 						stillActive)).build();
 	}
 
-	private Response register(InputStream input, BaseComponent desc,
+	private Response register(InputStream input, Component desc,
 			UserCredentials userCredentials, boolean userspace,
 			RegisterAction action) {
 		try {
@@ -1223,7 +1224,7 @@ public class ComponentRegistryRestService implements
 	 *             to detect recursion
 	 */
 	private void checkForRecursion(MDValidator validator,
-			ComponentRegistry registry, BaseComponent desc)
+			ComponentRegistry registry, Component desc)
 			throws ComponentRegistryException {
 		try {
 			// Expand to check for recursion. Operate on copy so that original
@@ -1243,7 +1244,7 @@ public class ComponentRegistryRestService implements
 
 	private Response registerComment(InputStream input,
 			ComponentRegistry registry, boolean userspace,
-			BaseComponent description, Principal principal,
+			Component description, Principal principal,
 			UserCredentials userCredentials) {
 		try {
 			CommentValidator validator = new CommentValidator(input,

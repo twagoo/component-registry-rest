@@ -5,18 +5,23 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
+
 import javax.xml.transform.TransformerException;
+
 import org.junit.Before;
 
 public class ComponentDescriptionTest {
 
     private MDMarshaller marshaller;
+    private Date testDate = new Date();
 
     @Before
     public void setUp() throws TransformerException {
@@ -31,7 +36,7 @@ public class ComponentDescriptionTest {
         desc.setCreatorName("myC");
         desc.setUserId("user1");
         desc.setDescription("myD");
-        desc.setRegistrationDate("myDate");
+        desc.setRegistrationDate(testDate);
         desc.setHref("linkToMyComponent");
         desc.setGroupName("MyGroup");
         desc.setDomainName("Linguistics");
@@ -44,7 +49,7 @@ public class ComponentDescriptionTest {
         expected += "    <id>clarin.eu:cr1:c_myId</id>\n";
         expected += "    <description>myD</description>\n";
         expected += "    <name>Name</name>\n";
-        expected += "    <registrationDate>myDate</registrationDate>\n";
+        expected += "    <registrationDate>"+DatesHelper.getRFCDateTime(testDate)+"</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
         expected += "    <userId>user1</userId>\n";
         expected += "    <domainName>Linguistics</domainName>\n";

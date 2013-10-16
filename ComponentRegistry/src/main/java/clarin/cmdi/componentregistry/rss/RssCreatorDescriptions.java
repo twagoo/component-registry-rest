@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.rss;
 
 import clarin.cmdi.componentregistry.DatesHelper;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import java.util.Comparator;
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author olhsha
  */
-public class RssCreatorDescriptions<T extends BaseComponent> extends RssCreator<T> {
+public class RssCreatorDescriptions<T extends Component> extends RssCreator<T> {
 
     /**
      *

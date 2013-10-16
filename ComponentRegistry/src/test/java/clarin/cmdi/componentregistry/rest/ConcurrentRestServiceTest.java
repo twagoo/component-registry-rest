@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
@@ -83,10 +83,10 @@ public class ConcurrentRestServiceTest extends
 	}
     }
 
-    private Comparator<BaseComponent> descriptionComparator = new Comparator<BaseComponent>() {
+    private Comparator<Component> descriptionComparator = new Comparator<Component>() {
 
 	@Override
-	public int compare(BaseComponent o1, BaseComponent o2) {
+	public int compare(Component o1, Component o2) {
 	    return o1.getName().compareTo(o2.getName());
 	}
     };

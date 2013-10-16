@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
@@ -36,18 +36,17 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Test(expected = DataAccessException.class)
     public void test02() {
-	BaseComponent cd1 = componentDescriptionDao.getByCmdId("c1");
+	Component cd1 = componentDescriptionDao.getByCmdId("c1");
 	assertNull(cd1);
 
-	BaseComponent cd = new BaseComponent();
+	Component cd = new Component();
 	cd.setCreatorName("user 123");
 	cd.setDescription("description");
 	cd.setDomainName("domain name");
 	cd.setGroupName("group name");
 	cd.setHref("href");
 	cd.setName("name");
-	cd.setRegistrationDate(DateFormatUtils.format(new Date(),
-		DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern()));
+	cd.setRegistrationDate(new Date());
 	cd.setUserId("123");
 	cd.setId(ComponentDescription.COMPONENT_PREFIX+"c1");
 	componentDescriptionDao.insertDescription(cd, "Content 1", false, 123);
@@ -60,7 +59,7 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Test
     public void test03() {
-	BaseComponent cd1 = componentDescriptionDao.getByCmdId("c1");
+	Component cd1 = componentDescriptionDao.getByCmdId("c1");
 	assertNull(cd1);
     }
 

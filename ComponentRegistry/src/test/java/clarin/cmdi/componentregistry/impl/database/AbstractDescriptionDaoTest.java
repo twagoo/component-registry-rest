@@ -5,19 +5,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
-import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.persistence.UserDao;
 
 /**
  * Base test class for concrete tests to profile and component DAOs
+ * 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author George.Georgovassilis@mpi.nl
  */
@@ -36,9 +37,9 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Test
     public void testInsertComponent() throws Exception {
-	String regDate = BaseComponent.createNewDate();
+	Date regDate = new Date();
 
-	BaseComponent description = createNewDescription();
+	Component description = createNewDescription();
 	description.setName("MyComponent");
 	description.setDescription("MyDescription");
 	description.setCreatorName("Aap");
@@ -52,7 +53,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	Number newId = getDao().insertDescription(description, testComponent,
 		true, null);
 	assertNotNull(newId);
-	BaseComponent descr = getDao().getById(newId);
+	Component descr = getDao().getById(newId);
 	assertNotNull(descr);
 	assertEquals("MyComponent", descr.getName());
 	assertEquals("MyDescription", descr.getDescription());
@@ -60,8 +61,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	assertEquals("MyGroup", descr.getGroupName());
 	assertEquals("MyDomain \u00CA", descr.getDomainName());
 	assertEquals("http://MyHref", descr.getHref());
-	assertEquals(ComponentUtils.getDate(regDate),
-		ComponentUtils.getDate(descr.getRegistrationDate()));
+	assertEquals(regDate, descr.getRegistrationDate());
 	assertEquals(testComponent,
 		getDao().getContent(false, description.getId()));
     }
@@ -73,7 +73,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	insert("B", true, null);
 	insert("a", true, null);
 
-	List<BaseComponent> descs = getDao().getPublicDescriptions();
+	List<Component> descs = getDao().getPublicDescriptions();
 	assertEquals(4, descs.size());
 	assertEquals("a", descs.get(0).getName()); // ordered by name case
 						   // insensitive then by cmdId
@@ -86,22 +86,22 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Test
     public void testGetPublicComponents() throws Exception {
-	List<BaseComponent> descriptions = getDao()
-		.getPublicDescriptions();
+	List<Component> descriptions = getDao().getPublicDescriptions();
 	assertNotNull(descriptions);
     }
 
     @Test
     public void testGetUserspaceDescriptions() throws Exception {
-	//TODO: test queries empty database and is happy that no results are returned. Should also test the case where there are userspace descriptions
-	List<BaseComponent> descriptions = getDao()
-		.getUserspaceComponents(-1);
+	// TODO: test queries empty database and is happy that no results are
+	// returned. Should also test the case where there are userspace
+	// descriptions
+	List<Component> descriptions = getDao().getUserspaceComponents(-1);
 	assertEquals(0, descriptions.size());
     }
 
     @Test
     public void testDeleteDescription() throws Exception {
-	BaseComponent description = createNewDescription();
+	Component description = createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
 	String testComponent = getContentString();
@@ -111,7 +111,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	getDao().insertDescription(description, testComponent, true, null);
 	assertEquals(count + 1, getDao().getPublicDescriptions().size());
 
-	List deletedDescriptions = getDao().getDeletedDescriptions(null);
+	List<Component> deletedDescriptions = getDao().getDeletedDescriptions(null);
 	assertEquals(0, deletedDescriptions.size());
 
 	// delete
@@ -124,7 +124,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Test
     public void testUpdateDescription() {
-	BaseComponent description = createNewDescription();
+	Component description = createNewDescription();
 	description.setName("Aap");
 	description.setDescription("MyDescription");
 	description.setCreatorName("Aap");
@@ -182,11 +182,11 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
     @Test
     public void testIsPublic() {
 	Number userId = userDao.insertUser(UserDaoTest.createTestUser());
-	BaseComponent publicDesc = insert(true, null);
+	Component publicDesc = insert(true, null);
 	assertTrue(getDao().isPublic(publicDesc.getId()));
 	assertFalse(getDao().isInUserSpace(publicDesc.getId(), userId));
 
-	BaseComponent privateDesc = insert(false, userId);
+	Component privateDesc = insert(false, userId);
 	assertFalse(getDao().isPublic(privateDesc.getId()));
 	assertTrue(getDao().isInUserSpace(privateDesc.getId(), userId));
 
@@ -199,13 +199,12 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	assertTrue(getDao().isInUserSpace(privateDesc.getId(), userId));
     }
 
-    private BaseComponent insert(boolean isPublic, Number userId) {
+    private Component insert(boolean isPublic, Number userId) {
 	return insert("Aap", isPublic, userId);
     }
 
-    private BaseComponent insert(String name, boolean isPublic,
-	    Number userId) {
-	BaseComponent desc = createNewDescription();
+    private Component insert(String name, boolean isPublic, Number userId) {
+	Component desc = createNewDescription();
 	desc.setName(name);
 	desc.setDescription("MyDescription");
 	getDao().insertDescription(desc, getContentString(), isPublic, userId);
@@ -214,5 +213,5 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     protected abstract String getContentString();
 
-    protected abstract BaseComponent createNewDescription();
+    protected abstract Component createNewDescription();
 }

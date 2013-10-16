@@ -21,7 +21,7 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
@@ -55,9 +55,9 @@ public class AdminRegistry {
     public void submitFile(CMDItemInfo info, Principal userPrincipal)
 	    throws SubmitFailedException {
 	try {
-	    BaseComponent originalDescription = info.getDataNode()
+	    Component originalDescription = info.getDataNode()
 		    .getDescription();
-	    BaseComponent description = null;
+	    Component description = null;
 	    CMDComponentSpec spec = null;
 	    if (originalDescription.isProfile()) {
 		description = marshaller.unmarshal(ProfileDescription.class,
@@ -95,7 +95,7 @@ public class AdminRegistry {
     }
 
     public void undelete(CMDItemInfo info) throws SubmitFailedException {
-	BaseComponent desc = info.getDataNode().getDescription();
+	Component desc = info.getDataNode().getDescription();
 	try {
 	    componentDao.setDeleted(desc, false);
 	} catch (DataAccessException e) {
@@ -106,7 +106,7 @@ public class AdminRegistry {
     public void delete(CMDItemInfo info, Principal userPrincipal)
 	    throws SubmitFailedException {
 	String id = info.getName();
-	BaseComponent desc = info.getDataNode().getDescription();
+	Component desc = info.getDataNode().getDescription();
 	try {
 	    deleteFromRegistry(userPrincipal, desc, info);
 	    LOG.info("Deleted item: " + id);
@@ -123,7 +123,7 @@ public class AdminRegistry {
     }
 
     private void deleteFromRegistry(Principal userPrincipal,
-	    BaseComponent desc, CMDItemInfo info) throws IOException,
+	    Component desc, CMDItemInfo info) throws IOException,
 	    UserUnauthorizedException, ComponentRegistryException {
 	ComponentRegistry registry = getRegistry(userPrincipal, desc, info);
 	LOG.info("Deleting item: " + desc);
@@ -136,7 +136,7 @@ public class AdminRegistry {
     }
 
     private ComponentRegistry getRegistry(Principal userPrincipal,
-	    BaseComponent desc, CMDItemInfo info) {
+	    Component desc, CMDItemInfo info) {
 	ComponentRegistry registry = componentRegistryFactory
 		.getPublicRegistry();
 	// TODO: More generic check

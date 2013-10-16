@@ -11,12 +11,12 @@ import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.BeanUtils;
 
 import clarin.cmdi.componentregistry.DatesHelper;
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 /**
- * Utilities for working with {@link BaseComponent}s
+ * Utilities for working with {@link Component}s
  * 
  * @author george.georgovassilis@mpi.nl
  * 
@@ -32,7 +32,7 @@ public class ComponentUtils {
 		.startsWith(ComponentDescription.COMPONENT_PREFIX);
     }
 
-    public static void copyPropertiesFrom(BaseComponent from, BaseComponent to) {
+    public static void copyPropertiesFrom(Component from, Component to) {
 	BeanUtils.copyProperties(from, to);
     }
 
@@ -56,12 +56,12 @@ public class ComponentUtils {
 
     /**
      * Compares two descriptions by the their value as returned by
-     * {@link BaseComponent#getName()
+     * {@link Component#getName()
      * }
      */
-    public static final Comparator<? super BaseComponent> COMPARE_ON_NAME = new Comparator<BaseComponent>() {
+    public static final Comparator<? super Component> COMPARE_ON_NAME = new Comparator<Component>() {
 	@Override
-	public int compare(BaseComponent o1, BaseComponent o2) {
+	public int compare(Component o1, Component o2) {
 	    int result = 0;
 	    if (o1.getName() != null && o2.getName() != null) {
 		result = o1.getName().compareToIgnoreCase(o2.getName());
@@ -74,21 +74,20 @@ public class ComponentUtils {
     };
     /**
      * Compares two descriptions by the their value as returned by
-     * {@link BaseComponent#getRegistrationDate() () * }
+     * {@link Component#getRegistrationDate() () * }
      */
-    public static final Comparator<? super BaseComponent> COMPARE_ON_DATE = new Comparator<BaseComponent>() {
+    public static final Comparator<? super Component> COMPARE_ON_DATE = new Comparator<Component>() {
 	/**
 	 * @returns 1 if o11 is older than o2, returns -1 if o1 is younger than
 	 *          o2
 	 */
 	@Override
-	public int compare(BaseComponent o1, BaseComponent o2) {
-	    return (DatesHelper.compareDateStrings(o1.getRegistrationDate(),
-		    o2.getRegistrationDate()));
+	public int compare(Component o1, Component o2) {
+	    return o1.getRegistrationDate().compareTo(o2.getRegistrationDate());
 	}
     };
 
-    public static ProfileDescription toProfile(BaseComponent component) {
+    public static ProfileDescription toProfile(Component component) {
 	if (component == null)
 	    return null;
 	ProfileDescription copy = new ProfileDescription();
@@ -96,7 +95,7 @@ public class ComponentUtils {
 	return copy;
     }
 
-    public static ComponentDescription toComponent(BaseComponent component) {
+    public static ComponentDescription toComponent(Component component) {
 	if (component == null)
 	    return null;
 	ComponentDescription copy = new ComponentDescription();
@@ -105,21 +104,21 @@ public class ComponentUtils {
     }
 
     public static List<ProfileDescription> toProfiles(
-	    List<BaseComponent> components) {
+	    List<Component> components) {
 	if (components == null)
 	    return null;
 	List<ProfileDescription> list = new ArrayList<ProfileDescription>();
-	for (BaseComponent c : components)
+	for (Component c : components)
 	    list.add(toProfile(c));
 	return list;
     }
 
     public static List<ComponentDescription> toComponents(
-	    List<BaseComponent> components) {
+	    List<Component> components) {
 	if (components == null)
 	    return null;
 	List<ComponentDescription> list = new ArrayList<ComponentDescription>();
-	for (BaseComponent c : components)
+	for (Component c : components)
 	    list.add(toComponent(c));
 	return list;
     }

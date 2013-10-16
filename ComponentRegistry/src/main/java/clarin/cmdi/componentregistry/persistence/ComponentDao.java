@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 
-import clarin.cmdi.componentregistry.model.BaseComponent;
+import clarin.cmdi.componentregistry.model.Component;
 
 /**
  * Interface for a persistence operation on components and profiles
@@ -20,14 +20,14 @@ public interface ComponentDao {
      * 
      * @return
      */
-    List<BaseComponent> getPublicComponentDescriptions();
+    List<Component> getPublicComponentDescriptions();
 
     /**
      * Get all public profiles
      * 
      * @return
      */
-    List<BaseComponent> getPublicProfileDescriptions();
+    List<Component> getPublicProfileDescriptions();
 
     /**
      * 
@@ -74,7 +74,7 @@ public interface ComponentDao {
      *            Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-    Number insertDescription(BaseComponent description, String content,
+    Number insertDescription(Component description, String content,
 	    boolean isPublic, Number userId) throws DataAccessException;
 
     /**
@@ -87,7 +87,7 @@ public interface ComponentDao {
      * @param content
      *            New content for description (leave null to not change)
      */
-    void updateDescription(Number id, BaseComponent description, String content);
+    void updateDescription(Number id, Component description, String content);
 
     /**
      * Retrieves description by it's primary key Id
@@ -96,7 +96,7 @@ public interface ComponentDao {
      *            Description key
      * @return The description, if it exists; null otherwise
      */
-    BaseComponent getById(Number id) throws DataAccessException;
+    Component getById(Number id) throws DataAccessException;
 
     /**
      * Get by ComponentId / ProfileId, whether in userspace or public
@@ -105,7 +105,7 @@ public interface ComponentDao {
      *            Full component id
      * @return The description, if it exists; null otherwise
      */
-    BaseComponent getByCmdId(String id) throws DataAccessException;
+    Component getByCmdId(String id) throws DataAccessException;
 
     /**
      * Get by ComponentId / ProfileId
@@ -116,7 +116,7 @@ public interface ComponentDao {
      *            Db id of user for workspace; null for public space
      * @return The description, if it exists; null otherwise
      */
-    BaseComponent getByCmdId(String id, Number userId)
+    Component getByCmdId(String id, Number userId)
 	    throws DataAccessException;
 
     /**
@@ -131,21 +131,21 @@ public interface ComponentDao {
      * 
      * @return All descriptions in the public space
      */
-    List<BaseComponent> getPublicDescriptions() throws DataAccessException;
+    List<Component> getPublicDescriptions() throws DataAccessException;
 
     /**
      * @return List of deleted descriptions in user space or in public when
      *         userId=null
      * @param userId
      */
-    List<BaseComponent> getDeletedDescriptions(Number userId);
+    List<Component> getDeletedDescriptions(Number userId);
 
     /**
      * 
      * @return All the user's components not in the public space and are also
      *         not part of any group
      */
-    List<BaseComponent> getUserspaceComponents(Number userId)
+    List<Component> getUserspaceComponents(Number userId)
 	    throws DataAccessException;
 
     /**
@@ -153,10 +153,10 @@ public interface ComponentDao {
      * @return All the user's profiles not in the public space and are also
      *         not part of any group
      */
-    List<BaseComponent> getUserspaceProfiles(Number userId)
+    List<Component> getUserspaceProfiles(Number userId)
 	    throws DataAccessException;
 
-    void setDeleted(BaseComponent desc, boolean isDeleted)
+    void setDeleted(Component desc, boolean isDeleted)
 	    throws DataAccessException;
 
     void setPublished(Number id, boolean published);

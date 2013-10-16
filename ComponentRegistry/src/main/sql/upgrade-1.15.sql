@@ -21,3 +21,17 @@ drop table component_description cascade;
 update ownership set componentid = profileid where componentid is null;
 
 alter table ownership drop column profileid;
+
+alter table persistentcomponents
+add column content text NOT NULL default '';
+
+update persistentcomponents set content = 
+(select content 
+ from xml_content
+ where xml_content.id = persistentcomponents.content_id
+ );
+
+drop table xml_content cascade;
+
+alter table persistentcomponents
+drop column content_id;

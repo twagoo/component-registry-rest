@@ -6,9 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 
 import org.junit.Test;
 
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 
 import javax.xml.transform.TransformerException;
@@ -18,6 +20,7 @@ import org.junit.Before;
 public class RegisterResponseTest {
 
     private MDMarshaller marshaller;
+    private Date testDate = new Date();
 
     @Before
     public void setUp() throws TransformerException {
@@ -67,7 +70,7 @@ public class RegisterResponseTest {
 	expected += "        <id>clarin.eu:cr1:p_myId</id>\n";
 	expected += "        <description>myD</description>\n";
 	expected += "        <name>Name</name>\n";
-	expected += "        <registrationDate>myDate</registrationDate>\n";
+	expected += "        <registrationDate>"+DatesHelper.getRFCDateTime(testDate)+"</registrationDate>\n";
 	expected += "        <creatorName>myC</creatorName>\n";
 	expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "        <commentsCount>2</commentsCount>\n";
@@ -99,7 +102,7 @@ public class RegisterResponseTest {
 	expected += "        <id>clarin.eu:cr1:c_myId</id>\n";
 	expected += "        <description>myD</description>\n";
 	expected += "        <name>Name</name>\n";
-	expected += "        <registrationDate>myDate</registrationDate>\n";
+	expected += "        <registrationDate>"+DatesHelper.getRFCDateTime(testDate)+"</registrationDate>\n";
 	expected += "        <creatorName>myC</creatorName>\n";
 	expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "        <groupName>imdi</groupName>\n";
@@ -121,7 +124,7 @@ public class RegisterResponseTest {
 	desc.setGroupName("imdi");
 	desc.setCreatorName("myC");
 	desc.setDescription("myD");
-	desc.setRegistrationDate("myDate");
+	desc.setRegistrationDate(testDate);
 	desc.setHref("linkToMyProfile");
 	desc.setCommentsCount(2);
 	return desc;
@@ -133,7 +136,7 @@ public class RegisterResponseTest {
 	desc.setId(ProfileDescription.PROFILE_PREFIX+"myId");
 	desc.setCreatorName("myC");
 	desc.setDescription("myD");
-	desc.setRegistrationDate("myDate");
+	desc.setRegistrationDate(testDate);
 	desc.setHref("linkToMyProfile");
 	desc.setCommentsCount(2);
 	return desc;

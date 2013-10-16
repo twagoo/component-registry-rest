@@ -2,12 +2,15 @@ package clarin.cmdi.componentregistry.model;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.IdSequence;
+
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Date;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "componentDescription")
-public class ComponentDescription extends BaseComponent implements Serializable {
+public class ComponentDescription extends Component implements Serializable {
 
     
     
@@ -39,7 +42,7 @@ public class ComponentDescription extends BaseComponent implements Serializable 
 	String id = COMPONENT_PREFIX + IdSequence.get();
 	ComponentDescription desc = new ComponentDescription();
 	desc.setId(id);
-	desc.setRegistrationDate(createNewDate());
+	desc.setRegistrationDate(new Date());
 	return desc;
     }
 }

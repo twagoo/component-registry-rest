@@ -2,12 +2,13 @@ package clarin.cmdi.componentregistry.persistence.jpa;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import clarin.cmdi.componentregistry.model.Ownership;
 
-public interface OwnershipDao extends CrudRepository<Ownership, String>{
+public interface OwnershipDao extends JpaRepository<Ownership, String>{
 
     @Query("select o from Ownership o where o.userId=?1 and o.componentId=?2")
     Ownership findOwnershipByUserAndComponent(long userId, String componentId);

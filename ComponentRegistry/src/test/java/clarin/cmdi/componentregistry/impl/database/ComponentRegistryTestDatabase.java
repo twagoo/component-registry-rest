@@ -1,12 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.omg.CORBA.PUBLIC_MEMBER;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 
 /**
  *
@@ -20,12 +14,15 @@ public final class ComponentRegistryTestDatabase {
     public static void resetDatabase(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("DROP SCHEMA PUBLIC CASCADE");
     }
+    
+    
 
     public static void createTablePersistentComponents(JdbcTemplate jdbcTemplate) {
-        jdbcTemplate.execute("CREATE TABLE persistentcomponents ("
+	jdbcTemplate.execute("create sequence profile_description_id_seq");
+	
+	jdbcTemplate.execute("CREATE TABLE persistentcomponents ("
                 + "id IDENTITY NOT NULL,"
                 + "  user_id integer,"
-                + "  content_id integer NOT NULL,"
                 + "  is_public boolean NOT NULL,"
                 + "  is_deleted boolean DEFAULT false NOT NULL,"
                 + "  component_id VARCHAR(255) NOT NULL,"
@@ -36,14 +33,11 @@ public final class ComponentRegistryTestDatabase {
                 + "  creator_name VARCHAR(255),"
                 + "  domain_name VARCHAR(255),"
                 + "  group_name VARCHAR(255), "
+                + "  content VARCHAR(10240) NOT NULL, "
                 + "  show_in_editor boolean DEFAULT true NOT NULL, "
                 + "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (component_id));");
     }
 
-    public static void createTableXmlContent(JdbcTemplate jdbcTemplate) {
-        jdbcTemplate.execute("CREATE TABLE xml_content ("
-                + "id IDENTITY NOT NULL, content VARCHAR(10240) NOT NULL);");
-    }
 
     public static void createTableRegistryUser(JdbcTemplate jdbcTemplate) {
         jdbcTemplate.execute("CREATE TABLE registry_user ("
@@ -94,7 +88,6 @@ public final class ComponentRegistryTestDatabase {
     public static void resetAndCreateAllTables(JdbcTemplate jdbcTemplate) {
         resetDatabase(jdbcTemplate);
         createTablePersistentComponents(jdbcTemplate);
-        createTableXmlContent(jdbcTemplate);
         createTableRegistryUser(jdbcTemplate);
         createTableComments(jdbcTemplate);
         createTableGroup(jdbcTemplate);
