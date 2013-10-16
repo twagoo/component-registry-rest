@@ -12,7 +12,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -23,9 +26,12 @@ import clarin.cmdi.componentregistry.model.BaseComponent;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import clarin.cmdi.componentregistry.persistence.ComponentRegistryDao;
 
 import java.util.Arrays;
 import java.util.Collection;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.collections.ListUtils;
 
@@ -38,8 +44,8 @@ import org.apache.commons.collections.ListUtils;
  */
 
 @Repository
-public class AbstractDescriptionDaoImpl extends ComponentRegistryDaoImpl
-	implements ComponentDao {
+public class AbstractDescriptionDaoImpl extends NamedParameterJdbcDaoSupport
+	implements ComponentDao, ComponentRegistryDao {
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(AbstractDescriptionDaoImpl.class);
@@ -54,6 +60,37 @@ public class AbstractDescriptionDaoImpl extends ComponentRegistryDaoImpl
 
     protected String getCommentsForeignKeyColumn() {
 	return "component_id";
+    }
+
+    protected BaseComponent getFirstOrNull(StringBuilder selectQuery, Object... args) {
+	return getFirstOrNull(selectQuery.toString(), args);
+    }
+
+    protected BaseComponent getFirstOrNull(String selectQuery, Object... args) {
+	List<BaseComponent> list = getList(selectQuery, args);
+	if (list.size() > 0) {
+	    return list.get(0);
+	} else {
+	    return null;
+	}
+    }
+
+    protected List<BaseComponent> getList(StringBuilder selectQuery, Object... args) {
+	return getList(selectQuery.toString(), args);
+    }
+
+    protected List<BaseComponent> getList(String selectQuery, Object... args) {
+	return getJdbcTemplate().query(selectQuery, getRowMapper(), args);
+    }
+
+    @Autowired
+    public void setNonFinalJdbcTemplate(JdbcTemplate jdbcTemplate) {
+	super.setJdbcTemplate(jdbcTemplate);
+    }
+    
+    @Override
+    public void setDatasourceProperty(DataSource ds) {
+	super.setDataSource(ds);
     }
 
     /**
@@ -385,10 +422,6 @@ public class AbstractDescriptionDaoImpl extends ComponentRegistryDaoImpl
 	}
     }
 
-    /**
-     * @return the rowMapper
-     */
-    @Override
     protected ParameterizedRowMapper<BaseComponent> getRowMapper() {
 	return rowMapper;
     }
