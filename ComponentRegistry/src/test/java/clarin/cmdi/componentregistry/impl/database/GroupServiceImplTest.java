@@ -15,9 +15,9 @@ import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
-import clarin.cmdi.componentregistry.persistence.UserDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupDao;
 import clarin.cmdi.componentregistry.persistence.jpa.OwnershipDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import static org.junit.Assert.*;
 
@@ -68,21 +68,21 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	user.setName("Test User");
 	user.setPrincipalName(DummyPrincipal.DUMMY_CREDENTIALS
 		.getPrincipalName());
-	userDao.insertUser(user);
+	user = userDao.saveAndFlush(user);
 	user = userDao.getByPrincipalName(user.getPrincipalName());
 
 	user2 = new RegistryUser();
 	user2.setName("Test User 2");
 	user2.setPrincipalName(DummyPrincipal.DUMMY_CREDENTIALS
 		.getPrincipalName() + "2");
-	userDao.insertUser(user2);
+	user2 = userDao.saveAndFlush(user2);
 	user2 = userDao.getByPrincipalName(user2.getPrincipalName());
 
 	user3 = new RegistryUser();
 	user3.setName("Test User 3");
 	user3.setPrincipalName(DummyPrincipal.DUMMY_CREDENTIALS
 		.getPrincipalName() + "3");
-	userDao.insertUser(user3);
+	user3 = userDao.saveAndFlush(user3);
 	user3 = userDao.getByPrincipalName(user3.getPrincipalName());
     }
 

@@ -58,6 +58,8 @@ public class ConcurrentRestServiceTest extends
 	runAllThreads(ts);
 	if (errors.size() > 0) {
 	    System.out.println(Arrays.toString(errors.toArray()));
+	    for (String e:errors)
+		System.err.println(e);
 	    fail();
 	}
 	assertProfiles(NR_OF_PROFILES, false);

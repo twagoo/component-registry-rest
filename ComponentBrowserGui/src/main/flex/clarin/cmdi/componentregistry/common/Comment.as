@@ -13,8 +13,7 @@ package clarin.cmdi.componentregistry.common
 		[Bindable]
 		public var commentDate:String;
 		
-		public var componentDescriptionId:String;
-		public var profileDescriptionId:String;
+		public var componentId:String;
 		public var id:String;
 		public var canDelete:Boolean;
 		public var itemDescription:ItemDescription;
@@ -27,8 +26,7 @@ package clarin.cmdi.componentregistry.common
 		public function create(comment:XML, itemDescription:ItemDescription):void{
 			this.comments = comment.comments;
 			this.commentDate  = DateUtils.formatDateString(comment.commentDate);
-			this.componentDescriptionId = comment.componentDescriptionId;
-			this.profileDescriptionId = comment.profileDescriptionId;
+			this.componentId = comment.componentDescriptionId;
 			this.id = comment.id;
 			this.userName = comment.userName;
 			this.canDelete = comment.canDelete == "true";
@@ -45,11 +43,8 @@ package clarin.cmdi.componentregistry.common
 			var result:XML = <comment></comment>;
 			result.appendChild(<comments>{comments}</comments>);
 			result.appendChild(<commentDate>{commentDate}</commentDate>);
-			if(profileDescriptionId){
-				result.appendChild(<profileDescriptionId>{profileDescriptionId}</profileDescriptionId>);
-			}
-			if(componentDescriptionId){
-				result.appendChild(<componentDescriptionId>{componentDescriptionId}</componentDescriptionId>);
+			if(componentId){
+				result.appendChild(<componentId>{componentId}</componentId>);
 			}
 			result.appendChild(<userName>{userName}</userName>);
 			return result;

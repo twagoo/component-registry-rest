@@ -15,9 +15,10 @@ import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
-import clarin.cmdi.componentregistry.persistence.ComponentRegistryDao;
 import clarin.cmdi.componentregistry.persistence.jpa.JpaComponentDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import javax.sql.DataSource;
 
@@ -31,10 +32,13 @@ import javax.sql.DataSource;
 
 @Repository
 public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
-	ComponentDao, ComponentRegistryDao {
+	ComponentDao{
 
     @Autowired
     private JpaComponentDao jpaComponentDao;
+    
+    @Autowired
+    private UserDao userDao;
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(ComponentDaoImpl.class);
@@ -96,11 +100,6 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
     @Autowired
     public void setNonFinalJdbcTemplate(JdbcTemplate jdbcTemplate) {
 	super.setJdbcTemplate(jdbcTemplate);
-    }
-
-    @Override
-    public void setDatasourceProperty(DataSource ds) {
-	super.setDataSource(ds);
     }
 
     /**
@@ -354,18 +353,16 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
      */
     @Override
     public String getOwnerPrincipalName(Number id) {
-	StringBuilder select = new StringBuilder("SELECT principal_name FROM "
-		+ TABLE_REGISTRY_USER);
-	select.append(" JOIN ").append(getTableName());
-	select.append(" ON user_id = " + TABLE_REGISTRY_USER + ".id ");
-	select.append(" WHERE ").append(getTableName()).append(".id = ?");
-	List<String> owner = getJdbcTemplate().query(select.toString(),
-		new ParameterizedSingleColumnRowMapper<String>(), id);
-	if (owner.isEmpty()) {
+	Component component = getById(id);
+	if (component == null)
 	    return null;
-	} else {
-	    return owner.get(0);
-	}
+	
+	long userId = component.getDbUserId();
+	RegistryUser user = userDao.findOne(userId);
+	if (user == null)
+	    return null;
+
+	return user.getPrincipalName();
     }
 
     @Override

@@ -33,11 +33,7 @@
 				comment.commentDate = "";
 
 				comment.comments = comments.text;
-				if(itemDescription.isProfile){
-					comment.profileDescriptionId = itemDescription.id;
-				} else{
-					comment.componentDescriptionId = itemDescription.id;
-				}
+				comment.componentId = itemDescription.id;
 				commentPostService.upload(comment, itemDescription);
 			}
 

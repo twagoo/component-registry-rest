@@ -3,21 +3,27 @@ package clarin.cmdi.componentregistry.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
+
 import javax.xml.transform.TransformerException;
+
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author george.georgovassilis@mpi.nl
  */
 public class CommentResponseTest {
 
     private MDMarshaller marshaller;
+    private Date testDate = new Date();
 
     @Before
     public void setUp() throws TransformerException {
@@ -72,7 +78,7 @@ public class CommentResponseTest {
 	expected += "    <errors/>\n";
 	expected += "    <comment>\n";
 	expected += "        <comments>Name</comments>\n";
-	expected += "        <commentDate>myDate</commentDate>\n";
+	expected += "        <commentDate>"+DatesHelper.isoFormat(testDate)+"</commentDate>\n";
 	expected += "        <componentId>myD</componentId>\n";
 	expected += "        <id>myId</id>\n";
 	expected += "        <userName>J. Unit</userName>\n";
@@ -90,9 +96,9 @@ public class CommentResponseTest {
 	Comment com = new Comment();
 	com.setComment("Name");
 	com.setId("myId");
-	com.setUserId("myU");
+	com.setUserId(123);
 	com.setComponentId("myD");
-	com.setCommentDate("myDate");
+	com.setCommentDate(testDate);
 	com.setUserName("J. Unit");
 	return com;
     }

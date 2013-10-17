@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistryException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,16 +14,20 @@ import java.util.regex.Pattern;
 import javax.xml.bind.JAXBException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+
 import javax.xml.transform.TransformerException;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -233,7 +238,7 @@ public final class RegistryTestHelper {
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>" + commentName + "</comments>\n";
-	comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
+	comContent += "    <commentDate>" + DatesHelper.createNewDate() + "</commentDate>\n";
 	comContent += "    <componentId>" + profileId + "</componentId>\n";
 	comContent += "    <userName>J. Unit</userName>\n";
 	comContent += "</comment>\n";
@@ -245,7 +250,7 @@ public final class RegistryTestHelper {
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>" + commentName + "</comments>\n";
-	comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
+	comContent += "    <commentDate>" + DatesHelper.createNewDate() + "</commentDate>\n";
 	comContent += "     <componentId>" + componentId + "</componentId>";
 	comContent += "    <userName>J. Unit</userName>\n";
 	comContent += "</comment>\n";

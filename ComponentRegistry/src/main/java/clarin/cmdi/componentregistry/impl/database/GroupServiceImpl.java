@@ -23,10 +23,10 @@ import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
-import clarin.cmdi.componentregistry.persistence.UserDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupMembershipDao;
 import clarin.cmdi.componentregistry.persistence.jpa.OwnershipDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 /**
  * Service that manages groups, memberships and ownerships. It exposes some

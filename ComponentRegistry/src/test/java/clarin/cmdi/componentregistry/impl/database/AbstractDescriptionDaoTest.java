@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.Component;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 /**
  * Base test class for concrete tests to profile and component DAOs
@@ -181,7 +181,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 
     @Test
     public void testIsPublic() {
-	Number userId = userDao.insertUser(UserDaoTest.createTestUser());
+	Number userId = userDao.save(UserDaoTest.createTestUser()).getId();
 	Component publicDesc = insert(true, null);
 	assertTrue(getDao().isPublic(publicDesc.getId()));
 	assertFalse(getDao().isInUserSpace(publicDesc.getId(), userId));

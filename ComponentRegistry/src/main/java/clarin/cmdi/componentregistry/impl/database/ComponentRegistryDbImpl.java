@@ -19,8 +19,8 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
-import clarin.cmdi.componentregistry.persistence.CommentsDao;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -183,7 +183,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	try {
 	    if (componentDao.isInRegistry(profileId, getUserId())) {
 		final List<Comment> commentsFromProfile = commentsDao
-			.getCommentsFromProfile(profileId);
+			.getCommentsFromComponent(profileId);
 		setCanDeleteInComments(commentsFromProfile, principal);
 		return commentsFromProfile;
 	    } else {
@@ -204,7 +204,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	    throws ComponentRegistryException {
 	try {
 	    Comment comment = commentsDao
-		    .getSpecifiedCommentFromProfile(commentId);
+		    .findOne(Long.parseLong(commentId));
 	    if (comment != null
 		    && profileId.equals(comment.getComponentId())
 		    && componentDao.isInRegistry(comment.getComponentId(),
@@ -251,9 +251,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	    throws ComponentRegistryException {
 	try {
 	    Comment comment = commentsDao
-		    .getSpecifiedCommentFromComponent(commentId);
+		    .findOne(Long.parseLong(commentId));
 	    if (comment != null
-		    && componentId.equals(comment.getComponentId())
+		    && componentId.equals(comment.getComponentId().toString())
 		    && componentDao.isInRegistry(comment.getComponentId(),
 			    getUserId())) {
 		setCanDeleteInComments(Collections.singleton(comment),
@@ -291,13 +291,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	if (principal != null && principal.getName() != null) {
 	    final RegistryUser registryUser = userDao
 		    .getByPrincipalName(principal.getName());
-	    final String registryUserId = registryUser == null ? null
-		    : registryUser.getId().toString();
+	    final long registryUserId = registryUser == null ? -1
+		    : registryUser.getId();
 	    final boolean isAdmin = registryUser != null
 		    && configuration.isAdminUser(principal);
 	    for (Comment comment : comments) {
 		comment.setCanDelete(isAdmin
-			|| comment.getUserId().equals(registryUserId));
+			|| comment.getUserId() == registryUserId);
 	    }
 	}
     }
@@ -386,16 +386,13 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	try {
 	    if (comment.getComponentId() != null
 		    && componentDao.isInRegistry(comment.getComponentId(),
-			    getUserId())
-		    || comment.getComponentId() != null
-		    && componentDao.isInRegistry(comment.getComponentId(),
 			    getUserId())) {
 		// Convert principal name to user record id
 		Number uid = convertUserIdInComment(comment, principalName);
 		// Set date to current date
-		comment.setCommentDate(Comment.createNewDate());
-		Number commentId = commentsDao.insertComment(comment, uid);
-		comment.setId(commentId.toString());
+		comment.setCommentDate(new Date());
+		comment.setUserId(uid.longValue());
+		commentsDao.saveAndFlush(comment);
 	    } else {
 		throw new ComponentRegistryException(
 			"Cannot insert comment into this registry. Unknown profileId or componentId");
@@ -458,10 +455,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	if (principalName != null) {
 	    RegistryUser user = userDao.getByPrincipalName(principalName);
 	    if (user != null) {
-		Number id = user.getId();
+		Long id = user.getId();
 		if (id != null) {
 		    // Set user id in comment for convenience of calling method
-		    comment.setUserId(id.toString());
+		    comment.setUserId(id);
 		    // Set name to user's preferred display name
 		    comment.setUserName(user.getName());
 		    return id;
@@ -755,10 +752,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     }
 
     private boolean isOwnerOfComment(Comment com, String principalName) {
-	String owner = commentsDao.getOwnerPrincipalName(Integer.parseInt(com
+	RegistryUser owner = commentsDao.getOwnerOfComment(Integer.parseInt(com
 		.getId()));
 	return owner != null // If owner is null, no one can be owner
-		&& principalName.equals(owner);
+		&& principalName.equals(owner.getPrincipalName());
     }
 
     private void checkAge(Component desc, Principal principal)
@@ -789,7 +786,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	if (isPublic()) {
 	    return ComponentRegistry.PUBLIC_NAME;
 	} else {
-	    return "Registry of " + userDao.getById(getUserId()).getName();
+	    RegistryUser u = userDao.findOne(getUserId().longValue());
+	    return "Registry of " + u.getName();
 	}
     }
 
@@ -810,18 +808,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	    throws IOException, ComponentRegistryException,
 	    UserUnauthorizedException, DeleteFailedException {
 	try {
-	    Comment comment = commentsDao.getById(Integer.parseInt(commentId));
+	    Comment comment = commentsDao.findOne(Long.parseLong(commentId));
 	    if (comment != null
 		    // Comment must have an existing (in this registry)
 		    // componentId or profileId
-		    && (comment.getComponentId() != null
+		    && comment.getComponentId() != null
 			    && componentDao.isInRegistry(
-				    comment.getComponentId(), getUserId()) || comment
-			    .getComponentId() != null
-			    && componentDao.isInRegistry(
-				    comment.getComponentId(), getUserId()))) {
+				    comment.getComponentId(), getUserId())) {
 		checkAuthorisationComment(comment, principal);
-		commentsDao.deleteComment(comment);
+		commentsDao.delete(comment);
 	    } else {
 		// Comment exists in DB, but component is not in this registry
 		throw new ComponentRegistryException("Comment " + commentId

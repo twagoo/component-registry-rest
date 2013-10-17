@@ -49,10 +49,8 @@ package clarin.cmdi.componentregistry.services {
 		
 		private function createUri(comment:Comment, userSpace:String):URI {
 			var uri:URI = null;
-			if (comment.profileDescriptionId) {
-				uri = new URI(Config.instance.getProfileCommentsPath(comment.profileDescriptionId));
-			} else if(comment.componentDescriptionId){
-				uri = new URI(Config.instance.getComponentCommentsPath(comment.componentDescriptionId));
+			if(comment.componentId){
+				uri = new URI(Config.instance.getComponentCommentsPath(comment.componentId));
 			} else{
 				return null;
 			}

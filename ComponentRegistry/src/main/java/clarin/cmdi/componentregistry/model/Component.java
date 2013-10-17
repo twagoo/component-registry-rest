@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.model;
 
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.util.DateAdapter;
+import clarin.cmdi.componentregistry.util.RFCDateAdapter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -60,7 +60,7 @@ public class Component implements Serializable {
     private String name;
 
     @Column(name = "registration_date")
-    @XmlJavaTypeAdapter(DateAdapter.class)
+    @XmlJavaTypeAdapter(RFCDateAdapter.class)
     private Date registrationDate;
 
     @Column(name = "creator_name")

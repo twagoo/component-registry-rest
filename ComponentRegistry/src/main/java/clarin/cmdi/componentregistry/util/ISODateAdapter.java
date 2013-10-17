@@ -11,17 +11,17 @@ import clarin.cmdi.componentregistry.DatesHelper;
  * @author george.georgovassilis@mpi.nl
  *
  */
-public class DateAdapter extends XmlAdapter<String, Date> {
+public class ISODateAdapter extends XmlAdapter<String, Date> {
 
     @Override
     public String marshal(Date v) throws Exception {
-	String string = DatesHelper.getRFCDateTime(v);
+	String string = DatesHelper.isoFormat(v);
 	return string;
     }
 
     @Override
     public Date unmarshal(String v) throws Exception {
-	Date date = DatesHelper.parseRFCDateTime(v);
+	Date date = DatesHelper.parseIso(v);
 	return date;
     }
 
