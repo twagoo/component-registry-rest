@@ -24,8 +24,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
 
-import clarin.cmdi.componentregistry.util.ISODateAdapter;
-import clarin.cmdi.componentregistry.util.RFCDateAdapter;
+import clarin.cmdi.componentregistry.util.XmlDateAdapter;
 
 /**
  * 
@@ -43,7 +42,7 @@ public class Comment {
     @Column(nullable = false)
     private String comments;
 
-    @XmlJavaTypeAdapter(ISODateAdapter.class)
+    @XmlJavaTypeAdapter(XmlDateAdapter.class)
     @Column(name = "comment_date", nullable = false)
     private Date commentDate;
 

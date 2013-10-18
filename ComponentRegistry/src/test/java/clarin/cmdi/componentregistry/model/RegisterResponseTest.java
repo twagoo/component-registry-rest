@@ -70,7 +70,7 @@ public class RegisterResponseTest {
 	expected += "        <id>clarin.eu:cr1:p_myId</id>\n";
 	expected += "        <description>myD</description>\n";
 	expected += "        <name>Name</name>\n";
-	expected += "        <registrationDate>"+DatesHelper.getRFCDateTime(testDate)+"</registrationDate>\n";
+	expected += "        <registrationDate>"+DatesHelper.formatXmlDateTime(testDate)+"</registrationDate>\n";
 	expected += "        <creatorName>myC</creatorName>\n";
 	expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "        <commentsCount>2</commentsCount>\n";
@@ -102,7 +102,7 @@ public class RegisterResponseTest {
 	expected += "        <id>clarin.eu:cr1:c_myId</id>\n";
 	expected += "        <description>myD</description>\n";
 	expected += "        <name>Name</name>\n";
-	expected += "        <registrationDate>"+DatesHelper.getRFCDateTime(testDate)+"</registrationDate>\n";
+	expected += "        <registrationDate>"+DatesHelper.formatXmlDateTime(testDate)+"</registrationDate>\n";
 	expected += "        <creatorName>myC</creatorName>\n";
 	expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "        <groupName>imdi</groupName>\n";

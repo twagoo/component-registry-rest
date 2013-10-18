@@ -44,7 +44,7 @@ public class CommentTest {
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	expected += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <comments>tester</comments>\n";
-	expected += "    <commentDate>"+DatesHelper.isoFormat(testDate)+"</commentDate>\n";
+	expected += "    <commentDate>"+DatesHelper.formatXmlDateTime(testDate)+"</commentDate>\n";
 	expected += "    <componentId>clarin.eu:cr1:p_1297242111880</componentId>\n";
 	expected += "    <id>1</id>\n";
 	expected += "    <userName>J. Unit</userName>\n";
@@ -74,7 +74,7 @@ public class CommentTest {
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	expected += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <comments>tester</comments>\n";
-	expected += "    <commentDate>"+DatesHelper.isoFormat(testDate)+"</commentDate>\n";
+	expected += "    <commentDate>"+DatesHelper.formatXmlDateTime(testDate)+"</commentDate>\n";
 	expected += "    <componentId>clarin.eu:cr1:c_1297242111880</componentId>\n";
 	expected += "    <id>1</id>\n";
 	expected += "    <userName>J. Unit</userName>\n";

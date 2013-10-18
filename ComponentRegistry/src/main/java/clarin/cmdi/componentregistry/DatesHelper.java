@@ -11,6 +11,7 @@ import clarin.cmdi.componentregistry.rest.NewAction;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 
@@ -126,6 +127,26 @@ public class DatesHelper {
 	SimpleDateFormat sdf = new SimpleDateFormat(
 		DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern());
 	return sdf.format(new Date(time));
+    }
+
+    public static String formatXmlDateTime(Date date) {
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZZ");
+	sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+	String s = sdf.format(date);
+	s = s.substring(0, s.length() - 2) + ":" + s.substring(s.length() - 2);
+	return s;
+    }
+
+    public static Date parseXmlDateTime(String date) {
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssZZ");
+	sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+	try {
+	    //strip timezone colom
+	    date = date.replaceAll("(.*?T.*?[+-])(\\d\\d):(\\d\\d)", "$1$2$3");
+	    return sdf.parse(date);
+	} catch (ParseException e) {
+	    return null;
+	}
     }
 
 }

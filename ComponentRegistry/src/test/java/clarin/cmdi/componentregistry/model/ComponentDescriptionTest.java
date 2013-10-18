@@ -49,7 +49,7 @@ public class ComponentDescriptionTest {
         expected += "    <id>clarin.eu:cr1:c_myId</id>\n";
         expected += "    <description>myD</description>\n";
         expected += "    <name>Name</name>\n";
-        expected += "    <registrationDate>"+DatesHelper.getRFCDateTime(testDate)+"</registrationDate>\n";
+        expected += "    <registrationDate>"+DatesHelper.formatXmlDateTime(testDate)+"</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
         expected += "    <userId>user1</userId>\n";
         expected += "    <domainName>Linguistics</domainName>\n";

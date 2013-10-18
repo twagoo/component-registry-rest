@@ -78,7 +78,7 @@ public class CommentResponseTest {
 	expected += "    <errors/>\n";
 	expected += "    <comment>\n";
 	expected += "        <comments>Name</comments>\n";
-	expected += "        <commentDate>"+DatesHelper.isoFormat(testDate)+"</commentDate>\n";
+	expected += "        <commentDate>"+DatesHelper.formatXmlDateTime(testDate)+"</commentDate>\n";
 	expected += "        <componentId>myD</componentId>\n";
 	expected += "        <id>myId</id>\n";
 	expected += "        <userName>J. Unit</userName>\n";
