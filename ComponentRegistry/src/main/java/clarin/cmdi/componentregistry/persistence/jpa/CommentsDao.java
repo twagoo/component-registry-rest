@@ -56,4 +56,21 @@ public interface CommentsDao extends JpaRepository<Comment, Long>{
     	@Query("select c from Comment c where c.comments = ?1")
 	Comment getByComment(String aComment) throws DataAccessException;
 
+	/**
+	 * Get number of comments for component
+	 * 
+	 * @param componentId
+	 * @return comment count
+	 */
+    	@Query("select count(c) from Comment c where c.componentId = ?1")
+	long findCommentCountForComponent(String componentId);
+    	
+	/**
+	 * Get number of comments for components
+	 * 
+	 * @param componentIds
+	 * @return list of (componentId,count) tuples
+	 */
+    	@Query(nativeQuery=true, value = "select component_id, count(*) from comments where component_id in (?1) group by component_id")
+	List<Object[]> findCommentCountForComponents(List<String> ids);
 }

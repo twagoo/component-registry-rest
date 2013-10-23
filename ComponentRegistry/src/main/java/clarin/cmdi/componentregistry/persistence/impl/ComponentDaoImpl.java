@@ -1,14 +1,14 @@
 package clarin.cmdi.componentregistry.persistence.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
-import org.springframework.jdbc.core.simple.ParameterizedSingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
 
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
@@ -17,10 +17,9 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.JpaComponentDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
-
-import javax.sql.DataSource;
 
 /**
  * Base DAO which can be extended to serve {@link ComponentDescription}s and
@@ -31,12 +30,14 @@ import javax.sql.DataSource;
  */
 
 @Repository
-public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
-	ComponentDao{
+public class ComponentDaoImpl implements ComponentDao {
 
     @Autowired
     private JpaComponentDao jpaComponentDao;
-    
+
+    @Autowired
+    private CommentsDao commentsDao;
+
     @Autowired
     private UserDao userDao;
 
@@ -44,8 +45,10 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
 	    .getLogger(ComponentDaoImpl.class);
 
     /**
-     * Copy a set of properties which are allowed to change from "from" to "to" thus making sure that only those
-     * properties are updated and not other ones.
+     * Copy a set of properties which are allowed to change from "from" to "to"
+     * thus making sure that only those properties are updated and not other
+     * ones.
+     * 
      * @param from
      * @param to
      */
@@ -85,21 +88,43 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
     }
 
     /**
-     * Update {@link Component#getCommentsCount()} (which is a transient property) with the number of comments for that component 
+     * Update {@link Component#getCommentsCount()} (which is a transient
+     * property) with the number of comments for that component and load
+     * {@link Component#getContent()}
+     * 
      * @param component
      */
-    private void updateCommentsCount(Component component) {
+    private void augment(Component component) {
 	if (component == null)
 	    return;
-	int count = getJdbcTemplate().queryForInt(
-		"select count(*) from comments where component_id = ?",
-		new Object[] { component.getId() });
+	int count = (int) commentsDao.findCommentCountForComponent(component
+		.getId());
 	component.setCommentsCount(count);
+	component.setContent(jpaComponentDao.findContentByComponentId(component
+		.getId()));
     }
 
-    @Autowired
-    public void setNonFinalJdbcTemplate(JdbcTemplate jdbcTemplate) {
-	super.setJdbcTemplate(jdbcTemplate);
+/**
+     * Update {@link Component#getCommentsCount()
+     * @param components
+     */
+    private List<Component> augment(List<Component> components) {
+	if (components.isEmpty())
+	    return components;
+	Map<String, Component> map = new HashMap<String, Component>();
+	List<String> idlist = new ArrayList<String>();
+	for (Component c:components) {
+	    idlist.add(c.getId());
+	    map.put(c.getId(), c);
+	}
+	List<Object[]> tuples = commentsDao
+		.findCommentCountForComponents(idlist);
+	for (Object[] tuple : tuples) {
+	    String id = tuple[0].toString();
+	    int count = Integer.parseInt(tuple[1].toString());
+	    map.get(id).setCommentsCount(count);
+	}
+	return components;
     }
 
     /**
@@ -155,12 +180,8 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
      * @return String value of XML content for profile or component
      */
     @Override
-    public String getContent(boolean isDeleted, String cmdId)
-	    throws DataAccessException {
-	Component component = jpaComponentDao.findByComponentId(cmdId);
-	if (component == null || component.isDeleted() != isDeleted)
-	    return null;
-	return component.getContent();
+    public String getContent(boolean isDeleted, String cmdId) {
+	return jpaComponentDao.findContentByComponentId(cmdId, isDeleted);
     }
 
     /**
@@ -172,18 +193,21 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
      */
     @Override
     public Number insertDescription(Component description, String content,
-	    boolean isPublic, Number userId) throws DataAccessException {
+	    boolean isPublic, Number userId) {
 
 	if (description.getId() != null
 		&& jpaComponentDao.findByComponentId(description.getId()) != null) {
 	    throw new IllegalArgumentException("Component "
 		    + description.getId() + " already in DB");
 	}
+	if (content == null)
+	    content = "";
 	Component copy = castDown(description);
 	copy.setContent(content);
 	copy.setPublic(isPublic);
 	copy.setUserId(toString(userId));
 	copy = jpaComponentDao.saveAndFlush(copy);
+	jpaComponentDao.updateContent(copy.getId(), content);
 	return copy.getDbId();
     }
 
@@ -200,18 +224,22 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
     @Override
     public void updateDescription(Number id, Component description,
 	    String content) {
+	if (content == null)
+	    content = "";
 	if (description != null) {
 	    // Update description
 	    Component copy = jpaComponentDao.findByComponentId(description
 		    .getId());
 	    copyPersistentProperties(description, copy);
 	    jpaComponentDao.saveAndFlush(copy);
+	    jpaComponentDao.updateContent(copy.getId(), content);
 	}
 
 	if (content != null) {
 	    Component copy = jpaComponentDao.findOne(id.longValue());
 	    copy.setContent(content);
 	    jpaComponentDao.saveAndFlush(copy);
+	    jpaComponentDao.updateContent(copy.getId(), content);
 	}
     }
 
@@ -223,10 +251,10 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
      * @return The description, if it exists; null otherwise
      */
     @Override
-    public Component getById(Number id) throws DataAccessException {
+    public Component getById(Number id) {
 	Component component = jpaComponentDao.findOne(id.longValue());
 	if (component != null && !component.isDeleted()) {
-	    updateCommentsCount(component);
+	    augment(component);
 	    return component;
 	}
 	return null;
@@ -240,10 +268,10 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
      * @return The description, if it exists; null otherwise
      */
     @Override
-    public Component getByCmdId(String id) throws DataAccessException {
+    public Component getByCmdId(String id) {
 	Component component = jpaComponentDao.findByComponentId(id);
 	if (component != null && !component.isDeleted()) {
-	    updateCommentsCount(component);
+	    augment(component);
 	    return component;
 	}
 	return null;
@@ -259,11 +287,10 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
      * @return The description, if it exists; null otherwise
      */
     @Override
-    public Component getByCmdId(String id, Number userId)
-	    throws DataAccessException {
+    public Component getByCmdId(String id, Number userId) {
 	Component component = getByCmdId(id);
 	if (component != null) {
-	    updateCommentsCount(component);
+	    augment(component);
 	    if (userId == null) {
 		if (!component.isPublic())
 		    component = null;
@@ -286,53 +313,58 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
     public Number getDbId(String cmdId) {
 	Number id = null;
 	Component c = jpaComponentDao.findByComponentId(cmdId);
-	if (c!=null)
+	if (c != null)
 	    id = c.getDbId();
 	return id;
     }
 
     /**
      * 
-     * @return All descriptions in the public space
+     * @return All descriptions in the public space. Won't include xml content
+     *         and comments count.
      */
     @Override
-    public List<Component> getPublicDescriptions() throws DataAccessException {
-	return jpaComponentDao.findPublicItems();
+    public List<Component> getPublicDescriptions() {
+	return augment(jpaComponentDao.findPublicItems());
     }
 
     /**
      * @return List of deleted descriptions in user space or in public when
-     *         userId=null
+     *         userId=null. Won't include xml content and comments count.
      * @param userId
      */
     @Override
     public List<Component> getDeletedDescriptions(Number userId) {
+	List<Component> list = null;
 	if (userId != null) {
-	    return jpaComponentDao.findDeletedItemsForUser(userId.longValue());
+	    list = jpaComponentDao.findDeletedItemsForUser(userId.longValue());
 	} else {
-	    return jpaComponentDao.findPublicDeletedItems();
+	    list = jpaComponentDao.findPublicDeletedItems();
 	}
+	list = augment(list);
+	return list;
     }
 
     /**
      * 
-     * @return All the user's descriptions not in the public space
+     * @return All the user's descriptions not in the public space .Won't
+     *         include xml content and comments count.
      */
     @Override
-    public List<Component> getUserspaceComponents(Number userId)
-	    throws DataAccessException {
-	return jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(), ComponentDescription.COMPONENT_PREFIX+"%");
+    public List<Component> getUserspaceComponents(Number userId) {
+	return augment(jpaComponentDao
+		.findItemsForUserThatAreNotInGroups(userId.longValue(),
+			ComponentDescription.COMPONENT_PREFIX + "%"));
     }
 
     @Override
-    public List<Component> getUserspaceProfiles(Number userId)
-	    throws DataAccessException {
-	return jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(), ProfileDescription.PROFILE_PREFIX+"%");
+    public List<Component> getUserspaceProfiles(Number userId) {
+	return augment(jpaComponentDao.findItemsForUserThatAreNotInGroups(
+		userId.longValue(), ProfileDescription.PROFILE_PREFIX + "%"));
     }
 
     @Override
-    public void setDeleted(Component desc, boolean isDeleted)
-	    throws DataAccessException {
+    public void setDeleted(Component desc, boolean isDeleted) {
 	Component copy = jpaComponentDao.findByComponentId(desc.getId());
 	copy.setDeleted(isDeleted);
 	jpaComponentDao.saveAndFlush(copy);
@@ -356,7 +388,7 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
 	Component component = getById(id);
 	if (component == null)
 	    return null;
-	
+
 	long userId = component.getDbUserId();
 	RegistryUser user = userDao.findOne(userId);
 	if (user == null)
@@ -367,12 +399,14 @@ public class ComponentDaoImpl extends NamedParameterJdbcDaoSupport implements
 
     @Override
     public List<Component> getPublicComponentDescriptions() {
-	return jpaComponentDao.findPublicItems(ComponentDescription.COMPONENT_PREFIX+"%");
+	return augment(jpaComponentDao
+		.findPublicItems(ComponentDescription.COMPONENT_PREFIX + "%"));
     }
 
     @Override
     public List<Component> getPublicProfileDescriptions() {
-	return jpaComponentDao.findPublicItems(ProfileDescription.PROFILE_PREFIX+"%");
+	return augment(jpaComponentDao
+		.findPublicItems(ProfileDescription.PROFILE_PREFIX + "%"));
     }
 
 }

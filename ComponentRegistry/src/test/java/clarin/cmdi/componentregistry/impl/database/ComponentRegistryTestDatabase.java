@@ -33,7 +33,7 @@ public final class ComponentRegistryTestDatabase {
                 + "  creator_name VARCHAR(255),"
                 + "  domain_name VARCHAR(255),"
                 + "  group_name VARCHAR(255), "
-                + "  content VARCHAR(10240) NOT NULL, "
+                + "  content VARCHAR(10240) DEFAULT '' NOT NULL, "
                 + "  show_in_editor boolean DEFAULT true NOT NULL, "
                 + "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (component_id));");
     }

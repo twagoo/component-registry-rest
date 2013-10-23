@@ -6,11 +6,14 @@ import clarin.cmdi.componentregistry.util.XmlDateAdapter;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -91,6 +94,7 @@ public class Component implements Serializable {
 
     @XmlTransient
     @Column(name = "content", nullable = false)
+    @Transient
     private String content = "";
 
     @XmlTransient

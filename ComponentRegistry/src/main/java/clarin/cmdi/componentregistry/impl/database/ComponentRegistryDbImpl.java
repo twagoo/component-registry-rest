@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of ComponentRegistry that uses Database Acces Objects for
@@ -53,6 +54,7 @@ import org.springframework.dao.DataAccessException;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author George.Georgovassilis@mpi.nl
  */
+@Transactional
 public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	implements ComponentRegistry {
 

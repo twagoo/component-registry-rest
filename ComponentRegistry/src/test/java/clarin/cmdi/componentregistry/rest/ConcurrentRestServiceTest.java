@@ -34,8 +34,8 @@ public class ConcurrentRestServiceTest extends
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(ConcurrentRestServiceTest.class);
-    private final int NR_OF_PROFILES = 2;
-    private final int NR_OF_COMPONENTS = 2;
+    private final int NR_OF_PROFILES = 20;
+    private final int NR_OF_COMPONENTS = 20;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
