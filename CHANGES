@@ -6,8 +6,13 @@ Release ComponentRegistry-1.15.0 ()
 - DB upgrade script which migrates profiles into components
 - Rest service XML using uniform element "componentId" in comments instead of "componentDescriptionId" or "profileDescriptionId"
 
-Release ComponentRegistry-1.14.0 (7 October 2013)
-- Implemented groups
+Release ComponentRegistry-1.14.0 (????)
+- User groups have been added, for more information see <https://trac.clarin.eu/wiki/ComponentRegistryAndEditor#Management>. https://trac.clarin.eu/ticket/143
+- Fixed erroneous link for child components with direct item links. https://trac.clarin.eu/ticket/322
+- Fixed search by component ID for profiles. https://trac.clarin.eu/ticket/225
+- Simple data categories no longer show up in ISOcat search. https://trac.clarin.eu/ticket/306
+- Improvement in admin interface. https://trac.clarin.eu/ticket/294
+- Internal refactoring w.r.t. persistence layer. https://trac.clarin.eu/ticket/360
 
 Release ComponentRegistry-1.13.0 (25 February 2013)
 - Added RSS feeds for public profiles, components, and comments. https://trac.clarin.eu/ticket/180

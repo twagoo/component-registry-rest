@@ -26,6 +26,9 @@ login to access these pages. To request one, contact <clarin@clarin.eu>.
 
 - Documentation for users is available at <http://www.clarin.eu/node/3223>.
 
+- Information on internally managing the application can be found at
+<https://trac.clarin.eu/wiki/ComponentRegistryAndEditor#Management>.
+
 Project structure
 -----
 This project contains two modules:
