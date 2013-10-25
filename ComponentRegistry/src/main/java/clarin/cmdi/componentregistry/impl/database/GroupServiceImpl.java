@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.GroupMembership;
 import clarin.cmdi.componentregistry.model.Ownership;
@@ -109,7 +109,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     protected boolean canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(
-	    RegistryUser user, Component description) {
+	    RegistryUser user, BaseDescription description) {
 	// TODO make some joins and multi-id queries to speed the entire method
 	// up
 	boolean isProfile = (description instanceof ProfileDescription);
@@ -149,9 +149,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
-	    RegistryUser user, Component component) {
+	    RegistryUser user, BaseDescription baseDescription) {
 	return canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(
-		user, component);
+		user, baseDescription);
     }
 
     @Override
@@ -265,7 +265,7 @@ public class GroupServiceImpl implements GroupService {
     public void transferItemOwnershipFromUserToGroup(String principal,
 	    String groupName, String itemId) {
 
-	Component item = null;
+	BaseDescription item = null;
 	item = componentDao.getByCmdId(itemId);
 	if (item == null)
 	    throw new ValidationException(
