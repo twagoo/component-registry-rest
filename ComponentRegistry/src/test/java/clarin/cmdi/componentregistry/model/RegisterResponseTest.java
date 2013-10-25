@@ -10,6 +10,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 
@@ -17,15 +18,9 @@ import javax.xml.transform.TransformerException;
 
 import org.junit.Before;
 
-public class RegisterResponseTest {
+public class RegisterResponseTest extends BaseUnitTest{
 
-    private MDMarshaller marshaller;
     private Date testDate = new Date();
-
-    @Before
-    public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-    }
 
     @Test
     public void testRegisterError() throws Exception {

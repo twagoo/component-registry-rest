@@ -7,7 +7,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -599,7 +599,7 @@ public class ComponentRegistryRestServiceTest extends
 		form);
 	assertTrue(response.isProfile());
 	assertEquals(1, getUserProfiles().size());
-	Component desc = response.getDescription();
+	BaseDescription desc = response.getDescription();
 	String profile = getResource()
 		.path("/registry/profiles/" + desc.getId() + "/xsd")
 		.accept(MediaType.TEXT_XML).get(String.class).trim();
@@ -619,7 +619,7 @@ public class ComponentRegistryRestServiceTest extends
 		form);
 	assertFalse(response.isProfile());
 	assertEquals(1, getUserComponents().size());
-	Component desc = response.getDescription();
+	BaseDescription desc = response.getDescription();
 	String profile = getResource()
 		.path("/registry/components/" + desc.getId() + "/xsd")
 		.accept(MediaType.TEXT_XML).get(String.class).trim();
@@ -772,7 +772,7 @@ public class ComponentRegistryRestServiceTest extends
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertTrue(response.isProfile());
-	Component desc = response.getDescription();
+	BaseDescription desc = response.getDescription();
 	assertEquals("Unpublished", desc.getDescription());
 	assertEquals(1, getUserProfiles().size());
 	assertEquals(0, getPublicProfiles().size());
@@ -798,7 +798,7 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
     }
 
-    private CMDComponentSpec getPublicSpec(Component desc) {
+    private CMDComponentSpec getPublicSpec(BaseDescription desc) {
 	if (desc.isProfile()) {
 	    return getResource().path("/registry/profiles/" + desc.getId())
 		    .get(CMDComponentSpec.class);
@@ -820,12 +820,12 @@ public class ComponentRegistryRestServiceTest extends
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertFalse(response.isProfile());
-	Component desc = response.getDescription();
+	BaseDescription desc = response.getDescription();
 	assertEquals("Unpublished", desc.getDescription());
 	assertEquals(1, getUserComponents().size());
 	assertEquals(0, getPublicComponents().size());
 	form = createFormData(
-		RegistryTestHelper.getComponentTestContent("publishedName"),
+		RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
 		"Published");
 	response = getAuthenticatedResource(
 		getResource().path(
@@ -1137,7 +1137,7 @@ public class ComponentRegistryRestServiceTest extends
 
 	// Update component
 	form = createFormData(
-		RegistryTestHelper.getComponentContent(compContent),
+		RegistryTestHelper.getComponentContentAsStream(compContent),
 		"UPDATE DESCRIPTION!");
 	cResponse = getAuthenticatedResource(
 		getResource().path(
@@ -1191,7 +1191,7 @@ public class ComponentRegistryRestServiceTest extends
 
 	// Now update
 	form = createFormData(
-		RegistryTestHelper.getComponentTestContent("TESTNAME"),
+		RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
 		"UPDATE DESCRIPTION!");
 	cResponse = getAuthenticatedResource(
 		getResource().path(
@@ -1445,7 +1445,7 @@ public class ComponentRegistryRestServiceTest extends
 	profileContent += "    </CMD_Component>\n";
 	profileContent += "</CMD_ComponentSpec>\n";
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
-		RegistryTestHelper.getComponentContent(profileContent),
+		RegistryTestHelper.getComponentContentAsStream(profileContent),
 		MediaType.APPLICATION_OCTET_STREAM_TYPE);
 	form.field(IComponentRegistryRestService.NAME_FORM_FIELD,
 		"ProfileTest1");

@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import static org.junit.Assert.assertEquals;
@@ -8,14 +9,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
-public class CMDItemInfoTest {
+public class CMDItemInfoTest extends BaseUnitTest{
 
     @Test
     public void testGetUserDir() throws Exception {
-	CMDItemInfo info = new CMDItemInfo(new MDMarshaller());
+	CMDItemInfo info = new CMDItemInfo(marshaller);
 	//info.setDataNode(new FileNode(createFile("users/user1/components/c_123/description.xml"), false));
 	info.setDataNode(new DisplayDataNode("test", false, createDescription(), ComponentStatus.PRIVATE));
 	assertTrue(info.isDeletable());
@@ -56,7 +57,7 @@ public class CMDItemInfoTest {
 	assertEquals("", info.getDescription());
     }
 
-    private Component createDescription() {
+    private BaseDescription createDescription() {
 	return ProfileDescription.createNewDescription();
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang.StringUtils;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -36,12 +37,12 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     public List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException {
 	LOG.debug("Checking usage of component {} in components", componentId);
 	List<ComponentDescription> result = new ArrayList<ComponentDescription>();
-	List<ComponentDescription> descs = getComponentDescriptions();
-	for (ComponentDescription desc : descs) {
-	    CMDComponentSpec spec = getMDComponent(desc.getId());
+	List<String> ids = getAllNonDeletedComponentIds();
+	for (String id:ids) {
+	    CMDComponentSpec spec = getMDComponent(id);
 	    if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
 		LOG.debug("Component {} used in component {}", componentId, spec.getHeader().getID());
-		result.add(desc);
+		result.add(getComponentDescription(id));
 	    }
 	}
 	return result;
@@ -51,11 +52,11 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     public List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException {
 	LOG.debug("Checking usage of component {} in profiles", componentId);
 	List<ProfileDescription> result = new ArrayList<ProfileDescription>();
-	for (ProfileDescription profileDescription : getProfileDescriptions()) {
-	    CMDComponentSpec profile = getMDProfile(profileDescription.getId());
+	for (String id : getAllNonDeletedProfileIds()) {
+	    CMDComponentSpec profile = getMDProfile(id);
 	    if (profile != null && findComponentId(componentId, profile.getCMDComponent())) {
 		LOG.debug("Component {} used in profile {}", componentId, profile.getHeader().getID());
-		result.add(profileDescription);
+		result.add(getProfileDescription(id));
 	    }
 	}
 	return result;
@@ -71,12 +72,13 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	// TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDaoImpl, should have better performance
 
 	// Get all profile descriptions
-	List<ProfileDescription> descriptionsCollection = getProfileDescriptions();
+	List<String> descriptionsCollectionIds = getAllNonDeletedProfileIds();
 	// Filter out ones that do should not be shown for metadata editor
-	ArrayList<ProfileDescription> descriptions = new ArrayList<ProfileDescription>(descriptionsCollection.size());
-	for (ProfileDescription profile : descriptionsCollection) {
-	    if (((ProfileDescription) profile).isShowInEditor()) {
-		descriptions.add((ProfileDescription) profile);
+	ArrayList<ProfileDescription> descriptions = new ArrayList<ProfileDescription>();
+	for (String id:descriptionsCollectionIds) {
+	    ProfileDescription profile = getProfileDescription(id);
+	    if (profile.isShowInEditor()) {
+		descriptions.add(profile);
 	    }
 	}
 	// Return filtered list
@@ -88,7 +90,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
     }
     
-    protected static void enrichSpecHeader(CMDComponentSpec spec, Component description) {
+    protected static void enrichSpecHeader(CMDComponentSpec spec, BaseDescription description) {
 	Header header = spec.getHeader();
 	header.setID(description.getId());
 	if (StringUtils.isEmpty(header.getName())) {
@@ -125,8 +127,8 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     }
     
     protected void checkStillUsed(String componentId) throws DeleteFailedException, ComponentRegistryException {
-	for (ProfileDescription profileDescription : getProfileDescriptions()) {
-	    CMDComponentSpec spec = getMDProfile(profileDescription.getId());
+	for (String id : getAllNonDeletedProfileIds()) {
+	    CMDComponentSpec spec = getMDProfile(id);
 	    if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
 		LOG.warn("Cannot delete component {}, still used in profile {} and possibly other profiles and/or components", componentId, spec.getHeader().getID());
 		// Profile match - throw
@@ -136,8 +138,8 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 	
 	LOG.debug("Component {} is not used in any profiles", componentId);
 	
-	for (ComponentDescription desc : getComponentDescriptions()) {
-	    CMDComponentSpec spec = getMDComponent(desc.getId());
+	for (String id : getAllNonDeletedComponentIds()) {
+	    CMDComponentSpec spec = getMDComponent(id);
 	    if (spec != null && findComponentId(componentId, spec.getCMDComponent())) {
 		LOG.warn("Cannot delete component {}, still used in component {} and possibly other components", componentId, spec.getHeader().getID());
 		// Component match -> throw

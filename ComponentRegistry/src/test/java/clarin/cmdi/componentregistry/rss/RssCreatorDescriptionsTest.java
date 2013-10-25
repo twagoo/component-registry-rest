@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.rss;
 
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -25,7 +25,7 @@ import org.junit.Test;
  */
 public class RssCreatorDescriptionsTest {
 
-    private void createTestDescription(Component desc, String creatorname,
+    private void createTestDescription(BaseDescription desc, String creatorname,
             String description, String groupname,
             String name, Date date, String id) {
 

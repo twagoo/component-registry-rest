@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.dao.DataAccessException;
 
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 
 /**
  * Interface for a persistence operation on components and profiles
@@ -20,14 +20,14 @@ public interface ComponentDao {
      * 
      * @return
      */
-    List<Component> getPublicComponentDescriptions();
+    List<BaseDescription> getPublicComponentDescriptions();
 
     /**
      * Get all public profiles
      * 
      * @return
      */
-    List<Component> getPublicProfileDescriptions();
+    List<BaseDescription> getPublicProfileDescriptions();
 
     /**
      * 
@@ -74,7 +74,7 @@ public interface ComponentDao {
      *            Content to insert and refer to from description
      * @return Id of newly inserted description
      */
-    Number insertDescription(Component description, String content,
+    Number insertDescription(BaseDescription description, String content,
 	    boolean isPublic, Number userId) throws DataAccessException;
 
     /**
@@ -87,7 +87,7 @@ public interface ComponentDao {
      * @param content
      *            New content for description (leave null to not change)
      */
-    void updateDescription(Number id, Component description, String content);
+    void updateDescription(Number id, BaseDescription description, String content);
 
     /**
      * Retrieves description by it's primary key Id
@@ -96,7 +96,7 @@ public interface ComponentDao {
      *            Description key
      * @return The description, if it exists; null otherwise
      */
-    Component getById(Number id) throws DataAccessException;
+    BaseDescription getById(Number id) throws DataAccessException;
 
     /**
      * Get by ComponentId / ProfileId, whether in userspace or public
@@ -105,7 +105,7 @@ public interface ComponentDao {
      *            Full component id
      * @return The description, if it exists; null otherwise
      */
-    Component getByCmdId(String id) throws DataAccessException;
+    BaseDescription getByCmdId(String id) throws DataAccessException;
 
     /**
      * Get by ComponentId / ProfileId
@@ -116,7 +116,7 @@ public interface ComponentDao {
      *            Db id of user for workspace; null for public space
      * @return The description, if it exists; null otherwise
      */
-    Component getByCmdId(String id, Number userId)
+    BaseDescription getByCmdId(String id, Number userId)
 	    throws DataAccessException;
 
     /**
@@ -131,21 +131,21 @@ public interface ComponentDao {
      * 
      * @return All descriptions in the public space
      */
-    List<Component> getPublicDescriptions() throws DataAccessException;
+    List<BaseDescription> getPublicDescriptions() throws DataAccessException;
 
     /**
      * @return List of deleted descriptions in user space or in public when
      *         userId=null
      * @param userId
      */
-    List<Component> getDeletedDescriptions(Number userId);
+    List<BaseDescription> getDeletedDescriptions(Number userId);
 
     /**
      * 
      * @return All the user's components not in the public space and are also
      *         not part of any group
      */
-    List<Component> getUserspaceComponents(Number userId)
+    List<BaseDescription> getUserspaceComponents(Number userId)
 	    throws DataAccessException;
 
     /**
@@ -153,10 +153,10 @@ public interface ComponentDao {
      * @return All the user's profiles not in the public space and are also
      *         not part of any group
      */
-    List<Component> getUserspaceProfiles(Number userId)
+    List<BaseDescription> getUserspaceProfiles(Number userId)
 	    throws DataAccessException;
 
-    void setDeleted(Component desc, boolean isDeleted)
+    void setDeleted(BaseDescription desc, boolean isDeleted)
 	    throws DataAccessException;
 
     void setPublished(Number id, boolean published);
@@ -168,5 +168,18 @@ public interface ComponentDao {
      * @return Principal name of description's owner, if any. Otherwise, null.
      */
     String getOwnerPrincipalName(Number id);
+    
+    /**
+     * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted profiles
+     * @return
+     */
+    List<String> getAllNonDeletedProfileIds();
+
+    /**
+     * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted components
+     * @return
+     */
+    List<String> getAllNonDeletedComponentIds();
+
 
 }

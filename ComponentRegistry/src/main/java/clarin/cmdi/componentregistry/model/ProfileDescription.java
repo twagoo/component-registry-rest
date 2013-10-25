@@ -12,7 +12,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.IdSequence;
 
 @XmlRootElement(name = "profileDescription")
-public class ProfileDescription extends Component implements Serializable {
+public class ProfileDescription extends BaseDescription implements Serializable {
 
     // Attention! PROFILE_PREFIX here and the client's Config.PROFILE_PREFIX must be the same 
     // If you change PROFILE_PREFIX here, then the client's  Config.PROFILE_PREFIX

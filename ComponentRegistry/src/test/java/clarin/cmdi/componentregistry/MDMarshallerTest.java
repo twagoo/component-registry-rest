@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import java.io.ByteArrayInputStream;
 import junit.framework.Assert;
@@ -12,19 +12,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class MDMarshallerTest {
+public class MDMarshallerTest extends BaseUnitTest{
 
     private static Logger logger = LoggerFactory.getLogger(MDMarshallerTest.class);
     
     @Test
     public void testMarshalToString() throws Exception {
-	MDMarshaller instance = new MDMarshaller();
-	Component desc = ComponentDescription.createNewDescription();
+	BaseDescription desc = ComponentDescription.createNewDescription();
 	desc.setName("Test \u00CA test");
-	String test = instance.marshalToString(desc);
+	String test = marshaller.marshalToString(desc);
 	logger.info(test);
 	Assert.assertTrue(test.contains("Test \u00CA test"));
-	Component result = instance.unmarshal(ComponentDescription.class, new ByteArrayInputStream(test.getBytes("UTF-8")), null);
+	BaseDescription result = marshaller.unmarshal(ComponentDescription.class, new ByteArrayInputStream(test.getBytes("UTF-8")), null);
 	logger.info(result.getName());
 	Assert.assertEquals(desc.getName(), result.getName());
     }

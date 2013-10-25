@@ -15,7 +15,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -321,9 +322,9 @@ public class ComponentRegistryRestService implements
 
 	@Override
 	public ComponentRegistry findRegistry(String id,
-			RegistryClosure<? extends Component> clos)
+			RegistryClosure<? extends BaseDescription> clos)
 			throws ComponentRegistryException {
-		Component desc = null;
+		BaseDescription desc = null;
 		ComponentRegistry result = getRegistry(getStatus(false));
 		desc = clos.getDescription(result, id);
 		if (desc == null) {
@@ -364,7 +365,7 @@ public class ComponentRegistryRestService implements
 	@Path("/components/usage/{componentId}")
 	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
 			MediaType.APPLICATION_JSON })
-	public List<Component> getComponentUsage(
+	public List<BaseDescription> getComponentUsage(
 			@PathParam("componentId") String componentId,
 			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace)
 			throws ComponentRegistryException {
@@ -381,7 +382,7 @@ public class ComponentRegistryRestService implements
 					components.size(), profiles.size(), componentId,
 					(System.currentTimeMillis() - start));
 
-			List<Component> usages = new ArrayList<Component>(
+			List<BaseDescription> usages = new ArrayList<BaseDescription>(
 					components.size() + profiles.size());
 			usages.addAll(components);
 			usages.addAll(profiles);
@@ -697,7 +698,7 @@ public class ComponentRegistryRestService implements
 		}
 	}
 
-	private void updateDescription(Component desc, String name,
+	private void updateDescription(BaseDescription desc, String name,
 			String description, String domainName, String group) {
 		desc.setName(name);
 		desc.setDescription(description);
@@ -945,7 +946,7 @@ public class ComponentRegistryRestService implements
 		}
 	}
 
-	private void checkAndThrowDescription(Component desc, String id) {
+	private void checkAndThrowDescription(BaseDescription desc, String id) {
 		if (desc == null) {
 			throw new WebApplicationException(Response.serverError()
 					.entity("Incorrect id:" + id + "cannot handle request")
@@ -1153,7 +1154,7 @@ public class ComponentRegistryRestService implements
 						stillActive)).build();
 	}
 
-	private Response register(InputStream input, Component desc,
+	private Response register(InputStream input, BaseDescription desc,
 			UserCredentials userCredentials, boolean userspace,
 			RegisterAction action) {
 		try {
@@ -1224,7 +1225,7 @@ public class ComponentRegistryRestService implements
 	 *             to detect recursion
 	 */
 	private void checkForRecursion(MDValidator validator,
-			ComponentRegistry registry, Component desc)
+			ComponentRegistry registry, BaseDescription desc)
 			throws ComponentRegistryException {
 		try {
 			// Expand to check for recursion. Operate on copy so that original
@@ -1244,7 +1245,7 @@ public class ComponentRegistryRestService implements
 
 	private Response registerComment(InputStream input,
 			ComponentRegistry registry, boolean userspace,
-			Component description, Principal principal,
+			BaseDescription description, Principal principal,
 			UserCredentials userCredentials) {
 		try {
 			CommentValidator validator = new CommentValidator(input,

@@ -104,6 +104,9 @@
 				<property name="generateDdl" value="true" />
 			</bean>
 		</property>
+		<property name="jpaDialect">
+		<bean class="clarin.cmdi.componentregistry.impl.database.PostgresJpaDialect"/>
+		</property>
 		<property name="persistenceUnitName" value="clarin.cmdi.componentregistry" />
 		<property name="jpaProperties">
 			<props>

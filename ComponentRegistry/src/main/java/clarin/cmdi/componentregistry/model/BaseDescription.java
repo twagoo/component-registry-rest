@@ -6,14 +6,11 @@ import clarin.cmdi.componentregistry.util.XmlDateAdapter;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -41,13 +38,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({ ComponentDescription.class, ProfileDescription.class })
 @Entity
-@Table(name = "persistentcomponents")
-public class Component implements Serializable {
+@Table(name = "basedescription")
+public class BaseDescription implements Serializable {
 
-    
+
+    @SequenceGenerator( name = "basedescription_id_seq", sequenceName = "basedescription_id_seq", allocationSize = 1, initialValue = 1 )
+    @GeneratedValue( strategy = GenerationType.SEQUENCE, generator = "basedescription_id_seq" )
     @Id
-    @SequenceGenerator( name = "profile_description_id_seq", sequenceName = "profile_description_id_seq", allocationSize = 1, initialValue = 1 )
-    @GeneratedValue( strategy = GenerationType.SEQUENCE, generator = "profile_description_id_seq" )
     @Column(name = "id")
     @XmlTransient
     private Long dbId;

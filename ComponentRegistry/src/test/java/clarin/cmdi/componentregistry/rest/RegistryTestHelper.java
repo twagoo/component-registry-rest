@@ -30,6 +30,7 @@ import javax.xml.transform.TransformerException;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Static helper methods to be used in tests
@@ -39,12 +40,9 @@ public final class RegistryTestHelper {
 
     private static MDMarshaller marshaller;
 
-    static {
-	try {
-	    marshaller = new MDMarshaller();
-	} catch (TransformerException ex) {
-	    throw new RuntimeException(ex);
-	}
+    @Autowired
+    public void setMarshaller(MDMarshaller marshaller) {
+	RegistryTestHelper.marshaller = marshaller;
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
@@ -68,10 +66,6 @@ public final class RegistryTestHelper {
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
-    }
-
-    public static int updateComponent(ComponentRegistry testRegistry, ComponentDescription description, String content) throws JAXBException {
-	return testRegistry.update(description, getComponentFromString(content), DummyPrincipal.DUMMY_CREDENTIALS.getPrincipal(), true);
     }
 
     public static String getProfileTestContentString() {
@@ -141,7 +135,7 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getComponentTestContent() {
-	return getComponentTestContent("Access");
+	return getComponentTestContentAsStream("Access");
     }
 
     public static String getComponentTestContentString(String componentName) {
@@ -191,15 +185,15 @@ public final class RegistryTestHelper {
 
     //////////////////////
     public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
-	return marshaller.unmarshal(CMDComponentSpec.class, getComponentContent(contentString), marshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getCMDComponentSchema());
     }
 
-    public static InputStream getComponentContent(String content) {
+    public static InputStream getComponentContentAsStream(String content) {
 	return new ByteArrayInputStream(content.getBytes());
     }
 
-    public static InputStream getComponentTestContent(String componentName) {
-	return getComponentContent(getComponentTestContentString(componentName));
+    public static InputStream getComponentTestContentAsStream(String componentName) {
+	return getComponentContentAsStream(getComponentTestContentString(componentName));
     }
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {
@@ -207,7 +201,7 @@ public final class RegistryTestHelper {
     }
 
     public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
-	return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), marshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getCMDComponentSchema());
     }
 
     public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {

@@ -5,7 +5,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.rest.NewAction;
 
 import java.text.ParseException;

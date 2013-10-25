@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 
@@ -20,15 +21,9 @@ import org.junit.Test;
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
  * @author george.georgovassilis@mpi.nl
  */
-public class CommentResponseTest {
+public class CommentResponseTest extends BaseUnitTest{
 
-    private MDMarshaller marshaller;
     private Date testDate = new Date();
-
-    @Before
-    public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-    }
 
     /**
      * Test with no validate attribute should return errors

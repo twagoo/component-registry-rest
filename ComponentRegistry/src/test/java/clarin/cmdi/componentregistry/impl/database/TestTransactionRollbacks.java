@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
@@ -36,10 +36,10 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Test(expected = DataAccessException.class)
     public void test02() {
-	Component cd1 = componentDescriptionDao.getByCmdId("c1");
+	BaseDescription cd1 = componentDescriptionDao.getByCmdId("c1");
 	assertNull(cd1);
 
-	Component cd = new Component();
+	BaseDescription cd = new BaseDescription();
 	cd.setCreatorName("user 123");
 	cd.setDescription("description");
 	cd.setDomainName("domain name");
@@ -59,7 +59,7 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Test
     public void test03() {
-	Component cd1 = componentDescriptionDao.getByCmdId("c1");
+	BaseDescription cd1 = componentDescriptionDao.getByCmdId("c1");
 	assertNull(cd1);
     }
 

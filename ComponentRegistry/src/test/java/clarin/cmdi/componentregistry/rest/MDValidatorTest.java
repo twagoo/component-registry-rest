@@ -31,15 +31,10 @@ public class MDValidatorTest extends BaseUnitTest {
 
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     private ComponentRegistry publicRegistry;
-    private MDMarshaller marshaller;
 
     @Before
     public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
 	publicRegistry = componentRegistryFactory.getPublicRegistry();
     }
 

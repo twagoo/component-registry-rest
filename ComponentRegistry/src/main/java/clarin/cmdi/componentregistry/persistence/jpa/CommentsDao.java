@@ -43,7 +43,7 @@ public interface CommentsDao extends JpaRepository<Comment, Long>{
 	 *            Id of description record
 	 * @return Principal name of description's owner, if any. Otherwise, null.
 	 */
-    	@Query("select user from RegistryUser user, Comment comment, Component component where comment.id = ?1 and comment.componentId = component.componentId and component.dbUserId = user.id")
+    	@Query("select user from RegistryUser user, Comment comment, BaseDescription component where comment.id = ?1 and comment.componentId = component.componentId and component.dbUserId = user.id")
 	RegistryUser getOwnerOfComment(long id);
 
 	/**

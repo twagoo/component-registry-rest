@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 
@@ -18,14 +19,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author jeafer
  */
-public class CommentTest {
-
-    private MDMarshaller marshaller;
-
-    @Before
-    public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-    }
+public class CommentTest extends BaseUnitTest{
 
     @Test
     public void testProfileComment() throws Exception {

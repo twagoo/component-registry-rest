@@ -10,7 +10,7 @@ import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "componentDescription")
-public class ComponentDescription extends Component implements Serializable {
+public class ComponentDescription extends BaseDescription implements Serializable {
 
     
     

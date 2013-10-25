@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.impl.database;
 
 import static clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase.*;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
@@ -25,7 +25,7 @@ public class ComponentDescriptionDaoTest extends AbstractDescriptionDaoTest {
     }
 
     @Override
-    protected Component createNewDescription() {
+    protected BaseDescription createNewDescription() {
 	return ComponentDescription.createNewDescription();
     }
 

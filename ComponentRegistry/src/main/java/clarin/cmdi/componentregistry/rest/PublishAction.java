@@ -4,7 +4,7 @@ import java.security.Principal;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 public class PublishAction implements RegisterAction {
@@ -16,7 +16,7 @@ public class PublishAction implements RegisterAction {
     }
 
     @Override
-    public int execute(Component desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) {
+    public int execute(BaseDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) {
         response.setIsInUserSpace(false);
         return registry.publish(desc, spec, principal);
     }

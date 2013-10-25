@@ -31,7 +31,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
@@ -223,7 +223,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 		}
 		DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
 		info.setDataNode(dn);
-		Component desc = dn.getDescription();
+		BaseDescription desc = dn.getDescription();
 		if (desc != null) {
 		    String content = componentDao.getContent(dn.isDeleted(), desc.getId());
 		    info.setContent(content);
@@ -289,8 +289,8 @@ public class AdminHomePage extends SecureAdminWebPage {
 	add(deletedProfNode, deletedProfileDescriptions, true, registry.getStatus());
     }
 
-    private void add(DefaultMutableTreeNode parent, List<? extends Component> descs, boolean isDeleted, ComponentStatus status) {
-	for (Component desc : descs) {
+    private void add(DefaultMutableTreeNode parent, List<? extends BaseDescription> descs, boolean isDeleted, ComponentStatus status) {
+	for (BaseDescription desc : descs) {
 	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, status));
 	    parent.add(child);
 	}

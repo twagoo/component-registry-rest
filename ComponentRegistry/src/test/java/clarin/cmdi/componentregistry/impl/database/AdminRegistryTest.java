@@ -73,7 +73,7 @@ public class AdminRegistryTest extends BaseUnitTest{
 	adminReg.setComponentRegistryFactory(componentRegistryFactory);
 	adminReg.setComponentDao(componentDao);
 	adminReg.setMarshaller(marshaller);
-	CMDItemInfo fileInfo = new CMDItemInfo(new MDMarshaller());
+	CMDItemInfo fileInfo = new CMDItemInfo(marshaller);
 	fileInfo.setForceUpdate(false);
 	fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, ComponentStatus.PUBLISHED));
 	fileInfo.setContent(content1);

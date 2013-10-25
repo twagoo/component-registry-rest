@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.GroupMembership;
@@ -41,7 +41,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     RegistryUser user2;
     RegistryUser user3;
 
-    protected Component makeTestProfile(String sid, boolean isPublic, long ownerId) {
+    protected BaseDescription makeTestProfile(String sid, boolean isPublic, long ownerId) {
 	ProfileDescription profile = new ProfileDescription();
 	profile.setDescription("some description");
 	profile.setId(ProfileDescription.PROFILE_PREFIX+sid);
@@ -51,9 +51,9 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	return componentDescriptionDao.getById(id);
     }
 
-    protected Component makeTestComponent(boolean isPublic,
+    protected BaseDescription makeTestComponent(boolean isPublic,
 	    long ownerId) {
-	Component componentDescription = new Component();
+	BaseDescription componentDescription = new BaseDescription();
 	componentDescription.setDescription("some description");
 	componentDescription.setId(ComponentDescription.COMPONENT_PREFIX+"4567");
 	componentDescription.setName("componentname");
@@ -117,7 +117,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPrivateProfile() {
 	// Make a private profile that belongs to someone else
-	Component profile = makeTestProfile("4567", false, 9999);
+	BaseDescription profile = makeTestProfile("4567", false, 9999);
 	// Expect that user can't access profile
 	boolean result = groupService
 		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
@@ -128,7 +128,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPublicProfile() {
 	// Make a public profile that belongs to someone else
-	Component profile = makeTestProfile("4567", true, 9999);
+	BaseDescription profile = makeTestProfile("4567", true, 9999);
 
 	// Expect that user can access the profile
 	boolean result = groupService
@@ -140,7 +140,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToOwnedPrivateProfile() {
 	// Make a profile that belongs to someone else
-	Component profile = makeTestProfile("4567", false, user.getId()
+	BaseDescription profile = makeTestProfile("4567", false, user.getId()
 		.longValue());
 	// Add an ownership to that profile to the current user
 	Ownership ownership = new Ownership();
@@ -158,7 +158,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessViaGroupToPrivateProfile() {
 	// Make a profile that belongs to someone else
-	Component profile = makeTestProfile("4567", false, 9999);
+	BaseDescription profile = makeTestProfile("4567", false, 9999);
 
 	// Make a group that belongs to someone else
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -184,7 +184,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPrivateComponent() {
 	// Make a private profile that belongs to someone else
-	Component componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		9999);
 
 	// Expect that user can't access profile
@@ -197,7 +197,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPublicComponent() {
 	// Make a public profile that belongs to someone else
-	Component componentDescription = makeTestComponent(true,
+	BaseDescription componentDescription = makeTestComponent(true,
 		9999);
 
 	// Expect that user can access the profile
@@ -210,7 +210,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToOwnedPrivateComponent() {
 	// Make a profile that belongs to someone else
-	Component componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		9999);
 
 	// Add an ownership to that profile to the current user
@@ -229,7 +229,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessViaGroupToPrivateComponent() {
 	// Make a profile that belongs to someone else
-	Component componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		user3.getId().longValue());
 
 	// Make a group that belongs to someone else
@@ -268,7 +268,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertTrue(groupService.getGroupsOfWhichUserIsAMember(user2.getPrincipalName()).contains(group));
 
 	// Make a component that belongs to user
-	Component componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		user.getId().longValue());
 
 	// Just for the fun of it: check that user can access the component
@@ -320,7 +320,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertTrue(groupService.getGroupsOfWhichUserIsAMember(user2.getPrincipalName()).contains(group));
 
 	// Make a profile that belongs to user
-	Component profileDescription= makeTestProfile("4567", false,
+	BaseDescription profileDescription= makeTestProfile("4567", false,
 		user.getId().longValue());
 
 	// Just for the fun of it: check that user can access the profile
@@ -373,7 +373,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertTrue(groupService.getGroupsOfWhichUserIsAMember(user2.getPrincipalName()).contains(group));
 
 	// Make a profile that belongs to user
-	Component profileDescription= makeTestProfile("4567", false,
+	BaseDescription profileDescription= makeTestProfile("4567", false,
 		user.getId().longValue());
 
 	// Just for the fun of it: check that user can access the profile
@@ -427,11 +427,11 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	groupService.makeMember(user.getPrincipalName(), group2.getName());
 
 	// Make a profile that belongs to user
-	Component profileDescription= makeTestProfile("4567", false,
+	BaseDescription profileDescription= makeTestProfile("4567", false,
 		user.getId().longValue());
 
 	// Make a profile that belongs to user, but that one will belong to group2
-	Component profileDescription2= makeTestProfile("666", false,
+	BaseDescription profileDescription2= makeTestProfile("666", false,
 		user.getId().longValue());
 
 	// user transfers ownership of the profile to his group

@@ -18,9 +18,9 @@ public final class ComponentRegistryTestDatabase {
     
 
     public static void createTablePersistentComponents(JdbcTemplate jdbcTemplate) {
-	jdbcTemplate.execute("create sequence profile_description_id_seq start with 1 increment by 1");
+	jdbcTemplate.execute("create sequence basedescription_id_seq start with 1 increment by 1");
 	
-	jdbcTemplate.execute("CREATE TABLE persistentcomponents ("
+	jdbcTemplate.execute("CREATE TABLE basedescription ("
                 + "id IDENTITY NOT NULL,"
                 + "  user_id integer,"
                 + "  is_public boolean NOT NULL,"

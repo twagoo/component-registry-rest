@@ -29,6 +29,10 @@
 		<property name="username" value="sa" />
 		<property name="password" value="" />
 		<property name="defaultAutoCommit" value="true" />
+		<property name="initialSize" value="400"/>
 	</bean>
 
+
+	<bean id="RegistryTestHelper" class="clarin.cmdi.componentregistry.rest.RegistryTestHelper"/>
+	<bean id="PrintXmlFromRssRunner" class="clarin.cmdi.componentregistry.rss.PrintXmlFromRssRunner"/>
 </beans>

@@ -15,13 +15,13 @@ public class RegisterResponse extends ComponentRegistryResponse {
     private Boolean isProfile;
 
     @XmlElement
-    private Component description;
+    private BaseDescription description;
 
-    public void setDescription(Component description) {
+    public void setDescription(BaseDescription description) {
         this.description = description;
     }
 
-    public Component getDescription() {
+    public BaseDescription getDescription() {
         return description;
     }
 

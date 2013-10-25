@@ -13,7 +13,7 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.impl.ComponentRegistryImplBase;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.model.Component;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -361,7 +361,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     }
 
     @Override
-    public int register(Component description, CMDComponentSpec spec) {
+    public int register(BaseDescription description, CMDComponentSpec spec) {
 	enrichSpecHeader(spec, description);
 	try {
 	    String xml = componentSpecToString(spec);
@@ -419,7 +419,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
      * @return Id (from database)
      * @throws DataAccessException
      */
-    private Number convertUserInDescription(Component description)
+    private Number convertUserInDescription(BaseDescription description)
 	    throws DataAccessException {
 	Number uid = null;
 	String name = null;
@@ -475,7 +475,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     }
 
     @Override
-    public int update(Component description, CMDComponentSpec spec,
+    public int update(BaseDescription description, CMDComponentSpec spec,
 	    Principal principal, boolean forceUpdate) {
 	try {
 	    checkAuthorisation(description, principal);
@@ -511,7 +511,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     }
 
     @Override
-    public int publish(Component desc, CMDComponentSpec spec,
+    public int publish(BaseDescription desc, CMDComponentSpec spec,
 	    Principal principal) {
 	int result = 0;
 	if (!isPublic()) { // if already in public workspace there is nothing
@@ -593,7 +593,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
     public void deleteMDComponent(String componentId, Principal principal,
 	    boolean forceDelete) throws UserUnauthorizedException,
 	    DeleteFailedException, ComponentRegistryException {
-	Component desc = componentDao.getByCmdId(componentId);
+	BaseDescription desc = componentDao.getByCmdId(componentId);
 	if (desc != null) {
 	    try {
 		checkAuthorisation(desc, principal);
@@ -662,7 +662,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	return registryStatus;
     }
 
-    private void invalidateCache(Component description) {
+    private void invalidateCache(BaseDescription description) {
 	if (description.isProfile()) {
 	    profilesCache.remove(description.getId());
 	} else {
@@ -680,7 +680,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
      * @throws IllegalArgumentException
      *             If description with non-existing id is passed
      */
-    private Number getIdForDescription(Component description)
+    private Number getIdForDescription(BaseDescription description)
 	    throws IllegalArgumentException {
 	Number dbId = null;
 	try {
@@ -723,7 +723,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	return null;
     }
 
-    private void checkAuthorisation(Component desc, Principal principal)
+    private void checkAuthorisation(BaseDescription desc, Principal principal)
 	    throws UserUnauthorizedException {
 	if (!isOwnerOfDescription(desc, principal.getName())
 		&& !configuration.isAdminUser(principal)) {
@@ -746,7 +746,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	}
     }
 
-    private boolean isOwnerOfDescription(Component desc, String principalName) {
+    private boolean isOwnerOfDescription(BaseDescription desc, String principalName) {
 	String owner = componentDao
 		.getOwnerPrincipalName(getIdForDescription(desc));
 	return owner != null // If owner is null, no one can be owner
@@ -760,7 +760,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 		&& principalName.equals(owner.getPrincipalName());
     }
 
-    private void checkAge(Component desc, Principal principal)
+    private void checkAge(BaseDescription desc, Principal principal)
 	    throws DeleteFailedException {
 	if (isPublic() && !configuration.isAdminUser(principal)) {
 	    Date regDate = desc.getRegistrationDate();
@@ -890,5 +890,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase
 	for (String id : componentIds)
 	    profiles.add(getProfileDescription(id));
 	return profiles;
+    }
+
+    @Override
+    public List<String> getAllNonDeletedProfileIds() {
+	return componentDao.getAllNonDeletedProfileIds();
+    }
+
+    @Override
+    public List<String> getAllNonDeletedComponentIds() {
+	return componentDao.getAllNonDeletedComponentIds();
     }
 }
