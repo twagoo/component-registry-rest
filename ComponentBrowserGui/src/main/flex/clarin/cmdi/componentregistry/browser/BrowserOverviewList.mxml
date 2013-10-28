@@ -81,7 +81,8 @@
 			}
 			
 			private function onSpaceChanged(event:Event):void{
-				createNewButton.enabled = (!Config.instance.selectedGroup);
+				createNewButton.visible = (!Config.instance.selectedGroup);
+				createNewButton.includeInLayout = (!Config.instance.selectedGroup);
 			}
 
 			private function scrollToSelected():void {
