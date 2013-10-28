@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.15.1 ()
+- Renamed components table, cleaned up sequences, indexes and constraints. Execute upgrade-1.15.1.sql
+
 Release ComponentRegistry-1.15.0 ()
 - Merged profiles and components on persistence level into BaseComponent
 - Only one component DAO left: ComponentDao
