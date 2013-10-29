@@ -62,11 +62,9 @@
 			private function dispatchBrowserSelectionEvent():void {
 				if (this.dataGrid.selectedItem != null) {
 					var item:ItemDescription = dataGrid.selectedItem as ItemDescription
-					if (currentSelectedItem == null || currentSelectedItem.id != item.id) { //Only update when the item selected is different.
-						currentSelectedItem = item;
-						var event:BrowserSelectionEvent = new BrowserSelectionEvent(item);
-						dispatchEvent(event);
-					}
+					currentSelectedItem = item;
+					var event:BrowserSelectionEvent = new BrowserSelectionEvent(item);
+					dispatchEvent(event);
 				}
 			}
 
@@ -197,7 +195,7 @@
 							y="112"
 							width="100%"
 							height="100%"
-							click="dispatchBrowserSelectionEvent()"
+							change="dispatchBrowserSelectionEvent()"
 							columns="{browserColumns}"
 							contextMenu="{menu.cm}"
 							allowMultipleSelection="true"

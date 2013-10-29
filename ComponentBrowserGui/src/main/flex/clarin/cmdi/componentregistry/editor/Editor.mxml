@@ -22,7 +22,6 @@
 									saveAsNewClick="saveSpec(Config.SPACE_USER, UploadService.NEW)"
 									publishClick="publishSpec()"
 									cancelClick="cancel()"
-									groupSelected="onGroupSelected(event)"
 									/>
 			<mx:Text id="errorMessageField"
 					 text="{uploadService.message}"

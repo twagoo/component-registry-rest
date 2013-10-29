@@ -56,7 +56,6 @@ public function init():void {
 	uploadService.init(uploadProgress);
 	Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
 	viewStack = this.parent as RegistryViewStack;
-	Config.instance.getListGroupsOfItemService().addEventListener(ListGroupsOfItemService.GROUPS_LOADED, onGroupsLoaded);
 }
 
 
@@ -210,40 +209,13 @@ public function getType():String {
 	return Config.VIEW_EDIT;
 }
 
-public function onGroupSelected(event:GroupSelectionEvent):void{
-	//Some handler already moved the group for us
-	if (event.groupWasMoved)
-		return;
-	if (!event.getGroupId()){
-		// we don't want items to be moved from groups into void, thus object this selection event
-		event.stopPropagation();
-		event.stopImmediatePropagation();
-		event.preventDefault();
-	} else{
-		var groupId:String = event.getGroupId();
-		var itemId:String = itemDescription.id;
-		Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
-			if (nestedCloseEvent.detail == Alert.YES) {
-				Config.instance.getListGroupsOfItemService().transferOwnership(itemId, groupId, itemTransferToGroupComplete);
-			}
-		});
-	}
-	event.groupWasMoved = true;
-}
-
-protected function itemTransferToGroupComplete(resultEvent:ResultEvent):void {
-	viewStack.switchToBrowse(itemDescription);
-}
-
 
 private function onGroupsLoaded(event:Event):void{
 	var groups:ArrayCollection = Config.instance.getListGroupsOfItemService().groups;
 	//buttonBar.groupPanel.visible = (Config.instance.space != Config.SPACE_PUBLIC) && Config.instance.getListUserGroupsMembershipService().groups.length>0;
-	if (groups.length < 1)
-		buttonBar.selectGroup(null);
+	if (groups.length < 1);
 	else{
 		var groupId:String = groups.getItemAt(0).id;
 		var itemId:String = itemDescription.id;
-		buttonBar.selectGroup(groupId);
 	}
 }
