@@ -120,9 +120,9 @@
 		</description>
 		<role-name>tomcat</role-name>
 	</security-role>
-
+	
 	<welcome-file-list>
-		<welcome-file>index</welcome-file>
-		<welcome-file>main.html</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
+	
 </web-app>
