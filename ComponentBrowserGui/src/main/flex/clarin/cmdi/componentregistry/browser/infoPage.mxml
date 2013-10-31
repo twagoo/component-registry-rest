@@ -3,9 +3,8 @@
 		 xmlns:comp="clarin.cmdi.componentregistry.common.components.*"
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
-		 creationComplete="init()"
 		 >
-
+	
 	<mx:Metadata>
 		[Event(name="groupSelected", type="clarin.cmdi.componentregistry.browser.GroupSelectionEvent")]
 	</mx:Metadata>
@@ -23,14 +22,6 @@
 		<mx:ToggleButtonBar id="toggleBar"
 							dataProvider="{infoViewStack}"/>
 		
-		<mx:HBox id="groupPanel" visible="true">
-			<mx:ComboBox id="groupBox"
-					 dataProvider="{groups}"
-					 />
-			<mx:Button id="moveToGroupBtn"
-				   label="Move to group"
-				   click="onMoveToGroupButtonClicked(event)"/>
-		</mx:HBox>
 	</mx:HBox>
 
 	<mx:ViewStack id="infoViewStack"
@@ -59,89 +50,14 @@
 
 	<mx:Script>
 		<![CDATA[
-			import clarin.cmdi.componentregistry.common.Group;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
-			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
-			import clarin.cmdi.componentregistry.services.CommentListService;
 			import clarin.cmdi.componentregistry.services.Config;
-			import clarin.cmdi.componentregistry.services.ListUserGroupsMembershipService;
 			
-			import mx.collections.ArrayCollection;
-			import mx.controls.Alert;
-			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
 			import mx.events.IndexChangedEvent;
-			import mx.messaging.SubscriptionInfo;
-			import mx.rpc.events.ResultEvent;
-			
-			private static var currentSelectedGroup:String="";
-			private var previousSelectedIndex:int=0;
+
 
 			[Bindable]
 			private var _itemDescription:ItemDescription;
-			[Bindable]
-			private var groups:ArrayCollection = new ArrayCollection();
-			
-			public function init():void{
-				groups.addItem("Move to group...");
-				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
-				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, updateGroupVisibility);
-				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
-				addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
-			}
-
-			private function onGroupSelected(event:GroupSelectionEvent):void {
-				//Some handler already moved the group for us
-				if (event.groupWasMoved)
-					return;
-				if (!event.getGroupId()){
-					// we don't want items to be moved from groups into void, thus object this selection event
-					event.stopPropagation();
-					event.stopImmediatePropagation();
-					event.preventDefault();
-				} else{
-					var groupId:String = event.getGroupId();
-					var itemId:String = _itemDescription.id;
-					Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
-						if (nestedCloseEvent.detail == Alert.YES) {
-							Config.instance.getListGroupsOfItemService().transferOwnership(itemId, groupId, itemTransferToGroupComplete);
-						}
-					});
-				}
-				event.groupWasMoved = true;
-			}
-
-			private function onMoveToGroupButtonClicked(event:Event):void {
-				currentSelectedGroup=groupBox.selectedItem.groupId;
-				var groupEvent:GroupSelectionEvent = new GroupSelectionEvent(groupBox.selectedItem.groupId, groupBox.selectedItem.label);
-				dispatchEvent(groupEvent);
-				// did someone object this selection?
-				if (groupEvent.isDefaultPrevented()){
-					//e.preventDefault, stopPropagation and stopImmediatePropagation don't undo the selection so we have to do it manually here
-					groupBox.selectedIndex = previousSelectedIndex;
-				} else{
-					previousSelectedIndex = groupBox.selectedIndex;
-				}
-			}
-			
-			
-			
-			public function onGroupsLoaded(event:Event):void{
-				groups.removeAll();
-				groups.addItem({label:"Move to group...", space:null, groupId:null});
-				
-				for each (var group:Group in Config.instance.getListUserGroupsMembershipService().groups) {
-					groups.addItem({label:group.name, space:Config.SPACE_USER, groupId:group.id});					
-				}
-				updateGroupVisibility(event);
-			}
-			
-			
-			private function updateGroupVisibility(event:Event):void{
-				var showGroups:Boolean = Config.instance.getListUserGroupsMembershipService().groups.length>0 && Config.instance.space != Config.SPACE_PUBLIC;
-				groupPanel.visible = showGroups;
-				groupBox.selectedIndex = 0;
-			}
 
 
 			public function setPanel(startupPanel:String):void {
@@ -175,10 +91,6 @@
 			protected function infoViewStack_changeHandler(event:IndexChangedEvent):void
 			{
 				xmlPanel.updateCmdComponentText();
-			}
-
-			protected function itemTransferToGroupComplete(resultEvent:ResultEvent):void {
-				RegistryViewStack.showView(Config.VIEW_BROWSE, _itemDescription);
 			}
 
 		]]>
