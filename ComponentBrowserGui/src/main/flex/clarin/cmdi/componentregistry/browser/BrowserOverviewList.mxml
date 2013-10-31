@@ -9,27 +9,25 @@
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
 		[Event(name="createNew", type="clarin.cmdi.componentregistry.browser.CreateNewComponentEvent")]
+		[Event(name="groupSelected", type="clarin.cmdi.componentregistry.browser.GroupSelectionEvent")]
 	</mx:Metadata>
 
 	<mx:Array id="browserColumns"/>
 	
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.common.Group;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
 			import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 			import clarin.cmdi.componentregistry.common.components.RssDescriptionsContextMenu;
 			import clarin.cmdi.componentregistry.services.Config;
-			import clarin.cmdi.componentregistry.common.StyleConstants;
-		
-			import flash.events.ContextMenuEvent;
-			import flash.ui.ContextMenu;
-			import flash.ui.ContextMenuItem;
-			import mx.controls.Alert;
+			import clarin.cmdi.componentregistry.services.ListUserGroupsMembershipService;
 			
 			import mx.collections.ArrayCollection;
-			import mx.controls.Text;
-			import mx.core.UIComponent;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.ResultEvent;
 			
 			private var defaultColor:Object;
 			private var currentSelectedItem:ItemDescription;
@@ -49,6 +47,12 @@
 			
 			[Bindable]
 			public var spaceSwitchEnabled:Boolean = false;
+			
+			[Bindable]
+			private var groups:ArrayCollection = new ArrayCollection();
+			
+			private static var currentSelectedGroup:String="";
+			private var previousSelectedIndex:int=0;
 			
 			public function set browserDataProvider(dataProvider:ArrayCollection):void {
 				if (dataProvider) {
@@ -75,12 +79,21 @@
 			
 			private function init():void{
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, onSpaceChanged);
+
+				groups.addItem("Move to group...");
+				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
+				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, updateGroupVisibility);
+				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
+				addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
+				
 				scrollToSelected();
 			}
 			
 			private function onSpaceChanged(event:Event):void{
 				createNewButton.visible = (!Config.instance.selectedGroup);
 				createNewButton.includeInLayout = (!Config.instance.selectedGroup);
+				importButton.visible = (!Config.instance.selectedGroup);
+				importButton.includeInLayout = (!Config.instance.selectedGroup);
 			}
 
 			private function scrollToSelected():void {
@@ -131,6 +144,63 @@
 				navigateToURL(request, "_blank");
 			}
 			
+			
+			
+			private function onGroupSelected(event:GroupSelectionEvent):void {
+				//Some handler already moved the group for us
+				if (event.groupWasMoved)
+					return;
+				if (!event.getGroupId()){
+					// we don't want items to be moved from groups into void, thus object this selection event
+					event.stopPropagation();
+					event.stopImmediatePropagation();
+					event.preventDefault();
+				} else{
+					var groupId:String = event.getGroupId();
+					Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
+						if (nestedCloseEvent.detail == Alert.YES) {
+							for each (var item:ItemDescription in dataGrid.selectedItems) {
+								Config.instance.getListGroupsOfItemService().transferOwnership(item.id, groupId, itemTransferToGroupComplete);
+							}
+						}
+					});
+				}
+				event.groupWasMoved = true;
+			}
+			
+			private function onMoveToGroupButtonClicked(event:Event):void {
+				currentSelectedGroup=groupBox.selectedItem.groupId;
+				var groupEvent:GroupSelectionEvent = new GroupSelectionEvent(groupBox.selectedItem.groupId, groupBox.selectedItem.label);
+				dispatchEvent(groupEvent);
+				// did someone object this selection?
+				if (groupEvent.isDefaultPrevented()){
+					//e.preventDefault, stopPropagation and stopImmediatePropagation don't undo the selection so we have to do it manually here
+					groupBox.selectedIndex = previousSelectedIndex;
+				} else{
+					previousSelectedIndex = groupBox.selectedIndex;
+				}
+			}
+			
+			public function onGroupsLoaded(event:Event):void{
+				groups.removeAll();
+				groups.addItem({label:"Move to group...", space:null, groupId:null});
+				
+				for each (var group:Group in Config.instance.getListUserGroupsMembershipService().groups) {
+					groups.addItem({label:group.name, space:Config.SPACE_USER, groupId:group.id});					
+				}
+				updateGroupVisibility(event);
+			}
+			
+			
+			private function updateGroupVisibility(event:Event):void{
+				var showGroups:Boolean = Config.instance.getListUserGroupsMembershipService().groups.length>0 && Config.instance.space != Config.SPACE_PUBLIC;
+				groupPanel.visible = showGroups;
+				groupBox.selectedIndex = 0;
+			}
+			
+			protected function itemTransferToGroupComplete(resultEvent:ResultEvent):void {
+				RegistryViewStack.showView(Config.VIEW_BROWSE, currentSelectedItem);
+			}
 		]]>
 	</mx:Script>
 	
@@ -168,9 +238,22 @@
 					   includeInLayout="{Config.instance.space != Config.SPACE_USER}"
 					   enabled="{Config.instance.space != Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
-			<mx:Button label="Import"
+			<mx:Button id="importButton"
+					   label="Import"
 					   toolTip="Import an item from a local file"
 					   click="importItem()" />
+			
+			<mx:HBox id="groupPanel" 
+					 visible="true"
+					 enabled="{Config.instance.space == Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
+					 >
+				<mx:ComboBox id="groupBox"
+							 dataProvider="{groups}"
+							 />
+				<mx:Button id="moveToGroupBtn"
+						   label="Move to group"
+						   click="onMoveToGroupButtonClicked(event)"/>
+			</mx:HBox>
 			
 		</mx:HBox>
 		
