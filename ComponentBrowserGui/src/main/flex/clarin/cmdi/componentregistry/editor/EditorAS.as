@@ -1,10 +1,7 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
-import clarin.cmdi.componentregistry.browser.GroupSelectionEvent;
-import clarin.cmdi.componentregistry.common.Group;
 import clarin.cmdi.componentregistry.common.ItemDescription;
 import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
-import clarin.cmdi.componentregistry.common.components.UserSettingsLabelButton;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 import clarin.cmdi.componentregistry.editor.model.CMDSpec;
 import clarin.cmdi.componentregistry.importer.UploadCompleteEvent;
@@ -13,7 +10,6 @@ import clarin.cmdi.componentregistry.services.ComponentListService;
 import clarin.cmdi.componentregistry.services.ComponentUsageCheckEvent;
 import clarin.cmdi.componentregistry.services.ComponentUsageService;
 import clarin.cmdi.componentregistry.services.Config;
-import clarin.cmdi.componentregistry.services.ListGroupsOfItemService;
 import clarin.cmdi.componentregistry.services.ProfileInfoService;
 import clarin.cmdi.componentregistry.services.UploadService;
 
@@ -23,7 +19,6 @@ import mx.collections.ArrayCollection;
 import mx.controls.Alert;
 import mx.events.CloseEvent;
 import mx.managers.CursorManager;
-import mx.rpc.events.ResultEvent;
 
 
 private var profileSrv:ProfileInfoService = new ProfileInfoService();

@@ -9,6 +9,7 @@
 	<mx:Metadata>
 		[Event(name="browserItemSelected",type="clarin.cmdi.componentregistry.browser.BrowserSelectionEvent")]
 		[Event(name="createNew", type="clarin.cmdi.componentregistry.browser.CreateNewComponentEvent")]
+		[Event(name="groupSelected", type="clarin.cmdi.componentregistry.browser.GroupSelectionEvent")]
 	</mx:Metadata>
 
 	<mx:Array id="browserColumns"/>
@@ -156,10 +157,11 @@
 					event.preventDefault();
 				} else{
 					var groupId:String = event.getGroupId();
-					var itemId:String = currentSelectedItem.id;
 					Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
 						if (nestedCloseEvent.detail == Alert.YES) {
-							Config.instance.getListGroupsOfItemService().transferOwnership(itemId, groupId, itemTransferToGroupComplete);
+							for each (var item:ItemDescription in dataGrid.selectedItems) {
+								Config.instance.getListGroupsOfItemService().transferOwnership(item.id, groupId, itemTransferToGroupComplete);
+							}
 						}
 					});
 				}

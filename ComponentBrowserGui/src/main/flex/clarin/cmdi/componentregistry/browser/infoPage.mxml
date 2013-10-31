@@ -5,10 +5,6 @@
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		 >
 	
-	<mx:Metadata>
-		[Event(name="groupSelected", type="clarin.cmdi.componentregistry.browser.GroupSelectionEvent")]
-	</mx:Metadata>
-	
 	<mx:XML id="cmdComponent"/>
 	<mx:String id="headerLabel"/>
 
