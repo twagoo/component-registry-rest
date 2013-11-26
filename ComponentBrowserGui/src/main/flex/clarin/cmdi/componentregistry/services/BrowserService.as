@@ -42,11 +42,9 @@ package clarin.cmdi.componentregistry.services {
 		public function findDescription(id:String):ItemDescription {			
 			for each (var item:ItemDescription in itemDescriptions) {
 				if (item.id == id) {
-					trace("found "+ id+" in "+itemDescriptions.length+" userSpace= "+space);
 					return item;
 				}
 			}
-			trace("not found "+ id+" in "+itemDescriptions+" userSpace= "+space);
 			return null;
 		}
 	}

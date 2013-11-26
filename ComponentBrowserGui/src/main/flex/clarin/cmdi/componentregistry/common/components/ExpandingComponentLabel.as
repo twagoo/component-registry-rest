@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.CMDComponentXMLEditor;
+	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
@@ -12,7 +13,7 @@ package clarin.cmdi.componentregistry.common.components {
 	
 	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
-
+	
 	import mx.containers.VBox;
 	import mx.controls.Label;
 	import mx.managers.CursorManager;
