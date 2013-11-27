@@ -144,17 +144,20 @@
 			}
 			
 			
-			
 			private function onGroupSelected(event:GroupSelectionEvent):void {
 				//Some handler already moved the group for us
 				if (event.groupWasMoved)
 					return;
 				if (!event.getGroupId()){
 					// we don't want items to be moved from groups into void, thus object this selection event
+					//TODO: event cancellation is a bad way of dealing with actions, but the reason is that this component (of which there are 4 instances)
+					// handles the group moving action which should be done only once. This should be done in a singleton controller.
 					event.stopPropagation();
 					event.stopImmediatePropagation();
 					event.preventDefault();
 				} else{
+					if (dataGrid.selectedItems.length==0)
+						return;
 					var groupId:String = event.getGroupId();
 					Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
 						if (nestedCloseEvent.detail == Alert.YES) {
@@ -170,7 +173,7 @@
 			private function onMoveToGroupButtonClicked(event:Event):void {
 				currentSelectedGroup=groupBox.selectedItem.groupId;
 				var groupEvent:GroupSelectionEvent = new GroupSelectionEvent(groupBox.selectedItem.groupId, groupBox.selectedItem.label);
-				dispatchEvent(groupEvent);
+				Config.instance.dispatchEvent(groupEvent);
 				// did someone object this selection?
 				if (groupEvent.isDefaultPrevented()){
 					//e.preventDefault, stopPropagation and stopImmediatePropagation don't undo the selection so we have to do it manually here
