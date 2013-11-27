@@ -1,5 +1,6 @@
 // ActionScript file
 import clarin.cmdi.componentregistry.browser.BrowserColumns;
+import clarin.cmdi.componentregistry.browser.GroupSelectionEvent;
 import clarin.cmdi.componentregistry.common.ItemDescription;
 import clarin.cmdi.componentregistry.common.components.RegistryViewStack;
 import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
@@ -26,7 +27,7 @@ private var componentSrv:ComponentInfoService = new ComponentInfoService();
 private var itemDescription:ItemDescription;
 
 [Bindable]
-private var componentsSrv:ComponentListService = new ComponentListService(Config.instance.space);
+private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv(Config.instance.space);
 
 [Bindable]
 public var cmdComponent:XML;
@@ -55,7 +56,7 @@ public function init():void {
 
 
 private function toggleUserSpace(event:Event):void {
-	componentsSrv = new ComponentListService(Config.instance.space);
+	componentsSrv = Config.instance.getComponentsSrv(Config.instance.space);
 }
 
 private function determineSaveButtonEnabled():void {

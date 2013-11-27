@@ -84,12 +84,11 @@
 				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, updateGroupVisibility);
 				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
-				addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
-				
-				scrollToSelected();
+				Config.instance.addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
 			}
 			
 			private function onSpaceChanged(event:Event):void{
+				userSpaceCB.setSelectedItem(Config.instance.space, Config.instance.selectedGroup);
 				createNewButton.visible = (!Config.instance.selectedGroup);
 				createNewButton.includeInLayout = (!Config.instance.selectedGroup);
 				importButton.visible = (!Config.instance.selectedGroup);

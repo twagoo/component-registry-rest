@@ -1,4 +1,5 @@
 package clarin.cmdi.componentregistry.services {
+	import clarin.cmdi.componentregistry.browser.GroupSelectionEvent;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Profile;
 	
