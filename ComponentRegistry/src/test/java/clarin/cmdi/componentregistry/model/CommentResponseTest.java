@@ -41,7 +41,7 @@ public class CommentResponseTest extends BaseUnitTest{
 	marshaller.marshal(resp, out);
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-	expected += "<commentResponse isInUserSpace=\"true\" registered=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+	expected += "<commentResponse registered=\"false\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <errors>\n";
 	expected += "        <error>Error 1</error>\n";
 	expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
@@ -69,7 +69,7 @@ public class CommentResponseTest extends BaseUnitTest{
 	marshaller.marshal(resp, out);
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-	expected += "<commentResponse isInUserSpace=\"false\" registered=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+	expected += "<commentResponse registered=\"true\" isInUserSpace=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <errors/>\n";
 	expected += "    <comment>\n";
 	expected += "        <comments>Name</comments>\n";

@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.browser.Browse;
+	import clarin.cmdi.componentregistry.browser.SwitchViewEvent;
 	import clarin.cmdi.componentregistry.common.Credentials;
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.Login;
@@ -26,6 +27,7 @@ package clarin.cmdi.componentregistry.common.components {
 			loginPanel = new Login();
 			loginPanel.addEventListener(Login.FAILED, loginFailed);
 			browse.addEventListener(Browse.START_ITEM_LOADED, switchWithStartupItem);
+			Config._instance.addEventListener(SwitchViewEvent.SWITCH_VIEW, onSwitchingView);
 			addChild(browse); //everyone can browse
 			
 			if (!Config.instance.debug) {
@@ -34,6 +36,15 @@ package clarin.cmdi.componentregistry.common.components {
 			}
 			addChild(editor);
 			addChild(importer);
+		}
+		
+		public static function showView(viewName:String, item:ItemDescription):void{
+			var event:SwitchViewEvent  = new SwitchViewEvent(viewName, item);
+			Config.instance.dispatchEvent(event);
+		}
+		
+		private function onSwitchingView(event:SwitchViewEvent):void{
+			switchView(event.view, event.item);
 		}
 		
 		private function switchWithStartupItem(even:Event):void {

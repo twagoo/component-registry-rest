@@ -4,7 +4,7 @@
 		 xmlns:common="clarin.cmdi.componentregistry.common.*"
 		 xmlns:browser="clarin.cmdi.componentregistry.browser.*"
 		 >
-
+	
 	<mx:XML id="cmdComponent"/>
 	<mx:String id="headerLabel"/>
 
@@ -17,6 +17,7 @@
 				  fontSize="14"/>
 		<mx:ToggleButtonBar id="toggleBar"
 							dataProvider="{infoViewStack}"/>
+		
 	</mx:HBox>
 
 	<mx:ViewStack id="infoViewStack"
@@ -42,19 +43,19 @@
 							   commentsLoaded="commentsLoadedHandler(event)"
 							   />
 	</mx:ViewStack>
+
 	<mx:Script>
 		<![CDATA[
 			import clarin.cmdi.componentregistry.common.ItemDescription;
-			import clarin.cmdi.componentregistry.services.CommentListService;
 			import clarin.cmdi.componentregistry.services.Config;
 			
-			import mx.events.FlexEvent;
 			import mx.events.IndexChangedEvent;
-			import mx.messaging.SubscriptionInfo;
-			
+
+
 			[Bindable]
 			private var _itemDescription:ItemDescription;
-			
+
+
 			public function setPanel(startupPanel:String):void {
 				if(startupPanel == Config.BROWSER_PANEL_VIEW){
 					infoViewStack.selectedChild = viewPanel;
