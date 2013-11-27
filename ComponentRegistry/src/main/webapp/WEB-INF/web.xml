@@ -53,23 +53,10 @@
 	</filter-mapping>
 	<servlet>
 		<servlet-name>ComponentRegistry Web Application</servlet-name>
-		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet
-		</servlet-class>
-		<init-param>
-			<param-name>com.sun.jersey.config.property.resourceConfigClass
-			</param-name>
-			<param-value>com.sun.jersey.api.core.ClassNamesResourceConfig
-			</param-value>
+		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+		<init-param> <param-name>com.sun.jersey.config.property.classnames</param-name> 
+			<param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider</param-value> 
 		</init-param>
-		<init-param>
-			<param-name>com.sun.jersey.config.property.classnames</param-name>
-			<param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider;clarin.cmdi.componentregistry.rest.ComponentRegistryRestService
-			</param-value>
-		</init-param>
-		<!-- <init-param> -->
-		<!-- <param-name>com.sun.jersey.config.property.packages</param-name> -->
-		<!-- <param-value>clarin.cmdi.componentregistry.rest</param-value> -->
-		<!-- </init-param> -->
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>

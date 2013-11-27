@@ -79,17 +79,16 @@
 			
 			private function init():void{
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, onSpaceChanged);
-
 				groups.addItem("Move to group...");
 				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
 				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, updateGroupVisibility);
 				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
-				addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
-				
+				Config.instance.addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
 				scrollToSelected();
 			}
 			
 			private function onSpaceChanged(event:Event):void{
+				userSpaceCB.setSelectedItem(Config.instance.space, Config.instance.selectedGroup);
 				createNewButton.visible = (!Config.instance.selectedGroup);
 				createNewButton.includeInLayout = (!Config.instance.selectedGroup);
 				importButton.visible = (!Config.instance.selectedGroup);
@@ -144,6 +143,7 @@
 				navigateToURL(request, "_blank");
 			}
 			
+<<<<<<< .working
 			
 			
 			private function onGroupSelected(event:GroupSelectionEvent):void {
@@ -201,6 +201,68 @@
 			protected function itemTransferToGroupComplete(resultEvent:ResultEvent):void {
 				RegistryViewStack.showView(Config.VIEW_BROWSE, currentSelectedItem);
 			}
+=======
+			
+			private function onGroupSelected(event:GroupSelectionEvent):void {
+				//Some handler already moved the group for us
+				if (event.groupWasMoved)
+					return;
+				if (!event.getGroupId()){
+					// we don't want items to be moved from groups into void, thus object this selection event
+					//TODO: event cancellation is a bad way of dealing with actions, but the reason is that this component (of which there are 4 instances)
+					// handles the group moving action which should be done only once. This should be done in a singleton controller.
+					event.stopPropagation();
+					event.stopImmediatePropagation();
+					event.preventDefault();
+				} else{
+					if (dataGrid.selectedItems.length==0)
+						return;
+					var groupId:String = event.getGroupId();
+					Alert.show("Items, once moved to a group, can not be moved back to your workspace. Do you want to move this item?", "Title", mx.controls.Alert.YES | mx.controls.Alert.NO, this, function (nestedCloseEvent:CloseEvent):void {
+						if (nestedCloseEvent.detail == Alert.YES) {
+							for each (var item:ItemDescription in dataGrid.selectedItems) {
+								Config.instance.getListGroupsOfItemService().transferOwnership(item.id, groupId, itemTransferToGroupComplete);
+							}
+						}
+					});
+				}
+				event.groupWasMoved = true;
+			}
+			
+			private function onMoveToGroupButtonClicked(event:Event):void {
+				currentSelectedGroup=groupBox.selectedItem.groupId;
+				var groupEvent:GroupSelectionEvent = new GroupSelectionEvent(groupBox.selectedItem.groupId, groupBox.selectedItem.label);
+				Config.instance.dispatchEvent(groupEvent);
+				// did someone object this selection?
+				if (groupEvent.isDefaultPrevented()){
+					//e.preventDefault, stopPropagation and stopImmediatePropagation don't undo the selection so we have to do it manually here
+					groupBox.selectedIndex = previousSelectedIndex;
+				} else{
+					previousSelectedIndex = groupBox.selectedIndex;
+				}
+			}
+			
+			public function onGroupsLoaded(event:Event):void{
+				groups.removeAll();
+				groups.addItem({label:"Move to group...", space:null, groupId:null});
+				
+				for each (var group:Group in Config.instance.getListUserGroupsMembershipService().groups) {
+					groups.addItem({label:group.name, space:Config.SPACE_USER, groupId:group.id});					
+				}
+				updateGroupVisibility(event);
+			}
+			
+			
+			private function updateGroupVisibility(event:Event):void{
+				var showGroups:Boolean = Config.instance.getListUserGroupsMembershipService().groups.length>0 && Config.instance.space != Config.SPACE_PUBLIC;
+				groupPanel.visible = showGroups;
+				groupBox.selectedIndex = 0;
+			}
+			
+			protected function itemTransferToGroupComplete(resultEvent:ResultEvent):void {
+				RegistryViewStack.showView(Config.VIEW_BROWSE, currentSelectedItem);
+			}
+>>>>>>> .merge-right.r4097
 		]]>
 	</mx:Script>
 	

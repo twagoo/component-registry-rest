@@ -12,9 +12,10 @@ import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -36,6 +37,7 @@ import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -64,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -319,9 +322,9 @@ public class ComponentRegistryRestService implements
 
 	@Override
 	public ComponentRegistry findRegistry(String id,
-			RegistryClosure<? extends AbstractDescription> clos)
+			RegistryClosure<? extends BaseDescription> clos)
 			throws ComponentRegistryException {
-		AbstractDescription desc = null;
+		BaseDescription desc = null;
 		ComponentRegistry result = getRegistry(getStatus(false));
 		desc = clos.getDescription(result, id);
 		if (desc == null) {
@@ -362,7 +365,7 @@ public class ComponentRegistryRestService implements
 	@Path("/components/usage/{componentId}")
 	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
 			MediaType.APPLICATION_JSON })
-	public List<AbstractDescription> getComponentUsage(
+	public List<BaseDescription> getComponentUsage(
 			@PathParam("componentId") String componentId,
 			@QueryParam(USERSPACE_PARAM) @DefaultValue("false") boolean userspace)
 			throws ComponentRegistryException {
@@ -379,7 +382,7 @@ public class ComponentRegistryRestService implements
 					components.size(), profiles.size(), componentId,
 					(System.currentTimeMillis() - start));
 
-			List<AbstractDescription> usages = new ArrayList<AbstractDescription>(
+			List<BaseDescription> usages = new ArrayList<BaseDescription>(
 					components.size() + profiles.size());
 			usages.addAll(components);
 			usages.addAll(profiles);
@@ -695,13 +698,13 @@ public class ComponentRegistryRestService implements
 		}
 	}
 
-	private void updateDescription(AbstractDescription desc, String name,
+	private void updateDescription(BaseDescription desc, String name,
 			String description, String domainName, String group) {
 		desc.setName(name);
 		desc.setDescription(description);
 		desc.setDomainName(domainName);
 		desc.setGroupName(group);
-		desc.setRegistrationDate(AbstractDescription.createNewDate());
+		desc.setRegistrationDate(new Date());
 	}
 
 	@Override
@@ -791,7 +794,7 @@ public class ComponentRegistryRestService implements
 			final Comment comment = registry.getSpecifiedCommentInProfile(
 					profileId, commentId, principal);
 			if (comment != null
-					&& profileId.equals(comment.getProfileDescriptionId())) {
+					&& profileId.equals(comment.getComponentId())) {
 				LOG.debug("Comment with id: {} set for deletion.", commentId);
 				registry.deleteComment(commentId, principal);
 			} else {
@@ -836,7 +839,7 @@ public class ComponentRegistryRestService implements
 			final Comment comment = registry.getSpecifiedCommentInComponent(
 					componentId, commentId, principal);
 			if (comment != null
-					&& componentId.equals(comment.getComponentDescriptionId())) {
+					&& componentId.equals(comment.getComponentId())) {
 				LOG.debug("Comment with id: {} set for deletion.", commentId);
 				registry.deleteComment(commentId, principal);
 			} else {
@@ -943,7 +946,7 @@ public class ComponentRegistryRestService implements
 		}
 	}
 
-	private void checkAndThrowDescription(AbstractDescription desc, String id) {
+	private void checkAndThrowDescription(BaseDescription desc, String id) {
 		if (desc == null) {
 			throw new WebApplicationException(Response.serverError()
 					.entity("Incorrect id:" + id + "cannot handle request")
@@ -1151,7 +1154,7 @@ public class ComponentRegistryRestService implements
 						stillActive)).build();
 	}
 
-	private Response register(InputStream input, AbstractDescription desc,
+	private Response register(InputStream input, BaseDescription desc,
 			UserCredentials userCredentials, boolean userspace,
 			RegisterAction action) {
 		try {
@@ -1222,7 +1225,7 @@ public class ComponentRegistryRestService implements
 	 *             to detect recursion
 	 */
 	private void checkForRecursion(MDValidator validator,
-			ComponentRegistry registry, AbstractDescription desc)
+			ComponentRegistry registry, BaseDescription desc)
 			throws ComponentRegistryException {
 		try {
 			// Expand to check for recursion. Operate on copy so that original
@@ -1242,7 +1245,7 @@ public class ComponentRegistryRestService implements
 
 	private Response registerComment(InputStream input,
 			ComponentRegistry registry, boolean userspace,
-			AbstractDescription description, Principal principal,
+			BaseDescription description, Principal principal,
 			UserCredentials userCredentials) {
 		try {
 			CommentValidator validator = new CommentValidator(input,
@@ -1274,12 +1277,12 @@ public class ComponentRegistryRestService implements
 					response.setRegistered(false);
 					response.addError("Unable to post at this moment. Internal server error.");
 				}
-				if (com.getComponentDescriptionId() != null) {
+				if (com.getComponentId() != null) {
 					LOG.info("Posted new comment on component {}",
-							com.getComponentDescriptionId());
+							com.getComponentId());
 				} else {
 					LOG.info("Posted new comment on profile {}",
-							com.getProfileDescriptionId());
+							com.getComponentId());
 				}
 			} else {
 				LOG.warn(
@@ -1418,7 +1421,7 @@ public class ComponentRegistryRestService implements
 		final RssCreatorDescriptions instance = new RssCreatorDescriptions(
 				userspace, getApplicationBaseURI(), "components",
 				Integer.parseInt(limit), components,
-				AbstractDescription.COMPARE_ON_DATE);
+				ComponentUtils.COMPARE_ON_DATE);
 		final Rss rss = instance.getRss();
 		LOG.debug("Releasing RSS of {} most recently registered components",
 				limit);
@@ -1451,7 +1454,7 @@ public class ComponentRegistryRestService implements
 		final RssCreatorDescriptions instance = new RssCreatorDescriptions(
 				userspace, getApplicationBaseURI(), "profiles",
 				Integer.parseInt(limit), profiles,
-				AbstractDescription.COMPARE_ON_DATE);
+				ComponentUtils.COMPARE_ON_DATE);
 		final Rss rss = instance.getRss();
 		LOG.debug("Releasing RSS of {} most recently registered profiles",
 				limit);
@@ -1578,7 +1581,7 @@ public class ComponentRegistryRestService implements
 			MediaType.APPLICATION_JSON })
 	public void transferItemOwnershipToGroup(@PathParam("itemId") String itemId, @QueryParam("groupId") long groupId) {
 	    Principal principal = security.getUserPrincipal();
-	    groupService.transferItemOwnershipFromUserToGroup(principal.getName(), groupId, itemId);
+	    groupService.transferItemOwnershipFromUserToGroupId(principal.getName(), groupId, itemId);
 	}
 
 }

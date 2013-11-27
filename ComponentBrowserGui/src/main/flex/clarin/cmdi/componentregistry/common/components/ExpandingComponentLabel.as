@@ -103,7 +103,6 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		private function handleComponentLoaded(event:Event):void {
-			trace("ExpandingComponentLable's handleComponentLoaded is called, it is calling CMDComponentLabel");
 			var comp:Component = componentSrv.component;
 			if (editable) {
 				expanded = new CMDComponentXMLEditor();

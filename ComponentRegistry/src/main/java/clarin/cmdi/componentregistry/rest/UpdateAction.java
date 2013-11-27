@@ -4,7 +4,7 @@ import java.security.Principal;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 public class UpdateAction implements RegisterAction {
@@ -16,7 +16,7 @@ public class UpdateAction implements RegisterAction {
     }
     
     @Override
-    public int execute(AbstractDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) {
+    public int execute(BaseDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) {
         return registry.update(desc, spec, principal, false);
     }
 

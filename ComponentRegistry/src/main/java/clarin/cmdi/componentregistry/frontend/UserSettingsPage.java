@@ -7,7 +7,7 @@ package clarin.cmdi.componentregistry.frontend;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.model.RegistryUser;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import java.security.Principal;
 
@@ -22,6 +22,7 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.spring.injection.annot.SpringBean;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataAccessException;
 
 /**
@@ -64,7 +65,9 @@ public class UserSettingsPage extends WebPage {
 		public void setObject(String newName) {
 		    registryUser.setName(newName);
 		    try {
-			userDao.updateUser(registryUser.getId(), registryUser);
+			RegistryUser u = userDao.findOne(registryUser.getId().longValue());
+			u.setName(newName);
+			userDao.saveAndFlush(u);
 			info("User info has been updated");
 		    } catch (DataAccessException daEx) {
 			error("Database error: " + daEx.getMessage());

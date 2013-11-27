@@ -3,7 +3,7 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,31 +28,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class CommentValidatorTest extends BaseUnitTest {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    private MDMarshaller marshaller;
-
-    @Before
-    public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
-    }
-
     /**
      * Fully successful comment validation
      */
     @Test
     public void testValidateSucces() {
-	AbstractDescription description = ProfileDescription
+	BaseDescription description = ProfileDescription
 		.createNewDescription();
 	String comContent = "";
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>myCom</comments>\n";
 	comContent += "    <commentDate></commentDate>\n";
-	comContent += "     <profileDescriptionId>" + description.getId()
-		+ "</profileDescriptionId>";
+	comContent += "     <componentId>" + description.getId()+ "</componentId>";
 	comContent += "    <userId>0</userId>\n";
 	comContent += "    <id>1</id>\n";
 	comContent += "</comment>\n";
@@ -67,7 +55,7 @@ public class CommentValidatorTest extends BaseUnitTest {
      */
     @Test
     public void testValidateComponent() {
-	AbstractDescription desc = ComponentDescription.createNewDescription();
+	BaseDescription desc = ComponentDescription.createNewDescription();
 	String comContent = "";
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -91,8 +79,8 @@ public class CommentValidatorTest extends BaseUnitTest {
 	commentContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	commentContent += "    <comments>myCom</comments>\n";
 	commentContent += "    <commentDate></commentDate>\n";
-	commentContent += "     <componentDescriptionId>" + desc.getId()
-		+ "</componentDescriptionId>";
+	commentContent += "     <componentId>" + desc.getId()
+		+ "</componentId>";
 	commentContent += "    <userId>0</userId>\n";
 	commentContent += "    <id>1</id>\n";
 	commentContent += "</comment>\n";
@@ -107,7 +95,7 @@ public class CommentValidatorTest extends BaseUnitTest {
      */
     @Test
     public void testValidateProfile() {
-	AbstractDescription desc = ProfileDescription.createNewDescription();
+	BaseDescription desc = ProfileDescription.createNewDescription();
 	String comContent = "";
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -131,8 +119,8 @@ public class CommentValidatorTest extends BaseUnitTest {
 	commentContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	commentContent += "    <comments>myCom</comments>\n";
 	commentContent += "    <commentDate></commentDate>\n";
-	commentContent += "     <profileDescriptionId>" + desc.getId()
-		+ "</profileDescriptionId>";
+	commentContent += "     <componentId>" + desc.getId()
+		+ "</componentId>";
 	commentContent += "    <userId>0</userId>\n";
 	commentContent += "    <id>1</id>\n";
 	commentContent += "</comment>\n";
@@ -149,7 +137,7 @@ public class CommentValidatorTest extends BaseUnitTest {
      */
     @Test
     public void testValidateNoCommentContent() throws Exception {
-	AbstractDescription desc = ProfileDescription.createNewDescription();
+	BaseDescription desc = ProfileDescription.createNewDescription();
 	String commentContent = "";
 	commentContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	commentContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -173,8 +161,8 @@ public class CommentValidatorTest extends BaseUnitTest {
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>myCom</comments>\n";
 	comContent += "    <commentDate></commentDate>\n";
-	comContent += "     <profileDescriptionId>" + desc.getId()
-		+ "</profileDescriptionId>";
+	comContent += "     <componentId>" + desc.getId()
+		+ "</componentId>";
 	comContent += "    <userId>0</userId>\n";
 	comContent += "    <id>1</id>\n";
 	comContent += "</comment>\n";

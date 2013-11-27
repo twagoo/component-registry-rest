@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistryException;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,18 +14,23 @@ import java.util.regex.Pattern;
 import javax.xml.bind.JAXBException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+
 import javax.xml.transform.TransformerException;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Static helper methods to be used in tests
@@ -34,12 +40,9 @@ public final class RegistryTestHelper {
 
     private static MDMarshaller marshaller;
 
-    static {
-	try {
-	    marshaller = new MDMarshaller();
-	} catch (TransformerException ex) {
-	    throw new RuntimeException(ex);
-	}
+    @Autowired
+    public void setMarshaller(MDMarshaller marshaller) {
+	RegistryTestHelper.marshaller = marshaller;
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
@@ -58,15 +61,11 @@ public final class RegistryTestHelper {
 	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
 	desc.setName(id);
 	desc.setDescription("Test Description");
-	desc.setId(ComponentRegistry.REGISTRY_ID + id);
-	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
+	desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
+	desc.setHref("link:" + desc.getId());
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
-    }
-
-    public static int updateComponent(ComponentRegistry testRegistry, ComponentDescription description, String content) throws JAXBException {
-	return testRegistry.update(description, getComponentFromString(content), DummyPrincipal.DUMMY_CREDENTIALS.getPrincipal(), true);
     }
 
     public static String getProfileTestContentString() {
@@ -120,8 +119,8 @@ public final class RegistryTestHelper {
 	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
 	desc.setName(id);
 	desc.setDescription("Test Description");
-	desc.setId(ComponentRegistry.REGISTRY_ID + id);
-	desc.setHref("link:" + ComponentRegistry.REGISTRY_ID + id);
+	desc.setId(ProfileDescription.PROFILE_PREFIX + id);
+	desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
@@ -136,7 +135,7 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getComponentTestContent() {
-	return getComponentTestContent("Access");
+	return getComponentTestContentAsStream("Access");
     }
 
     public static String getComponentTestContentString(String componentName) {
@@ -186,15 +185,15 @@ public final class RegistryTestHelper {
 
     //////////////////////
     public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
-	return marshaller.unmarshal(CMDComponentSpec.class, getComponentContent(contentString), marshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getCMDComponentSchema());
     }
 
-    public static InputStream getComponentContent(String content) {
+    public static InputStream getComponentContentAsStream(String content) {
 	return new ByteArrayInputStream(content.getBytes());
     }
 
-    public static InputStream getComponentTestContent(String componentName) {
-	return getComponentContent(getComponentTestContentString(componentName));
+    public static InputStream getComponentTestContentAsStream(String componentName) {
+	return getComponentContentAsStream(getComponentTestContentString(componentName));
     }
 
     public static CMDComponentSpec getTestComponent() throws JAXBException {
@@ -202,7 +201,7 @@ public final class RegistryTestHelper {
     }
 
     public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
-	return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(name), marshaller.getCMDComponentSchema());
+	return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getCMDComponentSchema());
     }
 
     public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
@@ -233,8 +232,8 @@ public final class RegistryTestHelper {
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>" + commentName + "</comments>\n";
-	comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
-	comContent += "    <profileDescriptionId>" + profileId + "</profileDescriptionId>\n";
+	comContent += "    <commentDate>" + DatesHelper.createNewDate() + "</commentDate>\n";
+	comContent += "    <componentId>" + profileId + "</componentId>\n";
 	comContent += "    <userName>J. Unit</userName>\n";
 	comContent += "</comment>\n";
 	return comContent;
@@ -245,8 +244,8 @@ public final class RegistryTestHelper {
 	comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 	comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	comContent += "    <comments>" + commentName + "</comments>\n";
-	comContent += "    <commentDate>" + Comment.createNewDate() + "</commentDate>\n";
-	comContent += "     <componentDescriptionId>" + componentId + "</componentDescriptionId>";
+	comContent += "    <commentDate>" + DatesHelper.createNewDate() + "</commentDate>\n";
+	comContent += "     <componentId>" + componentId + "</componentId>";
 	comContent += "    <userName>J. Unit</userName>\n";
 	comContent += "</comment>\n";
 	return comContent;
@@ -265,7 +264,7 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getCommentTestContent() {
-	return getTestCommentContent("Actual", "clarin.eu:cr1:profile1");
+	return getTestCommentContent("Actual", ProfileDescription.PROFILE_PREFIX+"profile1");
     }
 
     /**

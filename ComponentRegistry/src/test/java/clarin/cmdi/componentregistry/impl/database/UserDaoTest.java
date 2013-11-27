@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.RegistryUser;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class UserDaoTest extends BaseUnitTest {
 	RegistryUser testUser = createTestUser();
 
 	assertEquals(0, userDao.getAllUsers().size());
-	Number newId = userDao.insertUser(testUser);
+	Number newId = userDao.save(testUser).getId();
 	assertNotNull(newId);
 
 	List<RegistryUser> users = userDao.getAllUsers();
@@ -63,7 +63,7 @@ public class UserDaoTest extends BaseUnitTest {
     @Test
     public void testGetUserByPrincipalName() {
 	RegistryUser testUser = createTestUser();
-	userDao.insertUser(testUser);
+	userDao.save(testUser);
 
 	assertNotNull(userDao.getByPrincipalName(TEST_USER_PRINCIPAL_NAME));
 	assertNull(userDao.getByPrincipalName("NON-EXISTING PRINCIPAL NAME"));
@@ -79,12 +79,12 @@ public class UserDaoTest extends BaseUnitTest {
     @Test
     public void testUpdateUser() {
 	RegistryUser testUser = createTestUser();
-	Number id = userDao.insertUser(testUser);
-
+	testUser = userDao.saveAndFlush(testUser);
+	Number id = testUser.getId();
 	testUser.setName("I. Changed");
-	userDao.updateUser(id, testUser);
+	userDao.save(testUser);
 
-	assertEquals("I. Changed", userDao.getById(id).getName());
+	assertEquals("I. Changed", userDao.findOne(id.longValue()).getName());
     }
 
     public final static String TEST_USER_NAME = "Aap";

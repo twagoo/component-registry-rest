@@ -8,7 +8,7 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
@@ -40,7 +40,7 @@ import org.springframework.web.context.request.RequestContextListener;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
 	"classpath:spring-config/applicationContext.xml",
-	"classpath:spring-config/datasource-hsqldb.xml" })
+	"classpath:spring-config/test-applicationContext-fragment.xml" })
 //Important: these tests can not be configured with @Transactional because it spawns two (mutually deadlocking) transactions: the test itself and jersey services
 public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     // CommandLine test e.g.: curl -i -H "Accept:application/json" -X GET
@@ -82,7 +82,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected String getApplicationContextFile() {
 	// sorry for the duplication, but JerseyTest is not aware of
 	// @ContextConfiguration
-	return "classpath:spring-config/applicationContext.xml, classpath:spring-config/datasource-hsqldb.xml";
+	return "classpath:spring-config/applicationContext.xml, classpath:spring-config/test-applicationContext-fragment.xml";
     }
 
     @Override
@@ -124,7 +124,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 	RegistryUser user = new RegistryUser();
 	user.setName("Database test user");
 	user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
-	userDao.insertUser(user);
+	userDao.save(user);
     }
 
     protected UserDao getUserDao() {

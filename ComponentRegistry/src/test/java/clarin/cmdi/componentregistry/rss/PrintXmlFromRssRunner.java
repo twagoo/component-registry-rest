@@ -5,18 +5,24 @@ import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+
 import org.junit.BeforeClass;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -29,12 +35,12 @@ public class PrintXmlFromRssRunner {
 
     private static MDMarshaller marshaller;
 
-    @BeforeClass
-    public static void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
+    @Autowired
+    public void setMarshaller(MDMarshaller marshaller) {
+	this.marshaller = marshaller;
     }
 
-    public static <T extends AbstractDescription> void printIds(List<T> desc) {
+    public static <T extends BaseDescription> void printIds(List<T> desc) {
 	for (T current : desc) {
 	    String currentId = current.getId();
 	    System.out.println(currentId);
@@ -49,19 +55,19 @@ public class PrintXmlFromRssRunner {
 
     }
 
-    private static Rss makeRssForDescriptions(List<? extends AbstractDescription> descriptions, int kind, String baseUri, int limit) throws ParseException {
+    private static Rss makeRssForDescriptions(List<? extends BaseDescription> descriptions, int kind, String baseUri, int limit) throws ParseException {
 	System.out.println(descriptions.size());
-	Collections.sort(descriptions, AbstractDescription.COMPARE_ON_DATE);
+	Collections.sort(descriptions, ComponentUtils.COMPARE_ON_DATE);
 	System.out.println(descriptions.size());
 
 	System.out.println("check if the descriptions are sorted in a proper way, by the dates ");
-	for (AbstractDescription desc : descriptions) {
-	    String date = desc.getRegistrationDate();
-	    System.out.println(date + ", formatted: " + AbstractDescription.getDate(date)
+	for (BaseDescription desc : descriptions) {
+	    Date date = desc.getRegistrationDate();
+	    System.out.println(date + ", formatted: " + date
 		    + ", Rss=formatted: " + DatesHelper.getRFCDateTime(date));
 	}
 
-	RssCreatorDescriptions instance = new RssCreatorDescriptions(false, baseUri, (kind == 1) ? "profiles" : "components", limit, descriptions, AbstractDescription.COMPARE_ON_DATE);
+	RssCreatorDescriptions instance = new RssCreatorDescriptions(false, baseUri, (kind == 1) ? "profiles" : "components", limit, descriptions, ComponentUtils.COMPARE_ON_DATE);
 	Rss result = instance.getRss();
 
 	return result;
@@ -114,13 +120,13 @@ public class PrintXmlFromRssRunner {
 	 using one of the on-line rss-source vaidators */
 
 	if (kind == 1 || kind == 2) { // testing Rss for profiles/components
-	    List<? extends AbstractDescription> descriptions =
+	    List<? extends BaseDescription> descriptions =
 		    (kind == 1) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
 	    rss = makeRssForDescriptions(descriptions, kind, baseUri, 10);
 	};
 
 	if (kind == 3 || kind == 4) { // testing Rss comments
-	    List<? extends AbstractDescription> descriptions =
+	    List<? extends BaseDescription> descriptions =
 		    (kind == 3) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
 	    printIds(descriptions);
 	    System.out.println("Pick up and input one of the description id above");// "clarin.eu:cr1:p_1284723009187" "clarin.eu:cr1:c_1288172614011"

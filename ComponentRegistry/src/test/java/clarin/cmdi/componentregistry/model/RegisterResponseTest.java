@@ -6,21 +6,21 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 
 import org.junit.Test;
 
+import clarin.cmdi.componentregistry.BaseUnitTest;
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
+
 import javax.xml.transform.TransformerException;
+
 import org.junit.Before;
 
-public class RegisterResponseTest {
+public class RegisterResponseTest extends BaseUnitTest{
 
-    private MDMarshaller marshaller;
-
-    @Before
-    public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-    }
+    private Date testDate = new Date();
 
     @Test
     public void testRegisterError() throws Exception {
@@ -62,10 +62,10 @@ public class RegisterResponseTest {
 	expected += "<registerResponse isProfile=\"true\" registered=\"true\" isInUserSpace=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <errors/>\n";
 	expected += "    <description xsi:type=\"profileDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-	expected += "        <id>myId</id>\n";
+	expected += "        <id>clarin.eu:cr1:p_myId</id>\n";
 	expected += "        <description>myD</description>\n";
 	expected += "        <name>Name</name>\n";
-	expected += "        <registrationDate>myDate</registrationDate>\n";
+	expected += "        <registrationDate>"+DatesHelper.formatXmlDateTime(testDate)+"</registrationDate>\n";
 	expected += "        <creatorName>myC</creatorName>\n";
 	expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "        <commentsCount>2</commentsCount>\n";
@@ -77,7 +77,7 @@ public class RegisterResponseTest {
 	RegisterResponse rr = marshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertTrue(rr.isRegistered());
 	assertTrue(rr.isProfile());
-	assertEquals("myId", rr.getDescription().getId());
+	assertEquals("clarin.eu:cr1:p_myId", rr.getDescription().getId());
     }
 
     @Test
@@ -94,10 +94,10 @@ public class RegisterResponseTest {
 	expected += "<registerResponse isProfile=\"false\" registered=\"true\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <errors/>\n";
 	expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
-	expected += "        <id>myId</id>\n";
+	expected += "        <id>clarin.eu:cr1:c_myId</id>\n";
 	expected += "        <description>myD</description>\n";
 	expected += "        <name>Name</name>\n";
-	expected += "        <registrationDate>myDate</registrationDate>\n";
+	expected += "        <registrationDate>"+DatesHelper.formatXmlDateTime(testDate)+"</registrationDate>\n";
 	expected += "        <creatorName>myC</creatorName>\n";
 	expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "        <groupName>imdi</groupName>\n";
@@ -109,17 +109,17 @@ public class RegisterResponseTest {
 	RegisterResponse rr = marshaller.unmarshal(RegisterResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertTrue(rr.isRegistered());
 	assertFalse(rr.isProfile());
-	assertEquals("myId", rr.getDescription().getId());
+	assertEquals("clarin.eu:cr1:c_myId", rr.getDescription().getId());
     }
 
     private ComponentDescription getComponentDescription() {
 	ComponentDescription desc = new ComponentDescription();
 	desc.setName("Name");
-	desc.setId("myId");
+	desc.setId(ComponentDescription.COMPONENT_PREFIX+"myId");
 	desc.setGroupName("imdi");
 	desc.setCreatorName("myC");
 	desc.setDescription("myD");
-	desc.setRegistrationDate("myDate");
+	desc.setRegistrationDate(testDate);
 	desc.setHref("linkToMyProfile");
 	desc.setCommentsCount(2);
 	return desc;
@@ -128,10 +128,10 @@ public class RegisterResponseTest {
     private ProfileDescription getProfileDescription() {
 	ProfileDescription desc = new ProfileDescription();
 	desc.setName("Name");
-	desc.setId("myId");
+	desc.setId(ProfileDescription.PROFILE_PREFIX+"myId");
 	desc.setCreatorName("myC");
 	desc.setDescription("myD");
-	desc.setRegistrationDate("myDate");
+	desc.setRegistrationDate(testDate);
 	desc.setHref("linkToMyProfile");
 	desc.setCommentsCount(2);
 	return desc;

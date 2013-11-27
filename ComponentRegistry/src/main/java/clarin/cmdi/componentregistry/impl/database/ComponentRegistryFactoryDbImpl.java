@@ -9,7 +9,7 @@ import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.model.RegistryUser;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -106,7 +106,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	try {
 	    RegistryUser user;
 	    if (owner instanceof OwnerUser) {
-		user = userDao.getById(owner.getId());
+		user = userDao.findOne(owner.getId().longValue());
 	    } else {
 		// TODO: Implement for groups
 		throw new UnsupportedOperationException(
@@ -174,7 +174,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
 	    user = new RegistryUser();
 	    user.setPrincipalName(principalName);
 	    user.setName(displayName);
-	    userDao.insertUser(user);
+	    userDao.saveAndFlush(user);
 	    // Retrieve from db
 	    user = userDao.getByPrincipalName(principalName);
 	}

@@ -21,24 +21,22 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
 /**
  * 
  * @author george.georgovassilis@mpi.nl
- *
+ * 
  */
 public class AdminRegistry {
 
     private final static Logger LOG = LoggerFactory
 	    .getLogger(AdminRegistry.class);
     private ComponentRegistryFactory componentRegistryFactory;
-    private ProfileDescriptionDao profileDescriptionDao;
-    private ComponentDescriptionDao componentDescriptionDao;
+    private ComponentDao componentDao;
     private MDMarshaller marshaller;
 
     public void setComponentRegistryFactory(
@@ -46,14 +44,8 @@ public class AdminRegistry {
 	this.componentRegistryFactory = componentRegistryFactory;
     }
 
-    public void setProfileDescriptionDao(
-	    ProfileDescriptionDao profileDescriptionDao) {
-	this.profileDescriptionDao = profileDescriptionDao;
-    }
-
-    public void setComponentDescriptionDao(
-	    ComponentDescriptionDao componentDescriptionDao) {
-	this.componentDescriptionDao = componentDescriptionDao;
+    public void setComponentDao(ComponentDao componentDao) {
+	this.componentDao = componentDao;
     }
 
     public void setMarshaller(MDMarshaller marshaller) {
@@ -63,9 +55,9 @@ public class AdminRegistry {
     public void submitFile(CMDItemInfo info, Principal userPrincipal)
 	    throws SubmitFailedException {
 	try {
-	    AbstractDescription originalDescription = info.getDataNode()
+	    BaseDescription originalDescription = info.getDataNode()
 		    .getDescription();
-	    AbstractDescription description = null;
+	    BaseDescription description = null;
 	    CMDComponentSpec spec = null;
 	    if (originalDescription.isProfile()) {
 		description = marshaller.unmarshal(ProfileDescription.class,
@@ -103,13 +95,9 @@ public class AdminRegistry {
     }
 
     public void undelete(CMDItemInfo info) throws SubmitFailedException {
-	AbstractDescription desc = info.getDataNode().getDescription();
+	BaseDescription desc = info.getDataNode().getDescription();
 	try {
-	    if (desc.isProfile()) {
-		profileDescriptionDao.setDeleted(desc, false);
-	    } else {
-		componentDescriptionDao.setDeleted(desc, false);
-	    }
+	    componentDao.setDeleted(desc, false);
 	} catch (DataAccessException e) {
 	    throw new SubmitFailedException("Undelete failed", e);
 	}
@@ -118,7 +106,7 @@ public class AdminRegistry {
     public void delete(CMDItemInfo info, Principal userPrincipal)
 	    throws SubmitFailedException {
 	String id = info.getName();
-	AbstractDescription desc = info.getDataNode().getDescription();
+	BaseDescription desc = info.getDataNode().getDescription();
 	try {
 	    deleteFromRegistry(userPrincipal, desc, info);
 	    LOG.info("Deleted item: " + id);
@@ -135,7 +123,7 @@ public class AdminRegistry {
     }
 
     private void deleteFromRegistry(Principal userPrincipal,
-	    AbstractDescription desc, CMDItemInfo info) throws IOException,
+	    BaseDescription desc, CMDItemInfo info) throws IOException,
 	    UserUnauthorizedException, ComponentRegistryException {
 	ComponentRegistry registry = getRegistry(userPrincipal, desc, info);
 	LOG.info("Deleting item: " + desc);
@@ -148,7 +136,7 @@ public class AdminRegistry {
     }
 
     private ComponentRegistry getRegistry(Principal userPrincipal,
-	    AbstractDescription desc, CMDItemInfo info) {
+	    BaseDescription desc, CMDItemInfo info) {
 	ComponentRegistry registry = componentRegistryFactory
 		.getPublicRegistry();
 	// TODO: More generic check

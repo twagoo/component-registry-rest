@@ -2,8 +2,9 @@
 <mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml"
 				 dataProvider="{spaces}"
 				 width="110"
-				 close="userSpaceCloseHandler(event);"
+				 close="userSpaceCloseHandler(event)"
 				 initialize="init()"
+				 change="onSelectionChanged(event)"
 				 >
 	
 	<mx:Script>
@@ -24,6 +25,12 @@
 			
 			private static function initSpaces():void{
 				spaces = new ArrayCollection([{label: PUBLICSPACE_LABEL, space: Config.SPACE_PUBLIC, groupId:null}, {label: USERSPACE_LABEL, space: Config.SPACE_USER, groupId:null}]);
+			}
+			
+			private function onSelectionChanged(event:Event):void{
+				var groupId:String = getSelectedGroup(event);
+				Config.instance.selectedGroup = ComboBox(event.target).selectedItem.groupId;
+				Config.instance.userSpace = ComboBox(event.target).selectedItem.space;
 			}
 			
 			public function onGroupsLoaded(event:Event):void{
@@ -56,9 +63,6 @@
 
 			private function userSpaceCloseHandler(event:Event):void {
 				if (Credentials.instance.isLoggedIn()) {
-					var groupId:String = getSelectedGroup(event);
-					Config.instance.selectedGroup = groupId;
-					Config.instance.userSpace = getSelectedSpace(event);
 				} else if (selectedIndex != 0) {
 					selectedIndex = 0;
 					new Login().show(this.parent.parent, Config.VIEW_BROWSE, Config.SPACE_USER, null);

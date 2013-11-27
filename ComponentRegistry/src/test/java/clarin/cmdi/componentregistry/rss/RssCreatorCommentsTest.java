@@ -2,11 +2,17 @@ package clarin.cmdi.componentregistry.rss;
 
 import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.model.Comment;
+
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+
 import static org.junit.Assert.*;
+
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.Test;
 
 /**
@@ -15,18 +21,14 @@ import org.junit.Test;
  */
 public class RssCreatorCommentsTest {
 
-    private Comment makeTestComment(boolean canDelete, boolean isFromProfile, String comtext, String date, String commentId,
+    private Comment makeTestComment(boolean canDelete, boolean isFromProfile, String comtext, Date date, String commentId,
             String descrId, String userName) {
         Comment comm = new Comment();
 
         comm.setCanDelete(canDelete);
         comm.setComment(comtext);
         comm.setCommentDate(date);
-        if (isFromProfile) {
-            comm.setProfileDescriptionId(descrId);
-        } else {
-            comm.setComponentDescriptionId(descrId);
-        }
+        comm.setComponentId(descrId);
         comm.setId(commentId);
         comm.setUserName(userName);
 
@@ -44,6 +46,10 @@ public class RssCreatorCommentsTest {
         assertEquals(title, rssItem.getTitle());
 
     }
+    
+    private Date date(String d) {
+	return DatesHelper.parseIso(d);
+    }
 
     @Test
     public void testMakeRss() throws ParseException {
@@ -52,20 +58,20 @@ public class RssCreatorCommentsTest {
         boolean isFromProfile = true;
         boolean userspace = false;
 
-        Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", "2012-04-02T11:38:23+00:00", "commentId1", testPrfId,
+        Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", date("2012-04-02T11:38:23+00:00"), "commentId1", testPrfId,
                 "userello");
-        Comment comm2 = makeTestComment(false, isFromProfile, "this is comment # 2", "2011-04-02T11:38:22+00:00", "commentId2", testPrfId,
+        Comment comm2 = makeTestComment(false, isFromProfile, "this is comment # 2", date("2011-04-02T11:38:22+00:00"), "commentId2", testPrfId,
                 "userino");
-        Comment comm3 = makeTestComment(true, isFromProfile, "this is comment # 3", "2010-05-02T11:38:22+00:00", "commentId3", testPrfId,
+        Comment comm3 = makeTestComment(true, isFromProfile, "this is comment # 3", date("2010-05-02T11:38:22+00:00"), "commentId3", testPrfId,
                 "userito");
         List<Comment> comms = new ArrayList<Comment>(Arrays.asList(comm1, comm2, comm3));
 
         RssCreatorComments instance = new RssCreatorComments(userspace, baseUri, 3, testPrfId, "Test Profile", "profile", comms, Comment.COMPARE_ON_DATE);
         Rss result = instance.getRss();
 
-        String rfcdate1 = DatesHelper.getRFCDateTime("2012-04-02T11:38:23+00:00");
-        String rfcdate2 = DatesHelper.getRFCDateTime("2011-04-02T11:38:22+00:00");
-        String rfcdate3 = DatesHelper.getRFCDateTime("2010-05-02T11:38:22+00:00");
+        String rfcdate1 = DatesHelper.getRFCDateTime(DatesHelper.parseIso("2012-04-02T11:38:23+00:00"));
+        String rfcdate2 = DatesHelper.getRFCDateTime(DatesHelper.parseIso("2011-04-02T11:38:22+00:00"));
+        String rfcdate3 = DatesHelper.getRFCDateTime(DatesHelper.parseIso("2010-05-02T11:38:22+00:00"));
 
         List<RssItem> resitems = result.getChannel().getItem();
         String channelLink = baseUri + "?item=" + testPrfId + "&browserview=comments";

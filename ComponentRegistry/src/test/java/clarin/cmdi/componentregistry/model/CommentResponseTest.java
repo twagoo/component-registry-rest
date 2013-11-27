@@ -3,26 +3,27 @@ package clarin.cmdi.componentregistry.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
+import clarin.cmdi.componentregistry.BaseUnitTest;
+import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.MDMarshaller;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
+
 import javax.xml.transform.TransformerException;
+
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  *
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
+ * @author george.georgovassilis@mpi.nl
  */
-public class CommentResponseTest {
+public class CommentResponseTest extends BaseUnitTest{
 
-    private MDMarshaller marshaller;
-
-    @Before
-    public void setUp() throws TransformerException {
-	marshaller = new MDMarshaller();
-    }
+    private Date testDate = new Date();
 
     /**
      * Test with no validate attribute should return errors
@@ -72,8 +73,8 @@ public class CommentResponseTest {
 	expected += "    <errors/>\n";
 	expected += "    <comment>\n";
 	expected += "        <comments>Name</comments>\n";
-	expected += "        <commentDate>myDate</commentDate>\n";
-	expected += "        <profileDescriptionId>myD</profileDescriptionId>\n";
+	expected += "        <commentDate>"+DatesHelper.formatXmlDateTime(testDate)+"</commentDate>\n";
+	expected += "        <componentId>myD</componentId>\n";
 	expected += "        <id>myId</id>\n";
 	expected += "        <userName>J. Unit</userName>\n";
 	expected += "        <canDelete>false</canDelete>\n";
@@ -90,9 +91,9 @@ public class CommentResponseTest {
 	Comment com = new Comment();
 	com.setComment("Name");
 	com.setId("myId");
-	com.setUserId("myU");
-	com.setProfileDescriptionId("myD");
-	com.setCommentDate("myDate");
+	com.setUserId(123);
+	com.setComponentId("myD");
+	com.setCommentDate(testDate);
 	com.setUserName("J. Unit");
 	return com;
     }

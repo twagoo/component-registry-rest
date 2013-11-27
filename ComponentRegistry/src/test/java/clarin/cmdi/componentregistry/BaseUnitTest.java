@@ -20,10 +20,13 @@ import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
 	"classpath:spring-config/applicationContext.xml",
-	"classpath:spring-config/datasource-hsqldb.xml" })
+	"classpath:spring-config/test-applicationContext-fragment.xml" })
 @TransactionConfiguration(defaultRollback = true)
 @Transactional
 public abstract class BaseUnitTest {
+    
+    @Autowired
+    protected MDMarshaller marshaller;
 
     @Autowired
     protected JdbcTemplate jdbcTemplate;

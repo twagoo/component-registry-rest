@@ -29,18 +29,9 @@ public class Ownership implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String profileId;
     private String componentId;
     private long groupId;
     private long userId;
-
-    public String getProfileId() {
-	return profileId;
-    }
-
-    public void setProfileId(String profileId) {
-	this.profileId = profileId;
-    }
 
     public String getComponentId() {
 	return componentId;
