@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  *
@@ -18,6 +20,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 @XmlRootElement(name = "response")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({RegisterResponse.class, CommentResponse.class})
+@XmlType(propOrder = {"registered","isInUserSpace","errors"})
 public class ComponentRegistryResponse {
 
     @XmlAttribute(required = true)

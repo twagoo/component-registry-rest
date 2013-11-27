@@ -34,7 +34,7 @@ public class RegisterResponseTest extends BaseUnitTest{
 	marshaller.marshal(resp, out);
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-	expected += "<registerResponse isProfile=\"true\" isInUserSpace=\"true\" registered=\"false\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+	expected += "<registerResponse isProfile=\"true\" registered=\"false\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <errors>\n";
 	expected += "        <error>Error 1</error>\n";
 	expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
@@ -91,7 +91,7 @@ public class RegisterResponseTest extends BaseUnitTest{
 	marshaller.marshal(resp, out);
 	String expected = "";
 	expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-	expected += "<registerResponse isProfile=\"false\" isInUserSpace=\"true\" registered=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
+	expected += "<registerResponse isProfile=\"false\" registered=\"true\" isInUserSpace=\"true\" xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
 	expected += "    <errors/>\n";
 	expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
 	expected += "        <id>clarin.eu:cr1:c_myId</id>\n";
