@@ -35,6 +35,16 @@
             <param-value>UTF-8</param-value>
         </init-param>
     </filter>
+    	<filter>
+		<filter-name>NoCachingFilter</filter-name>
+		<filter-class>clarin.cmdi.componentregistry.servlet.DontCacheFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>NoCachingFilter</filter-name>
+		<url-pattern>/rest/registry/*</url-pattern>
+	</filter-mapping>
+    
+    
     <filter-mapping>
         <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
