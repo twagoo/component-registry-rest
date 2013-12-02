@@ -44,7 +44,8 @@ package clarin.cmdi.componentregistry.services {
 		public static const SPACE_USER:String = "user";
 		public static const SPACE_PUBLIC:String = "public";
 		
-		private static const COMPONENT_LIST_URL:String = "/rest/registry/components";
+		public static const COMPONENT_LIST_URL:String = "/rest/registry/components";
+		public static const ITEMS_URL:String= "/rest/registry/items";
 		private static const PROFILE_LIST_URL:String = "/rest/registry/profiles";
 		private static const COMPONENT_USAGE_URL:String = "/rest/registry/components/usage/";
 		private static const UPLOAD_PROFILE_SERVICE_URL:String = "/rest/registry/profiles";
@@ -189,7 +190,7 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		public function getGroupsOfItemPath(itemId:String):String{
-			return _serviceRootUrl + "/rest/registry/items/"+itemId+"/groups";
+			return _serviceRootUrl + ITEMS_URL+"/"+itemId+"/groups";
 		}
 
 		
@@ -230,7 +231,7 @@ package clarin.cmdi.componentregistry.services {
 		}
 		
 		public function getTransferItemOwnershipUrl(itemId:String,groupId:String):String{
-			return _serviceRootUrl + "/rest/registry/items/"+itemId+"/transferownership?groupId="+groupId;
+			return _serviceRootUrl + ITEMS_URL+"/"+itemId+"/transferownership?groupId="+groupId;
 		}
 
 		public function set userSpace(userSpace:String):void {

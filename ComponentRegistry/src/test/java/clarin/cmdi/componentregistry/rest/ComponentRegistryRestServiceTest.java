@@ -1229,4 +1229,15 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(1).getFilename(), null);
         assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(2).getFilename(), null);
     }
+    
+    @Test
+    public void testGetDescription() throws Exception{
+        fillUp();
+        ComponentDescription component = getResource().path("/registry/items/clarin.eu:cr1:component1").accept(MediaType.APPLICATION_JSON).get(ComponentDescription.class);
+        assertNotNull(component);
+        assertEquals("clarin.eu:cr1:component1", component.getId());
+        assertEquals("component1", component.getName());
+        assertEquals("Test Description", component.getDescription());
+
+    }
 }

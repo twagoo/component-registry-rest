@@ -12,8 +12,9 @@ package clarin.cmdi.componentregistry.common.components {
 	
 	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
-
+	
 	import mx.containers.VBox;
+	import mx.controls.Alert;
 	import mx.controls.Label;
 	import mx.managers.CursorManager;
 
@@ -29,6 +30,10 @@ package clarin.cmdi.componentregistry.common.components {
 		private var componentSrv:ComponentInfoService = new ComponentInfoService();
 
 		private var editable:Boolean;
+		
+		protected function setItem(item:ItemDescription):void{
+			this.item = item;
+		}
 
 		public function ExpandingComponentLabel(componentId:String, editable:Boolean = false) {
 			super();
@@ -42,10 +47,18 @@ package clarin.cmdi.componentregistry.common.components {
 			if (item && item.space == Config.SPACE_USER) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
+			//unfortunately the componend and profile services may overlook components from groups, so we have to ask the backend
+			if (item!=null)
+				updateView();
+			else{
+				Config.instance.getComponentsSrv(Config.SPACE_USER).getComponent(componentId, function(item:ItemDescription):void{
+					setItem(item);
+					updateView();
+				});
+			}
 		}
-
-		protected override function createChildren():void {
-			super.createChildren();
+		
+		private function updateView():void{
 			var id:Label = new Label();
 			if (item) {
 				id.text = item.name;

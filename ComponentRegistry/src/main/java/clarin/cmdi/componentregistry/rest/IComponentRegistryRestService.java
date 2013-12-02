@@ -237,5 +237,12 @@ public interface IComponentRegistryRestService {
 	 * @param groupId
 	 */
 	void transferItemOwnershipToGroup(String itemId, long groupId);
+	
+	/**
+	 * Get any component (public or private) with the specified ID
+	 * @param componentId
+	 * @return
+	 */
+	ComponentDescription getComponentDescription(String componentId) throws ComponentRegistryException;
 
 }

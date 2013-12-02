@@ -1581,4 +1581,17 @@ public class ComponentRegistryRestService implements
 	    groupService.transferItemOwnershipFromUserToGroup(principal.getName(), groupId, itemId);
 	}
 
+	@Override
+	@GET
+	@Path("/items/{itemId}")
+	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+			MediaType.APPLICATION_JSON })
+	public ComponentDescription getComponentDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException{
+			LOG.debug("Item with id: {} is requested.", itemId);
+			ComponentDescription description = getRegistry(getStatus(false)).getComponentDescription(itemId);
+			if (description == null)
+				description = getRegistry(getStatus(true)).getComponentDescription(itemId);
+			return description;
+	}
+
 }
