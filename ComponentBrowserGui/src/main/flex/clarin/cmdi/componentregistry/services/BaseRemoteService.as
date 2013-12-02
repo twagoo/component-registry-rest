@@ -42,7 +42,6 @@ package clarin.cmdi.componentregistry.services {
 		 * @param url URL to send request to
 		 */
 		protected function dispatchRequest(url:URI):void {
-			trace(url);
 			readService.setUrl(url);
 			var token:AsyncToken = readService.send();
 			token.addResponder(new Responder(this.requestCallbackOk, this.requestCallbackFailed));

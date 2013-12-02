@@ -1637,4 +1637,16 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(2)
 		.getFilename(), null);
     }
+    
+    @Test
+    public void testGetDescription() throws Exception{
+        fillUp();
+    	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
+        ComponentDescription component = getAuthenticatedResource(getResource().path("/registry/items/" + id)).accept(MediaType.APPLICATION_JSON).get(ComponentDescription.class);
+        assertNotNull(component);
+        assertEquals(id, component.getId());
+        assertEquals("component1", component.getName());
+        assertEquals("Test Description", component.getDescription());
+
+    }
 }
