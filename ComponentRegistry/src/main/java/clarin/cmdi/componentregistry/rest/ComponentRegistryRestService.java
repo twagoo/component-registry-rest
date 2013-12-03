@@ -1586,11 +1586,15 @@ public class ComponentRegistryRestService implements
 	@Path("/items/{itemId}")
 	@Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_XML,
 			MediaType.APPLICATION_JSON })
-	public ComponentDescription getComponentDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException{
+	public AbstractDescription getComponentDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException{
 			LOG.debug("Item with id: {} is requested.", itemId);
-			ComponentDescription description = getRegistry(getStatus(false)).getComponentDescription(itemId);
+			AbstractDescription description = getRegistry(getStatus(false)).getComponentDescription(itemId);
 			if (description == null)
 				description = getRegistry(getStatus(true)).getComponentDescription(itemId);
+			if (description == null)
+				description = getRegistry(getStatus(false)).getProfileDescription(itemId);
+			if (description == null)
+				description = getRegistry(getStatus(true)).getProfileDescription(itemId);
 			return description;
 	}
 

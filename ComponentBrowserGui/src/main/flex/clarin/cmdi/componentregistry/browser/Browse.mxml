@@ -13,6 +13,7 @@
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+			import clarin.cmdi.componentregistry.common.Group;
 			import clarin.cmdi.componentregistry.common.ItemDescription;
 			import clarin.cmdi.componentregistry.common.Profile;
 			import clarin.cmdi.componentregistry.common.components.BrowseContextMenu;
@@ -21,6 +22,7 @@
 			import clarin.cmdi.componentregistry.services.ComponentListService;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.DeleteService;
+			import clarin.cmdi.componentregistry.services.ListGroupsOfItemService;
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileListService;
 			
@@ -94,10 +96,8 @@
 				startupItemId = Config.instance.startupItem;
 				startupPanel = Config.instance.browserPanel;		
 				
-				trace(startupItemId);
 				if (startupItemId) { //only load this once on startup
 					profilesSrv.addEventListener(profilesSrv.PROFILES_LOADED, profilesLoaded);				
-					trace("1");
 					profilesSrv.load();
 				}
 				else{
@@ -115,18 +115,16 @@
 			
 			
 			private function profilesLoaded(event:Event):void {
-				trace("2");
 				profilesSrv.removeEventListener(profilesSrv.PROFILES_LOADED, profilesLoaded);
 				componentsSrv.addEventListener(componentsSrv.COMPONENTS_LOADED, componentsLoaded);	
 				componentsSrv.load();
 			}
 			
 			private function componentsLoaded(event:Event):void {	
-				trace("3");
 				componentsSrv.removeEventListener(componentsSrv.COMPONENTS_LOADED, componentsLoaded);
 				
 				var item:ItemDescription = profilesSrv.findDescription(startupItemId);
-				if(item != null){ 					
+				if(item != null){
 					selectedProfileSrv = new ProfileInfoService();
 					loadStartupItem(item);
 					profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
@@ -137,8 +135,33 @@
 						selectedComponentSrv = new ComponentInfoService();
 						loadStartupItem(item);
 						componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
-					}
+					} else
+						loadGroupItem(startupItemId);
 				}
+			}
+			
+			private function loadGroupItem(startupItemId:String):void{
+				Config.instance.getComponentsSrv(Config.instance.space).getComponent(startupItemId, function(item:ItemDescription):void{
+					Config.instance.getListGroupsOfItemService().addEventListener(ListGroupsOfItemService.GROUPS_LOADED, function():void{
+						var group:Group = (Config.instance.getListGroupsOfItemService().groups.getItemAt(0)) as Group;
+						if (item.id.indexOf("p_")!=-1){
+							selectedProfileSrv = new ProfileInfoService();
+							profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
+						} else {
+							selectedComponentSrv = new ComponentInfoService();
+							componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
+						}
+
+						userSpaceCB.setSelectedItem(null, ""+group.id);
+						Config.instance.selectedGroup = ""+group.id;
+						Config.instance.userSpace = Config.SPACE_USER;
+						loadStartupItem(item);
+						Config.instance.dispatchEvent(new GroupSelectionEvent(""+group.id, group.name));
+
+					});
+					Config.instance.getListGroupsOfItemService().loadGroupsForItem(startupItemId);
+				}
+			);
 			}
 			
 			private function loadStartupItem(item:ItemDescription):void {
