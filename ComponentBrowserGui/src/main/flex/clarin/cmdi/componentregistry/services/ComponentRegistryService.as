@@ -40,6 +40,9 @@ package clarin.cmdi.componentregistry.services //trunk
 				var resultXml:XML = resultEvent.result as XML;
 				var item:ItemDescription = new ItemDescription();
 				item.createComponent(resultXml, "user");
+				//there's a problem (fixed in trunk): the return data class is an abstractDescription for which we don't know whether it's a component or profile (isProfile value is incorrect)
+				//but we can fix that one missing property here because we can know the flavour from its ID
+				item.isProfile = (componentId.indexOf(Config.PROFILE_PREFIX)==0);
 				callback(item);
 			}, this.requestCallbackFailed));
 		}

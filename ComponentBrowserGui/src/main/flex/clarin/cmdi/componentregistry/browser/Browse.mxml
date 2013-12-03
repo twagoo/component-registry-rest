@@ -122,7 +122,6 @@
 			
 			private function componentsLoaded(event:Event):void {	
 				componentsSrv.removeEventListener(componentsSrv.COMPONENTS_LOADED, componentsLoaded);
-				
 				var item:ItemDescription = profilesSrv.findDescription(startupItemId);
 				if(item != null){
 					selectedProfileSrv = new ProfileInfoService();
@@ -144,7 +143,7 @@
 				Config.instance.getComponentsSrv(Config.instance.space).getComponent(startupItemId, function(item:ItemDescription):void{
 					Config.instance.getListGroupsOfItemService().addEventListener(ListGroupsOfItemService.GROUPS_LOADED, function():void{
 						var group:Group = (Config.instance.getListGroupsOfItemService().groups.getItemAt(0)) as Group;
-						if (item.id.indexOf("p_")!=-1){
+						if (item.isProfile){
 							selectedProfileSrv = new ProfileInfoService();
 							profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
 						} else {
@@ -157,7 +156,6 @@
 						Config.instance.userSpace = Config.SPACE_USER;
 						loadStartupItem(item);
 						Config.instance.dispatchEvent(new GroupSelectionEvent(""+group.id, group.name));
-
 					});
 					Config.instance.getListGroupsOfItemService().loadGroupsForItem(startupItemId);
 				}
@@ -187,11 +185,9 @@
 				if (desc.isProfile) {
 					tabnav.selectedIndex = 0;
 					this.selectedProfileItem = desc;
-					selectedProfileSrv.load(desc);
 				} else {
 					tabnav.selectedIndex = 1;
 					this.selectedComponentItem = desc;
-					selectedComponentSrv.load(desc);
 				}
 			}
 			
