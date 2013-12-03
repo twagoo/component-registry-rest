@@ -243,6 +243,6 @@ public interface IComponentRegistryRestService {
 	 * @param componentId
 	 * @return
 	 */
-	ComponentDescription getComponentDescription(String componentId) throws ComponentRegistryException;
+	BaseDescription getComponentDescription(String componentId) throws ComponentRegistryException;
 
 }
