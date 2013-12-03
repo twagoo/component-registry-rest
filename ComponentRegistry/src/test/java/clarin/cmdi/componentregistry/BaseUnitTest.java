@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry;
 
+import org.custommonkey.xmlunit.XMLTestCase;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase
 	"classpath:spring-config/test-applicationContext-fragment.xml" })
 @TransactionConfiguration(defaultRollback = true)
 @Transactional
-public abstract class BaseUnitTest {
+public abstract class BaseUnitTest extends XMLTestCase{
     
     @Autowired
     protected MDMarshaller marshaller;

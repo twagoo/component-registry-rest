@@ -13,9 +13,9 @@ import java.util.Date;
 
 import javax.xml.transform.TransformerException;
 
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.Test;
-
 /**
  *
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
@@ -47,7 +47,7 @@ public class CommentResponseTest extends BaseUnitTest{
 	expected += "        <error>Error 2, &lt;!-- to be escaped --&gt;</error>\n";
 	expected += "    </errors>\n";
 	expected += "</commentResponse>\n";
-	assertEquals(expected, out.toString());
+		assertXMLEqual(expected, out.toString());
 
 	CommentResponse rr = marshaller.unmarshal(CommentResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertFalse(rr.isRegistered());
@@ -80,7 +80,7 @@ public class CommentResponseTest extends BaseUnitTest{
 	expected += "        <canDelete>false</canDelete>\n";
 	expected += "    </comment>\n";
 	expected += "</commentResponse>\n";
-	assertEquals(expected, out.toString());
+	assertXMLEqual(expected, out.toString());
 
 	CommentResponse rr = marshaller.unmarshal(CommentResponse.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertTrue(rr.isRegistered());
