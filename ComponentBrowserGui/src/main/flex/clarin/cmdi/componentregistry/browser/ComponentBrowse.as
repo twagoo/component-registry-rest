@@ -3,9 +3,10 @@ package clarin.cmdi.componentregistry.browser {
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDComponentElement;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.containers.HBox;
+	import mx.controls.Alert;
 	import mx.controls.HRule;
 	import mx.core.Container;
 
