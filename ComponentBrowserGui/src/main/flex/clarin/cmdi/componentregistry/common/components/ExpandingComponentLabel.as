@@ -47,11 +47,12 @@ package clarin.cmdi.componentregistry.common.components {
 			if (item && item.space == Config.SPACE_USER) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
-			//unfortunately the componend and profile services may overlook components from groups, so we have to ask the backend
 			if (item!=null)
 				updateView();
+			//unfortunately the componend and profile services may overlook components from groups, so we have to ask the backend
 			else{
 				Config.instance.getComponentsSrv(Config.SPACE_USER).getComponent(componentId, function(item:ItemDescription):void{
+					setStyle("borderColor", StyleConstants.GROUP_BORDER_COLOR);
 					setItem(item);
 					updateView();
 				});
