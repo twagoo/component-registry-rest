@@ -32,7 +32,7 @@
 					+ "easy browsing, creation and editing of components and profiles.\n"
 					+ "\n"
 					+"Version: " + version + "\n"
-					+"Written by: Patrick Duin, Twan Goosen and Olha Shkaravska\n"
+					+"Written by: Patrick Duin, Twan Goosen, Olha Shkaravska and George Georgovassilis\n"
 					+"\n"
 					+"Go to <u><a target=\"_blank\" href=\"http://www.clarin.eu/cmdi\">www.clarin.eu/cmdi</a></u> for more information.\n"
 					+"Email <u><a href=\"mailto:cmdi@clarin.eu\">cmdi@clarin.eu</a></u> for questions/support.\n";
