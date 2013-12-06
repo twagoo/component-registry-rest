@@ -47,6 +47,10 @@ package clarin.cmdi.componentregistry.common {
 		public function createComponent(itemDescription:XML, space:String):void {
 			create(itemDescription, Config.instance.componentInfoUrl, false, space);
 		}
+		
+		public function toString():String{
+			return (isProfile?"profile":"component")+" id:"+id+" name:"+name+" url:"+dataUrl;
+		}
 
 	}
 }

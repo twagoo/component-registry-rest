@@ -146,6 +146,9 @@
 			
 			
 			private function onGroupSelected(event:GroupSelectionEvent):void {
+				//we're responsible only for either components or profiles
+				if (typeOfDescription!=Config.instance.activeFlavour)
+					return;
 				//Some handler already moved the group for us
 				if (event.groupWasMoved)
 					return;

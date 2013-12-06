@@ -27,6 +27,7 @@
 			import clarin.cmdi.componentregistry.services.ProfileListService;
 			
 			import mx.controls.Alert;
+			import mx.events.IndexChangedEvent;
 			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
@@ -242,6 +243,11 @@
 			
 			
 			
+			protected function tabnav_changeHandler(event:IndexChangedEvent):void
+			{
+				Config.instance.activeFlavour = (event.newIndex==0?Config.FLAVOUR_PROFILES:Config.FLAVOUR_COMPONENTS);
+			}
+			
 		]]>
 	</mx:Script>
 	
@@ -282,6 +288,7 @@
 							 y="59"
 							 borderStyle="outset"
 							 creationPolicy="all"
+							 change="tabnav_changeHandler(event)"
 							 >
 				<mx:VDividedBox label="Profiles"
 								width="100%">
@@ -295,7 +302,7 @@
 												 width="100%"
 												 height="70%"
 												 browseMenu="{profilesMenu}"
-												 typeOfDescription = "profiles"
+												 typeOfDescription = "{Config.FLAVOUR_PROFILES}"
 												 createNew="createNewProfile(event)"
 												 />
 					<browser:ProfileInfoPage id="profileInfoPage"
@@ -317,7 +324,7 @@
 												 width="100%"
 												 height="70%"
 												 browseMenu="{componentsMenu}"
-												 typeOfDescription= "components"
+												 typeOfDescription= "{Config.FLAVOUR_COMPONENTS}"
 												 createNew="createNewComponent(event)"
 												 />
 					<browser:ComponentInfoPage id="componentInfoPage"
