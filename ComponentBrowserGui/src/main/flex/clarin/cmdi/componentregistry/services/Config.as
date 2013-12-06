@@ -36,6 +36,8 @@ package clarin.cmdi.componentregistry.services {
 		public static const VIEW_BROWSE:String = "browse";
 		public static const VIEW_EDIT:String = "edit";
 		public static const VIEW_IMPORT:String = "import";
+		public static const FLAVOUR_PROFILES = "profiles";
+		public static const FLAVOUR_COMPONENTS = "components";
 		//Possible browser views to start with
 		public static const BROWSER_PANEL_VIEW:String = "view"; 
 		public static const BROWSER_PANEL_XML:String = "xml"; 
@@ -73,6 +75,7 @@ package clarin.cmdi.componentregistry.services {
 		private var _space:String = SPACE_PUBLIC;
 		private var _selectedGroup:String = "";
 		private var _debug:Boolean = false;
+		private var _activeFlavour = FLAVOUR_PROFILES;
 		
 		private var publicComponentsSrv:ComponentListService;
 		private var publicProfilesSrv:ProfileListService;
@@ -85,6 +88,14 @@ package clarin.cmdi.componentregistry.services {
 			if (_instance != null) {
 				throw new Error("Config can only be accessed through Config.instance");
 			}
+		}
+		
+		public function get activeFlavour():String{
+			return _activeFlavour;
+		}
+		
+		public function set activeFlavour(value:String):void{
+			_activeFlavour = value;
 		}
 		
 		public static function get instance():Config {
