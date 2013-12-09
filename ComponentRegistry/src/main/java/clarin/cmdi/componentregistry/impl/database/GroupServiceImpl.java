@@ -149,7 +149,7 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	@Override
-	@ManagedOperation(description = "Mage a user member of a group")
+	@ManagedOperation(description = "Make a user member of a group")
 	@ManagedOperationParameters({
 			@ManagedOperationParameter(name = "principalName", description = "Principal name of the user to make a member"),
 			@ManagedOperationParameter(name = "groupName", description = "Name of the group") })
