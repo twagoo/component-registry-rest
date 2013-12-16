@@ -785,8 +785,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	public List<ProfileDescription> getProfileDescriptionsInGroup(String groupId) throws ComponentRegistryException {
 		List<String> componentIds = groupService.getProfileIdsInGroup(Long.parseLong(groupId));
 		List<ProfileDescription> profiles = new ArrayList<ProfileDescription>();
-		for (String id : componentIds)
-			profiles.add(getProfileDescription(id));
+		for (String id : componentIds) {
+			ProfileDescription profile = getProfileDescription(id);
+			if (profile != null)
+				profiles.add(profile);
+		}
 		return profiles;
 	}
 
