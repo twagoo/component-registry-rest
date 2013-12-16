@@ -257,7 +257,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
 	@Override
 	public CMDComponentSpec getMDProfile(String id) throws ComponentRegistryException {
-		if (inWorkspace(profileDescriptionDao, id)||canCurrentUserAccessDescription(profileDescriptionDao, id)) {
+		if (inWorkspace(profileDescriptionDao, id) || canCurrentUserAccessDescription(profileDescriptionDao, id)) {
 			CMDComponentSpec result = profilesCache.get(id);
 			if (result == null && !profilesCache.containsKey(id)) {
 				result = getUncachedMDProfile(id);
@@ -281,7 +281,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
 	@Override
 	public CMDComponentSpec getMDComponent(String id) throws ComponentRegistryException {
-		if (inWorkspace(componentDescriptionDao, id)||canCurrentUserAccessDescription(componentDescriptionDao, id)) {
+		if (inWorkspace(componentDescriptionDao, id) || canCurrentUserAccessDescription(componentDescriptionDao, id)) {
 			CMDComponentSpec result = componentsCache.get(id);
 			if (result == null && !componentsCache.containsKey(id)) {
 				result = getUncachedMDComponent(id);
@@ -707,15 +707,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 		AbstractDescription description = dao.getByCmdId(cmdId);
 		if (description == null)
 			return false;
-		if (cmdId.startsWith(ComponentDescription.COMPONENT_PREFIX)){
-			return groupService.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(user, (ComponentDescription)description);
+		if (cmdId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
+			return groupService.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(user,
+					(ComponentDescription) description);
 		}
-		if (cmdId.startsWith(ProfileDescription.PROFILE_PREFIX)){
-			return groupService.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(user, (ProfileDescription)description);
+		if (cmdId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
+			return groupService.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(user,
+					(ProfileDescription) description);
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String getName() {
 		if (isPublic()) {
@@ -808,8 +810,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 	public List<ProfileDescription> getProfileDescriptionsInGroup(String groupId) throws ComponentRegistryException {
 		List<String> componentIds = groupService.getProfileIdsInGroup(Long.parseLong(groupId));
 		List<ProfileDescription> profiles = new ArrayList<ProfileDescription>();
-		for (String id : componentIds)
-			profiles.add(profileDescriptionDao.getByCmdId(id));
+		for (String id : componentIds) {
+			ProfileDescription profile = profileDescriptionDao.getByCmdId(id);
+			if (profile != null)
+				profiles.add(profile);
+		}
 		return profiles;
 	}
 }
