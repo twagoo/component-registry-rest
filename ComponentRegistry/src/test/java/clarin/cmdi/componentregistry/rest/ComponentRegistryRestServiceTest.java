@@ -160,11 +160,11 @@ public class ComponentRegistryRestServiceTest extends
 		.path("/registry/components/" + id)
 		.accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
 	assertNotNull(component);
-	assertEquals("Access", component.getCMDComponent().get(0).getName());
+	assertEquals("Access", component.getCMDComponent().getName());
 	component = getResource().path("/registry/components/" + id2)
 		.accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
 	assertNotNull(component);
-	assertEquals("Access", component.getCMDComponent().get(0).getName());
+	assertEquals("Access", component.getCMDComponent().getName());
 
 	assertEquals(id2, component.getHeader().getID());
 	assertEquals("component2", component.getHeader().getName());
@@ -535,11 +535,11 @@ public class ComponentRegistryRestServiceTest extends
 		.path("/registry/profiles/" + id)
 		.accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
 	assertNotNull(profile);
-	assertEquals("Actor", profile.getCMDComponent().get(0).getName());
+	assertEquals("Actor", profile.getCMDComponent().getName());
 	profile = getResource().path("/registry/profiles/" + id2)
 		.accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
 	assertNotNull(profile);
-	assertEquals("Actor", profile.getCMDComponent().get(0).getName());
+	assertEquals("Actor", profile.getCMDComponent().getName());
 
 	assertEquals(id2, profile.getHeader().getID());
 	assertEquals("profile2", profile.getHeader().getName());
@@ -795,7 +795,7 @@ public class ComponentRegistryRestServiceTest extends
 		profileDescription.getHref());
 	assertEquals("Published", profileDescription.getDescription());
 	CMDComponentSpec spec = getPublicSpec(profileDescription);
-	assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
+	assertEquals("publishedName", spec.getCMDComponent().getName());
     }
 
     private CMDComponentSpec getPublicSpec(BaseDescription desc) {
@@ -844,7 +844,7 @@ public class ComponentRegistryRestServiceTest extends
 		componentDescription.getHref());
 	assertEquals("Published", componentDescription.getDescription());
 	CMDComponentSpec spec = getPublicSpec(componentDescription);
-	assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
+	assertEquals("publishedName", spec.getCMDComponent().getName());
     }
 
     @Test
@@ -1184,7 +1184,7 @@ public class ComponentRegistryRestServiceTest extends
 	Date firstDate = desc.getRegistrationDate();
 	CMDComponentSpec spec = getUserComponent(desc);
 	assertNotNull(spec);
-	assertEquals("Access", spec.getCMDComponent().get(0).getName());
+	assertEquals("Access", spec.getCMDComponent().getName());
 	components = getUserComponents();
 	assertEquals(1, components.size());
 	assertEquals(0, getPublicComponents().size());
@@ -1213,7 +1213,7 @@ public class ComponentRegistryRestServiceTest extends
 
 	spec = getUserComponent(desc);
 	assertNotNull(spec);
-	assertEquals("TESTNAME", spec.getCMDComponent().get(0).getName());
+	assertEquals("TESTNAME", spec.getCMDComponent().getName());
 	components = getUserComponents();
 	assertEquals(1, components.size());
 	assertEquals(0, getPublicComponents().size());
@@ -1246,7 +1246,7 @@ public class ComponentRegistryRestServiceTest extends
 	Date firstDate = desc.getRegistrationDate();
 	CMDComponentSpec spec = getUserProfile(desc);
 	assertNotNull(spec);
-	assertEquals("Actor", spec.getCMDComponent().get(0).getName());
+	assertEquals("Actor", spec.getCMDComponent().getName());
 	profiles = getUserProfiles();
 	assertEquals(1, profiles.size());
 	assertEquals(0, getPublicComponents().size());
@@ -1275,7 +1275,7 @@ public class ComponentRegistryRestServiceTest extends
 
 	spec = getUserProfile(desc);
 	assertNotNull(spec);
-	assertEquals("TESTNAME", spec.getCMDComponent().get(0).getName());
+	assertEquals("TESTNAME", spec.getCMDComponent().getName());
 	profiles = getUserProfiles();
 	assertEquals(1, profiles.size());
 	assertEquals(0, getPublicComponents().size());

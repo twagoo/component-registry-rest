@@ -43,7 +43,7 @@ public abstract class CMDComponentSpecExpander {
 		    // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 		    CMDComponentSpec spec = getUncachedComponent(componentId);
 		    if (spec != null) {
-			CMDComponentType nested = getComponentTypeOfAComponent(spec);
+			CMDComponentType nested = spec.getCMDComponent();
 			expandNestedComponent(nested.getCMDComponent(), newPath);
 			overwriteAttributes(cmdComponentType, nested);
 			expanded.add(nested);
@@ -62,16 +62,6 @@ public abstract class CMDComponentSpecExpander {
 	}
 	cmdComponents.clear();
 	cmdComponents.addAll(expanded);
-    }
-    
-    private CMDComponentType getComponentTypeOfAComponent(CMDComponentSpec result) {
-	List<CMDComponentType> cmdComponents = result.getCMDComponent();
-	if (cmdComponents.size() != 1) {
-	    LOG.error("Internal error: CMDComponentSpec which is not a profile can only have one "
-		    + "CMDComponentType (which is the description of the component itself).");
-	}
-	CMDComponentType cmdComponentType = cmdComponents.get(0);
-	return cmdComponentType;
     }
 
     /**
@@ -94,7 +84,7 @@ public abstract class CMDComponentSpecExpander {
     protected CMDComponentSpec expandComponent(String componentId) throws ComponentRegistryException {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedComponent(componentId);//registry.getUncachedComponent(componentId);
-	CMDComponentType cmdComponentType = getComponentTypeOfAComponent(result);
+	CMDComponentType cmdComponentType = result.getCMDComponent();
 	expandNestedComponent(cmdComponentType.getCMDComponent(), componentId);
 	return result;
     }
@@ -102,8 +92,8 @@ public abstract class CMDComponentSpecExpander {
     protected CMDComponentSpec expandProfile(String profileId) throws ComponentRegistryException {
 	// Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
 	CMDComponentSpec result = getUncachedProfile(profileId);//registry.getUncachedProfile(profileId);
-	List<CMDComponentType> cmdComponents = result.getCMDComponent();
-	expandNestedComponent(cmdComponents, profileId);
+	CMDComponentType cmdComponent = result.getCMDComponent();
+	expandNestedComponent(Collections.singletonList(cmdComponent), profileId);
 	return result;
     }
 

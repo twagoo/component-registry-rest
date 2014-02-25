@@ -37,6 +37,7 @@ import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -1175,7 +1176,7 @@ public class ComponentRegistryRestService implements
 
 				// removing filename from spec before it gets extended.
 				// recursion over all the components
-				setFileNamesFromListToNull(spec.getCMDComponent());
+				setFileNamesFromListToNull(Collections.singletonList(spec.getCMDComponent()));
 
 				try {
 					checkForRecursion(validator, registry, desc);
@@ -1235,7 +1236,7 @@ public class ComponentRegistryRestService implements
 			// In case of recursion, the following will throw a
 			// ComponentRegistryException
 			registry.getExpander().expandNestedComponent(
-					specCopy.getCMDComponent(), desc.getId());
+					Collections.singletonList(specCopy.getCMDComponent()), desc.getId());
 		} catch (JAXBException ex) {
 			throw new ComponentRegistryException(
 					"Unmarshalling failed while preparing recursion detection",

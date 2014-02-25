@@ -20,6 +20,8 @@ import clarin.cmdi.componentregistry.impl.database.CMDComponentSpecExpanderDbImp
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  *
@@ -68,7 +70,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         item.add(new Label("profname", pd.getName()));
         CMDComponentSpec profile = CMDComponentSpecExpanderDbImpl.expandProfile(pd.getId(), (ComponentRegistryDbImpl) registry);
         Statistics stats = new Statistics();
-        componentCounter(profile.getCMDComponent(), stats);
+        componentCounter(profile, stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));
         item.add(new Label("nrprofelem", "" + stats.elementcounter));
         item.add(new Label("nrproflinks", "" + stats.conceptlinkcounter));
@@ -81,13 +83,17 @@ public class StatisticsPage extends SecureAdminWebPage {
         item.add(new Label("compname", cd.getName()));
         CMDComponentSpec compspec = CMDComponentSpecExpanderDbImpl.expandComponent(cd.getId(), (ComponentRegistryDbImpl) registry);
         Statistics stats = new Statistics();
-        componentCounter(compspec.getCMDComponent(), stats);
+        componentCounter(compspec, stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));
         item.add(new Label("nrelem", "" + stats.elementcounter));
         item.add(new Label("nrcomplinks", "" + stats.conceptlinkcounter));
     }
 
-    private void componentCounter(List<CMDComponentType> components, Statistics stats) {
+    private void componentCounter(CMDComponentSpec components, Statistics stats) {
+        componentCounter(Collections.singleton(components.getCMDComponent()), stats);
+    }
+    
+    private void componentCounter(Collection<CMDComponentType> components, Statistics stats) {
         if (components != null) {
             for (CMDComponentType component : components) {
                 stats.componentnumber++;

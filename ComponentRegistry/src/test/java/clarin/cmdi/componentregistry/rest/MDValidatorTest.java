@@ -293,8 +293,7 @@ public class MDValidatorTest extends BaseUnitTest {
 
 	// Spec content should match XML
 	assertTrue(cmdComponentSpec.isIsProfile());
-	assertEquals("Actor", cmdComponentSpec.getCMDComponent().get(0)
-		.getName());
+	assertEquals("Actor", cmdComponentSpec.getCMDComponent().getName());
 
 	// Spec copy should be a freshly unmarshalled copy
 	final CMDComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
@@ -302,7 +301,7 @@ public class MDValidatorTest extends BaseUnitTest {
 
 	// Content should still match XML
 	assertTrue(specCopy.isIsProfile());
-	assertEquals("Actor", specCopy.getCMDComponent().get(0).getName());
+	assertEquals("Actor", specCopy.getCMDComponent().getName());
     }
 
     private MDValidator getValidProfileValidator() {
