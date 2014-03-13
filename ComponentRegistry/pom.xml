@@ -69,11 +69,6 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
-			<version>9.4</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
@@ -323,6 +318,11 @@
 			<artifactId>jul-to-slf4j</artifactId>
 			<version>1.7.2</version>
 		</dependency>
+	 <dependency>
+	  <groupId>com.google.guava</groupId>
+	  <artifactId>guava</artifactId>
+	  <version>16.0.1</version>
+	 </dependency>
 	</dependencies>
 
 

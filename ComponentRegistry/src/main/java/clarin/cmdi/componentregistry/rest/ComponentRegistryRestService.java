@@ -25,6 +25,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
+import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
@@ -67,7 +68,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -1236,7 +1236,7 @@ public class ComponentRegistryRestService implements
 			// In case of recursion, the following will throw a
 			// ComponentRegistryException
 			registry.getExpander().expandNestedComponent(
-					Collections.singletonList(specCopy.getCMDComponent()), desc.getId());
+					Lists.newArrayList(specCopy.getCMDComponent()), desc.getId());
 		} catch (JAXBException ex) {
 			throw new ComponentRegistryException(
 					"Unmarshalling failed while preparing recursion detection",
