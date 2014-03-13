@@ -24,6 +24,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
+import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
@@ -36,6 +37,7 @@ import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -1172,7 +1174,7 @@ public class ComponentRegistryRestService implements
 
 				// removing filename from spec before it gets extended.
 				// recursion over all the components
-				setFileNamesFromListToNull(spec.getCMDComponent());
+				setFileNamesFromListToNull(Collections.singletonList(spec.getCMDComponent()));
 
 				try {
 					checkForRecursion(validator, registry, desc);
@@ -1232,7 +1234,7 @@ public class ComponentRegistryRestService implements
 			// In case of recursion, the following will throw a
 			// ComponentRegistryException
 			registry.getExpander().expandNestedComponent(
-					specCopy.getCMDComponent(), desc.getId());
+					Lists.newArrayList(specCopy.getCMDComponent()), desc.getId());
 		} catch (JAXBException ex) {
 			throw new ComponentRegistryException(
 					"Unmarshalling failed while preparing recursion detection",

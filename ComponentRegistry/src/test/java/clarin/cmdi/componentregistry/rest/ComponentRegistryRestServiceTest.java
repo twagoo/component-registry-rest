@@ -121,14 +121,27 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testGetRegisteredComponent() throws Exception {
-        fillUp();
+	fillUp();
         CMDComponentSpec component = getResource().path("/registry/components/clarin.eu:cr1:component1").accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
-        assertNotNull(component);
-        assertEquals("Access", component.getCMDComponent().get(0).getName());
+	assertNotNull(component);
+        assertEquals("Access", component.getCMDComponent().getName());
         component = getResource().path("/registry/components/clarin.eu:cr1:component2").accept(MediaType.APPLICATION_XML).get(
                 CMDComponentSpec.class);
-        assertNotNull(component);
-        assertEquals("Access", component.getCMDComponent().get(0).getName());
+	assertNotNull(component);
+        assertEquals("Access", component.getCMDComponent().getName());
+
+//        
+//        	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
+//	String id2 = ComponentDescription.COMPONENT_PREFIX + "component2";
+//	CMDComponentSpec component = getResource()
+//		.path("/registry/components/" + id)
+//		.accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+//	assertNotNull(component);
+//	assertEquals("Access", component.getCMDComponent().getName());
+//	component = getResource().path("/registry/components/" + id2)
+//		.accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+//	assertNotNull(component);
+//	assertEquals("Access", component.getCMDComponent().getName());
 
         assertEquals("clarin.eu:cr1:component2", component.getHeader().getID());
         assertEquals("component2", component.getHeader().getName());
@@ -386,15 +399,27 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testGetRegisteredProfile() throws Exception {
-        fillUp();
+	fillUp();
         CMDComponentSpec profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile1").accept(MediaType.APPLICATION_JSON).get(
                 CMDComponentSpec.class);
-        assertNotNull(profile);
-        assertEquals("Actor", profile.getCMDComponent().get(0).getName());
+	assertNotNull(profile);
+        assertEquals("Actor", profile.getCMDComponent().getName());
         profile = getResource().path("/registry/profiles/clarin.eu:cr1:profile2").accept(MediaType.APPLICATION_XML).get(
                 CMDComponentSpec.class);
-        assertNotNull(profile);
-        assertEquals("Actor", profile.getCMDComponent().get(0).getName());
+	assertNotNull(profile);
+        assertEquals("Actor", profile.getCMDComponent().getName());
+        
+//        	String id = ProfileDescription.PROFILE_PREFIX + "profile1";
+//	String id2 = ProfileDescription.PROFILE_PREFIX + "profile2";
+//	CMDComponentSpec profile = getResource()
+//		.path("/registry/profiles/" + id)
+//		.accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+//	assertNotNull(profile);
+//	assertEquals("Actor", profile.getCMDComponent().getName());
+//	profile = getResource().path("/registry/profiles/" + id2)
+//		.accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+//	assertNotNull(profile);
+//	assertEquals("Actor", profile.getCMDComponent().getName());
 
         assertEquals("clarin.eu:cr1:profile2", profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
@@ -558,16 +583,17 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId() + "/publish")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
 
-        assertEquals(0, getUserProfiles().size());
-        List<ProfileDescription> profiles = getPublicProfiles();
-        assertEquals(1, profiles.size());
-        ProfileDescription profileDescription = profiles.get(0);
-        assertNotNull(profileDescription.getId());
-        assertEquals(desc.getId(), profileDescription.getId());
-        assertEquals("http://localhost:9998/registry/profiles/" + desc.getId(), profileDescription.getHref());
-        assertEquals("Published", profileDescription.getDescription());
-        CMDComponentSpec spec = getPublicSpec(profileDescription);
-        assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
+	assertEquals(0, getUserProfiles().size());
+	List<ProfileDescription> profiles = getPublicProfiles();
+	assertEquals(1, profiles.size());
+	ProfileDescription profileDescription = profiles.get(0);
+	assertNotNull(profileDescription.getId());
+	assertEquals(desc.getId(), profileDescription.getId());
+	assertEquals("http://localhost:9998/registry/profiles/" + desc.getId(),
+		profileDescription.getHref());
+	assertEquals("Published", profileDescription.getDescription());
+	CMDComponentSpec spec = getPublicSpec(profileDescription);
+	assertEquals("publishedName", spec.getCMDComponent().getName());
     }
 
     private CMDComponentSpec getPublicSpec(AbstractDescription desc) {
@@ -593,16 +619,18 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId() + "/publish")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
 
-        assertEquals(0, getUserComponents().size());
-        List<ComponentDescription> components = getPublicComponents();
-        assertEquals(1, components.size());
-        ComponentDescription componentDescription = components.get(0);
-        assertNotNull(componentDescription.getId());
-        assertEquals(desc.getId(), componentDescription.getId());
-        assertEquals("http://localhost:9998/registry/components/" + desc.getId(), componentDescription.getHref());
-        assertEquals("Published", componentDescription.getDescription());
-        CMDComponentSpec spec = getPublicSpec(componentDescription);
-        assertEquals("publishedName", spec.getCMDComponent().get(0).getName());
+	assertEquals(0, getUserComponents().size());
+	List<ComponentDescription> components = getPublicComponents();
+	assertEquals(1, components.size());
+	ComponentDescription componentDescription = components.get(0);
+	assertNotNull(componentDescription.getId());
+	assertEquals(desc.getId(), componentDescription.getId());
+	assertEquals(
+		"http://localhost:9998/registry/components/" + desc.getId(),
+		componentDescription.getHref());
+	assertEquals("Published", componentDescription.getDescription());
+	CMDComponentSpec spec = getPublicSpec(componentDescription);
+	assertEquals("publishedName", spec.getCMDComponent().getName());
     }
 
     @Test
@@ -840,24 +868,30 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("user registered components", 0, components.size());
         assertEquals("public registered components", 0, getPublicComponents().size());
 
-        FormDataMultiPart form = createFormData(RegistryTestHelper.getComponentTestContent());
-        ClientResponse cResponse = getAuthenticatedResource(getResource().path("/registry/components").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
-        assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
-        RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
-        assertTrue(response.isRegistered());
-        assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
-        ComponentDescription desc = (ComponentDescription) response.getDescription();
-        assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("My Test", desc.getDescription());
+	FormDataMultiPart form = createFormData(RegistryTestHelper
+		.getComponentTestContent());
+	ClientResponse cResponse = getAuthenticatedResource(
+		getResource().path("/registry/components").queryParam(
+			USERSPACE_PARAM, "true")).type(
+		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+	assertEquals(ClientResponse.Status.OK.getStatusCode(),
+		cResponse.getStatus());
+	RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
+	assertTrue(response.isRegistered());
+	assertFalse(response.isProfile());
+	assertTrue(response.isInUserSpace());
+	ComponentDescription desc = (ComponentDescription) response
+		.getDescription();
+	assertNotNull(desc);
+	assertEquals("Test1", desc.getName());
+	assertEquals("My Test", desc.getDescription());
         Date firstDate = AbstractDescription.getDate(desc.getRegistrationDate());
-        CMDComponentSpec spec = getUserComponent(desc);
-        assertNotNull(spec);
-        assertEquals("Access", spec.getCMDComponent().get(0).getName());
-        components = getUserComponents();
-        assertEquals(1, components.size());
-        assertEquals(0, getPublicComponents().size());
+	CMDComponentSpec spec = getUserComponent(desc);
+	assertNotNull(spec);
+	assertEquals("Access", spec.getCMDComponent().getName());
+	components = getUserComponents();
+	assertEquals(1, components.size());
+	assertEquals(0, getPublicComponents().size());
 
         //Now update
         form = createFormData(RegistryTestHelper.getComponentTestContent("TESTNAME"), "UPDATE DESCRIPTION!");
@@ -876,12 +910,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         Date secondDate = AbstractDescription.getDate(desc.getRegistrationDate());
         assertTrue(firstDate.before(secondDate) || firstDate.equals(secondDate));
 
-        spec = getUserComponent(desc);
-        assertNotNull(spec);
-        assertEquals("TESTNAME", spec.getCMDComponent().get(0).getName());
-        components = getUserComponents();
-        assertEquals(1, components.size());
-        assertEquals(0, getPublicComponents().size());
+	spec = getUserComponent(desc);
+	assertNotNull(spec);
+	assertEquals("TESTNAME", spec.getCMDComponent().getName());
+	components = getUserComponents();
+	assertEquals(1, components.size());
+	assertEquals(0, getPublicComponents().size());
     }
 
     @Test
@@ -890,25 +924,31 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(0, profiles.size());
         assertEquals(0, getPublicProfiles().size());
 
-        FormDataMultiPart form = createFormData(RegistryTestHelper.getTestProfileContent());
-        ClientResponse cResponse = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(USERSPACE_PARAM, "true")).type(MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
-        assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
-        RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
-        assertTrue(response.isRegistered());
-        assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
-        ProfileDescription desc = (ProfileDescription) response.getDescription();
-        assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("My Test", desc.getDescription());
-        assertEquals("TestGroup", desc.getGroupName());
+	FormDataMultiPart form = createFormData(RegistryTestHelper
+		.getTestProfileContent());
+	ClientResponse cResponse = getAuthenticatedResource(
+		getResource().path("/registry/profiles").queryParam(
+			USERSPACE_PARAM, "true")).type(
+		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+	assertEquals(ClientResponse.Status.OK.getStatusCode(),
+		cResponse.getStatus());
+	RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
+	assertTrue(response.isRegistered());
+	assertTrue(response.isProfile());
+	assertTrue(response.isInUserSpace());
+	ProfileDescription desc = (ProfileDescription) response
+		.getDescription();
+	assertNotNull(desc);
+	assertEquals("Test1", desc.getName());
+	assertEquals("My Test", desc.getDescription());
+	assertEquals("TestGroup", desc.getGroupName());
         Date firstDate = AbstractDescription.getDate(desc.getRegistrationDate());
-        CMDComponentSpec spec = getUserProfile(desc);
-        assertNotNull(spec);
-        assertEquals("Actor", spec.getCMDComponent().get(0).getName());
-        profiles = getUserProfiles();
-        assertEquals(1, profiles.size());
-        assertEquals(0, getPublicComponents().size());
+	CMDComponentSpec spec = getUserProfile(desc);
+	assertNotNull(spec);
+	assertEquals("Actor", spec.getCMDComponent().getName());
+	profiles = getUserProfiles();
+	assertEquals(1, profiles.size());
+	assertEquals(0, getPublicComponents().size());
 
         //Now update
         form = createFormData(RegistryTestHelper.getTestProfileContent("TESTNAME"), "UPDATE DESCRIPTION!");
@@ -927,12 +967,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         Date secondDate = AbstractDescription.getDate(desc.getRegistrationDate());
         assertTrue(firstDate.before(secondDate) || firstDate.equals(secondDate));
 
-        spec = getUserProfile(desc);
-        assertNotNull(spec);
-        assertEquals("TESTNAME", spec.getCMDComponent().get(0).getName());
-        profiles = getUserProfiles();
-        assertEquals(1, profiles.size());
-        assertEquals(0, getPublicComponents().size());
+	spec = getUserProfile(desc);
+	assertNotNull(spec);
+	assertEquals("TESTNAME", spec.getCMDComponent().getName());
+	profiles = getUserProfiles();
+	assertEquals(1, profiles.size());
+	assertEquals(0, getPublicComponents().size());
     }
 
     private CMDComponentSpec getUserComponent(ComponentDescription desc) {
