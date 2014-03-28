@@ -16,6 +16,7 @@
     <name>ComponentBrowserGui</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<flex.version>3.6.0.16995</flex.version>
         <flexDebug>true</flexDebug>
     </properties>
 
@@ -32,7 +33,7 @@
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
             <artifactId>flex-framework</artifactId>
-            <version>3.6.0.16321</version>
+            <version>${flex.version}</version>
             <type>pom</type>
             <exclusions>
                 <exclusion>
@@ -44,7 +45,7 @@
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
             <artifactId>playerglobal</artifactId>
-            <version>3.6.0.16321</version>
+            <version>${flex.version}</version>
             <classifier>10</classifier>
             <type>swc</type>
         </dependency>
@@ -117,7 +118,7 @@
                     <dependency>
                         <groupId>com.adobe.flex</groupId>
                         <artifactId>compiler</artifactId>
-                        <version>3.6.0.16321</version>
+                        <version>${flex.version}</version>
                         <type>pom</type>
                     </dependency>
                 </dependencies>
