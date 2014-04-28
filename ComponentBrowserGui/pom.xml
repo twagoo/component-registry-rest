@@ -192,6 +192,11 @@
                 <enabled>true</enabled>
             </releases>
         </pluginRepository>
+        <pluginRepository>
+                <id>cmdi.clarin.repository</id>
+                <name>Clarin Repository</name>
+                <url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url>
+        </pluginRepository>
     </pluginRepositories>
 
 

@@ -26,11 +26,12 @@
   </properties>
   
   <repositories>
-<repository>
-<id>cmdi.clarin.repository</id>
-<name>Clarin Repository</name>
-<url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url> 
-</repository> 
+	<repository>
+		<id>cmdi.clarin.repository</id>
+		<name>Clarin Repository</name>
+		<url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url> 
+	</repository> 
+	
  </repositories>
 
   <reporting>
