@@ -15,19 +15,13 @@ import clarin.cmdi.componentregistry.model.BaseDescription;
  */
 public interface ComponentDao {
 
-    /**
-     * Get all public components
-     * 
-     * @return
-     */
-    List<BaseDescription> getPublicComponentDescriptions();
-
+    
     /**
      * Get all public profiles
      * 
      * @return
      */
-    List<BaseDescription> getPublicProfileDescriptions();
+    List<BaseDescription> getPublicBaseDescriptions(String prefix);
 
     /**
      * 
@@ -56,7 +50,7 @@ public interface ComponentDao {
      * @return Whether the specified item is in the specified workspace (user or
      *         public)
      */
-    boolean isInRegistry(String cmdId, Number userId);
+    //boolean isAccessible(String cmdId, Number userId);
 
     /**
      * 
@@ -116,8 +110,9 @@ public interface ComponentDao {
      *            Db id of user for workspace; null for public space
      * @return The description, if it exists; null otherwise
      */
-    BaseDescription getByCmdId(String id, Number userId)
-	    throws DataAccessException;
+//    BaseDescription getByCmdId(String id, Number userId)
+//	    throws DataAccessException;
+ 
 
     /**
      * 
@@ -145,17 +140,9 @@ public interface ComponentDao {
      * @return All the user's components not in the public space and are also
      *         not part of any group
      */
-    List<BaseDescription> getUserspaceComponents(Number userId)
+    List<BaseDescription> getPrivateBaseDescriptions(Number userId, String prefix)
 	    throws DataAccessException;
-
-    /**
-     * 
-     * @return All the user's profiles not in the public space and are also
-     *         not part of any group
-     */
-    List<BaseDescription> getUserspaceProfiles(Number userId)
-	    throws DataAccessException;
-
+  
     void setDeleted(BaseDescription desc, boolean isDeleted)
 	    throws DataAccessException;
 
@@ -181,5 +168,9 @@ public interface ComponentDao {
      */
     List<String> getAllNonDeletedComponentIds();
 
+    public List<BaseDescription> getAllNonDeletedDescriptions();
+            
+    // Olha was here
+    public List<String> getAllItemIdsInGroup(String prefix, Long groupId);
 
 }

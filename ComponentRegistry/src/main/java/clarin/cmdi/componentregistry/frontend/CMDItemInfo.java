@@ -1,9 +1,9 @@
 package clarin.cmdi.componentregistry.frontend;
 
-import clarin.cmdi.componentregistry.ComponentStatus;
 import java.io.Serializable;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 
 public class CMDItemInfo implements Serializable {
@@ -98,8 +98,8 @@ public class CMDItemInfo implements Serializable {
     }
 
     
-    public ComponentStatus getStatus() {
-	return displayNode.getStatus();
+    public RegistrySpace getSpace() {
+	return displayNode.getSpace();
     }
 	
     public void setForceUpdate(boolean forceUpdate) {

@@ -8,6 +8,7 @@ import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.OwnerUser;
+import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
@@ -49,13 +50,22 @@ public class ComponentRegistryFactoryDbImplTest extends BaseUnitTest {
 	ComponentRegistry registry = componentRegistryFactory
 		.getPublicRegistry();
 	assertNotNull(registry);
+        
+    }
+    
+    @Test
+    public void testGetBaseRegistry() {
+	ComponentRegistryDbImpl registry = componentRegistryFactory.getBaseRegistry(DummyPrincipal.DUMMY_CREDENTIALS);
+	assertNotNull(registry);
+        assertNotNull(registry.getRegistryOwner());
+        
     }
 
     @Test
     public void getComponentRegistry() throws UserUnauthorizedException {
 	// Get public
 	assertNotNull(componentRegistryFactory.getComponentRegistry(
-		ComponentStatus.PUBLISHED, null, null));
+		RegistrySpace.PUBLISHED, null, null, null));
 
 	// Get for non-existing user
 	final RegistryUser testUser = UserDaoTest.createTestUser();
@@ -63,25 +73,25 @@ public class ComponentRegistryFactoryDbImplTest extends BaseUnitTest {
 		testUser.getPrincipalName()).getCredentials();
 
 	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory
-		.getComponentRegistry(ComponentStatus.PRIVATE, null,
-			credentials);
+		.getComponentRegistry(RegistrySpace.PRIVATE, null,
+			credentials,null);
 	assertNotNull(cr1);
 	// Get for existing user
 	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory
-		.getComponentRegistry(ComponentStatus.PRIVATE, null,
-			credentials);
+		.getComponentRegistry(RegistrySpace.PRIVATE, null,
+			credentials, null);
 	;
 	assertNotNull(cr2);
-	assertEquals(cr1.getOwner(), cr2.getOwner());
+	assertEquals(cr1.getRegistryOwner(), cr2.getRegistryOwner());
 
 	// Get for another new user
 	UserCredentials credentials2 = new DummyPrincipal(
 		testUser.getPrincipalName() + "2").getCredentials();
 	ComponentRegistryDbImpl cr3 = (ComponentRegistryDbImpl) componentRegistryFactory
-		.getComponentRegistry(ComponentStatus.PRIVATE, null,
-			credentials2);
+		.getComponentRegistry(RegistrySpace.PRIVATE, null,
+			credentials2, null);
 	assertNotNull(cr3);
-	assertNotSame(cr1.getOwner(), cr3.getOwner());
+	assertNotSame(cr1.getRegistryOwner(), cr3.getRegistryOwner());
     }
 
     @Test
@@ -92,25 +102,23 @@ public class ComponentRegistryFactoryDbImplTest extends BaseUnitTest {
 
 	// Create registry for new user
 	ComponentRegistryDbImpl cr1 = (ComponentRegistryDbImpl) componentRegistryFactory
-		.getComponentRegistry(ComponentStatus.PRIVATE, null,
-			userCredentials);
+		.getComponentRegistry(RegistrySpace.PRIVATE, null,
+			userCredentials, null);
 
-	Number id = cr1.getOwner().getId();
+	Number id = cr1.getRegistryOwner().getId();
 
 	// Get it as admin
 	ComponentRegistryDbImpl cr2 = (ComponentRegistryDbImpl) componentRegistryFactory
 		.getOtherUserComponentRegistry(
-			DummyPrincipal.DUMMY_ADMIN_PRINCIPAL,
-			ComponentStatus.PRIVATE, new OwnerUser(id));
+			DummyPrincipal.DUMMY_ADMIN_PRINCIPAL, new OwnerUser(id));
 	assertNotNull(cr2);
 	// Should be this user's registry
-	assertEquals(cr1.getOwner(), cr2.getOwner());
+	assertEquals(cr1.getRegistryOwner(), cr2.getRegistryOwner());
 
 	// Try get it as non-admin
 	try {
 	    componentRegistryFactory.getOtherUserComponentRegistry(
-		    DummyPrincipal.DUMMY_PRINCIPAL, ComponentStatus.PRIVATE,
-		    new OwnerUser(id));
+		    DummyPrincipal.DUMMY_PRINCIPAL, new OwnerUser(id));
 	    fail("Non-admin can get other user's component registry");
 	} catch (Exception ex) {
 	    // Exception should occur

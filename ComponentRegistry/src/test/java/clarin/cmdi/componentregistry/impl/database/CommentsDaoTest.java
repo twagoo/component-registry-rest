@@ -92,7 +92,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 
     @Test
     public void testGetCommentsFromProfile() {
-	List<Comment> descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_PROFILE_ID);
+	List<Comment> descriptions = commentsDao.getCommentsFromItem(TEST_COMMENT_PROFILE_ID);
 	assertNotNull(descriptions);
 
 	int size = descriptions.size();
@@ -101,7 +101,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	comment1.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.save(comment1);
 
-	descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_PROFILE_ID);
+	descriptions = commentsDao.getCommentsFromItem(TEST_COMMENT_PROFILE_ID);
 	assertEquals(size + 1, descriptions.size());
 
 	Comment comment2 = createTestComment();
@@ -109,13 +109,13 @@ public class CommentsDaoTest extends BaseUnitTest{
 	comment2.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.save(comment2);
 
-	descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_PROFILE_ID);
+	descriptions = commentsDao.getCommentsFromItem(TEST_COMMENT_PROFILE_ID);
 	assertEquals(size + 2, descriptions.size());
     }
 
     @Test
     public void testGetCommentsFromComponent() {
-	List<Comment> descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_COMPONENT_ID);
+	List<Comment> descriptions = commentsDao.getCommentsFromItem(TEST_COMMENT_COMPONENT_ID);
 	assertNotNull(descriptions);
 
 	int size = descriptions.size();
@@ -124,7 +124,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	comment1.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.saveAndFlush(comment1);
 
-	descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_COMPONENT_ID);
+	descriptions = commentsDao.getCommentsFromItem(TEST_COMMENT_COMPONENT_ID);
 	assertEquals(size + 1, descriptions.size());
 
 	Comment comment2 = createTestComment();
@@ -132,7 +132,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	comment2.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.saveAndFlush(comment2);
 
-	descriptions = commentsDao.getCommentsFromComponent(TEST_COMMENT_COMPONENT_ID);
+	descriptions = commentsDao.getCommentsFromItem(TEST_COMMENT_COMPONENT_ID);
 	assertEquals(size + 2, descriptions.size());
     }
 

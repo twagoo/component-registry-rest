@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -94,7 +95,7 @@ public interface GroupService {
      * @param groupName
      * @param componentId
      */
-    void transferItemOwnershipFromUserToGroup(String principal, String groupId, String componentId);
+    void transferItemOwnershipFromUserToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
 
     /**
      * Move ownership of a component or profile from a user to a group
@@ -102,7 +103,7 @@ public interface GroupService {
      * @param groupId
      * @param componentId
      */
-    void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId);
+    void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) throws UserUnauthorizedException;
 
     /**
      * Get component IDs in a group
@@ -125,5 +126,7 @@ public interface GroupService {
      * @return
      */
     List<String> getProfileIdsInGroup(long groupId);
-
+    
+    boolean userGroupMember(String principalName, String groupId);
+   
 }

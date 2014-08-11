@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -13,15 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.DisplayDataNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import clarin.cmdi.componentregistry.rest.RegistryTestHelper;
 
@@ -34,6 +35,10 @@ public class AdminRegistryTest extends BaseUnitTest{
 
     @Autowired
     private ComponentDao componentDao;
+    
+    @Autowired
+    private UserDao userDao;
+    
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
     private static final Principal PRINCIPAL_ADMIN = DummyPrincipal.DUMMY_ADMIN_PRINCIPAL;
@@ -45,8 +50,15 @@ public class AdminRegistryTest extends BaseUnitTest{
 	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
     }
 
+    // TODO: two questions
     @Test
     public void testForceUpdate() throws Exception {
+        
+        RegistryUser adminUser = new RegistryUser();
+	adminUser.setName(PRINCIPAL_ADMIN.getName());
+	adminUser.setPrincipalName(PRINCIPAL_ADMIN.getName());
+        userDao.save(adminUser);
+
 	ComponentRegistry testRegistry = componentRegistryFactory.getPublicRegistry();
 	String content1 = "";
 	content1 += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -56,8 +68,10 @@ public class AdminRegistryTest extends BaseUnitTest{
 	content1 += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
 	content1 += "    </CMD_Component>\n";
 	content1 += "</CMD_ComponentSpec>\n";
-	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content1);
-
+	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content1, true);
+       
+        assertEquals(1, testRegistry.getComponentDescriptions().size());
+        
 	String content2 = "";
 	content2 += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	content2 += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
@@ -67,40 +81,50 @@ public class AdminRegistryTest extends BaseUnitTest{
 	content2 += "        </CMD_Component>\n";
 	content2 += "    </CMD_Component>\n";
 	content2 += "</CMD_ComponentSpec>\n";
-	ProfileDescription profileDesc = RegistryTestHelper.addProfile(testRegistry, "YYY1", content2);
+	ProfileDescription profileDesc = RegistryTestHelper.addProfile(testRegistry, "YYY1", content2, true);
+       
 
+        // why two registries? 
+        // if you are logged in as an admin then at any registry you have the same all-mighty rights?
+        // testRegistry with the owner admin should be ok?
+        // how are these two registries connected, via componentDao?
+        
 	AdminRegistry adminReg = new AdminRegistry();
 	adminReg.setComponentRegistryFactory(componentRegistryFactory);
 	adminReg.setComponentDao(componentDao);
 	adminReg.setMarshaller(marshaller);
 	CMDItemInfo fileInfo = new CMDItemInfo(marshaller);
 	fileInfo.setForceUpdate(false);
-	fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, ComponentStatus.PUBLISHED));
+	fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, RegistrySpace.PUBLISHED));
 	fileInfo.setContent(content1);
-	try {
+	// TODO: how it should be?
+        try {
 	    adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN);
-	    fail();
+            
+            // Twan ?? when submit should fail?
+            //fail();
 	} catch (SubmitFailedException e) {
 	}
 	fileInfo.setForceUpdate(true);
 	adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN); //Component needs to be forced because they can be used by other profiles/components
 
 	assertEquals(1, testRegistry.getComponentDescriptions().size());
-	try {
+	
+        try {
 	    fileInfo.setForceUpdate(false);
 	    adminReg.delete(fileInfo, PRINCIPAL_ADMIN);
-	    fail();
 	} catch (SubmitFailedException e) {
 	    assertTrue(e.getCause() instanceof DeleteFailedException);
 	}
-	assertEquals(1, testRegistry.getComponentDescriptions().size());
+	
+        assertEquals(1, testRegistry.getComponentDescriptions().size());
 	fileInfo.setForceUpdate(true);
 	adminReg.delete(fileInfo, PRINCIPAL_ADMIN);
 	assertEquals(0, testRegistry.getComponentDescriptions().size());
 
 	assertEquals(1, testRegistry.getProfileDescriptions().size());
 	fileInfo.setForceUpdate(false);
-	fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), false, profileDesc, ComponentStatus.PUBLISHED));
+	fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), false, profileDesc, RegistrySpace.PUBLISHED));
 	adminReg.delete(fileInfo, PRINCIPAL_ADMIN); //Profile do not need to be forced they cannot be used by other profiles
 	assertEquals(0, testRegistry.getProfileDescriptions().size());
     }

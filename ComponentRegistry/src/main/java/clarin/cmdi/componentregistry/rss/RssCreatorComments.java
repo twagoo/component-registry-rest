@@ -13,7 +13,7 @@ public class RssCreatorComments extends RssCreator<Comment> {
 
     /**
      *
-     * @param userspace if "true" then profiles and components from the user's
+     * @param isPrivate if "true" then profiles and components from the user's
      * workspace, otherwise -- public (uri-parameter)
      * @param baseURI where the database is located
      * @param limit number of items to be displayed (uri-parameter)
@@ -26,11 +26,11 @@ public class RssCreatorComments extends RssCreator<Comment> {
      * the channel will be created
      * @param comparator compare comments by dates
      */
-    public RssCreatorComments(boolean userspace, String baseURI, int limit,
+    public RssCreatorComments(boolean isPrivate, String baseURI, int limit,
             String descriptionId, String descriptionName, String descriptionType, List<Comment> comms, Comparator<Comment> comparator) {
-        super(userspace, baseURI, limit, comms);
-        setChannelLink(baseURI + "?item=" + descriptionId + ((userspace) ? "&space=user" : "") + "&browserview=comments");
-        setChannelTitle((userspace ? "Your workspace " : "Public ") + descriptionType + " \"" + descriptionName + "\"");
+        super(isPrivate, baseURI, limit, comms);
+        setChannelLink(baseURI + "?item=" + descriptionId + ((isPrivate) ? "&space=user" : "") + "&browserview=comments");
+        setChannelTitle((isPrivate ? "Private " : "Public ") + descriptionType + " \"" + descriptionName + "\"");
         setChannelDescription(String.format("Comments feed for the %s \"%s\"", descriptionType, descriptionName));
         setComparator(comparator);
     }

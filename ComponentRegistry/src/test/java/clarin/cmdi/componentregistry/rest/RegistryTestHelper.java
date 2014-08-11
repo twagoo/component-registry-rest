@@ -15,7 +15,9 @@ import javax.xml.bind.JAXBException;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.DatesHelper;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -26,10 +28,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 
-import javax.xml.transform.TransformerException;
-
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -45,24 +43,25 @@ public final class RegistryTestHelper {
 	RegistryTestHelper.marshaller = marshaller;
     }
 
-    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
-	return addComponent(testRegistry, id, getComponentTestContent());
+    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
+	return addComponent(testRegistry, id, getComponentTestContent(), isPublic);
     }
 
-    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content) throws ParseException,
+    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
 	    JAXBException, UnsupportedEncodingException {
-	return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")));
+	return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")), isPublic);
     }
 
-    private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
+    private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
 	    JAXBException {
 	ComponentDescription desc = ComponentDescription.createNewDescription();
 	desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
-	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
+        desc.setUserId(DummyPrincipal.DUMMY_PRINCIPAL.getName());
 	desc.setName(id);
 	desc.setDescription("Test Description");
 	desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
 	desc.setHref("link:" + desc.getId());
+        desc.setPublic(isPublic);
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
@@ -103,17 +102,17 @@ public final class RegistryTestHelper {
 	return new ByteArrayInputStream(getProfileTestContentString(name).getBytes());
     }
 
-    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id) throws ParseException, JAXBException {
-	return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent());
+    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
+	return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(), isPublic);
     }
 
-    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content) throws ParseException,
-	    JAXBException {
-	return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()));
+    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
+	    JAXBException, ItemNotFoundException {
+	return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()), isPublic);
     }
 
-    private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content) throws ParseException,
-	    JAXBException {
+    private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
+	    JAXBException, ItemNotFoundException {
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
 	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
@@ -121,6 +120,7 @@ public final class RegistryTestHelper {
 	desc.setDescription("Test Description");
 	desc.setId(ProfileDescription.PROFILE_PREFIX + id);
 	desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
+        desc.setPublic(isPublic);
 	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
 	testRegistry.register(desc, spec);
 	return desc;
@@ -215,13 +215,13 @@ public final class RegistryTestHelper {
 	return xml;
     }
 
-    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException {
+    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException,UserUnauthorizedException {
 	return addComment(testRegistry, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
 
     private static Comment addComment(ComponentRegistry testRegistry, InputStream content, String principal) throws ParseException,
 	    JAXBException,
-	    ComponentRegistryException {
+	    ComponentRegistryException, ItemNotFoundException,UserUnauthorizedException {
 	Comment spec = marshaller.unmarshal(Comment.class, content, null);
 	testRegistry.registerComment(spec, principal);
 	return spec;

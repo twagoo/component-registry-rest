@@ -7,10 +7,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
-import clarin.cmdi.componentregistry.model.GroupMembership;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -46,6 +46,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	profile.setDescription("some description");
 	profile.setId(ProfileDescription.PROFILE_PREFIX+sid);
 	profile.setName("profilename");
+        profile.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
 	Number id = componentDescriptionDao.insertDescription(profile, "someContent",
 		isPublic, ownerId);
 	return componentDescriptionDao.getById(id);
@@ -57,6 +58,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	componentDescription.setDescription("some description");
 	componentDescription.setId(ComponentDescription.COMPONENT_PREFIX+"4567");
 	componentDescription.setName("componentname");
+        componentDescription.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
 	Number id = componentDescriptionDao.insertDescription(
 		componentDescription, "someContent", isPublic, ownerId);
 	return componentDescriptionDao.getById(id);
@@ -254,7 +256,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testTransferComponentOwnershipFromUserToGroup() {
+    public void testTransferComponentOwnershipFromUserToGroup()  throws UserUnauthorizedException{
 
 	// Make a group
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -306,7 +308,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testtransferComponentOwnershipFromUserToGroup() {
+    public void testtransferComponentOwnershipFromUserToGroup()  throws UserUnauthorizedException{
 
 	// Make a group
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -359,7 +361,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testTransferItemOwnershipFromUserToGroup() {
+    public void testTransferItemOwnershipFromUserToGroup()  throws UserUnauthorizedException{
 	//TODO: improve test by mixing in components and exclusing components/profiles
 	// Make a group
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -412,7 +414,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testGetGroupsTheItemIsAMemberOf() {
+    public void testGetGroupsTheItemIsAMemberOf()  throws UserUnauthorizedException{
 	// Make a group
 	Group group1 = groupDao.findOne(groupService.createNewGroup("Group 1",
 		user.getPrincipalName()));

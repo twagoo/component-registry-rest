@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.BaseDescription;
+import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
@@ -95,7 +96,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	// TODO: test queries empty database and is happy that no results are
 	// returned. Should also test the case where there are userspace
 	// descriptions
-	List<BaseDescription> descriptions = getDao().getUserspaceComponents(-1);
+	List<BaseDescription> descriptions = getDao().getPrivateBaseDescriptions(-1, ComponentDescription.COMPONENT_PREFIX);
 	assertEquals(0, descriptions.size());
     }
 

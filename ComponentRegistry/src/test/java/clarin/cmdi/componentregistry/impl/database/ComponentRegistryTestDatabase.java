@@ -95,5 +95,6 @@ public final class ComponentRegistryTestDatabase {
         createTableGroup(jdbcTemplate);
         createTableOwnership(jdbcTemplate);
         createTableGroupMembership(jdbcTemplate);
+      
     }
 }

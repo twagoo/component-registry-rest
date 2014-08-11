@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -234,8 +235,9 @@ public class GroupServiceImpl implements GroupService {
 		Set<Ownership> ownerships = new HashSet<Ownership>();
 		ownerships.addAll(ownershipDao.findOwnershipByComponentId(itemId));
 		Set<Group> groups = new HashSet<Group>();
-		for (Ownership ownership : ownerships)
+		for (Ownership ownership : ownerships) {
 			groups.add(groupDao.findOne(ownership.getGroupId()));
+                }
 		List<Group> groupList = new ArrayList<Group>(groups);
 		Collections.sort(groupList, new Comparator<Group>() {
 
@@ -246,6 +248,8 @@ public class GroupServiceImpl implements GroupService {
 		});
 		return groupList;
 	}
+        
+        
 
 	@ManagedOperation(description = "Make a component owned by a group instead of a user")
 	@ManagedOperationParameters({
@@ -253,15 +257,29 @@ public class GroupServiceImpl implements GroupService {
 			@ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to"),
 			@ManagedOperationParameter(name = "componentId", description = "Id of component") })
 	@Override
-	public void transferItemOwnershipFromUserToGroup(String principal, String groupName, String itemId) {
-
+	public void transferItemOwnershipFromUserToGroup(String principal, String groupName, String itemId) throws UserUnauthorizedException{
+                
+                           
 		BaseDescription item = null;
 		item = componentDao.getByCmdId(itemId);
-		if (item == null)
+		if (item == null) {
 			throw new ValidationException("No profile or component found with ID " + itemId);
+                }
 		Group group = groupDao.findGroupByName(groupName);
-		if (group == null)
+		if (group == null) {
 			throw new ValidationException("No group found with name " + groupName);
+                }
+                
+                if (!this.userGroupMember(principal, String.valueOf(group.getId()))) {
+                   throw new UserUnauthorizedException("User " + principal+ " is not a member of group "+groupName); 
+                }
+                
+                String creatorName = item.getCreatorName();
+                if (!creatorName.equals(principal)) {
+                   throw new UserUnauthorizedException("User " + principal+ " is not creator of the item  "+item.getName()); 
+                }
+                
+                
 		Ownership ownership = null;
 		List<Ownership> oldOwnerships = ownershipDao.findOwnershipByComponentId(itemId);
 		ownershipDao.delete(oldOwnerships);
@@ -272,11 +290,18 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	@Override
-	public void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) {
+	public void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) throws UserUnauthorizedException{
 		Group group = groupDao.findOne(groupId);
-		if (group == null)
+		if (group == null) {
 			throw new ValidationException("No group found with id " + groupId);
-		transferItemOwnershipFromUserToGroup(principal, group.getName(), componentId);
+                }
+		this.transferItemOwnershipFromUserToGroup(principal, group.getName(), componentId);
 	}
 
+        @Override
+        public boolean userGroupMember(String principalName, String groupId) {
+            RegistryUser user = userDao.getByPrincipalName(principalName);
+            GroupMembership gm = groupMembershipDao.findMembership(user.getId(), Long.parseLong(groupId));
+            return gm != null;
+        }
 }

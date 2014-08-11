@@ -69,7 +69,7 @@
 		class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
 
 	<!-- Prototype bean for component registry (service) -->
-	<bean id="componentRegistry"
+	<bean id="componentRegistryDbImpl"
 		class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl"
 		scope="prototype" />
 

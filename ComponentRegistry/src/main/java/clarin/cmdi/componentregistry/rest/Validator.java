@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.List;
 
 public interface Validator {
@@ -14,6 +15,6 @@ public interface Validator {
     /**
      * Validate and create an error message when something is wrong.
      */
-    public boolean validate();
+    public boolean validate()  throws UserUnauthorizedException;
 
 }

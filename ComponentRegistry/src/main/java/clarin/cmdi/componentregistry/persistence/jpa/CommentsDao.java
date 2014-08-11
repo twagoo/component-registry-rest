@@ -34,7 +34,7 @@ public interface CommentsDao extends JpaRepository<Comment, Long>{
 	 * @throws DataAccessException
 	 */
     	@Query("select c from Comment c where c.componentId = ?1 order by c.commentDate, c.id")
-	List<Comment> getCommentsFromComponent(String componentId)
+	List<Comment> getCommentsFromItem(String componentId)
 			throws DataAccessException;
 
 	/**
@@ -43,7 +43,8 @@ public interface CommentsDao extends JpaRepository<Comment, Long>{
 	 *            Id of description record
 	 * @return Principal name of description's owner, if any. Otherwise, null.
 	 */
-    	@Query("select user from RegistryUser user, Comment comment, BaseDescription component where comment.id = ?1 and comment.componentId = component.componentId and component.dbUserId = user.id")
+    	//@Query("select user from RegistryUser user, Comment comment, BaseDescription component where comment.id = ?1 and comment.componentId = component.componentId and component.dbUserId = user.id")
+	@Query("select user from RegistryUser user, Comment comment where comment.id = ?1 and user.id=comment.userId")
 	RegistryUser getOwnerOfComment(long id);
 
 	/**

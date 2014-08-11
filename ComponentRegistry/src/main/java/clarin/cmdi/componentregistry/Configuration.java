@@ -73,11 +73,20 @@ public class Configuration {
 	return false;
     }
 
+    public boolean isAdminUser(String name) {
+	if (name != null) {
+	    return name.trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
+		    && adminUsers.contains(name);
+	}
+	return false;
+    }
+    
     public void setAdminUsers(Collection<String> adminUsers) {
 	LOG.debug("Setting adminUsers to {}", Arrays.toString(adminUsers.toArray()));
 	this.adminUsers = adminUsers;
     }
-
+    
+   
     /**
      *
      * @param adminUsers Whitespace-separated list of admin users

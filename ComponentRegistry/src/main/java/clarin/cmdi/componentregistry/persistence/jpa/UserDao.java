@@ -27,5 +27,8 @@ public interface UserDao extends JpaRepository<RegistryUser, Long>{
     	@Query("select u from RegistryUser u where u.principalName = ?1")
 	RegistryUser getByPrincipalName(String principalName)
 			throws DataAccessException;
+        
+        @Query("select u from RegistryUser u where u.id = ?1")
+	RegistryUser getPrincipalNameById(Number id) throws DataAccessException;
 
 }

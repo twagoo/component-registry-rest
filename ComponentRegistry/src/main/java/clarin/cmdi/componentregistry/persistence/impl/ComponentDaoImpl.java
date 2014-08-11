@@ -109,8 +109,9 @@ public class ComponentDaoImpl implements ComponentDao {
      * @param baseDescription
      */
     private List<BaseDescription> augment(List<BaseDescription> baseDescription) {
-	if (baseDescription.isEmpty())
+	if (baseDescription.isEmpty()) {
 	    return baseDescription;
+        }
 	Map<String, BaseDescription> map = new HashMap<String, BaseDescription>();
 	List<String> idlist = new ArrayList<String>();
 	for (BaseDescription c:baseDescription) {
@@ -164,14 +165,14 @@ public class ComponentDaoImpl implements ComponentDao {
      * @return Whether the specified item is in the specified workspace (user or
      *         public)
      */
-    @Override
-    public boolean isInRegistry(String cmdId, Number userId) {
-	if (userId == null) {
-	    return isPublic(cmdId);
-	} else {
-	    return isInUserSpace(cmdId, userId);
-	}
-    }
+//    @Override
+//    public boolean isAccessible(String cmdId, Number userId) {
+//	if (userId == null) {
+//	    return this.isPublic(cmdId);
+//	} else {
+//	    return this.isInUserSpace(cmdId, userId);
+//	}
+//    }
 
     /**
      * 
@@ -206,6 +207,7 @@ public class ComponentDaoImpl implements ComponentDao {
 	copy.setContent(content);
 	copy.setPublic(isPublic);
 	copy.setUserId(toString(userId));
+        copy.setCreatorName(description.getCreatorName());
 	copy = jpaComponentDao.saveAndFlush(copy);
 	jpaComponentDao.updateContent(copy.getId(), content);
 	return copy.getDbId();
@@ -277,32 +279,7 @@ public class ComponentDaoImpl implements ComponentDao {
 	return null;
     }
 
-    /**
-     * Get by ComponentId / ProfileId
-     * 
-     * @param id
-     *            Full component id
-     * @param userId
-     *            Db id of user for workspace; null for public space
-     * @return The description, if it exists; null otherwise
-     */
-    @Override
-    public BaseDescription getByCmdId(String id, Number userId) {
-	BaseDescription baseDescription = getByCmdId(id);
-	if (baseDescription != null) {
-	    augment(baseDescription);
-	    if (userId == null) {
-		if (!baseDescription.isPublic())
-		    baseDescription = null;
-	    } else {
-		if (baseDescription.isPublic()
-			|| !compare(baseDescription.getUserId(), userId))
-		    baseDescription = null;
-	    }
-	}
-	return baseDescription;
-    }
-
+  
     /**
      * 
      * @param cmdId
@@ -351,18 +328,12 @@ public class ComponentDaoImpl implements ComponentDao {
      *         include xml content and comments count.
      */
     @Override
-    public List<BaseDescription> getUserspaceComponents(Number userId) {
-	return augment(jpaComponentDao
-		.findItemsForUserThatAreNotInGroups(userId.longValue(),
-			ComponentDescription.COMPONENT_PREFIX + "%"));
+    public List<BaseDescription> getPrivateBaseDescriptions(Number userId, String prefix) {
+        return augment(jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(),prefix + "%"));
+	//return augment(jpaComponentDao.findNotPublishedUserItems(userId.longValue(),prefix + "%"));
     }
 
-    @Override
-    public List<BaseDescription> getUserspaceProfiles(Number userId) {
-	return augment(jpaComponentDao.findItemsForUserThatAreNotInGroups(
-		userId.longValue(), ProfileDescription.PROFILE_PREFIX + "%"));
-    }
-
+   
     @Override
     public void setDeleted(BaseDescription desc, boolean isDeleted) {
 	BaseDescription copy = jpaComponentDao.findByComponentId(desc.getId());
@@ -398,17 +369,11 @@ public class ComponentDaoImpl implements ComponentDao {
     }
 
     @Override
-    public List<BaseDescription> getPublicComponentDescriptions() {
-	return augment(jpaComponentDao
-		.findPublicItems(ComponentDescription.COMPONENT_PREFIX + "%"));
+    public List<BaseDescription> getPublicBaseDescriptions(String prefix) {
+	return augment(jpaComponentDao.findPublishedItems(prefix + "%"));
     }
 
-    @Override
-    public List<BaseDescription> getPublicProfileDescriptions() {
-	return augment(jpaComponentDao
-		.findPublicItems(ProfileDescription.PROFILE_PREFIX + "%"));
-    }
-
+   
     @Override
     public List<String> getAllNonDeletedProfileIds() {
 	return jpaComponentDao.findNonDeletedItemIds(ProfileDescription.PROFILE_PREFIX+"%");
@@ -418,5 +383,18 @@ public class ComponentDaoImpl implements ComponentDao {
     public List<String> getAllNonDeletedComponentIds() {
 	return jpaComponentDao.findNonDeletedItemIds(ComponentDescription.COMPONENT_PREFIX+"%");
     }
-
+    
+    @Override
+    public List<BaseDescription> getAllNonDeletedDescriptions() {
+	return jpaComponentDao.findNonDeletedDescriptions();
+    }
+    
+    // Olha was here
+    @Override
+    public List<String> getAllItemIdsInGroup(String prefix, Long groupId) {
+        // we are ineterested only in non-published components in the group
+	return jpaComponentDao.findAllItemIdsInGroup(false, prefix + "%", groupId);
+    }
+    
+   
 }

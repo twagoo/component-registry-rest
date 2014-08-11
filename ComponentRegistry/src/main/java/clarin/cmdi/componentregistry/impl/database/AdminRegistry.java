@@ -13,10 +13,10 @@ import org.springframework.dao.DataAccessException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.OwnerUser;
+import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
@@ -53,7 +53,12 @@ public class AdminRegistry {
     }
 
     public void submitFile(CMDItemInfo info, Principal userPrincipal)
-	    throws SubmitFailedException {
+	    throws SubmitFailedException, UserUnauthorizedException {
+        if (userPrincipal == null) {
+            LOG.info("Null user principal, nothings is submitted.");
+            return;
+        }
+        
 	try {
 	    BaseDescription originalDescription = info.getDataNode()
 		    .getDescription();
@@ -71,10 +76,8 @@ public class AdminRegistry {
 	    spec = marshaller.unmarshal(CMDComponentSpec.class,
 		    IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
 	    checkId(originalDescription.getId(), description.getId());
-
-	    int result = getRegistry(userPrincipal, originalDescription, info)
-		    .update(description, spec, userPrincipal,
-			    info.isForceUpdate());
+            ComponentRegistry cr = this.getRegistry(new UserCredentials(userPrincipal));
+	    int result = cr.update(description, spec, info.isForceUpdate());
 	    if (result < 0) {
 		throw new SubmitFailedException(
 			"Problem occured while registering, please check the tomcat logs for errors.");
@@ -82,6 +85,8 @@ public class AdminRegistry {
 	} catch (JAXBException e) {
 	    throw new SubmitFailedException(e);
 	} catch (IOException e) {
+	    throw new SubmitFailedException(e);
+	} catch (ItemNotFoundException e) {
 	    throw new SubmitFailedException(e);
 	}
     }
@@ -108,7 +113,7 @@ public class AdminRegistry {
 	String id = info.getName();
 	BaseDescription desc = info.getDataNode().getDescription();
 	try {
-	    deleteFromRegistry(userPrincipal, desc, info);
+	    this.deleteFromRegistry(userPrincipal, desc, info);
 	    LOG.info("Deleted item: " + id);
 	} catch (IOException e) {
 	    throw new SubmitFailedException(e);
@@ -118,37 +123,32 @@ public class AdminRegistry {
 	    throw new SubmitFailedException(e);
 	} catch (ComponentRegistryException e) {
 	    throw new SubmitFailedException(e);
+	} catch (ItemNotFoundException e) {
+	    throw new SubmitFailedException(e);
 	}
 
     }
 
     private void deleteFromRegistry(Principal userPrincipal,
 	    BaseDescription desc, CMDItemInfo info) throws IOException,
-	    UserUnauthorizedException, ComponentRegistryException {
-	ComponentRegistry registry = getRegistry(userPrincipal, desc, info);
+	    UserUnauthorizedException, ComponentRegistryException, ItemNotFoundException {
+        
+        if (userPrincipal == null) {
+           LOG.info("Bnull user principal, nothing is deleted"); 
+           return;
+        }
+        
+	ComponentRegistry registry = this.getRegistry(new UserCredentials(userPrincipal));
 	LOG.info("Deleting item: " + desc);
 	if (desc.isProfile()) {
-	    registry.deleteMDProfile(desc.getId(), userPrincipal);
+	    registry.deleteMDProfile(desc.getId());
 	} else {
-	    registry.deleteMDComponent(desc.getId(), userPrincipal,
-		    info.isForceUpdate());
+	    registry.deleteMDComponent(desc.getId(), info.isForceUpdate());
 	}
     }
 
-    private ComponentRegistry getRegistry(Principal userPrincipal,
-	    BaseDescription desc, CMDItemInfo info) {
-	ComponentRegistry registry = componentRegistryFactory
-		.getPublicRegistry();
-	// TODO: More generic check
-	if (info.getStatus() == ComponentStatus.PRIVATE /*
-							 * || info.getStatus()
-							 * == ComponentStatus.
-							 * DEVELOPMENT
-							 */) {
-	    registry = componentRegistryFactory.getOtherUserComponentRegistry(
-		    userPrincipal, info.getStatus(),
-		    new OwnerUser(Integer.parseInt(desc.getUserId())));
-	}
-	return registry;
-    }
+    private ComponentRegistry getRegistry(UserCredentials credentials) throws UserUnauthorizedException{
+        return componentRegistryFactory.getBaseRegistry(credentials);
+        }
+    
 }

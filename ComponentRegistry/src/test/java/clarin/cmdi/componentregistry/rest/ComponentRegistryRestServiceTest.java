@@ -2,7 +2,6 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
@@ -13,7 +12,7 @@ import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
-import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USERSPACE_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -31,6 +30,7 @@ import javax.ws.rs.core.Response.Status;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,18 +52,13 @@ public class ComponentRegistryRestServiceTest extends
     private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    private ComponentRegistry testRegistry;
+    private ComponentRegistry baseRegistry;
 
     @Before
     public void init() {
 	ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
 	createUserRecord();
-	// Get public component registry
-	testRegistry = componentRegistryBeanFactory.getNewComponentRegistry();
-    }
-
-    private ComponentRegistry getTestRegistry() {
-	return testRegistry;
+	baseRegistry = componentRegistryFactory.getBaseRegistry(DummyPrincipal.DUMMY_CREDENTIALS);
     }
 
     private String expectedUserId(String principal) {
@@ -75,41 +70,63 @@ public class ComponentRegistryRestServiceTest extends
     private ProfileDescription profile1;
     private ProfileDescription profile2;
     
+    private ComponentDescription component3;
+    private ProfileDescription profile3;
+    
     private Comment profile1Comment1;
     private Comment profile1Comment2;
     private Comment component1Comment3;
     private Comment component1Comment4;
+    
+    private Comment profile3Comment5;
+    private Comment component3Comment7;
 
-    private void fillUp() throws Exception {
-	profile1 = RegistryTestHelper.addProfile(getTestRegistry(), "profile2");
-	profile2 = RegistryTestHelper.addProfile(getTestRegistry(), "profile1");
-	component1 = RegistryTestHelper.addComponent(getTestRegistry(),
-		"component2");
-	component2 = RegistryTestHelper.addComponent(getTestRegistry(),
-		"component1");
-	profile1Comment2 = RegistryTestHelper.addComment(getTestRegistry(), "comment2",
+    private void fillUpPublicItems() throws Exception {
+        
+	profile1 = RegistryTestHelper.addProfile(baseRegistry, "profile2", true);
+	profile2 = RegistryTestHelper.addProfile(baseRegistry, "profile1", true);
+	component1 = RegistryTestHelper.addComponent(baseRegistry,
+		"component2", true);
+	component2 = RegistryTestHelper.addComponent(baseRegistry,
+		"component1", true);
+	profile1Comment2 = RegistryTestHelper.addComment(baseRegistry, "comment2",
 		ProfileDescription.PROFILE_PREFIX + "profile1",
 		"JUnit@test.com");
-	profile1Comment1 = RegistryTestHelper.addComment(getTestRegistry(), "comment1",
+	profile1Comment1 = RegistryTestHelper.addComment(baseRegistry, "comment1",
 		ProfileDescription.PROFILE_PREFIX + "profile1",
 		"JUnit@test.com");
-	component1Comment3 = RegistryTestHelper.addComment(getTestRegistry(), "comment3",
+	component1Comment3 = RegistryTestHelper.addComment(baseRegistry, "comment3",
 		ComponentDescription.COMPONENT_PREFIX + "component1",
 		"JUnit@test.com");
-	component1Comment4 = RegistryTestHelper.addComment(getTestRegistry(), "comment4",
+	component1Comment4 = RegistryTestHelper.addComment(baseRegistry, "comment4",
 		ComponentDescription.COMPONENT_PREFIX + "component1",
 		"JUnit@test.com");
     }
+    
+    private void fillUpPrivateItems() throws Exception {
+	profile3 = RegistryTestHelper.addProfile(baseRegistry, "profile3", false);
+	component3 = RegistryTestHelper.addComponent(baseRegistry,
+		"component3", false);
+	profile3Comment5 = RegistryTestHelper.addComment(baseRegistry, "comment5",
+		ProfileDescription.PROFILE_PREFIX + "profile3",
+		"JUnit@test.com");
+	component3Comment7 = RegistryTestHelper.addComment(baseRegistry, "comment7",
+		ComponentDescription.COMPONENT_PREFIX + "component3",
+		"JUnit@test.com");
+    }
 
-    @Test
-    public void testGetRegisteredProfiles() throws Exception {
-	fillUp();
-	RegistryTestHelper.addProfile(getTestRegistry(), "PROFILE2");
-	List<ProfileDescription> response = getResource()
-		.path("/registry/profiles").accept(MediaType.APPLICATION_XML)
+    @Test//ok
+    public void testGetPublicProfiles() throws Exception {
+        
+        fillUpPublicItems();
+        
+	RegistryTestHelper.addProfile(baseRegistry, "PROFILE2", true);
+	List<ProfileDescription> response = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles")).accept(MediaType.APPLICATION_XML)
 		.get(PROFILE_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
-	response = getResource().path("/registry/profiles")
+	response = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles"))
 		.accept(MediaType.APPLICATION_JSON)
 		.get(PROFILE_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
@@ -118,15 +135,18 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("profile2", response.get(2).getName());
     }
 
-    @Test
-    public void testGetRegisteredComponents() throws Exception {
-	fillUp();
-	RegistryTestHelper.addComponent(getTestRegistry(), "COMPONENT2");
-	List<ComponentDescription> response = getResource()
-		.path("/registry/components").accept(MediaType.APPLICATION_XML)
+    @Test //ok
+    public void testGetPublicComponents() throws Exception {
+        
+        fillUpPublicItems();
+        
+        RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
+	List<ComponentDescription> response = this.getAuthenticatedResource(getResource()
+		.path("/registry/components")).accept(MediaType.APPLICATION_XML)
 		.get(COMPONENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
-	response = getResource().path("/registry/components")
+	response = this.getAuthenticatedResource(getResource()
+		.path("/registry/components"))
 		.accept(MediaType.APPLICATION_JSON)
 		.get(COMPONENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
@@ -135,54 +155,66 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("component2", response.get(2).getName());
     }
 
-    @Test
+    @Test  //ok
     public void testGetUserComponents() throws Exception {
-	fillUp();
-	List<ComponentDescription> response = getUserComponents();
-	assertEquals(0, response.size());
-	response = getAuthenticatedResource(
-		getResource().path("/registry/components")).accept(
+        
+        fillUpPrivateItems();
+        
+       	List<ComponentDescription> response = this.getUserComponents();
+	assertEquals(1, response.size());
+        
+        ////
+        
+        fillUpPublicItems();
+	response = getAuthenticatedResource(getResource().path("/registry/components")).accept(
 		MediaType.APPLICATION_JSON).get(COMPONENT_LIST_GENERICTYPE);
 	assertEquals("Get public components", 2, response.size());
+        
 	ClientResponse cResponse = getResource().path("/registry/components")
-		.queryParam(USERSPACE_PARAM, "true")
+		.queryParam(REGISTRY_SPACE_PARAM, "private")
 		.accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
 	assertEquals("Trying to get userspace without credentials", 401,
 		cResponse.getStatus());
     }
 
-    @Test
-    public void testGetRegisteredComponent() throws Exception {
-	fillUp();
-	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
+    @Test //ok
+    public void testGetPublicComponent() throws Exception {
+        
+        fillUpPublicItems();
+        
+        String id = ComponentDescription.COMPONENT_PREFIX + "component1";
 	String id2 = ComponentDescription.COMPONENT_PREFIX + "component2";
-	CMDComponentSpec component = getResource()
-		.path("/registry/components/" + id)
+	CMDComponentSpec component = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + id))
 		.accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
 	assertNotNull(component);
 	assertEquals("Access", component.getCMDComponent().getName());
-	component = getResource().path("/registry/components/" + id2)
+        
+        
+	component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id2))
 		.accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
 	assertNotNull(component);
 	assertEquals("Access", component.getCMDComponent().getName());
-
 	assertEquals(id2, component.getHeader().getID());
 	assertEquals("component2", component.getHeader().getName());
 	assertEquals("Test Description", component.getHeader().getDescription());
     }
 
-    @Test
-    public void testGetRegisteredCommentsInProfile() throws Exception {
-	fillUp();
+    @Test   // ok    
+    public void testGetCommentsInPublicProfile() throws Exception {
+        
+        fillUpPublicItems();
+        
 	String id = ProfileDescription.PROFILE_PREFIX + "profile1";
-	RegistryTestHelper.addComment(getTestRegistry(), "COMMENT1", id,
+	RegistryTestHelper.addComment(baseRegistry, "COMMENT1", id,
 		"JUnit@test.com");
-	List<Comment> response = getResource()
-		.path("/registry/profiles/" + id + "/comments/")
+	List<Comment> response = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles/" + id + "/comments/"))
 		.accept(MediaType.APPLICATION_XML)
 		.get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
-	response = getResource().path("/registry/profiles/" + id + "/comments")
+        
+	response = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id + "/comments"))
 		.accept(MediaType.APPLICATION_JSON)
 		.get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
@@ -193,19 +225,20 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("Database test user", response.get(0).getUserName());
     }
 
-    @Test
-    public void testGetRegisteredCommentsInComponent() throws Exception {
-	fillUp();
+    @Test // ok
+    public void testGetCommentsInPubliComponent() throws Exception {
+        fillUpPublicItems();
+        
 	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
-	RegistryTestHelper.addComment(getTestRegistry(), "COMMENT2", id,
+	RegistryTestHelper.addComment(baseRegistry, "COMMENT2", id,
 		"JUnit@test.com");
-	List<Comment> response = getResource()
-		.path("/registry/components/" + id + "/comments/")
+	List<Comment> response = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + id + "/comments/"))
 		.accept(MediaType.APPLICATION_XML)
 		.get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
-	response = getResource()
-		.path("/registry/components/" + id + "/comments")
+	response = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + id + "/comments"))
 		.accept(MediaType.APPLICATION_JSON)
 		.get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(3, response.size());
@@ -216,18 +249,20 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("Database test user", response.get(0).getUserName());
     }
 
-    @Test
-    public void testGetSpecifiedCommentInComponent() throws Exception {
-	fillUp();
+    @Test // ok
+    public void testGetSpecifiedCommentInPublicComponent() throws Exception {
+        
+        fillUpPublicItems();
+        
 	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
-	Comment comment = getResource()
-		.path("/registry/components/" + id + "/comments/"+component1Comment3.getId())
+	Comment comment = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + id + "/comments/"+component1Comment3.getId()))
 		.accept(MediaType.APPLICATION_JSON).get(Comment.class);
 	assertNotNull(comment);
 	assertEquals("comment3", comment.getComment());
 	assertEquals(component1Comment3.getId(), comment.getId());
-	comment = getResource()
-		.path("/registry/components/" + id + "/comments/"+component1Comment4.getId())
+	comment = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + id + "/comments/"+component1Comment4.getId()))
 		.accept(MediaType.APPLICATION_JSON).get(Comment.class);
 	assertNotNull(comment);
 	assertEquals("comment4", comment.getComment());
@@ -235,36 +270,41 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals(id, comment.getComponentId());
     }
 
-    @Test
-    public void testGetSpecifiedCommentInProfile() throws Exception {
-	fillUp();
+    @Test //ok
+    public void testGetSpecifiedCommentInPublicProfile() throws Exception {
+        
+        fillUpPublicItems();
+        
 	String id = ProfileDescription.PROFILE_PREFIX + "profile1";
-	Comment comment = getResource()
-		.path("/registry/profiles/" + id + "/comments/"+profile1Comment2.getId())
+	Comment comment = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles/" + id + "/comments/"+profile1Comment2.getId()))
 		.accept(MediaType.APPLICATION_JSON).get(Comment.class);
 	assertNotNull(comment);
 	assertEquals("comment2", comment.getComment());
 	assertEquals(profile1Comment2.getId(), comment.getId());
-	comment = getResource()
-		.path("/registry/profiles/" + id + "/comments/"+profile1Comment1.getId())
-		.accept(MediaType.APPLICATION_JSON).get(Comment.class);
+        
+	comment = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles/" + id + "/comments/"+profile1Comment1.getId()))
+                .accept(MediaType.APPLICATION_JSON).get(Comment.class);
 	assertNotNull(comment);
 	assertEquals("comment1", comment.getComment());
 	assertEquals(profile1Comment1.getId(), comment.getId());
 	assertEquals(id, comment.getComponentId());
     }
 
-    @Test
-    public void testDeleteCommentFromComponent() throws Exception {
-	fillUp();
+    @Test  //ok
+    public void testDeleteCommentFromPublicComponent() throws Exception {
+        
+        fillUpPublicItems();
+        
 	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
 	String id2 = ComponentDescription.COMPONENT_PREFIX + "component2";
-	List<Comment> comments = getResource().path(
-		"/registry/components/" + id + "/comments").get(
+	List<Comment> comments = this.getAuthenticatedResource(getResource().path(
+		"/registry/components/" + id + "/comments")).get(
 		COMMENT_LIST_GENERICTYPE);
 	assertEquals(2, comments.size());
-	Comment aComment = getResource().path(
-		"/registry/components/" + id + "/comments/"+component1Comment3.getId())
+	Comment aComment = this.getAuthenticatedResource(getResource().path(
+		"/registry/components/" + id + "/comments/"+component1Comment3.getId()))
 		.get(Comment.class);
 	assertNotNull(aComment);
 
@@ -279,8 +319,8 @@ public class ComponentRegistryRestServiceTest extends
 		ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	comments = getResource().path(
-		"/registry/components/" + id + "/comments/").get(
+	comments = this.getAuthenticatedResource(getResource().path(
+		"/registry/components/" + id + "/comments/")).get(
 		COMMENT_LIST_GENERICTYPE);
 	assertEquals(1, comments.size());
 
@@ -289,22 +329,24 @@ public class ComponentRegistryRestServiceTest extends
 		ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	comments = getResource().path(
-		"/registry/components/" + id + "/comments").get(
+	comments = this.getAuthenticatedResource(getResource().path(
+		"/registry/components/" + id + "/comments")).get(
 		COMMENT_LIST_GENERICTYPE);
 	assertEquals(0, comments.size());
     }
 
     @Test
-    public void testManipulateCommentFromComponent() throws Exception {
-	fillUp();
-	List<Comment> comments = getResource().path(
+    public void testManipulateCommentFromPublicComponent() throws Exception {
+        
+        fillUpPublicItems();
+        
+	List<Comment> comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-			+ "component1/comments").get(COMMENT_LIST_GENERICTYPE);
+			+ "component1/comments")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(2, comments.size());
-	Comment aComment = getResource().path(
+	Comment aComment = this.getAuthenticatedResource(getResource().path(
 		"/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-			+ "component1/comments/"+component1Comment3.getId()).get(Comment.class);
+			+ "component1/comments/"+component1Comment3.getId())).get(Comment.class);
 	assertNotNull(aComment);
 
 	Form manipulateForm = new Form();
@@ -317,22 +359,24 @@ public class ComponentRegistryRestServiceTest extends
 		manipulateForm);
 	assertEquals(200, response.getStatus());
 
-	comments = getResource().path(
+	comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-			+ "component1/comments/").get(COMMENT_LIST_GENERICTYPE);
+			+ "component1/comments/")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(1, comments.size());
     }
 
     @Test
-    public void testDeleteCommentFromProfile() throws Exception {
-	fillUp();
-	List<Comment> comments = getResource().path(
+    public void testDeleteCommentFromPublicProfile() throws Exception {
+        
+        fillUpPublicItems();
+        
+	List<Comment> comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments").get(COMMENT_LIST_GENERICTYPE);
+			+ "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(2, comments.size());
-	Comment aComment = getResource().path(
+	Comment aComment = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments/"+profile1Comment1.getId()).get(Comment.class);
+			+ "profile1/comments/"+profile1Comment1.getId())).get(Comment.class);
 	assertNotNull(aComment);
 
 	// Try to delete from other profile
@@ -346,9 +390,9 @@ public class ComponentRegistryRestServiceTest extends
 			+ "profile1/comments/"+profile1Comment1.getId()).delete(ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	comments = getResource().path(
+	comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments/").get(COMMENT_LIST_GENERICTYPE);
+			+ "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(1, comments.size());
 
 	response = getAuthenticatedResource(
@@ -356,22 +400,24 @@ public class ComponentRegistryRestServiceTest extends
 			+ "profile1/comments/"+profile1Comment2.getId()).delete(ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	comments = getResource().path(
+	comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments").get(COMMENT_LIST_GENERICTYPE);
+			+ "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(0, comments.size());
     }
 
     @Test
-    public void testManipulateCommentFromProfile() throws Exception {
-	fillUp();
-	List<Comment> comments = getResource().path(
+    public void testManipulateCommentFromPublicProfile() throws Exception {
+        
+        fillUpPublicItems();
+        
+	List<Comment> comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments").get(COMMENT_LIST_GENERICTYPE);
+			+ "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(2, comments.size());
-	Comment aComment = getResource().path(
+	Comment aComment = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments/"+profile1Comment2.getId()).get(Comment.class);
+			+ "profile1/comments/"+profile1Comment2.getId())).get(Comment.class);
 	assertNotNull(aComment);
 
 	Form manipulateForm = new Form();
@@ -383,28 +429,30 @@ public class ComponentRegistryRestServiceTest extends
 		manipulateForm);
 	assertEquals(200, response.getStatus());
 
-	comments = getResource().path(
+	comments = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/comments/").get(COMMENT_LIST_GENERICTYPE);
+			+ "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
 	assertEquals(1, comments.size());
     }
 
     @Test
-    public void testDeleteRegisteredComponent() throws Exception {
-	fillUp();
-	List<ComponentDescription> components = getResource().path(
-		"/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+    public void testDeletePublicComponent() throws Exception {
+        
+        fillUpPublicItems();
+        
+	List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
+		"/registry/components")).get(COMPONENT_LIST_GENERICTYPE);
 	assertEquals(2, components.size());
-	CMDComponentSpec profile = getResource().path(
+	CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
 		"/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-			+ "component1").get(CMDComponentSpec.class);
+			+ "component1")).get(CMDComponentSpec.class);
 	assertNotNull(profile);
 	ClientResponse response = getAuthenticatedResource(
 		"/registry/components/" + ComponentDescription.COMPONENT_PREFIX
 			+ "component1").delete(ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	components = getResource().path("/registry/components").get(
+	components = this.getAuthenticatedResource(getResource().path("/registry/components")).get(
 		COMPONENT_LIST_GENERICTYPE);
 	assertEquals(1, components.size());
 
@@ -413,7 +461,7 @@ public class ComponentRegistryRestServiceTest extends
 			+ "component2").delete(ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	components = getResource().path("/registry/components").get(
+	components = this.getAuthenticatedResource(getResource().path("/registry/components")).get(
 		COMPONENT_LIST_GENERICTYPE);
 	assertEquals(0, components.size());
 
@@ -424,8 +472,11 @@ public class ComponentRegistryRestServiceTest extends
     }
 
     @Test
-    public void testDeleteRegisteredComponentStillUsed() throws Exception {
-	String content = "";
+    public void testDeletePublicComponentStillUsed() throws Exception {
+        
+        fillUpPublicItems();
+        
+        String content = "";
 	content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
 	content += "    <Header/>\n";
@@ -434,7 +485,7 @@ public class ComponentRegistryRestServiceTest extends
 	content += "    </CMD_Component>\n";
 	content += "</CMD_ComponentSpec>\n";
 	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
-		getTestRegistry(), "XXX1", content);
+		baseRegistry, "XXX1", content, true);
 
 	content = "";
 	content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -447,7 +498,7 @@ public class ComponentRegistryRestServiceTest extends
 	content += "    </CMD_Component>\n";
 	content += "</CMD_ComponentSpec>\n";
 	ComponentDescription compDesc2 = RegistryTestHelper.addComponent(
-		getTestRegistry(), "YYY1", content);
+		baseRegistry, "YYY1", content,true);
 
 	content = "";
 	content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -460,11 +511,11 @@ public class ComponentRegistryRestServiceTest extends
 	content += "    </CMD_Component>\n";
 	content += "</CMD_ComponentSpec>\n";
 	ProfileDescription profile = RegistryTestHelper.addProfile(
-		getTestRegistry(), "TestProfile3", content);
+		baseRegistry, "TestProfile3", content, true);
 
-	List<ComponentDescription> components = getResource().path(
-		"/registry/components").get(COMPONENT_LIST_GENERICTYPE);
-	assertEquals(2, components.size());
+	List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
+		"/registry/components")).get(COMPONENT_LIST_GENERICTYPE);
+	assertEquals(4, components.size());
 
 	ClientResponse response = getAuthenticatedResource(
 		"/registry/components/" + compDesc1.getId()).delete(
@@ -474,9 +525,9 @@ public class ComponentRegistryRestServiceTest extends
 		"Component is still in use by other components or profiles. Request component usage for details.",
 		response.getEntity(String.class));
 
-	components = getResource().path("/registry/components").get(
+	components = this.getAuthenticatedResource(getResource().path("/registry/components")).get(
 		COMPONENT_LIST_GENERICTYPE);
-	assertEquals(2, components.size());
+	assertEquals(4, components.size());
 
 	response = getAuthenticatedResource(
 		"/registry/profiles/" + profile.getId()).delete(
@@ -490,20 +541,22 @@ public class ComponentRegistryRestServiceTest extends
 		"/registry/components/" + compDesc1.getId()).delete(
 		ClientResponse.class);
 	assertEquals(200, response.getStatus());
-	components = getResource().path("/registry/components").get(
+	components = this.getAuthenticatedResource(getResource().path("/registry/components")).get(
 		COMPONENT_LIST_GENERICTYPE);
-	assertEquals(0, components.size());
+	assertEquals(2, components.size());
     }
 
     @Test
-    public void testManipulateRegisteredComponent() throws Exception {
-	fillUp();
-	List<ComponentDescription> components = getResource().path(
-		"/registry/components").get(COMPONENT_LIST_GENERICTYPE);
+    public void testManipulatePublicComponent() throws Exception {
+        
+        fillUpPublicItems();
+        
+	List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
+		"/registry/components")).get(COMPONENT_LIST_GENERICTYPE);
 	assertEquals(2, components.size());
-	CMDComponentSpec profile = getResource().path(
+	CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
 		"/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-			+ "component1").get(CMDComponentSpec.class);
+			+ "component1")).get(CMDComponentSpec.class);
 	assertNotNull(profile);
 
 	Form manipulateForm = new Form();
@@ -515,7 +568,7 @@ public class ComponentRegistryRestServiceTest extends
 		manipulateForm);
 	assertEquals(200, response.getStatus());
 
-	components = getResource().path("/registry/components").get(
+	components = this.getAuthenticatedResource(getResource().path("/registry/components")).get(
 		COMPONENT_LIST_GENERICTYPE);
 	assertEquals(1, components.size());
 
@@ -528,15 +581,17 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testGetRegisteredProfile() throws Exception {
-	fillUp();
+        
+        fillUpPublicItems();
+        
 	String id = ProfileDescription.PROFILE_PREFIX + "profile1";
 	String id2 = ProfileDescription.PROFILE_PREFIX + "profile2";
-	CMDComponentSpec profile = getResource()
-		.path("/registry/profiles/" + id)
+	CMDComponentSpec profile = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles/" + id))
 		.accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
 	assertNotNull(profile);
 	assertEquals("Actor", profile.getCMDComponent().getName());
-	profile = getResource().path("/registry/profiles/" + id2)
+	profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id2))
 		.accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
 	assertNotNull(profile);
 	assertEquals("Actor", profile.getCMDComponent().getName());
@@ -546,9 +601,9 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("Test Description", profile.getHeader().getDescription());
 
 	try {
-	    profile = getResource()
+	    profile = this.getAuthenticatedResource(getResource()
 		    .path("/registry/profiles/"
-			    + ProfileDescription.PROFILE_PREFIX + "profileXXXX")
+			    + ProfileDescription.PROFILE_PREFIX + "profileXXXX"))
 		    .accept(MediaType.APPLICATION_XML)
 		    .get(CMDComponentSpec.class);
 	    fail("Exception should have been thrown resource does not exist, HttpStatusCode 404");
@@ -559,18 +614,20 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testGetRegisteredProfileRawData() throws Exception {
-	fillUp();
-	String profile = getResource()
+        
+        fillUpPublicItems();
+        
+	String profile = this.getAuthenticatedResource(getResource()
 		.path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/xsd").accept(MediaType.TEXT_XML)
+			+ "profile1/xsd")).accept(MediaType.TEXT_XML)
 		.get(String.class).trim();
 	assertTrue(profile
 		.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(profile.endsWith("</xs:schema>"));
 
-	profile = getResource()
+	profile = this.getAuthenticatedResource(getResource()
 		.path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1/xml").accept(MediaType.TEXT_XML)
+			+ "profile1/xml")).accept(MediaType.TEXT_XML)
 		.get(String.class).trim();
 	assertTrue(profile
 		.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
@@ -578,30 +635,33 @@ public class ComponentRegistryRestServiceTest extends
 	assertTrue(profile.contains("xsi:schemaLocation"));
 
 	try {
-	    getResource()
+	    this.getAuthenticatedResource(getResource()
 		    .path("/registry/components/"
 			    + ComponentDescription.COMPONENT_PREFIX
-			    + "component1/xsl").accept(MediaType.TEXT_XML)
+			    + "component1/xsl")).accept(MediaType.TEXT_XML)
 		    .get(String.class);
 	    fail("Should have thrown exception, unsupported path parameter");
 	} catch (UniformInterfaceException e) {// server error
 	}
     }
 
+    // 
     @Test
     public void testPrivateProfileXsd() throws Exception {
+        
+        fillUpPublicItems();
+        
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getTestProfileContent());
-	RegisterResponse response = getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(
+			REGISTRY_SPACE_PARAM, "private")).type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertTrue(response.isProfile());
 	assertEquals(1, getUserProfiles().size());
 	BaseDescription desc = response.getDescription();
-	String profile = getResource()
-		.path("/registry/profiles/" + desc.getId() + "/xsd")
+	String profile = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles/" + desc.getId() + "/xsd"))
 		.accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile
 		.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
@@ -610,18 +670,21 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testPrivateComponentXsd() throws Exception {
+        
+        fillUpPublicItems();
+        
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getComponentTestContent());
 	RegisterResponse response = getAuthenticatedResource(
 		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).type(
+			REGISTRY_SPACE_PARAM, "private")).type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertFalse(response.isProfile());
 	assertEquals(1, getUserComponents().size());
 	BaseDescription desc = response.getDescription();
-	String profile = getResource()
-		.path("/registry/components/" + desc.getId() + "/xsd")
+	String profile = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + desc.getId() + "/xsd"))
 		.accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(profile
 		.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
@@ -630,13 +693,15 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testDeleteRegisteredProfile() throws Exception {
-	fillUp();
-	List<ProfileDescription> profiles = getResource().path(
-		"/registry/profiles").get(PROFILE_LIST_GENERICTYPE);
+        
+        fillUpPublicItems();
+        
+	List<ProfileDescription> profiles = this.getAuthenticatedResource(getResource().path(
+		"/registry/profiles")).get(PROFILE_LIST_GENERICTYPE);
 	assertEquals(2, profiles.size());
-	CMDComponentSpec profile = getResource().path(
+	CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1").get(CMDComponentSpec.class);
+			+ "profile1")).get(CMDComponentSpec.class);
 	assertNotNull(profile);
 
 	ClientResponse response = getAuthenticatedResource(
@@ -644,7 +709,7 @@ public class ComponentRegistryRestServiceTest extends
 			+ "profile1").delete(ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	profiles = getResource().path("/registry/profiles").get(
+	profiles = this.getAuthenticatedResource(getResource().path("/registry/profiles")).get(
 		PROFILE_LIST_GENERICTYPE);
 	assertEquals(1, profiles.size());
 
@@ -653,25 +718,27 @@ public class ComponentRegistryRestServiceTest extends
 			+ "profile2").delete(ClientResponse.class);
 	assertEquals(200, response.getStatus());
 
-	profiles = getResource().path("/registry/profiles").get(
+	profiles = this.getAuthenticatedResource(getResource().path("/registry/profiles")).get(
 		PROFILE_LIST_GENERICTYPE);
 	assertEquals(0, profiles.size());
 
 	response = getAuthenticatedResource(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
 			+ "profile1").delete(ClientResponse.class);
-	assertEquals(200, response.getStatus());
+	assertEquals(404, response.getStatus());
     }
 
     @Test
     public void testManipulateRegisteredProfile() throws Exception {
-	fillUp();
-	List<ProfileDescription> profiles = getResource().path(
-		"/registry/profiles").get(PROFILE_LIST_GENERICTYPE);
+        
+        fillUpPublicItems();
+        
+	List<ProfileDescription> profiles = this.getAuthenticatedResource(getResource().path(
+		"/registry/profiles")).get(PROFILE_LIST_GENERICTYPE);
 	assertEquals(2, profiles.size());
-	CMDComponentSpec profile = getResource().path(
+	CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
 		"/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-			+ "profile1").get(CMDComponentSpec.class);
+			+ "profile1")).get(CMDComponentSpec.class);
 	assertNotNull(profile);
 
 	Form manipulateForm = new Form();
@@ -683,7 +750,7 @@ public class ComponentRegistryRestServiceTest extends
 		.post(ClientResponse.class, manipulateForm);
 	assertEquals(200, response.getStatus());
 
-	profiles = getResource().path("/registry/profiles").get(
+	profiles = this.getAuthenticatedResource(getResource().path("/registry/profiles")).get(
 		PROFILE_LIST_GENERICTYPE);
 	assertEquals(1, profiles.size());
 
@@ -696,16 +763,18 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testGetRegisteredComponentRawData() throws Exception {
-	fillUp();
+        
+        fillUpPublicItems();
+        
 	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
-	String component = getResource()
-		.path("/registry/components/" + id + "/xsd")
+	String component = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + id + "/xsd"))
 		.accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(component
 		.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
 	assertTrue(component.endsWith("</xs:schema>"));
 
-	component = getResource().path("/registry/components/" + id + "/xml")
+	component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
 		.accept(MediaType.TEXT_XML).get(String.class).trim();
 	assertTrue(component
 		.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
@@ -713,10 +782,10 @@ public class ComponentRegistryRestServiceTest extends
 	assertTrue(component.contains("xsi:schemaLocation"));
 
 	try {
-	    getResource()
+	    this.getAuthenticatedResource(getResource()
 		    .path("/registry/components/"
 			    + ComponentDescription.COMPONENT_PREFIX
-			    + "component1/jpg").accept(MediaType.TEXT_XML)
+			    + "component1/jpg")).accept(MediaType.TEXT_XML)
 		    .get(String.class);
 	    fail("Should have thrown exception, unsopported path parameter");
 	} catch (UniformInterfaceException e) {
@@ -725,6 +794,9 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterProfile() throws Exception {
+        
+        fillUpPublicItems();
+        
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getTestProfileContent(),
@@ -741,7 +813,7 @@ public class ComponentRegistryRestServiceTest extends
 		"/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
 		RegisterResponse.class, form);
 	assertTrue(response.isProfile());
-	assertFalse(response.isInUserSpace());
+	assertTrue(response.isInUserSpace());
 	ProfileDescription profileDesc = (ProfileDescription) response
 		.getDescription();
 	assertNotNull(profileDesc);
@@ -761,34 +833,35 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testPublishProfile() throws Exception {
-	assertEquals("user registered profiles", 0, getUserProfiles().size());
-	assertEquals("public registered profiles", 0, getPublicProfiles()
+        
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        
+	assertEquals("user registered profiles", 1, getUserProfiles().size());
+	assertEquals("public registered profiles", 2, getPublicProfiles()
 		.size());
 	FormDataMultiPart form = createFormData(
 		RegistryTestHelper.getTestProfileContent(), "Unpublished");
-	RegisterResponse response = getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles")).type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertTrue(response.isProfile());
 	BaseDescription desc = response.getDescription();
 	assertEquals("Unpublished", desc.getDescription());
-	assertEquals(1, getUserProfiles().size());
-	assertEquals(0, getPublicProfiles().size());
+	assertEquals(2, getUserProfiles().size());
+	assertEquals(2, getPublicProfiles().size());
 	form = createFormData(
 		RegistryTestHelper.getTestProfileContent("publishedName"),
 		"Published");
-	response = getAuthenticatedResource(
-		getResource().path(
+	response = getAuthenticatedResource(getResource().path(
 			"/registry/profiles/" + desc.getId() + "/publish"))
 		.type(MediaType.MULTIPART_FORM_DATA).post(
 			RegisterResponse.class, form);
 
-	assertEquals(0, getUserProfiles().size());
+	assertEquals(1, getUserProfiles().size());
 	List<ProfileDescription> profiles = getPublicProfiles();
-	assertEquals(1, profiles.size());
-	ProfileDescription profileDescription = profiles.get(0);
+	assertEquals(3, profiles.size());
+	ProfileDescription profileDescription = profiles.get(2);
 	assertNotNull(profileDescription.getId());
 	assertEquals(desc.getId(), profileDescription.getId());
 	assertEquals("http://localhost:9998/registry/profiles/" + desc.getId(),
@@ -800,43 +873,45 @@ public class ComponentRegistryRestServiceTest extends
 
     private CMDComponentSpec getPublicSpec(BaseDescription desc) {
 	if (desc.isProfile()) {
-	    return getResource().path("/registry/profiles/" + desc.getId())
+	    return this.getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId()))
 		    .get(CMDComponentSpec.class);
 	} else {
-	    return getResource().path("/registry/components/" + desc.getId())
+	    return this.getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId()))
 		    .get(CMDComponentSpec.class);
 	}
     }
 
     @Test
-    public void testPublishComponent() throws Exception {
-	assertEquals(0, getUserComponents().size());
-	assertEquals(0, getPublicComponents().size());
+    public void testPublishRegisteredComponent() throws Exception {
+        
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        
+	assertEquals(1, getUserComponents().size());
+	assertEquals(2, getPublicComponents().size());
+        
 	FormDataMultiPart form = createFormData(
 		RegistryTestHelper.getComponentTestContent(), "Unpublished");
-	RegisterResponse response = getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components")).type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertFalse(response.isProfile());
 	BaseDescription desc = response.getDescription();
 	assertEquals("Unpublished", desc.getDescription());
-	assertEquals(1, getUserComponents().size());
-	assertEquals(0, getPublicComponents().size());
+	assertEquals(2, getUserComponents().size());
+	assertEquals(2, getPublicComponents().size());
 	form = createFormData(
 		RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
 		"Published");
-	response = getAuthenticatedResource(
-		getResource().path(
+	response = getAuthenticatedResource(getResource().path(
 			"/registry/components/" + desc.getId() + "/publish"))
 		.type(MediaType.MULTIPART_FORM_DATA).post(
 			RegisterResponse.class, form);
 
-	assertEquals(0, getUserComponents().size());
+	assertEquals(1, getUserComponents().size());
 	List<ComponentDescription> components = getPublicComponents();
-	assertEquals(1, components.size());
-	ComponentDescription componentDescription = components.get(0);
+	assertEquals(3, components.size());
+	ComponentDescription componentDescription = components.get(2);
 	assertNotNull(componentDescription.getId());
 	assertEquals(desc.getId(), componentDescription.getId());
 	assertEquals(
@@ -847,17 +922,20 @@ public class ComponentRegistryRestServiceTest extends
 	assertEquals("publishedName", spec.getCMDComponent().getName());
     }
 
+    // duplicates ("extendedly") testRegisterProfile, since you can pot only in user space, and then publish or move to group or so
     @Test
     public void testRegisterUserspaceProfile() throws Exception {
+        
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        
 	List<ProfileDescription> profiles = getUserProfiles();
-	assertEquals("user registered profiles", 0, profiles.size());
-	assertEquals("public registered profiles", 0, getPublicProfiles()
+	assertEquals("user registered profiles", 1, profiles.size());
+	assertEquals("public registered profiles", 2, getPublicProfiles()
 		.size());
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getTestProfileContent());
-	RegisterResponse response = getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles")).type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertTrue(response.isProfile());
@@ -874,53 +952,45 @@ public class ComponentRegistryRestServiceTest extends
 	assertNotNull(profileDesc.getRegistrationDate());
 	assertEquals(
 		"http://localhost:9998/registry/profiles/"
-			+ profileDesc.getId() + "?userspace=true",
+			+ profileDesc.getId(),
 		profileDesc.getHref());
 
 	profiles = getUserProfiles();
-	assertEquals(1, profiles.size());
-	assertEquals(0, getPublicProfiles().size());
+	assertEquals(2, profiles.size());
+	assertEquals(2, getPublicProfiles().size());
 
 	// Try to post unauthenticated
 	ClientResponse cResponse = getResource().path("/registry/profiles")
-		.queryParam(USERSPACE_PARAM, "true")
 		.type(MediaType.MULTIPART_FORM_DATA)
 		.post(ClientResponse.class, form);
 	assertEquals(401, cResponse.getStatus());
 
-	// Try get from public registry
-	cResponse = getResource()
-		.path("/registry/profiles/" + profileDesc.getId())
-		.accept(MediaType.APPLICATION_XML).get(ClientResponse.class);
-	// Should return 404 = not found
-	assertEquals(404, cResponse.getStatus());
-	CMDComponentSpec spec = getAuthenticatedResource(
-		getResource().path("/registry/profiles/" + profileDesc.getId())
-			.queryParam(USERSPACE_PARAM, "true")).accept(
+	
+	
+	CMDComponentSpec spec = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId())
+			.queryParam(REGISTRY_SPACE_PARAM, "private")).accept(
 		MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
 	assertNotNull(spec);
 
-	cResponse = getResource()
-		.path("/registry/profiles/" + profileDesc.getId() + "/xsd")
+	cResponse = this.getAuthenticatedResource(getResource()
+		.path("/registry/profiles/" + profileDesc.getId() + "/xsd"))
 		.accept(MediaType.TEXT_XML).get(ClientResponse.class);
 	assertEquals(200, cResponse.getStatus());
 	String profile = cResponse.getEntity(String.class);
 	assertTrue(profile.length() > 0);
 
-	profile = getAuthenticatedResource(
-		getResource().path(
+	profile = getAuthenticatedResource(getResource().path(
 			"/registry/profiles/" + profileDesc.getId() + "/xml"))
 		.accept(MediaType.TEXT_XML).get(String.class);
 	assertTrue(profile.length() > 0);
 
-	cResponse = getAuthenticatedResource(
-		getResource().path("/registry/profiles/" + profileDesc.getId())
-			.queryParam(USERSPACE_PARAM, "true")).delete(
+	cResponse = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId())
+			.queryParam(REGISTRY_SPACE_PARAM, "private")).delete(
 		ClientResponse.class);
 	assertEquals(200, cResponse.getStatus());
 
 	profiles = getUserProfiles();
-	assertEquals(0, profiles.size());
+	assertEquals(1, profiles.size());
     }
 
     private List<ProfileDescription> getPublicProfiles() {
@@ -929,9 +999,8 @@ public class ComponentRegistryRestServiceTest extends
     }
 
     private List<ProfileDescription> getUserProfiles() {
-	return getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, "true")).accept(
+	return getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(
+			REGISTRY_SPACE_PARAM, "private")).accept(
 		MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
     }
 
@@ -953,9 +1022,9 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterWithUserComponents() throws Exception {
-	ComponentRegistry userRegistry = componentRegistryFactory
-		.getComponentRegistry(ComponentStatus.PRIVATE, null,
-			DummyPrincipal.DUMMY_CREDENTIALS);
+        fillUpPrivateItems();
+        
+        // kid component, not public
 	String content = "";
 	content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
@@ -965,8 +1034,9 @@ public class ComponentRegistryRestServiceTest extends
 	content += "    </CMD_Component>\n";
 	content += "</CMD_ComponentSpec>\n";
 	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
-		userRegistry, "XXX1", content);
+		baseRegistry, "XXX1", content, false);
 
+        // a containing component, referring to the kid (which is not public, so the containing component cannot be registered
 	content = "";
 	content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
@@ -981,28 +1051,17 @@ public class ComponentRegistryRestServiceTest extends
 	RegisterResponse response = getAuthenticatedResource(
 		"/registry/components").type(MediaType.MULTIPART_FORM_DATA)
 		.post(RegisterResponse.class, form);
-	assertFalse(response.isRegistered());
-	assertEquals(1, response.getErrors().size());
-	assertEquals(
-		"referenced component cannot be found in the published components: "
-			+ compDesc1.getName() + " (" + compDesc1.getId() + ")",
-		response.getErrors().get(0));
-
-	response = getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).type(
-		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
-		form);
+        // we first alway register in a private space, so reference to a private component should work
 	assertTrue(response.isRegistered());
-	ComponentDescription comp2 = (ComponentDescription) response
-		.getDescription();
 
+
+        /// profiles ///
 	content = "";
 	content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
 	content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
 	content += "    <Header/>\n";
 	content += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-	content += "        <CMD_Component ComponentId=\"" + comp2.getId()
+	content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
 		+ "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
 	content += "        </CMD_Component>\n";
 	content += "    </CMD_Component>\n";
@@ -1012,33 +1071,23 @@ public class ComponentRegistryRestServiceTest extends
 	response = getAuthenticatedResource("/registry/profiles").type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
-	assertFalse(response.isRegistered());
-	assertEquals(1, response.getErrors().size());
-	assertEquals(
-		"referenced component cannot be found in the published components: "
-			+ comp2.getName() + " (" + comp2.getId() + ")",
-		response.getErrors().get(0));
-
-	response = getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, "true")).type(
-		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
-		form);
 	assertTrue(response.isRegistered());
+
     }
 
     @Test
     public void testRegisterUserspaceComponent() throws Exception {
+        
+        fillUpPrivateItems();
+        
 	List<ComponentDescription> components = getUserComponents();
-	assertEquals("user registered components", 0, components.size());
+	assertEquals("user registered components", 1, components.size());
 	assertEquals("public registered components", 0, getPublicComponents()
 		.size());
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getComponentTestContent());
 
-	RegisterResponse response = getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/components")).type(
 		MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
 		form);
 	assertTrue(response.isRegistered());
@@ -1056,59 +1105,54 @@ public class ComponentRegistryRestServiceTest extends
 		.startsWith(ComponentRegistry.REGISTRY_ID + "c_"));
 	assertNotNull(desc.getRegistrationDate());
 	String url = getResource().getUriBuilder().build().toString();
-	assertEquals(url + "registry/components/" + desc.getId()
-		+ "?userspace=true", desc.getHref());
+	assertEquals(url + "registry/components/" + desc.getId(), desc.getHref());
 
 	components = getUserComponents();
-	assertEquals(1, components.size());
+	assertEquals(2, components.size());
 	assertEquals(0, getPublicComponents().size());
 
 	// Try to post unauthenticated
 	ClientResponse cResponse = getResource().path("/registry/components")
-		.queryParam(USERSPACE_PARAM, "true")
 		.type(MediaType.MULTIPART_FORM_DATA)
 		.post(ClientResponse.class, form);
 	assertEquals(401, cResponse.getStatus());
 
-	// Try to get from public registry
-	cResponse = getResource().path("/registry/components/" + desc.getId())
+	// Try to get 
+	cResponse = this.getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId()))
 		.accept(MediaType.APPLICATION_XML).get(ClientResponse.class);
-	// Should return 404 = not found
-	assertEquals(404, cResponse.getStatus());
+	
+	assertEquals(200, cResponse.getStatus());
 	CMDComponentSpec spec = getUserComponent(desc);
 	assertNotNull(spec);
 
-	cResponse = getResource()
-		.path("/registry/components/" + desc.getId() + "/xsd")
+	cResponse = this.getAuthenticatedResource(getResource()
+		.path("/registry/components/" + desc.getId() + "/xsd"))
 		.accept(MediaType.TEXT_XML).get(ClientResponse.class);
 	assertEquals(200, cResponse.getStatus());
 	String result = cResponse.getEntity(String.class);
 	assertTrue(result.length() > 0);
 
-	result = getAuthenticatedResource(
-		getResource().path(
+	result = getAuthenticatedResource(getResource().path(
 			"/registry/components/" + desc.getId() + "/xml"))
 		.accept(MediaType.TEXT_XML).get(String.class);
 	assertTrue(result.length() > 0);
 
-	cResponse = getAuthenticatedResource(
-		getResource().path("/registry/components/" + desc.getId())
-			.queryParam(USERSPACE_PARAM, "true")).delete(
+	cResponse = getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId())).delete(
 		ClientResponse.class);
 	assertEquals(200, cResponse.getStatus());
 
 	components = getUserComponents();
-	assertEquals(0, components.size());
+	assertEquals(1, components.size());
     }
-
+//
     @Test
-    public void testCreateComponentWithRecursion() throws Exception {
+    public void testCreatePrivateComponentWithRecursion() throws Exception {
+        
+        fillUpPrivateItems();
 	// Create new componet
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getComponentTestContent());
-	ClientResponse cResponse = getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	ClientResponse cResponse = getAuthenticatedResource(getResource().path("/registry/components")).type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 	assertEquals(ClientResponse.Status.OK.getStatusCode(),
 		cResponse.getStatus());
@@ -1139,10 +1183,8 @@ public class ComponentRegistryRestServiceTest extends
 	form = createFormData(
 		RegistryTestHelper.getComponentContentAsStream(compContent),
 		"UPDATE DESCRIPTION!");
-	cResponse = getAuthenticatedResource(
-		getResource().path(
-			"/registry/components/" + desc.getId() + "/update")
-			.queryParam(USERSPACE_PARAM, "true")).type(
+	cResponse = getAuthenticatedResource(getResource().path(
+			"/registry/components/" + desc.getId() + "/update")).type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 	assertEquals(ClientResponse.Status.OK.getStatusCode(),
 		cResponse.getStatus());
@@ -1158,17 +1200,19 @@ public class ComponentRegistryRestServiceTest extends
     }
 
     @Test
-    public void testUpdateComponent() throws Exception {
+    public void testUpdatePrivateComponent() throws Exception {
+        
+        fillUpPrivateItems();
+        
 	List<ComponentDescription> components = getUserComponents();
-	assertEquals("user registered components", 0, components.size());
+	assertEquals("user registered components", 1, components.size());
 	assertEquals("public registered components", 0, getPublicComponents()
 		.size());
-
+        
+        // first, post a component to update
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getComponentTestContent());
-	ClientResponse cResponse = getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	ClientResponse cResponse = getAuthenticatedResource(getResource().path("/registry/components")).type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 	assertEquals(ClientResponse.Status.OK.getStatusCode(),
 		cResponse.getStatus());
@@ -1186,17 +1230,16 @@ public class ComponentRegistryRestServiceTest extends
 	assertNotNull(spec);
 	assertEquals("Access", spec.getCMDComponent().getName());
 	components = getUserComponents();
-	assertEquals(1, components.size());
+	assertEquals(2, components.size());
 	assertEquals(0, getPublicComponents().size());
 
-	// Now update
+	// second, now update
 	form = createFormData(
 		RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
 		"UPDATE DESCRIPTION!");
-	cResponse = getAuthenticatedResource(
-		getResource().path(
+	cResponse = getAuthenticatedResource(getResource().path(
 			"/registry/components/" + desc.getId() + "/update")
-			.queryParam(USERSPACE_PARAM, "true")).type(
+			.queryParam(REGISTRY_SPACE_PARAM, "private")).type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 	assertEquals(ClientResponse.Status.OK.getStatusCode(),
 		cResponse.getStatus());
@@ -1215,21 +1258,22 @@ public class ComponentRegistryRestServiceTest extends
 	assertNotNull(spec);
 	assertEquals("TESTNAME", spec.getCMDComponent().getName());
 	components = getUserComponents();
-	assertEquals(1, components.size());
+	assertEquals(2, components.size());
 	assertEquals(0, getPublicComponents().size());
     }
 
     @Test
-    public void testUpdateProfile() throws Exception {
+    public void testUpdatePrivateProfile() throws Exception {
+        
+        fillUpPrivateItems();
+        
 	List<ProfileDescription> profiles = getUserProfiles();
-	assertEquals(0, profiles.size());
+	assertEquals(1, profiles.size());
 	assertEquals(0, getPublicProfiles().size());
 
 	FormDataMultiPart form = createFormData(RegistryTestHelper
 		.getTestProfileContent());
-	ClientResponse cResponse = getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
-			USERSPACE_PARAM, "true")).type(
+	ClientResponse cResponse = getAuthenticatedResource(getResource().path("/registry/profiles")).type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 	assertEquals(ClientResponse.Status.OK.getStatusCode(),
 		cResponse.getStatus());
@@ -1248,17 +1292,15 @@ public class ComponentRegistryRestServiceTest extends
 	assertNotNull(spec);
 	assertEquals("Actor", spec.getCMDComponent().getName());
 	profiles = getUserProfiles();
-	assertEquals(1, profiles.size());
+	assertEquals(2, profiles.size());
 	assertEquals(0, getPublicComponents().size());
 
 	// Now update
 	form = createFormData(
 		RegistryTestHelper.getTestProfileContent("TESTNAME"),
 		"UPDATE DESCRIPTION!");
-	cResponse = getAuthenticatedResource(
-		getResource().path(
-			"/registry/profiles/" + desc.getId() + "/update")
-			.queryParam(USERSPACE_PARAM, "true")).type(
+	cResponse = getAuthenticatedResource(getResource().path(
+			"/registry/profiles/" + desc.getId() + "/update")).type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
 	assertEquals(ClientResponse.Status.OK.getStatusCode(),
 		cResponse.getStatus());
@@ -1277,21 +1319,19 @@ public class ComponentRegistryRestServiceTest extends
 	assertNotNull(spec);
 	assertEquals("TESTNAME", spec.getCMDComponent().getName());
 	profiles = getUserProfiles();
-	assertEquals(1, profiles.size());
+	assertEquals(2, profiles.size());
 	assertEquals(0, getPublicComponents().size());
     }
 
     private CMDComponentSpec getUserComponent(ComponentDescription desc) {
-	return getAuthenticatedResource(
-		getResource().path("/registry/components/" + desc.getId())
-			.queryParam(USERSPACE_PARAM, "true")).accept(
+	return getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId())
+			.queryParam(REGISTRY_SPACE_PARAM, "private")).accept(
 		MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
     }
 
     private CMDComponentSpec getUserProfile(ProfileDescription desc) {
-	return getAuthenticatedResource(
-		getResource().path("/registry/profiles/" + desc.getId())
-			.queryParam(USERSPACE_PARAM, "true")).accept(
+	return getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId())
+			.queryParam(REGISTRY_SPACE_PARAM, "private")).accept(
 		MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
     }
 
@@ -1301,14 +1341,16 @@ public class ComponentRegistryRestServiceTest extends
     }
 
     private List<ComponentDescription> getUserComponents() {
-	return getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
-			USERSPACE_PARAM, "true")).accept(
+	return getAuthenticatedResource(getResource().path("/registry/components").queryParam(
+			REGISTRY_SPACE_PARAM, "private")).accept(
 		MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
     }
 
     @Test
     public void testRegisterComponent() throws Exception {
+        
+        fillUpPrivateItems();
+        
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getComponentTestContent(),
@@ -1325,7 +1367,7 @@ public class ComponentRegistryRestServiceTest extends
 		.post(RegisterResponse.class, form);
 	assertTrue(response.isRegistered());
 	assertFalse(response.isProfile());
-	assertFalse(response.isInUserSpace());
+	assertTrue(response.isInUserSpace());
 	ComponentDescription desc = (ComponentDescription) response
 		.getDescription();
 	assertNotNull(desc);
@@ -1345,11 +1387,13 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterComment() throws Exception {
+        
+        fillUpPublicItems();
+        
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getCommentTestContent(),
 		MediaType.APPLICATION_OCTET_STREAM_TYPE);
-	fillUp();
 	String id = ProfileDescription.PROFILE_PREFIX + "profile1";
 	CommentResponse response = getAuthenticatedResource(
 		"/registry/profiles/" + id + "/comments").type(
@@ -1370,24 +1414,26 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterCommentToNonExistent() throws Exception {
+        fillUpPublicItems();
+        
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getCommentTestContent(),
 		MediaType.APPLICATION_OCTET_STREAM_TYPE);
-	fillUp();
 	ClientResponse cResponse = getAuthenticatedResource(
 		"/registry/profiles/clarin.eu:cr1:profile99/comments").type(
 		MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
-	assertEquals(500, cResponse.getStatus());
+	assertEquals(404, cResponse.getStatus());
     }
 
     @Test
     public void testRegisterCommentUnauthenticated() throws Exception {
+        fillUpPublicItems();
+        
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getCommentTestContent(),
 		MediaType.APPLICATION_OCTET_STREAM_TYPE);
-	fillUp();
 	ClientResponse cResponse = getResource()
 		.path("/registry/profiles/clarin.eu:cr1:profile1/comments")
 		.type(MediaType.MULTIPART_FORM_DATA)
@@ -1397,6 +1443,7 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterProfileInvalidData() throws Exception {
+        fillUpPrivateItems();
 	FormDataMultiPart form = new FormDataMultiPart();
 	String notAValidProfile = "<CMD_ComponentSpec> </CMD_ComponentSpec>";
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
@@ -1425,6 +1472,7 @@ public class ComponentRegistryRestServiceTest extends
      */
     @Test
     public void testRegisterInvalidProfile() throws Exception {
+        fillUpPrivateItems();
 	FormDataMultiPart form = new FormDataMultiPart();
 	String profileContent = "";
 	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -1468,6 +1516,7 @@ public class ComponentRegistryRestServiceTest extends
     @Test
     public void testRegisterProfileInvalidDescriptionAndContent()
 	    throws Exception {
+        fillUpPrivateItems();
 	FormDataMultiPart form = new FormDataMultiPart();
 	String profileContent = "";
 	profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -1498,6 +1547,7 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterLargeProfile() throws Exception {
+        //fillUpPrivateItems(); not necessary
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getLargeProfileContent(),
@@ -1518,6 +1568,7 @@ public class ComponentRegistryRestServiceTest extends
 
     @Test
     public void testRegisterComponentAsProfile() throws Exception {
+        //fillUpPrivateItems();; not necessary
 	FormDataMultiPart form = new FormDataMultiPart();
 	form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
 		RegistryTestHelper.getComponentTestContent(),
@@ -1640,8 +1691,8 @@ public class ComponentRegistryRestServiceTest extends
     
     @Test
     public void testGetDescription() throws Exception{
-        fillUp();
-    	String id = ComponentDescription.COMPONENT_PREFIX + "component1";
+        fillUpPublicItems();
+        String id = ComponentDescription.COMPONENT_PREFIX + "component1";
         ComponentDescription component = getAuthenticatedResource(getResource().path("/registry/items/" + id)).accept(MediaType.APPLICATION_JSON).get(ComponentDescription.class);
         assertNotNull(component);
         assertEquals(id, component.getId());

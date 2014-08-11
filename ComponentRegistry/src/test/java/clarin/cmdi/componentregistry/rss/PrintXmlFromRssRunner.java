@@ -4,7 +4,9 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DatesHelper;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -19,9 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
-import javax.xml.transform.TransformerException;
-
-import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -92,7 +91,7 @@ public class PrintXmlFromRssRunner {
     /*
      * input: sort of rss -- profiles, or comopnents, or comments (see below the prompt string)
      */
-    public static void main(String args[]) throws ComponentRegistryException, ParseException, IOException, JAXBException {
+    public static void main(String args[]) throws ComponentRegistryException, ParseException, IOException, JAXBException, UserUnauthorizedException, ItemNotFoundException {
 
 	System.out.println("Type 1 or 2, or 3, or 4, \n "
 		+ "to check Rss generaion for profiles, components  or comments for a profile or a component respectively: >> ");
@@ -136,8 +135,8 @@ public class PrintXmlFromRssRunner {
 		System.out.println("IO error trying to get the id");
 		System.exit(1);
 	    }
-	    final List<Comment> comments = (kind == 3) ? registry.getCommentsInProfile(buffer, null) : registry.getCommentsInComponent(buffer, null);
-	    final String name = (kind == 3) ? registry.getProfileDescription(buffer).getName() : registry.getComponentDescription(buffer).getName();
+	    final List<Comment> comments = (kind == 3) ? registry.getCommentsInProfile(buffer) : registry.getCommentsInComponent(buffer);
+	    final String name = (kind == 3) ? registry.getProfileDescriptionAccessControlled(buffer).getName() : registry.getComponentDescriptionAccessControlled(buffer).getName();
 	    rss = makeRssForComments(comments, kind, baseUri, 10, buffer, name);
 
 	}

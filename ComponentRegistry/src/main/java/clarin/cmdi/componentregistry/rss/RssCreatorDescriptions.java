@@ -13,7 +13,7 @@ public class RssCreatorDescriptions<T extends BaseDescription> extends RssCreato
 
     /**
      *
-     * @param userspace if "true" then profiles and components from the user's
+     * @param isPrivate if "true" then profiles and components from the user's
      * workspace, otherwise -- public (uri-parameter)
      * @param baseURI where the database is located
      * @param descriptionType "profile" or "component"
@@ -22,11 +22,11 @@ public class RssCreatorDescriptions<T extends BaseDescription> extends RssCreato
      * for the channel will be created
      * @param comparator compare descriptions by dates
      */
-    public RssCreatorDescriptions(boolean userspace, String baseURI, String descriptionType,
+    public RssCreatorDescriptions(boolean isPrivate, String baseURI, String descriptionType,
             int limit, List<T> descriptions, Comparator<T> comparator) {
-        super(userspace, baseURI, limit, descriptions);
+        super(isPrivate, baseURI, limit, descriptions);
         setChannelLink(baseURI + "/");
-        setChannelTitle((userspace ? "Your workspace " : "Public ") + descriptionType);
+        setChannelTitle((isPrivate ? "Private " : "Public ") + descriptionType);
         setChannelDescription(String.format("News feed for the %s", descriptionType));
         setComparator(comparator);
     }
@@ -40,7 +40,7 @@ public class RssCreatorDescriptions<T extends BaseDescription> extends RssCreato
      */
     @Override
     protected RssItem fromArgToRssItem(T desc) {
-        String href = getBaseURI() + "?item=" + desc.getId() + (userspace ? "&space=user" : "");
+        String href = getBaseURI() + "?item=" + desc.getId() + (isPrivate ? "&space=user" : "");
         RssItem retval = new RssItem();
         retval.setDescription(desc.getDescription());
         retval.setGuid(makeGuid(href));

@@ -24,7 +24,7 @@ public interface JpaComponentDao extends JpaRepository<BaseDescription, Long>{
     List<BaseDescription> findPublicItems();
 
     @Query("select c from BaseDescription c where c.ispublic = true and c.deleted = false and c.componentId like ?1 order by upper(c.name) asc")
-    List<BaseDescription> findPublicItems(String idPrefix);
+    List<BaseDescription> findPublishedItems(String idPrefix);
 
     @Query("select c from BaseDescription c where c.ispublic = false and c.deleted = true and c.dbUserId = ?1 order by upper(c.name), c.id")
     List<BaseDescription> findDeletedItemsForUser(Long userId);
@@ -32,6 +32,7 @@ public interface JpaComponentDao extends JpaRepository<BaseDescription, Long>{
     @Query("select c from BaseDescription c where c.ispublic = true and c.deleted = true order by upper(c.name), c.id")
     List<BaseDescription> findPublicDeletedItems();
     
+    //compare @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 order by upper(c.name), c.id")
     @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 AND not exists (select 1 from Ownership o where o.componentId = c.componentId) order by upper(c.name), c.id")
     List<BaseDescription> findItemsForUserThatAreNotInGroups(Long userId, String idPrefix);
 
@@ -47,5 +48,13 @@ public interface JpaComponentDao extends JpaRepository<BaseDescription, Long>{
     
     @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 order by c.id asc")
     List<String> findNonDeletedItemIds(String componentIdPrefix);
+    
+    @Query("select c from BaseDescription c where c.deleted = false order by c.id asc")
+    List<BaseDescription> findNonDeletedDescriptions();
 
+    @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 order by upper(c.name), c.id")
+    List<BaseDescription> findNotPublishedUserItems(Long userId, String idPrefix);    
+    
+    @Query("select c.componentId from BaseDescription c where c.ispublic = ?1 AND c.componentId like ?2 AND exists (select o from Ownership o where o.componentId = c.componentId AND o.groupId = ?3)")
+    List<String> findAllItemIdsInGroup(boolean isPublished, String idPrefix, long groupId);
 }
