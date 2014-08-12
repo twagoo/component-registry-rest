@@ -27,6 +27,8 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import com.google.common.collect.Lists;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
@@ -310,6 +312,7 @@ public class ComponentRegistryRestService implements
                             }
                         }
                     };
+                    return createDownloadResponse(result, fileName);
                 } else if ("xsd".equalsIgnoreCase(rawType)) {
                     result = new StreamingOutput() {
                         @Override
@@ -343,13 +346,11 @@ public class ComponentRegistryRestService implements
 
                         }
                     };
+                    return createDownloadResponse(result, fileName);
                 } else {
-                    throw new WebApplicationException(Response
-                            .serverError()
-                            .entity("unsupported rawType: " + rawType
-                            + " (only xml or xsd are supported)").build());
+                    return Response.status(Status.NOT_FOUND).entity("Usupported raw type "+rawType).build();
                 }
-                return createDownloadResponse(result, fileName);
+                
 
             } catch (UserUnauthorizedException e2) {
                 return Response.status(Status.FORBIDDEN).build();
@@ -875,8 +876,7 @@ public class ComponentRegistryRestService implements
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
         } catch (ItemNotFoundException e) {
-            LOG.warn("Profile with id " + profileId + " is not found.",
-                    e);
+            LOG.warn("Profile with id " + profileId + " is not found.");
             return Response.serverError().status(Status.NOT_FOUND)
                     .build();
         } catch (IOException e) {
@@ -930,11 +930,13 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.info("Could not retrieve component", e);
+        } 
+        catch (ComponentRegistryException e) {
+            LOG.info("Could not find comment "+commentId+ " for "+profileId);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             LOG.error("Comment with id: " + commentId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
@@ -982,8 +984,8 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.info("Could not retrieve component", e);
+        } catch (ComponentRegistryException e) {            
+            LOG.info("Could not retrieve component "+componentId+" for the component "+componentId);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
         } catch (IOException e) {
@@ -1011,7 +1013,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public Response getRegisteredProfileRawType(
             @PathParam("profileId") final String profileId,
-            @PathParam("rawType") String rawType) throws ComponentRegistryException {
+            @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
 
 
         LOG.debug("Profile with id {} and rawType {} is requested.", profileId,
@@ -1063,10 +1065,7 @@ public class ComponentRegistryRestService implements
                     }
                 };
             } else {
-                throw new WebApplicationException(Response
-                        .serverError()
-                        .entity("unsupported rawType: " + rawType
-                        + " (only xml or xsd are supported)").build());
+                return Response.status(Status.NOT_FOUND).entity("Unsupported raw type "+rawType).build();
             }
             return createDownloadResponse(result, fileName);
         } catch (UserUnauthorizedException ex) {

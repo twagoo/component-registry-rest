@@ -283,8 +283,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                     this.setCanDeleteInComments(Collections.singleton(comment));
                     return comment;
                 } else {
-                    // Comment exists in DB, but profile is not in this registry
-                    throw new ComponentRegistryException("Comment " + commentId + " cannot be found in specified registry");
+                    throw new ComponentRegistryException("Comment " + commentId  + "for the profile "+profileId);
                 }
             } catch (DataAccessException ex) {
                 throw new ComponentRegistryException("Database access error while trying to get comment from profile", ex);
@@ -322,10 +321,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                     this.setCanDeleteInComments(Collections.singleton(comment));
                     return comment;
                 } else {
-                    // Comment does not exists in DB or component is not in this
-                    // registry
-                    throw new ComponentRegistryException("Comment " + commentId
-                            + " cannot be found in specified registry for specified component");
+                    throw new ComponentRegistryException("Comment " + commentId  + "for the profile "+componentId);
                 }
             } catch (DataAccessException ex) {
                 throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
@@ -808,7 +804,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void deleteComment(String commentId) throws IOException, ComponentRegistryException, 
+    public void deleteComment(String commentId) throws IOException, 
             UserUnauthorizedException, DeleteFailedException, ItemNotFoundException {
         try {
             Comment comment = commentsDao.findOne(Long.parseLong(commentId));
@@ -821,7 +817,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                 commentsDao.delete(comment);
             } else {
                 // Comment exists in DB, but component is not in this registry
-                throw new ComponentRegistryException("Comment " + commentId + " cannot be found in specified registry");
+                throw new ItemNotFoundException("Comment " + commentId + " cannot be found in specified registry");
             }
         } catch (DataAccessException ex) {
             throw new DeleteFailedException("Database access error while trying to delete component", ex);

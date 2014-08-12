@@ -212,7 +212,7 @@ public interface ComponentRegistry {
      * @throws UserUnauthorizedException
      * @throws DeleteFailedException
      */
-    public void deleteComment(String commentId) throws IOException, ComponentRegistryException, UserUnauthorizedException,
+    public void deleteComment(String commentId) throws IOException, UserUnauthorizedException,
 	    DeleteFailedException, ItemNotFoundException;
 
     /**
