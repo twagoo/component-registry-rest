@@ -162,6 +162,10 @@ public class ComponentRegistryRestService implements
         return this.getRegistry(regSpace, groupIdNumber);
     }
 
+    private boolean checkRegistrySpaceString(String registrySpace) {
+        return (registrySpace.equalsIgnoreCase("group") || registrySpace.equalsIgnoreCase("private") || registrySpace.equalsIgnoreCase("published"));
+    }
+
     @Override
     @GET
     @Path("/components")
@@ -172,6 +176,11 @@ public class ComponentRegistryRestService implements
             @QueryParam(GROUPID_PARAM) String groupId)
             throws ComponentRegistryException, IOException {
         long start = System.currentTimeMillis();
+
+        if (!checkRegistrySpaceString(registrySpace)) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
+            return new ArrayList<ComponentDescription>();
+        }
 
         try {
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
@@ -204,6 +213,11 @@ public class ComponentRegistryRestService implements
             throws ComponentRegistryException, IOException {
 
         long start = System.currentTimeMillis();
+        
+        if (!checkRegistrySpaceString(registrySpace)) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
+            return new ArrayList<ProfileDescription>();
+        }
         try {
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
             List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
@@ -348,9 +362,9 @@ public class ComponentRegistryRestService implements
                     };
                     return createDownloadResponse(result, fileName);
                 } else {
-                    return Response.status(Status.NOT_FOUND).entity("Usupported raw type "+rawType).build();
+                    return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
                 }
-                
+
 
             } catch (UserUnauthorizedException e2) {
                 return Response.status(Status.FORBIDDEN).build();
@@ -757,7 +771,7 @@ public class ComponentRegistryRestService implements
             @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
         try {
             ComponentRegistry br = this.getBaseRegistry();
-            ComponentDescription desc =br.getComponentDescriptionAccessControlled(componentId);
+            ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
             if (desc != null) {
                 if (desc.isPublic()) {
                     return Response.status(Status.CONFLICT).entity("Cannot update already published component.")
@@ -930,13 +944,11 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } 
-        catch (ComponentRegistryException e) {
-            LOG.info("Could not find comment "+commentId+ " for "+profileId);
+        } catch (ComponentRegistryException e) {
+            LOG.info("Could not find comment " + commentId + " for " + profileId);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             LOG.error("Comment with id: " + commentId + " deletion failed.", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
@@ -984,8 +996,8 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {            
-            LOG.info("Could not retrieve component "+componentId+" for the component "+componentId);
+        } catch (ComponentRegistryException e) {
+            LOG.info("Could not retrieve component " + componentId + " for the component " + componentId);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
         } catch (IOException e) {
@@ -1065,7 +1077,7 @@ public class ComponentRegistryRestService implements
                     }
                 };
             } else {
-                return Response.status(Status.NOT_FOUND).entity("Unsupported raw type "+rawType).build();
+                return Response.status(Status.NOT_FOUND).entity("Unsupported raw type " + rawType).build();
             }
             return createDownloadResponse(result, fileName);
         } catch (UserUnauthorizedException ex) {

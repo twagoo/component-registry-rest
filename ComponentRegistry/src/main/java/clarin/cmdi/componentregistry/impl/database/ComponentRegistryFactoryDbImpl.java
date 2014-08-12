@@ -81,7 +81,7 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
             owner = new OwnerUser(user.getId());
         }
         ComponentRegistryDbImpl cr = componentRegistryBeanFactory.getNewComponentRegistry();// default public registry
-        cr.setRegistrySpace(RegistrySpace.PRIVATE);
+        cr.setRegistrySpace(RegistrySpace.GROUP);
         cr.setRegistryOwner(owner);
         cr.setGroupId(groupId);
         return cr;
