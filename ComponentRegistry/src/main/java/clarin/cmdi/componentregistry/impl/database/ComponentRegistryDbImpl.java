@@ -83,31 +83,28 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Autowired
     private GroupService groupService;
 
-    
     // 
     /**
      * Default constructor, to use this as a (spring) bean. The public registry
-     * by default. Use setRegistryStatus(), setRegistryOwner(), setGroupId() to make it another kind of
-     * registry.
+     * by default. Use setRegistryStatus(), setRegistryOwner(), setGroupId() to
+     * make it another kind of registry.
      *
-     * 
+     *
      */
     public ComponentRegistryDbImpl() throws TransformerException {
         this.registrySpace = RegistrySpace.PUBLISHED;
     }
 
-
     @Override
     public Owner getRegistryOwner() {
         return this.registryOwner;
     }
-    
+
     @Override
     public void setRegistryOwner(Owner registryOwner) {
         this.registryOwner = registryOwner;
     }
-    
-    
+
     @Override
     public RegistrySpace getRegistrySpace() {
         return this.registrySpace;
@@ -122,30 +119,30 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public Number getGroupId() {
         return this.groupId;
     }
-    
+
     @Override
     public void setGroupId(Number groupId) {
         this.groupId = groupId;
     }
-    
+
     @Override
-    public Number getBaseDescriptionOwnerId(String cmdId){
+    public Number getBaseDescriptionOwnerId(String cmdId) {
         BaseDescription bd = componentDao.getByCmdId(cmdId);
         return bd.getDbUserId();
     }
-    
+
     @Override
-    public  List<Number> getItemGroups(String cmdId){
+    public List<Number> getItemGroups(String cmdId) {
         List<Group> groups = groupService.getGroupsTheItemIsAMemberOf(cmdId);
         List<Number> result = new ArrayList<Number>();
         if (groups != null) {
-            for (Group group: groups) {
+            for (Group group : groups) {
                 result.add(group.getId());
             }
         }
         return result;
     }
-    
+
     /**
      * @return The user id, or null if there is no owner or it is not a user.
      */
@@ -156,7 +153,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             return null;
         }
     }
-    
+
     @Override
     public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException {
         try {
@@ -179,11 +176,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public Boolean isItemPublic(String id) throws ItemNotFoundException{
+    public Boolean isItemPublic(String id) throws ItemNotFoundException {
         BaseDescription desc = componentDao.getByCmdId(id);
         if (desc == null) {
             String idS = (id == null) ? "null" : id;
-            throw new ItemNotFoundException("The component with the id " + idS+ "is not found in the database.");
+            throw new ItemNotFoundException("The component with the id " + idS + "is not found in the database.");
         }
         return desc.isPublic();
     }
@@ -283,7 +280,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                     this.setCanDeleteInComments(Collections.singleton(comment));
                     return comment;
                 } else {
-                    throw new ComponentRegistryException("Comment " + commentId  + "for the profile "+profileId);
+                    throw new ItemNotFoundException("Comment " + commentId + " for the profile " + profileId + " is not found.");
                 }
             } catch (DataAccessException ex) {
                 throw new ComponentRegistryException("Database access error while trying to get comment from profile", ex);
@@ -321,7 +318,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                     this.setCanDeleteInComments(Collections.singleton(comment));
                     return comment;
                 } else {
-                    throw new ComponentRegistryException("Comment " + commentId  + "for the profile "+componentId);
+                    throw new ItemNotFoundException("Comment " + commentId + " for the component " + componentId + " is not found.");
                 }
             } catch (DataAccessException ex) {
                 throw new ComponentRegistryException("Database access error while trying to get comment from component", ex);
@@ -436,21 +433,20 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public int registerComment(Comment comment, String principalName) throws ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
         try {
-            if (comment.getComponentId() != null)  {
-                if (this.canCurrentUserAccessDescription(comment.getComponentId()))
-                {
-                // Convert principal name to user record id
-                Number uid = convertUserIdInComment(comment, principalName);
-                // Set date to current date
-                comment.setCommentDate(new Date());
-                comment.setUserId(uid.longValue());
-                commentsDao.saveAndFlush(comment);
-            
+            if (comment.getComponentId() != null) {
+                if (this.canCurrentUserAccessDescription(comment.getComponentId())) {
+                    // Convert principal name to user record id
+                    Number uid = convertUserIdInComment(comment, principalName);
+                    // Set date to current date
+                    comment.setCommentDate(new Date());
+                    comment.setUserId(uid.longValue());
+                    commentsDao.saveAndFlush(comment);
+
+                } else {
+                    throw new UserUnauthorizedException("The logged-in user cannot access the component/profile with id " + comment.getComponentId());
+                }
             } else {
-                throw new UserUnauthorizedException("The logged-in user cannot access the component/profile with id "+comment.getComponentId());
-            }
-            } else {
-                throw new ComponentRegistryException("The component/profile id for this comment is null.");            
+                throw new ComponentRegistryException("The component/profile id for this comment is null.");
             }
             return 0;
         } catch (DataAccessException ex) {
@@ -622,7 +618,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public void deleteMDComponent(String componentId, boolean forceDelete)
             throws UserUnauthorizedException, DeleteFailedException, ComponentRegistryException, ItemNotFoundException {
-        BaseDescription desc = componentDao.getByCmdId(componentId);
+        BaseDescription desc = getComponentDescriptionAccessControlled(componentId);
         if (desc != null) {
             try {
                 this.checkAuthorisation(desc);
@@ -638,8 +634,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
     }
-
-    
 
     private void invalidateCache(BaseDescription description) {
         if (description.isProfile()) {
@@ -703,7 +697,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private void checkAuthorisation(BaseDescription desc) throws UserUnauthorizedException, ItemNotFoundException {
-        if (!this.canCurrentUserAccessDescription(desc.getId())) {            
+        if (!this.canCurrentUserAccessDescription(desc.getId())) {
             String principalName = (registryOwner != null) ? userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName() : "null";
             throw new UserUnauthorizedException("Unauthorized operation user '" + principalName
                     + "' is not the creator (nor a member of the group, nor an administrator) of the "
@@ -714,8 +708,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private void checkAuthorisationComment(Comment desc) throws UserUnauthorizedException {
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
         if (!(this.isOwnerOfComment(desc, principalName) || configuration.isAdminUser(principalName))) {
-            throw new UserUnauthorizedException("Unauthorized operation user '" + principalName
-                    + "' is not the creator (nor a member of the group, nor an administrator) of the " + (desc.getId()) + "(" + desc + ").");
+            throw new UserUnauthorizedException("Unauthorized operation: user '" + principalName
+                    + "' is not the creator (nor the Administrator) of the comment " + (desc.getId()));
         }
     }
 
@@ -740,8 +734,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             if (regDate.before(calendar.getTime())) { // More then month old
                 throw new DeleteFailedException(
                         "The "
-                        + (desc.isProfile() ? "Profile" : "Component")
-                        + " is more then a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
+                        + (desc.isProfile() ? "profile" : "Ccomponent")
+                        + " is more than a month old and cannot be deleted anymore. It might have been used to create metadata, deleting it would invalidate that metadata.");
             }
         }
     }
@@ -765,17 +759,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return "Registry of " + u.getName();
     }
 
-    private boolean canCurrentUserAccessDescription(String cmdId) throws ItemNotFoundException{
+    private boolean canCurrentUserAccessDescription(String cmdId) throws ItemNotFoundException {
         if (cmdId == null) {
             throw new ItemNotFoundException("Item with the null cmdIdentifier.");
         }
-        
+
         BaseDescription description = componentDao.getByCmdId(cmdId);
         if (description == null) {
-            throw new ItemNotFoundException("Item with the id "+cmdId+" is not found.");
+            throw new ItemNotFoundException("Item with the id " + cmdId + " is not found.");
         }
-        
-       
+
+
         Number userId = getUserId();
         if (userId == null) {
             return false;
@@ -784,7 +778,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         if (user == null) {
             return false;
         }
-       
+
 
         if (configuration.isAdminUser(user.getPrincipalName())) {
             return true;
@@ -804,7 +798,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void deleteComment(String commentId) throws IOException, 
+    public void deleteComment(String commentId) throws IOException,
             UserUnauthorizedException, DeleteFailedException, ItemNotFoundException {
         try {
             Comment comment = commentsDao.findOne(Long.parseLong(commentId));
@@ -825,8 +819,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throw new DeleteFailedException("Illegal comment ID, cannot parse integer", ex);
         }
     }
-    
-  
 
     @Override
     public CMDComponentSpecExpander getExpander() {
@@ -856,7 +848,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         List<ComponentDescription> components = new ArrayList<ComponentDescription>();
         for (String id : componentIds) {
             BaseDescription description = componentDao.getByCmdId(id);
-            components.add(ComponentUtils.toComponent(description));
+            if (description != null) {
+                components.add(ComponentUtils.toComponent(description));
+            }
         }
         return components;
     }

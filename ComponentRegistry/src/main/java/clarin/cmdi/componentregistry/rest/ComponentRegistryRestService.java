@@ -188,6 +188,7 @@ public class ComponentRegistryRestService implements
             LOG.debug(
                     "Releasing {} registered components into the world ({} millisecs)",
                     result.size(), (System.currentTimeMillis() - start));
+           
             return result;
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -213,7 +214,7 @@ public class ComponentRegistryRestService implements
             throws ComponentRegistryException, IOException {
 
         long start = System.currentTimeMillis();
-        
+
         if (!checkRegistrySpaceString(registrySpace)) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
             return new ArrayList<ProfileDescription>();
@@ -224,6 +225,7 @@ public class ComponentRegistryRestService implements
             LOG.debug(
                     "Releasing {} registered components into the world ({} millisecs)",
                     result.size(), (System.currentTimeMillis() - start));
+             
             return result;
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -417,7 +419,7 @@ public class ComponentRegistryRestService implements
         MediaType.APPLICATION_JSON})
     public List<Comment> getCommentsFromProfile(
             @PathParam("profileId") String profileId)
-            throws ComponentRegistryException, IOException {
+            throws IOException {
         long start = System.currentTimeMillis();
         try {
             List<Comment> comments = this.getBaseRegistry().getCommentsInProfile(profileId);
@@ -425,15 +427,17 @@ public class ComponentRegistryRestService implements
                     "Releasing {} registered comments in profile into the world ({} millisecs)",
                     comments.size(), (System.currentTimeMillis() - start));
             return comments;
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
+        } catch (ComponentRegistryException e) {
+            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
             return new ArrayList<Comment>();
-
+        } catch (ItemNotFoundException e) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
+            return new ArrayList<Comment>();
         } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode());
+            response.sendError(Status.FORBIDDEN.getStatusCode(), e.getMessage());
             return new ArrayList<Comment>();
         } catch (AuthenticationFailException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
+            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new ArrayList<Comment>();
         }
     }
@@ -445,7 +449,7 @@ public class ComponentRegistryRestService implements
         MediaType.APPLICATION_JSON})
     public List<Comment> getCommentsFromComponent(
             @PathParam("componentId") String componentId)
-            throws ComponentRegistryException, IOException {
+            throws IOException {
         long start = System.currentTimeMillis();
         try {
             List<Comment> comments = this.getBaseRegistry().getCommentsInComponent(componentId);
@@ -453,14 +457,17 @@ public class ComponentRegistryRestService implements
                     "Releasing {} registered comments in Component into the world ({} millisecs)",
                     comments.size(), (System.currentTimeMillis() - start));
             return comments;
+        } catch (ComponentRegistryException e) {
+            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            return new ArrayList<Comment>();
         } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
             return new ArrayList<Comment>();
         } catch (UserUnauthorizedException e1) {
-            response.sendError(Status.FORBIDDEN.getStatusCode());
+            response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
             return new ArrayList<Comment>();
         } catch (AuthenticationFailException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
+            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new ArrayList<Comment>();
         }
     }
@@ -473,20 +480,23 @@ public class ComponentRegistryRestService implements
     public Comment getSpecifiedCommentFromProfile(
             @PathParam("profileId") String profileId,
             @PathParam("commentId") String commentId)
-            throws ComponentRegistryException, IOException {
+            throws IOException {
 
         LOG.debug("Comments of profile with id {} are requested.", commentId);
         try {
 
             return this.getBaseRegistry().getSpecifiedCommentInProfile(profileId, commentId);
+        } catch (ComponentRegistryException e) {
+            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            return new Comment();
         } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
             return new Comment();
         } catch (UserUnauthorizedException e1) {
-            response.sendError(Status.FORBIDDEN.getStatusCode());
+            response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
             return new Comment();
         } catch (AuthenticationFailException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
+            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new Comment();
         }
     }
@@ -499,19 +509,22 @@ public class ComponentRegistryRestService implements
     public Comment getSpecifiedCommentFromComponent(
             @PathParam("componentId") String componentId,
             @PathParam("commentId") String commentId)
-            throws ComponentRegistryException, IOException {
+            throws IOException {
         LOG.debug("Comments of component with id {} are requested.", commentId);
         try {
 
             return this.getBaseRegistry().getSpecifiedCommentInComponent(componentId, commentId);
+        } catch (ComponentRegistryException e) {
+            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+            return new Comment();
         } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
             return new Comment();
         } catch (UserUnauthorizedException e1) {
-            response.sendError(Status.FORBIDDEN.getStatusCode());
+            response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
             return new Comment();
         } catch (AuthenticationFailException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
+            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new Comment();
         }
     }
@@ -539,7 +552,7 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    // TODO: test via POSTMAN
+    
     @Override
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
@@ -554,7 +567,7 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    // TODO: test via POSTMAN
+    
     @Override
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
@@ -847,8 +860,7 @@ public class ComponentRegistryRestService implements
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
         } catch (ItemNotFoundException e) {
-            LOG.warn("Component with id " + componentId + " is not found.",
-                    e);
+            LOG.warn("Component with id " + componentId + " is not found.");
             return Response.serverError().status(Status.NOT_FOUND)
                     .build();
         } catch (IOException e) {
@@ -868,7 +880,7 @@ public class ComponentRegistryRestService implements
         }
 
         LOG.info("Component with id: {} deleted.", componentId);
-        return Response.ok().build();
+        return Response.ok("Component with id" + componentId+" deleted.").build();
     }
 
     @Override
@@ -1735,15 +1747,14 @@ public class ComponentRegistryRestService implements
     @Path("/items/{itemId}/transferownership")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
-    public String transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
+    public Response transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
             @QueryParam("groupId") long groupId) throws IOException {
         Principal principal = security.getUserPrincipal();
         try {
             groupService.transferItemOwnershipFromUserToGroupId(principal.getName(), groupId, itemId);
-            return "No exceptions happen, the item shoul be transferred";
+            return Response.ok("Ownership transferred").build();
         } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-            return e.toString();
+            return Response.status(Status.FORBIDDEN).build();
         }
     }
 
@@ -1756,20 +1767,24 @@ public class ComponentRegistryRestService implements
         LOG.debug("Item with id: {} is requested.", itemId);
         try {
             ComponentRegistry cr = this.getBaseRegistry();
-            try {
-                BaseDescription description = cr.getComponentDescriptionAccessControlled(itemId);
+            BaseDescription description;
+            if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
+                description = cr.getComponentDescriptionAccessControlled(itemId);
                 return description;
-            } catch (UserUnauthorizedException ex1) {
-                try {
-                    BaseDescription description = cr.getProfileDescriptionAccessControlled(itemId);
-                    return description;
-                } catch (UserUnauthorizedException ex2) {
-                    response.sendError(Status.FORBIDDEN.getStatusCode(), "User \'" + security.getUserPrincipal().getName() + "\' does not have access to the item with the given id or the item with the given id does not exist.");
-                    return new BaseDescription();
-                }
-            }
+            };
+            if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
+                description = cr.getProfileDescriptionAccessControlled(itemId);
+                return description;
+            };
+            response.sendError(Status.BAD_REQUEST.getStatusCode());
+            return new BaseDescription();
+
+
+        } catch (UserUnauthorizedException ex2) {
+            response.sendError(Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
+            return new BaseDescription();
         } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
             return new BaseDescription();
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());

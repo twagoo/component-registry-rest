@@ -327,7 +327,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ClientResponse response = getAuthenticatedResource(
                 "/registry/components/" + id2 + "/comments/" + component1Comment4.getId()).delete(
                 ClientResponse.class);
-        assertEquals(500, response.getStatus());
+        assertEquals(404, response.getStatus());
         // Delete from correct component
         response = getAuthenticatedResource(
                 "/registry/components/" + id + "/comments/" + component1Comment3.getId()).delete(
@@ -402,7 +402,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ClientResponse response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "profile2/comments/9999").delete(ClientResponse.class);
-        assertEquals(500, response.getStatus());
+        assertEquals(404, response.getStatus());
         // Delete from correct profile
         response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
@@ -491,7 +491,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = getAuthenticatedResource(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
                 + "component1").delete(ClientResponse.class);
-        assertEquals(200, response.getStatus());
+        assertEquals(404, response.getStatus());
     }
 
     @Test

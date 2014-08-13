@@ -114,7 +114,7 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         ClientResponse response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "profile2/comments/9999").delete(ClientResponse.class);
-        assertEquals(500, response.getStatus());
+        assertEquals(404, response.getStatus());
         // Delete from correct profile
         response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX

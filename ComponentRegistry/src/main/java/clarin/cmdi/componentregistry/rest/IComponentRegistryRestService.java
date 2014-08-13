@@ -145,53 +145,19 @@ public interface IComponentRegistryRestService {
 	 */
 	void setComponentRegistryFactory(ComponentRegistryFactory componentRegistryFactory);
 
-	/**
-	 *
-	 * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
-	 * @param limit the number of items to be displayed
-	 * @return rss for the components in the database to which we are currently connected
-	 * @throws ComponentRegistryException
-	 * @throws ParseException
-	 */
+	
 	Rss getRssComponent(String groupId, String registrySpace, String limit)
 			throws ComponentRegistryException, ParseException, IOException;
 
-	/**
-	 *
-	 * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
-	 * @param limit the number of items to be displayed
-	 * @return rss for the profiles in the database to which we are currently connected
-	 * @throws ComponentRegistryException
-	 * @throws ParseException
-	 */
+	
 	Rss getRssProfile(String groupId, String registrySpace, String limit)
 			throws ComponentRegistryException, ParseException, IOException;
 
-	/**
-	 *
-	 * @param profileId the Id of a profile whose comments are to be rss-ed
-	 * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
-	 * @param limit the number of items to be displayed
-	 * @return rss of the comments for a chosen profile
-	 * @throws ComponentRegistryException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws ParseException
-	 */
+	
 	Rss getRssOfCommentsFromProfile(String profileId, String limit) throws ComponentRegistryException, 
 			JAXBException, ParseException, IOException;
 
-	/**
-	 *
-	 * @param componentId the Id of a component whose comments are to be rss-ed
-	 * @param userspace if "true" then profiles and components from the user's workspace, otherwise -- public
-	 * @param limit the number of items to be displayed
-	 * @return rss of the comments for a chosen component
-	 * @throws ComponentRegistryException
-	 * @throws IOException
-	 * @throws JAXBException
-	 * @throws ParseException
-	 */
+	
 	Rss getRssOfCommentsFromComponent(String componentId,
 			String limit) throws ComponentRegistryException, IOException,
 			JAXBException, ParseException;
@@ -220,7 +186,7 @@ public interface IComponentRegistryRestService {
 	 * @param itemId
 	 * @param groupId
 	 */
-	String transferItemOwnershipToGroup(String itemId, long groupId) throws IOException;
+	Response transferItemOwnershipToGroup(String itemId, long groupId) throws IOException;
 	
 	/**
 	 * Get any component (public or private) with the specified ID

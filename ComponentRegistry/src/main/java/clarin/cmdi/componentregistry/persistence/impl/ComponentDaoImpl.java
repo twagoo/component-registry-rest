@@ -24,146 +24,144 @@ import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 /**
  * Base DAO which can be extended to serve {@link ComponentDescription}s and
  * {@link ProfileDescription}s
- * 
+ *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  * @author George.Georgovassilis@mpi.nl
  */
-
 @Repository
 public class ComponentDaoImpl implements ComponentDao {
 
     @Autowired
     private JpaComponentDao jpaComponentDao;
-
     @Autowired
     private CommentsDao commentsDao;
-
     @Autowired
     private UserDao userDao;
-
     private final static Logger LOG = LoggerFactory
-	    .getLogger(ComponentDaoImpl.class);
+            .getLogger(ComponentDaoImpl.class);
 
     /**
      * Copy a set of properties which are allowed to change from "from" to "to"
      * thus making sure that only those properties are updated and not other
      * ones.
-     * 
+     *
      * @param from
      * @param to
      */
     protected void copyPersistentProperties(BaseDescription from, BaseDescription to) {
-	to.setName(from.getName());
-	to.setDescription(from.getDescription());
-	to.setRegistrationDate(from.getRegistrationDate());
-	to.setCreatorName(from.getCreatorName());
-	to.setDomainName(from.getDomainName());
-	to.setGroupName(from.getGroupName());
-	to.setHref(from.getHref());
+        to.setName(from.getName());
+        to.setDescription(from.getDescription());
+        to.setRegistrationDate(from.getRegistrationDate());
+        to.setCreatorName(from.getCreatorName());
+        to.setDomainName(from.getDomainName());
+        to.setGroupName(from.getGroupName());
+        to.setHref(from.getHref());
     }
 
     protected String getTableName() {
-	return "persistentcomponents";
-    };
+        return "persistentcomponents";
+    }
+
+    ;
 
     private boolean compare(String s, Number n) {
-	return ("" + s).equals("" + n);
+        return ("" + s).equals("" + n);
     }
 
     private String toString(Number n) {
-	if (n == null)
-	    return null;
-	return n.toString();
+        if (n == null) {
+            return null;
+        }
+        return n.toString();
     }
 
     private BaseDescription castDown(BaseDescription c) {
-	// JPA will save only BaseComponent instances, not derived classes
-	if (c instanceof ComponentDescription
-		|| c instanceof ProfileDescription) {
-	    BaseDescription copy = new BaseDescription();
-	    ComponentUtils.copyPropertiesFrom(c, copy);
-	    return copy;
-	}
-	return c;
+        // JPA will save only BaseComponent instances, not derived classes
+        if (c instanceof ComponentDescription
+                || c instanceof ProfileDescription) {
+            BaseDescription copy = new BaseDescription();
+            ComponentUtils.copyPropertiesFrom(c, copy);
+            return copy;
+        }
+        return c;
     }
 
     /**
      * Update {@link BaseDescription#getCommentsCount()} (which is a transient
      * property) with the number of comments for that component and load
      * {@link BaseDescription#getContent()}
-     * 
+     *
      * @param baseDescription
      */
     private void augment(BaseDescription baseDescription) {
-	if (baseDescription == null)
-	    return;
-	int count = (int) commentsDao.findCommentCountForComponent(baseDescription
-		.getId());
-	baseDescription.setCommentsCount(count);
-	baseDescription.setContent(jpaComponentDao.findContentByComponentId(baseDescription
-		.getId()));
-    }
-
-/**
-     * Update {@link BaseDescription#getCommentsCount()
-     * @param baseDescription
-     */
-    private List<BaseDescription> augment(List<BaseDescription> baseDescription) {
-	if (baseDescription.isEmpty()) {
-	    return baseDescription;
+        if (baseDescription == null) {
+            return;
         }
-	Map<String, BaseDescription> map = new HashMap<String, BaseDescription>();
-	List<String> idlist = new ArrayList<String>();
-	for (BaseDescription c:baseDescription) {
-	    idlist.add(c.getId());
-	    map.put(c.getId(), c);
-	}
-	List<Object[]> tuples = commentsDao
-		.findCommentCountForComponents(idlist);
-	for (Object[] tuple : tuples) {
-	    String id = tuple[0].toString();
-	    int count = Integer.parseInt(tuple[1].toString());
-	    map.get(id).setCommentsCount(count);
-	}
-	return baseDescription;
+        int count = (int) commentsDao.findCommentCountForComponent(baseDescription
+                .getId());
+        baseDescription.setCommentsCount(count);
+        baseDescription.setContent(jpaComponentDao.findContentByComponentId(baseDescription
+                .getId()));
     }
 
     /**
-     * 
-     * @param cmdId
-     *            CMD id
+     * Update {@link BaseDescription#getCommentsCount()
+     *
+     * @param baseDescription
+     */
+    private List<BaseDescription> augment(List<BaseDescription> baseDescription) {
+        if (baseDescription.isEmpty()) {
+            return baseDescription;
+        }
+        Map<String, BaseDescription> map = new HashMap<String, BaseDescription>();
+        List<String> idlist = new ArrayList<String>();
+        for (BaseDescription c : baseDescription) {
+            if (c != null) {
+                idlist.add(c.getId());
+                map.put(c.getId(), c);
+            }
+        }
+        List<Object[]> tuples = commentsDao
+                .findCommentCountForComponents(idlist);
+        for (Object[] tuple : tuples) {
+            String id = tuple[0].toString();
+            int count = Integer.parseInt(tuple[1].toString());
+            map.get(id).setCommentsCount(count);
+        }
+        return baseDescription;
+    }
+
+    /**
+     *
+     * @param cmdId CMD id
      * @return Whether the specified item is in the public space
      */
     @Override
     public boolean isPublic(String cmdId) {
-	BaseDescription baseDescription = jpaComponentDao.findByComponentId(cmdId);
-	return baseDescription != null && baseDescription.isPublic();
+        BaseDescription baseDescription = jpaComponentDao.findByComponentId(cmdId);
+        return baseDescription != null && baseDescription.isPublic();
     }
 
     /**
-     * 
-     * @param cmdId
-     *            CMD id
-     * @param userId
-     *            User db id of workspace owner
+     *
+     * @param cmdId CMD id
+     * @param userId User db id of workspace owner
      * @return Whether the specified item is in the specified user's workspace
      */
     @Override
     public boolean isInUserSpace(String cmdId, Number userId) {
-	BaseDescription baseDescription = jpaComponentDao.findByComponentId(cmdId);
-	boolean b = baseDescription != null && !baseDescription.isPublic()
-		&& compare(baseDescription.getUserId(), userId);
-	return b;
+        BaseDescription baseDescription = jpaComponentDao.findByComponentId(cmdId);
+        boolean b = baseDescription != null && !baseDescription.isPublic()
+                && compare(baseDescription.getUserId(), userId);
+        return b;
     }
 
     /**
-     * 
-     * @param cmdId
-     *            CMD id
-     * @param userId
-     *            User db id of workspace owner, null for public registry
+     *
+     * @param cmdId CMD id
+     * @param userId User db id of workspace owner, null for public registry
      * @return Whether the specified item is in the specified workspace (user or
-     *         public)
+     * public)
      */
 //    @Override
 //    public boolean isAccessible(String cmdId, Number userId) {
@@ -173,228 +171,217 @@ public class ComponentDaoImpl implements ComponentDao {
 //	    return this.isInUserSpace(cmdId, userId);
 //	}
 //    }
-
     /**
-     * 
-     * @param cmdId
-     *            Profile or component Id (not primary key)
+     *
+     * @param cmdId Profile or component Id (not primary key)
      * @return String value of XML content for profile or component
      */
     @Override
     public String getContent(boolean isDeleted, String cmdId) {
-	return jpaComponentDao.findContentByComponentId(cmdId, isDeleted);
+        return jpaComponentDao.findContentByComponentId(cmdId, isDeleted);
     }
 
     /**
-     * @param description
-     *            Description to insert
-     * @param content
-     *            Content to insert and refer to from description
+     * @param description Description to insert
+     * @param content Content to insert and refer to from description
      * @return Id of newly inserted description
      */
     @Override
     public Number insertDescription(BaseDescription description, String content,
-	    boolean isPublic, Number userId) {
+            boolean isPublic, Number userId) {
 
-	if (description.getId() != null
-		&& jpaComponentDao.findByComponentId(description.getId()) != null) {
-	    throw new IllegalArgumentException("Component "
-		    + description.getId() + " already in DB");
-	}
-	if (content == null)
-	    content = "";
-	BaseDescription copy = castDown(description);
-	copy.setContent(content);
-	copy.setPublic(isPublic);
-	copy.setUserId(toString(userId));
+        if (description.getId() != null
+                && jpaComponentDao.findByComponentId(description.getId()) != null) {
+            throw new IllegalArgumentException("Component "
+                    + description.getId() + " already in DB");
+        }
+        if (content == null) {
+            content = "";
+        }
+        BaseDescription copy = castDown(description);
+        copy.setContent(content);
+        copy.setPublic(isPublic);
+        copy.setUserId(toString(userId));
         copy.setCreatorName(description.getCreatorName());
-	copy = jpaComponentDao.saveAndFlush(copy);
-	jpaComponentDao.updateContent(copy.getId(), content);
-	return copy.getDbId();
+        copy = jpaComponentDao.saveAndFlush(copy);
+        jpaComponentDao.updateContent(copy.getId(), content);
+        return copy.getDbId();
     }
 
     /**
      * Updates a description by database id
-     * 
-     * @param id
-     *            Id (key) of description record
-     * @param description
-     *            New values for description (leave null to not change)
-     * @param content
-     *            New content for description (leave null to not change)
+     *
+     * @param id Id (key) of description record
+     * @param description New values for description (leave null to not change)
+     * @param content New content for description (leave null to not change)
      */
     @Override
     public void updateDescription(Number id, BaseDescription description,
-	    String content) {
-	if (content == null)
-	    content = "";
-	if (description != null) {
-	    // Update description
-	    BaseDescription copy = jpaComponentDao.findByComponentId(description
-		    .getId());
-	    copyPersistentProperties(description, copy);
-	    jpaComponentDao.saveAndFlush(copy);
-	    jpaComponentDao.updateContent(copy.getId(), content);
-	}
+            String content) {
+        if (content == null) {
+            content = "";
+        }
+        if (description != null) {
+            // Update description
+            BaseDescription copy = jpaComponentDao.findByComponentId(description
+                    .getId());
+            copyPersistentProperties(description, copy);
+            jpaComponentDao.saveAndFlush(copy);
+            jpaComponentDao.updateContent(copy.getId(), content);
+        }
 
-	if (content != null) {
-	    BaseDescription copy = jpaComponentDao.findOne(id.longValue());
-	    copy.setContent(content);
-	    jpaComponentDao.saveAndFlush(copy);
-	    jpaComponentDao.updateContent(copy.getId(), content);
-	}
+        if (content != null) {
+            BaseDescription copy = jpaComponentDao.findOne(id.longValue());
+            copy.setContent(content);
+            jpaComponentDao.saveAndFlush(copy);
+            jpaComponentDao.updateContent(copy.getId(), content);
+        }
     }
 
     /**
      * Retrieves description by it's primary key Id
-     * 
-     * @param id
-     *            Description key
+     *
+     * @param id Description key
      * @return The description, if it exists; null otherwise
      */
     @Override
     public BaseDescription getById(Number id) {
-	BaseDescription baseDescription = jpaComponentDao.findOne(id.longValue());
-	if (baseDescription != null && !baseDescription.isDeleted()) {
-	    augment(baseDescription);
-	    return baseDescription;
-	}
-	return null;
+        BaseDescription baseDescription = jpaComponentDao.findOne(id.longValue());
+        if (baseDescription != null && !baseDescription.isDeleted()) {
+            augment(baseDescription);
+            return baseDescription;
+        }
+        return null;
     }
 
     /**
      * Get by ComponentId / ProfileId, whether in userspace or public
-     * 
-     * @param id
-     *            Full component id
+     *
+     * @param id Full component id
      * @return The description, if it exists; null otherwise
      */
     @Override
     public BaseDescription getByCmdId(String id) {
-	BaseDescription baseDescription = jpaComponentDao.findByComponentId(id);
-	if (baseDescription != null && !baseDescription.isDeleted()) {
-	    augment(baseDescription);
-	    return baseDescription;
-	}
-	return null;
+        BaseDescription baseDescription = jpaComponentDao.findByComponentId(id);
+        if (baseDescription != null && !baseDescription.isDeleted()) {
+            augment(baseDescription);
+            return baseDescription;
+        }
+        return null;
     }
 
-  
     /**
-     * 
-     * @param cmdId
-     *            CMD Id of description
+     *
+     * @param cmdId CMD Id of description
      * @return Database id for description record
      */
     @Override
     public Number getDbId(String cmdId) {
-	Number id = null;
-	BaseDescription c = jpaComponentDao.findByComponentId(cmdId);
-	if (c != null)
-	    id = c.getDbId();
-	return id;
+        Number id = null;
+        BaseDescription c = jpaComponentDao.findByComponentId(cmdId);
+        if (c != null) {
+            id = c.getDbId();
+        }
+        return id;
     }
 
     /**
-     * 
+     *
      * @return All descriptions in the public space. Won't include xml content
-     *         and comments count.
+     * and comments count.
      */
     @Override
     public List<BaseDescription> getPublicDescriptions() {
-	return augment(jpaComponentDao.findPublicItems());
+        return augment(jpaComponentDao.findPublicItems());
     }
 
     /**
      * @return List of deleted descriptions in user space or in public when
-     *         userId=null. Won't include xml content and comments count.
+     * userId=null. Won't include xml content and comments count.
      * @param userId
      */
     @Override
     public List<BaseDescription> getDeletedDescriptions(Number userId) {
-	List<BaseDescription> list = null;
-	if (userId != null) {
-	    list = jpaComponentDao.findDeletedItemsForUser(userId.longValue());
-	} else {
-	    list = jpaComponentDao.findPublicDeletedItems();
-	}
-	list = augment(list);
-	return list;
+        List<BaseDescription> list = null;
+        if (userId != null) {
+            list = jpaComponentDao.findDeletedItemsForUser(userId.longValue());
+        } else {
+            list = jpaComponentDao.findPublicDeletedItems();
+        }
+        list = augment(list);
+        return list;
     }
 
     /**
-     * 
+     *
      * @return All the user's descriptions not in the public space .Won't
-     *         include xml content and comments count.
+     * include xml content and comments count.
      */
     @Override
     public List<BaseDescription> getPrivateBaseDescriptions(Number userId, String prefix) {
-        return augment(jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(),prefix + "%"));
-	//return augment(jpaComponentDao.findNotPublishedUserItems(userId.longValue(),prefix + "%"));
+        return augment(jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(), prefix + "%"));
+        //return augment(jpaComponentDao.findNotPublishedUserItems(userId.longValue(),prefix + "%"));
     }
 
-   
     @Override
     public void setDeleted(BaseDescription desc, boolean isDeleted) {
-	BaseDescription copy = jpaComponentDao.findByComponentId(desc.getId());
-	copy.setDeleted(isDeleted);
-	jpaComponentDao.saveAndFlush(copy);
+        BaseDescription copy = jpaComponentDao.findByComponentId(desc.getId());
+        copy.setDeleted(isDeleted);
+        jpaComponentDao.saveAndFlush(copy);
     }
 
     @Override
     public void setPublished(Number id, boolean published) {
-	BaseDescription copy = jpaComponentDao.findOne(id.longValue());
-	copy.setPublic(published);
-	jpaComponentDao.saveAndFlush(copy);
+        BaseDescription copy = jpaComponentDao.findOne(id.longValue());
+        copy.setPublic(published);
+        jpaComponentDao.saveAndFlush(copy);
     }
 
     /**
-     * 
-     * @param id
-     *            Id of description record
+     *
+     * @param id Id of description record
      * @return Principal name of description's owner, if any. Otherwise, null.
      */
     @Override
     public String getOwnerPrincipalName(Number id) {
-	BaseDescription baseDescription = getById(id);
-	if (baseDescription == null)
-	    return null;
+        BaseDescription baseDescription = getById(id);
+        if (baseDescription == null) {
+            return null;
+        }
 
-	long userId = baseDescription.getDbUserId();
-	RegistryUser user = userDao.findOne(userId);
-	if (user == null)
-	    return null;
+        long userId = baseDescription.getDbUserId();
+        RegistryUser user = userDao.findOne(userId);
+        if (user == null) {
+            return null;
+        }
 
-	return user.getPrincipalName();
+        return user.getPrincipalName();
     }
 
     @Override
     public List<BaseDescription> getPublicBaseDescriptions(String prefix) {
-	return augment(jpaComponentDao.findPublishedItems(prefix + "%"));
+        return augment(jpaComponentDao.findPublishedItems(prefix + "%"));
     }
 
-   
     @Override
     public List<String> getAllNonDeletedProfileIds() {
-	return jpaComponentDao.findNonDeletedItemIds(ProfileDescription.PROFILE_PREFIX+"%");
+        return jpaComponentDao.findNonDeletedItemIds(ProfileDescription.PROFILE_PREFIX + "%");
     }
 
     @Override
     public List<String> getAllNonDeletedComponentIds() {
-	return jpaComponentDao.findNonDeletedItemIds(ComponentDescription.COMPONENT_PREFIX+"%");
+        return jpaComponentDao.findNonDeletedItemIds(ComponentDescription.COMPONENT_PREFIX + "%");
     }
-    
+
     @Override
     public List<BaseDescription> getAllNonDeletedDescriptions() {
-	return jpaComponentDao.findNonDeletedDescriptions();
+        return jpaComponentDao.findNonDeletedDescriptions();
     }
-    
+
     // Olha was here
     @Override
     public List<String> getAllItemIdsInGroup(String prefix, Long groupId) {
         // we are ineterested only in non-published components in the group
-	return jpaComponentDao.findAllItemIdsInGroup(false, prefix + "%", groupId);
+        return jpaComponentDao.findAllItemIdsInGroup(false, prefix + "%", groupId);
     }
-    
-   
 }
