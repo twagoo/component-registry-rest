@@ -149,6 +149,10 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         groupService.makeMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), "group B");
     }
     
+     private void MakeGroupC() throws ItemNotFoundException{
+        groupService.createNewGroup("group C", "anotherPrincipal");
+    }
+    
      private void fillUpGroupB() throws ParseException, JAXBException, ItemNotFoundException{
          
         MakeGroupB();
@@ -174,6 +178,32 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         groupService.addOwnership(ownership);
         
     }
+     
+     private void fillUpGroupC() throws ParseException, JAXBException, ItemNotFoundException{
+         
+        MakeGroupC();
+        
+        RegistryTestHelper.addProfile(baseRegistry, "Cprofile-1", false);
+        RegistryTestHelper.addComponent(baseRegistry, "Ccomponent-1", false);
+        RegistryTestHelper.addComponent(baseRegistry, "Ccomponent-2", false);
+        
+        Ownership ownership = new Ownership();
+        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX+"Cprofile-1");
+        ownership.setGroupId(3);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1");
+        ownership.setGroupId(3);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"Ccomponent-2");
+        ownership.setGroupId(3);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+    }
     
  //    Response createNewGroup(String groupName) throws IOException;
     
@@ -186,6 +216,8 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(200, cr.getStatus());
         assertEquals("Group with the name newGroup is created and given an id 1", cr.getEntity(String.class));
     }
+    
+    
     
     
 //  List<Group> getGroupsOwnedByUser(String pricipalName) throws IOException;
@@ -222,7 +254,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         
         MakeGroupA();
         MakeGroupB();
-        
         // test itself
         
        List<Group> result = this.getAuthenticatedResource(getResource()
@@ -329,7 +360,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         
         MakeGroupA();
         MakeGroupB();
-        
         // test itself
         
        //MultivaluedMap<String, String> params  = new  MultivaluedHashMap<String, String>(); 
@@ -426,5 +456,45 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 //    Response transferItemOwnershipToGroup(String itemId, long groupId) throws IOException;   
 //   
 
+    @Test
+    public void testTransferOwnership() throws Exception{
+        System.out.println("test makeTransferOwnership");
+        
+        fillUpGroupA();
+        fillUpGroupB();        
+        fillUpGroupC();
+        // test itself
+        
+        
+       RegistryTestHelper.addComponent(baseRegistry, "test_component", false);
+       RegistryTestHelper.addProfile(baseRegistry, "test_profile", false);
+       String test_profile_id = ProfileDescription.PROFILE_PREFIX+"test_profile";
+       String test_component_id = ComponentDescription.COMPONENT_PREFIX+"test_component";
+       //I'm not a member
+       ClientResponse cr  = this.getAuthenticatedResource(getResource()
+                .path("/registry/items/"+test_profile_id+"/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+       assertEquals(403, cr.getStatus());
+       
+       //make me a member
+       groupService.makeMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), "group C");
+       assertTrue(groupService.userGroupMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), "3"));
+       
+       cr  = this.getAuthenticatedResource(getResource()
+                .path("/registry/items/"+test_profile_id+"/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+       assertEquals(200, cr.getStatus());
+       cr  = this.getAuthenticatedResource(getResource()
+                .path("/registry/items/"+test_component_id+"/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+       assertEquals(200, cr.getStatus());
+       
+       
+       List<String> components = groupService.getComponentIdsInGroup(3);
+       assertEquals(3, components.size());
+       assertEquals(test_component_id, components.get(2));
+       List<String> profiles = groupService.getProfileIdsInGroup(3);
+       assertEquals(2, profiles.size());
+       assertEquals(test_profile_id, profiles.get(1));
+       
+    }
+    
 
 }
