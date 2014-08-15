@@ -329,8 +329,9 @@ public class GroupServiceImpl implements GroupService {
             throw new UserUnauthorizedException("User " + principal + " is not a member of group " + groupName);
         }
 
-        String creatorName = item.getCreatorName();
-        if (!creatorName.equals(principal)) {
+        long userId = item.getDbUserId();
+        long principalId = userDao.getByPrincipalName(principal).getId();
+        if (userId != principalId) {
             throw new UserUnauthorizedException("User " + principal + " is not creator of the item  " + item.getName());
         }
 
