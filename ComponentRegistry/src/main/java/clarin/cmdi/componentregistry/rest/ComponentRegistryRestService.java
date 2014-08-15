@@ -27,8 +27,6 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.UniformInterfaceException;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
@@ -60,6 +58,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -67,6 +66,8 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +189,7 @@ public class ComponentRegistryRestService implements
             LOG.debug(
                     "Releasing {} registered components into the world ({} millisecs)",
                     result.size(), (System.currentTimeMillis() - start));
-           
+
             return result;
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -225,7 +226,7 @@ public class ComponentRegistryRestService implements
             LOG.debug(
                     "Releasing {} registered components into the world ({} millisecs)",
                     result.size(), (System.currentTimeMillis() - start));
-             
+
             return result;
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -552,7 +553,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    
     @Override
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
@@ -567,7 +567,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    
     @Override
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
@@ -880,7 +879,7 @@ public class ComponentRegistryRestService implements
         }
 
         LOG.info("Component with id: {} deleted.", componentId);
-        return Response.ok("Component with id" + componentId+" deleted.").build();
+        return Response.ok("Component with id" + componentId + " deleted.").build();
     }
 
     @Override
@@ -1790,5 +1789,191 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new BaseDescription();
         }
+    }
+
+    // Group Service (added by Olha)
+    @Override
+    @POST
+    @Path("/groups/create")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+        MediaType.APPLICATION_JSON})
+    public Response createNewGroup(@QueryParam("groupName") String groupName) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            Number id = groupService.createNewGroup(groupName, principal.getName());
+            return Response.ok("Group with the name " + groupName + " is created and given an id " + id).build();
+        } catch (AuthenticationFailException e) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/groups/principal")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+        MediaType.APPLICATION_JSON})
+    public List<Group> getGroupsOwnedByUser(@QueryParam("principalName") String pricipalName) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            return groupService.getGroupsOwnedByUser(principal.getName());
+        } catch (AuthenticationFailException e) {
+            response.sendError(Status.UNAUTHORIZED.getStatusCode());
+            return new ArrayList<Group>();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/groups/names")
+    public Response listGroupNames() throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            List<String> result = groupService.listGroupNames();
+            //final GenericEntity<List<String>> entity  = new GenericEntity<List<String>>(result){};
+            //return Response.status(Status.OK).entity(entity).build();
+            StringsWrapper ids = new StringsWrapper();
+            ids.setStrings(result);
+            return Response.status(Status.OK).entity(ids).build();
+        } catch (AuthenticationFailException e) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/groups/ownership")
+    public Response isOwner(@QueryParam("groupName") String groupName) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            Boolean isOwner = groupService.isUserOwnerOfGroup(groupName, principal.getName());
+            return Response.ok(isOwner.toString()).build();
+        } catch (AuthenticationFailException e) {
+            return Response.serverError().status(Status.UNAUTHORIZED).build();
+        }
+    }
+
+    @Override
+    @POST
+    @Path("/groups/makemember")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+        MediaType.APPLICATION_JSON})
+    public Response makeGroupMember(@QueryParam("groupName") String groupName, @QueryParam("principalName") String principalName) throws IOException {
+        try {
+            ComponentRegistry registry = this.getBaseRegistry();
+            Number id = registry.makeGroupMember(principalName, groupName);
+            return Response.ok(id.toString()).build();
+        } catch (UserUnauthorizedException e) {
+            return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+        } catch (ItemNotFoundException e) {
+            return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+        
+        } catch (AuthenticationFailException e) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
+    
+//    @Override
+//    @DELETE
+//    @Path("/groups/removemember")
+//    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+//        MediaType.APPLICATION_JSON})
+//    public Response removeGroupMember(@QueryParam("groupName") String groupName, @QueryParam("principalName") String principalName) throws IOException {
+//        try {
+//            ComponentRegistry registry = this.getBaseRegistry();
+//            Number id = registry.removeGroupMember(principalName, groupName);
+//            return Response.ok(id.toString()).build();
+//        } catch (UserUnauthorizedException e) {
+//            return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
+//        } catch (ItemNotFoundException e) {
+//            return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+//        
+//        } catch (AuthenticationFailException e) {
+//            return Response.status(Status.UNAUTHORIZED).build();
+//        }
+//    }
+
+    @Override
+    @GET
+    @Path("/groups/profiles")
+    public Response listProfiles(@QueryParam("groupId") String groupId) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            List<String> result = groupService.getProfileIdsInGroup(Long.parseLong(groupId));
+            StringsWrapper ids = new StringsWrapper();
+            ids.setStrings(result);
+            return Response.status(Status.OK).entity(ids).build();
+        } catch (AuthenticationFailException e) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/groups/components")
+    public Response listComponents(@QueryParam("groupId") String groupId) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            List<String> result = groupService.getComponentIdsInGroup(Long.parseLong(groupId));
+            StringsWrapper ids = new StringsWrapper();
+            ids.setStrings(result);
+            return Response.status(Status.OK).entity(ids).build();
+        } catch (AuthenticationFailException e) {
+            response.sendError(Status.UNAUTHORIZED.getStatusCode());
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/groups/nameById")
+    public Response getGroupNameById(@QueryParam("groupId") String groupId) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            String name = groupService.getGroupNameById(Long.parseLong(groupId));
+            return Response.ok(name).build();
+        } catch (AuthenticationFailException e) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        } catch (ItemNotFoundException e) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    @Override
+    @GET
+    @Path("/groups/idByName")
+    public Response getGroupIdByName(@QueryParam("groupName") String groupName) throws IOException {
+
+        try {
+            Principal principal = this.checkAndGetUserPrincipal();
+            Number id = groupService.getGroupIdByName(groupName);
+            return Response.ok(id.toString()).build();
+        } catch (AuthenticationFailException e) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        } catch (ItemNotFoundException e) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    @XmlRootElement(name = "Identifiers")
+    public static class StringsWrapper {
+
+        @XmlElement(name = "item")
+        List<String> strings = new ArrayList<String>();
+
+        StringsWrapper() {
+        }
+
+        public void setStrings(List<String> strings) {
+            this.strings = strings;
+        }
+        
+       
     }
 }

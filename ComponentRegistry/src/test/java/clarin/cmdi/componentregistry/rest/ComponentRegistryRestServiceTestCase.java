@@ -6,6 +6,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
@@ -27,8 +28,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 
@@ -51,6 +50,10 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected final static GenericType<List<ComponentDescription>> COMPONENT_LIST_GENERICTYPE = new GenericType<List<ComponentDescription>>() {
     };
     protected final static GenericType<List<Comment>> COMMENT_LIST_GENERICTYPE = new GenericType<List<Comment>>() {
+    };
+    protected final static GenericType<List<Group>> GROUP_LIST_GENERICTYPE = new GenericType<List<Group>>() {
+    };
+    protected final static GenericType<List<String>> STRING_LIST_GENERICTYPE = new GenericType<List<String>>() {
     };
 
     private static SingletonTestContainerFactory _testContainerFactory;

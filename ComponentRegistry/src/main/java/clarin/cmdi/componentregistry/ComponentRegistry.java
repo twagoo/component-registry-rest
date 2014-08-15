@@ -235,4 +235,8 @@ public interface ComponentRegistry {
     
     Boolean isItemPublic(String id) throws ItemNotFoundException;
     
+    Number makeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException;
+    
+    //long removeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException;
+    
 }

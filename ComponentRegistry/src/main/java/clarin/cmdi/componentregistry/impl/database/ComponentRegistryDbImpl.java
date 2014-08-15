@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -153,7 +154,30 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             return null;
         }
     }
-
+    
+    @Override
+    public Number makeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException{
+        RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
+        if  (groupService.isUserOwnerOfGroup(groupName, regOwner.getPrincipalName()) || 
+                configuration.isAdminUser(regOwner.getPrincipalName())) {
+        return groupService.makeMember(principalName, groupName);
+        } else {
+            throw new UserUnauthorizedException("The registry owner is not the admin or not the owner of the group and cannot add users to the group");
+        }
+    }
+    
+//    @Override
+//    public long removeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException{
+//        RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
+//        if  (groupService.isUserOwnerOfGroup(groupName, regOwner.getPrincipalName()) || 
+//                configuration.isAdminUser(regOwner.getPrincipalName())) {
+//        return groupService.removeMember(principalName, groupName);
+//        } else {
+//            throw new UserUnauthorizedException("The registry owner is not the admin or not the owner of the group and cannot add users to the group");
+//        }
+//    }
+    
+   
     @Override
     public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException {
         try {
@@ -959,4 +983,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
     }
+    
+    
 }

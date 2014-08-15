@@ -42,6 +42,8 @@ public final class RegistryTestHelper {
     public void setMarshaller(MDMarshaller marshaller) {
 	RegistryTestHelper.marshaller = marshaller;
     }
+    
+   
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
 	return addComponent(testRegistry, id, getComponentTestContent(), isPublic);
@@ -110,6 +112,8 @@ public final class RegistryTestHelper {
 	    JAXBException, ItemNotFoundException {
 	return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()), isPublic);
     }
+    
+    
 
     private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
 	    JAXBException, ItemNotFoundException {

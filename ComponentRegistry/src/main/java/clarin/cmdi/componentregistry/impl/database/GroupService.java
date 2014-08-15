@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.List;
 
@@ -48,13 +49,8 @@ public interface GroupService {
      */
     List<String> listGroupNames();
 
-    /**
-     * Determines whether a user is the direct owner of a group
-     * @param groupId
-     * @param user
-     * @return
-     */
-    boolean isUserOwnerOfGroup(long groupId, RegistryUser user);
+   
+    boolean isUserOwnerOfGroup(String groupName, String ownerPrincipalName);
     
     /**
      * Add an ownership of a user or group to a profile or component. Will check ownership for plausibility and will fail if that ownership already exists.
@@ -87,7 +83,9 @@ public interface GroupService {
      * @param groupName
      * @return database ID of group membership row
      */
-    long makeMember(String userName, String groupName);
+    long makeMember(String userName, String groupName) throws ItemNotFoundException;
+    
+   // long removeMember(String userName, String groupName) throws ItemNotFoundException;
     
     /**
      * Move ownership of a component or profile from a user to a group
@@ -129,4 +127,7 @@ public interface GroupService {
     
     boolean userGroupMember(String principalName, String groupId);
    
+    public  Number  getGroupIdByName(String groupName) throws ItemNotFoundException;
+    
+    public  String  getGroupNameById(long groupId) throws ItemNotFoundException;
 }

@@ -15,5 +15,7 @@ public interface GroupMembershipDao extends JpaRepository<GroupMembership, Strin
 
     @Query("select gm from GroupMembership gm where gm.userId = ?1 and gm.groupId = ?2")
     GroupMembership findMembership(long userId, long groupId);
-
+//
+//    @Query("delete gm from GroupMembership gm where gm.userId = ?1 and gm.groupId = ?2")
+//    int deleteMembership(long userId, long groupId);
 }
