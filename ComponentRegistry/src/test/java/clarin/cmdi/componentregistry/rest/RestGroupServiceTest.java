@@ -1149,4 +1149,69 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         baseRegistry.setGroupId(2);
         assertEquals(0, baseRegistry.getProfileDescriptions().size());
     }
+      
+      @Test  
+    public void testDeleteCommentFromGroupComponentAndProfile() throws Exception {
+
+        System.out.println("test deleteCommentFromGroupComponent");
+
+        
+        fillUpGroupA();
+        fillUpGroupB();        
+        fillUpGroupC();
+        
+         RegistryTestHelper.addComment(baseRegistry, "COMMENTc1",  ComponentDescription.COMPONENT_PREFIX + "component-1",
+                "JUnit@test.com");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTp1",  ProfileDescription.PROFILE_PREFIX + "profile-1",
+                "JUnit@test.com");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTBc1",  ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1",
+                "anotherPrincipal");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTBp1",  ProfileDescription.PROFILE_PREFIX + "Bprofile-1",
+                "anotherPrincipal");
+       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCc1",  ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1",
+                "anotherPrincipal");
+       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1",  ProfileDescription.PROFILE_PREFIX + "Cprofile-1","anotherPrincipal");
+         
+        ClientResponse response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").delete(
+                ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").get(
+                ClientResponse.class);
+        assertEquals(404, response.getStatus());
+        
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1/comments/3").delete(
+                ClientResponse.class);
+        assertEquals(403, response.getStatus());
+        
+        
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5").delete(
+                ClientResponse.class);
+        assertEquals(403, response.getStatus());
+
+       
+       response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").delete(
+                ClientResponse.class);
+        assertEquals(200, response.getStatus());
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").get(
+                ClientResponse.class);
+        assertEquals(404, response.getStatus());
+        
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1/comments/4").delete(
+                ClientResponse.class);
+        assertEquals(403, response.getStatus());
+        
+        
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6").delete(
+                ClientResponse.class);
+        assertEquals(403, response.getStatus());
+        
+    }
 }
