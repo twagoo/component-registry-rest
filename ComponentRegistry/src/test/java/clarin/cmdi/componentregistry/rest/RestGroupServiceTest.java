@@ -1065,4 +1065,88 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(2, components.size());  
     }
     
+      @Test
+    public void testDeleteProfileAndComponentFromGroup() throws Exception {
+
+        System.out.println("test deleteProfileAndComponentFromGroup");
+
+        fillUpGroupA();
+        fillUpGroupB();        
+        fillUpGroupC();
+        
+        ClientResponse response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "component-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "component-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
+        
+        // my group, not my component 
+        
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "Bcomponent-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "Bcomponent-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
+        
+        // not my group
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "Ccomponent-1").delete(ClientResponse.class);
+        assertEquals(403, response.getStatus());
+        
+        baseRegistry.setRegistrySpace(RegistrySpace.GROUP);
+        baseRegistry.setGroupId(1);
+        assertEquals(1, baseRegistry.getComponentDescriptions().size());
+        baseRegistry.setGroupId(2);
+        assertEquals(1, baseRegistry.getComponentDescriptions().size());
+//        baseRegistry.setGroupId(3);
+//        assertEquals(2, baseRegistry.getComponentDescriptions().size());
+        
+        baseRegistry.setRegistrySpace(null);
+        baseRegistry.setGroupId(null);
+        
+        // profiles
+        
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "profile-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "profile-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
+        
+        // my group, not my component 
+        
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "Bprofile-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "Bprofile-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
+        
+        // not my group
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "Cprofile-1").delete(ClientResponse.class);
+        assertEquals(403, response.getStatus());
+        
+        baseRegistry.setRegistrySpace(RegistrySpace.GROUP);
+        baseRegistry.setGroupId(1);
+        assertEquals(0, baseRegistry.getProfileDescriptions().size());
+        baseRegistry.setGroupId(2);
+        assertEquals(0, baseRegistry.getProfileDescriptions().size());
+    }
 }

@@ -229,136 +229,89 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
     
   
     
-     @Test
-    public void testPublishGroupProfileAndComponent() throws Exception {
+    @Test
+    public void testDeleteProfileAndComponentFromGroup() throws Exception {
 
-        System.out.println("testPublishProfile");
+        System.out.println("test deleteProfileAndComponentFromGroup");
 
         fillUpGroupA();
         fillUpGroupB();        
         fillUpGroupC();
         
-        baseRegistry.setRegistrySpace(RegistrySpace.PUBLISHED);
+        ClientResponse response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "component-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "component-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
         
-        FormDataMultiPart  form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName"),
-                "Published");
-        RegisterResponse response = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"profile-1" + "/publish"))
-                .type(MediaType.MULTIPART_FORM_DATA).post(
-                RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
-        assertTrue(response.isProfile());
-        assertEquals(ProfileDescription.PROFILE_PREFIX+"profile-1", response.getDescription().getId());
+        // my group, not my component 
         
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "Bcomponent-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "Bcomponent-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
         
-        List<ProfileDescription> profiles = baseRegistry.getProfileDescriptions();
-        assertEquals(1, profiles.size());        
-        ProfileDescription profileDescription = profiles.get(0);
-        assertEquals(ProfileDescription.PROFILE_PREFIX+"profile-1", profileDescription.getId());
-        assertEquals("link:" + ProfileDescription.PROFILE_PREFIX+"profile-1",
-                profileDescription.getHref());
-        assertEquals("Published", profileDescription.getDescription());
+        // not my group
+        response = getAuthenticatedResource(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                + "Ccomponent-1").delete(ClientResponse.class);
+        assertEquals(403, response.getStatus());
         
+        baseRegistry.setRegistrySpace(RegistrySpace.GROUP);
+        baseRegistry.setGroupId(1);
+        assertEquals(1, baseRegistry.getComponentDescriptions().size());
+        baseRegistry.setGroupId(2);
+        assertEquals(1, baseRegistry.getComponentDescriptions().size());
+//        baseRegistry.setGroupId(3);
+//        assertEquals(2, baseRegistry.getComponentDescriptions().size());
         
-          
+        baseRegistry.setRegistrySpace(null);
+        baseRegistry.setGroupId(null);
         
-        // not my profile from "my" group
+        // profiles
         
-        form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName"),
-                "Published");
-        response = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Bprofile-1" + "/publish"))
-                .type(MediaType.MULTIPART_FORM_DATA).post(
-                RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
-        assertTrue(response.isProfile());
-        assertEquals(ProfileDescription.PROFILE_PREFIX+"Bprofile-1", response.getDescription().getId());
-      
-        profiles = baseRegistry.getProfileDescriptions();
-        assertEquals(2, profiles.size());        
-        profileDescription = profiles.get(0);
-        assertEquals(ProfileDescription.PROFILE_PREFIX+"Bprofile-1", profileDescription.getId());
-        assertEquals("link:" + ProfileDescription.PROFILE_PREFIX+"Bprofile-1",
-                profileDescription.getHref());
-        assertEquals("Published", profileDescription.getDescription());
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "profile-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "profile-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
         
-        // not my profile, not my group 
+        // my group, not my component 
         
-       form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName"),
-                "Published");
-        ClientResponse cr = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1" + "/publish"))
-                .type(MediaType.MULTIPART_FORM_DATA).post(
-                ClientResponse.class, form);
-        assertEquals(403, cr.getStatus());
-        profiles = baseRegistry.getProfileDescriptions();
-        assertEquals(2, profiles.size()); 
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "Bprofile-1").delete(ClientResponse.class);
+        assertEquals(200, response.getStatus());
+       
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "Bprofile-1").get(ClientResponse.class);
+        assertEquals(404, response.getStatus());
         
-        /// components 
+        // not my group
+        response = getAuthenticatedResource(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                + "Cprofile-1").delete(ClientResponse.class);
+        assertEquals(403, response.getStatus());
         
-        
-        form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
-                "Published");
-        response = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"component-1" + "/publish"))
-                .type(MediaType.MULTIPART_FORM_DATA).post(
-                RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
-        assertFalse(response.isProfile());
-        assertEquals(ComponentDescription.COMPONENT_PREFIX+"component-1", response.getDescription().getId());
-        
-        
-        List<ComponentDescription> components = baseRegistry.getComponentDescriptions();
-        assertEquals(1, components.size());        
-        ComponentDescription componentDescription = components.get(0);
-        assertEquals(ComponentDescription.COMPONENT_PREFIX+"component-1", componentDescription.getId());
-        assertEquals("link:" + ComponentDescription.COMPONENT_PREFIX+"component-1",
-                componentDescription.getHref());
-        assertEquals("Published", componentDescription.getDescription());
-        
-        
-          
-        
-        // not my profile from "my" group
-        
-        
-         form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
-                "Published");
-        response = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1" + "/publish"))
-                .type(MediaType.MULTIPART_FORM_DATA).post(
-                RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
-        assertFalse(response.isProfile());
-        assertEquals(ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1", response.getDescription().getId());
-        
-        
-        components = baseRegistry.getComponentDescriptions();
-        assertEquals(2, components.size());        
-        componentDescription = components.get(0);
-        assertEquals(ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1", componentDescription.getId());
-        assertEquals("link:" + ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1",
-                componentDescription.getHref());
-        assertEquals("Published", componentDescription.getDescription());
-        
-        
-        // not my profile, not my group 
-        
-        form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
-                "Published");
-        cr = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1" + "/publish"))
-                .type(MediaType.MULTIPART_FORM_DATA).post(
-                ClientResponse.class, form);
-        assertEquals(403, cr.getStatus());
-        components = baseRegistry.getComponentDescriptions();
-        assertEquals(2, components.size());  
+        baseRegistry.setRegistrySpace(RegistrySpace.GROUP);
+        baseRegistry.setGroupId(1);
+        assertEquals(0, baseRegistry.getProfileDescriptions().size());
+        baseRegistry.setGroupId(2);
+        assertEquals(0, baseRegistry.getProfileDescriptions().size());
     }
 
 }
