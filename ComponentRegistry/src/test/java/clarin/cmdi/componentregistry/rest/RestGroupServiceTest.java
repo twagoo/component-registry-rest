@@ -18,6 +18,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
+import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
 import java.text.ParseException;
 import java.util.List;
@@ -626,12 +627,145 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         
     
         ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1"))
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
         
          clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1"))
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+        // particular comments
+        
+       Comment responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+      
+        assertEquals(1, Long.parseLong(responseComment.getId()));
+        
+        responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+       
+        assertEquals(2, Long.parseLong(responseComment.getId()));
+        
+       responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+        assertEquals(3, Long.parseLong(responseComment.getId()));
+        
+        responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+        assertEquals(4, Long.parseLong(responseComment.getId()));
+       
+        clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments/6"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+         clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/5"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+    }
+   
+    @Test
+    public void testGetGroupRss() throws Exception {
+
+        System.out.println("test getGroupRss");
+
+        fillUpGroupA();
+        fillUpGroupB();        
+        fillUpGroupC();
+
+        
+         // lists of profiles and components
+        
+        Rss response = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupid", "1")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(1, response.getChannel().getItem().size());
+        
+         response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupid", "1")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(2, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupid", "2")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(1, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupid", "2")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(2, response.getChannel().getItem().size());
+        
+        ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupid", "3")).accept(MediaType.APPLICATION_XML)
+                .get(ClientResponse.class);
+        
+        assertEquals(403, clientResponse.getStatus());
+       
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTc1",  ComponentDescription.COMPONENT_PREFIX + "component-1",
+                "JUnit@test.com");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTp1",  ProfileDescription.PROFILE_PREFIX + "profile-1",
+                "JUnit@test.com");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTBc1",  ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1",
+                "anotherPrincipal");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTBp1",  ProfileDescription.PROFILE_PREFIX + "Bprofile-1",
+                "anotherPrincipal");
+       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCc1",  ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1",
+                "anotherPrincipal");
+       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1",  ProfileDescription.PROFILE_PREFIX + "Cprofile-1","anotherPrincipal");
+         
+          
+                // lists 
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/rss"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/rss"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/rss"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/rss"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
+        
+        
+    
+        clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments/rss"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+         clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/rss"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
         

@@ -16,6 +16,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
+import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
 import java.text.ParseException;
 import java.util.List;
@@ -206,14 +207,42 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
  
     
     @Test
-    public void testGetGroupComments() throws Exception {
+    public void testGetGroupRss() throws Exception {
 
-        System.out.println("test getGroupComments");
+        System.out.println("test getGroupRss");
 
         fillUpGroupA();
         fillUpGroupB();        
         fillUpGroupC();
 
+        
+         // lists of profiles and components
+        
+        Rss response = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupid", "1")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(1, response.getChannel().getItem().size());
+        
+         response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupid", "1")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(2, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupid", "2")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(1, response.getChannel().getItem().size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupid", "2")).accept(MediaType.APPLICATION_XML)
+                .get(Rss.class);
+        assertEquals(2, response.getChannel().getItem().size());
+        
+        ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupid", "3")).accept(MediaType.APPLICATION_XML)
+                .get(ClientResponse.class);
+        
+        assertEquals(403, clientResponse.getStatus());
        
         RegistryTestHelper.addComment(baseRegistry, "COMMENTc1",  ComponentDescription.COMPONENT_PREFIX + "component-1",
                 "JUnit@test.com");
@@ -230,39 +259,39 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
           
                 // lists 
         
-        List<Comment> response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/"))
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
-                .get(COMMENT_LIST_GENERICTYPE);        
-        assertEquals(1, response.size());
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
         
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/"))
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
-                .get(COMMENT_LIST_GENERICTYPE);        
-        assertEquals(1, response.size());
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
         
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/"))
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
-                .get(COMMENT_LIST_GENERICTYPE);        
-        assertEquals(1, response.size());
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
         
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/"))
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
-                .get(COMMENT_LIST_GENERICTYPE);        
-        assertEquals(1, response.size());
+                .get(Rss.class);        
+        assertEquals(1, response.getChannel().getItem().size());
         
         
     
-        ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1"))
+        clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments/rss"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
         
          clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1"))
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/rss"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
         
