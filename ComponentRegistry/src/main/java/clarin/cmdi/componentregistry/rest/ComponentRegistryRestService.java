@@ -1182,7 +1182,7 @@ public class ComponentRegistryRestService implements
         try {
             Principal principal = checkAndGetUserPrincipal();
             UserCredentials userCredentials = getUserCredentials(principal);
-            ComponentDescription desc = createNewComponentDescription();
+            ComponentDescription desc = this.createNewComponentDescription();
             desc.setCreatorName(userCredentials.getDisplayName());
             desc.setUserId(userCredentials.getPrincipalName()); // Hash used to
             // be created

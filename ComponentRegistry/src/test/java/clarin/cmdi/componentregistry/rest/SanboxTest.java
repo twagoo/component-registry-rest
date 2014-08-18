@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
+import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -33,6 +34,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 /**
  *
@@ -231,69 +233,83 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
     
    
     
-    @Test  
-    public void testDeleteCommentFromGroupComponentAndProfile() throws Exception {
+    @Test
+    public void testRegisterCommentInGroup() throws Exception {
 
-        System.out.println("test deleteCommentFromGroupComponent");
+        System.out.println("testRegisterCommmentInGroup");
 
         
-        fillUpGroupA();
         fillUpGroupB();        
         fillUpGroupC();
-        
-         RegistryTestHelper.addComment(baseRegistry, "COMMENTc1",  ComponentDescription.COMPONENT_PREFIX + "component-1",
-                "JUnit@test.com");
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTp1",  ProfileDescription.PROFILE_PREFIX + "profile-1",
-                "JUnit@test.com");
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTBc1",  ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1",
-                "anotherPrincipal");
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTBp1",  ProfileDescription.PROFILE_PREFIX + "Bprofile-1",
-                "anotherPrincipal");
-       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCc1",  ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1",
-                "anotherPrincipal");
-       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1",  ProfileDescription.PROFILE_PREFIX + "Cprofile-1","anotherPrincipal");
-         
-        ClientResponse response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").delete(
-                ClientResponse.class);
-        assertEquals(200, response.getStatus());
-        response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").get(
-                ClientResponse.class);
-        assertEquals(404, response.getStatus());
-        
-        response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1/comments/3").delete(
-                ClientResponse.class);
-        assertEquals(403, response.getStatus());
-        
-        
-        response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5").delete(
-                ClientResponse.class);
-        assertEquals(403, response.getStatus());
 
-       
-       response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").delete(
-                ClientResponse.class);
-        assertEquals(200, response.getStatus());
+        FormDataMultiPart form = new FormDataMultiPart();        
+        String id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+                RegistryTestHelper.getCommentTestContentStringForProfile("comment1", id),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        CommentResponse response = getAuthenticatedResource(
+                "/registry/profiles/" + id + "/comments").type(
+                MediaType.MULTIPART_FORM_DATA)
+                .post(CommentResponse.class, form);
+        assertTrue(response.isRegistered());
+        assertTrue(response.isInUserSpace());
+        Comment comment = response.getComment();
+        assertNotNull(comment);
+        assertEquals("comment1", comment.getComment());
+        assertEquals("Database test user", comment.getUserName());
+        Assert.notNull(comment.getCommentDate());
+        assertEquals(1, Long.parseLong(comment.getId()));
+
+        // User id should not be serialized!
+        assertEquals(0, comment.getUserId());
+        
+        
+        form = new FormDataMultiPart();        
+        id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+                RegistryTestHelper.getCommentTestContentStringForComponent("comment2", id),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").get(
-                ClientResponse.class);
-        assertEquals(404, response.getStatus());
+                "/registry/components/" + id + "/comments").type(
+                MediaType.MULTIPART_FORM_DATA)
+                .post(CommentResponse.class, form);
+        assertTrue(response.isRegistered());
+        assertTrue(response.isInUserSpace());
+        comment = response.getComment();
+        assertNotNull(comment);
+        assertEquals("comment2", comment.getComment());
+        assertEquals("Database test user", comment.getUserName());
+        Assert.notNull(comment.getCommentDate());
+        assertEquals(2, Long.parseLong(comment.getId()));
+
+        // User id should not be serialized!
+        assertEquals(0, comment.getUserId());
         
-        response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1/comments/4").delete(
-                ClientResponse.class);
-        assertEquals(403, response.getStatus());
+        // not my group
+        
+        form = new FormDataMultiPart();        
+        id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+                RegistryTestHelper.getCommentTestContentStringForProfile("comment3", id),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        ClientResponse cresponse = getAuthenticatedResource(
+                "/registry/profiles/" + id + "/comments").type(
+                MediaType.MULTIPART_FORM_DATA)
+                .post(ClientResponse.class, form);
+        assertEquals(403, cresponse.getStatus());
+
         
         
-        response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6").delete(
-                ClientResponse.class);
-        assertEquals(403, response.getStatus());
-        
+        form = new FormDataMultiPart();        
+        id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+                RegistryTestHelper.getCommentTestContentStringForComponent("comment4", id),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        cresponse = getAuthenticatedResource(
+                "/registry/components/" + id + "/comments").type(
+                MediaType.MULTIPART_FORM_DATA)
+                .post(ClientResponse.class, form);
+        assertEquals(403, cresponse.getStatus());
     }
 
 }

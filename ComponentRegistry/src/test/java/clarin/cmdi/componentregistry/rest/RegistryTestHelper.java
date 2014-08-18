@@ -350,6 +350,8 @@ public final class RegistryTestHelper {
     public static InputStream getCommentTestContent() {
         return getTestCommentContent("Actual", ProfileDescription.PROFILE_PREFIX + "profile1");
     }
+    
+  
 
     /**
      * Testing a big xsd string is a bit hard, so doing a best effort by
