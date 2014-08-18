@@ -523,8 +523,8 @@ public class ComponentRegistryRestService implements
             throws IOException {
         LOG.debug("Comments of component with id {} are requested.", commentId);
         try {
-
-            return this.getBaseRegistry().getSpecifiedCommentInComponent(componentId, commentId);
+            Comment result = this.getBaseRegistry().getSpecifiedCommentInComponent(componentId, commentId);
+            return result;
         } catch (ComponentRegistryException e) {
             response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
             return new Comment();

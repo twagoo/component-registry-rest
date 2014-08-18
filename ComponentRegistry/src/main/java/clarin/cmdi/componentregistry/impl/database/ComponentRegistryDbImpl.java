@@ -277,8 +277,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
-            //Olha was here
-            //if (componentDao.isInRegistry(profileId, getUserId())) {
             if (this.canCurrentUserAccessDescription(profileId)) {
                 final List<Comment> commentsFromProfile = commentsDao.getCommentsFromItem(profileId);
                 this.setCanDeleteInComments(commentsFromProfile);

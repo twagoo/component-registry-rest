@@ -6,35 +6,45 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
+import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.multipart.FormDataMultiPart;
+import java.text.ParseException;
 import java.util.List;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.xml.bind.JAXBException;
 import org.junit.Before;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author olhsha
  */
 public class SanboxTest extends ComponentRegistryRestServiceTestCase {
-
+    
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
-    @Autowired
-    private ComponentRegistryBeanFactory componentRegistryBeanFactory;
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired 
+    private GroupService groupService;
+    @Autowired 
+    private UserDao userDao;
+     @Autowired 
+    private CommentsDao commentsDao;
     private ComponentRegistry baseRegistry;
 
     @Before
@@ -44,9 +54,7 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         baseRegistry = componentRegistryFactory.getBaseRegistry(DummyPrincipal.DUMMY_CREDENTIALS);
     }
 
-    private String expectedUserId(String principal) {
-        return getUserDao().getByPrincipalName(principal).getId().toString();
-    }
+   
     private ComponentDescription component1;
     private ComponentDescription component2;
     private ProfileDescription profile1;
@@ -93,63 +101,213 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
                 ComponentDescription.COMPONENT_PREFIX + "component3",
                 "JUnit@test.com");
     }
-
+    
+     protected void createAntherUserRecord() {
+	RegistryUser user = new RegistryUser();
+	user.setName("Another database test user");
+	user.setPrincipalName("anotherPrincipal");
+	userDao.save(user);
+    }
+     
+    private void MakeGroupA(){
+        groupService.createNewGroup("group A", DummyPrincipal.DUMMY_PRINCIPAL.getName());
+    }
+    
+     private void fillUpGroupA() throws ParseException, JAXBException, ItemNotFoundException{
+         
+        MakeGroupA();
+        
+        RegistryTestHelper.addProfile(baseRegistry, "profile-1", false);
+        RegistryTestHelper.addComponent(baseRegistry, "component-1", false);
+        RegistryTestHelper.addComponent(baseRegistry, "component-2", false);
+        
+        Ownership ownership = new Ownership();
+        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX+"profile-1");
+        ownership.setGroupId(1);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"component-1");
+        ownership.setGroupId(1);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"component-2");
+        ownership.setGroupId(1);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+    }
+     
+     
+    
+    private void MakeGroupB() throws ItemNotFoundException{
+        createAntherUserRecord();
+        groupService.createNewGroup("group B", "anotherPrincipal");
+        groupService.makeMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), "group B");
+    }
+    
+     private void MakeGroupC() throws ItemNotFoundException{
+        groupService.createNewGroup("group C", "anotherPrincipal");
+    }
+    
+     private void fillUpGroupB() throws ParseException, JAXBException, ItemNotFoundException{
+         
+        MakeGroupB();
+        
+        RegistryTestHelper.addProfile(baseRegistry, "Bprofile-1", false);
+        RegistryTestHelper.addComponent(baseRegistry, "Bcomponent-1", false);
+        RegistryTestHelper.addComponent(baseRegistry, "Bcomponent-2", false);
+        
+        Ownership ownership = new Ownership();
+        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX+"Bprofile-1");
+        ownership.setGroupId(2);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1");
+        ownership.setGroupId(2);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"Bcomponent-2");
+        ownership.setGroupId(2);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+    }
+     
+     private void fillUpGroupC() throws ParseException, JAXBException, ItemNotFoundException{
+         
+        MakeGroupC();
+        
+        RegistryTestHelper.addProfileAnotherPrincipal(baseRegistry, "Cprofile-1", false);
+        RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Ccomponent-1", false);
+        RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Ccomponent-2", false);
+        
+        Ownership ownership = new Ownership();
+        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX+"Cprofile-1");
+        ownership.setGroupId(3);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1");
+        ownership.setGroupId(3);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"Ccomponent-2");
+        ownership.setGroupId(3);
+        ownership.setUserId(0);
+        groupService.addOwnership(ownership);
+        
+    }
+    
+ 
+    
     @Test
-    public void testDeleteCommentFromPublicProfile() throws Exception {
+    public void testGetGroupComments() throws Exception {
 
-        System.out.println("testDeleteCommentFromPublicProfile");
+        System.out.println("test getGroupComments");
 
-        fillUpPublicItems();
+        fillUpGroupA();
+        fillUpGroupB();        
+        fillUpGroupC();
 
-        List<Comment> comments = this.getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
-        assertEquals(2, comments.size());
-        Comment aComment = this.getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/" + profile1Comment1.getId())).get(Comment.class);
-        assertNotNull(aComment);
-
-        // Try to delete from other profile
-        ClientResponse response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile2/comments/9999").delete(ClientResponse.class);
-        assertEquals(404, response.getStatus());
-        // Delete from correct profile
-        response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/" + profile1Comment1.getId()).delete(ClientResponse.class);
-        assertEquals(200, response.getStatus());
-
-        comments = this.getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
-        assertEquals(1, comments.size());
-
-        response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/" + profile1Comment2.getId()).delete(ClientResponse.class);
-        assertEquals(200, response.getStatus());
-
-        comments = this.getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
-        assertEquals(0, comments.size());
+       
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTc1",  ComponentDescription.COMPONENT_PREFIX + "component-1",
+                "JUnit@test.com");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTp1",  ProfileDescription.PROFILE_PREFIX + "profile-1",
+                "JUnit@test.com");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTBc1",  ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1",
+                "anotherPrincipal");
+        RegistryTestHelper.addComment(baseRegistry, "COMMENTBp1",  ProfileDescription.PROFILE_PREFIX + "Bprofile-1",
+                "anotherPrincipal");
+       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCc1",  ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1",
+                "anotherPrincipal");
+       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1",  ProfileDescription.PROFILE_PREFIX + "Cprofile-1","anotherPrincipal");
+         
+          
+                // lists 
+        
+        List<Comment> response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMMENT_LIST_GENERICTYPE);        
+        assertEquals(1, response.size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMMENT_LIST_GENERICTYPE);        
+        assertEquals(1, response.size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMMENT_LIST_GENERICTYPE);        
+        assertEquals(1, response.size());
+        
+        response = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMMENT_LIST_GENERICTYPE);        
+        assertEquals(1, response.size());
+        
+        
+    
+        ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+         clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+        // particular comments
+        
+       Comment responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+      
+        assertEquals(1, Long.parseLong(responseComment.getId()));
+        
+        responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+       
+        assertEquals(2, Long.parseLong(responseComment.getId()));
+        
+       responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+        assertEquals(3, Long.parseLong(responseComment.getId()));
+        
+        responseComment = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(Comment.class);        
+        assertNotNull(responseComment);
+        assertEquals(4, Long.parseLong(responseComment.getId()));
+       
+        clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments/6"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
+         clientResponse = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/5"))
+                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
+        assertEquals(403, clientResponse.getStatus());
+        
     }
 
-    private FormDataMultiPart createFormData(Object content) {
-        return createFormData(content, "My Test");
-    }
-
-    private FormDataMultiPart createFormData(Object content, String description) {
-        FormDataMultiPart form = new FormDataMultiPart();
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content,
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
-        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
-                description);
-        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
-        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
-        return form;
-    }
 }
