@@ -154,18 +154,18 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             return null;
         }
     }
-    
+
     @Override
-    public Number makeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException{
+    public Number makeGroupMember(String principalName, String groupName) throws UserUnauthorizedException, ItemNotFoundException {
         RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
-        if  (groupService.isUserOwnerOfGroup(groupName, regOwner.getPrincipalName()) || 
-                configuration.isAdminUser(regOwner.getPrincipalName())) {
-        return groupService.makeMember(principalName, groupName);
+        if (groupService.isUserOwnerOfGroup(groupName, regOwner.getPrincipalName())
+                || configuration.isAdminUser(regOwner.getPrincipalName())) {
+            return groupService.makeMember(principalName, groupName);
         } else {
             throw new UserUnauthorizedException("The registry owner is not the admin or not the owner of the group and cannot add users to the group");
         }
     }
-    
+
 //    @Override
 //    public long removeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException{
 //        RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
@@ -176,10 +176,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 //            throw new UserUnauthorizedException("The registry owner is not the admin or not the owner of the group and cannot add users to the group");
 //        }
 //    }
-    
-   
     @Override
-    public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException {
+    public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
             switch (registrySpace) {
                 case PRIVATE:
@@ -233,7 +231,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException {
+    public List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
             switch (registrySpace) {
                 case PRIVATE:
@@ -860,11 +858,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private List<ComponentDescription> getComponentDescriptionsInGroup(Number groupId)
-            throws ComponentRegistryException, UserUnauthorizedException {
+            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
 
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
-
-        if (!groupService.userGroupMember(principalName, groupId.toString())) {
+        String groupName = groupService.getGroupNameById(groupId.longValue());
+        if (!groupService.userGroupMember(principalName, groupId.toString())
+                && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to components of the group " + groupId);
         }
 
@@ -879,11 +878,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return components;
     }
 
-    private List<ProfileDescription> getProfileDescriptionsInGroup(Number groupId) throws ComponentRegistryException, UserUnauthorizedException {
+    private List<ProfileDescription> getProfileDescriptionsInGroup(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
 
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
-
-        if (!groupService.userGroupMember(principalName, groupId.toString())) {
+        String groupName = groupService.getGroupNameById(groupId.longValue());
+        if (!groupService.userGroupMember(principalName, groupId.toString())
+                && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to profiles of the group " + groupId);
         }
 
@@ -899,8 +899,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws UserUnauthorizedException,
-            ComponentRegistryException {
+    public List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         return this.getProfileDescriptionsInGroup(groupId.longValue());
     }
 
@@ -983,6 +982,4 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
     }
-    
-    
 }

@@ -48,7 +48,8 @@ public final class RegistryTestHelper {
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
 	return addComponent(testRegistry, id, getComponentTestContent(), isPublic);
     }
-
+    
+    
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
 	    JAXBException, UnsupportedEncodingException {
 	return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")), isPublic);
@@ -59,6 +60,26 @@ public final class RegistryTestHelper {
 	ComponentDescription desc = ComponentDescription.createNewDescription();
 	desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
         desc.setUserId(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+	desc.setName(id);
+	desc.setDescription("Test Description");
+	desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
+	desc.setHref("link:" + desc.getId());
+        desc.setPublic(isPublic);
+	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
+	testRegistry.register(desc, spec);
+	return desc;
+    }
+    
+    public static ComponentDescription addComponentAnotherPrincipal(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
+	return addComponentAnotherPrincipal(testRegistry, id, getComponentTestContent(), isPublic);
+    }
+
+     private static ComponentDescription addComponentAnotherPrincipal(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
+	    JAXBException {
+	ComponentDescription desc = ComponentDescription.createNewDescription();
+	desc.setCreatorName("AnotherPrincipal");
+        desc.setUserId("AnotherPrincipal");
+        desc.setDbUserId(2);
 	desc.setName(id);
 	desc.setDescription("Test Description");
 	desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
@@ -120,6 +141,26 @@ public final class RegistryTestHelper {
 	ProfileDescription desc = ProfileDescription.createNewDescription();
 	desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
 	desc.setUserId(DummyPrincipal.DUMMY_CREDENTIALS.getPrincipalName());
+	desc.setName(id);
+	desc.setDescription("Test Description");
+	desc.setId(ProfileDescription.PROFILE_PREFIX + id);
+	desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
+        desc.setPublic(isPublic);
+	CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
+	testRegistry.register(desc, spec);
+	return desc;
+    }
+    
+    public static ProfileDescription addProfileAnotherPrincipal(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
+	return addProfileAnotherPrincipal(testRegistry, id, RegistryTestHelper.getTestProfileContent(), isPublic);
+    }
+    
+    private static ProfileDescription addProfileAnotherPrincipal(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
+	    JAXBException, ItemNotFoundException {
+	ProfileDescription desc = ProfileDescription.createNewDescription();
+	desc.setCreatorName("AnotherPrincipal");
+	desc.setUserId("AnotherPrincipal");
+        desc.setDbUserId(2);
 	desc.setName(id);
 	desc.setDescription("Test Description");
 	desc.setId(ProfileDescription.PROFILE_PREFIX + id);

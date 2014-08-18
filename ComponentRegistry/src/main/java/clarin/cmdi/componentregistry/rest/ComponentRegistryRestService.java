@@ -199,6 +199,11 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
 
+        
+        
+        } catch (ItemNotFoundException e) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
+            return new ArrayList<ComponentDescription>();
         }
 
     }
@@ -234,6 +239,11 @@ public class ComponentRegistryRestService implements
 
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
+            return new ArrayList<ProfileDescription>();
+        
+        
+        } catch (ItemNotFoundException e) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
         }
     }
@@ -1557,6 +1567,10 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new Rss();
         }
+        catch (ItemNotFoundException e) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
+            return new Rss();
+        }
         // obsolete, add group Id
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(!registrySpace.equalsIgnoreCase("published"), getApplicationBaseURI(), "components",
                 Integer.parseInt(limit), components,
@@ -1595,6 +1609,10 @@ public class ComponentRegistryRestService implements
             return new Rss();
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
+            return new Rss();
+        
+        } catch (ItemNotFoundException e) {
+            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(

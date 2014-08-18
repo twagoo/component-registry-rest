@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -52,7 +53,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     @SpringBean
     private MDMarshaller marshaller;
 
-    public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException {
+    public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException, ItemNotFoundException {
         super(parameters);
         adminRegistry.setComponentRegistryFactory(componentRegistryFactory);
         adminRegistry.setComponentDao(componentDao);
@@ -180,7 +181,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         
     }
 
-    private void reloadTreeModel(CMDItemInfo info) throws UserUnauthorizedException {
+    private void reloadTreeModel(CMDItemInfo info) throws UserUnauthorizedException, ItemNotFoundException {
         try {
             tree.setModelObject(createDBTreeModel());
         } catch (ComponentRegistryException e) {
@@ -253,7 +254,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
     }
 
-    private TreeModel createDBTreeModel() throws ComponentRegistryException, UserUnauthorizedException {
+    private TreeModel createDBTreeModel() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new DisplayDataNode("ComponentRegistry", false));
         DefaultMutableTreeNode publicNode = new DefaultMutableTreeNode(new DisplayDataNode("Public", false));
         rootNode.add(publicNode);
@@ -269,7 +270,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         return model;
     }
 
-    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException {
+    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
         parent.add(componentsNode);
         add(componentsNode, registry.getComponentDescriptions(), false, registry.getRegistrySpace());

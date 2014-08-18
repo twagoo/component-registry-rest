@@ -40,7 +40,7 @@ public interface ComponentRegistry {
      * @return List of component descriptions ordered by name ascending
      * @throws ComponentRegistryException
      */
-    List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException;
+    List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
    
     ComponentDescription getComponentDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
@@ -51,7 +51,7 @@ public interface ComponentRegistry {
      * @return List of profile descriptions ordered by name ascending
      * @throws ComponentRegistryException
      */
-    List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException;
+    List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
 
    /**
@@ -59,14 +59,14 @@ public interface ComponentRegistry {
      * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
      * @throws ComponentRegistryException
      */
-    List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException;
+    List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
     /**
     * @param groupId
     * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
     * @throws ComponentRegistryException
     */
-   List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws ComponentRegistryException, UserUnauthorizedException;
+   List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
    ProfileDescription getProfileDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
