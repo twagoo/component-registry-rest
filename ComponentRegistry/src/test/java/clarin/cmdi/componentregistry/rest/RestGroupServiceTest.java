@@ -15,12 +15,15 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
@@ -810,6 +813,121 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/5"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
+        
+    }
+    
+    
+    private FormDataMultiPart createFormData(Object content) {
+        return createFormData(content, "My Test");
+    }
+
+    private FormDataMultiPart createFormData(Object content, String description) {
+        FormDataMultiPart form = new FormDataMultiPart();
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content,
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
+                description);
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        return form;
+    }
+    
+    @Test
+    public void testUpdateGroupComponentAndProfile() throws Exception {
+
+        System.out.println("test updateGorupComponent");
+
+        fillUpGroupA();
+        fillUpGroupB();        
+        fillUpGroupC();
+
+      
+        
+        FormDataMultiPart form = createFormData(
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"component-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertFalse(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        ComponentDescription desc = (ComponentDescription) response.getDescription();
+        assertNotNull(desc);
+        assertEquals("Test1", desc.getName());
+        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+        
+        form = createFormData(
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertFalse(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        desc = (ComponentDescription) response.getDescription();
+        assertNotNull(desc);
+        assertEquals("Test1", desc.getName());
+        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+       
+        form = createFormData(
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(403, cResponse.getStatus());
+        
+        // profile
+        
+        form = createFormData(RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"profile-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertTrue(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        ProfileDescription pdesc = (ProfileDescription) response.getDescription();
+        assertNotNull(pdesc);
+        assertEquals("Test1", pdesc.getName());
+        assertEquals("UPDATE DESCRIPTION!", pdesc.getDescription());
+        
+        form = createFormData(
+                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Bprofile-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertTrue(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        pdesc = (ProfileDescription) response.getDescription();
+        assertNotNull(pdesc);
+        assertEquals("Test1", pdesc.getName());
+        assertEquals("UPDATE DESCRIPTION!", pdesc.getDescription());
+       
+         form = createFormData(
+                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(403, cResponse.getStatus());
         
     }
 

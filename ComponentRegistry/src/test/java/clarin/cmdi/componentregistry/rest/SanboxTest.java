@@ -13,13 +13,14 @@ import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegisterResponse;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
-import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.multipart.FormDataMultiPart;
 import java.text.ParseException;
-import java.util.List;
+import java.util.Date;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBException;
 import org.junit.Before;
@@ -206,136 +207,117 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
     
  
     
-    @Test
-    public void testGetGroupRss() throws Exception {
+     private FormDataMultiPart createFormData(Object content) {
+        return createFormData(content, "My Test");
+    }
 
-        System.out.println("test getGroupRss");
+    private FormDataMultiPart createFormData(Object content, String description) {
+        FormDataMultiPart form = new FormDataMultiPart();
+        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content,
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
+        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
+                description);
+        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
+        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        return form;
+    }
+    
+    @Test
+    public void testUpdateGroupComponentAndProfile() throws Exception {
+
+        System.out.println("test updateGorupComponent");
 
         fillUpGroupA();
         fillUpGroupB();        
         fillUpGroupC();
 
-        
-         // lists of profiles and components
-        
-        Rss response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupid", "1")).accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);
-        assertEquals(1, response.getChannel().getItem().size());
-        
-         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupid", "1")).accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);
-        assertEquals(2, response.getChannel().getItem().size());
-        
-        response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupid", "2")).accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);
-        assertEquals(1, response.getChannel().getItem().size());
-        
-        response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupid", "2")).accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);
-        assertEquals(2, response.getChannel().getItem().size());
-        
-        ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupid", "3")).accept(MediaType.APPLICATION_XML)
-                .get(ClientResponse.class);
-        
-        assertEquals(403, clientResponse.getStatus());
-       
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTc1",  ComponentDescription.COMPONENT_PREFIX + "component-1",
-                "JUnit@test.com");
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTp1",  ProfileDescription.PROFILE_PREFIX + "profile-1",
-                "JUnit@test.com");
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTBc1",  ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1",
-                "anotherPrincipal");
-        RegistryTestHelper.addComment(baseRegistry, "COMMENTBp1",  ProfileDescription.PROFILE_PREFIX + "Bprofile-1",
-                "anotherPrincipal");
-       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCc1",  ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1",
-                "anotherPrincipal");
-       (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1",  ProfileDescription.PROFILE_PREFIX + "Cprofile-1","anotherPrincipal");
-         
-          
-                // lists 
-        
-        response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/rss"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);        
-        assertEquals(1, response.getChannel().getItem().size());
-        
-        response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/rss"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);        
-        assertEquals(1, response.getChannel().getItem().size());
-        
-        response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/rss"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);        
-        assertEquals(1, response.getChannel().getItem().size());
-        
-        response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/rss"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Rss.class);        
-        assertEquals(1, response.getChannel().getItem().size());
-        
-        
-    
-        clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments/rss"))
-                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals(403, clientResponse.getStatus());
-        
-         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/rss"))
-                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals(403, clientResponse.getStatus());
-        
-        // particular comments
-        
-       Comment responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Comment.class);        
-        assertNotNull(responseComment);
       
-        assertEquals(1, Long.parseLong(responseComment.getId()));
         
-        responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Comment.class);        
-        assertNotNull(responseComment);
+        FormDataMultiPart form = createFormData(
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"component-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertFalse(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        ComponentDescription desc = (ComponentDescription) response.getDescription();
+        assertNotNull(desc);
+        assertEquals("Test1", desc.getName());
+        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+        
+        form = createFormData(
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertFalse(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        desc = (ComponentDescription) response.getDescription();
+        assertNotNull(desc);
+        assertEquals("Test1", desc.getName());
+        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
        
-        assertEquals(2, Long.parseLong(responseComment.getId()));
+        form = createFormData(
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(403, cResponse.getStatus());
         
-       responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Comment.class);        
-        assertNotNull(responseComment);
-        assertEquals(3, Long.parseLong(responseComment.getId()));
+        // profile
         
-        responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
-                .accept(MediaType.APPLICATION_XML)
-                .get(Comment.class);        
-        assertNotNull(responseComment);
-        assertEquals(4, Long.parseLong(responseComment.getId()));
+        form = createFormData(RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"profile-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertTrue(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        ProfileDescription pdesc = (ProfileDescription) response.getDescription();
+        assertNotNull(pdesc);
+        assertEquals("Test1", pdesc.getName());
+        assertEquals("UPDATE DESCRIPTION!", pdesc.getDescription());
+        
+        form = createFormData(
+                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Bprofile-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                cResponse.getStatus());
+        response = cResponse.getEntity(RegisterResponse.class);
+        assertTrue(response.isRegistered());
+        assertTrue(response.isProfile());
+        assertTrue(response.isInUserSpace());
+        pdesc = (ProfileDescription) response.getDescription();
+        assertNotNull(pdesc);
+        assertEquals("Test1", pdesc.getName());
+        assertEquals("UPDATE DESCRIPTION!", pdesc.getDescription());
        
-        clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1/comments/6"))
-                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals(403, clientResponse.getStatus());
-        
-         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Ccomponent-1/comments/5"))
-                .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals(403, clientResponse.getStatus());
+         form = createFormData(
+                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                "UPDATE DESCRIPTION!");
+        cResponse = getAuthenticatedResource(getResource().path(
+                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Cprofile-1" + "/update")).type(
+                MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+        assertEquals(403, cResponse.getStatus());
         
     }
 

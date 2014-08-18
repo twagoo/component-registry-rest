@@ -1301,8 +1301,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + desc.getId() + "/update")
-                .queryParam(REGISTRY_SPACE_PARAM, "private")).type(
+                "/registry/components/" + desc.getId() + "/update")).type(
                 MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(ClientResponse.Status.OK.getStatusCode(),
                 cResponse.getStatus());
