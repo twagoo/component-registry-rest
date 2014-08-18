@@ -1293,5 +1293,58 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .post(ClientResponse.class, form);
         assertEquals(403, cresponse.getStatus());
     }
+       
+        @Test
+    public void testGetRegisteredGroupProfilecomponentRawData() throws Exception {
+
+        System.out.println("test getRegisteredComponentAndProfileRawData");
+
+        fillUpGroupB();        
+        fillUpGroupC();
+
+        String id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
+        String component = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(component
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
+        assertTrue(component.endsWith("</xs:schema>"));
+
+        component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(component
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
+        assertTrue(component.endsWith("</CMD_ComponentSpec>"));
+        assertTrue(component.contains("xsi:schemaLocation"));
+        
+        id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
+        String profile = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(profile
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
+        assertTrue(profile.endsWith("</xs:schema>"));
+
+        profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id + "/xml"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(profile
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
+        assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
+        assertTrue(profile.contains("xsi:schemaLocation"));
+
+        id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
+        ClientResponse resp = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get( ClientResponse.class);
+        assertEquals(403, resp.getStatus());
+        
+        id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
+       resp = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get( ClientResponse.class);
+        assertEquals(403, resp.getStatus());
+        
+        
+    }
 
 }

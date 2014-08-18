@@ -234,82 +234,56 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
    
     
     @Test
-    public void testRegisterCommentInGroup() throws Exception {
+    public void testGetRegisteredGroupProfilecomponentRawData() throws Exception {
 
-        System.out.println("testRegisterCommmentInGroup");
+        System.out.println("test getRegisteredComponentAndProfileRawData");
 
-        
         fillUpGroupB();        
         fillUpGroupC();
 
-        FormDataMultiPart form = new FormDataMultiPart();        
-        String id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
-                RegistryTestHelper.getCommentTestContentStringForProfile("comment1", id),
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        CommentResponse response = getAuthenticatedResource(
-                "/registry/profiles/" + id + "/comments").type(
-                MediaType.MULTIPART_FORM_DATA)
-                .post(CommentResponse.class, form);
-        assertTrue(response.isRegistered());
-        assertTrue(response.isInUserSpace());
-        Comment comment = response.getComment();
-        assertNotNull(comment);
-        assertEquals("comment1", comment.getComment());
-        assertEquals("Database test user", comment.getUserName());
-        Assert.notNull(comment.getCommentDate());
-        assertEquals(1, Long.parseLong(comment.getId()));
+        String id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
+        String component = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(component
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
+        assertTrue(component.endsWith("</xs:schema>"));
 
-        // User id should not be serialized!
-        assertEquals(0, comment.getUserId());
+        component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(component
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
+        assertTrue(component.endsWith("</CMD_ComponentSpec>"));
+        assertTrue(component.contains("xsi:schemaLocation"));
         
-        
-        form = new FormDataMultiPart();        
-        id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
-                RegistryTestHelper.getCommentTestContentStringForComponent("comment2", id),
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        response = getAuthenticatedResource(
-                "/registry/components/" + id + "/comments").type(
-                MediaType.MULTIPART_FORM_DATA)
-                .post(CommentResponse.class, form);
-        assertTrue(response.isRegistered());
-        assertTrue(response.isInUserSpace());
-        comment = response.getComment();
-        assertNotNull(comment);
-        assertEquals("comment2", comment.getComment());
-        assertEquals("Database test user", comment.getUserName());
-        Assert.notNull(comment.getCommentDate());
-        assertEquals(2, Long.parseLong(comment.getId()));
+        id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
+        String profile = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(profile
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
+        assertTrue(profile.endsWith("</xs:schema>"));
 
-        // User id should not be serialized!
-        assertEquals(0, comment.getUserId());
-        
-        // not my group
-        
-        form = new FormDataMultiPart();        
-        id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
-                RegistryTestHelper.getCommentTestContentStringForProfile("comment3", id),
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        ClientResponse cresponse = getAuthenticatedResource(
-                "/registry/profiles/" + id + "/comments").type(
-                MediaType.MULTIPART_FORM_DATA)
-                .post(ClientResponse.class, form);
-        assertEquals(403, cresponse.getStatus());
+        profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id + "/xml"))
+                .accept(MediaType.TEXT_XML).get(String.class).trim();
+        assertTrue(profile
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
+        assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
+        assertTrue(profile.contains("xsi:schemaLocation"));
 
-        
-        
-        form = new FormDataMultiPart();        
         id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
-                RegistryTestHelper.getCommentTestContentStringForComponent("comment4", id),
-                MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        cresponse = getAuthenticatedResource(
-                "/registry/components/" + id + "/comments").type(
-                MediaType.MULTIPART_FORM_DATA)
-                .post(ClientResponse.class, form);
-        assertEquals(403, cresponse.getStatus());
+        ClientResponse resp = this.getAuthenticatedResource(getResource()
+                .path("/registry/components/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get( ClientResponse.class);
+        assertEquals(403, resp.getStatus());
+        
+        id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
+       resp = this.getAuthenticatedResource(getResource()
+                .path("/registry/profiles/" + id + "/xsd"))
+                .accept(MediaType.TEXT_XML).get( ClientResponse.class);
+        assertEquals(403, resp.getStatus());
+        
+        
     }
 
 }
