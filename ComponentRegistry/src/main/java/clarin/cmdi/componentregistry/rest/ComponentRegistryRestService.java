@@ -1305,7 +1305,7 @@ public class ComponentRegistryRestService implements
             MDValidator validator = new MDValidator(input, desc, registry, marshaller);
             RegisterResponse response = new RegisterResponse();
             //obsolete. Make it setstatus
-            response.setIsInUserSpace(!desc.isPublic());
+            response.setIsPrivate(!desc.isPublic());
             this.validate(response, descriptionValidator, validator);
             if (response.getErrors().isEmpty()) {
 
@@ -1390,7 +1390,7 @@ public class ComponentRegistryRestService implements
             CommentValidator validator = new CommentValidator(input, description, marshaller);
             CommentResponse responseLocal = new CommentResponse();
 
-            responseLocal.setIsInUserSpace(!description.isPublic());
+            responseLocal.setIsPrivate(!description.isPublic());
             this.validateComment(responseLocal, validator);
             if (responseLocal.getErrors().isEmpty()) {
                 Comment com = validator.getCommentSpec();

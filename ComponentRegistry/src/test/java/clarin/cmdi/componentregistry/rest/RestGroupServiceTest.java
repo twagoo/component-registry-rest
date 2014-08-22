@@ -859,7 +859,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ComponentDescription desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
@@ -876,7 +876,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
@@ -902,7 +902,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ProfileDescription pdesc = (ProfileDescription) response.getDescription();
         assertNotNull(pdesc);
         assertEquals("Test1", pdesc.getName());
@@ -919,7 +919,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         pdesc = (ProfileDescription) response.getDescription();
         assertNotNull(pdesc);
         assertEquals("Test1", pdesc.getName());
@@ -953,7 +953,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"profile-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
+        assertFalse(response.isPrivate());
         assertTrue(response.isProfile());
         assertEquals(ProfileDescription.PROFILE_PREFIX+"profile-1", response.getDescription().getId());
         
@@ -978,7 +978,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX+"Bprofile-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
+        assertFalse(response.isPrivate());
         assertTrue(response.isProfile());
         assertEquals(ProfileDescription.PROFILE_PREFIX+"Bprofile-1", response.getDescription().getId());
       
@@ -1013,7 +1013,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"component-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
+        assertFalse(response.isPrivate());
         assertFalse(response.isProfile());
         assertEquals(ComponentDescription.COMPONENT_PREFIX+"component-1", response.getDescription().getId());
         
@@ -1039,7 +1039,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
-        assertFalse(response.isInUserSpace());
+        assertFalse(response.isPrivate());
         assertFalse(response.isProfile());
         assertEquals(ComponentDescription.COMPONENT_PREFIX+"Bcomponent-1", response.getDescription().getId());
         
@@ -1236,7 +1236,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 MediaType.MULTIPART_FORM_DATA)
                 .post(CommentResponse.class, form);
         assertTrue(response.isRegistered());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         Comment comment = response.getComment();
         assertNotNull(comment);
         assertEquals("comment1", comment.getComment());
@@ -1258,7 +1258,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 MediaType.MULTIPART_FORM_DATA)
                 .post(CommentResponse.class, form);
         assertTrue(response.isRegistered());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         comment = response.getComment();
         assertNotNull(comment);
         assertEquals("comment2", comment.getComment());

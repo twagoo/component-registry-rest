@@ -860,7 +860,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 "/registry/profiles").type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
         assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ProfileDescription profileDesc = (ProfileDescription) response
                 .getDescription();
         assertNotNull(profileDesc);
@@ -992,7 +992,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                 form);
         assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ProfileDescription profileDesc = (ProfileDescription) response
                 .getDescription();
         assertNotNull(profileDesc);
@@ -1150,7 +1150,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 form);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ComponentDescription desc = (ComponentDescription) response
                 .getDescription();
         assertNotNull(desc);
@@ -1282,7 +1282,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ComponentDescription desc = (ComponentDescription) response
                 .getDescription();
         assertNotNull(desc);
@@ -1308,7 +1308,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
@@ -1344,7 +1344,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         RegisterResponse response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ProfileDescription desc = (ProfileDescription) response
                 .getDescription();
         assertNotNull(desc);
@@ -1371,7 +1371,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         response = cResponse.getEntity(RegisterResponse.class);
         assertTrue(response.isRegistered());
         assertTrue(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         desc = (ProfileDescription) response.getDescription();
         assertNotNull(desc);
         assertEquals("Test1", desc.getName());
@@ -1433,7 +1433,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .post(RegisterResponse.class, form);
         assertTrue(response.isRegistered());
         assertFalse(response.isProfile());
-        assertTrue(response.isInUserSpace());
+        assertTrue(response.isPrivate());
         ComponentDescription desc = (ComponentDescription) response
                 .getDescription();
         assertNotNull(desc);
@@ -1468,7 +1468,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 MediaType.MULTIPART_FORM_DATA)
                 .post(CommentResponse.class, form);
         assertTrue(response.isRegistered());
-        assertFalse(response.isInUserSpace());
+        assertFalse(response.isPrivate());
         Comment comment = response.getComment();
         assertNotNull(comment);
         assertEquals("Actual", comment.getComment());

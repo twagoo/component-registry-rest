@@ -19,7 +19,7 @@ public class PublishAction implements RegisterAction {
 
     @Override
     public int execute(BaseDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) throws UserUnauthorizedException, ItemNotFoundException{
-        response.setIsInUserSpace(false);
+        response.setIsPrivate(false);
         return registry.publish(desc, spec, principal);
     }
 }
