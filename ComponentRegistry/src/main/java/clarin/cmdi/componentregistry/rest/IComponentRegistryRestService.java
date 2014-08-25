@@ -44,7 +44,7 @@ public interface IComponentRegistryRestService {
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String REGISTRY_SPACE_PARAM = "registrySpace";
-    public static final String GROUPID_PARAM = "groupid";
+    public static final String GROUPID_PARAM = "groupId";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
     public static final String NUMBER_OF_RSSITEMS = "limit";
 

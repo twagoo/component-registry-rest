@@ -1765,7 +1765,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     public Response transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
-            @QueryParam("groupId") long groupId) throws IOException {
+            @QueryParam(GROUPID_PARAM) long groupId) throws IOException {
         Principal principal = security.getUserPrincipal();
         try {
             groupService.transferItemOwnershipFromUserToGroupId(principal.getName(), groupId, itemId);
@@ -1917,7 +1917,7 @@ public class ComponentRegistryRestService implements
     @Override
     @GET
     @Path("/groups/profiles")
-    public Response listProfiles(@QueryParam("groupId") String groupId) throws IOException {
+    public Response listProfiles(@QueryParam(GROUPID_PARAM) String groupId) throws IOException {
 
         try {
             Principal principal = this.checkAndGetUserPrincipal();
@@ -1933,7 +1933,7 @@ public class ComponentRegistryRestService implements
     @Override
     @GET
     @Path("/groups/components")
-    public Response listComponents(@QueryParam("groupId") String groupId) throws IOException {
+    public Response listComponents(@QueryParam(GROUPID_PARAM) String groupId) throws IOException {
 
         try {
             Principal principal = this.checkAndGetUserPrincipal();
@@ -1950,7 +1950,7 @@ public class ComponentRegistryRestService implements
     @Override
     @GET
     @Path("/groups/nameById")
-    public Response getGroupNameById(@QueryParam("groupId") String groupId) throws IOException {
+    public Response getGroupNameById(@QueryParam(GROUPID_PARAM) String groupId) throws IOException {
 
         try {
             Principal principal = this.checkAndGetUserPrincipal();
