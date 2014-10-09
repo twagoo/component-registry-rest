@@ -11,17 +11,17 @@ package clarin.cmdi.componentregistry.services {
 	import mx.controls.Alert;
 	import mx.controls.List;
  
-	[Event(name="userSpaceToggle", type="flash.events.Event")]
+	[Event(name="registrySpaceToggle", type="flash.events.Event")]
 	public final class Config extends EventDispatcher {
-		public static const USER_SPACE_TOGGLE_EVENT:String = "userSpaceToggle";
+		public static const REGISTRY_SPACE_TOGGLE_EVENT:String = "registrySpaceToggle";
 
 		public static const CLARIN_REGISTER_URL:String = "http://www.clarin.eu/user/register";
-		public static const PARAM_USERSPACE:String = "userspace";
 		public static const REGISTRY_PARAM_VIEW:String = "view";
 		public static const REGISTRY_PARAM_BROWSER_VIEW:String = "browserview";
-		public static const REGISTRY_PARAM_ITEM:String = "item";
-		public static const REGISTRY_PARAM_SPACE:String = "space";
+		public static const REGISTRY_PARAM_ITEM_ID:String = "itemId";
+		public static const REGISTRY_PARAM_SPACE:String = "registrySpace";
 		public static const REGISTRY_PARAM_DEBUG:String = "debug";
+		public static const REGISTRY_PARAM_GROUP_ID:String = "groupId"
 		
 		// REGISTRY_ID, COMPONENT_PREFIX, and PROFILE_PREFIX must be the same as on the server!
 		// REGISTRY_ID isdefined in ComponentRegistry
@@ -36,15 +36,16 @@ package clarin.cmdi.componentregistry.services {
 		public static const VIEW_BROWSE:String = "browse";
 		public static const VIEW_EDIT:String = "edit";
 		public static const VIEW_IMPORT:String = "import";
-		public static const FLAVOUR_PROFILES = "profiles";
-		public static const FLAVOUR_COMPONENTS = "components";
+		public static const FLAVOUR_PROFILES:String = "profiles";
+		public static const FLAVOUR_COMPONENTS:String = "components";
 		//Possible browser views to start with
 		public static const BROWSER_PANEL_VIEW:String = "view"; 
 		public static const BROWSER_PANEL_XML:String = "xml"; 
 		public static const BROWSER_PANEL_COMMENTS:String = "comments"; 
 		//Possible space to start with.
-		public static const SPACE_USER:String = "user";
-		public static const SPACE_PUBLIC:String = "public";
+		public static const SPACE_PRIVATE:String = "private";
+		public static const SPACE_PUBLISHED:String = "published";
+		public static const SPACE_GROUP:String = "group";
 		
 		public static const COMPONENT_LIST_URL:String = "/rest/registry/components";
 		public static const ITEMS_URL:String= "/rest/registry/items";
@@ -65,22 +66,19 @@ package clarin.cmdi.componentregistry.services {
 		public static var _instance:Config = new Config();
 		
 		
-		private var _startupItem:String; //item to be selected at startup, can be specified as a url parameter
+		private var _startupItemId:String; //item to be selected at startup, can be specified as a url parameter
 		private var _serviceRootUrl:String = "http://localhost:8080/ComponentRegistry";
 		//Default _serviceRootUrl value can be useful for testing. Set the proper value in your (index.)html that embeds the flash object.
 		//Like this: "FlashVars", "serviceRootUrl=http://localhost:8080/ComponentRegistry"
 
 		private var _view:String = VIEW_BROWSE;
 		private var _browserPanel:String = BROWSER_PANEL_VIEW;
-		private var _space:String = SPACE_PUBLIC;
-		private var _selectedGroup:String = "";
+		private var _registrySpace:RegistrySpace = new RegistrySpace(SPACE_PUBLISHED, "");
 		private var _debug:Boolean = false;
-		private var _activeFlavour = FLAVOUR_PROFILES;
+		private var _activeFlavour:String = FLAVOUR_PROFILES;
 		
-		private var publicComponentsSrv:ComponentListService;
-		private var publicProfilesSrv:ProfileListService;
-		private var userComponentsSrv:ComponentListService;
-		private var userProfilesSrv:ProfileListService;
+		private var componentsSrv:ComponentListService;
+		private var profilesSrv:ProfileListService;
 		private var listUserGroupsMembershipService:ListUserGroupsMembershipService;
 		private var listGroupsOfItemService:ListGroupsOfItemService;
 		
@@ -102,74 +100,58 @@ package clarin.cmdi.componentregistry.services {
 			return _instance;
 		}
 		
-		public function set selectedGroup(value:String):void{
-			_selectedGroup=value;
-		}
-
-		public function get selectedGroup():String{
-			return _selectedGroup;
-		}
+		
 
 		private function init(applicationParameters:Object):void {
-			var serviceRootUrl:String = applicationParameters.serviceRootUrl;
-			if (serviceRootUrl) {
-				_serviceRootUrl = serviceRootUrl;
+			var serviceRootUrl_:String = applicationParameters.serviceRootUrl;
+			if (serviceRootUrl_) {
+				_serviceRootUrl = serviceRootUrl_;
 			}
-			var item:String = applicationParameters.item;
-			if (item) {
-				_startupItem = item;
+			var itemId:String = applicationParameters.itemId;
+			if (itemId) {
+				_startupItemId = itemId;
 			}
-			var view:String = applicationParameters.view;
-			if (view) {
-				_view = view;
+			var view_:String = applicationParameters.view;
+			if (view_) {
+				_view = view_;
 			}
-			var browserPanel:String = applicationParameters.browserview;
-			if(browserPanel){
-				_browserPanel = browserPanel;
-			}
-			var space:String = applicationParameters.space;
-			if (space) {
-				_space = space;
-			}
-			var debug:int = applicationParameters.debug;
-			if(debug) {
-				_debug = Boolean(debug);
+			var browserPanel_:String = applicationParameters.browserview;
+			if(browserPanel_){
+				_browserPanel = browserPanel_;
 			}
 			
-			publicProfilesSrv = new ProfileListService(SPACE_PUBLIC);
-			userProfilesSrv = new ProfileListService(SPACE_USER);
-			publicComponentsSrv = new ComponentListService(SPACE_PUBLIC);
-			userComponentsSrv = new ComponentListService(SPACE_USER);
+			var space_:String = applicationParameters.registrySpace;
+			if (!space_) {
+				space_ = SPACE_PUBLISHED;
+			};
+			
+			var groupId_:String = applicationParameters.groupId;
+			if (!groupId_) {
+				groupId_ = "";
+			};
+			
+			registrySpace = new RegistrySpace(space_, groupId_);
+			
+			var debug_:int = applicationParameters.debug;
+			if(debug_) {
+				_debug = Boolean(debug_);				
+			}
+			
 			listUserGroupsMembershipService = new ListUserGroupsMembershipService();
-			listGroupsOfItemService = new ListGroupsOfItemService();
+			listGroupsOfItemService = new ListGroupsOfItemService();			
+			
 		}
 		
 		public function getListUserGroupsMembershipService():ListUserGroupsMembershipService{
 			return listUserGroupsMembershipService;
 		}
 
-		public function getProfilesSrv(userSpace:String):ProfileListService{
-			if (userSpace == SPACE_USER) {
-				userProfilesSrv.setGroupId(_selectedGroup);
-				return userProfilesSrv;
-			}
-			else
-			if (userSpace == SPACE_PUBLIC) {
-				return publicProfilesSrv;
-			}
-			else throw "No selection";
+		public function getProfilesSrv():ProfileListService{
+				return profilesSrv;		
 		}
 		
-		public function getComponentsSrv(userSpace:String):ComponentListService{
-			if (userSpace == SPACE_USER) {
-				userComponentsSrv.setGroupId(_selectedGroup);
-				return userComponentsSrv;
-			}
-			else
-			if (userSpace == SPACE_PUBLIC) {
-				return publicComponentsSrv;
-			}
-			else throw "unknown component server";
+		public function getComponentsSrv():ComponentListService{		
+				return componentsSrv;
 		}
 		
 		public function getListGroupsOfItemService():ListGroupsOfItemService{
@@ -245,16 +227,17 @@ package clarin.cmdi.componentregistry.services {
 			return _serviceRootUrl + ITEMS_URL+"/"+itemId+"/transferownership?groupId="+groupId;
 		}
 
-		public function set userSpace(userSpace:String):void {
-			_space = userSpace;
-			if (userSpace == Config.SPACE_PUBLIC){
-				_selectedGroup = "";
-			}
-			dispatchEvent(new Event(USER_SPACE_TOGGLE_EVENT));
+		public function set registrySpace(registrySpace:RegistrySpace):void {
+			_registrySpace = registrySpace;
+			profilesSrv = new ProfileListService(registrySpace);			
+			componentsSrv = new ComponentListService(registrySpace);
+			
+			// everything is ready to open new componentBrowser instance
+			dispatchEvent(new Event(REGISTRY_SPACE_TOGGLE_EVENT));
 		}
 
 		public function get startupItem():String {
-			return _startupItem;
+			return _startupItemId;
 		}
 
 		public function get view():String {
@@ -265,9 +248,9 @@ package clarin.cmdi.componentregistry.services {
 			return _browserPanel;
 		}
 
-		[Bindable(event="userSpaceToggle")]
-		public function get space():String {
-			return _space;
+		[Bindable(event=REGISTRY_SPACE_TOGGLE_EVENT)]
+		public function get registrySpace():RegistrySpace {
+			return _registrySpace;
 		}
 		
 		public function get debug():Boolean {
@@ -275,18 +258,24 @@ package clarin.cmdi.componentregistry.services {
 		}
 
 		public static function getBookmarkUrl(item:ItemDescription):String {
-			var uri:URI = new URI(Config.instance.serviceRootUrl);
-		    uri.setQueryValue(REGISTRY_PARAM_ITEM, item.id);
-			if (item.space == Config.SPACE_USER) {
-				uri.setQueryValue(REGISTRY_PARAM_SPACE, SPACE_USER);
+			var uri:URI = new URI(Config.instance.serviceRootUrl);	
+			uri.setQueryValue(REGISTRY_PARAM_SPACE, Config.instance.registrySpace.space);
+			if (Config.instance.registrySpace.space == SPACE_GROUP){
+				uri.setQueryValue(REGISTRY_PARAM_GROUP_ID, Config.instance.registrySpace.groupId);				
 			}
+		    uri.setQueryValue(REGISTRY_PARAM_ITEM_ID, item.id);
 			return uri.toString();
 		}
 		
-		public static function getRssUriDescriptions(typeOfDescription:String):String {
+		public static function getRssUriDescriptions(typeOfDescription:String, registrySpace:RegistrySpace):String {
 			var baseUri:String = (new URI(Config.instance.serviceRootUrl)).toString();
 			var result:String=baseUri+"/rest/registry/"+typeOfDescription+"/rss";
-			if (Config.instance.space == SPACE_USER) result=result+"?userspace=true";
+			if (registrySpace.space == Config.SPACE_PRIVATE) {
+				result = result + "?registrySpace=private";
+			}
+			if (registrySpace.space == Config.SPACE_GROUP) {
+				result = result + "?registrySpace=group&groupId="+registrySpace.groupId;
+			}
 			return result;
 		}
 		
@@ -295,8 +284,7 @@ package clarin.cmdi.componentregistry.services {
 			var typeOfDescription:String; 
 			if (item.isProfile) {typeOfDescription="profiles/";}
 			else typeOfDescription="components/";
-			var result:String=baseUri+"/rest/registry/"+typeOfDescription+item.id+"/comments/rss";
-			if (item.space == Config.SPACE_USER) result=result+"?userspace=true";
+			var result:String=baseUri+"/rest/registry/"+typeOfDescription+item.id+"/comments/rss";			
 			return result;
 		}
 		

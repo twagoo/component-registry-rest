@@ -40,24 +40,14 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;			
-			this.item = Config.instance.getComponentsSrv(Config.SPACE_USER).findDescription(componentId);
-			if (this.item==null) {
-				this.item = Config.instance.getComponentsSrv(Config.SPACE_PUBLIC).findDescription(componentId);
-			}
+			this.item = Config.instance.getComponentsSrv().findDescription(componentId);			
 			styleName = StyleConstants.EXPANDING_COMPONENT;
-			if (item && item.space == Config.SPACE_USER) {
+			if (item && item.isPrivate) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
 			if (item!=null)
 				updateView();
-			//unfortunately the componend and profile services may overlook components from groups, so we have to ask the backend
-			else{
-				Config.instance.getComponentsSrv(Config.SPACE_USER).getComponent(componentId, function(item:ItemDescription):void{
-					setStyle("borderColor", StyleConstants.GROUP_BORDER_COLOR);
-					setItem(item);
-					updateView();
-				});
-			}
+		
 		}
 		
 		private function updateView():void{

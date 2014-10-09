@@ -14,14 +14,14 @@ package clarin.cmdi.componentregistry.common {
 		public var isProfile:Boolean;
 		public var registrationDate:String;
 		public var registrationDateValue:Date;
-		public var space:String;
+		public var isPrivate:Boolean;
 		public var commentsCount:int;
 
 		public function ItemDescription() {
 
 		}
 
-		private function create(itemDescription:XML, infoUrl:String, isProfileValue:Boolean, space:String):void {
+		private function create(itemDescription:XML, infoUrl:String, isProfileValue:Boolean, isPrivate:Boolean):void {
 			this.id = itemDescription.id;
 			this.name = itemDescription.name;			
 			this.description = itemDescription.description;
@@ -31,7 +31,7 @@ package clarin.cmdi.componentregistry.common {
 			this.dataUrl = infoUrl + itemDescription.id;
 			this.commentsCount = itemDescription.commentsCount;
 			this.isProfile = isProfileValue;
-			this.space = space;
+			this.isPrivate = isPrivate;
 			
 			// getting ISO-8601 (GMT/UTC timezone) dates from the server. Need to convert this, flex does not support ISO-8601 times out of the box.
 			this.registrationDateValue = DateUtils.convertDate(itemDescription.registrationDate);
@@ -40,12 +40,12 @@ package clarin.cmdi.componentregistry.common {
 			}
 		}
 
-		public function createProfile(itemDescription:XML, space:String):void {
-			create(itemDescription, Config.instance.profileInfoUrl, true, space);
+		public function createProfile(itemDescription:XML, isPrivate:Boolean):void {
+			create(itemDescription, Config.instance.profileInfoUrl, true, isPrivate);
 		}
 
-		public function createComponent(itemDescription:XML, space:String):void {
-			create(itemDescription, Config.instance.componentInfoUrl, false, space);
+		public function createComponent(itemDescription:XML, isPrivate:Boolean):void {
+			create(itemDescription, Config.instance.componentInfoUrl, false, isPrivate);
 		}
 		
 		public function toString():String{

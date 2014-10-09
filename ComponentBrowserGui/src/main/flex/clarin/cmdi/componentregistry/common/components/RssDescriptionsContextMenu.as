@@ -20,15 +20,15 @@ package clarin.cmdi.componentregistry.common.components
 		}
 		
 		override protected function copyRssLink(event:ContextMenuEvent):void {
-			System.setClipboard(Config.getRssUriDescriptions(_typeOfDescription));
+			System.setClipboard(Config.getRssUriDescriptions(_typeOfDescription, Config.instance.registrySpace));
 		}
 				
 		override protected function showRssLink(event:ContextMenuEvent):void{
-			navigateToURL(new URLRequest(Config.getRssUriDescriptions(_typeOfDescription)), "_blank");
+			navigateToURL(new URLRequest(Config.getRssUriDescriptions(_typeOfDescription, Config.instance.registrySpace)), "_blank");
 		}
 		
 		override protected function menuUpdateCaption(event:ContextMenuEvent):void {
-			_showRssLinkMenuItem.caption = Config.getRssUriDescriptions(_typeOfDescription);
+			_showRssLinkMenuItem.caption = Config.getRssUriDescriptions(_typeOfDescription, Config.instance.registrySpace);
 		}
 	}
 }

@@ -7,6 +7,7 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.editor.Editor;
 	import clarin.cmdi.componentregistry.importer.Importer;
 	import clarin.cmdi.componentregistry.services.Config;
+	import clarin.cmdi.componentregistry.services.RegistrySpace;
 	
 	import flash.events.Event;
 	
@@ -53,7 +54,7 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		public function loadStartup():void {
-			if (Config.instance.space == Config.SPACE_USER && !Credentials.instance.isLoggedIn()) {
+			if ((Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && !Credentials.instance.isLoggedIn()) {
 				checkLogin();
 			} else {
 				if (Config.instance.startupItem) {
@@ -75,14 +76,20 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		public function switchToBrowse(itemDescription:ItemDescription):void {
-			if (itemDescription != null) {
-				if (Config.instance.space == itemDescription.space) {
-					browse.refresh();
-				} else {
-					Config.instance.userSpace = itemDescription.space;
+			if (itemDescription != null) {				
+				
+				if (itemDescription.isPrivate && Config.instance.registrySpace.space == Config.SPACE_PUBLISHED) {
+					Config.instance.registrySpace = new RegistrySpace( Config.SPACE_PRIVATE, "");
+				} else {					
+					if (!itemDescription.isPrivate && Config.instance.registrySpace.space != Config.SPACE_PUBLISHED) {
+						// the item has been published, go to public space
+						Config.instance.registrySpace = new RegistrySpace( Config.SPACE_PUBLISHED, "");
+					} else {
+						browse.refresh();
+					}
 				}
 				browse.setSelectedDescription(itemDescription);
-			}
+			} 
 			this.selectedItem = itemDescription;
 			this.selectedChild = browse;
 		}
@@ -109,7 +116,7 @@ package clarin.cmdi.componentregistry.common.components {
 				if (selectedItem) {
 					itemId = selectedItem.id;
 				}
-				loginPanel.show(this, RegistryView(this.selectedChild).getType(), Config.instance.space, itemId);
+				loginPanel.show(this, RegistryView(this.selectedChild).getType(), Config.instance.registrySpace.space, itemId);
 			}
 		}
 		

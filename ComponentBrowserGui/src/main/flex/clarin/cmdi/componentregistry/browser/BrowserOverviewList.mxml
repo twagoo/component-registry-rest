@@ -78,21 +78,44 @@
 			}
 			
 			private function init():void{
-				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, onSpaceChanged);
+				Config.instance.addEventListener(Config.REGISTRY_SPACE_TOGGLE_EVENT, onSpaceChanged);
 				groups.addItem("Move to group...");
 				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
-				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, updateGroupVisibility);
+				Config.instance.addEventListener(Config.REGISTRY_SPACE_TOGGLE_EVENT, updateGroupVisibility);
 				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
 				Config.instance.addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
 				scrollToSelected();
 			}
 			
 			private function onSpaceChanged(event:Event):void{
-				userSpaceCB.setSelectedItem(Config.instance.space, Config.instance.selectedGroup);
-				createNewButton.visible = (!Config.instance.selectedGroup);
-				createNewButton.includeInLayout = (!Config.instance.selectedGroup);
-				importButton.visible = (!Config.instance.selectedGroup);
-				importButton.includeInLayout = (!Config.instance.selectedGroup);
+				
+				createNewButton.visible = true;
+				createNewButton.includeInLayout = true;
+				createNewButton.enabled = true;
+				
+				editAsNew.visible = Config.instance.registrySpace.space == Config.SPACE_PUBLISHED;
+				editAsNew.includeInLayout = Config.instance.registrySpace.space  == Config.SPACE_PUBLISHED;
+				editAsNew.enabled = Config.instance.registrySpace.space  == Config.SPACE_PUBLISHED  && dataGrid.selectedItem != null;
+				
+				edit.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				edit.includeInLayout = Config.instance.registrySpace.space  == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				edit.enabled = (Config.instance.registrySpace.space  == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;
+					
+				importButton.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
+				importButton.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
+				importButton.enabled = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
+			
+				groupPanel.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				groupPanel.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				groupPanel.enabled = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;
+				
+				groupBox.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				groupBox.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				groupBox.enabled = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;
+				
+				moveToGroupBtn.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				moveToGroupBtn.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
+				moveToGroupBtn.enabled = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;			
 			}
 
 			private function scrollToSelected():void {
@@ -125,21 +148,21 @@
 			}
 			
 			private function editItem():void {
-				var item:ItemDescription = dataGrid.selectedItem as ItemDescription;
-				viewStack.switchToEditor(item);
+				var item:ItemDescription = dataGrid.selectedItem as ItemDescription;	
+				viewStack.switchToEditor(item);	
 			}
 			
-			private function importItem():void{
-				viewStack.switchToImport();
+			private function importItem():void{		
+				viewStack.switchToImport();	
 			}
 			
-			private function dispatchCreateNewEvent():void{
+			private function dispatchCreateNewEvent():void{	
 				dispatchEvent(new CreateNewComponentEvent());
 			}
 			
 			
 			private function goToFeed():void{
-				var request:URLRequest = new URLRequest(Config.getRssUriDescriptions(typeOfDescription));
+				var request:URLRequest = new URLRequest(Config.getRssUriDescriptions(typeOfDescription, Config.instance.registrySpace));
 				navigateToURL(request, "_blank");
 			}
 			
@@ -148,14 +171,14 @@
 				groups.addItem({label:"Move to group...", space:null, groupId:null});
 				
 				for each (var group:Group in Config.instance.getListUserGroupsMembershipService().groups) {
-					groups.addItem({label:group.name, space:Config.SPACE_USER, groupId:group.id});					
+					groups.addItem({label:group.name, space:Config.SPACE_GROUP, groupId:group.id});					
 				}
 				updateGroupVisibility(event);
 			}
 			
 			
 			private function updateGroupVisibility(event:Event):void{
-				var showGroups:Boolean = Config.instance.getListUserGroupsMembershipService().groups.length>0 && Config.instance.space != Config.SPACE_PUBLIC;
+				var showGroups:Boolean = Config.instance.getListUserGroupsMembershipService().groups.length>0;
 				groupPanel.visible = showGroups;
 				groupBox.selectedIndex = 0;
 			}
@@ -207,17 +230,24 @@
 			}
 			
 			
+			
+			public function updateSelectedIndexForRegistryComobBox():void {
+				this.registrySpaceComboBox.setSelectedIndex();
+			}
 		]]>
 	</mx:Script>
 	
-	<mx:HBox paddingLeft="5" 
+	<mx:HBox 
+			 paddingLeft="5" 
 			 paddingRight="5"
 			 width="100%">
 		
-		<mx:Box paddingTop="5" paddingLeft="5" 
+		<mx:Box 
+			    paddingTop="5" paddingLeft="5" 
 				visible="{spaceSwitchEnabled}" 
 				includeInLayout="{spaceSwitchEnabled}">
-			<comp:SpaceSwitch id="userSpaceCB" />
+			<comp:SpaceSwitch id="registrySpaceComboBox"
+							  />
 		</mx:Box>
 		
 		<mx:HBox horizontalAlign="left"
@@ -230,34 +260,50 @@
 				       id="createNewButton"
 					   label="Create new" 
 					   toolTip="Create a new item in the private workspace"
+					   visible="{true}" 
+					   includeInLayout="{true}"
+					   enabled="{true}"
 					   click="dispatchCreateNewEvent()"
 					   />
-			<mx:Button label="Edit"
+			<mx:Button 
+				       id = "edit"
+				       label="Edit"
 					   toolTip="Edit the selected item in the editor"
-					   visible="{Config.instance.space == Config.SPACE_USER}" 
-					   includeInLayout="{Config.instance.space == Config.SPACE_USER}"
-					   enabled="{Config.instance.space == Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
+					   visible="{Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP}" 
+					   includeInLayout="{Config.instance.registrySpace.space  == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP}"
+					   enabled="{(Config.instance.registrySpace.space  == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
-			<mx:Button label="Edit as new"   
-					   toolTip="Edit the selected item as a new item in the private workspace"
-					   visible="{Config.instance.space != Config.SPACE_USER}" 
-					   includeInLayout="{Config.instance.space != Config.SPACE_USER}"
-					   enabled="{Config.instance.space != Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
+			<mx:Button id = "editAsNew"
+				       label="Edit as new"   
+					   toolTip="Edit the selected item as a new item in the private or group workspace"
+					   visible="{Config.instance.registrySpace.space == Config.SPACE_PUBLISHED}" 
+					   includeInLayout="{Config.instance.registrySpace.space == Config.SPACE_PUBLISHED}"
+					   enabled="{Config.instance.registrySpace.space == Config.SPACE_PUBLISHED &amp;&amp; dataGrid.selectedItem != null}" 
 					   click="editItem()" />
 			<mx:Button id="importButton"
 					   label="Import"
+					   visible="{Config.instance.registrySpace.space == Config.SPACE_PRIVATE}" 
+					   includeInLayout="{Config.instance.registrySpace.space == Config.SPACE_PRIVATE}"
+					   enabled="{Config.instance.registrySpace.space == Config.SPACE_PRIVATE}"
 					   toolTip="Import an item from a local file"
 					   click="importItem()" />
 			
 			<mx:HBox id="groupPanel" 
-					 visible="true"
-					 enabled="{Config.instance.space == Config.SPACE_USER &amp;&amp; dataGrid.selectedItem != null}" 
+					 visible="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED}"
+					 includeInLayout="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED}"
+					 enabled="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED &amp;&amp; dataGrid.selectedItem != null}" 
 					 >
 				<mx:ComboBox id="groupBox"
+							 visible="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED}"
+							 includeInLayout="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED}"
+							 enabled="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED &amp;&amp; dataGrid.selectedItem != null}" 
 							 dataProvider="{groups}"
 							 />
 				<mx:Button id="moveToGroupBtn"
 						   label="Move to group"
+						   visible="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED}"
+						   includeInLayout="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED}"
+						   enabled="{Config.instance.registrySpace.space != Config.SPACE_PUBLISHED &amp;&amp; dataGrid.selectedItem != null}" 
 						   click="onMoveToGroupButtonClicked(event)"/>
 			</mx:HBox>
 			
@@ -272,8 +318,8 @@
 			<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
 	   </mx:HBox>
 		<comp:RssLinkButton 
-			enabled ="{Config.instance.space != Config.SPACE_USER}"
-			visible="{Config.instance.space != Config.SPACE_USER}"
+			enabled ="{Config.instance.registrySpace.space != Config.SPACE_PRIVATE}"
+			visible="{Config.instance.registrySpace.space != Config.SPACE_PRIVATE}"
 			contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
 			click="goToFeed()"
 			/>	

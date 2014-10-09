@@ -12,6 +12,8 @@ import clarin.cmdi.componentregistry.services.ComponentUsageCheckEvent;
 import clarin.cmdi.componentregistry.services.ComponentUsageService;
 import clarin.cmdi.componentregistry.services.Config;
 import clarin.cmdi.componentregistry.services.ProfileInfoService;
+import clarin.cmdi.componentregistry.services.ProfileListService;
+import clarin.cmdi.componentregistry.services.RegistrySpace;
 import clarin.cmdi.componentregistry.services.UploadService;
 
 import flash.events.Event;
@@ -27,7 +29,10 @@ private var componentSrv:ComponentInfoService = new ComponentInfoService();
 private var itemDescription:ItemDescription;
 
 [Bindable]
-private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv(Config.instance.space);
+private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv();
+
+[Bindable]
+private var profilesSrv:ProfileListService = Config.instance.getProfilesSrv();
 
 [Bindable]
 public var cmdComponent:XML;
@@ -50,17 +55,18 @@ public function init():void {
 	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
 	uploadService.addEventListener(UploadCompleteEvent.UPLOAD_COMPLETE, handleSaveComplete);
 	uploadService.init(uploadProgress);
-	Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
+	Config.instance.addEventListener(Config.REGISTRY_SPACE_TOGGLE_EVENT, toggleRegistrySpace);
 	viewStack = this.parent as RegistryViewStack;
 }
 
 
-private function toggleUserSpace(event:Event):void {
-	componentsSrv = Config.instance.getComponentsSrv(Config.instance.space);
+private function toggleRegistrySpace(event:Event):void {
+	componentsSrv = Config.instance.getComponentsSrv();
+	profilesSrv = Config.instance.getProfilesSrv();
 }
 
 private function determineSaveButtonEnabled():void {
-	buttonBar.saveBtn.enabled = (itemDescription != null && itemDescription.space == Config.SPACE_USER && null != itemDescription.id && null != xmlEditor.cmdSpec.headerId); 
+	buttonBar.saveBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.SPACE_GROUP));
 }
 
 private function profileLoaded(event:Event):void {
@@ -110,12 +116,12 @@ private function publishSpec():void {
 
 private function handlePublishAlert(event:CloseEvent):void {
 	if (event.detail == Alert.OK) {
-		saveSpec(Config.SPACE_PUBLIC, UploadService.PUBLISH);
-		Config.instance.userSpace = Config.SPACE_PUBLIC;
+		saveSpec(Config.SPACE_PUBLISHED, UploadService.PUBLISH);
+		Config.instance.registrySpace = new RegistrySpace(Config.SPACE_PUBLISHED, "");
 	}
 }
 
-private function saveSpec(space:String, uploadAction:int):void {
+private function saveSpec(registrySpace:String, uploadAction:int):void {
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
 		item.description = xmlEditor.cmdSpec.headerDescription;
@@ -123,17 +129,24 @@ private function saveSpec(space:String, uploadAction:int):void {
 		item.isProfile = xmlEditor.cmdSpec.isProfile;
 		item.groupName = xmlEditor.cmdSpec.groupName;
 		item.domainName = xmlEditor.cmdSpec.domainName;
-		item.space = space;
-		if (itemDescription && itemDescription.space == Config.SPACE_USER) {
+		item.isPrivate = (registrySpace ==  Config.SPACE_PRIVATE || registrySpace == Config.SPACE_GROUP);
+		if (itemDescription && itemDescription.isPrivate ) {
 			item.id = xmlEditor.cmdSpec.headerId;
 		}
 		
 		// Private components that are in updated require usage check call. If in use, the user can choose whether or not to save the changes .
-		if(space == Config.SPACE_USER && uploadAction == UploadService.UPDATE && !item.isProfile){
-			checkUsage(item, space);
+		if((registrySpace == Config.SPACE_PRIVATE || registrySpace == Config.SPACE_GROUP) && uploadAction == UploadService.UPDATE && !item.isProfile){
+			checkUsage(item, registrySpace);
 		}else{
 			doUpload(uploadAction,item);
 		}
+		
+		// if we are in public or group space but do "save as new" (i.e. in a private space)
+		// then we need to switch to the private space
+		if (registrySpace == Config.SPACE_PRIVATE) {
+			Config.instance.registrySpace=new RegistrySpace(Config.SPACE_PRIVATE, "");
+		}
+		
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
 	}
@@ -155,8 +168,8 @@ private function cancel():void {
 /**
  * Calls usage check for the specified component. If in use, asks user whether to proceed; if positive, initiates update.
  */
-private function checkUsage(item:ItemDescription, space:String, uploadAction:int = UploadService.UPDATE):void{
-	var componentUsageService:ComponentUsageService = new ComponentUsageService(item,space);
+private function checkUsage(item:ItemDescription, space:String, uploadAction:int = 0):void{
+	var componentUsageService:ComponentUsageService = new ComponentUsageService(item);
 	componentUsageService.addEventListener(ComponentUsageCheckEvent.COMPONENT_IN_USE, 
 		function (event:ComponentUsageCheckEvent):void{
 			if(event.isComponentInUse){
@@ -182,9 +195,9 @@ private function doUpload(uploadAction:int, item:ItemDescription):void{
 	uploadService.upload(uploadAction, item, xmlEditor.cmdSpec.toXml());
 }
 
-private function handleSaveComplete(event:UploadCompleteEvent):void {
+private function handleSaveComplete(event:UploadCompleteEvent):void {	
 	setDescription(event.itemDescription);
-	parentApplication.viewStack.switchToBrowse(event.itemDescription);
+	parentApplication.viewStack.switchToBrowse(event.itemDescription);	
 }
 
 
@@ -208,7 +221,6 @@ public function getType():String {
 
 private function onGroupsLoaded(event:Event):void{
 	var groups:ArrayCollection = Config.instance.getListGroupsOfItemService().groups;
-	//buttonBar.groupPanel.visible = (Config.instance.space != Config.SPACE_PUBLIC) && Config.instance.getListUserGroupsMembershipService().groups.length>0;
 	if (groups.length < 1);
 	else{
 		var groupId:String = groups.getItemAt(0).id;

@@ -9,7 +9,7 @@ package clarin.cmdi.componentregistry.common
 	public class Group
 	{
 		[Bindable]
-		public var id:uint;
+		public var id:String;
 		
 		[Bindable]
 		public var name:String;

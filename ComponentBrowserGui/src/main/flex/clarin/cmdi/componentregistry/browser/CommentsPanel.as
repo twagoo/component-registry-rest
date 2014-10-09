@@ -89,12 +89,12 @@
 				
 				
 				// Do actual loading
-				service = new CommentListService(_itemDescription, _itemDescription.space);
+				service = new CommentListService(_itemDescription);
 				service.addEventListener(CommentListService.COMMENTS_LOADED, commentsLoaded);
 				service.load();
 				
 				// Rss feed "button"
-				if  (_itemDescription.space != Config.SPACE_USER){
+				if  (_itemDescription.isPrivate != Config.SPACE_PRIVATE){
 					var spacer:Spacer = new Spacer();
 					spacer.percentWidth=100;
 					addChild(spacer);

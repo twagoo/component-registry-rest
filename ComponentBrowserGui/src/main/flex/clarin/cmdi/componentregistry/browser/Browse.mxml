@@ -25,19 +25,20 @@
 			import clarin.cmdi.componentregistry.services.ListGroupsOfItemService;
 			import clarin.cmdi.componentregistry.services.ProfileInfoService;
 			import clarin.cmdi.componentregistry.services.ProfileListService;
+			import clarin.cmdi.componentregistry.services.RegistrySpace;
 			
 			import mx.controls.Alert;
 			import mx.events.IndexChangedEvent;
+			import mx.utils.object_proxy;
 			
 			public static const START_ITEM_LOADED:String = "startItemLoaded";
 			
 			private var startupItemLoaded:Boolean = false;
-			private var _userSpace:String = Config.SPACE_PUBLIC;
 			
 			[Bindable]
-			private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv(Config.instance.space);
+			private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv();
 			[Bindable]
-			private var profilesSrv:ProfileListService = Config.instance.getProfilesSrv(Config.instance.space);
+			private var profilesSrv:ProfileListService = Config.instance.getProfilesSrv();
 			
 			[Bindable]
 			private var selectedProfileSrv:ProfileInfoService = new ProfileInfoService();
@@ -75,18 +76,15 @@
 				_deleteSrvProfiles.addEventListener(_deleteSrvProfiles.ITEM_DELETED, handleItemDeleted);
 				_deleteSrvComponents.addEventListener(_deleteSrvComponents.ITEM_DELETED, handleItemDeleted);
 				
-				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, toggleUserSpace);
-				Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setUserSpace);
-			
-				setUserSpace();
-
+				Config.instance.addEventListener(Config.REGISTRY_SPACE_TOGGLE_EVENT, toggleRegistrySpace);
+				
 			}
 			
-			private function toggleUserSpace(event:Event):void {
-				_userSpace = Config.instance.space;
-				componentsSrv = Config.instance.getComponentsSrv(_userSpace);
-				profilesSrv = Config.instance.getProfilesSrv(_userSpace);
-				refresh();
+			private function toggleRegistrySpace(event:Event):void {
+				componentsSrv = Config.instance.getComponentsSrv();
+				profilesSrv = Config.instance.getProfilesSrv();
+				refresh();				
+				registrySpaceComboBox.setSelectedIndex();
 			}
 			
 			private function creationComplete():void { 
@@ -136,32 +134,11 @@
 						loadStartupItem(item);
 						componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
 					} else
-						loadGroupItem(startupItemId);
+						throw "Cannot find the item "+startupItemId+" in the current registries.  :S"
 				}
 			}
 			
-			private function loadGroupItem(startupItemId:String):void{
-				Config.instance.getComponentsSrv(Config.instance.space).getComponent(startupItemId, function(item:ItemDescription):void{
-					Config.instance.getListGroupsOfItemService().addEventListener(ListGroupsOfItemService.GROUPS_LOADED, function():void{
-						var group:Group = (Config.instance.getListGroupsOfItemService().groups.getItemAt(0)) as Group;
-						if (item.isProfile){
-							selectedProfileSrv = new ProfileInfoService();
-							profileInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
-						} else {
-							selectedComponentSrv = new ComponentInfoService();
-							componentInfoPage.infoPanel.setPanel(Config.instance.browserPanel);	
-						}
-
-						userSpaceCB.setSelectedItem(null, ""+group.id);
-						Config.instance.selectedGroup = ""+group.id;
-						Config.instance.userSpace = Config.SPACE_USER;
-						loadStartupItem(item);
-						Config.instance.dispatchEvent(new GroupSelectionEvent(""+group.id, group.name));
-					});
-					Config.instance.getListGroupsOfItemService().loadGroupsForItem(startupItemId);
-				}
-			);
-			}
+		
 			
 			private function loadStartupItem(item:ItemDescription):void {
 				if (item) {
@@ -182,7 +159,7 @@
 				selectedComponentSrv.load(event.itemDescription);
 			}
 			
-			public function setSelectedDescription(desc:ItemDescription):void {
+			public function setSelectedDescription(desc:ItemDescription):void {				
 				if (desc.isProfile) {
 					tabnav.selectedIndex = 0;
 					this.selectedProfileItem = desc;
@@ -218,10 +195,7 @@
 				RegistryViewStack(this.parent).switchToEditor(null);
 			}
 			
-			private function setUserSpace(event:Event = null):void {
-				_userSpace=Config.instance.space;
-				userSpaceCB.setSelectedItem(Config.instance.space, Config.instance.selectedGroup);
-			}
+		
 			
 			private function getSelectedIndex():int{
 				if (isComponentId(Config.instance.startupItem)) {
@@ -271,7 +245,10 @@
 		<mx:Box paddingTop="{padding}" paddingLeft="{padding}"
 				horizontalCenter="-110"
 				>
-			<components:SpaceSwitch id="userSpaceCB" width="110" />
+			<components:SpaceSwitch id="registrySpaceComboBox" 
+									width="150" />
+			
+			
 		</mx:Box>
 		
 		<mx:VBox left="0"
