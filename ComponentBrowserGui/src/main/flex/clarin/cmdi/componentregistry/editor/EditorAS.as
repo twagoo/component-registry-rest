@@ -69,11 +69,16 @@ private function determineSaveButtonEnabled():void {
 	buttonBar.saveBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.SPACE_GROUP));
 }
 
+private function determinePublishButtonEnabled():void {
+	buttonBar.publishBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.SPACE_GROUP));
+}
+
 private function profileLoaded(event:Event):void {
 	var cmdComponent:XML = profileSrv.profile.profileSource;
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
 	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
+	determinePublishButtonEnabled();
 	Config.instance.getListGroupsOfItemService().loadGroupsForItem(itemDescription.id);
 	CursorManager.removeBusyCursor();
 }
@@ -84,6 +89,7 @@ private function componentLoaded(event:Event):void {
 	// Track changes for components being edited
 	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
+	determinePublishButtonEnabled();
 	Config.instance.getListGroupsOfItemService().loadGroupsForItem(itemDescription.id);
 	CursorManager.removeBusyCursor();
 }
@@ -206,6 +212,7 @@ private function handleEditorChange(event:Event):void {
 	uploadProgress.visible = false;
 	uploadProgress.includeInLayout = false;
 	determineSaveButtonEnabled();
+	determinePublishButtonEnabled();
 }
 
 private function initPaletteOverview():void {
