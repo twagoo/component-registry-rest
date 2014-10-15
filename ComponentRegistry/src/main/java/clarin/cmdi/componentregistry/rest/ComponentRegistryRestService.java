@@ -199,8 +199,8 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
 
-        
-        
+
+
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
@@ -240,8 +240,8 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
-        
-        
+
+
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
@@ -1537,6 +1537,24 @@ public class ComponentRegistryRestService implements
         setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     }
 
+    private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource) {
+        if (registrySpace == null || (registrySpace.equalsIgnoreCase("group") && groupId == null)
+                || resource == null) {
+            return "Undefined registry space or uindefined type of resource";
+        }
+        if (registrySpace.equalsIgnoreCase("published")) {
+            return "Published " + resource;
+        }
+        if (registrySpace.equalsIgnoreCase("private")) {
+            return "Private " + resource;
+        }
+        if (registrySpace.equalsIgnoreCase("group") && groupId != null) {
+            return resource + " of group " + groupId;
+        }
+
+        return "Undefined registry space or uindefined type of resource";
+    }
+
     /**
      *
      * @param isPublished if "true" then profiles and components from the user's
@@ -1566,15 +1584,15 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new Rss();
-        }
-        catch (ItemNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
         // obsolete, add group Id
-        final RssCreatorDescriptions instance = new RssCreatorDescriptions(!registrySpace.equalsIgnoreCase("published"), getApplicationBaseURI(), "components",
+        String title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components");
+        final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "components",
                 Integer.parseInt(limit), components,
-                BaseDescription.COMPARE_ON_DATE);
+                BaseDescription.COMPARE_ON_DATE, title);
         final Rss rss = instance.getRss();
         LOG.debug("Releasing RSS of {} most recently registered components",
                 limit);
@@ -1610,19 +1628,26 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new Rss();
-        
+
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
-        final RssCreatorDescriptions instance = new RssCreatorDescriptions(
-                !registrySpace.equalsIgnoreCase("published"), getApplicationBaseURI(), "profiles",
+        String title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles");
+        final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "profiles",
                 Integer.parseInt(limit), profiles,
-                BaseDescription.COMPARE_ON_DATE);
+                BaseDescription.COMPARE_ON_DATE, title);
         final Rss rss = instance.getRss();
         LOG.debug("Releasing RSS of {} most recently registered profiles",
                 limit);
         return rss;
+    }
+
+    private String helpToMakeTitleForRssComments(String itemId, String resource) {
+        if (itemId == null || resource == null) {
+            return "Undefined description";
+        }
+        return ("Comments for "+resource+ " "+itemId);
     }
 
     /**
@@ -1654,11 +1679,11 @@ public class ComponentRegistryRestService implements
             final List<Comment> comments = cr.getCommentsInProfile(profileId);
             final ProfileDescription pd = cr.getProfileDescriptionAccessControlled(profileId);
             final String profileName = pd.getName();
-            boolean profileIsPrivate = !pd.isPublic();
-            // obsolete, status must be involved, not boolean profileIsPrivate
-            final RssCreatorComments instance = new RssCreatorComments(profileIsPrivate,
+           
+            String title = this.helpToMakeTitleForRssComments(profileId, "profile");
+            final RssCreatorComments instance = new RssCreatorComments(
                     getApplicationBaseURI(), Integer.parseInt(limit), profileId,
-                    profileName, "profile", comments, Comment.COMPARE_ON_DATE);
+                    profileName, "profile", comments, Comment.COMPARE_ON_DATE, title);
             final Rss rss = instance.getRss();
             LOG.debug("Releasing RSS of {} most recent post on profile {}", limit,
                     profileId);
@@ -1703,11 +1728,11 @@ public class ComponentRegistryRestService implements
             final List<Comment> comments = cr.getCommentsInComponent(componentId);
             final ComponentDescription cd = cr.getComponentDescriptionAccessControlled(componentId);
             final String componentName = cd.getName();
-            final boolean isPrivate = !cd.isPublic();
             //oboslete. status must be involved, not boolean isPrivate
-            final RssCreatorComments instance = new RssCreatorComments(isPrivate,
+            String title = this.helpToMakeTitleForRssComments(componentId, "component");
+            final RssCreatorComments instance = new RssCreatorComments(
                     getApplicationBaseURI(), Integer.parseInt(limit), componentId,
-                    componentName, "component", comments, Comment.COMPARE_ON_DATE);
+                    componentName, "component", comments, Comment.COMPARE_ON_DATE, title);
             final Rss rss = instance.getRss();
             LOG.debug("Releasing RSS of {} most recent post on component {}",
                     limit, componentId);
@@ -1888,12 +1913,12 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
         } catch (ItemNotFoundException e) {
             return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
-        
+
         } catch (AuthenticationFailException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
     }
-    
+
 //    @Override
 //    @DELETE
 //    @Path("/groups/removemember")
@@ -1913,7 +1938,6 @@ public class ComponentRegistryRestService implements
 //            return Response.status(Status.UNAUTHORIZED).build();
 //        }
 //    }
-
     @Override
     @GET
     @Path("/groups/profiles")
@@ -1991,7 +2015,5 @@ public class ComponentRegistryRestService implements
         public void setStrings(List<String> strings) {
             this.strings = strings;
         }
-        
-       
     }
 }

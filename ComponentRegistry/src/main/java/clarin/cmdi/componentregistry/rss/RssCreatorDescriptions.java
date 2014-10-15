@@ -22,11 +22,11 @@ public class RssCreatorDescriptions<T extends BaseDescription> extends RssCreato
      * for the channel will be created
      * @param comparator compare descriptions by dates
      */
-    public RssCreatorDescriptions(boolean isPrivate, String baseURI, String descriptionType,
-            int limit, List<T> descriptions, Comparator<T> comparator) {
-        super(isPrivate, baseURI, limit, descriptions);
+    public RssCreatorDescriptions(String baseURI, String descriptionType,
+            int limit, List<T> descriptions, Comparator<T> comparator, String title) {
+        super(baseURI, limit, descriptions);
         setChannelLink(baseURI + "/");
-        setChannelTitle((isPrivate ? "Private " : "Public ") + descriptionType);
+        setChannelTitle(title);
         setChannelDescription(String.format("News feed for the %s", descriptionType));
         setComparator(comparator);
     }
@@ -40,7 +40,7 @@ public class RssCreatorDescriptions<T extends BaseDescription> extends RssCreato
      */
     @Override
     protected RssItem fromArgToRssItem(T desc) {
-        String href = getBaseURI() + "?item=" + desc.getId() + (isPrivate ? "&space=user" : "");
+        String href = getBaseURI() + "?item=" + desc.getId();
         RssItem retval = new RssItem();
         retval.setDescription(desc.getDescription());
         retval.setGuid(makeGuid(href));

@@ -26,11 +26,11 @@ public class RssCreatorComments extends RssCreator<Comment> {
      * the channel will be created
      * @param comparator compare comments by dates
      */
-    public RssCreatorComments(boolean isPrivate, String baseURI, int limit,
-            String descriptionId, String descriptionName, String descriptionType, List<Comment> comms, Comparator<Comment> comparator) {
-        super(isPrivate, baseURI, limit, comms);
-        setChannelLink(baseURI + "?item=" + descriptionId + ((isPrivate) ? "&space=user" : "") + "&browserview=comments");
-        setChannelTitle((isPrivate ? "Private " : "Public ") + descriptionType + " \"" + descriptionName + "\"");
+    public RssCreatorComments(String baseURI, int limit,
+            String descriptionId, String descriptionName, String descriptionType, List<Comment> comms, Comparator<Comment> comparator, String title) {
+        super(baseURI, limit, comms);
+        setChannelLink(baseURI + "?item=" + descriptionId + "&browserview=comments");
+        setChannelTitle(title);
         setChannelDescription(String.format("Comments feed for the %s \"%s\"", descriptionType, descriptionName));
         setComparator(comparator);
     }
