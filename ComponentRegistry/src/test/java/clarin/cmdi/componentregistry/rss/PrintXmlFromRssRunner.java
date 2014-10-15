@@ -56,7 +56,7 @@ public class PrintXmlFromRssRunner {
 
     private static Rss makeRssForDescriptions(List<? extends BaseDescription> descriptions, int kind, String baseUri, int limit) throws ParseException {
 	System.out.println(descriptions.size());
-	Collections.sort(descriptions, ComponentUtils.COMPARE_ON_DATE);
+	Collections.sort(descriptions, BaseDescription.COMPARE_ON_DATE);
 	System.out.println(descriptions.size());
 
 	System.out.println("check if the descriptions are sorted in a proper way, by the dates ");

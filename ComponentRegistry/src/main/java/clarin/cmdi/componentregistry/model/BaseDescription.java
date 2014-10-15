@@ -4,6 +4,7 @@ import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.util.XmlDateAdapter;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -290,5 +291,21 @@ public class BaseDescription implements Serializable {
     public void setPublic(boolean ispublic) {
 	this.ispublic = ispublic;
     }
+    
+    /**
+     * Compares two descriptions by the their value as returned by
+     * {@link BaseDescription#getRegistrationDate() () * }
+     */
+    public static final Comparator<? super BaseDescription> COMPARE_ON_DATE = new Comparator<BaseDescription>() {
+        /**
+         * @returns 1 if o11 is older than o2 (to the bottom), returns -1 if o1 is younger (to the top)
+         * o2
+         */
+        @Override
+        public int compare(BaseDescription o1, BaseDescription o2) {
+            // we need to sort not in standard ascending orde, but in descending, from higher (later date) to the smaller (older date)
+            return ComponentUtils.COMPARE_ON_DATE.compare(o1.getRegistrationDate(),  o2.getRegistrationDate());
+        }
+    };
 
 }

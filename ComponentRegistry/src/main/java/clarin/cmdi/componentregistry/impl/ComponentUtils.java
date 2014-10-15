@@ -12,6 +12,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.BeanUtils;
 
 import clarin.cmdi.componentregistry.model.BaseDescription;
+import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -70,18 +71,17 @@ public class ComponentUtils {
             return result;
         }
     };
-    /**
-     * Compares two descriptions by the their value as returned by
-     * {@link BaseDescription#getRegistrationDate() () * }
-     */
-    public static final Comparator<? super BaseDescription> COMPARE_ON_DATE = new Comparator<BaseDescription>() {
+    
+    
+     public static final Comparator<? super Date> COMPARE_ON_DATE = new Comparator<Date>() {
         /**
          * @returns 1 if o11 is older than o2, returns -1 if o1 is younger than
          * o2
          */
         @Override
-        public int compare(BaseDescription o1, BaseDescription o2) {
-            return o1.getRegistrationDate().compareTo(o2.getRegistrationDate());
+        public int compare(Date o1, Date o2) {
+            // we need to sort not in standard ascending orde, but in descending, from higher (later date on the top) to the smaller (older date on the bottm)
+            return (- o1.compareTo(o2));
         }
     };
 

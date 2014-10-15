@@ -91,17 +91,18 @@ public class RssCreatorDescriptionsTest {
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
 
-        RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, baseURI, "profiles", 3, descriptions, ComponentUtils.COMPARE_ON_DATE);
+        RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, baseURI, "profiles", 3, descriptions, BaseDescription.COMPARE_ON_DATE);
         Rss result = instance.getRss();
 
         List<RssItem> items = result.getChannel().getItem();
         assertEquals(3, result.getChannel().getItem().size());
+        // the youngest must be on the top (at "0"), the oldest must be on the bottom (at "3")
         compareRssVsValues("description-1", baseURI + "?item=clarin.eu:cr1:p_p_1", date("2001-01-01"),
-                instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1"), items.get(0));
+                instance.makeDescriptionTitle("name-1", "Useratti", "groupname-1"), items.get(2));
         compareRssVsValues("description-2", baseURI + "?item=clarin.eu:cr1:p_p_2", date("2001-01-02"),
                 instance.makeDescriptionTitle("name-2", "Usereno", "groupname-2"), items.get(1));
         compareRssVsValues("description-3", baseURI + "?item=clarin.eu:cr1:p_p_3", date("2001-01-03"),
-                instance.makeDescriptionTitle("name-3", "Userio", "groupname-3"), items.get(2));
+                instance.makeDescriptionTitle("name-3", "Userio", "groupname-3"), items.get(0));
 
         assertEquals("2.0", Double.toString(result.getVersion()));
         assertEquals("News feed for the profiles", result.getChannel().getDescription());

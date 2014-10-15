@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
@@ -11,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -160,18 +160,18 @@ public class Comment {
      */
     public static final Comparator<Comment> COMPARE_ON_DATE = new Comparator<Comment>() {
 	/**
-	 * @return 1 if o11 is older than o2, returns -1 if o1 is younger than
-	 *         o2
+	 * @return -1 if o11-s date is bigger than  o2's (o1 is younger), o1 goes up
+         * so the standard order (older up, smaller date is up) is reversed
 	 */
 	@Override
 	public int compare(Comment o1, Comment o2) {
 	    if (o1.getCommentDate() == o2.getCommentDate())
 		return 0;
 	    if (o1.getCommentDate() == null)
-		return -1;
+		return -1; // o1 goes down
 	    if (o2.getCommentDate() == null)
-		return 1;
-	    return o1.getCommentDate().compareTo(o2.getCommentDate());
+		return 1; // o1 goes up
+	    return ComponentUtils.COMPARE_ON_DATE.compare(o1.getCommentDate(),  o2.getCommentDate());
 	}
     };
 }

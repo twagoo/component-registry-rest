@@ -1574,7 +1574,7 @@ public class ComponentRegistryRestService implements
         // obsolete, add group Id
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(!registrySpace.equalsIgnoreCase("published"), getApplicationBaseURI(), "components",
                 Integer.parseInt(limit), components,
-                ComponentUtils.COMPARE_ON_DATE);
+                BaseDescription.COMPARE_ON_DATE);
         final Rss rss = instance.getRss();
         LOG.debug("Releasing RSS of {} most recently registered components",
                 limit);
@@ -1618,7 +1618,7 @@ public class ComponentRegistryRestService implements
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(
                 !registrySpace.equalsIgnoreCase("published"), getApplicationBaseURI(), "profiles",
                 Integer.parseInt(limit), profiles,
-                ComponentUtils.COMPARE_ON_DATE);
+                BaseDescription.COMPARE_ON_DATE);
         final Rss rss = instance.getRss();
         LOG.debug("Releasing RSS of {} most recently registered profiles",
                 limit);
