@@ -141,13 +141,14 @@ private function saveSpec(registrySpace:String, uploadAction:int):void {
 		}
 		
 		// Private components that are in updated require usage check call. If in use, the user can choose whether or not to save the changes .
-		if((registrySpace == Config.SPACE_PRIVATE || registrySpace == Config.SPACE_GROUP) && uploadAction == UploadService.UPDATE && !item.isProfile){
+		if((registrySpace == Config.SPACE_PRIVATE || 
+			registrySpace == Config.SPACE_GROUP) && uploadAction == UploadService.UPDATE && !item.isProfile){
 			checkUsage(item, registrySpace);
 		}else{
 			doUpload(uploadAction,item);
 		}
 		
-		// if we are in public or group space but do "save as new" (i.e. in a private space)
+		// if we are in public or group space but do "save as new" (i.e. registrySpace is private space)
 		// then we need to switch to the private space
 		if (registrySpace == Config.SPACE_PRIVATE) {
 			Config.instance.registrySpace=new RegistrySpace(Config.SPACE_PRIVATE, "");

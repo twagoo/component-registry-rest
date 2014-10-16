@@ -78,16 +78,25 @@ package clarin.cmdi.componentregistry.common.components {
 		public function switchToBrowse(itemDescription:ItemDescription):void {
 			if (itemDescription != null) {				
 				
-				if (itemDescription.isPrivate && Config.instance.registrySpace.space == Config.SPACE_PUBLISHED) {
-					Config.instance.registrySpace = new RegistrySpace( Config.SPACE_PRIVATE, "");
+				//Alert.show(itemDescription.id + " " +itemDescription.isPrivate + " " + Config.instance.registrySpace.space + " "+Config.instance.registrySpace.groupId);
+				
+				if (itemDescription.isPrivate) {
+					if (Config.instance.registrySpace.space == Config.SPACE_PUBLISHED) {
+						// from public registry we can save only to a private space
+					    Config.instance.registrySpace = new RegistrySpace(Config.SPACE_PRIVATE, "");
+					} else {
+						// registry, goup of private, stays the same
+					}
 				} else {					
-					if (!itemDescription.isPrivate && Config.instance.registrySpace.space != Config.SPACE_PUBLISHED) {
+					if (Config.instance.registrySpace.space != Config.SPACE_PUBLISHED) {
 						// the item has been published, go to public space
 						Config.instance.registrySpace = new RegistrySpace( Config.SPACE_PUBLISHED, "");
 					} else {
-						browse.refresh();
+						// public item in a public registry, the registry setting stays intact
 					}
 				}
+				
+				browse.refresh();
 				browse.setSelectedDescription(itemDescription);
 			} 
 			this.selectedItem = itemDescription;
