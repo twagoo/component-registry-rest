@@ -32,6 +32,7 @@ public interface ComponentRegistry {
     
     public Number getGroupId(); 
     public void setGroupId(Number groupId); 
+    public String getGroupName(Number groupId) throws ItemNotFoundException;
     
     public Number getBaseDescriptionOwnerId(String cmdId);
     

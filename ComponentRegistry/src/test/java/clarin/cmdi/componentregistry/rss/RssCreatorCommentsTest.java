@@ -56,7 +56,6 @@ public class RssCreatorCommentsTest {
         String testPrfId = "p_1234";
         String baseUri = "http://catalog.clarin.eu/ds/ComponentRegistry";
         boolean isFromProfile = true;
-        boolean userspace = false;
 
         Comment comm1 = makeTestComment(true, isFromProfile, "this is comment # 1", date("2012-04-02T11:38:23+00:00"), "commentId1", testPrfId,
                 "userello");
@@ -66,7 +65,7 @@ public class RssCreatorCommentsTest {
                 "userito");
         List<Comment> comms = new ArrayList<Comment>(Arrays.asList(comm1, comm2, comm3));
 
-        RssCreatorComments instance = new RssCreatorComments(userspace, baseUri, 3, testPrfId, "Test Profile", "profile", comms, Comment.COMPARE_ON_DATE);
+        RssCreatorComments instance = new RssCreatorComments(baseUri, 3, testPrfId, "Test Profile", "profile", comms, Comment.COMPARE_ON_DATE, "Comments for a private profile");
         Rss result = instance.getRss();
 
         String rfcdate1 = DatesHelper.getRFCDateTime(DatesHelper.parseIso("2012-04-02T11:38:23+00:00"));
@@ -83,7 +82,7 @@ public class RssCreatorCommentsTest {
                 "Comment commentId3\nby userito", resitems.get(2));
 
         assertEquals("2.0", Double.toString(result.getVersion()));
-        assertEquals("Public profile \"Test Profile\"", result.getChannel().getTitle());
+        assertEquals("Comments for a private profile", result.getChannel().getTitle());
         assertEquals(channelLink, result.getChannel().getLink());
         assertEquals("Comments feed for the profile \"Test Profile\"", result.getChannel().getDescription());
     }

@@ -80,7 +80,6 @@ public class RssCreatorDescriptionsTest {
     public void testMakeRss() throws JAXBException, UnsupportedEncodingException, IOException, ParseException {
         String baseURI = "http://catalog.clarin.eu/ds/ComponentRegistry";
         String channelLink = baseURI + "/";
-        boolean userspace = false;
 
         ProfileDescription desc1 = createTestProfileDescription("Useratti",
                 "description-1", "groupname-1", "name-1", true, date("2001-01-01"), ProfileDescription.PROFILE_PREFIX+"p_1");
@@ -91,7 +90,7 @@ public class RssCreatorDescriptionsTest {
 
         List<ProfileDescription> descriptions = Arrays.asList(desc1, desc2, desc3);
 
-        RssCreatorDescriptions instance = new RssCreatorDescriptions(userspace, baseURI, "profiles", 3, descriptions, BaseDescription.COMPARE_ON_DATE);
+        RssCreatorDescriptions instance = new RssCreatorDescriptions(baseURI, "profiles", 3, descriptions, BaseDescription.COMPARE_ON_DATE, "Public profiles");
         Rss result = instance.getRss();
 
         List<RssItem> items = result.getChannel().getItem();

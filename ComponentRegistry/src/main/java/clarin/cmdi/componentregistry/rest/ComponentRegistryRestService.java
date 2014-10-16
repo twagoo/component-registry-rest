@@ -1537,7 +1537,7 @@ public class ComponentRegistryRestService implements
         setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     }
 
-    private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource) {
+    private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {
         if (registrySpace == null || (registrySpace.equalsIgnoreCase("group") && groupId == null)
                 || resource == null) {
             return "Undefined registry space or uindefined type of resource";
@@ -1548,8 +1548,9 @@ public class ComponentRegistryRestService implements
         if (registrySpace.equalsIgnoreCase("private")) {
             return "Private " + resource;
         }
+
         if (registrySpace.equalsIgnoreCase("group") && groupId != null) {
-            return resource + " of group " + groupId;
+            return resource + " of group " + groupId + " '" + cr.getGroupName(Integer.parseInt(groupId)) + "'";
         }
 
         return "Undefined registry space or uindefined type of resource";
@@ -1575,9 +1576,11 @@ public class ComponentRegistryRestService implements
             @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
             throws ComponentRegistryException, ParseException, IOException {
         List<ComponentDescription> components = null;
+        String title = "";
         try {
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
             components = cr.getComponentDescriptions();
+            title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components", cr);
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new Rss();
@@ -1588,8 +1591,7 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
-        // obsolete, add group Id
-        String title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components");
+        
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "components",
                 Integer.parseInt(limit), components,
                 BaseDescription.COMPARE_ON_DATE, title);
@@ -1619,9 +1621,11 @@ public class ComponentRegistryRestService implements
             @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
             throws ComponentRegistryException, ParseException, IOException {
         List<ProfileDescription> profiles = null;
+        String title = "";
         try {
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
             profiles = cr.getProfileDescriptions();
+            title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles", cr);
         } catch (AuthenticationFailException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new Rss();
@@ -1633,7 +1637,6 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
-        String title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles");
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "profiles",
                 Integer.parseInt(limit), profiles,
                 BaseDescription.COMPARE_ON_DATE, title);
@@ -1647,7 +1650,7 @@ public class ComponentRegistryRestService implements
         if (itemId == null || resource == null) {
             return "Undefined description";
         }
-        return ("Comments for "+resource+ " "+itemId);
+        return ("Comments for " + resource + " " + itemId);
     }
 
     /**
@@ -1679,7 +1682,7 @@ public class ComponentRegistryRestService implements
             final List<Comment> comments = cr.getCommentsInProfile(profileId);
             final ProfileDescription pd = cr.getProfileDescriptionAccessControlled(profileId);
             final String profileName = pd.getName();
-           
+
             String title = this.helpToMakeTitleForRssComments(profileId, "profile");
             final RssCreatorComments instance = new RssCreatorComments(
                     getApplicationBaseURI(), Integer.parseInt(limit), profileId,

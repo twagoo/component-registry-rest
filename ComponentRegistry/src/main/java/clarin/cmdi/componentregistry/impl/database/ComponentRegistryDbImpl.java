@@ -125,6 +125,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public void setGroupId(Number groupId) {
         this.groupId = groupId;
     }
+    
+    @Override
+    public String getGroupName(Number groupId) throws ItemNotFoundException{
+        return groupService.getGroupNameById(groupId.longValue());
+    }
 
     @Override
     public Number getBaseDescriptionOwnerId(String cmdId) {

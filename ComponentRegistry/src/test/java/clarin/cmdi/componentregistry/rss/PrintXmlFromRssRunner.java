@@ -66,7 +66,7 @@ public class PrintXmlFromRssRunner {
 		    + ", Rss=formatted: " + DatesHelper.getRFCDateTime(date));
 	}
 
-	RssCreatorDescriptions instance = new RssCreatorDescriptions(false, baseUri, (kind == 1) ? "profiles" : "components", limit, descriptions, ComponentUtils.COMPARE_ON_DATE);
+	RssCreatorDescriptions instance = new RssCreatorDescriptions(baseUri, (kind == 1) ? "profiles" : "components", limit, descriptions, ComponentUtils.COMPARE_ON_DATE, "Public descriptions");
 	Rss result = instance.getRss();
 
 	return result;
@@ -83,7 +83,7 @@ public class PrintXmlFromRssRunner {
 	    System.out.println(commentje.getCommentDate());
 	}
 
-	RssCreatorComments instance = new RssCreatorComments(false, baseUri, limit, profileId, profileName, (kind == 3) ? "profile" : "component", comments, Comment.COMPARE_ON_DATE);
+	RssCreatorComments instance = new RssCreatorComments(baseUri, limit, profileId, profileName, (kind == 3) ? "profile" : "component", comments, Comment.COMPARE_ON_DATE, "Comments for profile "+profileId);
 	Rss result = instance.getRss();
 	return result;
     }
