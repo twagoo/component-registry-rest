@@ -109,11 +109,16 @@ package clarin.cmdi.componentregistry.common.components {
 		
 		private function doSwitchToEditor(itemDescription:ItemDescription):void {
 			this.selectedChild = editor;
-			if(itemDescription != null) {
+			
+			//memoise registry space of config
+			//because component palette can alter it (unwanted side effect)
+		   editor.registrySpaceEditor = new RegistrySpace(Config.instance.registrySpace.space, Config.instance.registrySpace.groupId);
+		   
+		   if(itemDescription != null) {
 				this.selectedItem = itemDescription;
 				editor.setDescription(itemDescription);
 			}
-		}
+		   }
 		
 		public function switchToImport():void {
 			this.selectedChild = importer;

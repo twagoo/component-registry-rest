@@ -49,9 +49,10 @@ private var uploadService:UploadService = new UploadService();
 [Bindable]
 private var viewStack:RegistryViewStack;
 
-private var registrySpaceEditor:RegistrySpace;
+private var _registrySpaceEditor:RegistrySpace;
 
 public function init():void {
+	
 	cmdSpec  = CMDSpec.createEmptyProfile();
 	profileSrv.addEventListener(ProfileInfoService.PROFILE_LOADED, profileLoaded);
 	componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, componentLoaded);
@@ -62,6 +63,10 @@ public function init():void {
 	
 }
 
+public function set registrySpaceEditor(rs:RegistrySpace):void{
+	_registrySpaceEditor = rs;
+	componentsPaletteOverview.registrySpaceComboBox.setSelectedIndex();
+}
 
 private function toggleRegistrySpace(event:Event):void {
 	componentsSrv = Config.instance.getComponentsSrv();
@@ -69,11 +74,11 @@ private function toggleRegistrySpace(event:Event):void {
 }
 
 private function determineSaveButtonEnabled():void {
-	buttonBar.saveBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( registrySpaceEditor.space == Config.SPACE_PRIVATE || registrySpaceEditor.space == Config.SPACE_GROUP));
+	buttonBar.saveBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( _registrySpaceEditor.space == Config.SPACE_PRIVATE || _registrySpaceEditor.space == Config.SPACE_GROUP));
 }
 
 private function determinePublishButtonEnabled():void {
-	buttonBar.publishBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( registrySpaceEditor.space == Config.SPACE_PRIVATE || registrySpaceEditor.space == Config.SPACE_GROUP));
+	buttonBar.publishBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( _registrySpaceEditor.space == Config.SPACE_PRIVATE || _registrySpaceEditor.space == Config.SPACE_GROUP));
 }
 
 private function profileLoaded(event:Event):void {
@@ -81,7 +86,7 @@ private function profileLoaded(event:Event):void {
 	this.cmdSpec = CMDModelFactory.createModel(cmdComponent, profileSrv.profile.description);
 	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
-	determinePublishButtonEnabled();
+	determinePublishButtonEnabled();	
 	Config.instance.getListGroupsOfItemService().loadGroupsForItem(itemDescription.id);
 	CursorManager.removeBusyCursor();
 }
@@ -93,6 +98,7 @@ private function componentLoaded(event:Event):void {
 	this.cmdSpec.changeTracking = true;
 	determineSaveButtonEnabled();
 	determinePublishButtonEnabled();
+	
 	Config.instance.getListGroupsOfItemService().loadGroupsForItem(itemDescription.id);
 	CursorManager.removeBusyCursor();
 }
@@ -111,27 +117,20 @@ public function setDescription(itemDescription:ItemDescription):void {
 	}
 }
 
-public function startNewProfile():void {
-	xmlEditor.clearEditorProfile();
-}
 
-public function startNewComponent():void {
-	xmlEditor.clearEditorComponent();
-}
 
 private function publishSpec():void {
 	Alert.show("If your profile/component is ready to be used by other people press ok, otherwise press cancel and save it in your workspace or continue editing.", "Publish", Alert.OK | Alert.CANCEL, null, handlePublishAlert);
-	Config.instance.registrySpace = registrySpaceEditor;
+	Config.instance.registrySpace = _registrySpaceEditor;
 }
 
 private function handlePublishAlert(event:CloseEvent):void {
 	if (event.detail == Alert.OK) {
-		saveSpec(Config.SPACE_PUBLISHED, UploadService.PUBLISH);
-		registrySpaceEditor = new RegistrySpace(Config.SPACE_PUBLISHED, "");
+		saveSpec(UploadService.PUBLISH);
 	}
 }
 
-private function saveSpec(registrySpace:String, uploadAction:int):void {
+private function saveSpec(uploadAction:int):void {
 	if (xmlEditor.validate()) {
 		var item:ItemDescription = new ItemDescription();
 		item.description = xmlEditor.cmdSpec.headerDescription;
@@ -139,30 +138,34 @@ private function saveSpec(registrySpace:String, uploadAction:int):void {
 		item.isProfile = xmlEditor.cmdSpec.isProfile;
 		item.groupName = xmlEditor.cmdSpec.groupName;
 		item.domainName = xmlEditor.cmdSpec.domainName;
-		item.isPrivate = (registrySpace ==  Config.SPACE_PRIVATE || registrySpace == Config.SPACE_GROUP);
+		item.isPrivate = (_registrySpaceEditor.space ==  Config.SPACE_PRIVATE || _registrySpaceEditor.space == Config.SPACE_GROUP);
 		if (itemDescription && itemDescription.isPrivate ) {
 			item.id = xmlEditor.cmdSpec.headerId;
 		}
 		
 		// Private components that are in updated require usage check call. If in use, the user can choose whether or not to save the changes .
-		if((registrySpace == Config.SPACE_PRIVATE || 
-			registrySpace == Config.SPACE_GROUP) && uploadAction == UploadService.UPDATE && !item.isProfile){
-			checkUsage(item, registrySpace);
+		if(( (_registrySpaceEditor.space) == Config.SPACE_PRIVATE || 
+			(_registrySpaceEditor.space) == Config.SPACE_GROUP) && uploadAction == UploadService.UPDATE && !item.isProfile){
+			checkUsage(item, _registrySpaceEditor.space);
 		}else{
 			doUpload(uploadAction,item);
 		}
 		
-		// if we are in public or group space but do "save as new" (i.e. registrySpace is private space)
-		// then we need to switch to the private space
-		if (registrySpace == Config.SPACE_PRIVATE) {
-			registrySpaceEditor=new RegistrySpace(Config.SPACE_PRIVATE, "");
+		if (uploadAction == UploadService.NEW) {
+			_registrySpaceEditor=new RegistrySpace(Config.SPACE_PRIVATE, "");
+		}
+		
+		if (uploadAction == UploadService.PUBLISH) {
+			_registrySpaceEditor=new RegistrySpace(Config.SPACE_PUBLISHED, "");
 		}
 		
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
 	}
-	Config.instance.registrySpace = registrySpaceEditor;
+	Config.instance.registrySpace = _registrySpaceEditor;
 }
+
+
 
 private function cancel():void {
 	if(xmlEditor.specHasChanges){
@@ -175,7 +178,7 @@ private function cancel():void {
 	} else {
 		viewStack.switchToBrowse(itemDescription);
 	}
-	Config.instance.registrySpace = registrySpaceEditor;
+	Config.instance.registrySpace = _registrySpaceEditor;
 }
 
 /**
@@ -215,9 +218,7 @@ private function handleSaveComplete(event:UploadCompleteEvent):void {
 
 
 private function handleEditorChange(event:Event):void {
-	//memoise registry space of config
-	registrySpaceEditor = new RegistrySpace(Config.instance.registrySpace.space, Config.instance.registrySpace.groupId);
-    errorMessageField.text = "";
+	errorMessageField.text = "";
 	uploadProgress.visible = false;
 	uploadProgress.includeInLayout = false;
 	determineSaveButtonEnabled();
