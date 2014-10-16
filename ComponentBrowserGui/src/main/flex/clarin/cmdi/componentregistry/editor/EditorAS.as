@@ -49,6 +49,8 @@ private var uploadService:UploadService = new UploadService();
 [Bindable]
 private var viewStack:RegistryViewStack;
 
+private var registrySpaceEditor:RegistrySpace;
+
 public function init():void {
 	cmdSpec  = CMDSpec.createEmptyProfile();
 	profileSrv.addEventListener(ProfileInfoService.PROFILE_LOADED, profileLoaded);
@@ -57,6 +59,7 @@ public function init():void {
 	uploadService.init(uploadProgress);
 	Config.instance.addEventListener(Config.REGISTRY_SPACE_TOGGLE_EVENT, toggleRegistrySpace);
 	viewStack = this.parent as RegistryViewStack;
+	
 }
 
 
@@ -66,11 +69,11 @@ private function toggleRegistrySpace(event:Event):void {
 }
 
 private function determineSaveButtonEnabled():void {
-	buttonBar.saveBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.SPACE_GROUP));
+	buttonBar.saveBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( registrySpaceEditor.space == Config.SPACE_PRIVATE || registrySpaceEditor.space == Config.SPACE_GROUP));
 }
 
 private function determinePublishButtonEnabled():void {
-	buttonBar.publishBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.SPACE_GROUP));
+	buttonBar.publishBtn.enabled =  (itemDescription != null && itemDescription.isPrivate && itemDescription.id != null && xmlEditor.cmdSpec.headerId != null && ( registrySpaceEditor.space == Config.SPACE_PRIVATE || registrySpaceEditor.space == Config.SPACE_GROUP));
 }
 
 private function profileLoaded(event:Event):void {
@@ -118,12 +121,13 @@ public function startNewComponent():void {
 
 private function publishSpec():void {
 	Alert.show("If your profile/component is ready to be used by other people press ok, otherwise press cancel and save it in your workspace or continue editing.", "Publish", Alert.OK | Alert.CANCEL, null, handlePublishAlert);
+	Config.instance.registrySpace = registrySpaceEditor;
 }
 
 private function handlePublishAlert(event:CloseEvent):void {
 	if (event.detail == Alert.OK) {
 		saveSpec(Config.SPACE_PUBLISHED, UploadService.PUBLISH);
-		Config.instance.registrySpace = new RegistrySpace(Config.SPACE_PUBLISHED, "");
+		registrySpaceEditor = new RegistrySpace(Config.SPACE_PUBLISHED, "");
 	}
 }
 
@@ -151,12 +155,13 @@ private function saveSpec(registrySpace:String, uploadAction:int):void {
 		// if we are in public or group space but do "save as new" (i.e. registrySpace is private space)
 		// then we need to switch to the private space
 		if (registrySpace == Config.SPACE_PRIVATE) {
-			Config.instance.registrySpace=new RegistrySpace(Config.SPACE_PRIVATE, "");
+			registrySpaceEditor=new RegistrySpace(Config.SPACE_PRIVATE, "");
 		}
 		
 	} else {
 		errorMessageField.text = "Validation errors: red colored fields are invalid.";
 	}
+	Config.instance.registrySpace = registrySpaceEditor;
 }
 
 private function cancel():void {
@@ -170,6 +175,7 @@ private function cancel():void {
 	} else {
 		viewStack.switchToBrowse(itemDescription);
 	}
+	Config.instance.registrySpace = registrySpaceEditor;
 }
 
 /**
@@ -209,7 +215,9 @@ private function handleSaveComplete(event:UploadCompleteEvent):void {
 
 
 private function handleEditorChange(event:Event):void {
-	errorMessageField.text = "";
+	//memoise registry space of config
+	registrySpaceEditor = new RegistrySpace(Config.instance.registrySpace.space, Config.instance.registrySpace.groupId);
+    errorMessageField.text = "";
 	uploadProgress.visible = false;
 	uploadProgress.includeInLayout = false;
 	determineSaveButtonEnabled();
@@ -221,6 +229,7 @@ private function initPaletteOverview():void {
 	componentsPaletteOverview.dataGrid.allowMultipleSelection = true;
 	componentsPaletteOverview.dataGrid.resizableColumns = true;
 	componentsPaletteOverview.topPlank.getChildByName("rssLink").visible = false;
+	
 }
 
 public function getType():String {
