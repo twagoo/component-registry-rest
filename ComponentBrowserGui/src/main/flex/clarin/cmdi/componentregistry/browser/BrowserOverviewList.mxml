@@ -237,12 +237,12 @@
 		]]>
 	</mx:Script>
 	
-	<mx:HBox 
+	<mx:HBox id = "topPlank"
 			 paddingLeft="5" 
 			 paddingRight="5"
 			 width="100%">
 		
-		<mx:Box 
+		<mx:Box id ="registrySpaceOuter"
 			    paddingTop="5" paddingLeft="5" 
 				visible="{spaceSwitchEnabled}" 
 				includeInLayout="{spaceSwitchEnabled}">
@@ -250,7 +250,8 @@
 							  />
 		</mx:Box>
 		
-		<mx:HBox horizontalAlign="left"
+		<mx:HBox id = "actionButtons"
+			     horizontalAlign="left"
 				 verticalAlign="middle"
 				 width="70%"
 				 visible="{buttonsEnabled}">
@@ -309,7 +310,8 @@
 			
 		</mx:HBox>
 		
-		<mx:HBox horizontalAlign="right"
+		<mx:HBox id= "showBox"
+			    horizontalAlign="right"
 				 verticalAlign="middle"
 				 width="30%">
 	
@@ -318,11 +320,12 @@
 			<mx:Label text="Showing {dataGrid.dataProvider.length} of {dataGrid.unfilteredLength}"/>
 	   </mx:HBox>
 		<comp:RssLinkButton 
+			id="rssLink"
 			enabled ="{Config.instance.registrySpace.space != Config.SPACE_PRIVATE}"
 			visible="{Config.instance.registrySpace.space != Config.SPACE_PRIVATE}"
 			contextMenu = "{(new RssDescriptionsContextMenu(typeOfDescription)).cm}"
-			click="goToFeed()"
-			/>	
+			click="goToFeed()">	
+	  </comp:RssLinkButton>	
 	</mx:HBox>
 
 	<comp:FilteringDataGrid id="dataGrid"

@@ -220,6 +220,7 @@ private function initPaletteOverview():void {
 	componentsPaletteOverview.dataGrid.dragEnabled = true;
 	componentsPaletteOverview.dataGrid.allowMultipleSelection = true;
 	componentsPaletteOverview.dataGrid.resizableColumns = true;
+	componentsPaletteOverview.topPlank.getChildByName("rssLink").visible = false;
 }
 
 public function getType():String {

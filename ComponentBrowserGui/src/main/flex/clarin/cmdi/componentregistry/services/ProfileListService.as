@@ -19,7 +19,7 @@ package clarin.cmdi.componentregistry.services {
 			var tempArray:ArrayCollection = new ArrayCollection();
 			for each (var node:XML in nodes) {
 				var item:ItemDescription = new ItemDescription();
-				var isPrivate:Boolean = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP);
+				var isPrivate:Boolean = (registrySpace.space == Config.SPACE_PRIVATE || registrySpace.space == Config.SPACE_GROUP);
 				item.createProfile(node, isPrivate);
 				tempArray.addItem(item);
 			}
