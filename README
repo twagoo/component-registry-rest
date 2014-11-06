@@ -83,8 +83,13 @@ Do a 'svn propget svn:externals' to see the property. Results in: 'http://svn.cl
 The ComponentBrowserGui project needs some swf files which are not in any maven repository I could find. 
 So install them manually: go to ComponentBrowserGui/libs/ and run the commands in maveninstalllib.txt
  
-* Developing and Debugging "ComponentBrowserGui". First of all, make sure that ComponentRegistry-war
-grabbed the newest version of the Gui. For this you do "mvn install" in ComponentBrowserGui, and 
+* Developing and Debugging "ComponentBrowserGui". 
+
+Select the 'development' Maven profile (Netbeans has a dropdown menu for this) to get 
+logging output on the console.
+
+Always make sure that ComponentRegistry-war grabbed the newest version of the Flex GUI. 
+For this you do "mvn install" in ComponentBrowserGui, and 
 then compile the backend in ComponentRegistry. Second of all, you should know that you can run and 
 debug the Gui from FlashBuilder.  For this you need to edit "Run/Debug" in the project properties.
 For instance,  if a bug to fix appears when fuilfilling the request 
@@ -93,6 +98,10 @@ you need to make this uri an "URI to launch". To do this, you duplicate one of t
 scenarios in Run/debug menu, and then EDIT the duplicated version by changing its "name" 
 and  "URI or path to launch" in the corresponding way.
 
+If, when trying to run the backend, you're getting errors from Spring stating that
+  "Name [ComponentRegistry] is not bound in this Context. Unable to find [ComponentRegistry]"
+it means that you do not have a JNDI resource for the database connection set up correctly.
+See the installation instructions for more information.
  
  
 Installation
