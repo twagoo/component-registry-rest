@@ -29,11 +29,6 @@ Version specific update instructions
 
 - Execute DB update script upgrade-1.14.sql
 
-- The application requires a JNDI server-managed datasource over the database under the namespace java:comp/env/jdbc/ComponentRegistry. I.e. in tomcat, edit /config/context.xml:
-
-  <Resource auth="Container" driverClassName="org.postgresql.Driver" maxActive="10" name="jdbc/ComponentRegistry" password="password" type="javax.sql.DataSource" url="jdbc:postgresql:ComponentRegistry" username="compreg"/>
-
-
 
 === 1.13 ===
 
