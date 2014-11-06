@@ -36,6 +36,8 @@
         <!-- hibernate.version>4.2.4.Final</hibernate.version -->
         <hibernate.version>3.6.10.Final</hibernate.version>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
+        <logging.appender>FILE</logging.appender>
+        <logging.level>warn</logging.level>
     </properties>
 
 
@@ -327,6 +329,22 @@
 
 
     <profiles>
+        <profile>
+            <!-- development profile that directs logging output to the console -->
+            <id>development</id>
+            <properties>
+                <logging.level>debug</logging.level>
+                <logging.appender>CONSOLE</logging.appender>
+                <serviceRootUrl>http://localhost:8080/ComponentRegistry</serviceRootUrl>
+                <!-- Will be inserted in context.xml -->
+                <shibLI>http://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
+                <!-- Shibboleth login URI for SHHAA -->
+                <shibLO>http://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
+                <!-- Shibboleth logout URI for SHHAA -->
+                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
+                <!-- web.xml for shibboleth authentication -->
+            </properties>
+        </profile>
         <profile>
             <id>lux16</id>
             <properties>
