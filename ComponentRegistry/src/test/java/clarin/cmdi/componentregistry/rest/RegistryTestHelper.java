@@ -67,6 +67,10 @@ public final class RegistryTestHelper {
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
         desc.setHref("link:" + desc.getId());
         desc.setPublic(isPublic);
+        return addComponent(content, testRegistry, desc);
+    }
+
+    public static ComponentDescription addComponent(InputStream content, ComponentRegistry testRegistry, ComponentDescription desc) throws JAXBException {
         CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
@@ -87,9 +91,7 @@ public final class RegistryTestHelper {
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
         desc.setHref("link:" + desc.getId());
         desc.setPublic(isPublic);
-        CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
-        testRegistry.register(desc, spec);
-        return desc;
+        return addComponent(content, testRegistry, desc);
     }
 
     public static String getProfileTestContentString() {
@@ -146,6 +148,10 @@ public final class RegistryTestHelper {
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
         desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
+        return addProfile(content, testRegistry, desc);
+    }
+
+    public static ProfileDescription addProfile(InputStream content, ComponentRegistry testRegistry, ProfileDescription desc) throws JAXBException {
         CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
@@ -166,9 +172,7 @@ public final class RegistryTestHelper {
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
         desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
-        CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
-        testRegistry.register(desc, spec);
-        return desc;
+        return addProfile(content, testRegistry, desc);
     }
 
     public static CMDComponentSpec getTestProfile() throws JAXBException {
