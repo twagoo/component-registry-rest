@@ -154,8 +154,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("PROFILE2", response.get(1).getName());
         assertEquals("profile2", response.get(2).getName());
     }
-    
-        @Test //ok
+
+    @Test //ok
     public void testGetPublicComponentsUnauthenticated() throws Exception {
         fillUpPublicItems();
 
@@ -296,7 +296,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(profile);
 //        assertEquals("Access", profile.getCMDComponent().getName());
         assertEquals(id2, profile.getHeader().getID());
-        assertEquals("component2", profile.getHeader().getName());
+        assertEquals("profile2", profile.getHeader().getName());
         assertEquals("Test Description", profile.getHeader().getDescription());
     }
 
@@ -837,8 +837,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
             System.out.println("test fails due to exception: " + e.getMessage());
             return;
         }
-        
-        
+
         //make unauthenticated request
         String profile = getResource()
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
@@ -1700,7 +1699,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 RegistryTestHelper.getCommentTestContent(),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         ClientResponse cResponse = getResource()
-                .path("/registry/profiles/clarin.eu:cr1:profile1/comments")
+                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile1/comments")
                 .type(MediaType.MULTIPART_FORM_DATA)
                 .post(ClientResponse.class, form);
         assertEquals(401, cResponse.getStatus());

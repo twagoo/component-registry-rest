@@ -35,7 +35,7 @@
 	
 	<authorization>
 	    <location  target="/admin/*" />
-	</authorization>
+        </authorization>
 	
 	
 	<handler>

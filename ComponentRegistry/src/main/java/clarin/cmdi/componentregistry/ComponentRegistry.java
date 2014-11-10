@@ -22,31 +22,32 @@ public interface ComponentRegistry {
     public static final String REGISTRY_ID = "clarin.eu:cr1:";
     public static final String PUBLIC_NAME = "Public Registry";
 
-    
-   
-    public Owner getRegistryOwner();  
-    public void setRegistryOwner(Owner registryOwner);     
-    
-    public RegistrySpace getRegistrySpace(); 
-    public void setRegistrySpace(RegistrySpace registrySpace); 
-    
-    public Number getGroupId(); 
-    public void setGroupId(Number groupId); 
+    public Owner getRegistryOwner();
+
+    public void setRegistryOwner(Owner registryOwner);
+
+    public RegistrySpace getRegistrySpace();
+
+    public void setRegistrySpace(RegistrySpace registrySpace);
+
+    public Number getGroupId();
+
+    public void setGroupId(Number groupId);
+
     public String getGroupName(Number groupId) throws ItemNotFoundException;
-    
+
     public Number getBaseDescriptionOwnerId(String cmdId);
-    
+
     public List<Number> getItemGroups(String cmdId);
+
     /**
      * @return List of component descriptions ordered by name ascending
      * @throws ComponentRegistryException
      */
     List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
-   
-    ComponentDescription getComponentDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    ComponentDescription getComponentDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
-    
     /**
      *
      * @return List of profile descriptions ordered by name ascending
@@ -54,28 +55,30 @@ public interface ComponentRegistry {
      */
     List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
-
-   /**
+    /**
      *
-     * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
+     * @return List of profile descriptions ordered by name ascending, only the
+     * ones marked for showing in metadata editor
      * @throws ComponentRegistryException
      */
     List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
     /**
-    * @param groupId
-    * @return List of profile descriptions ordered by name ascending, only the ones marked for showing in metadata editor
-    * @throws ComponentRegistryException
-    */
-   List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+     * @param groupId
+     * @return List of profile descriptions ordered by name ascending, only the
+     * ones marked for showing in metadata editor
+     * @throws ComponentRegistryException
+     */
+    List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
-   ProfileDescription getProfileDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    ProfileDescription getProfileDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
-    CMDComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    CMDComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
-    CMDComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    CMDComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     CMDComponentSpec getMDComponent(String id) throws ComponentRegistryException;
+
     /**
      *
      * @return -1 if profile could not be registered
@@ -87,20 +90,20 @@ public interface ComponentRegistry {
      * @param comment
      * @return -1 if comment could not be registered
      */
-    int registerComment(Comment comment, String userId) throws ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException;
+    int registerComment(Comment comment, String userId) throws ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException;
 
     /**
      *
      * @return -1 if component could not be updated
      */
-    int update(BaseDescription description, CMDComponentSpec spec, boolean forceUpdate)  throws UserUnauthorizedException, ItemNotFoundException;
+    int update(BaseDescription description, CMDComponentSpec spec, boolean forceUpdate) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     /**
      *
      * @return -1 if component could not be published. Published means move from
      * current (private) workspace to public workspace.
      */
-    int publish(BaseDescription desc, CMDComponentSpec spec, Principal principal)  throws UserUnauthorizedException, ItemNotFoundException;
+    int publish(BaseDescription desc, CMDComponentSpec spec, Principal principal) throws UserUnauthorizedException,  AuthenticationRequiredException, ItemNotFoundException;
 
     void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
@@ -114,26 +117,25 @@ public interface ComponentRegistry {
      *
      * @param profileIds
      * @throws IOException
-     * @throws UserUnauthorizedException
-     * thrown when principal does not match creator of profile
+     * @throws UserUnauthorizedException thrown when principal does not match
+     * creator of profile
      * @throws DeleteFailedException
      */
-    void deleteMDProfile(String profileId) throws IOException, UserUnauthorizedException, ComponentRegistryException, DeleteFailedException, ItemNotFoundException;
+    void deleteMDProfile(String profileId) throws IOException, UserUnauthorizedException, AuthenticationRequiredException, ComponentRegistryException, DeleteFailedException, ItemNotFoundException;
 
     /**
      *
      * @param componentId
      * @param principal
-     * @param forceDelete
-     * ignores the fact that the component is still in use by other
-     * components and just deletes.
+     * @param forceDelete ignores the fact that the component is still in use by
+     * other components and just deletes.
      * @throws IOException
-     * @throws UserUnauthorizedException
-     * thrown when principal does not match creator of component
+     * @throws UserUnauthorizedException thrown when principal does not match
+     * creator of component
      * @throws DeleteFailedException
      */
-    void deleteMDComponent(String componentId, boolean forceDelete) throws IOException, ComponentRegistryException, UserUnauthorizedException,
-	    DeleteFailedException, ItemNotFoundException;
+    void deleteMDComponent(String componentId, boolean forceDelete) throws IOException, ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException,
+            DeleteFailedException, ItemNotFoundException;
 
     /**
      *
@@ -151,10 +153,9 @@ public interface ComponentRegistry {
      */
     List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException;
 
-  
-
     /**
-     * @return {@link ComponentRegistry.PUBLIC_NAME} or name of the user's workspace
+     * @return {@link ComponentRegistry.PUBLIC_NAME} or name of the user's
+     * workspace
      */
     String getName();
 
@@ -162,7 +163,7 @@ public interface ComponentRegistry {
      *
      * @return List of profile descriptions ordered by name ascending
      */
-    List<ProfileDescription> getDeletedProfileDescriptions()throws ComponentRegistryException;
+    List<ProfileDescription> getDeletedProfileDescriptions() throws ComponentRegistryException;
 
     /**
      *
@@ -176,7 +177,7 @@ public interface ComponentRegistry {
      * @return List of comments fro a specific profile
      * @throws ComponentRegistryException
      */
-    List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     /**
      *
@@ -185,7 +186,7 @@ public interface ComponentRegistry {
      * @return a specific comment from a profile
      * @throws ComponentRegistryException
      */
-    Comment getSpecifiedCommentInProfile(String profileId, String commentId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    Comment getSpecifiedCommentInProfile(String profileId, String commentId) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     /**
      *
@@ -193,7 +194,7 @@ public interface ComponentRegistry {
      * @return List of comments from a specific component
      * @throws ComponentRegistryException
      */
-    List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    List<Comment> getCommentsInComponent(String componentId) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     /**
      *
@@ -202,42 +203,46 @@ public interface ComponentRegistry {
      * @return a specific comment from a component
      * @throws ComponentRegistryException
      */
-    Comment getSpecifiedCommentInComponent(String componentId, String commentId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    Comment getSpecifiedCommentInComponent(String componentId, String commentId) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     /**
      *
      * @param commentId Id of comment to delete
      * @param principal User principal
      * @throws IOException
-     * @throws ComponentRegistryException When comment cannot be successfully retrieved from registry
+     * @throws ComponentRegistryException When comment cannot be successfully
+     * retrieved from registry
      * @throws UserUnauthorizedException
      * @throws DeleteFailedException
      */
-    public void deleteComment(String commentId) throws IOException, UserUnauthorizedException,
-	    DeleteFailedException, ItemNotFoundException;
+    public void deleteComment(String commentId) throws IOException, UserUnauthorizedException, AuthenticationRequiredException,
+            DeleteFailedException, ItemNotFoundException;
 
     /**
      *
      * @return a component specification expander for this registry
      */
     public CMDComponentSpecExpander getExpander();
-    
+
     /**
-     * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted profiles
+     * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted
+     * profiles
+     *
      * @return
      */
     List<String> getAllNonDeletedProfileIds();
 
     /**
-     * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted components
+     * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted
+     * components
+     *
      * @return
      */
     List<String> getAllNonDeletedComponentIds();
-    
+
     Boolean isItemPublic(String id) throws ItemNotFoundException;
-    
-    Number makeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException;
-    
+
+    Number makeGroupMember(String principalName, String groupName) throws UserUnauthorizedException, ItemNotFoundException;
+
     //long removeGroupMember(String principalName, String groupName) throws  UserUnauthorizedException, ItemNotFoundException;
-    
 }

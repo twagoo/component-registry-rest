@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
-import clarin.cmdi.componentregistry.AuthenticationFailException;
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -107,10 +107,14 @@ public class ComponentRegistryRestService implements
     @Autowired
     private GroupService groupService;
 
-    private ComponentRegistry getBaseRegistry() throws AuthenticationFailException {
-        Principal userPrincipal = this.checkAndGetUserPrincipal();
-        UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
-        return componentRegistryFactory.getBaseRegistry(userCredentials);
+    private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
+        Principal userPrincipal = security.getUserPrincipal();
+        if (userPrincipal == null) {
+            return componentRegistryFactory.getBaseRegistry(null);
+        } else {
+            UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
+            return componentRegistryFactory.getBaseRegistry(userCredentials);
+        }
     }
 
     private ComponentRegistry getRegistry(RegistrySpace space, Number groupId) {
@@ -129,13 +133,13 @@ public class ComponentRegistryRestService implements
     /**
      *
      * @return Principal of current request
-     * @throws IllegalArgumentException If no user principal found
+     * @throws AuthenticationRequiredException If no user principal found
      */
     private Principal checkAndGetUserPrincipal()
-            throws AuthenticationFailException {
+            throws AuthenticationRequiredException {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
-            throw new AuthenticationFailException("No user principal found.");
+            throw new AuthenticationRequiredException("No user principal found.");
         }
         return principal;
     }
@@ -148,7 +152,7 @@ public class ComponentRegistryRestService implements
         return userCredentials;
     }
 
-    private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationFailException {
+    private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
         //checking credentials 
         RegistrySpace regSpace = RegistrySpace.valueOf(space.toUpperCase());
         if (!space.equals("published")) {
@@ -192,15 +196,13 @@ public class ComponentRegistryRestService implements
                     result.size(), (System.currentTimeMillis() - start));
 
             return result;
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
 
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
-
-
 
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
@@ -234,14 +236,13 @@ public class ComponentRegistryRestService implements
                     result.size(), (System.currentTimeMillis() - start));
 
             return result;
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
 
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
-
 
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
@@ -264,7 +265,7 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.NOT_FOUND).build();
         } catch (ComponentRegistryException e1) {
             return Response.serverError().status(Status.CONFLICT).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         } catch (UserUnauthorizedException e) {
             return Response.serverError().status(Status.FORBIDDEN).build();
@@ -288,7 +289,7 @@ public class ComponentRegistryRestService implements
             return Response.serverError().status(Status.CONFLICT).build();
         } catch (UserUnauthorizedException e) {
             return Response.serverError().status(Status.FORBIDDEN).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
     }
@@ -384,7 +385,7 @@ public class ComponentRegistryRestService implements
             }
         } catch (ItemNotFoundException e3) {
             return Response.status(Status.NOT_FOUND).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
     }
@@ -417,7 +418,7 @@ public class ComponentRegistryRestService implements
             LOG.warn("Could not retrieve profile usage {}", componentId);
             LOG.debug("Details", e);
             return new ArrayList<BaseDescription>();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode());
             return new ArrayList<BaseDescription>();
         }
@@ -447,7 +448,7 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.getMessage());
             return new ArrayList<Comment>();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new ArrayList<Comment>();
         }
@@ -477,7 +478,7 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e1) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
             return new ArrayList<Comment>();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new ArrayList<Comment>();
         }
@@ -506,7 +507,7 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e1) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
             return new Comment();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new Comment();
         }
@@ -534,7 +535,7 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e1) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
             return new Comment();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
             return new Comment();
         }
@@ -624,7 +625,7 @@ public class ComponentRegistryRestService implements
                         .build();
             }
 
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.serverError().status(Status.UNAUTHORIZED)
                     .build();
         } catch (ItemNotFoundException e1) {
@@ -695,7 +696,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException ex2) {
             return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
                     .build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -759,7 +760,7 @@ public class ComponentRegistryRestService implements
                         .entity("Invalid id, cannot update nonexistent profile")
                         .build();
             }
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             LOG.warn("Could not retrieve component {}", componentId);
             LOG.debug("Details", e);
             return Response.serverError().status(Status.UNAUTHORIZED)
@@ -832,7 +833,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException ex2) {
             return Response.status(Status.FORBIDDEN).entity(ex2.getMessage())
                     .build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -883,7 +884,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -924,7 +925,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -979,7 +980,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -1031,7 +1032,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Deletion failure details:", e);
             return Response.serverError().status(Status.FORBIDDEN)
                     .entity("" + e.getMessage()).build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -1105,7 +1106,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException e) {
             return Response.serverError().status(Status.NOT_FOUND)
                     .entity("" + e.getMessage()).build();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
@@ -1156,7 +1157,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Trying to register Profile: {}", desc);
             ComponentRegistry cr = this.getRegistry(RegistrySpace.PRIVATE, null);
             return this.register(input, desc, new NewAction(), cr);
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             LOG.debug("Details", e);
             return Response.serverError().status(Status.UNAUTHORIZED)
                     .build();
@@ -1197,7 +1198,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Trying to register Component: {}", desc);
             ComponentRegistry cr = this.getRegistry(RegistrySpace.PRIVATE, null);
             return this.register(input, desc, new NewAction(), cr);
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             LOG.debug("Details", e);
             return Response.serverError().status(Status.UNAUTHORIZED)
                     .build();
@@ -1223,7 +1224,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Trying to register comment to {}", componentId);
 
             return this.registerComment(input, description, registry);
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             LOG.debug("Details", e);
             return Response.serverError().status(Status.UNAUTHORIZED)
                     .build();
@@ -1255,7 +1256,7 @@ public class ComponentRegistryRestService implements
             LOG.debug("Trying to register comment to {}", profileId);
 
             return this.registerComment(input, description, registry);
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             LOG.debug("Details", e);
             return Response.serverError().status(Status.UNAUTHORIZED)
                     .build();
@@ -1295,7 +1296,7 @@ public class ComponentRegistryRestService implements
                                 stillActive)).build();
     }
 
-    private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException {
+    private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
         try {
 
             DescriptionValidator descriptionValidator = new DescriptionValidator(
@@ -1383,7 +1384,7 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    private Response registerComment(InputStream input, BaseDescription description, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationFailException {
+    private Response registerComment(InputStream input, BaseDescription description, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
         try {
             CommentValidator validator = new CommentValidator(input, description, marshaller);
             CommentResponse responseLocal = new CommentResponse();
@@ -1578,7 +1579,7 @@ public class ComponentRegistryRestService implements
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
             components = cr.getComponentDescriptions();
             title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components", cr);
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new Rss();
         } catch (UserUnauthorizedException e) {
@@ -1623,7 +1624,7 @@ public class ComponentRegistryRestService implements
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
             profiles = cr.getProfileDescriptions();
             title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles", cr);
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new Rss();
         } catch (UserUnauthorizedException e) {
@@ -1694,7 +1695,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode());
             return new Rss();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new Rss();
         }
@@ -1743,7 +1744,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode());
             return new Rss();
-        } catch (AuthenticationFailException e1) {
+        } catch (AuthenticationRequiredException e1) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode());
             return new Rss();
         }
@@ -1827,7 +1828,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
             return new BaseDescription();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new BaseDescription();
         }
@@ -1845,7 +1846,7 @@ public class ComponentRegistryRestService implements
             Principal principal = this.checkAndGetUserPrincipal();
             Number id = groupService.createNewGroup(groupName, principal.getName());
             return Response.ok("Group with the name " + groupName + " is created and given an id " + id).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
     }
@@ -1860,7 +1861,7 @@ public class ComponentRegistryRestService implements
         try {
             Principal principal = this.checkAndGetUserPrincipal();
             return groupService.getGroupsOwnedByUser(principal.getName());
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode());
             return new ArrayList<Group>();
         }
@@ -1879,7 +1880,7 @@ public class ComponentRegistryRestService implements
             StringsWrapper ids = new StringsWrapper();
             ids.setStrings(result);
             return Response.status(Status.OK).entity(ids).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
     }
@@ -1893,7 +1894,7 @@ public class ComponentRegistryRestService implements
             Principal principal = this.checkAndGetUserPrincipal();
             Boolean isOwner = groupService.isUserOwnerOfGroup(groupName, principal.getName());
             return Response.ok(isOwner.toString()).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
     }
@@ -1913,7 +1914,7 @@ public class ComponentRegistryRestService implements
         } catch (ItemNotFoundException e) {
             return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
 
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
     }
@@ -1933,7 +1934,7 @@ public class ComponentRegistryRestService implements
 //        } catch (ItemNotFoundException e) {
 //            return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
 //        
-//        } catch (AuthenticationFailException e) {
+//        } catch (AuthenticationRequiredException e) {
 //            return Response.status(Status.UNAUTHORIZED).build();
 //        }
 //    }
@@ -1948,7 +1949,7 @@ public class ComponentRegistryRestService implements
             StringsWrapper ids = new StringsWrapper();
             ids.setStrings(result);
             return Response.status(Status.OK).entity(ids).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         }
     }
@@ -1964,7 +1965,7 @@ public class ComponentRegistryRestService implements
             StringsWrapper ids = new StringsWrapper();
             ids.setStrings(result);
             return Response.status(Status.OK).entity(ids).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode());
             return Response.status(Status.UNAUTHORIZED).build();
         }
@@ -1979,7 +1980,7 @@ public class ComponentRegistryRestService implements
             Principal principal = this.checkAndGetUserPrincipal();
             String name = groupService.getGroupNameById(Long.parseLong(groupId));
             return Response.ok(name).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         } catch (ItemNotFoundException e) {
             return Response.status(Status.NOT_FOUND).build();
@@ -1995,7 +1996,7 @@ public class ComponentRegistryRestService implements
             Principal principal = this.checkAndGetUserPrincipal();
             Number id = groupService.getGroupIdByName(groupName);
             return Response.ok(id.toString()).build();
-        } catch (AuthenticationFailException e) {
+        } catch (AuthenticationRequiredException e) {
             return Response.status(Status.UNAUTHORIZED).build();
         } catch (ItemNotFoundException e) {
             return Response.status(Status.NOT_FOUND).build();

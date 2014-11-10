@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl;
 
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -31,8 +32,6 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 
     protected abstract MDMarshaller getMarshaller();
 
-    
-
     /**
      *
      * @return List of profile descriptions ordered by name ascending, only the
@@ -41,7 +40,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
      */
     @Override
     public List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException {
-        // TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDaoImpl, should have better performance
+        // TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDaoImpl, should have *much* better performance
 
         // Get all profile descriptions
         List<String> descriptionsCollectionIds = getAllNonDeletedProfileIds();
@@ -53,6 +52,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
                 if (profile.isShowInEditor()) {
                     descriptions.add(profile);
                 }
+            } catch (AuthenticationRequiredException e) {
             } catch (UserUnauthorizedException e) {
             } catch (ItemNotFoundException e) {
             }
@@ -77,10 +77,6 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
             header.setDescription(description.getDescription());
         }
     }
-
-    
-   
-    
 
     protected void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
         getMarshaller().generateXsd(expandedSpec, outputStream);

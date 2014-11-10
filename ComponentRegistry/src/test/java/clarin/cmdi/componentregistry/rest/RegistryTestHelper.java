@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 
 import java.io.ByteArrayInputStream;
@@ -264,13 +265,13 @@ public final class RegistryTestHelper {
         return xml;
     }
 
-    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
+    public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException {
         return addComment(testRegistry, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
 
     private static Comment addComment(ComponentRegistry testRegistry, InputStream content, String principal) throws ParseException,
             JAXBException,
-            ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
+            ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException {
         Comment spec = marshaller.unmarshal(Comment.class, content, null);
         testRegistry.registerComment(spec, principal);
         return spec;

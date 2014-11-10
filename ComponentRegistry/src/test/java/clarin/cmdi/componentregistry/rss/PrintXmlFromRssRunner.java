@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rss;
 
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -91,7 +92,7 @@ public class PrintXmlFromRssRunner {
     /*
      * input: sort of rss -- profiles, or comopnents, or comments (see below the prompt string)
      */
-    public static void main(String args[]) throws ComponentRegistryException, ParseException, IOException, JAXBException, UserUnauthorizedException, ItemNotFoundException {
+    public static void main(String args[]) throws ComponentRegistryException, ParseException, IOException, JAXBException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
 
 	System.out.println("Type 1 or 2, or 3, or 4, \n "
 		+ "to check Rss generaion for profiles, components  or comments for a profile or a component respectively: >> ");
