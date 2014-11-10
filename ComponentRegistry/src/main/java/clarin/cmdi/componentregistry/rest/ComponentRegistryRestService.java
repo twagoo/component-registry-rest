@@ -13,7 +13,6 @@ import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -58,7 +57,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -153,7 +151,10 @@ public class ComponentRegistryRestService implements
     private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationFailException {
         //checking credentials 
         RegistrySpace regSpace = RegistrySpace.valueOf(space.toUpperCase());
-        UserCredentials user = this.getUserCredentials(this.checkAndGetUserPrincipal());
+        if (!space.equals("published")) {
+            // ensure that user is authenticated
+            this.getUserCredentials(this.checkAndGetUserPrincipal());
+        }
         // initializing the registry
         Number groupIdNumber = null;
         if (groupId != null && !groupId.isEmpty()) {
@@ -377,7 +378,6 @@ public class ComponentRegistryRestService implements
                 } else {
                     return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
                 }
-
 
             } catch (UserUnauthorizedException e2) {
                 return Response.status(Status.FORBIDDEN).build();
@@ -1048,7 +1048,6 @@ public class ComponentRegistryRestService implements
             @PathParam("profileId") final String profileId,
             @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
 
-
         LOG.debug("Profile with id {} and rawType {} is requested.", profileId,
                 rawType);
         try {
@@ -1120,7 +1119,7 @@ public class ComponentRegistryRestService implements
                 .ok()
                 .type("application/x-download")
                 .header("Content-Disposition",
-                "attachment; filename=\"" + fileName + "\"")
+                        "attachment; filename=\"" + fileName + "\"")
                 .entity(result).build();
         return response;
 
@@ -1280,7 +1279,7 @@ public class ComponentRegistryRestService implements
         if (LOG.isInfoEnabled()) {
             LOG.debug("ping by <{}>",
                     (userPrincipal == null ? "unauthorized user"
-                    : userPrincipal.getName()));
+                            : userPrincipal.getName()));
         }
         if (request != null) {
             if (userPrincipal != null
@@ -1293,12 +1292,11 @@ public class ComponentRegistryRestService implements
         return Response
                 .ok()
                 .entity(String.format("<session stillActive=\"%s\"/>",
-                stillActive)).build();
+                                stillActive)).build();
     }
 
     private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException {
         try {
-
 
             DescriptionValidator descriptionValidator = new DescriptionValidator(
                     desc);
@@ -1399,7 +1397,6 @@ public class ComponentRegistryRestService implements
 
                 // If user name is left empty, fill it using the user's display
                 // name
-
                 Principal principal = this.checkAndGetUserPrincipal();
                 UserCredentials userCredentials = this.getUserCredentials(principal);
                 if (null == com.getUserName() || "".equals(com.getUserName())) {
@@ -1591,7 +1588,7 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
-        
+
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "components",
                 Integer.parseInt(limit), components,
                 BaseDescription.COMPARE_ON_DATE, title);
@@ -1823,7 +1820,6 @@ public class ComponentRegistryRestService implements
             };
             response.sendError(Status.BAD_REQUEST.getStatusCode());
             return new BaseDescription();
-
 
         } catch (UserUnauthorizedException ex2) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
