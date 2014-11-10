@@ -212,7 +212,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ClientResponse cResponse = getResource().path("/registry/components")
                 .queryParam(REGISTRY_SPACE_PARAM, "private")
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals("Trying to get userspace without credentials", 401,
+        assertEquals("Trying to get userspace components without credentials", 401,
                 cResponse.getStatus());
     }
 
@@ -227,14 +227,14 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(1, response.size());
 
         fillUpPublicItems();
-        response = getAuthenticatedResource(getResource().path("/registry/components")).accept(
+        response = getAuthenticatedResource(getResource().path("/registry/profiles")).accept(
                 MediaType.APPLICATION_JSON).get(PROFILE_LIST_GENERICTYPE);
         assertEquals("Get public profiles", 2, response.size());
 
-        ClientResponse cResponse = getResource().path("/registry/components")
+        ClientResponse cResponse = getResource().path("/registry/profiles")
                 .queryParam(REGISTRY_SPACE_PARAM, "private")
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
-        assertEquals("Trying to get userspace without credentials", 401,
+        assertEquals("Trying to get userspace profiles without credentials", 401,
                 cResponse.getStatus());
     }
 
