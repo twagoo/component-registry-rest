@@ -112,7 +112,29 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
-    public void testGetPublicProfiles() throws Exception {
+    public void testGetPublicProfilesUnauthenticated() throws Exception {
+
+        System.out.println("testGetPublicProfiles");
+
+        fillUpPublicItems();
+
+        RegistryTestHelper.addProfile(baseRegistry, "PROFILE2", true);
+        List<ProfileDescription> response = getResource()
+                .path("/registry/profiles").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+        response = getResource()
+                .path("/registry/profiles")
+                .accept(MediaType.APPLICATION_JSON)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+        assertEquals("profile1", response.get(0).getName());
+        assertEquals("PROFILE2", response.get(1).getName());
+        assertEquals("profile2", response.get(2).getName());
+    }
+
+    @Test
+    public void testGetPublicProfilesAuthenticated() throws Exception {
 
         System.out.println("testGetPublicProfiles");
 
@@ -132,12 +154,28 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("PROFILE2", response.get(1).getName());
         assertEquals("profile2", response.get(2).getName());
     }
+    
+        @Test //ok
+    public void testGetPublicComponentsUnauthenticated() throws Exception {
+        fillUpPublicItems();
+
+        RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
+        List<ComponentDescription> response = (getResource()
+                .path("/registry/components")).accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+        response = (getResource()
+                .path("/registry/components"))
+                .accept(MediaType.APPLICATION_JSON)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+        assertEquals("component1", response.get(0).getName());
+        assertEquals("COMPONENT2", response.get(1).getName());
+        assertEquals("component2", response.get(2).getName());
+    }
 
     @Test //ok
-    public void testGetPublicComponents() throws Exception {
-
-        System.out.println("testGetPublicComponents");
-
+    public void testGetPublicComponentsAuthenticated() throws Exception {
         fillUpPublicItems();
 
         RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
