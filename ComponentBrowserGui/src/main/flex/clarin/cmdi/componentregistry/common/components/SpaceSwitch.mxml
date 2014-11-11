@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml"
-				 dataProvider="{spaces}"
-				 width="110"
-				 close="registrySpaceCloseHandler(event)"
-				 initialize="init()"
-				 change="onSelectionChanged(event)"
-				 >
+			 width="110" change="selectionChangedHandler(event)"
+			 dataProvider="{spaces}" initialize="init()">
 	
 	<mx:Script>
 		<![CDATA[
@@ -18,6 +14,7 @@
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
+			import mx.events.ListEvent;
 			
 			private static const PRIVATE_SPACE_LABEL:String = "Private space";
 			private static const PUBLIC_SPACE_LABEL:String = "Public space";
@@ -28,24 +25,26 @@
 			private function initSpaces():void{
 				spaces = new ArrayCollection([{label: PUBLIC_SPACE_LABEL, space: Config.SPACE_PUBLISHED, groupId:null}, {label: PRIVATE_SPACE_LABEL, space: Config.SPACE_PRIVATE, groupId:null}]);
 			}
-			
-			private function onSelectionChanged(event:Event):void{
-				var space:String = ComboBox(event.target).selectedItem.space;
-				var groupId:String = ComboBox(event.target).selectedItem.groupId;
-				if ((groupId != null) && (groupId != "")) {
-					space = Config.SPACE_GROUP; 
-				}
-				Config.instance.registrySpace = new RegistrySpace(space, groupId);
-			}
-			
-		
 
 			public function init():void{
 				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
 				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser(); // triggers the event ListUserGroupsMembershipService.GROUPS_LOADED
+			}
+			
+			private function selectionChangedHandler(event:ListEvent):void {
+				if (Credentials.instance.isLoggedIn()) {
+					var space:String = ComboBox(event.target).selectedItem.space;
+					var groupId:String = ComboBox(event.target).selectedItem.groupId;
+					if ((groupId != null) && (groupId != "")) {
+						space = Config.SPACE_GROUP; 
+					}
+					Config.instance.registrySpace = new RegistrySpace(space, groupId);
+				} else {
+					event.stopPropagation();
+					new Login().show(this.parent.parent, Config.VIEW_BROWSE, Config.instance.registrySpace.space, null);
+					selectedIndex = 0;
 				}
-			
-			
+			}
 			
 			public function onGroupsLoaded(event:Event):void{
 				initSpaces();
@@ -54,47 +53,42 @@
 				} 
 				setSelectedIndex();
 			}
-		
-			private function registrySpaceCloseHandler(event:Event):void {
-				if (Credentials.instance.isLoggedIn()) {
-				} else {
-					if (Config.instance.registrySpace.space != Config.SPACE_PUBLISHED) {
-						new Login().show(this.parent.parent, Config.VIEW_BROWSE, Config.instance.registrySpace.space, null);
-						//setSelectedIndex(); 
-					} 
-					
-				}
-			}
 			
+			/**
+			 * sets the index according to the current registry space
+			 */
 			public function setSelectedIndex():void{	
 				
 				if (Config.instance.registrySpace.space==Config.SPACE_PUBLISHED) {
 					this.selectedIndex = 0;
 					return;
 				}
-				if (Config.instance.registrySpace.space==Config.SPACE_PRIVATE) {
-					this.selectedIndex = 1;
-					return;
-				}
 				
-				var index:int;
-				if (Config.instance.registrySpace.space==Config.SPACE_GROUP) {
-					for (index=2;index<spaces.length; index++) {
-						if (spaces[index].groupId==Config.instance.registrySpace.groupId){
-							trace("indeces:" + index+" " +Config.instance.registrySpace.groupId +" " +spaces[index].groupId);
-							this.selectedIndex = index;
-							return;
+				if(Credentials.instance.isLoggedIn()) {
+					if (Config.instance.registrySpace.space==Config.SPACE_PRIVATE) {
+						this.selectedIndex = 1;
+						return;
+					}
+					
+					var index:int;
+					if (Config.instance.registrySpace.space==Config.SPACE_GROUP) {
+						for (index=2;index<spaces.length; index++) {
+							if (spaces[index].groupId==Config.instance.registrySpace.groupId){
+								trace("indeces:" + index+" " +Config.instance.registrySpace.groupId +" " +spaces[index].groupId);
+								this.selectedIndex = index;
+								return;
+							}
 						}
 					}
+					
+					// in case of #$%^-up: 				
+					var spacesDump:String= spaces[0].space + "; "+spaces[1].space;
+					for (index=2;index<spaces.length; index++) {
+						spacesDump=spacesDump+";  "+spaces[index].space + " " +spaces[index].groupId;
+						}
+					
+					throw "Cannot identify the selection index for registry-space combobox. space = "+Config.instance.registrySpace.space+ " group "+Config.instance.registrySpace.groupId + spacesDump;
 				}
-				
-				// in case of #$%^-up: 				
-				var spacesDump:String= spaces[0].space + "; "+spaces[1].space;
-				for (index=2;index<spaces.length; index++) {
-					spacesDump=spacesDump+";  "+spaces[index].space + " " +spaces[index].groupId;
-					}
-				
-				throw "Cannot indetify the selection index for registry-space combobox. space = "+Config.instance.registrySpace.space+ " group "+Config.instance.registrySpace.groupId + spacesDump;
 			}
 				
 			
