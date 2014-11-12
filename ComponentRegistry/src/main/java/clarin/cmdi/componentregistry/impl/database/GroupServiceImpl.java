@@ -29,6 +29,9 @@ import clarin.cmdi.componentregistry.persistence.jpa.GroupDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupMembershipDao;
 import clarin.cmdi.componentregistry.persistence.jpa.OwnershipDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
+import com.google.common.base.Converter;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * Service that manages groups, memberships and ownerships. It exposes some
@@ -168,19 +171,19 @@ public class GroupServiceImpl implements GroupService {
     @ManagedOperationParameters({
         @ManagedOperationParameter(name = "principalName", description = "Principal name of the user to make a member"),
         @ManagedOperationParameter(name = "groupName", description = "Name of the group")})
-    public long makeMember(String userPrincipalName, String groupName) throws ItemNotFoundException{
-        
+    public long makeMember(String userPrincipalName, String groupName) throws ItemNotFoundException {
+
         RegistryUser user = userDao.getByPrincipalName(userPrincipalName);
-        
+
         if (user == null) {
-            throw new ItemNotFoundException("User with the principal name "+userPrincipalName+" is not found.");
+            throw new ItemNotFoundException("User with the principal name " + userPrincipalName + " is not found.");
         }
         Group group = groupDao.findGroupByName(groupName);
-        
+
         if (group == null) {
-            throw new ItemNotFoundException("Group with the  name "+groupName+" is not found.");
+            throw new ItemNotFoundException("Group with the  name " + groupName + " is not found.");
         }
-        
+
         GroupMembership gm = groupMembershipDao.findMembership(user.getId().longValue(), group.getId());
         if (gm != null) {
             return gm.getId();
@@ -190,8 +193,7 @@ public class GroupServiceImpl implements GroupService {
         gm.setUserId(user.getId().longValue());
         return groupMembershipDao.save(gm).getId();
     }
-    
-    
+
 //    @Override
 //    @ManagedOperation(description = "Remove user member from  a group")
 //    @ManagedOperationParameters({
@@ -213,8 +215,6 @@ public class GroupServiceImpl implements GroupService {
 //       
 //        return groupMembershipDao.deleteMembership(user.getId(), group.getId());
 //    }
-
-    
     @ManagedOperation(description = "Create a new group")
     @ManagedOperationParameters({
         @ManagedOperationParameter(name = "name", description = "Name of the group, must be unique"),
@@ -314,7 +314,6 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public void transferItemOwnershipFromUserToGroup(String principal, String groupName, String itemId) throws UserUnauthorizedException {
 
-
         BaseDescription item = null;
         item = componentDao.getByCmdId(itemId);
         if (item == null) {
@@ -334,7 +333,6 @@ public class GroupServiceImpl implements GroupService {
         if (userId != principalId) {
             throw new UserUnauthorizedException("User " + principal + " is not creator of the item  " + item.getName());
         }
-
 
         Ownership ownership = null;
         List<Ownership> oldOwnerships = ownershipDao.findOwnershipByComponentId(itemId);
@@ -360,24 +358,36 @@ public class GroupServiceImpl implements GroupService {
         GroupMembership gm = groupMembershipDao.findMembership(user.getId(), Long.parseLong(groupId));
         return gm != null;
     }
-    
+
     @Override
-    public  Number  getGroupIdByName(String groupName) throws ItemNotFoundException {
-        Group group = groupDao.findGroupByName(groupName);        
+    public Number getGroupIdByName(String groupName) throws ItemNotFoundException {
+        Group group = groupDao.findGroupByName(groupName);
         if (group != null) {
             return group.getId();
         } else {
-            throw new ItemNotFoundException("No group with the name "+groupName);
+            throw new ItemNotFoundException("No group with the name " + groupName);
         }
     }
-   
+
     @Override
-    public  String  getGroupNameById(long groupId) throws ItemNotFoundException {
-        Group group = groupDao.findOne(groupId);        
+    public String getGroupNameById(long groupId) throws ItemNotFoundException {
+        Group group = groupDao.findOne(groupId);
         if (group != null) {
             return group.getName();
         } else {
-            throw new ItemNotFoundException("No group with the id "+groupId);
+            throw new ItemNotFoundException("No group with the id " + groupId);
         }
+    }
+
+    @Override
+    public List<RegistryUser> getUsersInGroup(long groupId) {
+        final List<GroupMembership> groupMemberships = groupMembershipDao.findForGroup(groupId);
+        return Lists.transform(groupMemberships, new Function<GroupMembership, RegistryUser>() {
+
+            @Override
+            public RegistryUser apply(GroupMembership f) {
+                return userDao.getPrincipalNameById(f.getUserId());
+            }
+        });
     }
 }

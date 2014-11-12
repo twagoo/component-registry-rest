@@ -1,11 +1,14 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
+import clarin.cmdi.componentregistry.model.RegistryUser;
+import java.util.Collections;
 import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
-import org.apache.wicket.behavior.IBehavior;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -26,7 +29,7 @@ public class Groups extends SecureAdminWebPage {
 
     @SpringBean
     private GroupService groupService;
-    private final IModel<String> selectedGroup = new Model<String>(null);
+    private final IModel<Long> selectedGroup = new Model<Long>(null);
 
     public Groups(PageParameters parameters) {
         super(parameters);
@@ -34,6 +37,7 @@ public class Groups extends SecureAdminWebPage {
 
         add(createGroupForm("groupForm"));
         add(createGroupList("groups"));
+        add(createGroupInfo("group"));
     }
 
     private Component createGroupForm(String id) {
@@ -77,12 +81,97 @@ public class Groups extends SecureAdminWebPage {
 
                     @Override
                     public void onClick() {
-                        selectedGroup.setObject((String) li.getModelObject());
+                        final String groupName = (String) li.getModelObject();
+                        try {
+                            final Long groupId = (Long) groupService.getGroupIdByName(groupName);
+                            selectedGroup.setObject(groupId);
+                        } catch (ItemNotFoundException ex) {
+                            selectedGroup.setObject(null);
+                        }
                     }
                 });
             }
         };
 
+    }
+
+    private Component createGroupInfo(String id) {
+        final WebMarkupContainer container = new WebMarkupContainer(id) {
+
+            @Override
+            public boolean isVisible() {
+                return selectedGroup.getObject() != null;
+            }
+
+        };
+
+        container.add(new Label("name", new AbstractReadOnlyModel<String>() {
+
+            @Override
+            public String getObject() {
+                try {
+                    return groupService.getGroupNameById(selectedGroup.getObject());
+                } catch (ItemNotFoundException ex) {
+                    return "NOT FOUND";
+                }
+            }
+        }));
+        container.add(createNewMemberForm("newMember"));
+        container.add(createGroupMembersView("members"));
+
+        return container;
+    }
+
+    private Form createNewMemberForm(String id) {
+        final IModel<String> principalModel = new Model<String>("");
+        final Form memberForm = new Form(id) {
+
+            @Override
+            protected void onSubmit() {
+                try {
+                    final String groupName = groupService.getGroupNameById(selectedGroup.getObject());
+                    groupService.makeMember(principalModel.getObject(), groupName);
+                    info("User " + principalModel.getObject() + " added to group");
+                } catch (ItemNotFoundException ex) {
+                    error(ex);
+                }
+            }
+
+        };
+        memberForm.add(new FeedbackPanel("feedback"));
+        memberForm.add(new TextField("principal", principalModel).setRequired(true));
+        return memberForm;
+    }
+
+    private ListView createGroupMembersView(String id) {
+        final IModel<List> membersModel = new AbstractReadOnlyModel<List>() {
+
+            @Override
+            public List getObject() {
+                final Long groupId = selectedGroup.getObject();
+                if (groupId == null) {
+                    return Collections.emptyList();
+                } else {
+                    return groupService.getUsersInGroup(groupId);
+                }
+            }
+        };
+        final ListView membersView = new ListView(id, membersModel) {
+
+            @Override
+            protected void populateItem(ListItem li) {
+                final RegistryUser user = (RegistryUser) li.getModelObject();
+                li.add(new Label("name", user.getName()));
+                li.add(new Link("remove") {
+
+                    @Override
+                    public void onClick() {
+                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                    }
+                });
+            }
+        };
+        return membersView;
     }
 
 }

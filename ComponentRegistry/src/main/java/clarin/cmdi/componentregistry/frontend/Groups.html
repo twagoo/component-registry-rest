@@ -10,6 +10,8 @@
             <a wicket:id="home">AdminHome</a>
         </div>
 
+        <hr />
+
         <h2>New group</h2>
         <form wicket:id="groupForm">
             <div wicket:id="feedback"></div>            
@@ -18,6 +20,8 @@
             <input type="submit" value="Create group" />
         </form>
 
+        <hr />
+
         <h2>Groups</h2>
         <ul>
             <li wicket:id="groups">
@@ -25,5 +29,24 @@
                 <a wicket:id="select">[Select]</a>
             </li>
         </ul>
+
+        <div wicket:id="group" style="border: 1px dashed; padding-left: 2em;">
+            <h3>Group <span wicket:id="name">[name]</span></h3>
+
+            <h4>Add member</h4>
+            <form wicket:id="newMember">
+                <div wicket:id="feedback"></div>            
+                Principal name: <input type="text" wicket:id="principal" /> <br />
+                <input type="submit" value="Add member" />
+            </form>
+
+            <h4>Members</h4>
+            <ul>
+                <li wicket:id="members">
+                    <span wicket:id="name">[name]</span>
+                    <a wicket:id="remove">[Remove]</a>
+                </li>
+            </ul>
+        </div>
     </body>
 </html>

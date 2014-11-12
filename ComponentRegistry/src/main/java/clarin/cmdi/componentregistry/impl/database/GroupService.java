@@ -125,6 +125,8 @@ public interface GroupService {
      */
     List<String> getProfileIdsInGroup(long groupId);
     
+    List<RegistryUser> getUsersInGroup(long groupId);
+    
     boolean userGroupMember(String principalName, String groupId);
    
     public  Number  getGroupIdByName(String groupName) throws ItemNotFoundException;
