@@ -190,7 +190,8 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
     }
 
-    private void addLinks() {
+    @Override
+    protected void addLinks() {
         add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
         add(new Link("massMigrate") {
             @Override

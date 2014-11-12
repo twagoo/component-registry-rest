@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 
 import clarin.cmdi.componentregistry.Configuration;
+import org.apache.wicket.markup.html.link.Link;
 
 public abstract class SecureAdminWebPage extends WebPage {
 
@@ -21,6 +22,16 @@ public abstract class SecureAdminWebPage extends WebPage {
 
     protected final Principal getUserPrincipal() {
 	return getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
+    }
+
+    @SuppressWarnings(value = "serial")
+    protected void addLinks() {
+        add(new Link("home") {
+            @Override
+            public void onClick() {
+                setResponsePage(AdminHomePage.class);
+            }
+        });
     }
 
 }
