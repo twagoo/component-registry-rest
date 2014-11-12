@@ -1,7 +1,7 @@
 <html
     xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
     <head>
-        <title>CMDI ComponentRegistry Statistics Page</title>
+        <title>CMDI ComponentRegistry Group Management</title>
         <link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
     </head>
     <body>
@@ -9,5 +9,21 @@
         <div class="links">
             <a wicket:id="home">AdminHome</a>
         </div>
+
+        <h2>New group</h2>
+        <form wicket:id="groupForm">
+            <div wicket:id="feedback"></div>            
+            Group name: <input type="text" wicket:id="name" /> <br />
+            Owner name: <input type="text" wicket:id="owner" /> <br />
+            <input type="submit" value="Create group" />
+        </form>
+
+        <h2>Groups</h2>
+        <ul>
+            <li wicket:id="groups">
+                <span wicket:id="name">[name]</span>
+                <a wicket:id="select">[Select]</a>
+            </li>
+        </ul>
     </body>
 </html>

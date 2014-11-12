@@ -26,7 +26,7 @@ public interface GroupService {
      * @return ID of group created
      * @throws ValidationException
      */
-    long createNewGroup(String name, String ownerPrincipalName);
+    long createNewGroup(String name, String ownerPrincipalName) throws ValidationException;
     
     /**
      * Gets groups directly owned by a user
