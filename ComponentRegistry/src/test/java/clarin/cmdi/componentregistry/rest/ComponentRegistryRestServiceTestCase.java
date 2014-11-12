@@ -23,6 +23,7 @@ import com.sun.jersey.test.framework.AppDescriptor;
 import com.sun.jersey.test.framework.JerseyTest;
 import com.sun.jersey.test.framework.WebAppDescriptor;
 import com.sun.jersey.test.framework.spi.container.TestContainerFactory;
+import java.security.Principal;
 
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +34,14 @@ import org.springframework.web.context.request.RequestContextListener;
 
 /**
  * Base test that starts a servlet container with the component registry
+ *
  * @author george.georgovassilis@mpi.nl
  *
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {
-	"classpath:spring-config/applicationContext.xml",
-	"classpath:spring-config/test-applicationContext-fragment.xml" })
+    "classpath:spring-config/applicationContext.xml",
+    "classpath:spring-config/test-applicationContext-fragment.xml"})
 //Important: these tests can not be configured with @Transactional because it spawns two (mutually deadlocking) transactions: the test itself and jersey services
 public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     // CommandLine test e.g.: curl -i -H "Accept:application/json" -X GET
@@ -60,9 +62,9 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     @Override
     public void setUp() throws Exception {
-	if (!_testContainerFactory.isTestContainerRunning()) {
-	    _testContainerFactory.startTestContainer();
-	}
+        if (!_testContainerFactory.isTestContainerRunning()) {
+            _testContainerFactory.startTestContainer();
+        }
     }
 
     @Override
@@ -71,12 +73,12 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     @Override
     protected TestContainerFactory getTestContainerFactory() {
-	if (_testContainerFactory == null) {
-	    _testContainerFactory = new SingletonTestContainerFactory(
-		    super.getTestContainerFactory());
-	}
-	;
-	return _testContainerFactory;
+        if (_testContainerFactory == null) {
+            _testContainerFactory = new SingletonTestContainerFactory(
+                    super.getTestContainerFactory());
+        }
+        ;
+        return _testContainerFactory;
     }
 
     @Autowired
@@ -84,30 +86,30 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     protected String getApplicationContextFile() {
 	// sorry for the duplication, but JerseyTest is not aware of
-	// @ContextConfiguration
-	return "classpath:spring-config/applicationContext.xml, classpath:spring-config/test-applicationContext-fragment.xml";
+        // @ContextConfiguration
+        return "classpath:spring-config/applicationContext.xml, classpath:spring-config/test-applicationContext-fragment.xml";
     }
 
     @Override
     protected AppDescriptor configure() {
-	WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder()
-		.contextParam("contextConfigLocation",
-			getApplicationContextFile())
-		.servletClass(SpringServlet.class)
-		.initParam(WebComponent.RESOURCE_CONFIG_CLASS,
-			ClassNamesResourceConfig.class.getName())
-		.initParam(
-			ClassNamesResourceConfig.PROPERTY_CLASSNAMES,
-			FormDataMultiPartDispatchProvider.class.getName() + ";"
-				+ ComponentRegistryRestService.class.getName())
-		.addFilter(DummySecurityFilter.class, "DummySecurityFilter")
-		.requestListenerClass(RequestContextListener.class)
-		.contextListenerClass(ContextLoaderListener.class);
-	return builder.build();
+        WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder()
+                .contextParam("contextConfigLocation",
+                        getApplicationContextFile())
+                .servletClass(SpringServlet.class)
+                .initParam(WebComponent.RESOURCE_CONFIG_CLASS,
+                        ClassNamesResourceConfig.class.getName())
+                .initParam(
+                        ClassNamesResourceConfig.PROPERTY_CLASSNAMES,
+                        FormDataMultiPartDispatchProvider.class.getName() + ";"
+                        + ComponentRegistryRestService.class.getName())
+                .addFilter(DummySecurityFilter.class, "DummySecurityFilter")
+                .requestListenerClass(RequestContextListener.class)
+                .contextListenerClass(ContextLoaderListener.class);
+        return builder.build();
     }
 
     protected WebResource getResource() {
-	return resource();
+        return resource();
     }
 
     protected Builder getAuthenticatedResource(String path) {
@@ -115,23 +117,26 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     }
 
     protected Builder getAuthenticatedResource(WebResource resource) {
-	return resource.header(
-		HttpHeaders.AUTHORIZATION,
-		"Basic "
-			+ new String(Base64
-				.encode(DummyPrincipal.DUMMY_PRINCIPAL
-					.getName() + ":dummy")));
+        return getAuthenticatedResource(DummyPrincipal.DUMMY_PRINCIPAL, resource);
+    }
+
+    protected Builder getAuthenticatedResource(Principal principal, WebResource resource) {
+        return resource.header(HttpHeaders.AUTHORIZATION,
+                "Basic "
+                + new String(Base64
+                        .encode(principal
+                                .getName() + ":dummy")));
     }
 
     protected void createUserRecord() {
-	RegistryUser user = new RegistryUser();
-	user.setName("Database test user");
-	user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
-	userDao.save(user);
+        RegistryUser user = new RegistryUser();
+        user.setName("Database test user");
+        user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+        userDao.save(user);
     }
 
     protected UserDao getUserDao() {
-	return userDao;
+        return userDao;
     }
 
 }

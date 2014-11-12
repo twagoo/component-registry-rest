@@ -89,17 +89,17 @@ public interface GroupService {
     
     /**
      * Move ownership of a component or profile from a user to a group
-     * @param principal
-     * @param groupName
-     * @param componentId
+     * @param principal name of the owner principal
+     * @param groupName target group name
+     * @param componentId component to transfer
      */
     void transferItemOwnershipFromUserToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
 
     /**
      * Move ownership of a component or profile from a user to a group
-     * @param principal
-     * @param groupId
-     * @param componentId
+     * @param principal name of the owner principal
+     * @param groupId target group id
+     * @param componentId component to transfer
      */
     void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) throws UserUnauthorizedException;
 

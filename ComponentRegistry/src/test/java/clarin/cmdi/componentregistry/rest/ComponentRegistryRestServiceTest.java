@@ -4,8 +4,8 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
+import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
+import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.GROUPID_PARAM;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -47,8 +48,6 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
-    @Autowired
-    private ComponentRegistryBeanFactory componentRegistryBeanFactory;
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private ComponentRegistry baseRegistry;
@@ -455,11 +454,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         List<Comment> comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                + "component1/comments")).get(COMMENT_LIST_GENERICTYPE);
+                        + "component1/comments")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(2, comments.size());
         Comment aComment = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                + "component1/comments/" + component1Comment3.getId())).get(Comment.class);
+                        + "component1/comments/" + component1Comment3.getId())).get(Comment.class);
         assertNotNull(aComment);
 
         Form manipulateForm = new Form();
@@ -474,7 +473,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                + "component1/comments/")).get(COMMENT_LIST_GENERICTYPE);
+                        + "component1/comments/")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, comments.size());
     }
 
@@ -487,11 +486,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         List<Comment> comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
+                        + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(2, comments.size());
         Comment aComment = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/" + profile1Comment1.getId())).get(Comment.class);
+                        + "profile1/comments/" + profile1Comment1.getId())).get(Comment.class);
         assertNotNull(aComment);
 
         // Try to delete from other profile
@@ -507,7 +506,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
+                        + "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, comments.size());
 
         response = getAuthenticatedResource(
@@ -517,7 +516,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
+                        + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(0, comments.size());
     }
 
@@ -530,11 +529,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         List<Comment> comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
+                        + "profile1/comments")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(2, comments.size());
         Comment aComment = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/" + profile1Comment2.getId())).get(Comment.class);
+                        + "profile1/comments/" + profile1Comment2.getId())).get(Comment.class);
         assertNotNull(aComment);
 
         Form manipulateForm = new Form();
@@ -548,7 +547,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         comments = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
+                        + "profile1/comments/")).get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, comments.size());
     }
 
@@ -561,7 +560,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(1, components.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                + "component3")).get(CMDComponentSpec.class);
+                        + "component3")).get(CMDComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
@@ -587,7 +586,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(1, components.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile3").queryParam(REGISTRY_SPACE_PARAM, "private")).get(CMDComponentSpec.class);
+                        + "profile3").queryParam(REGISTRY_SPACE_PARAM, "private")).get(CMDComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
@@ -653,7 +652,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, components.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                + "component1")).get(CMDComponentSpec.class);
+                        + "component1")).get(CMDComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
@@ -768,7 +767,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, components.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                + "component1")).get(CMDComponentSpec.class);
+                        + "component1")).get(CMDComponentSpec.class);
         assertNotNull(profile);
 
         Form manipulateForm = new Form();
@@ -915,7 +914,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .getComponentTestContent());
         RegisterResponse response = getAuthenticatedResource(
                 getResource().path("/registry/components").queryParam(
-                        REGISTRY_SPACE_PARAM, "private")).type(
+                REGISTRY_SPACE_PARAM, "private")).type(
                         MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                         form);
         assertFalse(response.isProfile());
@@ -941,7 +940,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, profiles.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1")).get(CMDComponentSpec.class);
+                        + "profile1")).get(CMDComponentSpec.class);
         assertNotNull(profile);
 
         ClientResponse response = getAuthenticatedResource(
@@ -980,7 +979,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, profiles.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                + "profile1")).get(CMDComponentSpec.class);
+                        + "profile1")).get(CMDComponentSpec.class);
         assertNotNull(profile);
 
         Form manipulateForm = new Form();

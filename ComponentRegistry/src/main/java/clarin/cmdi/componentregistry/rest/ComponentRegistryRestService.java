@@ -155,7 +155,7 @@ public class ComponentRegistryRestService implements
     private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
         //checking credentials 
         RegistrySpace regSpace = RegistrySpace.valueOf(space.toUpperCase());
-        if (!space.equals("published")) {
+        if (regSpace != RegistrySpace.PUBLISHED) {
             // ensure that user is authenticated
             this.getUserCredentials(this.checkAndGetUserPrincipal());
         }
