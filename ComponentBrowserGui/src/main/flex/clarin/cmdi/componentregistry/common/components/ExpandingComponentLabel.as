@@ -40,7 +40,11 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;			
-			this.item = Config.instance.getComponentsSrv().findDescription(componentId);			
+			this.item = Config.instance.getCurrentComponentsSrv().findDescription(componentId);
+			// item not from current space? try public...
+			if (this.item==null) {
+				this.item = Config.instance.getPublicComponentsSrv().findDescription(componentId);
+			}
 			styleName = StyleConstants.EXPANDING_COMPONENT;
 			if (item && item.isPrivate) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);

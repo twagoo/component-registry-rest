@@ -45,12 +45,18 @@ package clarin.cmdi.componentregistry.services {
 			super.dispatchRequest(copy);
 		}
 		
-		public function findDescription(id:String):ItemDescription {			
+		/**
+		 * finds a component inside the currently loaded space
+		 */
+		public function findDescription(id:String):ItemDescription {
+			//look in the current space
 			for each (var item:ItemDescription in itemDescriptions) {
 				if (item.id == id) {
 					return item;
 				}
 			}
+			//item not in current space
+			//TODO: request description from server
 			return null;
 		}
 	}

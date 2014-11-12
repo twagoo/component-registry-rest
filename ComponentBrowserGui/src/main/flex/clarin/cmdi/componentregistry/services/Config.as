@@ -78,7 +78,9 @@ package clarin.cmdi.componentregistry.services {
 		private var _activeFlavour:String = FLAVOUR_PROFILES;
 		
 		private var componentsSrv:ComponentListService;
+		private var publicComponentsSrv:ComponentListService;
 		private var profilesSrv:ProfileListService;
+		private var publicProfilesSrv:ProfileListService;
 		private var listUserGroupsMembershipService:ListUserGroupsMembershipService;
 		private var listGroupsOfItemService:ListGroupsOfItemService;
 		
@@ -130,28 +132,38 @@ package clarin.cmdi.componentregistry.services {
 				groupId_ = "";
 			};
 			
-			registrySpace = new RegistrySpace(space_, groupId_);
-			
 			var debug_:int = applicationParameters.debug;
 			if(debug_) {
 				_debug = Boolean(debug_);				
 			}
-			
+									
 			listUserGroupsMembershipService = new ListUserGroupsMembershipService();
-			listGroupsOfItemService = new ListGroupsOfItemService();			
+			listGroupsOfItemService = new ListGroupsOfItemService();
+
+			publicProfilesSrv = new ProfileListService(new RegistrySpace(SPACE_PUBLISHED, ""));
+			publicComponentsSrv = new ComponentListService(new RegistrySpace(SPACE_PUBLISHED, ""))
 			
+			registrySpace = new RegistrySpace(space_, groupId_);
 		}
 		
 		public function getListUserGroupsMembershipService():ListUserGroupsMembershipService{
 			return listUserGroupsMembershipService;
 		}
-
-		public function getProfilesSrv():ProfileListService{
-				return profilesSrv;		
+		
+		public function getCurrentProfilesSrv():ProfileListService{
+			return profilesSrv;		
 		}
 		
-		public function getComponentsSrv():ComponentListService{		
-				return componentsSrv;
+		public function getPublicProfilesSrv():ProfileListService{
+			return publicProfilesSrv;		
+		}
+		
+		public function getCurrentComponentsSrv():ComponentListService{		
+			return componentsSrv;
+		}
+		
+		public function getPublicComponentsSrv():ComponentListService{
+			return publicComponentsSrv;
 		}
 		
 		public function getListGroupsOfItemService():ListGroupsOfItemService{
@@ -229,8 +241,14 @@ package clarin.cmdi.componentregistry.services {
 
 		public function set registrySpace(registrySpace:RegistrySpace):void {
 			_registrySpace = registrySpace;
-			profilesSrv = new ProfileListService(registrySpace);			
-			componentsSrv = new ComponentListService(registrySpace);
+			
+			if(registrySpace.space == SPACE_PUBLISHED) {
+				profilesSrv = publicProfilesSrv;
+				componentsSrv = publicComponentsSrv;
+			} else {
+				profilesSrv = new ProfileListService(registrySpace);			
+				componentsSrv = new ComponentListService(registrySpace);
+			}
 			
 			// everything is ready to open new componentBrowser instance
 			dispatchEvent(new Event(REGISTRY_SPACE_TOGGLE_EVENT));
