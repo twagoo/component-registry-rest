@@ -199,6 +199,13 @@ public class AdminHomePage extends SecureAdminWebPage {
                 setResponsePage(MassMigratePage.class);
             }
         });
+        add(new Link("groups") {
+
+            @Override
+            public void onClick() {
+                setResponsePage(Groups.class);
+            }
+        });
         add(new Link("log") {
             @Override
             public void onClick() {
