@@ -89,7 +89,7 @@ public class ComponentRegistryRestService implements
         IComponentRegistryRestService {
 
     private final static Logger LOG = LoggerFactory
-            .getLogger(IComponentRegistryRestService.class);
+            .getLogger(ComponentRegistryRestService.class);
     @Context
     private UriInfo uriInfo;
     @Context

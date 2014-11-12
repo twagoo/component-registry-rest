@@ -910,22 +910,24 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<String> getAllNonDeletedProfileIds() {
-        return componentDao.getAllNonDeletedProfileIds();
+    public List<String> getAllNonDeletedProfileIds(String containedId) {
+        return componentDao.getAllNonDeletedProfileIds(containedId);
     }
 
     @Override
-    public List<String> getAllNonDeletedComponentIds() {
-        return componentDao.getAllNonDeletedComponentIds();
+    public List<String> getAllNonDeletedComponentIds(String containedId) {
+        return componentDao.getAllNonDeletedComponentIds(containedId);
     }
 
     @Override
     public List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException {
         LOG.debug("Checking usage of component {} in components", componentId);
         List<ComponentDescription> result = new ArrayList<ComponentDescription>();
-        List<String> ids = getAllNonDeletedComponentIds();
+        // get the IDs of all non-deleted components that mention the target ID in their XML content
+        List<String> ids = getAllNonDeletedComponentIds(componentId);
         for (String id : ids) {
-            CMDComponentSpec spec = getMDComponent(id);
+            final CMDComponentSpec spec = getMDComponent(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.debug("Component {} used in component {}", componentId, spec.getHeader().getID());
                 result.add(getComponentDescription(id));
@@ -937,9 +939,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException {
         LOG.debug("Checking usage of component {} in profiles", componentId);
-        List<ProfileDescription> result = new ArrayList<ProfileDescription>();
-        for (String id : getAllNonDeletedProfileIds()) {
-            CMDComponentSpec profile = getMDProfile(id);
+        final List<ProfileDescription> result = new ArrayList<ProfileDescription>();
+        // get the IDs of all non-deleted profiles that mention the target ID in their XML content
+        final List<String> profileIds = getAllNonDeletedProfileIds(componentId);
+        for (String id : profileIds) {
+            final CMDComponentSpec profile = getMDProfile(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (profile != null && hasComponentId(componentId, profile.getCMDComponent())) {
                 LOG.debug("Component {} used in profile {}", componentId, profile.getHeader().getID());
                 result.add(getProfileDescription(id));
@@ -948,7 +953,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return result;
     }
 
-    protected static boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
+    private static boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
         for (CMDComponentType cmdComponent : componentReferences) {
             if (hasComponentId(componentId, cmdComponent)) {
                 return true;
@@ -960,16 +965,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private static boolean hasComponentId(String componentId, CMDComponentType cmdComponent) {
         if (componentId.equals(cmdComponent.getComponentId())) {
             return true;
-        } else if (findComponentId(componentId, cmdComponent.getCMDComponent())) {
-            return true;
         } else {
-            return false;
+            //recurse over children
+            return findComponentId(componentId, cmdComponent.getCMDComponent());
         }
     }
 
     protected void checkStillUsed(String componentId) throws DeleteFailedException, ComponentRegistryException {
-        for (String id : getAllNonDeletedProfileIds()) {
-            CMDComponentSpec spec = getMDProfile(id);
+        final List<String> profileIds = getAllNonDeletedProfileIds(componentId);
+        for (String id : profileIds) {
+            final CMDComponentSpec spec = getMDProfile(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.warn("Cannot delete component {}, still used in profile {} and possibly other profiles and/or components", componentId, spec.getHeader().getID());
                 // Profile match - throw
@@ -977,15 +983,22 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
 
+        // if we get here, profiles are 'clean'
         LOG.debug("Component {} is not used in any profiles", componentId);
 
-        for (String id : getAllNonDeletedComponentIds()) {
-            CMDComponentSpec spec = getMDComponent(id);
+        // get the IDs of all non-deleted profiles that mention the target ID in their XML content
+        final List<String> componentIds = getAllNonDeletedComponentIds(componentId);
+        for (String id : componentIds) {
+            final CMDComponentSpec spec = getMDComponent(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.warn("Cannot delete component {}, still used in component {} and possibly other components", componentId, spec.getHeader().getID());
                 // Component match -> throw
                 throw new DeleteFailedException("Component is still in use by one or more other components. Request component usage for details.");
             }
         }
+
+        // if we get here, components are 'clean, too'
+        LOG.debug("Component {} is not used in any components", componentId);
     }
 }

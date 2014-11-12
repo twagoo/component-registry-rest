@@ -364,13 +364,23 @@ public class ComponentDaoImpl implements ComponentDao {
     }
 
     @Override
-    public List<String> getAllNonDeletedProfileIds() {
-        return jpaComponentDao.findNonDeletedItemIds(ProfileDescription.PROFILE_PREFIX + "%");
+    public List<String> getAllNonDeletedProfileIds(String contentFilter) {
+        final String prefix = ProfileDescription.PROFILE_PREFIX + "%";
+        if (contentFilter == null) {
+            return jpaComponentDao.findNonDeletedItemIds(prefix);
+        } else {
+            return jpaComponentDao.findNonDeletedItemIds(prefix, contentFilter);
+        }
     }
 
     @Override
-    public List<String> getAllNonDeletedComponentIds() {
-        return jpaComponentDao.findNonDeletedItemIds(ComponentDescription.COMPONENT_PREFIX + "%");
+    public List<String> getAllNonDeletedComponentIds(String contentFilter) {
+        final String prefix = ComponentDescription.COMPONENT_PREFIX + "%";
+        if (contentFilter == null) {
+            return jpaComponentDao.findNonDeletedItemIds(prefix);
+        } else {
+            return jpaComponentDao.findNonDeletedItemIds(prefix, contentFilter);
+        }
     }
 
     @Override
