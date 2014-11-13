@@ -40,18 +40,34 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;			
+			styleName = StyleConstants.EXPANDING_COMPONENT;		
+
 			this.item = Config.instance.getCurrentComponentsSrv().findDescription(componentId);
 			// item not from current space? try public...
 			if (this.item==null) {
 				this.item = Config.instance.getPublicComponentsSrv().findDescription(componentId);
 			}
-			styleName = StyleConstants.EXPANDING_COMPONENT;
+			if (this.item==null) {
+				// retrieve the item by ID
+				componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, setRetrievedItem);
+				componentSrv.loadFromUrl(Config.instance.componentInfoUrl + componentId);
+			} else {
+				//item already available
+				processItem();
+			}
+		}
+		
+		private function setRetrievedItem(event:Event):void {
+			this.item = componentSrv.component.description;
+			processItem();
+		}
+		
+		private function processItem():void {
 			if (item && item.isPrivate) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
 			if (item!=null)
 				updateView();
-		
 		}
 		
 		private function updateView():void{
