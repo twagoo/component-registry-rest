@@ -170,7 +170,7 @@ public class ComponentRegistryRestService implements
     }
     
     private boolean checkRegistrySpaceString(String registrySpace) {
-        return (registrySpace.equalsIgnoreCase("group") || registrySpace.equalsIgnoreCase("private") || registrySpace.equalsIgnoreCase("published"));
+        return (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED));
     }
     
     @Override
@@ -179,7 +179,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     public List<ComponentDescription> getRegisteredComponents(
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue("published") String registrySpace,
+            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
             @QueryParam(GROUPID_PARAM) String groupId,
             @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace)
             throws ComponentRegistryException, IOException {
@@ -189,7 +189,7 @@ public class ComponentRegistryRestService implements
         if (!Strings.isNullOrEmpty(userSpace)) {
             LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
             if (Boolean.valueOf(userSpace)) {
-                registrySpace = "private";
+                registrySpace = REGISTRY_SPACE_PRIVATE;
             }
         }
         
@@ -227,7 +227,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     public List<ProfileDescription> getRegisteredProfiles(
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue("published") String registrySpace,
+            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
             @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
             @QueryParam(GROUPID_PARAM) String groupId,
             @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace
@@ -240,7 +240,7 @@ public class ComponentRegistryRestService implements
         if (!Strings.isNullOrEmpty(userSpace)) {
             LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
             if (Boolean.valueOf(userSpace)) {
-                registrySpace = "private";
+                registrySpace = REGISTRY_SPACE_PRIVATE;
             }
         }
         
@@ -1556,18 +1556,18 @@ public class ComponentRegistryRestService implements
     }
     
     private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {
-        if (registrySpace == null || (registrySpace.equalsIgnoreCase("group") && groupId == null)
+        if (registrySpace == null || (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId == null)
                 || resource == null) {
             return "Undefined registry space or uindefined type of resource";
         }
-        if (registrySpace.equalsIgnoreCase("published")) {
+        if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED)) {
             return "Published " + resource;
         }
-        if (registrySpace.equalsIgnoreCase("private")) {
+        if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE)) {
             return "Private " + resource;
         }
         
-        if (registrySpace.equalsIgnoreCase("group") && groupId != null) {
+        if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId != null) {
             return resource + " of group " + groupId + " '" + cr.getGroupName(Integer.parseInt(groupId)) + "'";
         }
         
@@ -1590,7 +1590,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     public Rss getRssComponent(@QueryParam(GROUPID_PARAM) String groupId,
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue("published") String registrySpace,
+            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
             @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
             throws ComponentRegistryException, ParseException, IOException {
         List<ComponentDescription> components = null;
@@ -1635,7 +1635,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     public Rss getRssProfile(@QueryParam(GROUPID_PARAM) String groupId,
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue("published") String registrySpace,
+            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
             @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
             throws ComponentRegistryException, ParseException, IOException {
         List<ProfileDescription> profiles = null;

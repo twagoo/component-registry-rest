@@ -23,6 +23,7 @@ import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.GROUPID_PARAM;
+import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_GROUP;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
@@ -531,27 +532,27 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         // lists
         List<ProfileDescription> response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles").queryParam("registrySpace", "group").queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/profiles").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(PROFILE_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         List<ComponentDescription> responseC = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, responseC.size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles").queryParam("registrySpace", "group").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/profiles").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(PROFILE_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         responseC = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, responseC.size());
 
         ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
 
         assertEquals(403, clientResponse.getStatus());
@@ -703,27 +704,27 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
          // lists of profiles and components
         Rss response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/components/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(2, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/rss").queryParam("registrySpace", "group").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/rss").queryParam("registrySpace", "group").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/components/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(2, response.getChannel().getItem().size());
 
         ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", "group").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
+                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
 
         assertEquals(403, clientResponse.getStatus());
@@ -1319,7 +1320,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         ClientResponse response = getResource()
                 .path("/registry/components")
-                .queryParam(REGISTRY_SPACE_PARAM, "group")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam("groupId", "1")
                 .accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
@@ -1336,7 +1337,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         ClientResponse response = getAuthenticatedResource(
                 getResource()
                 .path("/registry/components")
-                .queryParam(REGISTRY_SPACE_PARAM, "group")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "3"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
@@ -1349,7 +1350,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         List<ComponentDescription> response = getAuthenticatedResource(getResource()
                 .path("/registry/components")
-                .queryParam(REGISTRY_SPACE_PARAM, "group")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "1"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
@@ -1363,7 +1364,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         ClientResponse response = (getResource()
                 .path("/registry/profiles")
-                .queryParam(REGISTRY_SPACE_PARAM, "group")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "1"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
@@ -1376,7 +1377,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         List<ProfileDescription> response = getAuthenticatedResource(getResource()
                 .path("/registry/profiles")
-                .queryParam(REGISTRY_SPACE_PARAM, "group")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "1"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(PROFILE_LIST_GENERICTYPE);

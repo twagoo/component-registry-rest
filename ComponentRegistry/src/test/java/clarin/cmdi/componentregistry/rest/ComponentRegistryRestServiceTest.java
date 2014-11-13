@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PARAM;
+import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PRIVATE;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -207,7 +208,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Get public components", 2, response.size());
 
         ClientResponse cResponse = getResource().path("/registry/components")
-                .queryParam(REGISTRY_SPACE_PARAM, "private")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals("Trying to get userspace components without credentials", 401,
                 cResponse.getStatus());
@@ -229,7 +230,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Get public profiles", 2, response.size());
 
         ClientResponse cResponse = getResource().path("/registry/profiles")
-                .queryParam(REGISTRY_SPACE_PARAM, "private")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals("Trying to get userspace profiles without credentials", 401,
                 cResponse.getStatus());
@@ -554,7 +555,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPrivateItems();
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
-                "/registry/components").queryParam(REGISTRY_SPACE_PARAM, "private")).get(COMPONENT_LIST_GENERICTYPE);
+                "/registry/components").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
@@ -565,7 +566,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 + "component3").delete(ClientResponse.class);
         assertEquals(200, response.getStatus());
 
-        components = this.getAuthenticatedResource(getResource().path("/registry/components").queryParam(REGISTRY_SPACE_PARAM, "private")).get(
+        components = this.getAuthenticatedResource(getResource().path("/registry/components").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(
                 COMPONENT_LIST_GENERICTYPE);
         assertEquals(0, components.size());
 
@@ -580,18 +581,18 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPrivateItems();
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
-                "/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, "private")).get(COMPONENT_LIST_GENERICTYPE);
+                "/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
         CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                        + "profile3").queryParam(REGISTRY_SPACE_PARAM, "private")).get(CMDComponentSpec.class);
+                        + "profile3").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(CMDComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "profile3").delete(ClientResponse.class);
         assertEquals(200, response.getStatus());
 
-        components = this.getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, "private")).get(
+        components = this.getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(
                 COMPONENT_LIST_GENERICTYPE);
         assertEquals(0, components.size());
 
@@ -606,7 +607,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPrivateItems();
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
-                "/registry/components").queryParam(REGISTRY_SPACE_PARAM, "private")).get(COMPONENT_LIST_GENERICTYPE);
+                "/registry/components").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
         ClientResponse response = getAuthenticatedResource(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
@@ -614,7 +615,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Deleting another user's profile should not be allowed", 403, response.getStatus());
 
         // should not affect listing of own private profiles
-        components = this.getAuthenticatedResource(getResource().path("/registry/components").queryParam(REGISTRY_SPACE_PARAM, "private")).get(
+        components = this.getAuthenticatedResource(getResource().path("/registry/components").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(
                 COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
     }
@@ -624,7 +625,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPrivateItems();
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
-                "/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, "private")).get(COMPONENT_LIST_GENERICTYPE);
+                "/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
 
         ClientResponse response = getAuthenticatedResource(
@@ -633,7 +634,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Deleting another user's profile should not be allowed", 403, response.getStatus());
 
         // should not affect listing of own private profiles
-        components = this.getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, "private")).get(
+        components = this.getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(
                 COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
     }
@@ -887,7 +888,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         FormDataMultiPart form = createFormData(RegistryTestHelper
                 .getTestProfileContent());
         RegisterResponse response = getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(
-                REGISTRY_SPACE_PARAM, "private")).type(
+                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).type(
                         MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                         form);
         assertTrue(response.isProfile());
@@ -912,7 +913,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .getComponentTestContent());
         RegisterResponse response = getAuthenticatedResource(
                 getResource().path("/registry/components").queryParam(
-                REGISTRY_SPACE_PARAM, "private")).type(
+                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).type(
                         MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                         form);
         assertFalse(response.isProfile());
@@ -1212,7 +1213,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(401, cResponse.getStatus());
 
         CMDComponentSpec spec = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, "private")).accept(
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
                         MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
         assertNotNull(spec);
 
@@ -1229,7 +1230,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(profile.length() > 0);
 
         cResponse = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, "private")).delete(
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).delete(
                         ClientResponse.class);
         assertEquals(200, cResponse.getStatus());
 
@@ -1244,7 +1245,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     private List<ProfileDescription> getUserProfiles() {
         return getAuthenticatedResource(getResource().path("/registry/profiles").queryParam(
-                REGISTRY_SPACE_PARAM, "private")).accept(
+                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
                         MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
     }
 
@@ -1579,13 +1580,13 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     private CMDComponentSpec getUserComponent(ComponentDescription desc) {
         return getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, "private")).accept(
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
                         MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
     }
 
     private CMDComponentSpec getUserProfile(ProfileDescription desc) {
         return getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, "private")).accept(
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
                         MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
     }
 
@@ -1596,7 +1597,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     private List<ComponentDescription> getUserComponents() {
         return getAuthenticatedResource(getResource().path("/registry/components").queryParam(
-                REGISTRY_SPACE_PARAM, "private")).accept(
+                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
                         MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
     }
 
