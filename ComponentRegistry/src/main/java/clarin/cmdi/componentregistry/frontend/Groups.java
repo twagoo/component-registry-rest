@@ -1,9 +1,12 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ItemNotFoundException;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import org.apache.wicket.Component;
@@ -12,6 +15,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -118,6 +122,7 @@ public class Groups extends SecureAdminWebPage {
         }));
         container.add(createNewMemberForm("newMember"));
         container.add(createGroupMembersView("members"));
+        container.add(createItemsView("items"));
 
         return container;
     }
@@ -162,16 +167,50 @@ public class Groups extends SecureAdminWebPage {
             protected void populateItem(ListItem li) {
                 final RegistryUser user = (RegistryUser) li.getModelObject();
                 li.add(new Label("name", user.getName()));
-                li.add(new Link("remove") {
-
-                    @Override
-                    public void onClick() {
-                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-                    }
-                });
+//                li.add(new Link("remove") {
+//
+//                    @Override
+//                    public void onClick() {
+//                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//                    }
+//                });
             }
         };
         return membersView;
+    }
+
+    private ListView createItemsView(String id) {
+        final IModel<List> itemsModel = new AbstractReadOnlyModel<List>() {
+
+            @Override
+            public List getObject() {
+                final Long groupId = selectedGroup.getObject();
+                return Lists.newArrayList(Iterables.concat(
+                        groupService.getComponentIdsInGroup(groupId),
+                        groupService.getProfileIdsInGroup(groupId)));
+            }
+        };
+        final ListView itemsView = new ListView(id, itemsModel) {
+
+            @Override
+            protected void populateItem(ListItem li) {
+                final String id = (String) li.getModelObject();
+                final ExternalLink link = new ExternalLink("link", new AbstractReadOnlyModel<String>() {
+
+                    @Override
+                    public String getObject() {
+                        if (ComponentUtils.isProfileId(id)) {
+                            return "../rest/registry/profiles/" + id;
+                        } else {
+                            return "../rest/registry/components/" + id;
+                        }
+                    }
+                });
+                link.add(new Label("id", li.getModel()));
+                li.add(link);
+            }
+        };
+        return itemsView;
     }
 
 }
