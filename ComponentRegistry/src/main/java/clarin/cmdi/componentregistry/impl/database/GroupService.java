@@ -93,7 +93,7 @@ public interface GroupService {
      * @param groupName target group name
      * @param componentId component to transfer
      */
-    void transferItemOwnershipFromUserToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
+    void transferItemOwnershipToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
 
     /**
      * Move ownership of a component or profile from a user to a group
@@ -127,7 +127,7 @@ public interface GroupService {
     
     List<RegistryUser> getUsersInGroup(long groupId);
     
-    boolean userGroupMember(String principalName, String groupId);
+    boolean userGroupMember(String principalName, long groupId);
    
     public  Number  getGroupIdByName(String groupName) throws ItemNotFoundException;
     

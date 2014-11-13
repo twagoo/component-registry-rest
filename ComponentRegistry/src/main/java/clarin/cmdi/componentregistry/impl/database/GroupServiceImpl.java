@@ -29,9 +29,9 @@ import clarin.cmdi.componentregistry.persistence.jpa.GroupDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupMembershipDao;
 import clarin.cmdi.componentregistry.persistence.jpa.OwnershipDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
-import com.google.common.base.Converter;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Service that manages groups, memberships and ownerships. It exposes some
@@ -312,35 +312,46 @@ public class GroupServiceImpl implements GroupService {
         @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to"),
         @ManagedOperationParameter(name = "componentId", description = "Id of component")})
     @Override
-    public void transferItemOwnershipFromUserToGroup(String principal, String groupName, String itemId) throws UserUnauthorizedException {
-
-        BaseDescription item = null;
-        item = componentDao.getByCmdId(itemId);
+    public void transferItemOwnershipToGroup(String principal, String groupName, String itemId) throws UserUnauthorizedException {
+        final BaseDescription item = componentDao.getByCmdId(itemId);
         if (item == null) {
             throw new ValidationException("No profile or component found with ID " + itemId);
         }
-        Group group = groupDao.findGroupByName(groupName);
-        if (group == null) {
+        final Group target = groupDao.findGroupByName(groupName);
+        if (target == null) {
             throw new ValidationException("No group found with name " + groupName);
         }
 
-        if (!this.userGroupMember(principal, String.valueOf(group.getId()))) {
+        if (!this.userGroupMember(principal, target.getId())) {
             throw new UserUnauthorizedException("User " + principal + " is not a member of group " + groupName);
         }
 
-        long userId = item.getDbUserId();
-        long principalId = userDao.getByPrincipalName(principal).getId();
-        if (userId != principalId) {
-            throw new UserUnauthorizedException("User " + principal + " is not creator of the item  " + item.getName());
+        final List<Ownership> currentOwnerships = ownershipDao.findOwnershipByComponentId(itemId);
+        if (!userHasRightToMove(item, principal, currentOwnerships)) {
+            throw new UserUnauthorizedException("User " + principal + " does not have the rights to move item  " + item.getName());
         }
 
-        Ownership ownership = null;
-        List<Ownership> oldOwnerships = ownershipDao.findOwnershipByComponentId(itemId);
-        ownershipDao.delete(oldOwnerships);
-        ownership = new Ownership();
+        ownershipDao.delete(currentOwnerships);
+        final Ownership ownership = new Ownership();
         ownership.setComponentId(itemId);
-        ownership.setGroupId(group.getId());
+        ownership.setGroupId(target.getId());
         addOwnership(ownership);
+    }
+
+    private boolean userHasRightToMove(BaseDescription item, String principal, List<Ownership> currentOwnerships) throws DataAccessException {
+        long itemOwnerUser = item.getDbUserId();
+        long principalId = userDao.getByPrincipalName(principal).getId();
+        if (itemOwnerUser == principalId) {
+            return true;
+        } else {
+            // check if item and user are in the same group
+            for (Ownership ownership : currentOwnerships) {
+                if (userGroupMember(principal, ownership.getGroupId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -349,13 +360,13 @@ public class GroupServiceImpl implements GroupService {
         if (group == null) {
             throw new ValidationException("No group found with id " + groupId);
         }
-        this.transferItemOwnershipFromUserToGroup(principal, group.getName(), componentId);
+        this.transferItemOwnershipToGroup(principal, group.getName(), componentId);
     }
 
     @Override
-    public boolean userGroupMember(String principalName, String groupId) {
+    public boolean userGroupMember(String principalName, long groupId) {
         RegistryUser user = userDao.getByPrincipalName(principalName);
-        GroupMembership gm = groupMembershipDao.findMembership(user.getId(), Long.parseLong(groupId));
+        GroupMembership gm = groupMembershipDao.findMembership(user.getId(), groupId);
         return gm != null;
     }
 

@@ -868,7 +868,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
         String groupName = groupService.getGroupNameById(groupId.longValue());
-        if (!groupService.userGroupMember(principalName, groupId.toString())
+        if (!groupService.userGroupMember(principalName, groupId.longValue())
                 && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to components of the group " + groupId);
         }
@@ -888,7 +888,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
         String groupName = groupService.getGroupNameById(groupId.longValue());
-        if (!groupService.userGroupMember(principalName, groupId.toString())
+        if (!groupService.userGroupMember(principalName, groupId.longValue())
                 && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to profiles of the group " + groupId);
         }
