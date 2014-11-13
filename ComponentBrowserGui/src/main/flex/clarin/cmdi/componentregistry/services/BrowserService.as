@@ -50,13 +50,12 @@ package clarin.cmdi.componentregistry.services {
 		 */
 		public function findDescription(id:String):ItemDescription {
 			//look in the current space
+			//TODO: faster (hash)map based lookup?
 			for each (var item:ItemDescription in itemDescriptions) {
 				if (item.id == id) {
 					return item;
 				}
 			}
-			//item not in current space
-			//TODO: request description from server
 			return null;
 		}
 	}
