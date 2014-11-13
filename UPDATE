@@ -25,6 +25,12 @@ Version specific update instructions
 
 - Execute DB update script upgrade-1.14.sql
 
+- Add the following context parameter (default values given):
+
+  <Parameter 
+	  name="eu.clarin.cmdi.componentregistry.jpaDialect" 
+	  value="org.hibernate.dialect.PostgreSQLDialect"/> 
+
 === 1.13 ===
 
 - The following context fragment have been renamed, and should be updated
