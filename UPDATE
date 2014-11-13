@@ -23,12 +23,7 @@ Version specific update instructions
 -------------------------------------
 === 1.14.0 ===
 
-- Servlet container will require jmx registry. For tomcat, that is enabled with JVM arguments like these:
-
-   -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false
-
 - Execute DB update script upgrade-1.14.sql
-
 
 === 1.13 ===
 
