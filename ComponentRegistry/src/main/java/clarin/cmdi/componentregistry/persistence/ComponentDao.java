@@ -158,15 +158,17 @@ public interface ComponentDao {
     
     /**
      * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted profiles
+     * @param contentFilter filter on profiles that contain this string in their XML content (can be null for no filtering)
      * @return
      */
-    List<String> getAllNonDeletedProfileIds();
+    List<String> getAllNonDeletedProfileIds(String contentFilter);
 
     /**
      * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted components
+     * @param contentFilter filter on components that contain this string in their XML content (can be null for no filtering)
      * @return
      */
-    List<String> getAllNonDeletedComponentIds();
+    List<String> getAllNonDeletedComponentIds(String contentFilter);
 
     public List<BaseDescription> getAllNonDeletedDescriptions();
             

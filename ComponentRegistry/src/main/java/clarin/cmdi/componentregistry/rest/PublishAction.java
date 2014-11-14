@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import java.security.Principal;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
@@ -18,7 +19,7 @@ public class PublishAction implements RegisterAction {
     }
 
     @Override
-    public int execute(BaseDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) throws UserUnauthorizedException, ItemNotFoundException{
+    public int execute(BaseDescription desc, CMDComponentSpec spec, RegisterResponse response, ComponentRegistry registry) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException{
         response.setIsPrivate(false);
         return registry.publish(desc, spec, principal);
     }

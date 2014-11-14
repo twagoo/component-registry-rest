@@ -190,12 +190,20 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
     }
 
-    private void addLinks() {
+    @Override
+    protected void addLinks() {
         add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
         add(new Link("massMigrate") {
             @Override
             public void onClick() {
                 setResponsePage(MassMigratePage.class);
+            }
+        });
+        add(new Link("groups") {
+
+            @Override
+            public void onClick() {
+                setResponsePage(Groups.class);
             }
         });
         add(new Link("log") {

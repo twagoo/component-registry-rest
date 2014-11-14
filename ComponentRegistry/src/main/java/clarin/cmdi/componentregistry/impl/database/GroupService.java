@@ -26,7 +26,7 @@ public interface GroupService {
      * @return ID of group created
      * @throws ValidationException
      */
-    long createNewGroup(String name, String ownerPrincipalName);
+    long createNewGroup(String name, String ownerPrincipalName) throws ValidationException;
     
     /**
      * Gets groups directly owned by a user
@@ -89,17 +89,17 @@ public interface GroupService {
     
     /**
      * Move ownership of a component or profile from a user to a group
-     * @param principal
-     * @param groupName
-     * @param componentId
+     * @param principal name of the owner principal
+     * @param groupName target group name
+     * @param componentId component to transfer
      */
-    void transferItemOwnershipFromUserToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
+    void transferItemOwnershipToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
 
     /**
      * Move ownership of a component or profile from a user to a group
-     * @param principal
-     * @param groupId
-     * @param componentId
+     * @param principal name of the owner principal
+     * @param groupId target group id
+     * @param componentId component to transfer
      */
     void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) throws UserUnauthorizedException;
 
@@ -125,7 +125,9 @@ public interface GroupService {
      */
     List<String> getProfileIdsInGroup(long groupId);
     
-    boolean userGroupMember(String principalName, String groupId);
+    List<RegistryUser> getUsersInGroup(long groupId);
+    
+    boolean userGroupMember(String principalName, long groupId);
    
     public  Number  getGroupIdByName(String groupName) throws ItemNotFoundException;
     

@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -88,7 +89,9 @@ public class AdminRegistry {
 	    throw new SubmitFailedException(e);
 	} catch (ItemNotFoundException e) {
 	    throw new SubmitFailedException(e);
-	}
+	} catch(AuthenticationRequiredException e) {
+            throw new SubmitFailedException(e);
+        }
     }
 
     private void checkId(String id, String id2) throws SubmitFailedException {
@@ -125,13 +128,15 @@ public class AdminRegistry {
 	    throw new SubmitFailedException(e);
 	} catch (ItemNotFoundException e) {
 	    throw new SubmitFailedException(e);
-	}
+	} catch(AuthenticationRequiredException e){
+            throw new SubmitFailedException(e);
+        }
 
     }
 
     private void deleteFromRegistry(Principal userPrincipal,
 	    BaseDescription desc, CMDItemInfo info) throws IOException,
-	    UserUnauthorizedException, ComponentRegistryException, ItemNotFoundException {
+	    UserUnauthorizedException, ComponentRegistryException, ItemNotFoundException, AuthenticationRequiredException {
         
         if (userPrincipal == null) {
            LOG.info("Bnull user principal, nothing is deleted"); 

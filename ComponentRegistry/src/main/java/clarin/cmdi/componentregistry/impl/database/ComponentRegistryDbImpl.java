@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
@@ -47,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -125,9 +125,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public void setGroupId(Number groupId) {
         this.groupId = groupId;
     }
-    
+
     @Override
-    public String getGroupName(Number groupId) throws ItemNotFoundException{
+    public String getGroupName(Number groupId) throws ItemNotFoundException {
         return groupService.getGroupNameById(groupId.longValue());
     }
 
@@ -213,7 +213,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public ProfileDescription getProfileDescriptionAccessControlled(String id) throws ItemNotFoundException, UserUnauthorizedException, ComponentRegistryException {
+    public ProfileDescription getProfileDescriptionAccessControlled(String id) throws ItemNotFoundException, UserUnauthorizedException, ComponentRegistryException, AuthenticationRequiredException {
         boolean hasAccess = this.canCurrentUserAccessDescription(id);
         if (hasAccess) {
             try {
@@ -257,7 +257,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public ComponentDescription getComponentDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public ComponentDescription getComponentDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         boolean hasAccess = this.canCurrentUserAccessDescription(id);
         if (hasAccess) {
             try {
@@ -280,7 +280,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public List<Comment> getCommentsInProfile(String profileId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         try {
             if (this.canCurrentUserAccessDescription(profileId)) {
                 final List<Comment> commentsFromProfile = commentsDao.getCommentsFromItem(profileId);
@@ -297,7 +297,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public Comment getSpecifiedCommentInProfile(String profileId, String commentId)
-            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(profileId)) {
             try {
                 Comment comment = commentsDao.findOne(Long.parseLong(commentId));
@@ -317,7 +317,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public List<Comment> getCommentsInComponent(String componentId)
-            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(componentId)) {
             try {
                 final List<Comment> commentsFromComponent = commentsDao.getCommentsFromItem(componentId);
@@ -335,7 +335,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public Comment getSpecifiedCommentInComponent(String componentId, String commentId)
-            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+            throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(componentId)) {
             try {
                 Comment comment = commentsDao.findOne(Long.parseLong(commentId));
@@ -373,7 +373,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public CMDComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public CMDComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(id)) {
             return this.getMDProfile(id);
         } else {
@@ -403,7 +403,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public CMDComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public CMDComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(id)) {
             return this.getMDComponent(id);
         } else {
@@ -456,7 +456,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public int registerComment(Comment comment, String principalName) throws ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
+    public int registerComment(Comment comment, String principalName) throws ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException {
         try {
             if (comment.getComponentId() != null) {
                 if (this.canCurrentUserAccessDescription(comment.getComponentId())) {
@@ -543,7 +543,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public int update(BaseDescription description, CMDComponentSpec spec, boolean forceUpdate) throws UserUnauthorizedException, ItemNotFoundException {
+    public int update(BaseDescription description, CMDComponentSpec spec, boolean forceUpdate) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         try {
             this.checkAuthorisation(description);
             this.checkAge(description);
@@ -574,7 +574,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public int publish(BaseDescription desc, CMDComponentSpec spec, Principal principal) throws UserUnauthorizedException, ItemNotFoundException {
+    public int publish(BaseDescription desc, CMDComponentSpec spec, Principal principal) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         int result = 0;
         this.checkAuthorisation(desc);
         if (desc.isPublic()) { // if already in published
@@ -626,7 +626,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public void deleteMDProfile(String profileId) throws UserUnauthorizedException,
-            DeleteFailedException, ComponentRegistryException, ItemNotFoundException {
+            DeleteFailedException, ComponentRegistryException, ItemNotFoundException, AuthenticationRequiredException {
         ProfileDescription desc = getProfileDescriptionAccessControlled(profileId);
         if (desc != null) {
             try {
@@ -642,7 +642,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public void deleteMDComponent(String componentId, boolean forceDelete)
-            throws UserUnauthorizedException, DeleteFailedException, ComponentRegistryException, ItemNotFoundException {
+            throws UserUnauthorizedException, DeleteFailedException, ComponentRegistryException, ItemNotFoundException, AuthenticationRequiredException {
         BaseDescription desc = getComponentDescriptionAccessControlled(componentId);
         if (desc != null) {
             try {
@@ -721,7 +721,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return null;
     }
 
-    private void checkAuthorisation(BaseDescription desc) throws UserUnauthorizedException, ItemNotFoundException {
+    private void checkAuthorisation(BaseDescription desc) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (!this.canCurrentUserAccessDescription(desc.getId())) {
             String principalName = (registryOwner != null) ? userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName() : "null";
             throw new UserUnauthorizedException("Unauthorized operation user '" + principalName
@@ -784,7 +784,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return "Registry of " + u.getName();
     }
 
-    private boolean canCurrentUserAccessDescription(String cmdId) throws ItemNotFoundException {
+    private boolean canCurrentUserAccessDescription(String cmdId) throws ItemNotFoundException, AuthenticationRequiredException {
         if (cmdId == null) {
             throw new ItemNotFoundException("Item with the null cmdIdentifier.");
         }
@@ -794,22 +794,25 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throw new ItemNotFoundException("Item with the id " + cmdId + " is not found.");
         }
 
-
-        Number userId = getUserId();
-        if (userId == null) {
-            return false;
-        }
-        RegistryUser user = userDao.findOne(userId.longValue());
-        if (user == null) {
-            return false;
-        }
-
-
-        if (configuration.isAdminUser(user.getPrincipalName())) {
+        if (description.isPublic()) {
+            // everyone can access public description
             return true;
-        }
+        } else {
+            final Number userId = getUserId();
+            if (userId == null) {
+                throw new AuthenticationRequiredException("Requested component is not public but no current user");
+            }
+            final RegistryUser user = userDao.findOne(userId.longValue());
+            if (user == null) {
+                return false;
+            }
 
-        return groupService.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(user, description);
+            if (configuration.isAdminUser(user.getPrincipalName())) {
+                return true;
+            }
+
+            return groupService.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(user, description);
+        }
     }
 
     @Override
@@ -824,7 +827,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public void deleteComment(String commentId) throws IOException,
-            UserUnauthorizedException, DeleteFailedException, ItemNotFoundException {
+            UserUnauthorizedException, DeleteFailedException, ItemNotFoundException, AuthenticationRequiredException {
         try {
             Comment comment = commentsDao.findOne(Long.parseLong(commentId));
             if (comment != null
@@ -865,7 +868,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
         String groupName = groupService.getGroupNameById(groupId.longValue());
-        if (!groupService.userGroupMember(principalName, groupId.toString())
+        if (!groupService.userGroupMember(principalName, groupId.longValue())
                 && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to components of the group " + groupId);
         }
@@ -885,7 +888,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
         String groupName = groupService.getGroupNameById(groupId.longValue());
-        if (!groupService.userGroupMember(principalName, groupId.toString())
+        if (!groupService.userGroupMember(principalName, groupId.longValue())
                 && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to profiles of the group " + groupId);
         }
@@ -907,22 +910,24 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<String> getAllNonDeletedProfileIds() {
-        return componentDao.getAllNonDeletedProfileIds();
+    public List<String> getAllNonDeletedProfileIds(String containedId) {
+        return componentDao.getAllNonDeletedProfileIds(containedId);
     }
 
     @Override
-    public List<String> getAllNonDeletedComponentIds() {
-        return componentDao.getAllNonDeletedComponentIds();
+    public List<String> getAllNonDeletedComponentIds(String containedId) {
+        return componentDao.getAllNonDeletedComponentIds(containedId);
     }
 
     @Override
     public List<ComponentDescription> getUsageInComponents(String componentId) throws ComponentRegistryException {
         LOG.debug("Checking usage of component {} in components", componentId);
         List<ComponentDescription> result = new ArrayList<ComponentDescription>();
-        List<String> ids = getAllNonDeletedComponentIds();
+        // get the IDs of all non-deleted components that mention the target ID in their XML content
+        List<String> ids = getAllNonDeletedComponentIds(componentId);
         for (String id : ids) {
-            CMDComponentSpec spec = getMDComponent(id);
+            final CMDComponentSpec spec = getMDComponent(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.debug("Component {} used in component {}", componentId, spec.getHeader().getID());
                 result.add(getComponentDescription(id));
@@ -934,9 +939,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public List<ProfileDescription> getUsageInProfiles(String componentId) throws ComponentRegistryException {
         LOG.debug("Checking usage of component {} in profiles", componentId);
-        List<ProfileDescription> result = new ArrayList<ProfileDescription>();
-        for (String id : getAllNonDeletedProfileIds()) {
-            CMDComponentSpec profile = getMDProfile(id);
+        final List<ProfileDescription> result = new ArrayList<ProfileDescription>();
+        // get the IDs of all non-deleted profiles that mention the target ID in their XML content
+        final List<String> profileIds = getAllNonDeletedProfileIds(componentId);
+        for (String id : profileIds) {
+            final CMDComponentSpec profile = getMDProfile(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (profile != null && hasComponentId(componentId, profile.getCMDComponent())) {
                 LOG.debug("Component {} used in profile {}", componentId, profile.getHeader().getID());
                 result.add(getProfileDescription(id));
@@ -945,7 +953,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return result;
     }
 
-    protected static boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
+    private static boolean findComponentId(String componentId, List<CMDComponentType> componentReferences) {
         for (CMDComponentType cmdComponent : componentReferences) {
             if (hasComponentId(componentId, cmdComponent)) {
                 return true;
@@ -957,16 +965,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private static boolean hasComponentId(String componentId, CMDComponentType cmdComponent) {
         if (componentId.equals(cmdComponent.getComponentId())) {
             return true;
-        } else if (findComponentId(componentId, cmdComponent.getCMDComponent())) {
-            return true;
         } else {
-            return false;
+            //recurse over children
+            return findComponentId(componentId, cmdComponent.getCMDComponent());
         }
     }
 
     protected void checkStillUsed(String componentId) throws DeleteFailedException, ComponentRegistryException {
-        for (String id : getAllNonDeletedProfileIds()) {
-            CMDComponentSpec spec = getMDProfile(id);
+        final List<String> profileIds = getAllNonDeletedProfileIds(componentId);
+        for (String id : profileIds) {
+            final CMDComponentSpec spec = getMDProfile(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.warn("Cannot delete component {}, still used in profile {} and possibly other profiles and/or components", componentId, spec.getHeader().getID());
                 // Profile match - throw
@@ -974,15 +983,22 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             }
         }
 
+        // if we get here, profiles are 'clean'
         LOG.debug("Component {} is not used in any profiles", componentId);
 
-        for (String id : getAllNonDeletedComponentIds()) {
-            CMDComponentSpec spec = getMDComponent(id);
+        // get the IDs of all non-deleted profiles that mention the target ID in their XML content
+        final List<String> componentIds = getAllNonDeletedComponentIds(componentId);
+        for (String id : componentIds) {
+            final CMDComponentSpec spec = getMDComponent(id);
+            // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.warn("Cannot delete component {}, still used in component {} and possibly other components", componentId, spec.getHeader().getID());
                 // Component match -> throw
                 throw new DeleteFailedException("Component is still in use by one or more other components. Request component usage for details.");
             }
         }
+
+        // if we get here, components are 'clean, too'
+        LOG.debug("Component {} is not used in any components", componentId);
     }
 }

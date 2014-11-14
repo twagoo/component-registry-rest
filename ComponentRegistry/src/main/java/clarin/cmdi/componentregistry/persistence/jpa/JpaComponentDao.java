@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
@@ -48,6 +47,9 @@ public interface JpaComponentDao extends JpaRepository<BaseDescription, Long>{
     
     @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 order by c.id asc")
     List<String> findNonDeletedItemIds(String componentIdPrefix);
+    
+    @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 and content like CONCAT('%', ?2, '%') order by c.id asc")
+    List<String> findNonDeletedItemIds(String componentIdPrefix, String contentFilter);
     
     @Query("select c from BaseDescription c where c.deleted = false order by c.id asc")
     List<BaseDescription> findNonDeletedDescriptions();

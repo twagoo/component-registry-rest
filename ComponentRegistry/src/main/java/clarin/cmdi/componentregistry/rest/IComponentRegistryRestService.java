@@ -44,14 +44,19 @@ public interface IComponentRegistryRestService {
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String REGISTRY_SPACE_PARAM = "registrySpace";
+    public static final String USER_SPACE_PARAM = "userspace";
     public static final String GROUPID_PARAM = "groupId";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
     public static final String NUMBER_OF_RSSITEMS = "limit";
 
-    List<ComponentDescription> getRegisteredComponents(String registrySpace, String groupId)
+    public static final String REGISTRY_SPACE_PUBLISHED = "published";
+    public static final String REGISTRY_SPACE_PRIVATE = "private";
+    public static final String REGISTRY_SPACE_GROUP = "group";
+
+    List<ComponentDescription> getRegisteredComponents(String registrySpace, String groupId, String userSpace)
             throws ComponentRegistryException, IOException, UserUnauthorizedException;
 
-    List<ProfileDescription> getRegisteredProfiles(String registrySpace, boolean metadataEditor, String groupId) throws ComponentRegistryException, IOException, UserUnauthorizedException;
+    List<ProfileDescription> getRegisteredProfiles(String registrySpace, boolean metadataEditor, String groupId, String userSpace) throws ComponentRegistryException, IOException, UserUnauthorizedException;
 
     Response getRegisteredComponent(String componentId) throws IOException;
 
@@ -162,8 +167,6 @@ public interface IComponentRegistryRestService {
 
     void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents);
 
-  
-
     /**
      * Get any component (public or private) with the specified ID
      *
@@ -173,17 +176,14 @@ public interface IComponentRegistryRestService {
     BaseDescription getBaseDescription(String componentId) throws ComponentRegistryException, IOException;
 
     // Group Service 
-    
-     /**
+    /**
      * Get a list of groups the user is a member of
      *
      * @return
      */
     List<Group> getGroupsTheCurrentUserIsAMemberOf();
 
-   
-    
-     /**
+    /**
      * Get a list of groups the item is available to. For all practical reasons,
      * this will return either 0 or 1 groups
      *
@@ -200,9 +200,8 @@ public interface IComponentRegistryRestService {
      * @param groupId
      */
     Response transferItemOwnershipToGroup(String itemId, long groupId) throws IOException;
-    
+
     // (added by Olha)
-    
     Response createNewGroup(String groupName) throws IOException;
 
     List<Group> getGroupsOwnedByUser(String pricipalName) throws IOException;
@@ -212,9 +211,8 @@ public interface IComponentRegistryRestService {
     Response isOwner(String groupName) throws IOException;
 
     Response makeGroupMember(String groupName, String principalName) throws IOException;
-    
-    //Response removeGroupMember(String groupName, String principalName) throws IOException;
 
+    //Response removeGroupMember(String groupName, String principalName) throws IOException;
     Response listProfiles(String groupId) throws IOException;
 
     Response listComponents(String groupId) throws IOException;

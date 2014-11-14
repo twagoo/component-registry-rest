@@ -286,7 +286,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertFalse(result);
 
 	// user transfers ownership of the component to his group
-	groupService.transferItemOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group.getName(), componentDescription.getId());
 	
 	List<Ownership> ownerships = (List<Ownership>)ownershipDao.findAll();
@@ -338,7 +338,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertFalse(result);
 
 	// user transfers ownership of the component to his group
-	groupService.transferItemOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group.getName(),
 		profileDescription.getId());
 	
@@ -391,7 +391,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertFalse(result);
 
 	// user transfers ownership of the component to his group
-	groupService.transferItemOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group.getName(),
 		profileDescription.getId());
 	
@@ -438,12 +438,12 @@ public class GroupServiceImplTest extends BaseUnitTest {
 		user.getId().longValue());
 
 	// user transfers ownership of the profile to his group
-	groupService.transferItemOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group1.getName(),
 		profileDescription.getId());
 
 	// user transfers ownership of the profile to his group
-	groupService.transferItemOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group2.getName(),
 		profileDescription2.getId());
 

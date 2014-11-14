@@ -85,13 +85,22 @@
 				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
 				Config.instance.addEventListener(GroupSelectionEvent.GROUP_SELECTED, onGroupSelected);
 				scrollToSelected();
+				updateButtonState();
 			}
 			
 			private function onSpaceChanged(event:Event):void{
-				
+				updateButtonState();
+			}
+			
+			private function updateButtonState():void {
 				createNewButton.visible = true;
 				createNewButton.includeInLayout = true;
-				createNewButton.enabled = true;
+				createNewButton.enabled = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
+				if(Config.instance.registrySpace.space == Config.SPACE_PRIVATE) {
+					createNewButton.toolTip = "Create a new component or profile in the private workspace";
+				} else {
+					createNewButton.toolTip = "Switch to your private workspace in order to create a new component or profile";
+				}
 				
 				editAsNew.visible = Config.instance.registrySpace.space == Config.SPACE_PUBLISHED;
 				editAsNew.includeInLayout = Config.instance.registrySpace.space  == Config.SPACE_PUBLISHED;
@@ -100,11 +109,11 @@
 				edit.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
 				edit.includeInLayout = Config.instance.registrySpace.space  == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
 				edit.enabled = (Config.instance.registrySpace.space  == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;
-					
+				
 				importButton.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
 				importButton.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
 				importButton.enabled = Config.instance.registrySpace.space == Config.SPACE_PRIVATE;
-			
+				
 				groupPanel.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
 				groupPanel.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
 				groupPanel.enabled = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;
@@ -115,7 +124,7 @@
 				
 				moveToGroupBtn.visible = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
 				moveToGroupBtn.includeInLayout = Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP;
-				moveToGroupBtn.enabled = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;			
+				moveToGroupBtn.enabled = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && dataGrid.selectedItem != null;
 			}
 
 			private function scrollToSelected():void {
@@ -263,7 +272,7 @@
 					   toolTip="Create a new item in the private workspace"
 					   visible="{true}" 
 					   includeInLayout="{true}"
-					   enabled="{true}"
+					   enabled="{false}"
 					   click="dispatchCreateNewEvent()"
 					   />
 			<mx:Button 

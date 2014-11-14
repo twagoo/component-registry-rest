@@ -114,14 +114,4 @@ public class StatisticsPage extends SecureAdminWebPage {
         }
     }
 
-    @SuppressWarnings("serial")
-    private void addLinks() {
-        add(new Link("home") {
-
-            @Override
-            public void onClick() {
-                setResponsePage(AdminHomePage.class);
-            }
-        });
-    }
 }

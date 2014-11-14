@@ -30,6 +30,7 @@ package clarin.cmdi.componentregistry.services //trunk
 			} else {
 				throw "Registry space is lost."
 			}
+			trace("Dispatching request to " + url.toDisplayString())
 			super.dispatchRequest(url);
 		}
 		

@@ -45,7 +45,12 @@ package clarin.cmdi.componentregistry.services {
 			super.dispatchRequest(copy);
 		}
 		
-		public function findDescription(id:String):ItemDescription {			
+		/**
+		 * finds a component inside the currently loaded space
+		 */
+		public function findDescription(id:String):ItemDescription {
+			//look in the current space
+			//TODO: faster (hash)map based lookup?
 			for each (var item:ItemDescription in itemDescriptions) {
 				if (item.id == id) {
 					return item;

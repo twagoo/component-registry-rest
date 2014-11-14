@@ -29,10 +29,10 @@ private var componentSrv:ComponentInfoService = new ComponentInfoService();
 private var itemDescription:ItemDescription;
 
 [Bindable]
-private var componentsSrv:ComponentListService = Config.instance.getComponentsSrv();
+private var componentsSrv:ComponentListService = Config.instance.getCurrentComponentsSrv();
 
 [Bindable]
-private var profilesSrv:ProfileListService = Config.instance.getProfilesSrv();
+private var profilesSrv:ProfileListService = Config.instance.getCurrentProfilesSrv();
 
 [Bindable]
 public var cmdComponent:XML;
@@ -69,8 +69,8 @@ public function set registrySpaceEditor(rs:RegistrySpace):void{
 }
 
 private function toggleRegistrySpace(event:Event):void {
-	componentsSrv = Config.instance.getComponentsSrv();
-	profilesSrv = Config.instance.getProfilesSrv();
+	componentsSrv = Config.instance.getCurrentComponentsSrv();
+	profilesSrv = Config.instance.getCurrentProfilesSrv();
 }
 
 private function determineSaveButtonEnabled():void {
