@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- 
-	Configuration file for ComponentRegistry in shibbolized context, which
-	any production environment should be.
+        Configuration file for ComponentRegistry in shibbolized context, which
+        any production environment should be.
 -->
 
 <web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>ComponentRegistry</display-name>
     <description>Clarin Metadata Component Registry</description>
 
@@ -16,10 +16,10 @@
         <param-value>/WEB-INF/shhaa.xml</param-value>
     </context-param>
     <context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:spring-config/applicationContext.xml,classpath:spring-config/container-environment.xml
-		</param-value>
-	</context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:spring-config/applicationContext.xml,classpath:spring-config/container-environment.xml
+        </param-value>
+    </context-param>
 
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
@@ -35,14 +35,14 @@
             <param-value>UTF-8</param-value>
         </init-param>
     </filter>
-    	<filter>
-		<filter-name>NoCachingFilter</filter-name>
-		<filter-class>clarin.cmdi.componentregistry.servlet.DontCacheFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>NoCachingFilter</filter-name>
-		<url-pattern>/rest/registry/*</url-pattern>
-	</filter-mapping>
+    <filter>
+        <filter-name>NoCachingFilter</filter-name>
+        <filter-class>clarin.cmdi.componentregistry.servlet.DontCacheFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>NoCachingFilter</filter-name>
+        <url-pattern>/rest/registry/*</url-pattern>
+    </filter-mapping>
     
     
     <filter-mapping>
@@ -50,7 +50,7 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
   
-<!-- Make sure this one is declared before the wicket filter, the order matters. Shibboleth should trigger the login, before continuing with the wicket filter.-->
+    <!-- Make sure this one is declared before the wicket filter, the order matters. Shibboleth should trigger the login, before continuing with the wicket filter.-->
     <filter>
         <filter-name>AAIFilter</filter-name>
         <filter-class>de.mpg.aai.shhaa.AuthFilter</filter-class>
@@ -73,23 +73,28 @@
         </init-param>
         <init-param>
             <param-name>configuration</param-name>
-<!--      <param-value>development</param-value>-->
+            <!--      <param-value>development</param-value>-->
             <param-value>deployment</param-value>
-      <!-- you can override with -Dwicket.configuration=development -->
+            <!-- you can override with -Dwicket.configuration=development -->
         </init-param>
     </filter>
     <filter-mapping>
         <filter-name>wicket.componentregistry</filter-name>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
-	<servlet>
-		<servlet-name>ComponentRegistry Web Application</servlet-name>
-		<servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-		<init-param> <param-name>com.sun.jersey.config.property.classnames</param-name> 
-			<param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider</param-value> 
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
+    <servlet>
+        <servlet-name>ComponentRegistry Web Application</servlet-name>
+        <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
+        <init-param> 
+            <param-name>com.sun.jersey.config.property.classnames</param-name> 
+            <param-value>com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider</param-value> 
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.config.property.packages</param-name>
+            <param-value>com.wordnik.swagger.jersey.listing</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ComponentRegistry Web Application</servlet-name>
         <url-pattern>/rest/*</url-pattern>
@@ -104,5 +109,18 @@
         <servlet-name>Isocat Servlet</servlet-name>
         <url-pattern>/isocat/*</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>JerseyJaxrsConfig</servlet-name>
+        <servlet-class>com.wordnik.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
+        <init-param>
+            <param-name>api.version</param-name>
+            <param-value>1.0.0</param-value>
+        </init-param>
+        <init-param>
+            <param-name>swagger.api.basepath</param-name>
+            <param-value>http://localhost:8080/ComponentRegistry/rest</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
 
 </web-app>
