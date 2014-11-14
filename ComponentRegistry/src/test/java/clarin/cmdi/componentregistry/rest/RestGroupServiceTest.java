@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  *      Items: profile-1, component-1, component-2
  * 
  * B
- *      Owner: Dummy
+ *      Owner: anotherPrincipal
  *      Members: Dummy
  *      Items: Bprofile-1, Bcomponent-1, Bcomponent-2
  * 
@@ -219,38 +219,21 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         groupService.addOwnership(ownership);
     }
 
- //    Response createNewGroup(String groupName) throws IOException;
-    @Test
-    public void testCreateNewGroup() {
-        System.out.println("test createNewGroup");
-        ClientResponse cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/groups/create").queryParam("groupName", "newGroup"))
-                .accept(MediaType.TEXT_XML).post(ClientResponse.class);
-        assertEquals(200, cr.getStatus());
-        assertEquals("Group with the name newGroup is created and given an id 1", cr.getEntity(String.class));
-    }
-
 //  List<Group> getGroupsOwnedByUser(String pricipalName) throws IOException;
     @Test
-    public void testGetGroupsOwnedByUser() {
-        System.out.println("test GetGroupsOwnedByUser");
-        ClientResponse cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/groups/create").queryParam("groupName", "newGroup1"))
-                .accept(MediaType.TEXT_XML).post(ClientResponse.class);
-        assertEquals(200, cr.getStatus());
-        ClientResponse cr1 = this.getAuthenticatedResource(getResource()
-                .path("/registry/groups/create").queryParam("groupName", "newGroup2"))
-                .accept(MediaType.TEXT_XML).post(ClientResponse.class);
-        assertEquals(200, cr1.getStatus());
-
+    public void testGetGroupsOwnedByUser() throws Exception {
+        fillUpGroupA();
+        fillUpGroupB();
+        fillUpGroupC();
+        fillUpGroupD();
+        
         // test itself
         List<Group> result = this.getAuthenticatedResource(getResource()
                 .path("/registry/groups/principal").queryParam("principalName", DummyPrincipal.DUMMY_PRINCIPAL.getName()))
                 .accept(MediaType.APPLICATION_XML).get(GROUP_LIST_GENERICTYPE);
 
-        assertEquals(2, result.size());
-        assertEquals("newGroup1", result.get(0).getName());
-        assertEquals("newGroup2", result.get(1).getName());
+        assertEquals(1, result.size());
+        assertEquals("group A", result.get(0).getName());
     }
 
 //    List<Group> getGroupsTheCurrentUserIsAMemberOf();   

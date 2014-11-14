@@ -1887,23 +1887,6 @@ public class ComponentRegistryRestService implements
             return new BaseDescription();
         }
     }
-
-    // Group Service (added by Olha)
-    @Override
-    @POST
-    @Path("/groups/create")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Response createNewGroup(@QueryParam("groupName") String groupName) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            Number id = groupService.createNewGroup(groupName, principal.getName());
-            return Response.ok("Group with the name " + groupName + " is created and given an id " + id).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        }
-    }
     
     @Override
     @GET
