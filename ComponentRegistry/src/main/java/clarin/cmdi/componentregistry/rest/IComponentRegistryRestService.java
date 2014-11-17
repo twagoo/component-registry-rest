@@ -201,23 +201,4 @@ public interface IComponentRegistryRestService {
      */
     Response transferItemOwnershipToGroup(String itemId, long groupId) throws IOException;
 
-    // (added by Olha)
-    Response createNewGroup(String groupName) throws IOException;
-
-    List<Group> getGroupsOwnedByUser(String pricipalName) throws IOException;
-
-    Response listGroupNames() throws IOException;
-
-    Response isOwner(String groupName) throws IOException;
-
-    Response makeGroupMember(String groupName, String principalName) throws IOException;
-
-    //Response removeGroupMember(String groupName, String principalName) throws IOException;
-    Response listProfiles(String groupId) throws IOException;
-
-    Response listComponents(String groupId) throws IOException;
-
-    Response getGroupNameById(String groupId) throws IOException;
-
-    Response getGroupIdByName(String groupName) throws IOException;
 }

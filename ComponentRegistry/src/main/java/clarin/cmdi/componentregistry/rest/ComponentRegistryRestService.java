@@ -30,6 +30,9 @@ import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,7 +91,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(rollbackFor = {Exception.class, ValidationException.class})
 public class ComponentRegistryRestService implements
         IComponentRegistryRestService {
-    
+
     private final static Logger LOG = LoggerFactory
             .getLogger(ComponentRegistryRestService.class);
     @Context
@@ -107,7 +110,7 @@ public class ComponentRegistryRestService implements
     private MDMarshaller marshaller;
     @Autowired
     private GroupService groupService;
-    
+
     private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
         Principal userPrincipal = security.getUserPrincipal();
         if (userPrincipal == null) {
@@ -117,7 +120,7 @@ public class ComponentRegistryRestService implements
             return componentRegistryFactory.getBaseRegistry(userCredentials);
         }
     }
-    
+
     private ComponentRegistry getRegistry(RegistrySpace space, Number groupId) {
         Principal userPrincipal = security.getUserPrincipal();
         UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
@@ -144,7 +147,7 @@ public class ComponentRegistryRestService implements
         }
         return principal;
     }
-    
+
     private UserCredentials getUserCredentials(Principal userPrincipal) {
         UserCredentials userCredentials = null;
         if (userPrincipal != null) {
@@ -152,7 +155,7 @@ public class ComponentRegistryRestService implements
         }
         return userCredentials;
     }
-    
+
     private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
         //checking credentials 
         RegistrySpace regSpace = RegistrySpace.valueOf(space.toUpperCase());
@@ -165,14 +168,14 @@ public class ComponentRegistryRestService implements
         if (groupId != null && !groupId.isEmpty()) {
             groupIdNumber = Integer.parseInt(groupId);
         }
-        
+
         return this.getRegistry(regSpace, groupIdNumber);
     }
-    
+
     private boolean checkRegistrySpaceString(String registrySpace) {
         return (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED));
     }
-    
+
     @Override
     @GET
     @Path("/components")
@@ -184,7 +187,7 @@ public class ComponentRegistryRestService implements
             @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace)
             throws ComponentRegistryException, IOException {
         long start = System.currentTimeMillis();
-        
+
         // deprecated parameter, processed here for backwards compatibility
         if (!Strings.isNullOrEmpty(userSpace)) {
             LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
@@ -192,35 +195,35 @@ public class ComponentRegistryRestService implements
                 registrySpace = REGISTRY_SPACE_PRIVATE;
             }
         }
-        
+
         if (!checkRegistrySpaceString(registrySpace)) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
             return new ArrayList<ComponentDescription>();
         }
-        
+
         try {
             ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
             List<ComponentDescription> result = cr.getComponentDescriptions();
             LOG.debug(
                     "Releasing {} registered components into the world ({} millisecs)",
                     result.size(), (System.currentTimeMillis() - start));
-            
+
             return result;
         } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
-            
+
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
-            
+
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new ArrayList<ComponentDescription>();
         }
-        
+
     }
-    
+
     @Override
     @GET
     @Path("/profiles")
@@ -233,7 +236,7 @@ public class ComponentRegistryRestService implements
             @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace
     )
             throws ComponentRegistryException, IOException {
-        
+
         long start = System.currentTimeMillis();
 
         // deprecated parameter, processed here for backwards compatibility
@@ -243,7 +246,7 @@ public class ComponentRegistryRestService implements
                 registrySpace = REGISTRY_SPACE_PRIVATE;
             }
         }
-        
+
         if (!checkRegistrySpaceString(registrySpace)) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
             return new ArrayList<ProfileDescription>();
@@ -254,22 +257,22 @@ public class ComponentRegistryRestService implements
             LOG.debug(
                     "Releasing {} registered components into the world ({} millisecs)",
                     result.size(), (System.currentTimeMillis() - start));
-            
+
             return result;
         } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
-            
+
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
-            
+
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new ArrayList<ProfileDescription>();
         }
     }
-    
+
     @Override
     @GET
     @Path("/components/{componentId}")
@@ -291,12 +294,16 @@ public class ComponentRegistryRestService implements
             return Response.serverError().status(Status.FORBIDDEN).build();
         }
     }
-    
+
     @Override
     @GET
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Get the component specification XML a single profile", response = CMDComponentSpec.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "Profile does not exist")
+    })
     public Response getRegisteredProfile(
             @PathParam("profileId") String profileId) throws IOException {
         LOG.debug("Profile with id {} is requested.", profileId);
@@ -313,14 +320,14 @@ public class ComponentRegistryRestService implements
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
     }
-    
+
     @Override
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
     public Response getRegisteredComponentRawType(
             @PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) throws ComponentRegistryException {
-        
+
         LOG.debug("Component with id: {} and rawType: {} is requested.", componentId, rawType);
         try {
             final ComponentRegistry registry = this.getBaseRegistry();
@@ -355,7 +362,7 @@ public class ComponentRegistryRestService implements
                                             .status(Status.INTERNAL_SERVER_ERROR)
                                             .build());
                                 }
-                                
+
                             } catch (UserUnauthorizedException e2) {
                                 LOG.error(e2.toString());
                             }
@@ -392,14 +399,14 @@ public class ComponentRegistryRestService implements
                             } catch (UserUnauthorizedException e2) {
                                 LOG.error(e2.toString());
                             }
-                            
+
                         }
                     };
                     return createDownloadResponse(result, fileName);
                 } else {
                     return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
                 }
-                
+
             } catch (UserUnauthorizedException e2) {
                 return Response.status(Status.FORBIDDEN).build();
             }
@@ -409,7 +416,7 @@ public class ComponentRegistryRestService implements
             return Response.serverError().status(Status.UNAUTHORIZED).build();
         }
     }
-    
+
     @Override
     @GET
     @Path("/components/usage/{componentId}")
@@ -417,22 +424,22 @@ public class ComponentRegistryRestService implements
         MediaType.APPLICATION_JSON})
     public List<BaseDescription> getComponentUsage(
             @PathParam("componentId") String componentId) throws ComponentRegistryException, IOException {
-        
+
         final long start = System.currentTimeMillis();
         try {
             ComponentRegistry registry = this.getBaseRegistry();
             List<ComponentDescription> components = registry.getUsageInComponents(componentId);
             List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
-            
+
             LOG.debug(
                     "Found {} components and {} profiles that use component {} ({} millisecs)",
                     components.size(), profiles.size(), componentId,
                     (System.currentTimeMillis() - start));
-            
+
             List<BaseDescription> usages = new ArrayList<BaseDescription>(components.size() + profiles.size());
             usages.addAll(components);
             usages.addAll(profiles);
-            
+
             return usages;
         } catch (ComponentRegistryException e) {
             LOG.warn("Could not retrieve profile usage {}", componentId);
@@ -443,7 +450,7 @@ public class ComponentRegistryRestService implements
             return new ArrayList<BaseDescription>();
         }
     }
-    
+
     @Override
     @GET
     @Path("/profiles/{profileId}/comments")
@@ -473,7 +480,7 @@ public class ComponentRegistryRestService implements
             return new ArrayList<Comment>();
         }
     }
-    
+
     @Override
     @GET
     @Path("/components/{componentId}/comments")
@@ -503,7 +510,7 @@ public class ComponentRegistryRestService implements
             return new ArrayList<Comment>();
         }
     }
-    
+
     @Override
     @GET
     @Path("/profiles/{profileId}/comments/{commentId}")
@@ -513,10 +520,10 @@ public class ComponentRegistryRestService implements
             @PathParam("profileId") String profileId,
             @PathParam("commentId") String commentId)
             throws IOException {
-        
+
         LOG.debug("Comments of profile with id {} are requested.", commentId);
         try {
-            
+
             return this.getBaseRegistry().getSpecifiedCommentInProfile(profileId, commentId);
         } catch (ComponentRegistryException e) {
             response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
@@ -532,7 +539,7 @@ public class ComponentRegistryRestService implements
             return new Comment();
         }
     }
-    
+
     @Override
     @GET
     @Path("/components/{componentId}/comments/{commentId}")
@@ -583,7 +590,7 @@ public class ComponentRegistryRestService implements
             return Response.ok().build();
         }
     }
-    
+
     @Override
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
@@ -597,7 +604,7 @@ public class ComponentRegistryRestService implements
             return Response.ok().build();
         }
     }
-    
+
     @Override
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
@@ -624,7 +631,7 @@ public class ComponentRegistryRestService implements
             @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
             @FormDataParam(GROUP_FORM_FIELD) String group,
             @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        
+
         try {
             Principal principal = checkAndGetUserPrincipal();
             ComponentRegistry registry = this.getBaseRegistry();
@@ -644,7 +651,7 @@ public class ComponentRegistryRestService implements
                         .entity("Invalid id, cannot update nonexistent profile")
                         .build();
             }
-            
+
         } catch (AuthenticationRequiredException e) {
             return Response.serverError().status(Status.UNAUTHORIZED)
                     .build();
@@ -660,7 +667,7 @@ public class ComponentRegistryRestService implements
                     .build();
         }
     }
-    
+
     @Override
     @POST
     @Path("/profiles/{profileId}/update")
@@ -679,7 +686,7 @@ public class ComponentRegistryRestService implements
                 if (desc.isPublic()) {
                     return Response.status(Status.CONFLICT).entity("Cannot update already published profile.")
                             .build();
-                    
+
                 }
                 Number groupId;
                 RegistrySpace space;
@@ -691,7 +698,7 @@ public class ComponentRegistryRestService implements
                     groupId = groupIds.get(0);
                     space = RegistrySpace.GROUP;
                 }
-                
+
                 updateDescription(desc, name, description, domainName, group);
                 ComponentRegistry cr = this.getRegistry(space, groupId);
                 return register(input, desc, new UpdateAction(), cr);
@@ -708,11 +715,11 @@ public class ComponentRegistryRestService implements
             LOG.debug("Details", e);
             return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                     .build();
-            
+
         } catch (UserUnauthorizedException ex) {
             return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
                     .build();
-            
+
         } catch (ItemNotFoundException ex2) {
             return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
                     .build();
@@ -720,7 +727,7 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
     }
 
     /**
@@ -759,7 +766,7 @@ public class ComponentRegistryRestService implements
             @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
             @FormDataParam(GROUP_FORM_FIELD) String group,
             @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        
+
         try {
             Principal principal = checkAndGetUserPrincipal();
             ComponentRegistry registry = this.getBaseRegistry();
@@ -800,7 +807,7 @@ public class ComponentRegistryRestService implements
                     .build();
         }
     }
-    
+
     @Override
     @POST
     @Path("/components/{componentId}/update")
@@ -830,7 +837,7 @@ public class ComponentRegistryRestService implements
                     groupId = groupIds.get(0);
                     space = RegistrySpace.GROUP;
                 }
-                
+
                 this.updateDescription(desc, name, description, domainName, group);
                 ComponentRegistry cr = this.getRegistry(space, groupId);
                 return this.register(input, desc, new UpdateAction(), cr);
@@ -857,9 +864,9 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
     }
-    
+
     private void updateDescription(BaseDescription desc, String name,
             String description, String domainName, String group) {
         desc.setName(name);
@@ -868,7 +875,7 @@ public class ComponentRegistryRestService implements
         desc.setGroupName(group);
         desc.setRegistrationDate(new Date());
     }
-    
+
     @Override
     @DELETE
     @Path("/components/{componentId}")
@@ -908,14 +915,20 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
         LOG.info("Component with id: {} deleted.", componentId);
         return Response.ok("Component with id" + componentId + " deleted.").build();
     }
-    
+
     @Override
     @DELETE
     @Path("/profiles/{profileId}")
+    @ApiOperation(value = "Deletes a profile from the registry")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not logged authenticated"),
+        @ApiResponse(code = 403, message = "Profile is not owned by current user and user is no administrator or profile is published and has been consolidated into the registry"),
+        @ApiResponse(code = 404, message = "Profile does not exist")
+    })
     public Response deleteRegisteredProfile(
             @PathParam("profileId") String profileId) {
         try {
@@ -949,14 +962,20 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
         LOG.info("Profile with id: {} deleted.", profileId);
         return Response.ok().build();
     }
-    
+
     @Override
     @DELETE
     @Path("/profiles/{profileId}/comments/{commentId}")
+    @ApiOperation(value = "Deletes a comment from a profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Comment is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 404, message = "Comment does not exist")
+    })
     public Response deleteCommentFromProfile(
             @PathParam("profileId") String profileId,
             @PathParam("commentId") String commentId) {
@@ -979,7 +998,7 @@ public class ComponentRegistryRestService implements
                 return Response.serverError().status(Status.NOT_FOUND)
                         .entity("" + e1.getMessage()).build();
             }
-            
+
         } catch (DeleteFailedException e) {
             LOG.info("Comment with id: {} deletion failed: {}", commentId,
                     e.getMessage());
@@ -1004,14 +1023,20 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
         LOG.info("Comment with id: {} deleted.", commentId);
         return Response.ok("Comment with id " + commentId + " deleted.").build();
     }
-    
+
     @Override
     @DELETE
     @Path("/components/{componentId}/comments/{commentId}")
+    @ApiOperation(value = "Deletes a comment from a component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Comment is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 404, message = "Comment does not exist")
+    })
     public Response deleteCommentFromComponent(
             @PathParam("componentId") String componentId,
             @PathParam("commentId") String commentId) {
@@ -1056,11 +1081,11 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
         LOG.info("Comment with id: {} deleted.", commentId);
         return Response.ok("Comment with id " + commentId + " deleted.").build();
     }
-    
+
     @Override
     @GET
     @Path("/profiles/{profileId}/{rawType}")
@@ -1068,17 +1093,17 @@ public class ComponentRegistryRestService implements
     public Response getRegisteredProfileRawType(
             @PathParam("profileId") final String profileId,
             @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
-        
+
         LOG.debug("Profile with id {} and rawType {} is requested.", profileId,
                 rawType);
         try {
             final ComponentRegistry registry = this.getBaseRegistry();
-            
+
             ProfileDescription desc = registry.getProfileDescriptionAccessControlled(profileId);
             if (desc == null) {
                 return Response.status(Status.NOT_FOUND).build();
             }
-            
+
             StreamingOutput result = null;
             String fileName = desc.getName() + "." + rawType;
             if ("xml".equalsIgnoreCase(rawType)) {
@@ -1130,9 +1155,9 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                     .build();
         }
-        
+
     }
-    
+
     private Response createDownloadResponse(StreamingOutput result,
             String fileName) {
         // Making response so it triggers browsers native save as dialog.
@@ -1143,9 +1168,9 @@ public class ComponentRegistryRestService implements
                         "attachment; filename=\"" + fileName + "\"")
                 .entity(result).build();
         return response;
-        
+
     }
-    
+
     @Override
     @POST
     @Path("/profiles")
@@ -1186,7 +1211,7 @@ public class ComponentRegistryRestService implements
                     .build();
         }
     }
-    
+
     @Override
     @POST
     @Path("/components")
@@ -1227,7 +1252,7 @@ public class ComponentRegistryRestService implements
                     .build();
         }
     }
-    
+
     @Override
     @POST
     @Path("/components/{componentId}/comments")
@@ -1240,9 +1265,9 @@ public class ComponentRegistryRestService implements
         try {
             ComponentRegistry registry = this.getBaseRegistry();
             ComponentDescription description = registry.getComponentDescriptionAccessControlled(componentId);
-            
+
             LOG.debug("Trying to register comment to {}", componentId);
-            
+
             return this.registerComment(input, description, registry);
         } catch (AuthenticationRequiredException e) {
             LOG.debug("Details", e);
@@ -1272,9 +1297,9 @@ public class ComponentRegistryRestService implements
             ComponentRegistry registry = this.getBaseRegistry();
             ProfileDescription description = registry
                     .getProfileDescriptionAccessControlled(profileId);
-            
+
             LOG.debug("Trying to register comment to {}", profileId);
-            
+
             return this.registerComment(input, description, registry);
         } catch (AuthenticationRequiredException e) {
             LOG.debug("Details", e);
@@ -1288,7 +1313,7 @@ public class ComponentRegistryRestService implements
                     .entity("" + e1.getMessage()).build();
         }
     }
-    
+
     @Override
     @GET
     @Path("/pingSession")
@@ -1315,10 +1340,10 @@ public class ComponentRegistryRestService implements
                 .entity(String.format("<session stillActive=\"%s\"/>",
                                 stillActive)).build();
     }
-    
+
     private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
         try {
-            
+
             DescriptionValidator descriptionValidator = new DescriptionValidator(
                     desc);
             MDValidator validator = new MDValidator(input, desc, registry, marshaller);
@@ -1327,13 +1352,13 @@ public class ComponentRegistryRestService implements
             response.setIsPrivate(!desc.isPublic());
             this.validate(response, descriptionValidator, validator);
             if (response.getErrors().isEmpty()) {
-                
+
                 CMDComponentSpec spec = validator.getCMDComponentSpec();
 
                 // removing filename from spec before it gets extended.
                 // recursion over all the components
                 setFileNamesFromListToNull(Collections.singletonList(spec.getCMDComponent()));
-                
+
                 try {
                     checkForRecursion(validator, registry, desc);
 
@@ -1403,12 +1428,12 @@ public class ComponentRegistryRestService implements
                     ex);
         }
     }
-    
+
     private Response registerComment(InputStream input, BaseDescription description, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
         try {
             CommentValidator validator = new CommentValidator(input, description, marshaller);
             CommentResponse responseLocal = new CommentResponse();
-            
+
             responseLocal.setIsPrivate(!description.isPublic());
             this.validateComment(responseLocal, validator);
             if (responseLocal.getErrors().isEmpty()) {
@@ -1468,19 +1493,19 @@ public class ComponentRegistryRestService implements
             }
         }
     }
-    
+
     private ComponentDescription createNewComponentDescription() {
         ComponentDescription desc = ComponentDescription.createNewDescription();
         desc.setHref(createXlink(desc.getId()));
         return desc;
     }
-    
+
     private ProfileDescription createNewProfileDescription() {
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setHref(createXlink(desc.getId()));
         return desc;
     }
-    
+
     private String createXlink(String id) {
         URI uri = uriInfo.getRequestUriBuilder().path(id).build();
         return uri.toString();
@@ -1499,7 +1524,7 @@ public class ComponentRegistryRestService implements
     private String getApplicationBaseURI() {
         return servletContext.getInitParameter(APPLICATION_BASE_URL_PARAM);
     }
-    
+
     private void validate(RegisterResponse response, Validator... validators) throws UserUnauthorizedException {
         for (Validator validator : validators) {
             if (!validator.validate()) {
@@ -1509,7 +1534,7 @@ public class ComponentRegistryRestService implements
             }
         }
     }
-    
+
     private void validateComment(CommentResponse response,
             Validator... validators) throws UserUnauthorizedException {
         for (Validator validator : validators) {
@@ -1538,11 +1563,11 @@ public class ComponentRegistryRestService implements
     @Override
     public void setFileNamesFromListToNull(
             List<CMDComponentType> listofcomponents) {
-        
+
         for (CMDComponentType currentcomponent : listofcomponents) {
             setFileNamesToNullCurrent(currentcomponent);
         }
-        
+
     }
 
     /**
@@ -1554,7 +1579,7 @@ public class ComponentRegistryRestService implements
         currentcomponent.setFilename(null);
         setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     }
-    
+
     private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {
         if (registrySpace == null || (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId == null)
                 || resource == null) {
@@ -1566,11 +1591,11 @@ public class ComponentRegistryRestService implements
         if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE)) {
             return "Private " + resource;
         }
-        
+
         if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId != null) {
             return resource + " of group " + groupId + " '" + cr.getGroupName(Integer.parseInt(groupId)) + "'";
         }
-        
+
         return "Undefined registry space or uindefined type of resource";
     }
 
@@ -1609,7 +1634,7 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
         }
-        
+
         final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "components",
                 Integer.parseInt(limit), components,
                 BaseDescription.COMPARE_ON_DATE, title);
@@ -1650,7 +1675,7 @@ public class ComponentRegistryRestService implements
         } catch (UserUnauthorizedException e) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
             return new Rss();
-            
+
         } catch (ItemNotFoundException e) {
             response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
             return new Rss();
@@ -1663,7 +1688,7 @@ public class ComponentRegistryRestService implements
                 limit);
         return rss;
     }
-    
+
     private String helpToMakeTitleForRssComments(String itemId, String resource) {
         if (itemId == null || resource == null) {
             return "Undefined description";
@@ -1694,13 +1719,13 @@ public class ComponentRegistryRestService implements
             throws ComponentRegistryException, IOException, JAXBException,
             ParseException {
         try {
-            
+
             ComponentRegistry cr = this.getBaseRegistry();
-            
+
             final List<Comment> comments = cr.getCommentsInProfile(profileId);
             final ProfileDescription pd = cr.getProfileDescriptionAccessControlled(profileId);
             final String profileName = pd.getName();
-            
+
             String title = this.helpToMakeTitleForRssComments(profileId, "profile");
             final RssCreatorComments instance = new RssCreatorComments(
                     getApplicationBaseURI(), Integer.parseInt(limit), profileId,
@@ -1768,20 +1793,23 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.UNAUTHORIZED.getStatusCode());
             return new Rss();
         }
-        
+
     }
-    
+
     @Override
     @GET
     @Path("/AllowedTypes")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(
+            value = "A listing of values that are allowed as element or attribute type by the CMDI schema",
+            response = AllowedAttributetypesXML.class)
     public AllowedAttributetypesXML getAllowedAttributeTypes()
             throws ComponentRegistryException, IOException, JAXBException,
             ParseException {
         return (new AllowedAttributetypesXML());
     }
-    
+
     @Override
     @GET
     @Path("/groups/usermembership")
@@ -1795,7 +1823,7 @@ public class ComponentRegistryRestService implements
         List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
         return groups;
     }
-    
+
     @Override
     @GET
     @Path("/items/{itemId}/groups")
@@ -1804,7 +1832,7 @@ public class ComponentRegistryRestService implements
     public List<Group> getGroupsTheItemIsAMemberOf(@PathParam("itemId") String itemId) {
         return groupService.getGroupsTheItemIsAMemberOf(itemId);
     }
-    
+
     @Override
     @POST
     @Path("/items/{itemId}/transferownership")
@@ -1820,12 +1848,18 @@ public class ComponentRegistryRestService implements
             return Response.status(Status.FORBIDDEN).build();
         }
     }
-    
+
     @Override
     @GET
     @Path("/items/{itemId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "The description (metadata) of a single component or profile item")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated and authentication is required"),
+        @ApiResponse(code = 403, message = "Item is not accessible to the current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
         LOG.debug("Item with id: {} is requested.", itemId);
         try {
@@ -1841,7 +1875,7 @@ public class ComponentRegistryRestService implements
             };
             response.sendError(Status.BAD_REQUEST.getStatusCode());
             return new BaseDescription();
-            
+
         } catch (UserUnauthorizedException ex2) {
             response.sendError(Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
             return new BaseDescription();
@@ -1851,189 +1885,6 @@ public class ComponentRegistryRestService implements
         } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new BaseDescription();
-        }
-    }
-
-    // Group Service (added by Olha)
-    @Override
-    @POST
-    @Path("/groups/create")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Response createNewGroup(@QueryParam("groupName") String groupName) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            Number id = groupService.createNewGroup(groupName, principal.getName());
-            return Response.ok("Group with the name " + groupName + " is created and given an id " + id).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        }
-    }
-    
-    @Override
-    @GET
-    @Path("/groups/principal")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public List<Group> getGroupsOwnedByUser(@QueryParam("principalName") String pricipalName) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            return groupService.getGroupsOwnedByUser(principal.getName());
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
-            return new ArrayList<Group>();
-        }
-    }
-    
-    @Override
-    @GET
-    @Path("/groups/names")
-    public Response listGroupNames() throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            List<String> result = groupService.listGroupNames();
-            //final GenericEntity<List<String>> entity  = new GenericEntity<List<String>>(result){};
-            //return Response.status(Status.OK).entity(entity).build();
-            StringsWrapper ids = new StringsWrapper();
-            ids.setStrings(result);
-            return Response.status(Status.OK).entity(ids).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        }
-    }
-    
-    @Override
-    @GET
-    @Path("/groups/ownership")
-    public Response isOwner(@QueryParam("groupName") String groupName) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            Boolean isOwner = groupService.isUserOwnerOfGroup(groupName, principal.getName());
-            return Response.ok(isOwner.toString()).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.serverError().status(Status.UNAUTHORIZED).build();
-        }
-    }
-    
-    @Override
-    @POST
-    @Path("/groups/makemember")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Response makeGroupMember(@QueryParam("groupName") String groupName, @QueryParam("principalName") String principalName) throws IOException {
-        try {
-            ComponentRegistry registry = this.getBaseRegistry();
-            Number id = registry.makeGroupMember(principalName, groupName);
-            return Response.ok(id.toString()).build();
-        } catch (UserUnauthorizedException e) {
-            return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-        } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
-            
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        }
-    }
-
-//    @Override
-//    @DELETE
-//    @Path("/groups/removemember")
-//    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-//        MediaType.APPLICATION_JSON})
-//    public Response removeGroupMember(@QueryParam("groupName") String groupName, @QueryParam("principalName") String principalName) throws IOException {
-//        try {
-//            ComponentRegistry registry = this.getBaseRegistry();
-//            Number id = registry.removeGroupMember(principalName, groupName);
-//            return Response.ok(id.toString()).build();
-//        } catch (UserUnauthorizedException e) {
-//            return Response.status(Status.FORBIDDEN).entity(e.getMessage()).build();
-//        } catch (ItemNotFoundException e) {
-//            return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
-//        
-//        } catch (AuthenticationRequiredException e) {
-//            return Response.status(Status.UNAUTHORIZED).build();
-//        }
-//    }
-    @Override
-    @GET
-    @Path("/groups/profiles")
-    public Response listProfiles(@QueryParam(GROUPID_PARAM) String groupId) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            List<String> result = groupService.getProfileIdsInGroup(Long.parseLong(groupId));
-            StringsWrapper ids = new StringsWrapper();
-            ids.setStrings(result);
-            return Response.status(Status.OK).entity(ids).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        }
-    }
-    
-    @Override
-    @GET
-    @Path("/groups/components")
-    public Response listComponents(@QueryParam(GROUPID_PARAM) String groupId) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            List<String> result = groupService.getComponentIdsInGroup(Long.parseLong(groupId));
-            StringsWrapper ids = new StringsWrapper();
-            ids.setStrings(result);
-            return Response.status(Status.OK).entity(ids).build();
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
-            return Response.status(Status.UNAUTHORIZED).build();
-        }
-    }
-    
-    @Override
-    @GET
-    @Path("/groups/nameById")
-    public Response getGroupNameById(@QueryParam(GROUPID_PARAM) String groupId) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            String name = groupService.getGroupNameById(Long.parseLong(groupId));
-            return Response.ok(name).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
-        }
-    }
-    
-    @Override
-    @GET
-    @Path("/groups/idByName")
-    public Response getGroupIdByName(@QueryParam("groupName") String groupName) throws IOException {
-        
-        try {
-            Principal principal = this.checkAndGetUserPrincipal();
-            Number id = groupService.getGroupIdByName(groupName);
-            return Response.ok(id.toString()).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
-        }
-    }
-    
-    @XmlRootElement(name = "Identifiers")
-    public static class StringsWrapper {
-        
-        @XmlElement(name = "item")
-        List<String> strings = new ArrayList<String>();
-        
-        StringsWrapper() {
-        }
-        
-        public void setStrings(List<String> strings) {
-            this.strings = strings;
         }
     }
 }
