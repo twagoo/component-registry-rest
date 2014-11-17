@@ -21,8 +21,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ComponentBrowserGui.version>1.14.0-SNAPSHOT</ComponentBrowserGui.version>
-    <ComponentRegistry.version>1.14.0-SNAPSHOT</ComponentRegistry.version>
+    <ComponentBrowserGui.version>1.14.0-RC2</ComponentBrowserGui.version>
+    <ComponentRegistry.version>1.14.0-RC2</ComponentRegistry.version>
   </properties>
   
   <repositories>
