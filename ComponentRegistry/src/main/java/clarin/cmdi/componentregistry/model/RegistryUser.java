@@ -23,37 +23,47 @@ public class RegistryUser implements Serializable {
 
     @Column(name = "name")
     private String name;
-    
-    @Column(name = "principal_name", unique=true)
+
+    @Column(name = "principal_name", unique = true)
     private String principalName;
-    
+
     @Id
-    @SequenceGenerator( name = "registry_user_id_seq", sequenceName = "registry_user_id_seq", allocationSize = 1, initialValue = 1 )
-    @GeneratedValue( strategy = GenerationType.SEQUENCE, generator = "registry_user_id_seq" )
+    @SequenceGenerator(name = "registry_user_id_seq", sequenceName = "registry_user_id_seq", allocationSize = 1, initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "registry_user_id_seq")
     @Column(name = "id")
     private Long id;
 
     public void setName(String name) {
-	this.name = name;
+        this.name = name;
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public void setPrincipalName(String principalName) {
-	this.principalName = principalName;
+        this.principalName = principalName;
     }
 
     public String getPrincipalName() {
-	return principalName;
+        return principalName;
     }
 
     public Long getId() {
-	return id;
+        return id;
     }
 
     public void setId(Long id) {
-	this.id = id;
+        this.id = id;
     }
+
+    @Override
+    public String toString() {
+        if (getName() == null) {
+            return getPrincipalName();
+        } else {
+            return String.format("%s [%s]", getName(), getPrincipalName());
+        }
+    }
+
 }

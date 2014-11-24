@@ -364,12 +364,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
      * @see Comment#isCanDelete()
      */
     private void setCanDeleteInComments(Collection<Comment> comments) {
-        String principalName = (userDao.getPrincipalNameById(registryOwner.getId())).getPrincipalName();
-        final boolean isAdmin = configuration.isAdminUser(principalName);
-        for (Comment comment : comments) {
-            comment.setCanDelete(isAdmin || comment.getUserId() == registryOwner.getId().longValue());
+        if (registryOwner != null) {
+            final RegistryUser user = userDao.getPrincipalNameById(registryOwner.getId());
+            if (user != null) {
+                final boolean isAdmin = configuration.isAdminUser(user.getPrincipalName());
+                for (Comment comment : comments) {
+                    comment.setCanDelete(isAdmin || comment.getUserId() == registryOwner.getId().longValue());
+                }
+            }
         }
-
     }
 
     @Override
