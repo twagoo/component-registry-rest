@@ -5,18 +5,20 @@ import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.RegistryUser;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import java.util.Collections;
 import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -24,6 +26,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.spring.injection.annot.SpringBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,8 +35,12 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
  */
 public class Groups extends SecureAdminWebPage {
 
+    private final static Logger logger = LoggerFactory.getLogger(Groups.class);
+
     @SpringBean
     private GroupService groupService;
+    @SpringBean
+    private UserDao userDao;
     private final IModel<Long> selectedGroup = new Model<Long>(null);
 
     public Groups(PageParameters parameters) {
@@ -68,35 +76,40 @@ public class Groups extends SecureAdminWebPage {
     }
 
     private Component createGroupList(String id) {
-        final IModel<List> groupsModel = new AbstractReadOnlyModel<List>() {
+        final IModel<String> groupModel = new Model<String>(null);
+        final Form form = new Form(id) {
 
             @Override
-            public List getObject() {
+            protected void onSubmit() {
+                final String groupName = groupModel.getObject();
+                if (groupName != null) {
+                    try {
+                        final Long groupId = (Long) groupService.getGroupIdByName(groupName);
+                        selectedGroup.setObject(groupId);
+                    } catch (ItemNotFoundException ex) {
+                        logger.warn("Could", ex);
+                        selectedGroup.setObject(null);
+                    }
+                }
+            }
+
+        };
+
+        // model for group options
+        final IModel<List<String>> groupsModel = new AbstractReadOnlyModel<List<String>>() {
+
+            @Override
+            public List<String> getObject() {
                 return groupService.listGroupNames();
             }
         };
 
-        return new ListView(id, groupsModel) {
+        // group selector
+        final DropDownChoice<String> groupChoice = new DropDownChoice<String>("group", groupModel, groupsModel);
+        groupChoice.setRequired(true);
+        form.add(groupChoice);
 
-            @Override
-            protected void populateItem(final ListItem li) {
-                li.add(new Label("name", li.getModel()));
-                li.add(new Link("select") {
-
-                    @Override
-                    public void onClick() {
-                        final String groupName = (String) li.getModelObject();
-                        try {
-                            final Long groupId = (Long) groupService.getGroupIdByName(groupName);
-                            selectedGroup.setObject(groupId);
-                        } catch (ItemNotFoundException ex) {
-                            selectedGroup.setObject(null);
-                        }
-                    }
-                });
-            }
-        };
-
+        return form;
     }
 
     private Component createGroupInfo(String id) {
@@ -128,14 +141,14 @@ public class Groups extends SecureAdminWebPage {
     }
 
     private Form createNewMemberForm(String id) {
-        final IModel<String> principalModel = new Model<String>("");
+        final IModel<RegistryUser> principalModel = new Model<RegistryUser>(null);
         final Form memberForm = new Form(id) {
 
             @Override
             protected void onSubmit() {
                 try {
                     final String groupName = groupService.getGroupNameById(selectedGroup.getObject());
-                    groupService.makeMember(principalModel.getObject(), groupName);
+                    groupService.makeMember(principalModel.getObject().getPrincipalName(), groupName);
                     info("User " + principalModel.getObject() + " added to group");
                 } catch (ItemNotFoundException ex) {
                     error(ex);
@@ -144,7 +157,26 @@ public class Groups extends SecureAdminWebPage {
 
         };
         memberForm.add(new FeedbackPanel("feedback"));
-        memberForm.add(new TextField("principal", principalModel).setRequired(true));
+
+        final IModel<List<RegistryUser>> usersModel = new AbstractReadOnlyModel<List<RegistryUser>>() {
+
+            @Override
+            public List<RegistryUser> getObject() {
+                // return all users sorted by their tostring value (ignoring case)
+                return new Ordering<Object>() {
+
+                    @Override
+                    public int compare(Object t, Object t1) {
+                        return t.toString().compareToIgnoreCase(t1.toString());
+                    }
+
+                }.sortedCopy(userDao.getAllUsers());
+            }
+        };
+
+        final DropDownChoice<RegistryUser> usersChoice = new DropDownChoice<RegistryUser>("principal", principalModel, usersModel);
+        usersChoice.setRequired(true);
+        memberForm.add(usersChoice);
         return memberForm;
     }
 
