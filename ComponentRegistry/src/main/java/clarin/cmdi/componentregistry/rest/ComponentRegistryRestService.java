@@ -1263,7 +1263,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
-    @ApiOperation(value = "Registers a profile in the user's private space")
+    @ApiOperation(value = "Registers a profile specification (data content) with the associated metadata (form content) in the user's private space")
     @ApiResponses(value = {
         @ApiResponse(code = 401, message = "User is not authenticated"),
         @ApiResponse(code = 403, message = "Current user has no access")
@@ -1309,7 +1309,7 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
-    @ApiOperation(value = "Registers a component in the user's private space")
+    @ApiOperation(value = "Registers a component specification (data content) with the associated metadata (form content) in the user's private space")
     @ApiResponses(value = {
         @ApiResponse(code = 401, message = "User is not authenticated"),
         @ApiResponse(code = 403, message = "Current user has no access")
