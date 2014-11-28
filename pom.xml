@@ -12,7 +12,6 @@
   <modules>
     <module>ComponentBrowserGui</module>
     <module>ComponentRegistry</module>
-    <module>CMDValidate</module>
   </modules>
 
   <scm>
