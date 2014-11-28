@@ -58,6 +58,7 @@ package clarin.cmdi.componentregistry.services {
 			var resultXml:XML = resultEvent.result as XML;
 			this.handleXmlResult(resultXml);
 			this.dispatchEvent(new Event(this.successEventName));
+			
 		}
 
 		protected function requestCallbackFailed(faultEvent:FaultEvent):void {

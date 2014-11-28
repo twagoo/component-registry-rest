@@ -18,8 +18,8 @@
 			<editor:EditorButtonBar id="buttonBar"
 									width="100%"
 									height="90"
-									saveClick="saveSpec(Config.SPACE_USER, UploadService.UPDATE)"
-									saveAsNewClick="saveSpec(Config.SPACE_USER, UploadService.NEW)"
+									saveClick="saveSpec(UploadService.UPDATE)"
+									saveAsNewClick="saveSpec(UploadService.NEW)"
 									publishClick="publishSpec()"
 									cancelClick="cancel()"
 									/>

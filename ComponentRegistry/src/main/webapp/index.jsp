@@ -89,7 +89,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			"allowScriptAccess","sameDomain",
 			"type", "application/x-shockwave-flash",
 			"pluginspage", "http://www.adobe.com/go/getflashplayer",
-			"FlashVars", "serviceRootUrl=<%= application.getInitParameter("eu.clarin.cmdi.componentregistry.serviceRootUrl") %>&userName=${pageContext.request.remoteUser}&item=${param.item}&view=${param.view}&browserview=${param.browserview}&space=${param.space}&debug=${flexDebug}"
+			"FlashVars", "serviceRootUrl=<%= application.getInitParameter("eu.clarin.cmdi.componentregistry.serviceRootUrl") %>&userName=${pageContext.request.remoteUser}&itemId=${param.itemId}&view=${param.view}&browserview=${param.browserview}&registrySpace=${param.registrySpace}&groupId=${param.groupId}&debug=${flexDebug}"
 			    
 	);
   } else {  // flash is too old or we can't detect the plugin

@@ -1,5 +1,14 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.15.1 ()
+- Renamed components table, cleaned up sequences, indexes and constraints. Execute upgrade-1.15.1.sql
+
+Release ComponentRegistry-1.15.0 ()
+- Merged profiles and components on persistence level into BaseComponent
+- Only one component DAO left: ComponentDao
+- DB upgrade script which migrates profiles into components
+- Rest service XML using uniform element "componentId" in comments instead of "componentDescriptionId" or "profileDescriptionId"
+
 Release ComponentRegistry-1.14.0 (????)
 - User groups have been added, for more information see <https://trac.clarin.eu/wiki/ComponentRegistryAndEditor#Management>. https://trac.clarin.eu/ticket/143
 - Fixed erroneous link for child components with direct item links. https://trac.clarin.eu/ticket/322

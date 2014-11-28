@@ -8,6 +8,7 @@ public final class DummyPrincipal implements Principal {
 
     public static final DummyPrincipal DUMMY_ADMIN_PRINCIPAL = new DummyPrincipal("JUnit.Admin@test.com");
     public static final DummyPrincipal DUMMY_PRINCIPAL = new DummyPrincipal("JUnit@test.com");
+    public static final DummyPrincipal DUMMY_PRINCIPAL2 = new DummyPrincipal("M.Ock@test.com");
     public static final UserCredentials DUMMY_CREDENTIALS = new UserCredentials(DUMMY_PRINCIPAL) {
 
 	@Override

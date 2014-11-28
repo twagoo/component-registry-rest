@@ -107,16 +107,10 @@ package clarin.cmdi.componentregistry.services {
 			}
 			switch (action) {
 				case UPDATE:
-					uri = new URI(uriBase + "/" + desc.id + "/update");
-					if (desc.space  == Config.SPACE_USER) {
-						uri.setQueryValue(Config.PARAM_USERSPACE, "true");
-					}
+					uri = new URI(uriBase + "/" + desc.id + "/update");					
 					break;
 				case NEW:
 					uri = new URI(uriBase);
-					if (desc.space == Config.SPACE_USER) {
-						uri.setQueryValue(Config.PARAM_USERSPACE, "true");
-					}
 					break;
 				case PUBLISH:
 					uri = new URI(uriBase + "/" + desc.id + "/publish");
@@ -236,11 +230,11 @@ package clarin.cmdi.componentregistry.services {
 		private function handleResponse(response:XML):void {
 			if (response.@registered == true) {
 				var item:ItemDescription = new ItemDescription();
-				var isInUserSpace:Boolean = response.@isInUserSpace == true;
+				var isPrivate:Boolean = response.@isPrivate == true;
 				if (response.@isProfile == true) {
-					item.createProfile(response.description[0], isInUserSpace?Config.SPACE_USER:Config.SPACE_PUBLIC);
+					item.createProfile(response.description[0], isPrivate);
 				} else {
-					item.createComponent(response.description[0], isInUserSpace?Config.SPACE_USER:Config.SPACE_PUBLIC);
+					item.createComponent(response.description[0], isPrivate);
 				}
 				dispatchEvent(new UploadCompleteEvent(item));
 			} else {

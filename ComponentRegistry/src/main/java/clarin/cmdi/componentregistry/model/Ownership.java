@@ -29,18 +29,9 @@ public class Ownership implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String profileId;
     private String componentId;
     private long groupId;
     private long userId;
-
-    public String getProfileId() {
-	return profileId;
-    }
-
-    public void setProfileId(String profileId) {
-	this.profileId = profileId;
-    }
 
     public String getComponentId() {
 	return componentId;
@@ -54,6 +45,10 @@ public class Ownership implements Serializable {
 	return groupId;
     }
 
+    /**
+     * 
+     * @param groupId 0 denotes no group (user must be set)
+     */
     public void setGroupId(long groupId) {
 	this.groupId = groupId;
     }
@@ -62,6 +57,10 @@ public class Ownership implements Serializable {
 	return userId;
     }
 
+    /**
+     * 
+     * @param userId 0 denotes no user (group must be set)
+     */
     public void setUserId(long userId) {
 	this.userId = userId;
     }

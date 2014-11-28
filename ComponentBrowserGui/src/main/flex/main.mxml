@@ -8,17 +8,18 @@
 	<mx:Style source="/assets/css/main.css"/>
 	<mx:Script>
 		<![CDATA[
-			import com.flexspy.FlexSpy;
-			
-			import mx.controls.Button;
-			import mx.managers.PopUpManager;
-			
 			import clarin.cmdi.componentregistry.common.AboutPopup;
 			import clarin.cmdi.componentregistry.common.Credentials;
 			import clarin.cmdi.componentregistry.common.components.HelpLabelButton;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.PingSessionService;
+			import clarin.cmdi.componentregistry.services.RegistrySpace;
 			import clarin.cmdi.componentregistry.services.remote.ClientServiceFactoryImpl;
+			
+			import com.flexspy.FlexSpy;
+			
+			import mx.controls.Button;
+			import mx.managers.PopUpManager;
 			
 			import org.hasseg.externalMouseWheel.ExternalMouseWheelSupport;
 			
@@ -60,9 +61,9 @@
 				ExternalMouseWheelSupport.getInstance(stage);
 				sessionPinger = PingSessionService.INSTANCE
 				sessionPinger.startPinging();
-				if (Credentials.instance.isLoggedIn() && (Config.instance.space == Config.SPACE_USER)) {
-					Config.instance.userSpace = Config.SPACE_USER;
-				}
+				/* if (Credentials.instance.isLoggedIn() && (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP)) {
+					Config.instance.registrySpace= new RegistrySpace(Config.SPACE_PRIVATE, "");
+				} */
 				viewStack.loadStartup();
 				
 				if(Config.instance.debug){

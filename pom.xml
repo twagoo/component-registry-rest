@@ -21,16 +21,17 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ComponentBrowserGui.version>1.14.0-TESTING</ComponentBrowserGui.version>
-    <ComponentRegistry.version>1.14.0-TESTING</ComponentRegistry.version>
+    <ComponentBrowserGui.version>1.14.0-SNAPSHOT</ComponentBrowserGui.version>
+    <ComponentRegistry.version>1.14.0-SNAPSHOT</ComponentRegistry.version>
   </properties>
   
   <repositories>
-<repository>
-<id>cmdi.clarin.repository</id>
-<name>Clarin Repository</name>
-<url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url> 
-</repository> 
+	<repository>
+		<id>cmdi.clarin.repository</id>
+		<name>Clarin Repository</name>
+		<url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url> 
+	</repository> 
+	
  </repositories>
 
   <reporting>

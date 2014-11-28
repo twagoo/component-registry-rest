@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml"
-				 dataProvider="{spaces}"
-				 width="110"
-				 close="userSpaceCloseHandler(event)"
-				 initialize="init()"
-				 change="onSelectionChanged(event)"
-				 >
+			 width="110" change="selectionChangedHandler(event)"
+			 dataProvider="{spaces}" initialize="init()">
 	
 	<mx:Script>
 		<![CDATA[
@@ -14,83 +10,88 @@
 			import clarin.cmdi.componentregistry.common.Login;
 			import clarin.cmdi.componentregistry.services.Config;
 			import clarin.cmdi.componentregistry.services.ListUserGroupsMembershipService;
+			import clarin.cmdi.componentregistry.services.RegistrySpace;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
+			import mx.events.ListEvent;
 			
-			private static const USERSPACE_LABEL:String = "Work space";
-			private static const PUBLICSPACE_LABEL:String = "Public space";
+			private static const PRIVATE_SPACE_LABEL:String = "Private space";
+			private static const PUBLIC_SPACE_LABEL:String = "Public space";
 			[Bindable]
-			public static var spaces:ArrayCollection;
+			public var spaces:ArrayCollection;
 			
-			private static function initSpaces():void{
-				spaces = new ArrayCollection([{label: PUBLICSPACE_LABEL, space: Config.SPACE_PUBLIC, groupId:null}, {label: USERSPACE_LABEL, space: Config.SPACE_USER, groupId:null}]);
+			//before groups are known
+			private function initSpaces():void{
+				spaces = new ArrayCollection([{label: PUBLIC_SPACE_LABEL, space: Config.SPACE_PUBLISHED, groupId:null}, {label: PRIVATE_SPACE_LABEL, space: Config.SPACE_PRIVATE, groupId:null}]);
+			}
+
+			public function init():void{
+				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
+				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser(); // triggers the event ListUserGroupsMembershipService.GROUPS_LOADED
 			}
 			
-			private function onSelectionChanged(event:Event):void{
-				var groupId:String = getSelectedGroup(event);
-				Config.instance.selectedGroup = ComboBox(event.target).selectedItem.groupId;
-				Config.instance.userSpace = ComboBox(event.target).selectedItem.space;
+			private function selectionChangedHandler(event:ListEvent):void {
+				if (Credentials.instance.isLoggedIn()) {
+					var space:String = ComboBox(event.target).selectedItem.space;
+					var groupId:String = ComboBox(event.target).selectedItem.groupId;
+					if ((groupId != null) && (groupId != "")) {
+						space = Config.SPACE_GROUP; 
+					}
+					Config.instance.registrySpace = new RegistrySpace(space, groupId);
+				} else {
+					event.stopPropagation();
+					new Login().show(this.parent.parent, Config.VIEW_BROWSE, Config.instance.registrySpace.space, null);
+					selectedIndex = 0;
+				}
 			}
 			
 			public function onGroupsLoaded(event:Event):void{
 				initSpaces();
 				for each (var group:Group in Config.instance.getListUserGroupsMembershipService().groups) {
-					spaces.addItem({label:group.name, space:Config.SPACE_USER, groupId:group.id});					
-				}
-				if (Config.instance.space == Config.SPACE_PUBLIC)
+					spaces.addItem({label:group.name, space:Config.SPACE_GROUP, groupId:group.id});					
+				} 
+				setSelectedIndex();
+			}
+			
+			/**
+			 * sets the index according to the current registry space
+			 */
+			public function setSelectedIndex():void{	
+				
+				if (Config.instance.registrySpace.space==Config.SPACE_PUBLISHED) {
 					this.selectedIndex = 0;
-				else
-				if (Config.instance.space == Config.SPACE_USER){
-					this.selectedIndex = 1;
+					return;
 				}
-			}
-
-			public function init():void{
-				Config.instance.getListUserGroupsMembershipService().addEventListener(ListUserGroupsMembershipService.GROUPS_LOADED, onGroupsLoaded);
-				Config.instance.getListUserGroupsMembershipService().loadGroupsForUser();
-			}
-			
-			private function getSelectedSpace(event:Event):String{
-				return ComboBox(event.target).selectedItem.space;
-			}
-
-			private function getSelectedGroup(event:Event):String{
-				var s:String;
-				var cb:ComboBox = ComboBox(event.target);
-				return cb.selectedItem.groupId;
-			}
-
-			private function userSpaceCloseHandler(event:Event):void {
-				if (Credentials.instance.isLoggedIn()) {
-				} else if (selectedIndex != 0) {
-					selectedIndex = 0;
-					new Login().show(this.parent.parent, Config.VIEW_BROWSE, Config.SPACE_USER, null);
-				}
-			}
-			
-			public function setSelectedItem(space:String, groupId:String):void{
-				var index:int = 0;
-				var found:Boolean = false;
-				if (groupId)
-				for each (var item:Object in spaces) {
-					if (item.groupId==groupId){
-						this.selectedIndex = index;
-						found = true;
-						break;
+				
+				if(Credentials.instance.isLoggedIn()) {
+					if (Config.instance.registrySpace.space==Config.SPACE_PRIVATE) {
+						this.selectedIndex = 1;
+						return;
 					}
-					index++;
-				}
-				index = 0;
-				if (!found)
-				for each (var item:Object in spaces) {
-					if (item.space==space){
-						this.selectedIndex = index;
-						break;
+					
+					var index:int;
+					if (Config.instance.registrySpace.space==Config.SPACE_GROUP) {
+						for (index=2;index<spaces.length; index++) {
+							if (spaces[index].groupId==Config.instance.registrySpace.groupId){
+								trace("indeces:" + index+" " +Config.instance.registrySpace.groupId +" " +spaces[index].groupId);
+								this.selectedIndex = index;
+								return;
+							}
+						}
 					}
-					index++;
+					
+					// in case of #$%^-up: 				
+					var spacesDump:String= spaces[0].space + "; "+spaces[1].space;
+					for (index=2;index<spaces.length; index++) {
+						spacesDump=spacesDump+";  "+spaces[index].space + " " +spaces[index].groupId;
+						}
+					
+					throw "Cannot identify the selection index for registry-space combobox. space = "+Config.instance.registrySpace.space+ " group "+Config.instance.registrySpace.groupId + spacesDump;
 				}
 			}
+				
+			
 		]]>
 	</mx:Script>
 </mx:ComboBox>

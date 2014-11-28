@@ -6,10 +6,17 @@ package clarin.cmdi.componentregistry;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
+
 import static org.junit.Assert.*;
+
 import org.junit.Test;
+
+import clarin.cmdi.componentregistry.util.XmlDateAdapter;
 
 /**
  *
@@ -57,4 +64,6 @@ public class DatesHelperTest {
         String result = DatesHelper.getRFCDateTime(dateString);
         assertEquals(expResult, result);
     }
+
+
 }

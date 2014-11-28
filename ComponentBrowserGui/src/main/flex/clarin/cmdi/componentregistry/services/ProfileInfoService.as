@@ -21,10 +21,7 @@ package clarin.cmdi.componentregistry.services {
 		public function load(item:ItemDescription):void {
 			profile = new Profile();
 			profile.description = item;
-			var url:URI = new URI(item.dataUrl);
-			if (item.space == Config.SPACE_USER) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
-			}
+			var url:URI = new URI(item.dataUrl);			
 			super.dispatchRequest(url);
 		}
 		

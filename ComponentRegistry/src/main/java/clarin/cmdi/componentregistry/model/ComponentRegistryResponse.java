@@ -20,14 +20,14 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "response")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({RegisterResponse.class, CommentResponse.class})
-@XmlType(propOrder = {"registered","isInUserSpace","errors"})
+@XmlType(propOrder = {"registered","isPrivate","errors"})
 public class ComponentRegistryResponse {
 
     @XmlAttribute(required = true)
     private Boolean registered;
     
     @XmlAttribute(required = true)
-    private Boolean isInUserSpace;
+    private Boolean isPrivate;
     
     @XmlElementWrapper(name = "errors", required = false)
     @XmlElements(
@@ -57,11 +57,11 @@ public class ComponentRegistryResponse {
         this.registered = registered;
     }
 
-    public void setIsInUserSpace(Boolean isInUserSpace) {
-        this.isInUserSpace = isInUserSpace;
+    public void setIsPrivate(Boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 
-    public Boolean isInUserSpace() {
-        return isInUserSpace;
+    public Boolean isPrivate() {
+        return isPrivate;
     }
 }

@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class RssMarshallingTest {
+public class RssMarshallingTest extends BaseUnitTest{
 
     @Test
     public void testMarshall() throws Exception {
@@ -34,7 +34,7 @@ public class RssMarshallingTest {
 	channel.getItem().add(item2);
 
 	ByteArrayOutputStream os = new ByteArrayOutputStream();
-	new MDMarshaller().marshal(rss, os);
+	marshaller.marshal(rss, os);
 	String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
 		+ "<rss version=\"2.0\""
                 + ">\n"

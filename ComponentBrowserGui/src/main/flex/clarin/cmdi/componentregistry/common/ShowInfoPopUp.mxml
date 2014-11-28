@@ -42,11 +42,12 @@
 			}
 			
 			private function getBookmarkText():String {
-			    if (item.space == Config.SPACE_USER) {
+			    if (item.isPrivate) {
 			        return "Bookmark link (requires login):";
 			    } else {
 			        return "Bookmark link:";
 			    }
+		
 			}
 
 		]]>

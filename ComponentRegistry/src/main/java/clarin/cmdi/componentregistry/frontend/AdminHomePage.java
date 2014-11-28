@@ -28,16 +28,15 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.ComponentStatus;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.RegistrySpace;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.impl.ComponentDescriptionDaoImpl;
-import clarin.cmdi.componentregistry.persistence.impl.ProfileDescriptionDaoImpl;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -45,265 +44,265 @@ public class AdminHomePage extends SecureAdminWebPage {
     private static final long serialVersionUID = 1L;
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
     private final CMDItemInfo info;
-    private final LinkTree tree;
+    private LinkTree tree;
     private transient AdminRegistry adminRegistry = new AdminRegistry();
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
     @SpringBean
-    private ProfileDescriptionDao profileDescriptionDao;
-    @SpringBean
-    private ComponentDescriptionDao componentDescriptionDao;
+    private ComponentDao componentDao;
     @SpringBean
     private MDMarshaller marshaller;
 
-    public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException {
-	super(parameters);
-	adminRegistry.setComponentRegistryFactory(componentRegistryFactory);
-	adminRegistry.setProfileDescriptionDao(profileDescriptionDao);
-	adminRegistry.setComponentDescriptionDao(componentDescriptionDao);
-	adminRegistry.setMarshaller(marshaller);
-	info = new CMDItemInfo(marshaller);
-	addLinks();
-	final FeedbackPanel feedback = new FeedbackPanel("feedback");
-	feedback.setOutputMarkupId(true);
-	add(feedback);
-	Form form = new ItemEditForm("form");
-	add(form);
+    public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException, ItemNotFoundException {
+        super(parameters);
+        adminRegistry.setComponentRegistryFactory(componentRegistryFactory);
+        adminRegistry.setComponentDao(componentDao);
+        adminRegistry.setMarshaller(marshaller);
+        info = new CMDItemInfo(marshaller);
+        addLinks();
+        final FeedbackPanel feedback = new FeedbackPanel("feedback");
+        feedback.setOutputMarkupId(true);
+        add(feedback);
+        Form form = new ItemEditForm("form");
+        add(form);
 
-	Button deleteButton = new AjaxFallbackButton("delete", form) {
+        Button deleteButton = new AjaxFallbackButton("delete", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+                info("deleting:" + info.getName());
+                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                try {
+                    adminRegistry.delete(info, userPrincipal);
+                    info("Item deleted.");
+                    reloadTreeModel(info);
+                } catch (Exception e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot delete: " + info.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                    target.addComponent(tree);
+                    target.addComponent(feedback);
+                }
+            }
 
-	    @Override
-	    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-		CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-		info("deleting:" + info.getName());
-		Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
-		try {
-		    adminRegistry.delete(info, userPrincipal);
-		    info("Item deleted.");
-		    reloadTreeModel(info);
-		} catch (SubmitFailedException e) {
-		    LOG.error("Admin: ", e);
-		    error("Cannot delete: " + info.getName() + "\n error=" + e);
-		}
-		if (target != null) {
-		    target.addComponent(form);
-		    target.addComponent(tree);
-		    target.addComponent(feedback);
-		}
-	    }
+            @Override
+            public boolean isEnabled() {
+                return info.isDeletable();
 
-	    @Override
-	    public boolean isEnabled() {
-		return info.isDeletable();
-
-	    }
-	;
-	};
+            }
+        ;
+        };
 	form.add(deleteButton);
 
-	Button undeleteButton = new AjaxFallbackButton("undelete", form) {
+        Button undeleteButton = new AjaxFallbackButton("undelete", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+                info("undeleting:" + info.getName());
+                try {
+                    adminRegistry.undelete(info);
+                    info("Item put back.");
+                    reloadTreeModel(info);
+                } catch (Exception e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot undelete: " + info.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                    target.addComponent(tree);
+                    target.addComponent(feedback);
+                }
+            }
 
-	    @Override
-	    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-		CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-		info("undeleting:" + info.getName());
-		try {
-		    adminRegistry.undelete(info);
-		    info("Item put back.");
-		    reloadTreeModel(info);
-		} catch (SubmitFailedException e) {
-		    LOG.error("Admin: ", e);
-		    error("Cannot undelete: " + info.getName() + "\n error=" + e);
-		}
-		if (target != null) {
-		    target.addComponent(form);
-		    target.addComponent(tree);
-		    target.addComponent(feedback);
-		}
-	    }
+            @Override
+            public boolean isEnabled() {
+                return info.isUndeletable();
+            }
+        };
+        form.add(undeleteButton);
 
-	    @Override
-	    public boolean isEnabled() {
-		return info.isUndeletable();
-	    }
-	};
-	form.add(undeleteButton);
+        CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
+        form.add(forceUpdateCheck);
 
-	CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
-	form.add(forceUpdateCheck);
+        Button submitButton = new AjaxFallbackButton("submit", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                info("submitting:" + info.getName() + " id=(" + info.getDataNode().getDescription().getId() + ")");
+                try {
+                    adminRegistry.submitFile(info, userPrincipal);
+                    info("submitting done.");
+                    reloadTreeModel(info);
+                } catch (Exception e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot submit: " + info.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                    target.addComponent(tree);
+                    target.addComponent(feedback);
+                }
+            }
 
-	Button submitButton = new AjaxFallbackButton("submit", form) {
+            @Override
+            public boolean isEnabled() {
+                return info.isEditable();
+            }
+        };
+        form.add(submitButton);
 
-	    @Override
-	    protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-		CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-		Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
-		info("submitting:" + info.getName() + " id=(" + info.getDataNode().getDescription().getId() + ")");
-		try {
-		    adminRegistry.submitFile(info, userPrincipal);
-		    info("submitting done.");
-		    reloadTreeModel(info);
-		} catch (SubmitFailedException e) {
-		    LOG.error("Admin: ", e);
-		    error("Cannot submit: " + info.getName() + "\n error=" + e);
-		}
-		if (target != null) {
-		    target.addComponent(form);
-		    target.addComponent(tree);
-		    target.addComponent(feedback);
-		}
-	    }
 
-	    @Override
-	    public boolean isEnabled() {
-		return info.isEditable();
-	    }
-	};
-	form.add(submitButton);
 
-	tree = createTree("tree", form, createDBTreeModel());
-	add(tree);
-	add(new Link("expandAll") {
 
-	    @Override
-	    public void onClick() {
-		tree.getTreeState().expandAll();
-	    }
-	});
+        try {
+            tree = createTree("tree", form, createDBTreeModel());
+            add(tree);
+            add(new Link("expandAll") {
+                @Override
+                public void onClick() {
+                    tree.getTreeState().expandAll();
+                }
+            });
 
-	add(new Link("collapseAll") {
+            add(new Link("collapseAll") {
+                @Override
+                public void onClick() {
+                    tree.getTreeState().collapseAll();
+                }
+            });
 
-	    @Override
-	    public void onClick() {
-		tree.getTreeState().collapseAll();
-	    }
-	});
-
+        } catch (UserUnauthorizedException e) {            
+            LOG.error("Admin: ", e);
+            error("Cannot create tree: error = " + e);
+        }
+        
     }
 
-    private void reloadTreeModel(CMDItemInfo info) {
-	try {
-	    tree.setModelObject(createDBTreeModel());
-	} catch (ComponentRegistryException e) {
-	    LOG.error("Admin: ", e);
-	    error("Cannot reload tree: " + info.getName() + "\n error=" + e);
-	}
+    private void reloadTreeModel(CMDItemInfo info) throws UserUnauthorizedException, ItemNotFoundException {
+        try {
+            tree.setModelObject(createDBTreeModel());
+        } catch (ComponentRegistryException e) {
+            LOG.error("Admin: ", e);
+            error("Cannot reload tree: " + info.getName() + "\n error=" + e);
+        }
     }
 
-    private void addLinks() {
-	add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
-	add(new Link("massMigrate") {
+    @Override
+    protected void addLinks() {
+        add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
+        add(new Link("massMigrate") {
+            @Override
+            public void onClick() {
+                setResponsePage(MassMigratePage.class);
+            }
+        });
+        add(new Link("groups") {
 
-	    @Override
-	    public void onClick() {
-		setResponsePage(MassMigratePage.class);
-	    }
-	});
-	add(new Link("log") {
-
-	    @Override
-	    public void onClick() {
-		setResponsePage(ViewLogPage.class);
-	    }
-	});
-	add(new Link("statistics") {
-
-	    @Override
-	    public void onClick() {
-		setResponsePage(StatisticsPage.class);
-	    }
-	});
+            @Override
+            public void onClick() {
+                setResponsePage(Groups.class);
+            }
+        });
+        add(new Link("log") {
+            @Override
+            public void onClick() {
+                setResponsePage(ViewLogPage.class);
+            }
+        });
+        add(new Link("statistics") {
+            @Override
+            public void onClick() {
+                setResponsePage(StatisticsPage.class);
+            }
+        });
     }
 
     private LinkTree createTree(String id, final Form form, TreeModel treeModel) {
-	final LinkTree adminTree = new LinkTree(id, treeModel) {
-
-	    @Override
-	    protected void onNodeLinkClicked(Object node, BaseTree tree, AjaxRequestTarget target) {
-		super.onNodeLinkClicked(node, tree, target);
-		ITreeState treeState = tree.getTreeState();
-		if (treeState.isNodeExpanded(node)) {
-		    treeState.collapseNode(node);
-		} else {
-		    treeState.expandNode(node);
-		}
-		DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
-		info.setDataNode(dn);
-		AbstractDescription desc = dn.getDescription();
-		if (desc != null) {
-		    String content;
-		    if (desc.isProfile()) {
-			content = profileDescriptionDao.getContent(dn.isDeleted(), desc.getId());
-		    } else {
-			content = componentDescriptionDao.getContent(dn.isDeleted(), desc.getId());
-		    }
-		    info.setContent(content);
-		}
-		if (target != null) {
-		    target.addComponent(form);
-		}
-	    }
-	};
-	return adminTree;
+        final LinkTree adminTree = new LinkTree(id, treeModel) {
+            @Override
+            protected void onNodeLinkClicked(Object node, BaseTree tree, AjaxRequestTarget target) {
+                super.onNodeLinkClicked(node, tree, target);
+                ITreeState treeState = tree.getTreeState();
+                if (treeState.isNodeExpanded(node)) {
+                    treeState.collapseNode(node);
+                } else {
+                    treeState.expandNode(node);
+                }
+                DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
+                info.setDataNode(dn);
+                BaseDescription desc = dn.getDescription();
+                if (desc != null) {
+                    String content = componentDao.getContent(dn.isDeleted(), desc.getId());
+                    info.setContent(content);
+                }
+                if (target != null) {
+                    target.addComponent(form);
+                }
+            }
+        };
+        return adminTree;
     }
 
     private class ItemEditForm extends Form<CMDItemInfo> {
 
-	public ItemEditForm(String name) {
-	    super(name);
-	    CompoundPropertyModel model = new CompoundPropertyModel(info);
-	    setModel(model);
+        public ItemEditForm(String name) {
+            super(name);
+            CompoundPropertyModel model = new CompoundPropertyModel(info);
+            setModel(model);
 
-	    TextArea descriptionArea = new TextArea("description");
-	    descriptionArea.setOutputMarkupId(true);
-	    add(descriptionArea);
-	    TextArea contentArea = new TextArea("content");
-	    contentArea.setOutputMarkupId(true);
-	    add(contentArea);
-	}
+            TextArea descriptionArea = new TextArea("description");
+            descriptionArea.setOutputMarkupId(true);
+            add(descriptionArea);
+            TextArea contentArea = new TextArea("content");
+            contentArea.setOutputMarkupId(true);
+            add(contentArea);
+        }
     }
 
-    private TreeModel createDBTreeModel() throws ComponentRegistryException {
-	DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new DisplayDataNode("ComponentRegistry", false));
-	DefaultMutableTreeNode publicNode = new DefaultMutableTreeNode(new DisplayDataNode("Public", false));
-	rootNode.add(publicNode);
-	ComponentRegistry publicRegistry = componentRegistryFactory.getPublicRegistry();
-	add(publicNode, publicRegistry);
-	List<ComponentRegistry> userRegistries = componentRegistryFactory.getAllUserRegistries();
-	for (ComponentRegistry registry : userRegistries) {
-	    DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(new DisplayDataNode(registry.getName(), false));
-	    rootNode.add(userNode);
-	    add(userNode, registry);
-	}
-	TreeModel model = new DefaultTreeModel(rootNode);
-	return model;
+    private TreeModel createDBTreeModel() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new DisplayDataNode("ComponentRegistry", false));
+        DefaultMutableTreeNode publicNode = new DefaultMutableTreeNode(new DisplayDataNode("Public", false));
+        rootNode.add(publicNode);
+        ComponentRegistry publicRegistry = componentRegistryFactory.getPublicRegistry();
+        add(publicNode, publicRegistry);
+        List<ComponentRegistry> userRegistries = componentRegistryFactory.getAllUserRegistries();
+        for (ComponentRegistry registry : userRegistries) {
+            DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(new DisplayDataNode(registry.getName(), false));
+            rootNode.add(userNode);
+            add(userNode, registry);
+        }
+        TreeModel model = new DefaultTreeModel(rootNode);
+        return model;
     }
 
-    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException {
-	DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
-	parent.add(componentsNode);
-	add(componentsNode, registry.getComponentDescriptions(), false, registry.getStatus());
+    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+        DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
+        parent.add(componentsNode);
+        add(componentsNode, registry.getComponentDescriptions(), false, registry.getRegistrySpace());
 
-	DefaultMutableTreeNode profilesNode = new DefaultMutableTreeNode(new DisplayDataNode("Profiles", false));
-	parent.add(profilesNode);
-	add(profilesNode, registry.getProfileDescriptions(), false, registry.getStatus());
+        DefaultMutableTreeNode profilesNode = new DefaultMutableTreeNode(new DisplayDataNode("Profiles", false));
+        parent.add(profilesNode);
+        add(profilesNode, registry.getProfileDescriptions(), false, registry.getRegistrySpace());
 
-	DefaultMutableTreeNode deletedCompNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Components", true));
-	parent.add(deletedCompNode);
+        DefaultMutableTreeNode deletedCompNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Components", true));
+        parent.add(deletedCompNode);
 
-	List<ComponentDescription> deletedComponentDescriptions = registry.getDeletedComponentDescriptions();
-	add(deletedCompNode, deletedComponentDescriptions, true, registry.getStatus());
+        List<ComponentDescription> deletedComponentDescriptions = registry.getDeletedComponentDescriptions();
+        add(deletedCompNode, deletedComponentDescriptions, true, registry.getRegistrySpace());
 
-	DefaultMutableTreeNode deletedProfNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Profiles", true));
-	parent.add(deletedProfNode);
-	List<ProfileDescription> deletedProfileDescriptions = registry.getDeletedProfileDescriptions();
-	add(deletedProfNode, deletedProfileDescriptions, true, registry.getStatus());
+        DefaultMutableTreeNode deletedProfNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Profiles", true));
+        parent.add(deletedProfNode);
+        List<ProfileDescription> deletedProfileDescriptions = registry.getDeletedProfileDescriptions();
+        add(deletedProfNode, deletedProfileDescriptions, true, registry.getRegistrySpace());
     }
 
-    private void add(DefaultMutableTreeNode parent, List<? extends AbstractDescription> descs, boolean isDeleted, ComponentStatus status) {
-	for (AbstractDescription desc : descs) {
-	    DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, status));
-	    parent.add(child);
-	}
+    private void add(DefaultMutableTreeNode parent, List<? extends BaseDescription> descs, boolean isDeleted, RegistrySpace space) {
+        for (BaseDescription desc : descs) {
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, space));
+            parent.add(child);
+        }
     }
 }

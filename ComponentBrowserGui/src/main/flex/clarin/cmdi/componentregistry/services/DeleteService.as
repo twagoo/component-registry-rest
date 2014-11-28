@@ -36,11 +36,13 @@ package clarin.cmdi.componentregistry.services {
 			CursorManager.setBusyCursor();
 			
 			var deleteUrl:URI = new URI(item.dataUrl);
-			if (item.space == Config.SPACE_USER) {
-				deleteUrl.setQueryValue(Config.PARAM_USERSPACE, "true");
+			
+			if (item.isProfile) {
+				sendDelete(deleteUrl);
+				return;
 			}
 			
-			var usageService:ComponentUsageService = new ComponentUsageService(item, item.space);
+			var usageService:ComponentUsageService = new ComponentUsageService(item);
 			usageService.addEventListener(ComponentUsageCheckEvent.COMPONENT_IN_USE, 
 				function (event:ComponentUsageCheckEvent):void{
 					if(event.isComponentInUse){
@@ -49,7 +51,7 @@ package clarin.cmdi.componentregistry.services {
 						sendDelete(deleteUrl);
 					}
 				});
-			usageService.checkUsage();
+			usageService.checkUsage(); // dispatching the event
 		}
 		
 		public function onComponentInUse(event:ComponentUsageCheckEvent):void{
@@ -63,10 +65,7 @@ package clarin.cmdi.componentregistry.services {
 		
 		public function deleteComment(comment:Comment):void {
 			CursorManager.setBusyCursor();
-			var url:URI = new URI(comment.dataUrl);
-			if (comment.itemDescription.space == Config.SPACE_USER) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
-			}
+			var url:URI = new URI(comment.dataUrl);		
 			sendDelete(url);
 		}
 		

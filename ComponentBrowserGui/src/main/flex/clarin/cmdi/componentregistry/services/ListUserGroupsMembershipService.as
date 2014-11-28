@@ -22,15 +22,12 @@ package clarin.cmdi.componentregistry.services {
 			super(GROUPS_LOADED);
 		}
 
-		public function loadGroupsForUser():void{
-			if (groups!=null){
-				this.dispatchEvent(new Event(this.successEventName));
-				return;
-			}
+		public function loadGroupsForUser():void{			
 			groups = new ArrayCollection();
 			var url:String;
 			url = Config.instance.getListGroupsOfUserPath();
 			dispatchRequest(new URI(url));
+			
 		}
 		
 		override protected function handleXmlResult(resultXml:XML):void{

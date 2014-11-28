@@ -16,6 +16,7 @@
     <name>ComponentBrowserGui</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<flex.version>3.6.0.16995</flex.version>
         <flexDebug>true</flexDebug>
     </properties>
 
@@ -32,7 +33,7 @@
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
             <artifactId>flex-framework</artifactId>
-            <version>3.6.0.16321</version>
+            <version>${flex.version}</version>
             <type>pom</type>
             <exclusions>
                 <exclusion>
@@ -44,14 +45,14 @@
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
             <artifactId>playerglobal</artifactId>
-            <version>3.6.0.16321</version>
+            <version>${flex.version}</version>
             <classifier>10</classifier>
             <type>swc</type>
         </dependency>
         <dependency>
             <groupId>com.adobe</groupId>
             <artifactId>as3corelib</artifactId>
-            <version>0.92.1</version>
+            <version>0.93</version>
             <type>swc</type>
         </dependency>
         <dependency>
@@ -117,7 +118,7 @@
                     <dependency>
                         <groupId>com.adobe.flex</groupId>
                         <artifactId>compiler</artifactId>
-                        <version>3.6.0.16321</version>
+                        <version>${flex.version}</version>
                         <type>pom</type>
                     </dependency>
                 </dependencies>
@@ -173,6 +174,11 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
+        <repository>
+    <!-- repository for as3corelib.swc v0.93 -->
+		<id>ooo-maven-repo</id>
+      		<url>http://ooo-maven.googlecode.com/hg/repository</url>
+    	</repository>
     </repositories>
 
     <pluginRepositories>
@@ -185,6 +191,11 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
+        </pluginRepository>
+        <pluginRepository>
+                <id>cmdi.clarin.repository</id>
+                <name>Clarin Repository</name>
+                <url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url>
         </pluginRepository>
     </pluginRepositories>
 

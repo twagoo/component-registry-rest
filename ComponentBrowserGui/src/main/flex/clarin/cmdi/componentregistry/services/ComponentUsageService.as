@@ -26,13 +26,9 @@ package clarin.cmdi.componentregistry.services
 	{
 		private var service:HTTPService;
 		
-		public function ComponentUsageService(itemDescription:ItemDescription, space:String)
+		public function ComponentUsageService(itemDescription:ItemDescription)
 		{
-			var url:URI = new URI(Config.instance.componentUsageUrl + itemDescription.id);
-			if (space == Config.SPACE_USER) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
-			}
-
+			var url:URI = new URI(Config.instance.componentUsageUrl + itemDescription.id);			
 			service = new HTTPService();
 			service.url = url.toString();
 			service.method = HTTPRequestMessage.GET_METHOD;

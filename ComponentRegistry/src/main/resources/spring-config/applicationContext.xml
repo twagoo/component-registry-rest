@@ -69,7 +69,7 @@
 		class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
 
 	<!-- Prototype bean for component registry (service) -->
-	<bean id="componentRegistry"
+	<bean id="componentRegistryDbImpl"
 		class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl"
 		scope="prototype" />
 
@@ -89,7 +89,9 @@
 
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="applicationServerDataSource"/>
 	</bean>
+	
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
@@ -102,12 +104,15 @@
 				<property name="generateDdl" value="true" />
 			</bean>
 		</property>
+		<property name="jpaDialect">
+		<bean class="clarin.cmdi.componentregistry.impl.database.PostgresJpaDialect"/>
+		</property>
 		<property name="persistenceUnitName" value="clarin.cmdi.componentregistry" />
 		<property name="jpaProperties">
 			<props>
 				<prop key="hibernate.dialect">${eu.clarin.cmdi.componentregistry.jpaDialect}</prop>
 				<prop key="hibernate.show_sql">false</prop>
-				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<!-- prop key="hibernate.hbm2ddl.auto">update</prop -->
 			</props>
 
 		</property>

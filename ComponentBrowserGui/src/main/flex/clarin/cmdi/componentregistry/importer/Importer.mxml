@@ -43,7 +43,7 @@
 					if (domainName.selectedIndex != -1)
 						item.domainName = domainName.selectedItem.data;
 					item.isProfile = isProfile;
-					item.space = Config.SPACE_USER; //We only allow import into workspace it can be published from there.
+					item.isPrivate = true; //We only allow import into workspace it can be published from there.
 					if (loadedXML) {
 						updateXMLFromFormFields(loadedXML);
 						uploadSrv.upload(UploadService.NEW, item, loadedXML.toXMLString());

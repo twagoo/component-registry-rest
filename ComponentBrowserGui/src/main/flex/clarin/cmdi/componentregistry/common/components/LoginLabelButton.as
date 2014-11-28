@@ -34,7 +34,7 @@ package clarin.cmdi.componentregistry.common.components {
 				uri.setQueryValue(Config.REGISTRY_PARAM_SPACE, spaceType);
 			}
 			if (itemId) {
-				uri.setQueryValue(Config.REGISTRY_PARAM_ITEM, itemId);
+				uri.setQueryValue(Config.REGISTRY_PARAM_ITEM_ID, itemId);
 			}
 			req.url = uri.toString();
 			navigateToURL(req, "_top");

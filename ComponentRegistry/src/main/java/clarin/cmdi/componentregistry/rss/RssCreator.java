@@ -19,12 +19,10 @@ public abstract class RssCreator<T> {
     private String channelDescription;
     private String channelTitle;
     private Comparator<T> comparator;
-    protected final boolean userspace;
     private List<T> objs;
     private int limit;
 
-    protected RssCreator(boolean userspace, String baseURI, int limit, List<T> objs) {
-        this.userspace = userspace;
+    protected RssCreator(String baseURI, int limit, List<T> objs) {
         this.baseURI = baseURI;
         this.limit = limit;
         this.objs = objs;

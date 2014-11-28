@@ -35,63 +35,37 @@
     for login/logout are set correctly in WEB-INF/shhaa.xml. 
 -->
 <Context antiJARLocking="true" path="/ComponentRegistry">
-    <!-- 
+  <!-- 
 	Passed to the Flex UI via index.jsp so that it can locate the 
 	ComponentRegistry REST service. Just supply the application root:
 	the '/rest/registry' part will be added by the application.
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.serviceRootUrl" 
-	value="${serviceRootUrl}" />
-    
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceRootUrl" value="${serviceRootUrl}"/>
+  <!--
 	Location that gets redirected to from /documentation.jsp, which in turn is linked to
 	from the Flex application through the 'Help' link button.
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.documentationUrl" 
-	value="http://www.clarin.eu/cmdi" />
-    
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="http://www.clarin.eu/cmdi"/>
+  <!--
 	Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.adminUsers" 
-	value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl" />
-
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl"/>
+  <!--
 	Location of the CMDI general component schema that validates component specifications
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" 
-	value="https://infra.clarin.eu/cmd/general-component-schema.xsd" />
-    
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" value="https://infra.clarin.eu/cmd/general-component-schema.xsd"/>
+  <!--
 	Location of the stylesheet that transforms component specifications into XML schema documents
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" 
-	value="https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl" />
-
-    <!-- 
+  <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" value="https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl"/>
+  <!-- 
         Schema location that will go into xsi:schemaLocation attribute of component specification. Beware this should follow
         XML standards and have a namespace component (URI) and schema location component (URL) separated by a space
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" 
-	value="http://www.clarin.eu/cmd https://infra.clarin.eu/cmd/general-component-schema.xsd" />
-
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" value="http://www.clarin.eu/cmd https://infra.clarin.eu/cmd/general-component-schema.xsd"/>
+  <!--
 	Base location of the ISOcat service
     -->
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.isocatRestUrl" 
-	value="https://catalog.clarin.eu/isocat/rest/" />
-	
-    <Parameter 
-	name="eu.clarin.cmdi.componentregistry.jpaDialect" 
-	value="org.hibernate.dialect.PostgreSQL82Dialect" />
-
-	
-
+  <Parameter name="eu.clarin.cmdi.componentregistry.isocatRestUrl" value="https://catalog.clarin.eu/isocat/rest/"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.jpaDialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
 </Context>

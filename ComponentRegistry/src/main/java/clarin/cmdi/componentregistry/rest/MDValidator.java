@@ -4,11 +4,14 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryResourceResolver;
 import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
+import clarin.cmdi.componentregistry.NullIdException;
+import clarin.cmdi.componentregistry.RegistrySpace;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
-import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.schema.cmd.Validator.Message;
 import clarin.cmdi.schema.cmd.ValidatorException;
 import java.io.ByteArrayInputStream;
@@ -28,14 +31,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MDValidator implements Validator {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(MDValidator.class);
     static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
     static final String PARSE_ERROR = "Error in validation input file: ";
     static final String SCHEMA_ERROR = "Error in reading general component schema: ";
     static final String IO_ERROR = "Error while reading specification or general component schema: ";
-    static final String COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR = "referenced component cannot be found in the published components: ";
+    static final String COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR = "referenced component cannot be found in the appropriate registry components: ";
     static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
     static final String ILLEGAL_ATTRIBUTE_NAME_ERROR = "Illegal attribute name: ";
     static final String UNKNOWN_VALIDATION_ERROR = "Unknown validation error";
@@ -44,10 +47,8 @@ public class MDValidator implements Validator {
     private CMDComponentSpec spec = null;
     private byte[] originalSpecBytes;
     private final InputStream input;
-    private final AbstractDescription description;
+    private final BaseDescription description;
     private final ComponentRegistry registry;
-    private final ComponentRegistry userRegistry;
-    private final ComponentRegistry publicRegistry;
     private final MDMarshaller marshaller;
 
     /**
@@ -60,22 +61,20 @@ public class MDValidator implements Validator {
      * give nice error messages if needed. Can be the same as
      * @param registry
      */
-    public MDValidator(InputStream input, AbstractDescription description, ComponentRegistry registry, ComponentRegistry userRegistry, ComponentRegistry publicRegistry, MDMarshaller marshaller) {
+    public MDValidator(InputStream input, BaseDescription description, ComponentRegistry registry, MDMarshaller marshaller) {
         this.input = input;
         this.description = description;
         this.registry = registry;
-        this.userRegistry = userRegistry;
-        this.publicRegistry = publicRegistry;
         this.marshaller = marshaller;
     }
-    
+
     @Override
     public List<String> getErrorMessages() {
         return errorMessages;
     }
-    
+
     @Override
-    public boolean validate() {
+    public boolean validate() throws UserUnauthorizedException {
         try {
             clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
             validator.setResourceResolver(new ComponentRegistryResourceResolver());
@@ -115,67 +114,90 @@ public class MDValidator implements Validator {
                 validateComponents(spec);
             } catch (ComponentRegistryException e) {
                 errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + e);
+            } catch (ItemNotFoundException e2) {
+                errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e2);
+            } catch (NullIdException e3) {
+                errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e3);
             }
         }
         return errorMessages.isEmpty();
     }
-    
+
     private byte[] getBytesFromInputStream() throws IOException {
         int len;
         byte[] b = new byte[4096];
         final ByteArrayOutputStream bOS = new ByteArrayOutputStream();
-        
+
         while ((len = input.read(b)) > 0) {
             bOS.write(b, 0, len);
         }
-        
+
         return bOS.toByteArray();
     }
 
-    private void validateComponents(CMDComponentSpec componentSpec) throws ComponentRegistryException {
+    private void validateComponents(CMDComponentSpec componentSpec) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException {
         validateComponents(Collections.singletonList(componentSpec.getCMDComponent()));
     }
-    
-    private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException {
+
+    private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException {
         for (CMDComponentType cmdComponentType : cmdComponents) {
-            validateDescribedComponents(cmdComponentType);
-            validateComponents(cmdComponentType.getCMDComponent());//Recursion
+            this.validateDescribedComponents(cmdComponentType);
+            this.validateComponents(cmdComponentType.getCMDComponent());//Recursion
         }
     }
-    
-    private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
-        checkPublicComponents(cmdComponentType);
+
+    private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException {
+        this.checkComponentInSpace(cmdComponentType);
     }
-    
-    private void checkPublicComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException {
+
+    private void checkComponentInSpace(CMDComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException {
         if (isDefinedInSeparateFile(cmdComponentType)) {
             String id = cmdComponentType.getComponentId();
-            CMDComponentSpec registeredComponent;
-            if (registry.isPublic()) { // public registry requires only published components
-                registeredComponent = registry.getMDComponent(id);
-                if (registeredComponent == null) {
-                    String error = cmdComponentType.getComponentId();
-                    if (userRegistry != null) {
-                        ComponentDescription desc = userRegistry.getComponentDescription(id);
-                        if (desc != null) {
-                            error = desc.getName() + " (" + cmdComponentType.getComponentId() + ")";
-                        }
-                    }
-                    errorMessages.add(COMPONENT_NOT_PUBLICLY_REGISTERED_ERROR + error);
-                }
-            } else { //User registry, can link to components from public registry and the user's registry
-                registeredComponent = registry.getMDComponent(id);
-                if (registeredComponent == null) {
-                    registeredComponent = publicRegistry.getMDComponent(id);
-                    if (registeredComponent == null) {
-                        errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
-                    }
-                }
-                
+            if (id == null) {
+                String name = (cmdComponentType.getName() == null) ? "null" : cmdComponentType.getName();
+                throw new NullIdException("The component with the name " + name + " has a null id. :(");
             }
+            CMDComponentSpec registeredComponent = registry.getMDComponent(id);
+            if (registeredComponent != null) {
+                String componentId = cmdComponentType.getComponentId();
+                Boolean isPublicB = registry.isItemPublic(id);// throws ItemNotFoundException
+                boolean isPublic = isPublicB.booleanValue();
+                if (isPublic) {  // if  a component is public, it is available for any registry
+                    return;
+                };
+                // a private component for a private registry is available only if its owner is the owner of the resgitry
+                if (registry.getRegistrySpace().equals(RegistrySpace.PRIVATE)) {
+                    Number registryOwnerId = registry.getRegistryOwner().getId();
+                    Number componentOwnerId = registry.getBaseDescriptionOwnerId(cmdComponentType.getComponentId());
+                    if (registryOwnerId.equals(componentOwnerId)) {
+                        return;
+                    };
+                    errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private registry)");
+                    return;
+
+                } else { // a private component in a group registry is availabe only if it belongs to the group
+                    if (registry.getRegistrySpace().equals(RegistrySpace.GROUP)) {
+                        if (registry.getGroupId() == null) {
+                            errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + "in the group space, the group id is null");
+                            return;
+                        }
+                        List<Number> componentGroupIds = registry.getItemGroups(cmdComponentType.getComponentId());
+                        if (componentGroupIds.contains(registry.getGroupId())) {
+                            return;
+                        }
+                        errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (group registry) " + registry.getGroupId());
+                        return;
+                    }
+                    errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private component in public registry).");
+                    return;
+                }
+
+            };
+            errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
         }
+
     }
-    
+
     private boolean isDefinedInSeparateFile(CMDComponentType cmdComponentType) {
         return cmdComponentType.getName() == null;
     }
@@ -194,8 +216,7 @@ public class MDValidator implements Validator {
      * Creates a fresh (re-unmarshalled) copy of the specification this instance
      * has validated. If you are not going to alter this copy, you can re-use
      * and share the copy used during validation by getting it from {@link #getCMDComponentSpec()
-     * }.
-     * <em>Do not call before having called {@link #validate() }!</em>
+     * }. <em>Do not call before having called {@link #validate() }!</em>
      *
      * @return a freshly unmarshalled copy of the spec based on the bytes
      * collected from the input stream passed to {@link #validate() }. If this
@@ -208,8 +229,10 @@ public class MDValidator implements Validator {
     public CMDComponentSpec getCopyOfCMDComponentSpec() throws JAXBException {
         // Re-unmarshall original bytes
         return unmarshalSpec(originalSpecBytes);
+
+
     }
-    
+
     private CMDComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
         return marshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
     }

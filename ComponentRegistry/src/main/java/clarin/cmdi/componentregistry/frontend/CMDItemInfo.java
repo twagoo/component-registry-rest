@@ -1,10 +1,10 @@
 package clarin.cmdi.componentregistry.frontend;
 
-import clarin.cmdi.componentregistry.ComponentStatus;
 import java.io.Serializable;
 
 import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.RegistrySpace;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 
 public class CMDItemInfo implements Serializable {
 
@@ -58,7 +58,7 @@ public class CMDItemInfo implements Serializable {
         setDescription("");
         setContent("");
         if (dataNode != null) {
-            AbstractDescription desc = dataNode.getDescription();
+            BaseDescription desc = dataNode.getDescription();
             if (desc != null) {
                 String contentDescr = marshaller.marshalToString(desc);
                 setDescription(contentDescr);
@@ -98,8 +98,8 @@ public class CMDItemInfo implements Serializable {
     }
 
     
-    public ComponentStatus getStatus() {
-	return displayNode.getStatus();
+    public RegistrySpace getSpace() {
+	return displayNode.getSpace();
     }
 	
     public void setForceUpdate(boolean forceUpdate) {

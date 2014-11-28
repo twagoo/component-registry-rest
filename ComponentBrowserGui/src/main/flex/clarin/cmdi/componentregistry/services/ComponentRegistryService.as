@@ -13,28 +13,35 @@ package clarin.cmdi.componentregistry.services //trunk
 	public class ComponentRegistryService extends BaseRemoteService {
 		
 		protected var serviceUrl:URI;
-		protected var space:String;
 		
 		public function ComponentRegistryService(successEvent:String, serviceUrl:URI) {
 			super(successEvent);
 			this.serviceUrl = serviceUrl;
 		}
 		
+		
 		override protected function dispatchRequest(url:URI):void {
 			url.setQueryValue("unique", new Date().getTime().toString());
-			if (space == Config.SPACE_USER) {
-				url.setQueryValue(Config.PARAM_USERSPACE, "true");
-			} else
-				url.setQueryValue(Config.PARAM_USERSPACE, null);
+			if (Config.instance.registrySpace != null) {
+				url.setQueryValue(Config.REGISTRY_PARAM_SPACE, Config.instance.registrySpace.space);
+				if (Config.instance.registrySpace.space==Config.SPACE_GROUP) {
+					url.setQueryValue(Config.REGISTRY_PARAM_GROUP_ID, Config.instance.registrySpace.groupId);
+				}
+			} else {
+				throw "Registry space is lost."
+			}
+			trace("Dispatching request to " + url.toDisplayString())
 			super.dispatchRequest(url);
 		}
+		
+		
 		
 		public function load():void {
 			dispatchRequest(serviceUrl);
 		}
 		
 		public function getComponent(componentId:String, callback:Function):void{
-			readService.setUrl(new URI(Config.instance.serviceRootUrl+Config.ITEMS_URL+"/"+componentId+"?userspace=true"));
+			readService.setUrl(new URI(Config.instance.serviceRootUrl+Config.ITEMS_URL+"/"+componentId));
 			var token:AsyncToken = readService.send();
 			token.addResponder(new Responder(function(resultEvent):void{
 				var resultXml:XML = resultEvent.result as XML;

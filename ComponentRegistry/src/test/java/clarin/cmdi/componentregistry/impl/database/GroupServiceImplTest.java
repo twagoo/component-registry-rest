@@ -7,17 +7,18 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
-import clarin.cmdi.componentregistry.model.GroupMembership;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
-import clarin.cmdi.componentregistry.persistence.ComponentDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.ProfileDescriptionDao;
-import clarin.cmdi.componentregistry.persistence.UserDao;
+import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.persistence.jpa.GroupDao;
 import clarin.cmdi.componentregistry.persistence.jpa.OwnershipDao;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import static org.junit.Assert.*;
 
@@ -27,8 +28,6 @@ public class GroupServiceImplTest extends BaseUnitTest {
     GroupService groupService;
     @Autowired
     UserDao userDao;
-    @Autowired
-    ProfileDescriptionDao profileDescriptionDao;
 
     @Autowired
     GroupDao groupDao;
@@ -37,28 +36,30 @@ public class GroupServiceImplTest extends BaseUnitTest {
     OwnershipDao ownershipDao;
 
     @Autowired
-    ComponentDescriptionDao componentDescriptionDao;
+    ComponentDao componentDescriptionDao;
 
     RegistryUser user;
     RegistryUser user2;
     RegistryUser user3;
 
-    protected ProfileDescription makeTestProfile(String sid, boolean isPublic, long ownerId) {
+    protected BaseDescription makeTestProfile(String sid, boolean isPublic, long ownerId) {
 	ProfileDescription profile = new ProfileDescription();
 	profile.setDescription("some description");
-	profile.setId(sid);
+	profile.setId(ProfileDescription.PROFILE_PREFIX+sid);
 	profile.setName("profilename");
-	Number id = profileDescriptionDao.insertDescription(profile, "someContent",
+        profile.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+	Number id = componentDescriptionDao.insertDescription(profile, "someContent",
 		isPublic, ownerId);
-	return profileDescriptionDao.getById(id);
+	return componentDescriptionDao.getById(id);
     }
 
-    protected ComponentDescription makeTestComponent(boolean isPublic,
+    protected BaseDescription makeTestComponent(boolean isPublic,
 	    long ownerId) {
-	ComponentDescription componentDescription = new ComponentDescription();
+	BaseDescription componentDescription = new BaseDescription();
 	componentDescription.setDescription("some description");
-	componentDescription.setId("4567");
+	componentDescription.setId(ComponentDescription.COMPONENT_PREFIX+"4567");
 	componentDescription.setName("componentname");
+        componentDescription.setCreatorName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
 	Number id = componentDescriptionDao.insertDescription(
 		componentDescription, "someContent", isPublic, ownerId);
 	return componentDescriptionDao.getById(id);
@@ -70,21 +71,21 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	user.setName("Test User");
 	user.setPrincipalName(DummyPrincipal.DUMMY_CREDENTIALS
 		.getPrincipalName());
-	userDao.insertUser(user);
+	user = userDao.saveAndFlush(user);
 	user = userDao.getByPrincipalName(user.getPrincipalName());
 
 	user2 = new RegistryUser();
 	user2.setName("Test User 2");
 	user2.setPrincipalName(DummyPrincipal.DUMMY_CREDENTIALS
 		.getPrincipalName() + "2");
-	userDao.insertUser(user2);
+	user2 = userDao.saveAndFlush(user2);
 	user2 = userDao.getByPrincipalName(user2.getPrincipalName());
 
 	user3 = new RegistryUser();
 	user3.setName("Test User 3");
 	user3.setPrincipalName(DummyPrincipal.DUMMY_CREDENTIALS
 		.getPrincipalName() + "3");
-	userDao.insertUser(user3);
+	user3 = userDao.saveAndFlush(user3);
 	user3 = userDao.getByPrincipalName(user3.getPrincipalName());
     }
 
@@ -119,10 +120,10 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPrivateProfile() {
 	// Make a private profile that belongs to someone else
-	ProfileDescription profile = makeTestProfile("4567", false, 9999);
+	BaseDescription profile = makeTestProfile("4567", false, 9999);
 	// Expect that user can't access profile
 	boolean result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profile);
 	assertFalse(result);
     }
@@ -130,11 +131,11 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPublicProfile() {
 	// Make a public profile that belongs to someone else
-	ProfileDescription profile = makeTestProfile("4567", true, 9999);
+	BaseDescription profile = makeTestProfile("4567", true, 9999);
 
 	// Expect that user can access the profile
 	boolean result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profile);
 	assertTrue(result);
     }
@@ -142,25 +143,25 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToOwnedPrivateProfile() {
 	// Make a profile that belongs to someone else
-	ProfileDescription profile = makeTestProfile("4567", false, user.getId()
+	BaseDescription profile = makeTestProfile("4567", false, user.getId()
 		.longValue());
 	// Add an ownership to that profile to the current user
 	Ownership ownership = new Ownership();
-	ownership.setProfileId(profile.getId());
+	ownership.setComponentId(profile.getId());
 	ownership.setUserId(user.getId().longValue());
 	groupService.addOwnership(ownership);
 
 	// Expect that user can access the profile
 	boolean result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profile);
 	assertTrue(result);
     }
 
     @Test
-    public void testAccessViaGroupToPrivateProfile() {
+    public void testAccessViaGroupToPrivateProfile() throws ItemNotFoundException{
 	// Make a profile that belongs to someone else
-	ProfileDescription profile = makeTestProfile("4567", false, 9999);
+	BaseDescription profile = makeTestProfile("4567", false, 9999);
 
 	// Make a group that belongs to someone else
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -172,13 +173,13 @@ public class GroupServiceImplTest extends BaseUnitTest {
 
 	// Add an ownership to that profile to the group
 	Ownership ownership = new Ownership();
-	ownership.setProfileId(profile.getId());
+	ownership.setComponentId(profile.getId());
 	ownership.setGroupId(group.getId());
 	groupService.addOwnership(ownership);
 
 	// Expect that user can access the profile
 	boolean result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profile);
 	assertTrue(result);
     }
@@ -186,7 +187,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPrivateComponent() {
 	// Make a private profile that belongs to someone else
-	ComponentDescription componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		9999);
 
 	// Expect that user can't access profile
@@ -199,7 +200,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToNonOwnedPublicComponent() {
 	// Make a public profile that belongs to someone else
-	ComponentDescription componentDescription = makeTestComponent(true,
+	BaseDescription componentDescription = makeTestComponent(true,
 		9999);
 
 	// Expect that user can access the profile
@@ -212,7 +213,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAccessToOwnedPrivateComponent() {
 	// Make a profile that belongs to someone else
-	ComponentDescription componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		9999);
 
 	// Add an ownership to that profile to the current user
@@ -229,9 +230,9 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testAccessViaGroupToPrivateComponent() {
+    public void testAccessViaGroupToPrivateComponent() throws ItemNotFoundException{
 	// Make a profile that belongs to someone else
-	ComponentDescription componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		user3.getId().longValue());
 
 	// Make a group that belongs to someone else
@@ -256,7 +257,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testTransferComponentOwnershipFromUserToGroup() {
+    public void testTransferComponentOwnershipFromUserToGroup()  throws UserUnauthorizedException, ItemNotFoundException{
 
 	// Make a group
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -270,7 +271,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertTrue(groupService.getGroupsOfWhichUserIsAMember(user2.getPrincipalName()).contains(group));
 
 	// Make a component that belongs to user
-	ComponentDescription componentDescription = makeTestComponent(false,
+	BaseDescription componentDescription = makeTestComponent(false,
 		user.getId().longValue());
 
 	// Just for the fun of it: check that user can access the component
@@ -285,9 +286,8 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertFalse(result);
 
 	// user transfers ownership of the component to his group
-	groupService.transferComponentOwnershipFromUserToGroup(
-		user.getPrincipalName(), group.getName(),
-		componentDescription.getId());
+	groupService.transferItemOwnershipToGroup(
+		user.getPrincipalName(), group.getName(), componentDescription.getId());
 	
 	List<Ownership> ownerships = (List<Ownership>)ownershipDao.findAll();
 
@@ -309,7 +309,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     }
 
     @Test
-    public void testTransferProfileOwnershipFromUserToGroup() {
+    public void testtransferComponentOwnershipFromUserToGroup()  throws UserUnauthorizedException, ItemNotFoundException{
 
 	// Make a group
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -323,22 +323,22 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertTrue(groupService.getGroupsOfWhichUserIsAMember(user2.getPrincipalName()).contains(group));
 
 	// Make a profile that belongs to user
-	ProfileDescription profileDescription= makeTestProfile("4567", false,
+	BaseDescription profileDescription= makeTestProfile("4567", false,
 		user.getId().longValue());
 
 	// Just for the fun of it: check that user can access the profile
 	// while user2 can't
 	boolean result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profileDescription);
 	assertTrue(result);
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user2, profileDescription);
 	assertFalse(result);
 
 	// user transfers ownership of the component to his group
-	groupService.transferProfileOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group.getName(),
 		profileDescription.getId());
 	
@@ -346,23 +346,23 @@ public class GroupServiceImplTest extends BaseUnitTest {
 
 	// Check that user and user2 have access to the component...
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profileDescription);
 	assertTrue(result);
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user2, profileDescription);
 	assertTrue(result);
 
 	// ... but someone unreleated not
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user3, profileDescription);
 	assertFalse(result);
     }
 
     @Test
-    public void testTransferItemOwnershipFromUserToGroup() {
+    public void testTransferItemOwnershipFromUserToGroup()  throws UserUnauthorizedException, ItemNotFoundException{
 	//TODO: improve test by mixing in components and exclusing components/profiles
 	// Make a group
 	Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
@@ -376,46 +376,46 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	assertTrue(groupService.getGroupsOfWhichUserIsAMember(user2.getPrincipalName()).contains(group));
 
 	// Make a profile that belongs to user
-	ProfileDescription profileDescription= makeTestProfile("4567", false,
+	BaseDescription profileDescription= makeTestProfile("4567", false,
 		user.getId().longValue());
 
 	// Just for the fun of it: check that user can access the profile
 	// while user2 can't
 	boolean result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profileDescription);
 	assertTrue(result);
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user2, profileDescription);
 	assertFalse(result);
 
 	// user transfers ownership of the component to his group
-	groupService.transferItemOwnershipFromUserToGroup(
-		user.getPrincipalName(), group.getId(),
+	groupService.transferItemOwnershipToGroup(
+		user.getPrincipalName(), group.getName(),
 		profileDescription.getId());
 	
 	List<Ownership> ownerships = (List<Ownership>)ownershipDao.findAll();
 
 	// Check that user and user2 have access to the component...
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user, profileDescription);
 	assertTrue(result);
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user2, profileDescription);
 	assertTrue(result);
 
 	// ... but someone unreleated not
 	result = groupService
-		.canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(
+		.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(
 			user3, profileDescription);
 	assertFalse(result);
     }
 
     @Test
-    public void testGetGroupsTheItemIsAMemberOf() {
+    public void testGetGroupsTheItemIsAMemberOf()  throws UserUnauthorizedException, ItemNotFoundException{
 	// Make a group
 	Group group1 = groupDao.findOne(groupService.createNewGroup("Group 1",
 		user.getPrincipalName()));
@@ -430,20 +430,20 @@ public class GroupServiceImplTest extends BaseUnitTest {
 	groupService.makeMember(user.getPrincipalName(), group2.getName());
 
 	// Make a profile that belongs to user
-	ProfileDescription profileDescription= makeTestProfile("4567", false,
+	BaseDescription profileDescription= makeTestProfile("4567", false,
 		user.getId().longValue());
 
 	// Make a profile that belongs to user, but that one will belong to group2
-	ProfileDescription profileDescription2= makeTestProfile("666", false,
+	BaseDescription profileDescription2= makeTestProfile("666", false,
 		user.getId().longValue());
 
 	// user transfers ownership of the profile to his group
-	groupService.transferProfileOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group1.getName(),
 		profileDescription.getId());
 
 	// user transfers ownership of the profile to his group
-	groupService.transferProfileOwnershipFromUserToGroup(
+	groupService.transferItemOwnershipToGroup(
 		user.getPrincipalName(), group2.getName(),
 		profileDescription2.getId());
 

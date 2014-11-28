@@ -13,6 +13,9 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ItemNotFoundException;
+import clarin.cmdi.componentregistry.RegistrySpace;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.components.CMDElementType;
@@ -39,14 +42,14 @@ public class StatisticsPage extends SecureAdminWebPage {
         private int conceptlinkcounter = 0;
     }
 
-    public StatisticsPage(final PageParameters pageParameters) throws IOException, ComponentRegistryException {
+    public StatisticsPage(final PageParameters pageParameters) throws IOException, ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         super(pageParameters);
-        ComponentRegistry registry = componentRegistryFactory.getPublicRegistry();
+        ComponentRegistry registry = componentRegistryFactory.getComponentRegistry(RegistrySpace.PUBLISHED, null, null, null);
         addLinks();
         displayStatistics(registry);
     }
 
-    private void displayStatistics(ComponentRegistry registry) throws ComponentRegistryException {
+    private void displayStatistics(ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         List<ProfileDescription> profileList = registry.getProfileDescriptions();
         RepeatingView repeating = new RepeatingView("repeating");
         add(repeating);
@@ -111,14 +114,4 @@ public class StatisticsPage extends SecureAdminWebPage {
         }
     }
 
-    @SuppressWarnings("serial")
-    private void addLinks() {
-        add(new Link("home") {
-
-            @Override
-            public void onClick() {
-                setResponsePage(AdminHomePage.class);
-            }
-        });
-    }
 }

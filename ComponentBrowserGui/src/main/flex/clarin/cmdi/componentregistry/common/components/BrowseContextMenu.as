@@ -44,7 +44,7 @@ package clarin.cmdi.componentregistry.common.components {
 			cm.customItems = createMenuItems();
 			setItemStates();
 			
-			Config.instance.addEventListener(Config.USER_SPACE_TOGGLE_EVENT, setItemStates);
+			Config.instance.addEventListener(Config.REGISTRY_SPACE_TOGGLE_EVENT, setItemStates);
 		}
 
 		private function createMenuItems():Array {
@@ -76,8 +76,8 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		private function setItemStates(event:Event = null):void {
-			editMenuItem.visible = Config.instance.space == Config.SPACE_USER;
-			editAsNewMenuItem.visible = (Config.instance.space!= Config.SPACE_USER);
+			editMenuItem.visible = (Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP);
+			editAsNewMenuItem.visible = (Config.instance.registrySpace.space == Config.SPACE_PUBLISHED);
 		}
 
 		public function set dataGrid(dataGrid:DataGrid):void {

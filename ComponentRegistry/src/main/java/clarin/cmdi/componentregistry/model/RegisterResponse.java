@@ -5,23 +5,25 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "registerResponse")
+@XmlType(propOrder = {"isProfile","description"})
 public class RegisterResponse extends ComponentRegistryResponse {
 
     @XmlAttribute(required = true)
     private Boolean isProfile;
 
     @XmlElement
-    private AbstractDescription description;
+    private BaseDescription description;
 
-    public void setDescription(AbstractDescription description) {
+    public void setDescription(BaseDescription description) {
         this.description = description;
     }
 
-    public AbstractDescription getDescription() {
+    public BaseDescription getDescription() {
         return description;
     }
 

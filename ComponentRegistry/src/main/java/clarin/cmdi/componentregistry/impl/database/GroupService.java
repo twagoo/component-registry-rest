@@ -1,13 +1,14 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.ItemNotFoundException;
+import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
-import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.Ownership;
-import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 
 /**
@@ -25,7 +26,7 @@ public interface GroupService {
      * @return ID of group created
      * @throws ValidationException
      */
-    long createNewGroup(String name, String ownerPrincipalName);
+    long createNewGroup(String name, String ownerPrincipalName) throws ValidationException;
     
     /**
      * Gets groups directly owned by a user
@@ -48,13 +49,8 @@ public interface GroupService {
      */
     List<String> listGroupNames();
 
-    /**
-     * Determines whether a user is the direct owner of a group
-     * @param groupId
-     * @param user
-     * @return
-     */
-    boolean isUserOwnerOfGroup(long groupId, RegistryUser user);
+   
+    boolean isUserOwnerOfGroup(String groupName, String ownerPrincipalName);
     
     /**
      * Add an ownership of a user or group to a profile or component. Will check ownership for plausibility and will fail if that ownership already exists.
@@ -70,27 +66,16 @@ public interface GroupService {
     void removeOwnership(Ownership ownership);
     
     /**
-     * Determines whether a user has read access to a profile. Factors that allow access are:
-     * 1. The profile is public
-     * 2. The user is the creator
-     * 3. The user has an ownership (see {@link #addOwnership(Ownership)})
-     * 4. The user belongs to a group that has ownership
-     * @param user
-     * @param profile
-     * @return
-     */
-    boolean canUserAccessProfileEitherOnHisOwnOrThroughGroupMembership(RegistryUser user, ProfileDescription profile);
-    /**
      * Determines whether a user has read access to a component. Factors that allow access are:
      * 1. The component is public
      * 2. The user is the creator
      * 3. The user has an ownership (see {@link #addOwnership(Ownership)})
      * 4. The user belongs to a group that has ownership
      * @param user
-     * @param component
+     * @param baseDescription
      * @return
      */
-    boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(RegistryUser user, ComponentDescription component);
+    boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(RegistryUser user, BaseDescription baseDescription);
 
     /**
      * Make a user a mamber of a group
@@ -98,31 +83,25 @@ public interface GroupService {
      * @param groupName
      * @return database ID of group membership row
      */
-    long makeMember(String userName, String groupName);
+    long makeMember(String userName, String groupName) throws ItemNotFoundException;
     
-    /**
-     * Move ownership of a component from a user to a group
-     * @param principal
-     * @param groupName
-     * @param componentId
-     */
-    void transferComponentOwnershipFromUserToGroup(String principal, String groupName, String componentId);
-
-    /**
-     * Move ownership of a profile from a user to a group
-     * @param principal
-     * @param groupName
-     * @param profileId
-     */
-    void transferProfileOwnershipFromUserToGroup(String principal, String groupName, String profileId);
+   // long removeMember(String userName, String groupName) throws ItemNotFoundException;
     
     /**
      * Move ownership of a component or profile from a user to a group
-     * @param principal
-     * @param groupId
-     * @param componentId
+     * @param principal name of the owner principal
+     * @param groupName target group name
+     * @param componentId component to transfer
      */
-    void transferItemOwnershipFromUserToGroup(String principal, long groupId, String componentId);
+    void transferItemOwnershipToGroup(String principal, String groupId, String componentId) throws UserUnauthorizedException;
+
+    /**
+     * Move ownership of a component or profile from a user to a group
+     * @param principal name of the owner principal
+     * @param groupId target group id
+     * @param componentId component to transfer
+     */
+    void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) throws UserUnauthorizedException;
 
     /**
      * Get component IDs in a group
@@ -132,17 +111,25 @@ public interface GroupService {
     List<String> getComponentIdsInGroup(long groupId);
 
     /**
-     * Get profile IDs in a group
-     * @param groupId
-     * @return
-     */
-    List<String> getProfileIdsInGroup(long groupId);
-    
-    /**
      * Get a list of groups the item is a member of. While it's technically possible for an item to belong to none, one or multiple groups, the transferXOwnerwhip methods make sure
      * an item belongs only to a single group at most, thus this method returns at most a single group for all practical purposes.
      * @param itemId
      * @return List of groups
      */
     List<Group> getGroupsTheItemIsAMemberOf(String itemId);
+    
+    /**
+     * Get profile IDs in a group
+     * @param groupId
+     * @return
+     */
+    List<String> getProfileIdsInGroup(long groupId);
+    
+    List<RegistryUser> getUsersInGroup(long groupId);
+    
+    boolean userGroupMember(String principalName, long groupId);
+   
+    public  Number  getGroupIdByName(String groupName) throws ItemNotFoundException;
+    
+    public  String  getGroupNameById(long groupId) throws ItemNotFoundException;
 }

@@ -7,6 +7,7 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.editor.Editor;
 	import clarin.cmdi.componentregistry.importer.Importer;
 	import clarin.cmdi.componentregistry.services.Config;
+	import clarin.cmdi.componentregistry.services.RegistrySpace;
 	
 	import flash.events.Event;
 	
@@ -53,7 +54,7 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		public function loadStartup():void {
-			if (Config.instance.space == Config.SPACE_USER && !Credentials.instance.isLoggedIn()) {
+			if ((Config.instance.registrySpace.space == Config.SPACE_PRIVATE || Config.instance.registrySpace.space == Config.SPACE_GROUP) && !Credentials.instance.isLoggedIn()) {
 				checkLogin();
 			} else {
 				if (Config.instance.startupItem) {
@@ -75,14 +76,29 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 		
 		public function switchToBrowse(itemDescription:ItemDescription):void {
-			if (itemDescription != null) {
-				if (Config.instance.space == itemDescription.space) {
-					browse.refresh();
-				} else {
-					Config.instance.userSpace = itemDescription.space;
+			if (itemDescription != null) {				
+				
+				//Alert.show(itemDescription.id + " " +itemDescription.isPrivate + " " + Config.instance.registrySpace.space + " "+Config.instance.registrySpace.groupId);
+				
+				if (itemDescription.isPrivate) {
+					if (Config.instance.registrySpace.space == Config.SPACE_PUBLISHED) {
+						// from public registry we can save only to a private space
+					    Config.instance.registrySpace = new RegistrySpace(Config.SPACE_PRIVATE, "");
+					} else {
+						// registry, goup of private, stays the same
+					}
+				} else {					
+					if (Config.instance.registrySpace.space != Config.SPACE_PUBLISHED) {
+						// the item has been published, go to public space
+						Config.instance.registrySpace = new RegistrySpace( Config.SPACE_PUBLISHED, "");
+					} else {
+						// public item in a public registry, the registry setting stays intact
+					}
 				}
+				
+				browse.refresh();
 				browse.setSelectedDescription(itemDescription);
-			}
+			} 
 			this.selectedItem = itemDescription;
 			this.selectedChild = browse;
 		}
@@ -93,11 +109,16 @@ package clarin.cmdi.componentregistry.common.components {
 		
 		private function doSwitchToEditor(itemDescription:ItemDescription):void {
 			this.selectedChild = editor;
-			if(itemDescription != null) {
+			
+			//memoise registry space of config
+			//because component palette can alter it (unwanted side effect)
+		   editor.registrySpaceEditor = new RegistrySpace(Config.instance.registrySpace.space, Config.instance.registrySpace.groupId);
+		   
+		   if(itemDescription != null) {
 				this.selectedItem = itemDescription;
 				editor.setDescription(itemDescription);
 			}
-		}
+		   }
 		
 		public function switchToImport():void {
 			this.selectedChild = importer;
@@ -109,7 +130,7 @@ package clarin.cmdi.componentregistry.common.components {
 				if (selectedItem) {
 					itemId = selectedItem.id;
 				}
-				loginPanel.show(this, RegistryView(this.selectedChild).getType(), Config.instance.space, itemId);
+				loginPanel.show(this, RegistryView(this.selectedChild).getType(), Config.instance.registrySpace.space, itemId);
 			}
 		}
 		

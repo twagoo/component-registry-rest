@@ -5,6 +5,7 @@ package clarin.cmdi.componentregistry.common.components {
 	import clarin.cmdi.componentregistry.common.ItemDescription;
 	import clarin.cmdi.componentregistry.common.StyleConstants;
 	import clarin.cmdi.componentregistry.editor.CMDComponentXMLEditor;
+	import clarin.cmdi.componentregistry.editor.model.CMDComponent;
 	import clarin.cmdi.componentregistry.editor.model.CMDModelFactory;
 	import clarin.cmdi.componentregistry.services.ComponentInfoService;
 	import clarin.cmdi.componentregistry.services.ComponentListService;
@@ -39,24 +40,34 @@ package clarin.cmdi.componentregistry.common.components {
 			super();
 			this.editable = editable;
 			this.componentId = componentId;			
-			this.item = Config.instance.getComponentsSrv(Config.SPACE_USER).findDescription(componentId);
+			styleName = StyleConstants.EXPANDING_COMPONENT;		
+
+			this.item = Config.instance.getCurrentComponentsSrv().findDescription(componentId);
+			// item not from current space? try public...
 			if (this.item==null) {
-				this.item = Config.instance.getComponentsSrv(Config.SPACE_PUBLIC).findDescription(componentId);
+				this.item = Config.instance.getPublicComponentsSrv().findDescription(componentId);
 			}
-			styleName = StyleConstants.EXPANDING_COMPONENT;
-			if (item && item.space == Config.SPACE_USER) {
+			if (this.item==null) {
+				// retrieve the item by ID
+				componentSrv.addEventListener(ComponentInfoService.COMPONENT_LOADED, setRetrievedItem);
+				componentSrv.loadFromUrl(Config.instance.componentInfoUrl + componentId);
+			} else {
+				//item already available
+				processItem();
+			}
+		}
+		
+		private function setRetrievedItem(event:Event):void {
+			this.item = componentSrv.component.description;
+			processItem();
+		}
+		
+		private function processItem():void {
+			if (item && item.isPrivate) {
 				this.setStyle("borderColor", StyleConstants.USER_BORDER_COLOR);
 			}
 			if (item!=null)
 				updateView();
-			//unfortunately the componend and profile services may overlook components from groups, so we have to ask the backend
-			else{
-				Config.instance.getComponentsSrv(Config.SPACE_USER).getComponent(componentId, function(item:ItemDescription):void{
-					setStyle("borderColor", StyleConstants.GROUP_BORDER_COLOR);
-					setItem(item);
-					updateView();
-				});
-			}
 		}
 		
 		private function updateView():void{
@@ -116,7 +127,6 @@ package clarin.cmdi.componentregistry.common.components {
 		}
 
 		private function handleComponentLoaded(event:Event):void {
-			trace("ExpandingComponentLable's handleComponentLoaded is called, it is calling CMDComponentLabel");
 			var comp:Component = componentSrv.component;
 			if (editable) {
 				expanded = new CMDComponentXMLEditor();

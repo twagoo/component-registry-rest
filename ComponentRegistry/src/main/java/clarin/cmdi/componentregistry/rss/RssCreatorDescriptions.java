@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.rss;
 
 import clarin.cmdi.componentregistry.DatesHelper;
-import clarin.cmdi.componentregistry.model.AbstractDescription;
+import clarin.cmdi.componentregistry.model.BaseDescription;
 import java.util.Comparator;
 import java.util.List;
 
@@ -9,11 +9,11 @@ import java.util.List;
  *
  * @author olhsha
  */
-public class RssCreatorDescriptions<T extends AbstractDescription> extends RssCreator<T> {
+public class RssCreatorDescriptions<T extends BaseDescription> extends RssCreator<T> {
 
     /**
      *
-     * @param userspace if "true" then profiles and components from the user's
+     * @param isPrivate if "true" then profiles and components from the user's
      * workspace, otherwise -- public (uri-parameter)
      * @param baseURI where the database is located
      * @param descriptionType "profile" or "component"
@@ -22,11 +22,11 @@ public class RssCreatorDescriptions<T extends AbstractDescription> extends RssCr
      * for the channel will be created
      * @param comparator compare descriptions by dates
      */
-    public RssCreatorDescriptions(boolean userspace, String baseURI, String descriptionType,
-            int limit, List<T> descriptions, Comparator<T> comparator) {
-        super(userspace, baseURI, limit, descriptions);
+    public RssCreatorDescriptions(String baseURI, String descriptionType,
+            int limit, List<T> descriptions, Comparator<T> comparator, String title) {
+        super(baseURI, limit, descriptions);
         setChannelLink(baseURI + "/");
-        setChannelTitle((userspace ? "Your workspace " : "Public ") + descriptionType);
+        setChannelTitle(title);
         setChannelDescription(String.format("News feed for the %s", descriptionType));
         setComparator(comparator);
     }
@@ -40,7 +40,7 @@ public class RssCreatorDescriptions<T extends AbstractDescription> extends RssCr
      */
     @Override
     protected RssItem fromArgToRssItem(T desc) {
-        String href = getBaseURI() + "?item=" + desc.getId() + (userspace ? "&space=user" : "");
+        String href = getBaseURI() + "?item=" + desc.getId();
         RssItem retval = new RssItem();
         retval.setDescription(desc.getDescription());
         retval.setGuid(makeGuid(href));

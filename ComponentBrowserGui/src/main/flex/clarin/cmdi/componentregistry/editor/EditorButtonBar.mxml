@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:editor="clarin.cmdi.componentregistry.editor.*"
 		 width="400"
 		 creationComplete="init()"
 		 paddingTop="10"
@@ -12,14 +13,12 @@
 		[Event(name="cancelClick", type="flash.events.MouseEvent")]
 	</mx:Metadata>
 		
-	<mx:HBox width="400" height="30">
+	<mx:HBox width="800" height="30">
 	<mx:Button id="saveBtn"
 			   label="Save"
-			   click="dispatchEvent(new MouseEvent('saveClick'))"
-			   enabled="false"
-			   />
+			   click="dispatchEvent(new MouseEvent('saveClick'))"/>
 	<mx:Button id="saveAsNewBtn"
-			   label="Save as new"
+			   label="Save as new in your private space"
 			   click="dispatchEvent(new MouseEvent('saveAsNewClick'))"/>
 	<mx:Button id="publishBtn"
 			   label="Publish in public space"
@@ -28,13 +27,11 @@
 	<mx:Button id="cancelBtn"
 			   label="Cancel"
 			   click="dispatchEvent(new MouseEvent('cancelClick'))"/>
-
 	</mx:HBox>
 	
 	<mx:Script>
 		<![CDATA[
 			import clarin.cmdi.componentregistry.services.Config;
-			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.events.ListEvent;
@@ -45,8 +42,11 @@
 			private var previousSelectedIndex:int=0;
 			private static var currentSelectedGroup:String="";
 			
+			
 			public function init():void{
 			}
+			
+			
 			
 		]]>
 	</mx:Script>
