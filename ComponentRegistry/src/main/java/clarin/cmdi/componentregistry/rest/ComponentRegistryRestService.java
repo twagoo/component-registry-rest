@@ -30,6 +30,7 @@ import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
+import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
@@ -68,8 +69,6 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +88,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Path("/registry")
 @Service
 @Transactional(rollbackFor = {Exception.class, ValidationException.class})
+@Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
 public class ComponentRegistryRestService implements
         IComponentRegistryRestService {
 
@@ -181,6 +181,12 @@ public class ComponentRegistryRestService implements
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "A listing of the descriptions of components in the specified registry space")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Registry requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public registry is not owned by current user"),
+        @ApiResponse(code = 404, message = "Registry space does not exist")
+    })
     public List<ComponentDescription> getRegisteredComponents(
             @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
             @QueryParam(GROUPID_PARAM) String groupId,
@@ -229,6 +235,12 @@ public class ComponentRegistryRestService implements
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "A listing of the descriptions of profiles in the specified registry space")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Registry requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public registry is not owned by current user"),
+        @ApiResponse(code = 404, message = "Registry space does not exist")
+    })
     public List<ProfileDescription> getRegisteredProfiles(
             @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
             @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
@@ -278,6 +290,12 @@ public class ComponentRegistryRestService implements
     @Path("/components/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "The component specification of a single component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response getRegisteredComponent(
             @PathParam("componentId") String componentId) throws IOException {
         LOG.debug("Component with id: {} is requested.", componentId);
@@ -300,9 +318,11 @@ public class ComponentRegistryRestService implements
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Get the component specification XML a single profile", response = CMDComponentSpec.class)
+    @ApiOperation(value = "The component specification of a single profile")
     @ApiResponses(value = {
-        @ApiResponse(code = 403, message = "Profile does not exist")
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
     })
     public Response getRegisteredProfile(
             @PathParam("profileId") String profileId) throws IOException {
@@ -325,6 +345,10 @@ public class ComponentRegistryRestService implements
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+    @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single component (publicly accessible regardless of state!)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response getRegisteredComponentRawType(
             @PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) throws ComponentRegistryException {
 
@@ -422,6 +446,10 @@ public class ComponentRegistryRestService implements
     @Path("/components/usage/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a descriptions listing of components that use the identified component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated")
+    })
     public List<BaseDescription> getComponentUsage(
             @PathParam("componentId") String componentId) throws ComponentRegistryException, IOException {
 
@@ -456,6 +484,12 @@ public class ComponentRegistryRestService implements
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a listing of all comments that have been made on the identified profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public List<Comment> getCommentsFromProfile(
             @PathParam("profileId") String profileId)
             throws IOException {
@@ -486,6 +520,12 @@ public class ComponentRegistryRestService implements
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a listing of all comments that have been made on the identified component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public List<Comment> getCommentsFromComponent(
             @PathParam("componentId") String componentId)
             throws IOException {
@@ -516,6 +556,12 @@ public class ComponentRegistryRestService implements
     @Path("/profiles/{profileId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a single comment on a profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Component requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public component is not owned by current user"),
+        @ApiResponse(code = 404, message = "Component or comment does not exist")
+    })
     public Comment getSpecifiedCommentFromProfile(
             @PathParam("profileId") String profileId,
             @PathParam("commentId") String commentId)
@@ -545,6 +591,12 @@ public class ComponentRegistryRestService implements
     @Path("/components/{componentId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a single comment on a component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Component requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public component is not owned by current user"),
+        @ApiResponse(code = 404, message = "Component or comment does not exist")
+    })
     public Comment getSpecifiedCommentFromComponent(
             @PathParam("componentId") String componentId,
             @PathParam("commentId") String commentId)
@@ -581,6 +633,7 @@ public class ComponentRegistryRestService implements
     @Override
     @POST
     @Path("/profiles/{profileId}")
+    @ApiOperation(value = "Allows for deletion of single profile (workaround for Flex which does not support the DELETE method)")
     public Response manipulateRegisteredProfile(
             @PathParam("profileId") String profileId,
             @FormParam("method") String method) {
@@ -594,6 +647,7 @@ public class ComponentRegistryRestService implements
     @Override
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
+    @ApiOperation(value = "Allows for deletion of single profile comment (workaround for Flex which does not support the DELETE method)")
     public Response manipulateCommentFromProfile(
             @PathParam("profileId") String profileId,
             @PathParam("commentId") String commentId,
@@ -608,6 +662,7 @@ public class ComponentRegistryRestService implements
     @Override
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
+    @ApiOperation(value = "Allows for deletion of single component comment (workaround for Flex which does not support the DELETE method)")
     public Response manipulateCommentFromComponent(
             @PathParam("componentId") String componentId,
             @PathParam("commentId") String commentId,
@@ -619,11 +674,16 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    // TODO: test via POSTMAN
     @Override
     @POST
     @Path("/profiles/{profileId}/publish")
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Changes the state of the specified profile to published")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response publishRegisteredProfile(
             @PathParam("profileId") String profileId,
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
@@ -672,6 +732,12 @@ public class ComponentRegistryRestService implements
     @POST
     @Path("/profiles/{profileId}/update")
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Updates an already registered (but unpublished) profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response updateRegisteredProfile(
             @PathParam("profileId") String profileId,
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
@@ -739,11 +805,10 @@ public class ComponentRegistryRestService implements
      * @param method
      * @return
      */
-    // twan: why do we need it?
-    // TODO: test via POSTMAN
     @Override
     @POST
     @Path("/components/{componentId}")
+    @ApiOperation(value = "Allows for deletion of single component (workaround for Flex which does not support the DELETE method)")
     public Response manipulateRegisteredComponent(
             @PathParam("componentId") String componentId,
             @FormParam("method") String method) {
@@ -754,11 +819,16 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    // TODO: test via POSTMAN
     @Override
     @POST
     @Path("/components/{componentId}/publish")
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Changes the state of the specified component to published")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response publishRegisteredComponent(
             @PathParam("componentId") String componentId,
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
@@ -812,6 +882,12 @@ public class ComponentRegistryRestService implements
     @POST
     @Path("/components/{componentId}/update")
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Updates an already registered (but unpublished) component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response updateRegisteredComponent(
             @PathParam("componentId") String componentId,
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
@@ -879,6 +955,12 @@ public class ComponentRegistryRestService implements
     @Override
     @DELETE
     @Path("/components/{componentId}")
+    @ApiOperation(value = "Deletes the component with the specified ID from its registry")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response deleteRegisteredComponent(
             @PathParam("componentId") String componentId) {
         try {
@@ -923,11 +1005,11 @@ public class ComponentRegistryRestService implements
     @Override
     @DELETE
     @Path("/profiles/{profileId}")
-    @ApiOperation(value = "Deletes a profile from the registry")
+    @ApiOperation(value = "Deletes the profile with the specified ID from its registry")
     @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not logged authenticated"),
-        @ApiResponse(code = 403, message = "Profile is not owned by current user and user is no administrator or profile is published and has been consolidated into the registry"),
-        @ApiResponse(code = 404, message = "Profile does not exist")
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 404, message = "Item does not exist")
     })
     public Response deleteRegisteredProfile(
             @PathParam("profileId") String profileId) {
@@ -1090,6 +1172,10 @@ public class ComponentRegistryRestService implements
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+    @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single profile (publicly accessible regardless of state!)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response getRegisteredProfileRawType(
             @PathParam("profileId") final String profileId,
             @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
@@ -1177,6 +1263,11 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Registers a profile specification (data content) with the associated metadata (form content) in the user's private space")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Current user has no access")
+    })
     public Response registerProfile(
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
             @FormDataParam(NAME_FORM_FIELD) String name,
@@ -1218,6 +1309,11 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Registers a component specification (data content) with the associated metadata (form content) in the user's private space")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Current user has no access")
+    })
     public Response registerComponent(
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
             @FormDataParam(NAME_FORM_FIELD) String name,
@@ -1259,6 +1355,12 @@ public class ComponentRegistryRestService implements
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Publishes a comment on the specified component")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response registerCommentInComponent(
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
             @PathParam("componentId") String componentId) throws ComponentRegistryException {
@@ -1282,13 +1384,18 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    // TODO test with the POSTMAN
     @Override
     @POST
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
     @Consumes("multipart/form-data")
+    @ApiOperation(value = "Publishes a comment on the specified profile")
+    @ApiResponses(value = {
+        @ApiResponse(code = 401, message = "User is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+        @ApiResponse(code = 404, message = "Item does not exist")
+    })
     public Response registerCommentInProfile(
             @FormDataParam(DATA_FORM_FIELD) InputStream input,
             @PathParam("profileId") String profileId)
@@ -1319,6 +1426,7 @@ public class ComponentRegistryRestService implements
     @Path("/pingSession")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Keeps the session alive")
     public Response pingSession() {
         boolean stillActive = false;
         Principal userPrincipal = security.getUserPrincipal();
@@ -1815,6 +1923,7 @@ public class ComponentRegistryRestService implements
     @Path("/groups/usermembership")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a listing of groups the current user is a member of (empty list when unauthenticated)")
     public List<Group> getGroupsTheCurrentUserIsAMemberOf() {
         Principal principal = security.getUserPrincipal();
         if (principal == null) {
@@ -1829,6 +1938,7 @@ public class ComponentRegistryRestService implements
     @Path("/items/{itemId}/groups")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Returns a listing of groups to which an item belongs")
     public List<Group> getGroupsTheItemIsAMemberOf(@PathParam("itemId") String itemId) {
         return groupService.getGroupsTheItemIsAMemberOf(itemId);
     }
@@ -1838,6 +1948,10 @@ public class ComponentRegistryRestService implements
     @Path("/items/{itemId}/transferownership")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
         MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Transfers an item to the specified group (either from the private space or another group)")
+    @ApiResponses(value = {
+        @ApiResponse(code = 403, message = "Current user has no access")
+    })
     public Response transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
             @QueryParam(GROUPID_PARAM) long groupId) throws IOException {
         Principal principal = security.getUserPrincipal();
@@ -1856,8 +1970,8 @@ public class ComponentRegistryRestService implements
         MediaType.APPLICATION_JSON})
     @ApiOperation(value = "The description (metadata) of a single component or profile item")
     @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated and authentication is required"),
-        @ApiResponse(code = 403, message = "Item is not accessible to the current user"),
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
         @ApiResponse(code = 404, message = "Item does not exist")
     })
     public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
