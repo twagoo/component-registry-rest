@@ -43,27 +43,22 @@ import org.springframework.util.Assert;
 /**
  *
  * Test groups:
- * 
+ *
  * A
- *      Owner: Dummy
- *      Members: -
- *      Items: profile-1, component-1, component-2
- * 
+ * Owner: Dummy Members: - Items: profile-1, component-1, component-2
+ *
  * B
- *      Owner: anotherPrincipal
- *      Members: Dummy
- *      Items: Bprofile-1, Bcomponent-1, Bcomponent-2
- * 
+ * Owner: anotherPrincipal Members: Dummy Items: Bprofile-1, Bcomponent-1,
+ * Bcomponent-2
+ *
  * C
- *      Owner: anotherPrincipal
- *      Members: -
- *      Items: Cprofile-1, Ccomponent-1, Ccomponent-2
- * 
+ * Owner: anotherPrincipal Members: - Items: Cprofile-1, Ccomponent-1,
+ * Ccomponent-2
+ *
  * D
- *      Owner: anotherPrincipal
- *      Members: Dummy, anotherPrincipal
- *      Items: Dprofile-1, Dcomponent-1, Dcomponent-2
- * 
+ * Owner: anotherPrincipal Members: Dummy, anotherPrincipal Items: Dprofile-1,
+ * Dcomponent-1, Dcomponent-2
+ *
  * @author olhsha
  * @author twagoo
  */
@@ -159,7 +154,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
     }
 
-     private void MakeGroupC() throws ItemNotFoundException{
+    private void MakeGroupC() throws ItemNotFoundException {
         groupService.createNewGroup("group C", "anotherPrincipal");
     }
 
@@ -188,7 +183,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         groupService.addOwnership(ownership);
     }
 
-     private void MakeGroupD() throws ItemNotFoundException{
+    private void MakeGroupD() throws ItemNotFoundException {
         groupService.createNewGroup("group D", "anotherPrincipal");
         groupService.makeMember("anotherPrincipal", "group D");
         groupService.makeMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), "group D");
@@ -219,7 +214,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         groupService.addOwnership(ownership);
     }
 
-
 //    List<Group> getGroupsTheCurrentUserIsAMemberOf();   
     @Test
     public void testGetGroupsTheCurrentUserIsAMemberOf() throws ItemNotFoundException {
@@ -238,6 +232,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
     }
 //    Response transferItemOwnershipToGroup(String itemId, long groupId) throws IOException;   
 //   
+
     @Test
     public void testTransferOwnership() throws Exception {
         System.out.println("test makeTransferOwnership");
@@ -277,7 +272,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
     }
 
-     
     @Test
     public void testTransferOwnershipBetweenGroups() throws Exception {
         System.out.println("test makeTransferOwnership");
@@ -287,7 +281,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupC();
         fillUpGroupD();
         // test itself
-        
+
         // this profile was created and moved into group D by someone else
         String test_profile_id = ProfileDescription.PROFILE_PREFIX + "Dprofile-1";
         // try to move to group C
@@ -295,7 +289,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .path("/registry/items/" + test_profile_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am member of both groups, so should be allowed
         assertEquals("Moving between groups should be allowed as long as user is member", 200, cr.getStatus());
-        
+
         // this component was created and moved into group D by someone else
         String test_component_id = ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1";
         // try to move to group C
@@ -303,18 +297,17 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .path("/registry/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am not a member of groups C, so should not be allowed
         assertEquals("Moving between groups should not be allowed if user is not member", 403, cr.getStatus());
-        
-        
-       // component in group C
+
+        // component in group C
         test_component_id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
         // try to move to group B (which I am a member of)
         cr = this.getAuthenticatedResource(getResource()
                 .path("/registry/items/" + test_component_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am not a member of group C, so should not be allowed
         assertEquals("Moving between groups should not be allowed if user is not member", 403, cr.getStatus());
-        
+
     }
-    
+
     @Test
     public void testGetGroupProfilesAndComponents() throws Exception {
 
@@ -409,7 +402,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 "anotherPrincipal");
         (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1", ProfileDescription.PROFILE_PREFIX + "Cprofile-1", "anotherPrincipal");
 
-                // lists 
+        // lists 
         List<Comment> response = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/"))
                 .accept(MediaType.APPLICATION_XML)
@@ -496,7 +489,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupB();
         fillUpGroupC();
 
-         // lists of profiles and components
+        // lists of profiles and components
         Rss response = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
@@ -535,7 +528,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 "anotherPrincipal");
         (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1", ProfileDescription.PROFILE_PREFIX + "Cprofile-1", "anotherPrincipal");
 
-                // lists 
+        // lists 
         response = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
@@ -1098,13 +1091,13 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         ClientResponse resp = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + id + "/xsd"))
                 .accept(MediaType.TEXT_XML).get(ClientResponse.class);
-        assertEquals(403, resp.getStatus());
+        assertEquals("XSD should always be available", 200, resp.getStatus());
 
         id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
         resp = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + id + "/xsd"))
                 .accept(MediaType.TEXT_XML).get(ClientResponse.class);
-        assertEquals(403, resp.getStatus());
+        assertEquals("XSD should always be available", 200, resp.getStatus());
 
     }
 

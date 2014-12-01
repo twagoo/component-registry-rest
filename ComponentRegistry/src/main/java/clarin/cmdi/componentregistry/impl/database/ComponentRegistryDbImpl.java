@@ -226,9 +226,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
     }
 
-    private ProfileDescription getProfileDescription(String id) throws ComponentRegistryException {
+    @Override
+    public ProfileDescription getProfileDescription(String id) throws ComponentRegistryException, ItemNotFoundException {
         try {
-            return ComponentUtils.toProfile(componentDao.getByCmdId(id));
+            final BaseDescription descr = componentDao.getByCmdId(id);
+            if (descr == null) {
+                throw new ItemNotFoundException("Profile not found:" + id);
+            } else {
+                return ComponentUtils.toProfile(descr);
+            }
         } catch (DataAccessException ex) {
             throw new ComponentRegistryException("Database access error while trying to get profile description", ex);
         }
@@ -270,9 +276,15 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         }
     }
 
-    private ComponentDescription getComponentDescription(String id) throws ComponentRegistryException {
+    @Override
+    public ComponentDescription getComponentDescription(String id) throws ComponentRegistryException, ItemNotFoundException {
         try {
-            return ComponentUtils.toComponent(componentDao.getByCmdId(id));
+            final BaseDescription descr = componentDao.getByCmdId(id);
+            if (descr == null) {
+                throw new ItemNotFoundException("Component not found: " + id);
+            } else {
+                return ComponentUtils.toComponent(descr);
+            }
         } catch (DataAccessException ex) {
             throw new ComponentRegistryException("Database access error while trying to get component description", ex);
         }
@@ -933,7 +945,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (spec != null && hasComponentId(componentId, spec.getCMDComponent())) {
                 LOG.debug("Component {} used in component {}", componentId, spec.getHeader().getID());
-                result.add(getComponentDescription(id));
+                try {
+                    result.add(getComponentDescription(id));
+                } catch (ItemNotFoundException ex) {
+                    throw new ComponentRegistryException("Component not found", ex);
+                }
             }
         }
         return result;
@@ -950,7 +966,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
             if (profile != null && hasComponentId(componentId, profile.getCMDComponent())) {
                 LOG.debug("Component {} used in profile {}", componentId, profile.getHeader().getID());
-                result.add(getProfileDescription(id));
+                try {
+                    result.add(getProfileDescription(id));
+                } catch (ItemNotFoundException ex) {
+                    throw new ComponentRegistryException("Profile not found", ex);
+                }
             }
         }
         return result;
