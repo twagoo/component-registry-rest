@@ -48,6 +48,7 @@ public interface ComponentRegistry {
 
     ComponentDescription getComponentDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
+    ComponentDescription getComponentDescription(String id) throws ComponentRegistryException, ItemNotFoundException;
     /**
      *
      * @return List of profile descriptions ordered by name ascending
@@ -73,6 +74,8 @@ public interface ComponentRegistry {
 
     ProfileDescription getProfileDescriptionAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
+    ProfileDescription getProfileDescription(String id) throws ComponentRegistryException, ItemNotFoundException;
+    
     CMDComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     CMDComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;

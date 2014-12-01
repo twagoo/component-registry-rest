@@ -355,84 +355,79 @@ public class ComponentRegistryRestService implements
         LOG.debug("Component with id: {} and rawType: {} is requested.", componentId, rawType);
         try {
             final ComponentRegistry registry = this.getBaseRegistry();
-            try {
-                ComponentDescription desc = registry.getComponentDescriptionAccessControlled(componentId);
-                StreamingOutput result = null;
-                String fileName = desc.getName() + "." + rawType;
-                if ("xml".equalsIgnoreCase(rawType)) {
-                    result = new StreamingOutput() {
-                        @Override
-                        public void write(OutputStream output) throws IOException,
-                                WebApplicationException {
+            ComponentDescription desc = registry.getComponentDescription(componentId);
+            StreamingOutput result = null;
+            String fileName = desc.getName() + "." + rawType;
+            if ("xml".equalsIgnoreCase(rawType)) {
+                result = new StreamingOutput() {
+                    @Override
+                    public void write(OutputStream output) throws IOException,
+                            WebApplicationException {
+                        try {
                             try {
                                 try {
-                                    try {
-                                        registry.getMDComponentAsXml(componentId, output);
-                                    } catch (ItemNotFoundException e1) {
-                                        LOG.warn("Could not retrieve component {}",
-                                                componentId);
-                                        LOG.debug("Details", e1);
-                                        throw new WebApplicationException(e1, Response
-                                                .serverError()
-                                                .status(Status.INTERNAL_SERVER_ERROR)
-                                                .build());
-                                    }
-                                } catch (ComponentRegistryException e) {
+                                    registry.getMDComponentAsXml(componentId, output);
+                                } catch (ItemNotFoundException e1) {
                                     LOG.warn("Could not retrieve component {}",
                                             componentId);
-                                    LOG.debug("Details", e);
-                                    throw new WebApplicationException(e, Response
+                                    LOG.debug("Details", e1);
+                                    throw new WebApplicationException(e1, Response
                                             .serverError()
                                             .status(Status.INTERNAL_SERVER_ERROR)
                                             .build());
                                 }
-
-                            } catch (UserUnauthorizedException e2) {
-                                LOG.error(e2.toString());
+                            } catch (ComponentRegistryException e) {
+                                LOG.warn("Could not retrieve component {}",
+                                        componentId);
+                                LOG.debug("Details", e);
+                                throw new WebApplicationException(e, Response
+                                        .serverError()
+                                        .status(Status.INTERNAL_SERVER_ERROR)
+                                        .build());
                             }
+
+                        } catch (UserUnauthorizedException e2) {
+                            LOG.error(e2.toString());
                         }
-                    };
-                    return createDownloadResponse(result, fileName);
-                } else if ("xsd".equalsIgnoreCase(rawType)) {
-                    result = new StreamingOutput() {
-                        @Override
-                        public void write(OutputStream output) throws IOException,
-                                WebApplicationException {
+                    }
+                };
+                return createDownloadResponse(result, fileName);
+            } else if ("xsd".equalsIgnoreCase(rawType)) {
+                result = new StreamingOutput() {
+                    @Override
+                    public void write(OutputStream output) throws IOException,
+                            WebApplicationException {
+                        try {
                             try {
                                 try {
-                                    try {
-                                        registry.getMDComponentAsXsd(componentId, output);
-                                    } catch (ItemNotFoundException e1) {
-                                        LOG.warn("Could not retrieve component {}",
-                                                componentId);
-                                        LOG.debug("Details", e1);
-                                        throw new WebApplicationException(e1, Response
-                                                .serverError()
-                                                .status(Status.INTERNAL_SERVER_ERROR)
-                                                .build());
-                                    }
-                                } catch (ComponentRegistryException e) {
+                                    registry.getMDComponentAsXsd(componentId, output);
+                                } catch (ItemNotFoundException e1) {
                                     LOG.warn("Could not retrieve component {}",
                                             componentId);
-                                    LOG.debug("Details", e);
-                                    throw new WebApplicationException(e, Response
+                                    LOG.debug("Details", e1);
+                                    throw new WebApplicationException(e1, Response
                                             .serverError()
                                             .status(Status.INTERNAL_SERVER_ERROR)
                                             .build());
                                 }
-                            } catch (UserUnauthorizedException e2) {
-                                LOG.error(e2.toString());
+                            } catch (ComponentRegistryException e) {
+                                LOG.warn("Could not retrieve component {}",
+                                        componentId);
+                                LOG.debug("Details", e);
+                                throw new WebApplicationException(e, Response
+                                        .serverError()
+                                        .status(Status.INTERNAL_SERVER_ERROR)
+                                        .build());
                             }
-
+                        } catch (UserUnauthorizedException e2) {
+                            LOG.error(e2.toString());
                         }
-                    };
-                    return createDownloadResponse(result, fileName);
-                } else {
-                    return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
-                }
 
-            } catch (UserUnauthorizedException e2) {
-                return Response.status(Status.FORBIDDEN).build();
+                    }
+                };
+                return createDownloadResponse(result, fileName);
+            } else {
+                return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
             }
         } catch (ItemNotFoundException e3) {
             return Response.status(Status.NOT_FOUND).build();
@@ -1185,7 +1180,7 @@ public class ComponentRegistryRestService implements
         try {
             final ComponentRegistry registry = this.getBaseRegistry();
 
-            ProfileDescription desc = registry.getProfileDescriptionAccessControlled(profileId);
+            final ProfileDescription desc = registry.getProfileDescription(profileId);
             if (desc == null) {
                 return Response.status(Status.NOT_FOUND).build();
             }
@@ -1232,8 +1227,6 @@ public class ComponentRegistryRestService implements
                 return Response.status(Status.NOT_FOUND).entity("Unsupported raw type " + rawType).build();
             }
             return createDownloadResponse(result, fileName);
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).build();
         } catch (ItemNotFoundException e) {
             return Response.serverError().status(Status.NOT_FOUND)
                     .entity("" + e.getMessage()).build();

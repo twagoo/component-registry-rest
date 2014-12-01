@@ -275,13 +275,13 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         ClientResponse resp = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + id + "/xsd"))
                 .accept(MediaType.TEXT_XML).get( ClientResponse.class);
-        assertEquals(403, resp.getStatus());
+        assertEquals("XSD should always be available", 200, resp.getStatus());
         
         id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
        resp = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + id + "/xsd"))
                 .accept(MediaType.TEXT_XML).get( ClientResponse.class);
-        assertEquals(403, resp.getStatus());
+        assertEquals("XSD should always be available", 200, resp.getStatus());
         
         
     }
