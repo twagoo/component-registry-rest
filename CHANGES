@@ -4,7 +4,6 @@ Release ComponentRegistry-1.14.1 (1 December 2014)
 - Component and profile XML and XSD are available without authentication
 
 Release ComponentRegistry-1.14.0 (28 November 2014)
-- Renamed components table, cleaned up sequences, indexes and constraints. Execute upgrade-1.15.1.sql
 - Merged profiles and components on persistence level into BaseComponent
 - Only one component DAO left: ComponentDao
 - DB upgrade script which migrates profiles into components
