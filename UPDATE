@@ -33,6 +33,10 @@ Version specific update instructions
   context.xml or application context fragment, as it is now provided within the web.xml 
   of the application itself.
 
+=== 1.14.2 ===
+
+No additional steps required.
+
 === 1.14.1 ===
 
 No additional steps required.
