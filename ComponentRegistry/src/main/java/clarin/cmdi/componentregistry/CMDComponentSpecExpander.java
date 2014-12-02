@@ -99,10 +99,19 @@ public abstract class CMDComponentSpecExpander {
 
     protected CMDComponentSpec expandProfile(String profileId) throws ComponentRegistryException {
         // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
-        CMDComponentSpec result = getUncachedProfile(profileId);//registry.getUncachedProfile(profileId);
-        CMDComponentType cmdComponent = result.getCMDComponent();
-        expandNestedComponent(Lists.newArrayList(cmdComponent), profileId);
-        return result;
+        CMDComponentSpec profileSpec = getUncachedProfile(profileId);
+        expandProfileSpec(profileSpec, profileId);
+        return profileSpec;
+    }
+
+    private void expandProfileSpec(CMDComponentSpec profileSpec, String profileId) throws ComponentRegistryException {
+        // make a temporary list of the root component (singleton)
+        final CMDComponentType rootComponent = profileSpec.getCMDComponent();
+        final ArrayList<CMDComponentType> rootComponentList = Lists.newArrayList(rootComponent);
+        // expand 'all' components
+        expandNestedComponent(rootComponentList, profileId);
+        // put the expanded root back in the profile spec
+        profileSpec.setCMDComponent(rootComponentList.get(0));
     }
 
 //    protected CMDComponentSpec expandComment(String commentId) throws ComponentRegistryException {

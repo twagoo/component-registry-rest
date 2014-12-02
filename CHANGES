@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-1.14.2 (2 December 2014)
+- Fixed a bug which caused incomplete component specification expansion
+
 Release ComponentRegistry-1.14.1 (1 December 2014)
 - Component and profile XML and XSD are available without authentication
 
