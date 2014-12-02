@@ -22,6 +22,12 @@ Procedure for updating
 Version specific update instructions
 -------------------------------------
 
+=== 1.15.0 ===
+
+- Remove the context parameter eu.clarin.cmdi.componentregistry.jpaDialect from the global
+  context.xml or application context fragment, as it is now provided within the web.xml 
+  of the application itself.
+
 === 1.14.1 ===
 
 No additional steps required.
