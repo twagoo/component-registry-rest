@@ -101,13 +101,13 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>Isocat Servlet</servlet-name>
-        <servlet-class>clarin.cmdi.componentregistry.servlet.IsocatServlet</servlet-class>
+        <servlet-name>Concept Registry Servlet</servlet-name>
+        <servlet-class>clarin.cmdi.componentregistry.servlet.ConceptRegistryServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Isocat Servlet</servlet-name>
-        <url-pattern>/isocat/*</url-pattern>
+        <servlet-name>Concept Registry Servlet</servlet-name>
+        <url-pattern>/ccr/*</url-pattern>
     </servlet-mapping>
     <servlet>
         <servlet-name>JerseyJaxrsConfig</servlet-name>

@@ -18,23 +18,23 @@ import org.slf4j.LoggerFactory;
  */
 public class Configuration {
 
-    private static Logger LOG = LoggerFactory.getLogger(Configuration.class);
+    private final static Logger LOG = LoggerFactory.getLogger(Configuration.class);
     //NOTE: Default values, can be overwritten in applicationContext.xml
     private String generalComponentSchema = "https://infra.clarin.eu/cmd/general-component-schema.xsd";
     private String component2SchemaXsl = "https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
-    private String isocatRestUrl = "http://www.isocat.org/rest/";
+    private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
 
     {//Default values
-	displayNameShibbolethKeys.add("displayName");
-	displayNameShibbolethKeys.add("commonName");
+        displayNameShibbolethKeys.add("displayName");
+        displayNameShibbolethKeys.add("commonName");
     }
-    private Map<String, String> schemaLocations = new HashMap<String, String>();
+    private final Map<String, String> schemaLocations = new HashMap<String, String>();
 
     {//Default values
-	schemaLocations.put(CMDComponentSpec.class.getName(),
-		"http://www.clarin.eu/cmd/ http://infra.clarin.eu/cmd/general-component-schema.xsd");
+        schemaLocations.put(CMDComponentSpec.class.getName(),
+                "http://www.clarin.eu/cmd/ http://infra.clarin.eu/cmd/general-component-schema.xsd");
     }
     private final static Configuration INSTANCE = new Configuration();
 
@@ -42,89 +42,88 @@ public class Configuration {
     }
 
     public static Configuration getInstance() {
-	return INSTANCE;
+        return INSTANCE;
     }
 
     public String getComponent2SchemaXsl() {
-	return component2SchemaXsl;
+        return component2SchemaXsl;
     }
 
     public List<String> getDisplayNameShibbolethKeys() {
-	return displayNameShibbolethKeys;
+        return displayNameShibbolethKeys;
     }
 
     public String getGeneralComponentSchema() {
-	return generalComponentSchema;
+        return generalComponentSchema;
     }
 
-    public String getIsocatRestUrl() {
-	return isocatRestUrl;
+    public String getCcrRestUrl() {
+        return ccrRestUrl;
     }
 
     public String getSchemaLocation(String key) {
-	return schemaLocations.get(key);
+        return schemaLocations.get(key);
     }
 
     public boolean isAdminUser(Principal principal) {
-	if (principal != null) {
-	    return principal.getName().trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
-		    && adminUsers.contains(principal.getName());
-	}
-	return false;
+        if (principal != null) {
+            return principal.getName().trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
+                    && adminUsers.contains(principal.getName());
+        }
+        return false;
     }
 
     public boolean isAdminUser(String name) {
-	if (name != null) {
-	    return name.trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
-		    && adminUsers.contains(name);
-	}
-	return false;
+        if (name != null) {
+            return name.trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
+                    && adminUsers.contains(name);
+        }
+        return false;
     }
-    
+
     public void setAdminUsers(Collection<String> adminUsers) {
-	LOG.debug("Setting adminUsers to {}", Arrays.toString(adminUsers.toArray()));
-	this.adminUsers = adminUsers;
+        LOG.debug("Setting adminUsers to {}", Arrays.toString(adminUsers.toArray()));
+        this.adminUsers = adminUsers;
     }
-    
-   
+
     /**
      *
      * @param adminUsers Whitespace-separated list of admin users
      */
     public void setAdminUsersList(String adminUsersList) {
-	String[] adminUsersArray = adminUsersList.trim().split("\\s+");
-	if (LOG.isDebugEnabled()) {
-	    LOG.info("Setting adminUsersList to {}", Arrays.toString(adminUsersArray));
-	}
-	setAdminUsers(Arrays.asList(adminUsersArray));
+        String[] adminUsersArray = adminUsersList.trim().split("\\s+");
+        if (LOG.isDebugEnabled()) {
+            LOG.info("Setting adminUsersList to {}", Arrays.toString(adminUsersArray));
+        }
+        setAdminUsers(Arrays.asList(adminUsersArray));
     }
 
     public void setComponent2SchemaXsl(String component2SchemaXsl) {
-	LOG.info("Setting component2SchemaXsl to {}", component2SchemaXsl);
-	this.component2SchemaXsl = component2SchemaXsl;
+        LOG.info("Setting component2SchemaXsl to {}", component2SchemaXsl);
+        this.component2SchemaXsl = component2SchemaXsl;
     }
 
     public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {
-	LOG.info("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
-	schemaLocations.put(CMDComponentSpec.class.getName(), componentSpecSchemaLocation);
+        LOG.info("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
+        schemaLocations.put(CMDComponentSpec.class.getName(), componentSpecSchemaLocation);
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {
-	LOG.info("Setting displayNameShibbolethKeys to {}", displayNameShibbolethKeys);
-	this.displayNameShibbolethKeys = displayNameShibbolethKeys;
+        LOG.info("Setting displayNameShibbolethKeys to {}", displayNameShibbolethKeys);
+        this.displayNameShibbolethKeys = displayNameShibbolethKeys;
     }
 
     public void setGeneralComponentSchema(String generalComponentSchema) {
-	LOG.info("Setting generalComponentSchema to {}", generalComponentSchema);
-	this.generalComponentSchema = generalComponentSchema;
+        LOG.info("Setting generalComponentSchema to {}", generalComponentSchema);
+        this.generalComponentSchema = generalComponentSchema;
     }
 
-    public void setIsocatRestUrl(String isocatRestUrl) {
-	LOG.info("Setting isocatRestUrl to {}", isocatRestUrl);
-	this.isocatRestUrl = isocatRestUrl;
+    public void setCcrRestUrl(String ccrRestUrl) {
+        LOG.info("Setting ccrRestUrl to {}", ccrRestUrl);
+        this.ccrRestUrl = ccrRestUrl;
     }
 
     public String[] getAdminUsersArray() {
-	return adminUsers.toArray(new String[0]);
+        return adminUsers.toArray(new String[0]);
     }
 }

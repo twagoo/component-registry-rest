@@ -75,17 +75,18 @@ i.e. development or testing environments. -->
     <servlet-mapping>
         <servlet-name>ComponentRegistry Web Application</servlet-name>
         <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>    
+    
     <servlet>
-        <servlet-name>Isocat Servlet</servlet-name>
-        <servlet-class>clarin.cmdi.componentregistry.servlet.IsocatServlet
-        </servlet-class>
+        <servlet-name>Concept Registry Servlet</servlet-name>
+        <servlet-class>clarin.cmdi.componentregistry.servlet.ConceptRegistryServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>Isocat Servlet</servlet-name>
-        <url-pattern>/isocat/*</url-pattern>
+        <servlet-name>Concept Registry Servlet</servlet-name>
+        <url-pattern>/ccr/*</url-pattern>
     </servlet-mapping>
+    
     <servlet>
         <servlet-name>JerseyJaxrsConfig</servlet-name>
         <servlet-class>com.wordnik.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>

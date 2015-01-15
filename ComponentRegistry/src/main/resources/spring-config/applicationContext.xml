@@ -50,8 +50,8 @@
 			value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
 		<property name="componentSpecSchemaLocation"
 			value="${eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation}" />
-		<property name="isocatRestUrl"
-			value="${eu.clarin.cmdi.componentregistry.isocatRestUrl}" />
+		<property name="ccrRestUrl"
+			value="${eu.clarin.cmdi.componentregistry.ccrRestUrl}" />
 		<!-- Extra attribute keys that are passed in a shibboleth authenticated 
 			request principal. You need to configure the shhaa.xml file to enable the 
 			extra attributes. -->
