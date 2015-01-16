@@ -58,7 +58,7 @@ package clarin.cmdi.componentregistry.services {
 		private static const PING_SESSION_URL:String = "/rest/registry/pingSession";
 		private static const USER_SETTINGS_URL:String = "/admin/userSettings";
 		private static const COMMENTS_URL_PATH:String = "/comments/";
-		private static const ISOCAT_SERVLET:String = "/isocat";
+		private static const ISOCAT_SERVLET:String = "/ccr";
 		private static const USER_GROUPS_MEMBERSHIP_URL:String = "/rest/registry/groups/usermembership";
 		
 		

@@ -124,7 +124,7 @@
 				<mx:VBox>
 					<mx:Button label="Use Controlled Vocabulary"
 							   click="setControlledVocabulary()"/>
-					<mx:Button label="Search in isocat..."
+					<mx:Button label="Search in concept registry..."
 							   click="handleIsocatButtonClick(event)"
 							   enabled="{enumerationGrid.conceptLinkEdit}"/>
 				</mx:VBox>
