@@ -112,6 +112,7 @@
 			<props>
 				<prop key="hibernate.dialect">${eu.clarin.cmdi.componentregistry.jpaDialect}</prop>
 				<prop key="hibernate.show_sql">false</prop>
+                                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
 				<!-- prop key="hibernate.hbm2ddl.auto">update</prop -->
 			</props>
 
