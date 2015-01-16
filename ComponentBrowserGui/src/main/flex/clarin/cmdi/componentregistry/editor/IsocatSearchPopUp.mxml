@@ -4,7 +4,7 @@
 				showCloseButton="true"
 				creationComplete="PopUpManager.centerPopUp(this)"
 				close="cleanUp();"
-				title="Search in Isocat.org">
+				title="Search in CLARIN Concept Registry">
 
 	<mx:Metadata>
 		[Event(name="OK", type="flash.events.Event")]

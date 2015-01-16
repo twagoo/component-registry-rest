@@ -51,7 +51,7 @@ package clarin.cmdi.componentregistry.editor {
 		}
 		
 		private function createSearchConceptLinkButton():void {
-			searchConceptLink.label = "Search in isocat...";
+			searchConceptLink.label = "Search in concept registry...";
 			searchConceptLink.addEventListener(MouseEvent.CLICK, handleButtonClick);
 		}
 		

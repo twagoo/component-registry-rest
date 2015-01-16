@@ -367,20 +367,20 @@ public class ComponentRegistryRestService implements
                             try {
                                 try {
                                     registry.getMDComponentAsXml(componentId, output);
-                                } catch (ItemNotFoundException e1) {
-                                    LOG.warn("Could not retrieve component {}",
-                                            componentId);
-                                    LOG.debug("Details", e1);
-                                    throw new WebApplicationException(e1, Response
+                                } catch (ItemNotFoundException e) {
+                                    LOG.warn("Could not retrieve component {}: {}",
+                                            componentId, e.getMessage());
+                                    LOG.debug("Details", e);
+                                    throw new WebApplicationException(Response
                                             .serverError()
                                             .status(Status.INTERNAL_SERVER_ERROR)
                                             .build());
                                 }
                             } catch (ComponentRegistryException e) {
-                                LOG.warn("Could not retrieve component {}",
-                                        componentId);
+                                LOG.warn("Could not retrieve component {}: {}",
+                                        componentId, e.getMessage());
                                 LOG.debug("Details", e);
-                                throw new WebApplicationException(e, Response
+                                throw new WebApplicationException(Response
                                         .serverError()
                                         .status(Status.INTERNAL_SERVER_ERROR)
                                         .build());
@@ -401,20 +401,20 @@ public class ComponentRegistryRestService implements
                             try {
                                 try {
                                     registry.getMDComponentAsXsd(componentId, output);
-                                } catch (ItemNotFoundException e1) {
-                                    LOG.warn("Could not retrieve component {}",
-                                            componentId);
-                                    LOG.debug("Details", e1);
-                                    throw new WebApplicationException(e1, Response
+                                } catch (ItemNotFoundException e) {
+                                    LOG.warn("Could not retrieve component {}: {}",
+                                            componentId, e.getMessage());
+                                    LOG.debug("Details", e);
+                                    throw new WebApplicationException(Response
                                             .serverError()
                                             .status(Status.INTERNAL_SERVER_ERROR)
                                             .build());
                                 }
                             } catch (ComponentRegistryException e) {
-                                LOG.warn("Could not retrieve component {}",
-                                        componentId);
+                                LOG.warn("Could not retrieve component {}: {}",
+                                        componentId, e.getMessage());
                                 LOG.debug("Details", e);
-                                throw new WebApplicationException(e, Response
+                                throw new WebApplicationException(Response
                                         .serverError()
                                         .status(Status.INTERNAL_SERVER_ERROR)
                                         .build());
@@ -1195,10 +1195,10 @@ public class ComponentRegistryRestService implements
                         try {
                             registry.getMDProfileAsXml(profileId, output);
                         } catch (Exception e) {
-                            LOG.warn("Could not retrieve component {}",
-                                    profileId);
+                            LOG.warn("Could not retrieve component {}: {}",
+                                    profileId, e.getMessage());
                             LOG.debug("Details", e);
-                            throw new WebApplicationException(e, Response
+                            throw new WebApplicationException(Response
                                     .serverError()
                                     .status(Status.INTERNAL_SERVER_ERROR)
                                     .build());
@@ -1213,10 +1213,10 @@ public class ComponentRegistryRestService implements
                         try {
                             registry.getMDProfileAsXsd(profileId, output);
                         } catch (Exception e) {
-                            LOG.warn("Could not retrieve component {}",
-                                    profileId);
+                            LOG.warn("Could not retrieve component {}: {}",
+                                    profileId, e.getMessage());
                             LOG.debug("Details", e);
-                            throw new WebApplicationException(e, Response
+                            throw new WebApplicationException(Response
                                     .serverError()
                                     .status(Status.INTERNAL_SERVER_ERROR)
                                     .build());

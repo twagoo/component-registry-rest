@@ -799,7 +799,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return "Registry of " + u.getName();
     }
 
-    private boolean canCurrentUserAccessDescription(String cmdId) throws ItemNotFoundException, AuthenticationRequiredException {
+    @Override
+    public boolean canCurrentUserAccessDescription(String cmdId) throws ItemNotFoundException, AuthenticationRequiredException {
         if (cmdId == null) {
             throw new ItemNotFoundException("Item with the null cmdIdentifier.");
         }
