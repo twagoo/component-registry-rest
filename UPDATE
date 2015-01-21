@@ -24,15 +24,9 @@ Version specific update instructions
 
 === 1.15.0 ===
 
-- ComponentRegistry no longer provides its own JDBC driver jar. In case the Tomcat 
-  container does NOT provide a suitable PostgreSQL JDBC driver yet:
-
-    - Download a suitable version and deploy it as a provided library in the Tomcat
-
 - Remove the context parameter eu.clarin.cmdi.componentregistry.jpaDialect from the global
   context.xml or application context fragment, as it is now provided within the web.xml 
   of the application itself.
-  
   
 === 1.14.5 ===
 
@@ -62,6 +56,12 @@ No additional steps required.
   <Parameter 
 	  name="eu.clarin.cmdi.componentregistry.jpaDialect" 
 	  value="org.hibernate.dialect.PostgreSQLDialect"/> 
+	  
+- ComponentRegistry no longer provides its own JDBC driver jar. In case the Tomcat 
+  container does NOT provide a suitable PostgreSQL JDBC driver yet:
+
+    - Download a suitable version and deploy it as a provided library in the Tomcat
+
 
 === 1.13 ===
 
