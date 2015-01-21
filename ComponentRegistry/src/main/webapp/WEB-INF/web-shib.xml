@@ -5,27 +5,31 @@
         any production environment should be.
 -->
 
-<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" 
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
     <display-name>ComponentRegistry</display-name>
     <description>Clarin Metadata Component Registry</description>
-
-
-    <context-param>
-        <param-name>ShhaaConfigLocation</param-name>
-        <param-value>/WEB-INF/shhaa.xml</param-value>
-    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+    
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath:spring-config/applicationContext.xml,classpath:spring-config/container-environment.xml
         </param-value>
     </context-param>
+    
+    <context-param>
+        <param-name>eu.clarin.cmdi.componentregistry.jpaDialect</param-name>
+        <param-value>org.hibernate.dialect.PostgreSQLDialect</param-value>
+    </context-param>
 
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    
-    
+    <context-param>
+        <param-name>ShhaaConfigLocation</param-name>
+        <param-value>/WEB-INF/shhaa.xml</param-value>
+    </context-param>    
 
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
