@@ -6,6 +6,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -24,6 +25,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,22 +101,56 @@ public class ConceptRegistryServlet extends HttpServlet {
 
         try {
             logger.debug("Transforming CCR response to response writer");
-            final Transformer transformer = ccr2dcifTemplates.newTransformer();
-            final Source source = new StreamSource(ccrResponse);
-            final Result result = new StreamResult(resp.getWriter());
-            transformer.transform(source, result);
-        } catch (TransformerConfigurationException ex) {
-            throw new ServletException("Could not configure transformer for converting CCR output to DCIF", ex);
-        } catch (TransformerException ex) {
-            throw new ServletException("Could not transform CCR output to DCIF", ex);
+            transformCCRResponse(ccrResponse, new StreamResult(resp.getWriter()));
         } finally {
             ccrResponse.close();
             resp.flushBuffer();
         }
     }
 
-    private void serveJSON(HttpServletResponse resp, final InputStream ccrResponse) throws IOException {
-        //TODO: Implement JSON response
-        resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "JSON not supported yet - to be implemented in backend");
+    private void serveJSON(HttpServletResponse resp, final InputStream ccrResponse) throws IOException, ServletException {
+        // Prepare response
+        resp.setContentType(MediaType.APPLICATION_JSON);
+        resp.setCharacterEncoding("UTF-8");
+
+        try {
+            logger.debug("Transforming CCR response to JSON");
+            // Make DCIF XML
+            final StringWriter xmlWriter = new StringWriter();
+            transformCCRResponse(ccrResponse, new StreamResult(xmlWriter));
+
+            // convert to JSON
+            logger.debug("Converting DCIF XML to JSON");
+            final JSONObject dcifJson = XML.toJSONObject(xmlWriter.toString());
+            
+            // extract Concept objects (strip off envelope)
+            final JSONObject dcSelection = dcifJson.getJSONObject("dcif:dataCategorySelection");
+            final JSONArray dcArray;
+            if (dcSelection.has("dcif:dataCategory")) {
+                dcArray = dcSelection.getJSONArray("dcif:dataCategory");
+            } else {
+                // no DCs, return an empty array
+                dcArray = new JSONArray();
+            }
+            // send back to client
+            resp.getWriter().write(dcArray.toString(4));
+        } catch (JSONException ex) {
+            throw new ServletException("Could not create JSON object", ex);
+        } finally {
+            ccrResponse.close();
+            resp.flushBuffer();
+        }
+    }
+
+    private void transformCCRResponse(final InputStream ccrResponse, final Result result) throws IOException, ServletException {
+        try {
+            final Transformer transformer = ccr2dcifTemplates.newTransformer();
+            final Source source = new StreamSource(ccrResponse);
+            transformer.transform(source, result);
+        } catch (TransformerConfigurationException ex) {
+            throw new ServletException("Could not configure transformer for converting CCR output to DCIF", ex);
+        } catch (TransformerException ex) {
+            throw new ServletException("Could not transform CCR output to DCIF", ex);
+        }
     }
 }

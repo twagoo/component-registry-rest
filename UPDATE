@@ -22,6 +22,17 @@ Procedure for updating
 Version specific update instructions
 -------------------------------------
 
+=== 1.14.5 ===
+
+The context parameter eu.clarin.cmdi.componentregistry.isocatRestUrl has been replaced
+with the new parameter eu.clarin.cmdi.componentregistry.ccrRestUrl. An example 
+configuration with the default value for the new parameter is:
+
+
+  <Parameter 
+  		name="eu.clarin.cmdi.componentregistry.ccrRestUrl" 
+  		value="https://openskos.meertens.knaw.nl/ccr/api/"/>
+
 === 1.14.2 ===
 
 No additional steps required.
