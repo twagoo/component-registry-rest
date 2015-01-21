@@ -10,7 +10,6 @@
   <version>1.0</version>
   <description>Parent pom for ComponentRegistry, see www.clarin.eu/cmdi.</description>
   <modules>
-    <module>ComponentBrowserGui</module>
     <module>ComponentRegistry</module>
   </modules>
 
@@ -20,7 +19,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ComponentBrowserGui.version>2.0-SNAPSHOT</ComponentBrowserGui.version>
     <ComponentRegistry.version>2.0-SNAPSHOT</ComponentRegistry.version>
   </properties>
   
