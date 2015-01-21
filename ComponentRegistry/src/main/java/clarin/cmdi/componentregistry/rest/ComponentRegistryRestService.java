@@ -690,6 +690,7 @@ public class ComponentRegistryRestService implements
         try {
             Principal principal = checkAndGetUserPrincipal();
             ComponentRegistry registry = this.getBaseRegistry();
+            registry.setRegistrySpace(RegistrySpace.PUBLISHED);
             ProfileDescription desc = registry.getProfileDescriptionAccessControlled(profileId);
             if (desc != null) {
                 if (desc.isPublic()) {

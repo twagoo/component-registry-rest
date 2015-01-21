@@ -169,7 +169,7 @@ public class MDValidator implements Validator {
                     return;
                 };
                 // a private component for a private registry is available only if its owner is the owner of the resgitry
-                if (registry.getRegistrySpace().equals(RegistrySpace.PRIVATE)) {
+                if (RegistrySpace.PRIVATE.equals(registry.getRegistrySpace())) {
                     if(registry.canCurrentUserAccessDescription(componentId)) {
                         return;
                     }
@@ -177,7 +177,7 @@ public class MDValidator implements Validator {
                     return;
 
                 } else { // a private component in a group registry is availabe only if it belongs to the group
-                    if (registry.getRegistrySpace().equals(RegistrySpace.GROUP)) {
+                    if (RegistrySpace.GROUP.equals(registry.getRegistrySpace())) {
                         if (registry.getGroupId() == null) {
                             errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + "in the group space, the group id is null");
                             return;
