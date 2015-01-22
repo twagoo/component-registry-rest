@@ -370,6 +370,7 @@
         <profile>
             <id>clarin</id>
             <properties>
+                <logging.level>warn</logging.level>
                 <serviceRootUrl>http://catalog.clarin.eu/ds/ComponentRegistry</serviceRootUrl>
                 <!-- Will be inserted in context.xml -->
                 <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
