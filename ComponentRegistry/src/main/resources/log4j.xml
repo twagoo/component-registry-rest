@@ -31,7 +31,7 @@
     <logger name="org.apache.wicket">
         <level value="warn"/>
     </logger>
-    <logger name="org.springframework">
+<!--    <logger name="org.springframework">
         <level value="info"/>
     </logger>
     <logger name="org.springframework.transaction">
@@ -39,7 +39,7 @@
     </logger>
     <logger name="org.springframework.web.context.ContextLoader">
         <level value="info"/>
-    </logger>
+    </logger>-->
     <root>
         <level value="info"/>
         <appender-ref ref="${logging.appender}"/> <!-- filtered through Maven -->   
