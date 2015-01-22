@@ -22,7 +22,7 @@
     <logger name="clarin.cmdi.componentregistry.rest">
         <level value="${logging.level}"/>
     </logger>
-    <logger name="clarin.cmdi.componentregistry.servlet.IsocatServlet">
+    <logger name="clarin.cmdi.componentregistry.servlet.ConceptRegistryServlet">
         <level value="${logging.level}"/>
     </logger>
     <logger name="com.sun.jersey">
