@@ -53,6 +53,11 @@
 					searchService.load(searchBox.text, isocatSearchType);					
 				}				
 			}
+			
+			private function openCCR():void {
+				var urlRequest:URLRequest = new URLRequest("http://www.clarin.eu/ccr/");
+                navigateToURL(urlRequest, "_blank");
+			}
 		]]>
 	</mx:Script>
 
@@ -66,6 +71,12 @@
 					   label="Search"
 					   click="handleSearch(event);" />
 			<mx:Label text="{dataGrid.dataProvider.length} results"/>
+			
+		    <mx:Spacer width="100%"/>
+		    
+			<mx:Label textAlign="right" textDecoration="underline" click="openCCR()" >
+            	<mx:htmlText><![CDATA[Searching in the <a href="http://www.clarin.eu/ccr/">CLARIN Concept Registry</a>]]></mx:htmlText>
+			</mx:Label>
 		</mx:HBox>
 		<mx:DataGrid id="dataGrid"
 					 dataProvider="{searchService.searchResults}"
