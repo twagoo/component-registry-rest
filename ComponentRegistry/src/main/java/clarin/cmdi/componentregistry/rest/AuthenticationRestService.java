@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
-import clarin.cmdi.componentregistry.Configuration;
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
@@ -37,19 +37,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationRestService {
 
     private final Logger logger = LoggerFactory.getLogger(AuthenticationRestService.class);
-    
+
     @Context
     private SecurityContext security;
     @Context
     private UriInfo uriInfo;
-    
+
     @GET
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Information on the current authentication state")
     public AuthenticationInfo getAuthenticationInformation() throws JSONException, AuthenticationRequiredException {
         final Principal userPrincipal = security.getUserPrincipal();
 
-        if (userPrincipal == null) {
+        if (userPrincipal == null || ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
             return new AuthenticationInfo(false);
         } else {
             return new AuthenticationInfo(new UserCredentials(userPrincipal));
@@ -64,7 +64,7 @@ public class AuthenticationRestService {
     })
     public Response triggerAuthenticationRequest() {
         logger.debug("Client has triggered authentication request");
-        
+
         //done - redirect to front end
         final URI frontEndUri = uriInfo.getBaseUri().resolve("..");
         return Response.seeOther(frontEndUri).build();
