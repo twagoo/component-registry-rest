@@ -119,18 +119,6 @@ i.e. development or testing environments. -->
             <role-name>tomcat</role-name>
         </auth-constraint>
     </security-constraint>
-    <security-constraint>
-        <display-name>ComponentRegistry SWF GET</display-name>
-        <web-resource-collection>
-            <web-resource-name>ComponentRegistry access</web-resource-name>
-            <description />
-            <url-pattern>/*</url-pattern>
-            <http-method>GET</http-method>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>tomcat</role-name>
-        </auth-constraint>
-    </security-constraint>
     <login-config>
         <auth-method>BASIC</auth-method>
     </login-config>
