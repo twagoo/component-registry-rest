@@ -15,6 +15,7 @@ import clarin.cmdi.componentregistry.components.CMDComponentSpec;
 import clarin.cmdi.componentregistry.components.CMDComponentType;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
+import clarin.cmdi.componentregistry.model.AuthenticationInfo;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
@@ -69,6 +70,8 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1993,6 +1996,20 @@ public class ComponentRegistryRestService implements
         } catch (AuthenticationRequiredException e) {
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new BaseDescription();
+        }
+    }
+
+    @GET
+    @Path("/authentication")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @ApiOperation(value = "Information on the current authentication state")
+    public AuthenticationInfo getAuthenticationInformation() throws JSONException, AuthenticationRequiredException {
+        final Principal userPrincipal = security.getUserPrincipal();
+
+        if (userPrincipal == null) {
+            return new AuthenticationInfo(false);
+        } else {
+            return new AuthenticationInfo(getUserCredentials(userPrincipal));
         }
     }
 }
