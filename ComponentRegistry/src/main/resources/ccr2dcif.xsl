@@ -24,7 +24,7 @@
 			identifier="{(skos:notation)[1]}"
 			name="{(skos:prefLabel[@xml:lang='en'])[1]}"
 			owner="CLARIN"
-			pid="{@rdf:resource}"
+			pid="{@rdf:about}"
 			type="concept"
 			version="1:0">
 		</dcif:dataCategory>
