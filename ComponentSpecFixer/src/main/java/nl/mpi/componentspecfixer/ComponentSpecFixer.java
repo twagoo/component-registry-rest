@@ -38,7 +38,7 @@ public class ComponentSpecFixer {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentSpecFixer.class);
     private static final String XSLT_RESOURCE = "/xslt/collapse-component-spec.xsl";
-    private static final boolean DRY_RUN = true;
+    private static final boolean DRY_RUN = false;
 
     private ClassPathXmlApplicationContext applicationContext;
     private ComponentDao componentDao;
