@@ -28,7 +28,15 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- *
+ * This utility will apply a style sheet to all component specifications in the
+ * Component Registry database (versions 1.14.5 and higher) that minimizes all
+ * specifications that have consolidated expansion (components with both a
+ * ComponentId attribute and children).
+ * 
+ * 
+ * Usage:
+ * - make sure no other application is connected to the database
+ * - run the main 
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class ComponentSpecFixer {
@@ -64,6 +72,7 @@ public class ComponentSpecFixer {
         for (final BaseDescription descr : descriptions) {
             final String id = descr.getId();
 
+            // read and update in a transaction
             transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
                 @Override
