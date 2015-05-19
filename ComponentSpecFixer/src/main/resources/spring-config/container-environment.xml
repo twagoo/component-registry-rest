@@ -8,25 +8,30 @@
      http://www.springframework.org/schema/aop
      http://www.springframework.org/schema/aop/spring-aop.xsd
      http://www.springframework.org/schema/context
-     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/context/spring-context-3.2.xsd
      ">
 
-    <!-- Using the Datasource JNDI defined in the servlet container. See below 
-    for a sample Tomcat datasource configuration. We need TransactionAwareDataSourceProxy 
-    because of the mixed access of plain JDBC and JPA. JDBCTemplate will close 
-    the database connection otherwise. -->
+    <!--<context:property-placeholder location="datasource.properties"/>-->
 
-    <bean id="dataSource"
-              class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+<!--    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="datasource.properties" />
+        <property name="ignoreResourceNotFound" value="false" />
+    </bean>-->
+        
+    <!-- Using the Datasource taking properties from a property file.
+    We need TransactionAwareDataSourceProxy because of the mixed access of plain
+    JDBC and JPA. JDBCTemplate will close the database connection otherwise. -->
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <property name="targetDataSource" ref="applicationServerDataSource"/>
     </bean>
-
+    
 
     <bean id="applicationServerDataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
-        <property name="driverClass" value="org.postgresql.Driver" />
-        <property name="url" value="jdbc:postgresql://localhost:5432/component_registry" />
-        <property name="username" value="compreg" />
-        <property name="password" value="compreg" />
+        <property name="driverClass" value="${database.driver}" />
+        <property name="url" value="${database.url}" />
+        <property name="username" value="${database.username}" />
+        <property name="password" value="${database.password}" />
     </bean>
     <!--
     <bean id="applicationServerDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">

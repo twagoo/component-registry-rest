@@ -32,9 +32,13 @@
 	<!-- Fallback properties for unit tests, loads properties from /test/γ -->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="location"
-			value="classpath:spring-config/component-registry.properties" />
-		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+                    <list>
+                        <value>classpath:spring-config/component-registry.properties</value>
+                        <value>classpath:datasource.properties</value>
+                    </list>
+                </property>
+		<property name="ignoreResourceNotFound" value="false" />
 	</bean>
 
 	<bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller" />
