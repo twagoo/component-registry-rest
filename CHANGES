@@ -1,6 +1,6 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-1.14.5 (?? January 2014)
+Release ComponentRegistry-1.14.5 (2 February 2014)
 - The Component Registry now connects to the CLARIN Concept Registry instead of ISOcat. https://trac.clarin.eu/ticket/731
 - Group components can now be saved as new in the private workspace. https://trac.clarin.eu/ticket/717
 - Reduced noice in log output. https://trac.clarin.eu/ticket/714 ; https://trac.clarin.eu/ticket/715
