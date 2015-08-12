@@ -12,6 +12,7 @@
   <modules>
     <module>ComponentBrowserGui</module>
     <module>ComponentRegistry</module>
+    <module>ComponentSpecFixer</module>
   </modules>
 
   <scm>
