@@ -18,7 +18,7 @@
 		</dcif:dataCategorySelection>
 	</xsl:template>
 
-	<xsl:template match="rdf:Description[rdf:type/@rdf:resource='http://www.w3.org/2004/02/skos/core#Concept']">	
+	<xsl:template match="rdf:Description[rdf:type/@rdf:resource='http://www.w3.org/2004/02/skos/core#Concept']|skos:Concept">
 		<dcif:dataCategory
 			definition="{(skos:definition[@xml:lang='en'])[1]}"
 			identifier="{(skos:notation)[1]}"
