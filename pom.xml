@@ -11,6 +11,7 @@
   <description>Parent pom for ComponentRegistry, see www.clarin.eu/cmdi.</description>
   <modules>
     <module>ComponentRegistry</module>
+    <module>ComponentSpecFixer</module>
   </modules>
 
   <scm>
