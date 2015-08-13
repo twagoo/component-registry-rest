@@ -27,11 +27,10 @@
   
   <repositories>
 	<repository>
-		<id>cmdi.clarin.repository</id>
+        <id>CLARIN</id>
 		<name>Clarin Repository</name>
-		<url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url> 
+    	<url>https://nexus.clarin.eu/content/repositories/Clarin</url>
 	</repository> 
-	
  </repositories>
 
   <reporting>
