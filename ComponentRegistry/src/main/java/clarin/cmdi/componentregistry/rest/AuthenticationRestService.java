@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.UriInfo;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,6 +75,8 @@ public class AuthenticationRestService {
     private SecurityContext security;
     @Context
     private UriInfo uriInfo;
+    @Autowired
+    private Configuration configuration;
 
     @GET
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -88,7 +92,7 @@ public class AuthenticationRestService {
         if (userPrincipal == null || ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
             authInfo = new AuthenticationInfo(false);
         } else {
-            authInfo = new AuthenticationInfo(new UserCredentials(userPrincipal));
+            authInfo = new AuthenticationInfo(new UserCredentials(userPrincipal), configuration.isAdminUser(userPrincipal));
         }
 
         if (Strings.isNullOrEmpty(redirectUri)) {
