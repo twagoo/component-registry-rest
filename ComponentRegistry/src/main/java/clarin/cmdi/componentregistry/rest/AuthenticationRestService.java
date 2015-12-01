@@ -89,7 +89,9 @@ public class AuthenticationRestService {
         final Principal userPrincipal = security.getUserPrincipal();
 
         final AuthenticationInfo authInfo;
-        if (userPrincipal == null || ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+        if (userPrincipal == null) {
+            authInfo = new AuthenticationInfo(false);
+        } else if(ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
             authInfo = new AuthenticationInfo(false);
         } else {
             authInfo = new AuthenticationInfo(new UserCredentials(userPrincipal), configuration.isAdminUser(userPrincipal));
