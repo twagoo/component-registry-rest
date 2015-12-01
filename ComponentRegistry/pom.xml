@@ -538,16 +538,10 @@
                 </reporting>
     -->
     <repositories>
-        <repository>
-            <id>cmdi.clarin.repository</id>
-            <name>Clarin Repository</name>
-            <url>http://catalog.clarin.eu/ds/nexus/content/groups/public/</url>
-        </repository>
-        <!--
-        <repository>
-                        <id>sonatype</id>
-                        <url>https://oss.sonatype.org/content/groups/public</url>
-        </repository>
-        -->
+		<repository>
+			<id>CLARIN</id>
+			<name>Clarin Repository</name>
+			<url>https://nexus.clarin.eu/content/repositories/Clarin</url>
+		</repository> 
     </repositories>
 </project>
