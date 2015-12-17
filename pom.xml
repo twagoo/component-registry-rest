@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>clarin.cmdi</groupId>
+  <groupId>eu.clarin.cmdi</groupId>
   <artifactId>componentRegistry.parent</artifactId>
   <name>componentRegistry_parent</name>
   <packaging>pom</packaging>
@@ -20,6 +20,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ComponentRegistry.version>2.0-SNAPSHOT</ComponentRegistry.version>
+    <ComponentBrowserGui.version>1.0.0-alpha-SNAPSHOT</ComponentBrowserGui.version>
   </properties>
   
   <repositories>

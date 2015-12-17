@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>clarin.cmdi</groupId>
+        <groupId>eu.clarin.cmdi</groupId>
         <artifactId>componentRegistry.parent</artifactId>
         <version>1.0</version>
     </parent>
-    <groupId>clarin.cmdi</groupId>
-    <artifactId>ComponentRegistry</artifactId>
+    <groupId>eu.clarin.cmdi</groupId>
+    <artifactId>component-registry-rest</artifactId>
     <packaging>${packaging}</packaging>
     <version>${ComponentRegistry.version}</version>
     <name>ComponentRegistry</name>
@@ -484,6 +484,30 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-ui</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>component-registry-react-ui</artifactId>
+                                    <version>${ComponentBrowserGui.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2.2</version>
                 <executions>
@@ -521,27 +545,11 @@
         </plugins>
     </build>
 
-    <!--
-                <reporting>
-                                <plugins>
-                                                <plugin>
-                                                                <groupId>org.codehaus.mojo</groupId>
-                                                                <artifactId>findbugs-maven-plugin</artifactId>
-                                                        <version>2.5.4-SNAPSHOT</version>
-                                                                <configuration>
-                                                                        <excludeFilterFile>${basedir}/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
-                                                                        <threshold>Normal</threshold>
-                                                                        <effort>Min</effort>
-                                                                </configuration>
-                                                </plugin>
-                                </plugins>
-                </reporting>
-    -->
     <repositories>
-		<repository>
-			<id>CLARIN</id>
-			<name>Clarin Repository</name>
-			<url>https://nexus.clarin.eu/content/repositories/Clarin</url>
-		</repository> 
+        <repository>
+            <id>CLARIN</id>
+            <name>Clarin Repository</name>
+            <url>https://nexus.clarin.eu/content/repositories/Clarin</url>
+        </repository> 
     </repositories>
 </project>
