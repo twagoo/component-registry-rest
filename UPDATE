@@ -27,7 +27,10 @@ Version specific update instructions
 - Since the JS front end (like the previous Flash based front end) is quite heavy
   on the loading of compressible content, consider enabling content compression
   on the Tomcat server to improve performance, especially on clients with slow
-  connections. E.g., use the following:
+  connections. In particular the loading of content of types 'application/json'
+  and 'application/javascript' benefits from this. 
+  
+  E.g., use the following in the Tomcat's server.xml:
 
     <Connector port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
