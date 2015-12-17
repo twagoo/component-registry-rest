@@ -49,7 +49,7 @@
   <!--
 	Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl menwin@mpi.nl"/>
   <!--
 	Location of the CMDI general component schema that validates component specifications
     -->
