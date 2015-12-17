@@ -22,6 +22,23 @@ Procedure for updating
 Version specific update instructions
 -------------------------------------
 
+=== 2.0 ===
+
+- Since the JS front end (like the previous Flash based front end) is quite heavy
+  on the loading of compressible content, consider enabling content compression
+  on the Tomcat server to improve performance, especially on clients with slow
+  connections. E.g., use the following:
+
+    <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443"
+               compression="on" 
+               compressableMimeType="text/html,text/xml,text/plain,text/javascript,text/css,application/json,application/javascript"
+               />
+
+  More information can be found at the following page:
+  	<https://tomcat.apache.org/tomcat-7.0-doc/config/http.html>
+
 === 1.15.0 ===
 
 - Remove the context parameter eu.clarin.cmdi.componentregistry.jpaDialect from the global
