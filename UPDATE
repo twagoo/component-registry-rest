@@ -24,6 +24,17 @@ Version specific update instructions
 
 === 2.0 ===
 
+- The scheme for bookmark URLs of the front end have changed. Add a rewrite rule
+  that causes a redirect from
+  
+  	http://server/ComponentRegistry?param1=x&param2=y
+                                   ^
+  to
+  
+  	http://server/ComponentRegistry#/?param1=x&param2=y
+                                   ^^^
+  (Difference marked)
+
 - Since the JS front end (like the previous Flash based front end) is quite heavy
   on the loading of compressible content, consider enabling content compression
   on the Tomcat server to improve performance, especially on clients with slow
