@@ -501,6 +501,8 @@
                                     <version>${ComponentBrowserGui.version}</version>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
+                                    <!-- exclude bundled external config, we provide our own -->
+                                    <excludes>compRegConfig.jsp</excludes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
