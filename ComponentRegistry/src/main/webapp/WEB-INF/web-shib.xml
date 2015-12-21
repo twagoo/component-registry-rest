@@ -88,7 +88,7 @@
     </filter-mapping>
     
     <!-- Enable CORS -->
-    <filter>
+<!--    <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
         <init-param>
@@ -99,7 +99,7 @@
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>
+    </filter-mapping>-->
 
     <servlet>
         <servlet-name>ComponentRegistry Web Application</servlet-name>

@@ -359,9 +359,9 @@
             <properties>
                 <serviceRootUrl>http://lux16.mpi.nl/ds/ComponentRegistry</serviceRootUrl>
                 <!-- Will be inserted in context.xml -->
-                <shibLI>http://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
+                <shibLI>https://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->
-                <shibLO>http://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
+                <shibLO>https://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
                 <!-- Shibboleth logout URI for SHHAA -->
                 <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
                 <!-- web.xml for shibboleth authentication -->
