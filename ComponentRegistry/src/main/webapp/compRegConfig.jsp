@@ -1,16 +1,14 @@
+<%-- Configuration hosted next to the front end index page, from which it is loaded --%>
+<%@ page import="java.net.URI" %>
 {
-  "cors": true,
+  "cors": false,
   "REST": {
-    "protocol": "http",
-    "host": "localhost",
-    "port": "8080",
-    "path": "/ComponentRegistry",
-    "auth": {
-      "username": "user",
-      "password": "passwd" 
-    }
+    "url": "<%= application.getInitParameter("eu.clarin.cmdi.componentregistry.serviceRootUrl") %>"
   },
   "deploy": {
-    "path": "/ComponentRegistry"
+    "path": "<%= 
+                URI.create(application.getInitParameter("eu.clarin.cmdi.componentregistry.serviceRootUrl"))
+                        .getPath() //at same URL as app, so simply take path
+            %>"
   }
 }
