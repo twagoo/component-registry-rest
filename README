@@ -4,13 +4,14 @@ CLARIN COMPONENT REGISTRY
 What is it?
 -----------
 The Component Registry stores CMDI metadata components and profiles and
-offers a service to list and retrieve them. The BrowserGui is a web
+offers a service to list and retrieve them. The separate GUI project is a web
 application displaying available components in the component registry in the
 correct context: application domain, creator, creation date, version, etc.
 The registry offers a hierarchical structure for browsing the components. 
 
-The componentRegistry is set up as a Flex Gui frontend communicating with a
-Java based backend (REST service).
+The Component Registry is set up as a Javascript frontend communicating with a
+Java based backend (REST service). Sources for the front end can be found, along
+with more information, at <https://github.com/clarin-eric/react-webpack-comp-reg>.
 
 The ComponentRegistry is a central software component to the Clarin MetaData
 Infrastructure (CMDI). For more information on CMDI, see
@@ -35,35 +36,24 @@ This project contains two modules:
 
 - 'ComponentRegistry', a Java project that implements the Component Registry
   REST service, administration pages and a web container for a client UI.
-- 'ComponentBrowserGui', a Flex project that implements a client for the
-  Component Registry REST service.
+- 'ComponentSpecFixer', a utility that cleans up the component specifications
+in the database with 'materialised expansion'.
 
 How to set up for development/building from source
 --------------------------------------------------
 * Creating initial setup files:
 
- - in ComponentBrowserGui: `mvn buildnumber:create flexmojos:flexbuilder` 
-	- This generates project files for Flash Builder. Open in FB using 
-	  File > Import Flex Project and use the 'Project Folder' option.
  - in ComponentRegistry: `mvn eclipse:eclipse`  
 	- Generates eclipse configuration
 	- For NetBeans, simply open the POM as a project
 
-When using FlashBuilder to develop the ComponentBrowserGui, create a porject by 
-"Import a Flex project from an FXP, ZIP, or project folder".
-
-When using FlashBuilder to develop, make sure to configure the correct Flex SDK. It should
-be version 3.6, which you can download for free at <http://www.adobe.com/cfusion/entitlement/index.cfm?e=flex3sdk>.
-In addition, you should configure the project to build for Flash player 10.0.0 (instead of default minimum version
-provided by SDK).
-
 * Creating war artifact for local deployment:
 
- - in ComponentBrowserGui: mvn install
  - in ComponentRegistry: mvn package
  
-The ComponentRegistry war will include the flex swf file needed to start the application. 
-So deploying the resulting war will be enough to start the application.
+The ComponentRegistry war will include the front end files needed to start the
+application. So deploying the resulting war will be enough to start the 
+application.
 
 * Building for specific deployment environment
 By default the application is set to work when deployed on localhost. If you want to change that 
@@ -77,11 +67,8 @@ the src/sql directory. For configuration instructions, see the comments in conte
 * NOTE on generating java classes from general-component-schema.xsd.
 The ComponentRegistry needs the general-component-schema.xsd, which should be found at:
 1) ComponentRegistry/src/main/binding/ -> that directory has a svn:externals property pointing to the schema.
-Do a 'svn propget svn:externals' to see the property. Results in: 'http://svn.clarin.eu/metadata/trunk/toolkit/general-component-schema.xsd general-component-schema.xsd'
-
-* Missing some artifacts for Maven?:
-The ComponentBrowserGui project needs some swf files which are not in any maven repository I could find. 
-So install them manually: go to ComponentBrowserGui/libs/ and run the commands in maveninstalllib.txt
+Do a 'svn propget svn:externals' to see the property. Results in: 
+	'http://svn.clarin.eu/metadata/trunk/toolkit/general-component-schema.xsd general-component-schema.xsd'
 
 * Developing and Debugging "ComponentRegistry" back-end. 
  
@@ -92,24 +79,10 @@ If, when trying to run the backend, you're getting errors from Spring stating th
   "Name [ComponentRegistry] is not bound in this Context. Unable to find [ComponentRegistry]"
 it means that you do not have a JNDI resource for the database connection set up correctly.
 See the installation instructions for more information.
- 
-* Developing and Debugging "ComponentBrowserGui". 
 
-Always make sure that ComponentRegistry-war grabbed the newest version of the Flex GUI. 
-For this you do "mvn install" in ComponentBrowserGui, and 
-then compile the backend in ComponentRegistry. Second of all, you should know that you can run and 
-debug the Gui from FlashBuilder.  For this you need to edit "Run/Debug" in the project properties.
-For instance,  if a bug to fix appears when fuilfilling the request 
-http://localhost:8080/ComponentRegistry/?item=clarin.eu:cr1:c_1288172614011&browserview=comments
-you need to make this uri an "URI to launch". To do this, you duplicate one of the existing 
-scenarios in Run/debug menu, and then EDIT the duplicated version by changing its "name" 
-and  "URI or path to launch" in the corresponding way.
+* Developing the front end:
 
-Make sure to download and install the DEBUG version of the Adobe Flash Player plugin from
-	<https://www.adobe.com/support/flashplayer/downloads.html>
-If you are using Chrome, make sure to also disable the built-in Flash player. See:
-	<https://support.google.com/chrome/answer/108086>
-
+See <https://github.com/clarin-eric/react-webpack-comp-reg>.
  
 Installation
 ------------
