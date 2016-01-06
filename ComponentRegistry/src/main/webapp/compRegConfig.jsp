@@ -15,6 +15,8 @@
   "REST": {
     "url": "<%= application.getInitParameter("eu.clarin.cmdi.componentregistry.serviceRootUrl") %>"
   },
+  "backEndVersion": "${project.version}",
+  "frontEndVersion": "${frontEndVersion}",
   "deploy": {
     "path": "<%= 
                 URI.create(application.getInitParameter("eu.clarin.cmdi.componentregistry.serviceRootUrl"))
