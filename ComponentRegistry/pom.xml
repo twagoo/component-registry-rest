@@ -20,7 +20,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <packaging>war</packaging>
-        <frontEndVersion>1.0.0-beta</frontEndVersion>
+        <frontEndVersion>1.0.0-beta2-dev-SNAPSHOT</frontEndVersion>
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
         <serviceRootUrl>http://localhost:8080/${project.artifactId}</serviceRootUrl>
@@ -39,7 +39,6 @@
         <logging.appender>FILE</logging.appender>
         <logging.level>warn</logging.level>
     </properties>
-
 
     <ciManagement>
         <system>hudson</system>
