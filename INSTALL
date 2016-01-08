@@ -65,3 +65,7 @@ Some aspects require additional configuration depending on the context:
   	* eu.clarin.cmdi.componentregistry.component2SchemaXslUrl
   	* eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation
   	* eu.clarin.cmdi.componentregistry.ccrRestUrl
+
+- Public base location for the application: needs to be configured, and will 
+  need additional attention if the application is running behind a proxy. 
+  See context.xml for details.

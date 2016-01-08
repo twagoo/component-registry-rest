@@ -24,14 +24,39 @@ Version specific update instructions
 
 === 2.0 ===
 
+- The application's public base URL is configured differently as of this 
+  release. 
+
+  The following context parameter is NO LONGER USED:
+
+    eu.clarin.cmdi.componentregistry.serviceRootUrl <- DEPRECATED
+
+  Instead, configure the parameter:
+
+    eu.clarin.cmdi.componentregistry.serviceUrlPath
+        e.g. "/ds/ComponentRegistry"
+  and
+
+    EITHER
+        eu.clarin.cmdi.componentregistry.serviceUrlBase
+            e.g. "http://catalog.clarin.eu"
+    OR (if the application is running behind a proxy)
+            eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader
+                    e.g. (usually) "X-FORWARDED-PROTO"
+                AND
+            eu.clarin.cmdi.componentregistry.serviceUrlHostHeader
+                    e.g. (usually) "X-FORWARDED-HOST"
+
+  See the bundled context.xml for details and examples.
+
 - The scheme for bookmark URLs of the front end have changed. Add a rewrite rule
   that causes a redirect from
   
-  	http://server/ComponentRegistry?param1=x&param2=y
+    http://server/ComponentRegistry?param1=x&param2=y
                                    ^
   to
   
-  	http://server/ComponentRegistry#/?param1=x&param2=y
+    http://server/ComponentRegistry#/?param1=x&param2=y
                                    ^^^
   (Difference marked)
 
