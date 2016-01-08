@@ -20,7 +20,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <packaging>war</packaging>
-        <frontEndVersion>1.0.0-beta2-dev-SNAPSHOT</frontEndVersion>
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
         <serviceUrlBase>http://localhost:8080</serviceUrlBase>
@@ -29,7 +28,7 @@
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-        <flexDebug>0</flexDebug>
+        <frontEndVersion>1.0.0-beta2</frontEndVersion>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <jackson.version>1.9.13</jackson.version>
