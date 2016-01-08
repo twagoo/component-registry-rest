@@ -37,7 +37,10 @@ import com.sun.jersey.spi.resource.Singleton;
 @Transactional(rollbackFor = Exception.class)
 public interface IComponentRegistryRestService {
 
-    public static final String APPLICATION_BASE_URL_PARAM = "eu.clarin.cmdi.componentregistry.serviceRootUrl";
+    public static final String APPLICATION_URL_BASE_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlBase";
+    public static final String APPLICATION_URL_PATH_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlPath";
+    public static final String APPLICATION_URL_PROTOCOL_HEADER_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader";
+    public static final String APPLICATION_URL_HOST_HEADER_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlHostHeader";
     public static final String DATA_FORM_FIELD = "data";
     public static final String NAME_FORM_FIELD = "name";
     public static final String DESCRIPTION_FORM_FIELD = "description";

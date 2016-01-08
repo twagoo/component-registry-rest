@@ -23,7 +23,8 @@
         <frontEndVersion>1.0.0-beta2-dev-SNAPSHOT</frontEndVersion>
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
-        <serviceRootUrl>http://localhost:8080/${project.artifactId}</serviceRootUrl>
+        <serviceUrlBase>http://localhost:8080</serviceUrlBase>
+        <serviceUrlPath>/${project.artifactId}</serviceUrlPath>
         <!-- Will be inserted in context.xml -->
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
@@ -344,7 +345,8 @@
             <properties>
                 <logging.level>debug</logging.level>
                 <logging.appender>CONSOLE</logging.appender>
-                <serviceRootUrl>http://localhost:8080/ComponentRegistry</serviceRootUrl>
+                <serviceUrlBase>http://localhost:8080</serviceUrlBase>
+                <serviceUrlPath>/ComponentRegistry</serviceUrlPath>
                 <!-- Will be inserted in context.xml -->
                 <shibLI>http://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->
@@ -357,7 +359,8 @@
         <profile>
             <id>lux16</id>
             <properties>
-                <serviceRootUrl>http://lux16.mpi.nl/ds/ComponentRegistry</serviceRootUrl>
+                <serviceUrlBase>http://lux16.mpi.nl</serviceUrlBase>
+                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
                 <!-- Will be inserted in context.xml -->
                 <shibLI>https://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->
@@ -371,7 +374,9 @@
             <id>clarin</id>
             <properties>
                 <logging.level>warn</logging.level>
-                <serviceRootUrl>http://catalog.clarin.eu/ds/ComponentRegistry</serviceRootUrl>
+                <serviceRootUrl></serviceRootUrl>
+                <serviceUrlBase>http://catalog.clarin.eu</serviceUrlBase>
+                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
                 <!-- Will be inserted in context.xml -->
                 <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->

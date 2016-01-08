@@ -40,7 +40,14 @@
 	ComponentRegistry REST service. Just supply the application root:
 	the '/rest/registry' part will be added by the application.
     -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.serviceRootUrl" value="${serviceRootUrl}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlBase" value="${serviceUrlBase}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlPath" value="${serviceUrlPath}"/>
+
+ <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader" value="${serviceUrlProtocolHeader}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlHostHeader" value="${serviceUrlHostHeader}"/>
+ -->
+  
   <!--
 	Location that gets redirected to from /documentation.jsp, which in turn is linked to
 	from the Flex application through the 'Help' link button.
