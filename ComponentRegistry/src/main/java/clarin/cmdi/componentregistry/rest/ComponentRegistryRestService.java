@@ -2014,7 +2014,7 @@ public class ComponentRegistryRestService implements
                 return String.format("%s://%s%s",
                         request.getHeader(protocolHeader),
                         request.getHeader(hostHeader),
-                        request.getHeader(path)
+                        path
                 );
             } else {
                 final String base = servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM);
