@@ -1614,45 +1614,11 @@ public class ComponentRegistryRestService implements
     }
 
     /**
-     *
-     * @return The application's base URI as defined by the following context
-     * parameters:
-     *
-     * {@link APPLICATION_URL_BASE_PARAM},
-     *     {@link APPLICATION_URL_PATH_PARAM},
-     *     {@link APPLICATION_URL_PROTOCOL_HEADER_PARAM}, and
-     * {@link APPLICATION_URL_HOST_HEADER_PARAM}
-     *
-     * If correctly configured, it should look something like
-     * "http://catalog.clarin.eu/ds/ComponentRegistry". <em>Be aware that this
-     * can also be null if configured incorrectly!</em>
+     * 
+     * @see ComponentRegistryRestService#getApplicationBaseURI(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest) 
      */
-    private synchronized String getApplicationBaseURI() {
-        //TODO: Move logic to separate class so that it can also be used in the conig.jsp
-        final String path = servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM);
-        if (path != null) {
-            final String protocolHeader = servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM);
-            final String hostHeader = servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM);
-            if (protocolHeader != null && hostHeader != null) {
-
-                return String.format("%s://%s%s",
-                        request.getHeader(protocolHeader),
-                        request.getHeader(hostHeader),
-                        request.getHeader(path)
-                );
-            } else {
-                final String base = servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM);
-                return base + path;
-            }
-        }
-        LOG.error("Application URI could not be determined. Information available:\n"
-                + " {}: {}\n {}: {}\n {}: {}\n {}: {}",
-                APPLICATION_URL_PATH_PARAM, servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM),
-                APPLICATION_URL_BASE_PARAM, servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM),
-                APPLICATION_URL_PROTOCOL_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM),
-                APPLICATION_URL_HOST_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM)
-        );
-        throw new RuntimeException("Cannot determine application path");
+    private String getApplicationBaseURI() {
+        return getApplicationBaseURI(servletContext, request);
     }
 
     private void validate(RegisterResponse response, Validator... validators) throws UserUnauthorizedException {
@@ -2022,6 +1988,47 @@ public class ComponentRegistryRestService implements
             response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
             return new BaseDescription();
         }
+    }
+
+    /**
+     *
+     * @return The application's base URI as defined by the following context
+     * parameters:
+     *
+     * {@link APPLICATION_URL_BASE_PARAM},
+     *     {@link APPLICATION_URL_PATH_PARAM},
+     *     {@link APPLICATION_URL_PROTOCOL_HEADER_PARAM}, and
+     * {@link APPLICATION_URL_HOST_HEADER_PARAM}
+     *
+     * If correctly configured, it should look something like
+     * "http://catalog.clarin.eu/ds/ComponentRegistry". <em>Be aware that this
+     * can also be null if configured incorrectly!</em>
+     */
+    public static String getApplicationBaseURI(ServletContext servletContext, HttpServletRequest request) {
+        final String path = servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM);
+        if (path != null) {
+            final String protocolHeader = servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM);
+            final String hostHeader = servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM);
+            if (protocolHeader != null && hostHeader != null) {
+
+                return String.format("%s://%s%s",
+                        request.getHeader(protocolHeader),
+                        request.getHeader(hostHeader),
+                        request.getHeader(path)
+                );
+            } else {
+                final String base = servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM);
+                return base + path;
+            }
+        }
+        LOG.error("Application URI could not be determined. Information available:\n"
+                + " {}: {}\n {}: {}\n {}: {}\n {}: {}",
+                APPLICATION_URL_PATH_PARAM, servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM),
+                APPLICATION_URL_BASE_PARAM, servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM),
+                APPLICATION_URL_PROTOCOL_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM),
+                APPLICATION_URL_HOST_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM)
+        );
+        throw new RuntimeException("Cannot determine application path");
     }
 
 }
