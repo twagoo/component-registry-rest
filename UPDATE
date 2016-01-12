@@ -34,7 +34,7 @@ Version specific update instructions
   Instead, configure the parameter:
 
     eu.clarin.cmdi.componentregistry.serviceUrlPath
-        e.g. "/ds/ComponentRegistry"
+        e.g. "/ds/ComponentRegistry" (or "" for root deployment)
   and
 
     EITHER
