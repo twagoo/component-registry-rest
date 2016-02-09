@@ -6,12 +6,11 @@ The Component Registry REST service depends on a PostgreSQL database to
 store its data. It is packaged as a servlet and has been tested to work with
 Tomcat. 
 
-The package includes a Flex based client that runs client-side in the
-user's browser. It is wrapped by an index.jsp page that embeds it and passes
-some parameters; it is located in the root of the application directory. 
+The package includes a Javascript (REACT) based client that runs client-side in
+the user's browser. It is wrapped by an index.html page that loads it and passes
+some configuration; it is located in the root of the application directory. 
 
-The web application uses the Spring framework and in the current version it
-is partly configured through Spring (see below).
+The application is mainly configured through context parameters (see below).
 
 Setting up the database
 -----------------------
@@ -66,3 +65,7 @@ Some aspects require additional configuration depending on the context:
   	* eu.clarin.cmdi.componentregistry.component2SchemaXslUrl
   	* eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation
   	* eu.clarin.cmdi.componentregistry.ccrRestUrl
+
+- Public base location for the application: needs to be configured, and will 
+  need additional attention if the application is running behind a proxy. 
+  See context.xml for details.

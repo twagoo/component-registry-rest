@@ -64,6 +64,21 @@ i.e. development or testing environments. -->
         <filter-name>wicket.componentregistry</filter-name>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
+    
+    <!-- Enable CORS -->
+<!--    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+        <init-param>
+            <param-name>cors.allowed.methods</param-name>
+            <param-value>GET, POST, PUT, DELETE, HEAD, OPTIONS</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+    
     <servlet>
         <servlet-name>ComponentRegistry Web Application</servlet-name>
         <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
@@ -119,18 +134,6 @@ i.e. development or testing environments. -->
             <role-name>tomcat</role-name>
         </auth-constraint>
     </security-constraint>
-    <security-constraint>
-        <display-name>ComponentRegistry SWF GET</display-name>
-        <web-resource-collection>
-            <web-resource-name>ComponentRegistry access</web-resource-name>
-            <description />
-            <url-pattern>/*</url-pattern>
-            <http-method>GET</http-method>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>tomcat</role-name>
-        </auth-constraint>
-    </security-constraint>
     <login-config>
         <auth-method>BASIC</auth-method>
     </login-config>
@@ -141,7 +144,7 @@ i.e. development or testing environments. -->
     </security-role>
 	
     <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 	
 </web-app>

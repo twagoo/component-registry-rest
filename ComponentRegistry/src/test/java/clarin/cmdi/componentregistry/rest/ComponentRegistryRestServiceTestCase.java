@@ -95,6 +95,8 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
         WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder()
                 .contextParam("contextConfigLocation",
                         getApplicationContextFile())
+                .contextParam("eu.clarin.cmdi.componentregistry.serviceUrlBase", "localhost") // deliberately inaccurate,
+                .contextParam("eu.clarin.cmdi.componentregistry.serviceUrlPath", "test")      // for use of user/front end only
                 .servletClass(SpringServlet.class)
                 .initParam(WebComponent.RESOURCE_CONFIG_CLASS,
                         ClassNamesResourceConfig.class.getName())

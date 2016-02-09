@@ -3,14 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>clarin.cmdi</groupId>
+        <groupId>eu.clarin.cmdi</groupId>
         <artifactId>componentRegistry.parent</artifactId>
-        <version>1.0</version>
+        <version>2.1-SNAPSHOT</version>
     </parent>
-    <groupId>clarin.cmdi</groupId>
-    <artifactId>ComponentRegistry</artifactId>
+    <groupId>eu.clarin.cmdi</groupId>
+    <artifactId>component-registry-rest</artifactId>
     <packaging>${packaging}</packaging>
-    <version>${ComponentRegistry.version}</version>
+    <version>2.1-SNAPSHOT</version>
     <name>ComponentRegistry</name>
     <description>
         ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
@@ -22,13 +22,13 @@
         <packaging>war</packaging>
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
-        <serviceRootUrl>http://localhost:8080/${project.artifactId}</serviceRootUrl>
+        <serviceUrlBase>http://localhost:8080</serviceUrlBase>
+        <serviceUrlPath>/${project.artifactId}</serviceUrlPath>
         <!-- Will be inserted in context.xml -->
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-        <ComponentRegistrySwfName>${project.artifactId}-${ComponentBrowserGui.version}</ComponentRegistrySwfName>
-        <flexDebug>0</flexDebug>
+        <frontEndVersion>1.0.0-beta3</frontEndVersion>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <jackson.version>1.9.13</jackson.version>
@@ -39,7 +39,6 @@
         <logging.appender>FILE</logging.appender>
         <logging.level>warn</logging.level>
     </properties>
-
 
     <ciManagement>
         <system>hudson</system>
@@ -345,7 +344,8 @@
             <properties>
                 <logging.level>debug</logging.level>
                 <logging.appender>CONSOLE</logging.appender>
-                <serviceRootUrl>http://localhost:8080/ComponentRegistry</serviceRootUrl>
+                <serviceUrlBase>http://localhost:8080</serviceUrlBase>
+                <serviceUrlPath>/ComponentRegistry</serviceUrlPath>
                 <!-- Will be inserted in context.xml -->
                 <shibLI>http://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->
@@ -358,11 +358,12 @@
         <profile>
             <id>lux16</id>
             <properties>
-                <serviceRootUrl>http://lux16.mpi.nl/ds/ComponentRegistry</serviceRootUrl>
+                <serviceUrlBase>http://lux16.mpi.nl</serviceUrlBase>
+                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
                 <!-- Will be inserted in context.xml -->
-                <shibLI>http://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
+                <shibLI>https://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->
-                <shibLO>http://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
+                <shibLO>https://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
                 <!-- Shibboleth logout URI for SHHAA -->
                 <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
                 <!-- web.xml for shibboleth authentication -->
@@ -372,7 +373,9 @@
             <id>clarin</id>
             <properties>
                 <logging.level>warn</logging.level>
-                <serviceRootUrl>http://catalog.clarin.eu/ds/ComponentRegistry</serviceRootUrl>
+                <serviceRootUrl></serviceRootUrl>
+                <serviceUrlBase>http://catalog.clarin.eu</serviceUrlBase>
+                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
                 <!-- Will be inserted in context.xml -->
                 <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth login URI for SHHAA -->
@@ -489,21 +492,21 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy</id>
+                        <id>unpack-ui</id>
                         <phase>process-resources</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>clarin.cmdi</groupId>
-                                    <artifactId>ComponentBrowserGui</artifactId>
-                                    <version>${ComponentBrowserGui.version}</version>
-                                    <type>swf</type>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>component-registry-react-ui</artifactId>
+                                    <version>${frontEndVersion}</version>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
-                                    <destFileName>${ComponentRegistrySwfName}.swf</destFileName>
+                                    <!-- exclude bundled external config, we provide our own -->
+                                    <excludes>compRegConfig.jsp</excludes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -548,27 +551,11 @@
         </plugins>
     </build>
 
-    <!--
-                <reporting>
-                                <plugins>
-                                                <plugin>
-                                                                <groupId>org.codehaus.mojo</groupId>
-                                                                <artifactId>findbugs-maven-plugin</artifactId>
-                                                        <version>2.5.4-SNAPSHOT</version>
-                                                                <configuration>
-                                                                        <excludeFilterFile>${basedir}/src/main/resources/findbugs-exclude.xml</excludeFilterFile>
-                                                                        <threshold>Normal</threshold>
-                                                                        <effort>Min</effort>
-                                                                </configuration>
-                                                </plugin>
-                                </plugins>
-                </reporting>
-    -->
     <repositories>
-		<repository>
-			<id>CLARIN</id>
-			<name>Clarin Repository</name>
-			<url>https://nexus.clarin.eu/content/repositories/Clarin</url>
-		</repository> 
+        <repository>
+            <id>CLARIN</id>
+            <name>Clarin Repository</name>
+            <url>https://nexus.clarin.eu/content/repositories/Clarin</url>
+        </repository> 
     </repositories>
 </project>

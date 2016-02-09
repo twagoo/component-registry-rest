@@ -36,11 +36,28 @@
 -->
 <Context antiJARLocking="true" path="/ComponentRegistry">
   <!-- 
-	Passed to the Flex UI via index.jsp so that it can locate the 
-	ComponentRegistry REST service. Just supply the application root:
-	the '/rest/registry' part will be added by the application.
+	Passed to the Flex via compRegConfig.jsp so that it can locate the 
+	ComponentRegistry REST service. Just supply the PUBLIC application root 
+        in the path; the '/rest/registry' part will be added by the application.
+        
+        "serviceUrlPath" is MANDATORY in all cases and should contain the path 
+        of the application relative to the server root, starting with a forward
+        slash but no trailing slash, e.g. "/ComponentRegistry", or "" for root
+        deployment.
+        
+        In addition, either "serviceUrlPath" OR the two parameters
+        "serviceUrlProtocolHeader" and "serviceUrlHostHeader" need to be 
+        defined.
     -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.serviceRootUrl" value="${serviceRootUrl}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlBase" value="${serviceUrlBase}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlPath" value="${serviceUrlPath}"/>
+ <!--
+  Uncomment two lines below iff you would like to use the protocol and host
+  provided in the request headers.
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader" value="X-FORWARDED-PROTO"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlHostHeader" value="X-FORWARDED-HOST"/>
+ -->
+  
   <!--
 	Location that gets redirected to from /documentation.jsp, which in turn is linked to
 	from the Flex application through the 'Help' link button.
@@ -49,7 +66,7 @@
   <!--
 	Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl olhsha@mpi.nl daan.broeder@mpi.nl dietuyt@mpi.nl Menzo.Windhouwer@mpi.nl"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl twan.goosen_mpi.nl@clarin.eu dietuyt@mpi.nl dietuyt_mpi.nl@clarin.eu menwin@mpi.nl menwin_mpi.nl@clarin.eu"/>
   <!--
 	Location of the CMDI general component schema that validates component specifications
     -->

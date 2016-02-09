@@ -22,7 +22,61 @@ Procedure for updating
 Version specific update instructions
 -------------------------------------
 
-=== 1.15.0 ===
+=== 2.0 ===
+
+- The application's public base URL is configured differently as of this 
+  release. 
+
+  The following context parameter is NO LONGER USED:
+
+    eu.clarin.cmdi.componentregistry.serviceRootUrl <- DEPRECATED
+
+  Instead, configure the parameter:
+
+    eu.clarin.cmdi.componentregistry.serviceUrlPath
+        e.g. "/ds/ComponentRegistry" (or "" for root deployment)
+  and
+
+    EITHER
+        eu.clarin.cmdi.componentregistry.serviceUrlBase
+            e.g. "http://catalog.clarin.eu"
+    OR (if the application is running behind a proxy)
+            eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader
+                    e.g. (usually) "X-FORWARDED-PROTO"
+                AND
+            eu.clarin.cmdi.componentregistry.serviceUrlHostHeader
+                    e.g. (usually) "X-FORWARDED-HOST"
+
+  See the bundled context.xml for details and examples.
+
+- The scheme for bookmark URLs of the front end have changed. Add a rewrite rule
+  that causes a redirect from
+  
+    http://server/ComponentRegistry?param1=x&param2=y
+                                   ^
+  to
+  
+    http://server/ComponentRegistry#/?param1=x&param2=y
+                                   ^^^
+  (Difference marked)
+
+- Since the JS front end (like the previous Flash based front end) is quite heavy
+  on the loading of compressible content, consider enabling content compression
+  on the Tomcat server to improve performance, especially on clients with slow
+  connections. In particular the loading of content of types 'application/json'
+  and 'application/javascript' benefits from this. 
+  
+  E.g., use the following in the Tomcat's server.xml:
+
+    <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443"
+               compression="on" 
+               compressableMimeType="text/html,text/xml,text/plain,text/javascript,text/css,application/json,application/javascript"
+               />
+
+  More information can be found at the following page:
+  	<https://tomcat.apache.org/tomcat-7.0-doc/config/http.html>
 
 - Remove the context parameter eu.clarin.cmdi.componentregistry.jpaDialect from the global
   context.xml or application context fragment, as it is now provided within the web.xml 
