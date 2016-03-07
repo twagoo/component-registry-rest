@@ -28,7 +28,7 @@
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-        <frontEndVersion>2.0.2</frontEndVersion>
+        <frontEndVersion>2.0.3</frontEndVersion>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <jackson.version>1.9.13</jackson.version>
