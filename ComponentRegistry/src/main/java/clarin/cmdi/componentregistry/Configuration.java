@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ public class Configuration {
     private final Map<String, String> schemaLocations = new HashMap<String, String>();
 
     {//Default values
-        schemaLocations.put(CMDComponentSpec.class.getName(),
+        schemaLocations.put(ComponentSpec.class.getName(),
                 "http://www.clarin.eu/cmd/ http://infra.clarin.eu/cmd/general-component-schema.xsd");
     }
     private final static Configuration INSTANCE = new Configuration();
@@ -105,7 +105,7 @@ public class Configuration {
 
     public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {
         LOG.info("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
-        schemaLocations.put(CMDComponentSpec.class.getName(), componentSpecSchemaLocation);
+        schemaLocations.put(ComponentSpec.class.getName(), componentSpecSchemaLocation);
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {

@@ -17,8 +17,8 @@ import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec.Header;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
@@ -67,7 +67,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
     }
 
-    protected static void enrichSpecHeader(CMDComponentSpec spec, BaseDescription description) {
+    protected static void enrichSpecHeader(ComponentSpec spec, BaseDescription description) {
         Header header = spec.getHeader();
         header.setID(description.getId());
         if (StringUtils.isEmpty(header.getName())) {
@@ -78,11 +78,11 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         }
     }
 
-    protected void writeXsd(CMDComponentSpec expandedSpec, OutputStream outputStream) {
+    protected void writeXsd(ComponentSpec expandedSpec, OutputStream outputStream) {
         getMarshaller().generateXsd(expandedSpec, outputStream);
     }
 
-    protected void writeXml(CMDComponentSpec spec, OutputStream outputStream) {
+    protected void writeXml(ComponentSpec spec, OutputStream outputStream) {
         try {
             getMarshaller().marshal(spec, outputStream);
         } catch (UnsupportedEncodingException e) {

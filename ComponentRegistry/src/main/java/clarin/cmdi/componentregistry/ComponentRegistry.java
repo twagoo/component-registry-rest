@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -76,17 +76,17 @@ public interface ComponentRegistry {
 
     ProfileDescription getProfileDescription(String id) throws ComponentRegistryException, ItemNotFoundException;
     
-    CMDComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
+    ComponentSpec getMDProfileAccessControled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
-    CMDComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
+    ComponentSpec getMDComponentAccessControlled(String id) throws ComponentRegistryException, UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
-    CMDComponentSpec getMDComponent(String id) throws ComponentRegistryException;
+    ComponentSpec getMDComponent(String id) throws ComponentRegistryException;
 
     /**
      *
      * @return -1 if profile could not be registered
      */
-    int register(BaseDescription desc, CMDComponentSpec spec);
+    int register(BaseDescription desc, ComponentSpec spec);
 
     /**
      *
@@ -99,14 +99,14 @@ public interface ComponentRegistry {
      *
      * @return -1 if component could not be updated
      */
-    int update(BaseDescription description, CMDComponentSpec spec, boolean forceUpdate) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
+    int update(BaseDescription description, ComponentSpec spec, boolean forceUpdate) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
     /**
      *
      * @return -1 if component could not be published. Published means move from
      * current (private) workspace to public workspace.
      */
-    int publish(BaseDescription desc, CMDComponentSpec spec, Principal principal) throws UserUnauthorizedException,  AuthenticationRequiredException, ItemNotFoundException;
+    int publish(BaseDescription desc, ComponentSpec spec, Principal principal) throws UserUnauthorizedException,  AuthenticationRequiredException, ItemNotFoundException;
 
     void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 

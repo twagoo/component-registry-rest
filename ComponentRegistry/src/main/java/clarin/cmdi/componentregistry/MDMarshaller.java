@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -87,7 +87,7 @@ public class MDMarshaller implements Serializable {
 	m.marshal(marshallableObject, writer);
     }
 
-    public synchronized Schema getCMDComponentSchema() {
+    public synchronized Schema getComponentSchema() {
 	if (generalComponentSchema == null) {
 	    try {
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
@@ -102,7 +102,7 @@ public class MDMarshaller implements Serializable {
 	return generalComponentSchema;
     }
 
-    public void generateXsd(CMDComponentSpec spec, OutputStream outputStream) {
+    public void generateXsd(ComponentSpec spec, OutputStream outputStream) {
 	try {
 	    Transformer transformer = componentToSchemaTemplates.newTransformer();
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -120,7 +120,7 @@ public class MDMarshaller implements Serializable {
 	}
     }
 
-    private String getSpecId(CMDComponentSpec spec) {
+    private String getSpecId(ComponentSpec spec) {
 	String result = "";
 	if (spec != null && spec.getHeader() != null) {
 	    result = spec.getHeader().getID();

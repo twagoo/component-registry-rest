@@ -16,9 +16,9 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
-import clarin.cmdi.componentregistry.components.CMDElementType;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentType;
+import clarin.cmdi.componentregistry.components.ElementType;
 import clarin.cmdi.componentregistry.impl.database.CMDComponentSpecExpanderDbImpl;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -71,7 +71,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         repeatingview.add(item);
         item.add(new Label("ID", pd.getId()));
         item.add(new Label("profname", pd.getName()));
-        CMDComponentSpec profile = CMDComponentSpecExpanderDbImpl.expandProfile(pd.getId(), (ComponentRegistryDbImpl) registry);
+        ComponentSpec profile = CMDComponentSpecExpanderDbImpl.expandProfile(pd.getId(), (ComponentRegistryDbImpl) registry);
         Statistics stats = new Statistics();
         componentCounter(profile, stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));
@@ -84,7 +84,7 @@ public class StatisticsPage extends SecureAdminWebPage {
         repeatingview.add(item);
         item.add(new Label("ID", cd.getId()));
         item.add(new Label("compname", cd.getName()));
-        CMDComponentSpec compspec = CMDComponentSpecExpanderDbImpl.expandComponent(cd.getId(), (ComponentRegistryDbImpl) registry);
+        ComponentSpec compspec = CMDComponentSpecExpanderDbImpl.expandComponent(cd.getId(), (ComponentRegistryDbImpl) registry);
         Statistics stats = new Statistics();
         componentCounter(compspec, stats);
         item.add(new Label("nrcomp", "" + stats.componentnumber));
@@ -92,24 +92,24 @@ public class StatisticsPage extends SecureAdminWebPage {
         item.add(new Label("nrcomplinks", "" + stats.conceptlinkcounter));
     }
 
-    private void componentCounter(CMDComponentSpec components, Statistics stats) {
-        componentCounter(Collections.singleton(components.getCMDComponent()), stats);
+    private void componentCounter(ComponentSpec components, Statistics stats) {
+        componentCounter(Collections.singleton(components.getComponent()), stats);
     }
     
-    private void componentCounter(Collection<CMDComponentType> components, Statistics stats) {
+    private void componentCounter(Collection<ComponentType> components, Statistics stats) {
         if (components != null) {
-            for (CMDComponentType component : components) {
+            for (ComponentType component : components) {
                 stats.componentnumber++;
-                List<CMDElementType> elementlist = component.getCMDElement();
+                List<ElementType> elementlist = component.getElement();
                 if (elementlist != null) {
                     stats.elementcounter += elementlist.size();
-                    for (CMDElementType elem : elementlist) {
+                    for (ElementType elem : elementlist) {
                         if (elem.getConceptLink() != null) {
                             stats.conceptlinkcounter++;
                         }
                     }
                 }
-                componentCounter(component.getCMDComponent(), stats);
+                componentCounter(component.getComponent(), stats);
             }
         }
     }

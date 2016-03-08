@@ -8,7 +8,7 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.RegistrySpace;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -345,29 +345,29 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(403, clientResponse.getStatus());
 
         // particular components and profiles
-        CMDComponentSpec component = this.getAuthenticatedResource(getResource()
+        ComponentSpec component = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1"))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Actor", component.getCMDComponent().getName());
+        assertEquals("Actor", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1"))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Access", component.getCMDComponent().getName());
+        assertEquals("Access", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1"))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Actor", component.getCMDComponent().getName());
+        assertEquals("Actor", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1"))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Access", component.getCMDComponent().getName());
+        assertEquals("Access", component.getComponent().getName());
 
         clientResponse = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1"))

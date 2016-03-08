@@ -6,7 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -276,7 +276,7 @@ public class MDValidatorTest extends BaseUnitTest {
     }
 
     /**
-     * Test of getCMDComponentSpec method, of class MDValidator.
+     * Test of getComponentSpec method, of class MDValidator.
      */
     @Test
     public void testGetCMDComponentSpec() throws Exception {
@@ -287,25 +287,25 @@ public class MDValidatorTest extends BaseUnitTest {
         MDValidator validator = new MDValidator(input, desc, testRegistry, marshaller);
 
         // Spec is created during validation, before it should be null
-        assertNull(validator.getCMDComponentSpec());
+        assertNull(validator.getComponentSpec());
         validator.validate();
 
         // Get spec created during validation
-        final CMDComponentSpec cmdComponentSpec = validator
-                .getCMDComponentSpec();
+        final ComponentSpec cmdComponentSpec = validator
+                .getComponentSpec();
         assertNotNull(cmdComponentSpec);
 
         // Spec content should match XML
         assertTrue(cmdComponentSpec.isIsProfile());
-        assertEquals("Actor", cmdComponentSpec.getCMDComponent().getName());
+        assertEquals("Actor", cmdComponentSpec.getComponent().getName());
 
         // Spec copy should be a freshly unmarshalled copy
-        final CMDComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
+        final ComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
         assertNotSame(cmdComponentSpec, specCopy);
 
         // Content should still match XML
         assertTrue(specCopy.isIsProfile());
-        assertEquals("Actor", specCopy.getCMDComponent().getName());
+        assertEquals("Actor", specCopy.getComponent().getName());
     }
 
     private MDValidator getValidProfileValidator() {

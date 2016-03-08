@@ -19,7 +19,7 @@ import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -72,7 +72,7 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(InputStream content, ComponentRegistry testRegistry, ComponentDescription desc) throws JAXBException {
-        CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
+        ComponentSpec spec = marshaller.unmarshal(ComponentSpec.class, content, marshaller.getComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
     }
@@ -153,7 +153,7 @@ public final class RegistryTestHelper {
     }
 
     public static ProfileDescription addProfile(InputStream content, ComponentRegistry testRegistry, ProfileDescription desc) throws JAXBException {
-        CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
+        ComponentSpec spec = marshaller.unmarshal(ComponentSpec.class, content, marshaller.getComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
     }
@@ -176,8 +176,8 @@ public final class RegistryTestHelper {
         return addProfile(content, testRegistry, desc);
     }
 
-    public static CMDComponentSpec getTestProfile() throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getTestProfile() throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getTestProfileContent(), marshaller.getComponentSchema());
     }
 
     public static String getComponentTestContentString() {
@@ -234,8 +234,8 @@ public final class RegistryTestHelper {
     }
 
     //////////////////////
-    public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getComponentFromString(String contentString) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getComponentSchema());
     }
 
     public static InputStream getComponentContentAsStream(String content) {
@@ -246,15 +246,15 @@ public final class RegistryTestHelper {
         return getComponentContentAsStream(getComponentTestContentString(componentName));
     }
 
-    public static CMDComponentSpec getTestComponent() throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getTestComponent() throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentTestContent(), marshaller.getComponentSchema());
     }
 
-    public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getTestComponent(String name) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getComponentSchema());
     }
 
-    public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
+    public static String getXml(ComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         marshaller.marshal(componentSpec, os);
         String xml = os.toString();

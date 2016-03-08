@@ -10,8 +10,8 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.NullIdException;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.schema.cmd.Validator.Message;
@@ -47,7 +47,7 @@ public class MDValidator implements Validator {
     static final String UNKNOWN_VALIDATION_ERROR = "Unknown validation error";
     static final Collection<String> ILLEGAL_ATTRIBUTE_NAMES = Collections.unmodifiableCollection(Arrays.asList("ref", "ComponentId"));
     private List<String> errorMessages = new ArrayList<String>();
-    private CMDComponentSpec spec = null;
+    private ComponentSpec spec = null;
     private byte[] originalSpecBytes;
     private final InputStream input;
     private final BaseDescription description;
@@ -57,7 +57,7 @@ public class MDValidator implements Validator {
     /**
      *
      * @param input In order to validate the input is consumed. So use
-     * @see getCMDComponentSpec to get the parsed CMDComponentSpec.
+     * @see getComponentSpec to get the parsed ComponentSpec.
      * @param desc
      * @param registry (registry you currently used)
      * @param userRegistry can be null, We get user registry as well so we can
@@ -140,29 +140,29 @@ public class MDValidator implements Validator {
         return bOS.toByteArray();
     }
 
-    private void validateComponents(CMDComponentSpec componentSpec) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
-        validateComponents(Collections.singletonList(componentSpec.getCMDComponent()));
+    private void validateComponents(ComponentSpec componentSpec) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
+        validateComponents(Collections.singletonList(componentSpec.getComponent()));
     }
 
-    private void validateComponents(List<CMDComponentType> cmdComponents) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
-        for (CMDComponentType cmdComponentType : cmdComponents) {
+    private void validateComponents(List<ComponentType> cmdComponents) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
+        for (ComponentType cmdComponentType : cmdComponents) {
             this.validateDescribedComponents(cmdComponentType);
-            this.validateComponents(cmdComponentType.getCMDComponent());//Recursion
+            this.validateComponents(cmdComponentType.getComponent());//Recursion
         }
     }
 
-    private void validateDescribedComponents(CMDComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
+    private void validateDescribedComponents(ComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
         this.checkComponentInSpace(cmdComponentType);
     }
 
-    private void checkComponentInSpace(CMDComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
+    private void checkComponentInSpace(ComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
         if (isDefinedInSeparateFile(cmdComponentType)) {
             String id = cmdComponentType.getComponentId();
             if (id == null) {
                 String name = (cmdComponentType.getName() == null) ? "null" : cmdComponentType.getName();
                 throw new NullIdException("The component with the name " + name + " has a null id. :(");
             }
-            CMDComponentSpec registeredComponent = registry.getMDComponent(id);
+            ComponentSpec registeredComponent = registry.getMDComponent(id);
             if (registeredComponent != null) {
                 final String componentId = cmdComponentType.getComponentId();
                 if (registry.isItemPublic(id)) {  // if  a component is public, it is available for any registry
@@ -199,7 +199,7 @@ public class MDValidator implements Validator {
 
     }
 
-    private boolean isDefinedInSeparateFile(CMDComponentType cmdComponentType) {
+    private boolean isDefinedInSeparateFile(ComponentType cmdComponentType) {
         return cmdComponentType.getName() == null;
     }
 
@@ -209,14 +209,14 @@ public class MDValidator implements Validator {
      * @return the spec unmarshalled during {@link #validate() }. If this has
      * not been called, returns null.
      */
-    public CMDComponentSpec getCMDComponentSpec() {
+    public ComponentSpec getComponentSpec() {
         return spec;
     }
 
     /**
      * Creates a fresh (re-unmarshalled) copy of the specification this instance
      * has validated. If you are not going to alter this copy, you can re-use
-     * and share the copy used during validation by getting it from {@link #getCMDComponentSpec()
+     * and share the copy used during validation by getting it from {@link #getComponentSpec()
      * }. <em>Do not call before having called {@link #validate() }!</em>
      *
      * @return a freshly unmarshalled copy of the spec based on the bytes
@@ -225,16 +225,16 @@ public class MDValidator implements Validator {
      * @throws JAXBException exception occurred while marshalling from the input
      * bytes
      * @see #validate()
-     * @see #getCMDComponentSpec()
+     * @see #getComponentSpec()
      */
-    public CMDComponentSpec getCopyOfCMDComponentSpec() throws JAXBException {
+    public ComponentSpec getCopyOfCMDComponentSpec() throws JAXBException {
         // Re-unmarshall original bytes
         return unmarshalSpec(originalSpecBytes);
 
 
     }
 
-    private CMDComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
+    private ComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
     }
 }

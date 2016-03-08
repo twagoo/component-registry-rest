@@ -11,8 +11,8 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -300,7 +300,7 @@ public class ComponentRegistryRestService implements
             @PathParam("componentId") String componentId) throws IOException {
         LOG.debug("Component with id: {} is requested.", componentId);
         try {
-            CMDComponentSpec mdComponent = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
+            ComponentSpec mdComponent = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
             return Response.ok(mdComponent).build();
         } catch (ItemNotFoundException e) {
             return Response.status(Status.NOT_FOUND).build();
@@ -328,7 +328,7 @@ public class ComponentRegistryRestService implements
             @PathParam("profileId") String profileId) throws IOException {
         LOG.debug("Profile with id {} is requested.", profileId);
         try {
-            CMDComponentSpec mdProfile = this.getBaseRegistry().getMDProfileAccessControled(profileId);
+            ComponentSpec mdProfile = this.getBaseRegistry().getMDProfileAccessControled(profileId);
             return Response.ok(mdProfile).build();
         } catch (ItemNotFoundException e) {
             return Response.status(Status.NOT_FOUND).build();
@@ -1455,11 +1455,7 @@ public class ComponentRegistryRestService implements
             this.validate(response, descriptionValidator, validator);
             if (response.getErrors().isEmpty()) {
 
-                CMDComponentSpec spec = validator.getCMDComponentSpec();
-
-                // removing filename from spec before it gets extended.
-                // recursion over all the components
-                setFileNamesFromListToNull(Collections.singletonList(spec.getCMDComponent()));
+                ComponentSpec spec = validator.getComponentSpec();
 
                 try {
                     checkForRecursion(validator, registry, desc);
@@ -1518,12 +1514,12 @@ public class ComponentRegistryRestService implements
         try {
             // Expand to check for recursion. Operate on copy so that original
             // does not get expanded.
-            final CMDComponentSpec specCopy = validator
+            final ComponentSpec specCopy = validator
                     .getCopyOfCMDComponentSpec();
             // In case of recursion, the following will throw a
             // ComponentRegistryException
             registry.getExpander().expandNestedComponent(
-                    Lists.newArrayList(specCopy.getCMDComponent()), desc.getId());
+                    Lists.newArrayList(specCopy.getComponent()), desc.getId());
         } catch (JAXBException ex) {
             throw new ComponentRegistryException(
                     "Unmarshalling failed while preparing recursion detection",
@@ -1649,31 +1645,6 @@ public class ComponentRegistryRestService implements
     public void setComponentRegistryFactory(
             ComponentRegistryFactory componentRegistryFactory) {
         this.componentRegistryFactory = componentRegistryFactory;
-    }
-
-    /**
-     *
-     * @param listofcomponents a list of components whose file-names and whose
-     * childrens' filenames are to be set to null
-     */
-    @Override
-    public void setFileNamesFromListToNull(
-            List<CMDComponentType> listofcomponents) {
-
-        for (CMDComponentType currentcomponent : listofcomponents) {
-            setFileNamesToNullCurrent(currentcomponent);
-        }
-
-    }
-
-    /**
-     *
-     * @param currentcomponent a component whose file-name and whose children
-     * filenames are to be set to null
-     */
-    protected void setFileNamesToNullCurrent(CMDComponentType currentcomponent) {
-        currentcomponent.setFilename(null);
-        setFileNamesFromListToNull(currentcomponent.getCMDComponent());
     }
 
     private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {

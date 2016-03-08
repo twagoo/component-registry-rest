@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -167,8 +167,6 @@ public interface IComponentRegistryRestService {
     AllowedAttributetypesXML getAllowedAttributeTypes()
             throws ComponentRegistryException, IOException, JAXBException,
             ParseException;
-
-    void setFileNamesFromListToNull(List<CMDComponentType> listofcomponents);
 
     /**
      * Get any component (public or private) with the specified ID

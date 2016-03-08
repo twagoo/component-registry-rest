@@ -2,8 +2,7 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -21,7 +20,6 @@ import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -245,23 +243,23 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         String id2 = ComponentDescription.COMPONENT_PREFIX + "component2";
 
         // make an unauthenticated reponse
-        CMDComponentSpec component = getResource()
+        ComponentSpec component = getResource()
                 .path("/registry/components/" + id)
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull("unauthenticated component request", component);
-        assertEquals("Access", component.getCMDComponent().getName());
+        assertEquals("Access", component.getComponent().getName());
 
         // make an authenticated reponse
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + id))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull("authenticated component request", component);
-        assertEquals("Access", component.getCMDComponent().getName());
+        assertEquals("Access", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id2))
-                .accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Access", component.getCMDComponent().getName());
+        assertEquals("Access", component.getComponent().getName());
         assertEquals(id2, component.getHeader().getID());
         assertEquals("component2", component.getHeader().getName());
         assertEquals("Test Description", component.getHeader().getDescription());
@@ -276,23 +274,23 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         String id2 = ProfileDescription.PROFILE_PREFIX + "profile2";
 
         // make an unauthenticated reponse
-        CMDComponentSpec profile = getResource()
+        ComponentSpec profile = getResource()
                 .path("/registry/profiles/" + id)
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull("unauthenticated component request", profile);
-//        assertEquals("Access", profile.getCMDComponent().getName());
+//        assertEquals("Access", profile.getComponent().getName());
 
         // make an authenticated reponse
         profile = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + id))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull("authenticated component request", profile);
-//        assertEquals("Access", profile.getCMDComponent().getName());
+//        assertEquals("Access", profile.getComponent().getName());
 
         profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id2))
-                .accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
         assertNotNull(profile);
-//        assertEquals("Access", profile.getCMDComponent().getName());
+//        assertEquals("Access", profile.getComponent().getName());
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
         assertEquals("Test Description", profile.getHeader().getDescription());
@@ -557,9 +555,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 "/registry/components").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
+        ComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                        + "component3")).get(CMDComponentSpec.class);
+                        + "component3")).get(ComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
@@ -583,9 +581,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(1, components.size());
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
+        ComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                        + "profile3").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(CMDComponentSpec.class);
+                        + "profile3").queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).get(ComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
@@ -649,9 +647,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 "/registry/components")).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, components.size());
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
+        ComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                        + "component1")).get(CMDComponentSpec.class);
+                        + "component1")).get(ComponentSpec.class);
         assertNotNull(profile);
         ClientResponse response = getAuthenticatedResource(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
@@ -764,9 +762,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 "/registry/components")).get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, components.size());
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
+        ComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
-                        + "component1")).get(CMDComponentSpec.class);
+                        + "component1")).get(ComponentSpec.class);
         assertNotNull(profile);
 
         Form manipulateForm = new Form();
@@ -798,15 +796,15 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         String id = ProfileDescription.PROFILE_PREFIX + "profile1";
         String id2 = ProfileDescription.PROFILE_PREFIX + "profile2";
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource()
+        ComponentSpec profile = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + id))
-                .accept(MediaType.APPLICATION_JSON).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(profile);
-        assertEquals("Actor", profile.getCMDComponent().getName());
+        assertEquals("Actor", profile.getComponent().getName());
         profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id2))
-                .accept(MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
         assertNotNull(profile);
-        assertEquals("Actor", profile.getCMDComponent().getName());
+        assertEquals("Actor", profile.getComponent().getName());
 
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
@@ -817,7 +815,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                     .path("/registry/profiles/"
                             + ProfileDescription.PROFILE_PREFIX + "profileXXXX"))
                     .accept(MediaType.APPLICATION_XML)
-                    .get(CMDComponentSpec.class);
+                    .get(ComponentSpec.class);
             fail("Exception should have been thrown resource does not exist, HttpStatusCode 404");
         } catch (UniformInterfaceException e) {
             assertEquals(404, e.getResponse().getStatus());
@@ -937,9 +935,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         List<ProfileDescription> profiles = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles")).get(PROFILE_LIST_GENERICTYPE);
         assertEquals(2, profiles.size());
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
+        ComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                        + "profile1")).get(CMDComponentSpec.class);
+                        + "profile1")).get(ComponentSpec.class);
         assertNotNull(profile);
 
         ClientResponse response = getAuthenticatedResource(
@@ -976,9 +974,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         List<ProfileDescription> profiles = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles")).get(PROFILE_LIST_GENERICTYPE);
         assertEquals(2, profiles.size());
-        CMDComponentSpec profile = this.getAuthenticatedResource(getResource().path(
+        ComponentSpec profile = this.getAuthenticatedResource(getResource().path(
                 "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
-                        + "profile1")).get(CMDComponentSpec.class);
+                        + "profile1")).get(ComponentSpec.class);
         assertNotNull(profile);
 
         Form manipulateForm = new Form();
@@ -1110,17 +1108,17 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("http://localhost:9998/registry/profiles/" + desc.getId(),
                 profileDescription.getHref());
         assertEquals("Published", profileDescription.getDescription());
-        CMDComponentSpec spec = getPublicSpec(profileDescription);
-        assertEquals("publishedName", spec.getCMDComponent().getName());
+        ComponentSpec spec = getPublicSpec(profileDescription);
+        assertEquals("publishedName", spec.getComponent().getName());
     }
 
-    private CMDComponentSpec getPublicSpec(BaseDescription desc) {
+    private ComponentSpec getPublicSpec(BaseDescription desc) {
         if (desc.isProfile()) {
             return this.getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId()))
-                    .get(CMDComponentSpec.class);
+                    .get(ComponentSpec.class);
         } else {
             return this.getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId()))
-                    .get(CMDComponentSpec.class);
+                    .get(ComponentSpec.class);
         }
     }
 
@@ -1163,8 +1161,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 "http://localhost:9998/registry/components/" + desc.getId(),
                 componentDescription.getHref());
         assertEquals("Published", componentDescription.getDescription());
-        CMDComponentSpec spec = getPublicSpec(componentDescription);
-        assertEquals("publishedName", spec.getCMDComponent().getName());
+        ComponentSpec spec = getPublicSpec(componentDescription);
+        assertEquals("publishedName", spec.getComponent().getName());
     }
 
     // duplicates ("extendedly") testRegisterProfile, since you can pot only in user space, and then publish or move to group or so
@@ -1212,9 +1210,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .post(ClientResponse.class, form);
         assertEquals(401, cResponse.getStatus());
 
-        CMDComponentSpec spec = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId())
+        ComponentSpec spec = getAuthenticatedResource(getResource().path("/registry/profiles/" + profileDesc.getId())
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+                        MediaType.APPLICATION_XML).get(ComponentSpec.class);
         assertNotNull(spec);
 
         cResponse = this.getAuthenticatedResource(getResource()
@@ -1371,7 +1369,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .accept(MediaType.APPLICATION_XML).get(ClientResponse.class);
 
         assertEquals(200, cResponse.getStatus());
-        CMDComponentSpec spec = getUserComponent(desc);
+        ComponentSpec spec = getUserComponent(desc);
         assertNotNull(spec);
 
         cResponse = this.getAuthenticatedResource(getResource()
@@ -1480,9 +1478,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Test1", desc.getName());
         assertEquals("My Test", desc.getDescription());
         Date firstDate = desc.getRegistrationDate();
-        CMDComponentSpec spec = getUserComponent(desc);
+        ComponentSpec spec = getUserComponent(desc);
         assertNotNull(spec);
-        assertEquals("Access", spec.getCMDComponent().getName());
+        assertEquals("Access", spec.getComponent().getName());
         components = getUserComponents();
         assertEquals(2, components.size());
         assertEquals(0, getPublicComponents().size());
@@ -1509,7 +1507,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         spec = getUserComponent(desc);
         assertNotNull(spec);
-        assertEquals("TESTNAME", spec.getCMDComponent().getName());
+        assertEquals("TESTNAME", spec.getComponent().getName());
         components = getUserComponents();
         assertEquals(2, components.size());
         assertEquals(0, getPublicComponents().size());
@@ -1543,9 +1541,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("My Test", desc.getDescription());
         assertEquals("TestGroup", desc.getGroupName());
         Date firstDate = desc.getRegistrationDate();
-        CMDComponentSpec spec = getUserProfile(desc);
+        ComponentSpec spec = getUserProfile(desc);
         assertNotNull(spec);
-        assertEquals("Actor", spec.getCMDComponent().getName());
+        assertEquals("Actor", spec.getComponent().getName());
         profiles = getUserProfiles();
         assertEquals(2, profiles.size());
         assertEquals(0, getPublicComponents().size());
@@ -1572,22 +1570,22 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         spec = getUserProfile(desc);
         assertNotNull(spec);
-        assertEquals("TESTNAME", spec.getCMDComponent().getName());
+        assertEquals("TESTNAME", spec.getComponent().getName());
         profiles = getUserProfiles();
         assertEquals(2, profiles.size());
         assertEquals(0, getPublicComponents().size());
     }
 
-    private CMDComponentSpec getUserComponent(ComponentDescription desc) {
+    private ComponentSpec getUserComponent(ComponentDescription desc) {
         return getAuthenticatedResource(getResource().path("/registry/components/" + desc.getId())
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+                        MediaType.APPLICATION_XML).get(ComponentSpec.class);
     }
 
-    private CMDComponentSpec getUserProfile(ProfileDescription desc) {
+    private ComponentSpec getUserProfile(ProfileDescription desc) {
         return getAuthenticatedResource(getResource().path("/registry/profiles/" + desc.getId())
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(CMDComponentSpec.class);
+                        MediaType.APPLICATION_XML).get(ComponentSpec.class);
     }
 
     private List<ComponentDescription> getPublicComponents() {
@@ -1853,107 +1851,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(1, response.getErrors().size());
         assertEquals(MDValidator.MISMATCH_ERROR, response.getErrors().get(0));
     }
-
-    /**
-     * creates a tree-like component, whose root has two kids, and the kids have
-     * three their own kids each the corresponding filenames are: "wortel",
-     * "nodel-L", "node-R", "leaf-LL", "leaf-LM", "leaf-LR", "leaf-RL",
-     * "leaf-RM", "leaf-RR"
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testSetFilenamesToNull() throws Exception {
-        System.out.println("testSetfilenamesTonull");
-        // helper assists in generating a test component
-        CMDComponentSetFilenamesToNullTestRunner helper = new CMDComponentSetFilenamesToNullTestRunner();
-
-        // making an (up to ternary) tree of test components
-        // inductive explaination of the variable names, an example: leaf-LM is
-        // the middle child of the nodeL
-        // the filename is this leaf is "leaf-LM"
-        // making children of the node L
-        CMDComponentType leafLR = helper.makeTestComponent("leaf-LR", null);
-        CMDComponentType leafLM = helper.makeTestComponent("leaf-LM", null);
-        CMDComponentType leafLL = helper.makeTestComponent("leaf-LL", null);
-
-        // making node L
-        List<CMDComponentType> nodeLchild = (new ArrayList<CMDComponentType>());
-        nodeLchild.add(leafLL);
-        nodeLchild.add(leafLM);
-        nodeLchild.add(leafLR);
-        CMDComponentType nodeL = helper.makeTestComponent("node-L", nodeLchild);
-
-        // making children of the node R
-        CMDComponentType leafRR = helper.makeTestComponent("leaf-RR", null);
-        CMDComponentType leafRM = helper.makeTestComponent("leaf-RM", null);
-        CMDComponentType leafRL = helper.makeTestComponent("leaf-RL", null);
-
-        // making node R
-        List<CMDComponentType> nodeRchild = (new ArrayList<CMDComponentType>());
-        nodeRchild.add(leafRL);
-        nodeRchild.add(leafRM);
-        nodeRchild.add(leafRR);
-        CMDComponentType nodeR = helper.makeTestComponent("node-R", nodeRchild);
-
-        // making the root, which has children NodeL and nodeR
-        List<CMDComponentType> wortelchild = (new ArrayList<CMDComponentType>());
-        wortelchild.add(nodeL);
-        wortelchild.add(nodeR);
-        CMDComponentType root = helper.makeTestComponent("wortel", wortelchild);
-
-        // checking if the test compnent has the expected structure and the
-        // expected filenames
-        // ALSO this checking code below shows the strtucture of the tree
-        assertEquals(root.getCMDComponent().size(), 2);
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().size(), 3);
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().size(), 3);
-
-        assertEquals(root.getFilename(), "wortel");
-
-        assertEquals(root.getCMDComponent().get(0).getFilename(), "node-L");
-        assertEquals(root.getCMDComponent().get(1).getFilename(), "node-R");
-
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().get(0)
-                .getFilename(), "leaf-LL");
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().get(1)
-                .getFilename(), "leaf-LM");
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().get(2)
-                .getFilename(), "leaf-LR");
-
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(0)
-                .getFilename(), "leaf-RL");
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(1)
-                .getFilename(), "leaf-RM");
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(2)
-                .getFilename(), "leaf-RR");
-
-        // the actual job
-        // nulling the filenames will be called as a method of testrestservice
-        ComponentRegistryRestService restservice = new ComponentRegistryRestService();
-        restservice.setFileNamesToNullCurrent(root);
-
-        // check if the filenames are nulled
-        assertEquals(root.getFilename(), null);
-
-        assertEquals(root.getCMDComponent().get(0).getFilename(), null);
-        assertEquals(root.getCMDComponent().get(1).getFilename(), null);
-
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().get(0)
-                .getFilename(), null);
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().get(1)
-                .getFilename(), null);
-        assertEquals(root.getCMDComponent().get(0).getCMDComponent().get(2)
-                .getFilename(), null);
-
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(0)
-                .getFilename(), null);
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(1)
-                .getFilename(), null);
-        assertEquals(root.getCMDComponent().get(1).getCMDComponent().get(2)
-                .getFilename(), null);
-    }
-
+    
     @Test
     public void testGetDescription() throws Exception {
         System.out.println("testGetDescription");

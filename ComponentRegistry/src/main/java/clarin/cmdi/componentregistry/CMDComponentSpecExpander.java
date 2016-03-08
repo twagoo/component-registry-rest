@@ -1,7 +1,7 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
-import clarin.cmdi.componentregistry.components.CMDComponentType;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentType;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,13 +30,13 @@ public abstract class CMDComponentSpecExpander {
      * @param id
      * @throws ComponentRegistryException
      */
-    public void expandNestedComponent(List<CMDComponentType> cmdComponents, String id) throws ComponentRegistryException {
+    public void expandNestedComponent(List<ComponentType> cmdComponents, String id) throws ComponentRegistryException {
         expandNestedComponent(cmdComponents, new HashSet<String>(Collections.singleton(id)));
     }
 
-    private void expandNestedComponent(List<CMDComponentType> cmdComponents, Collection<String> path) throws ComponentRegistryException {
-        List<CMDComponentType> expanded = new ArrayList<CMDComponentType>();
-        for (CMDComponentType cmdComponentType : cmdComponents) {
+    private void expandNestedComponent(List<ComponentType> cmdComponents, Collection<String> path) throws ComponentRegistryException {
+        List<ComponentType> expanded = new ArrayList<ComponentType>();
+        for (ComponentType cmdComponentType : cmdComponents) {
             String componentId = cmdComponentType.getComponentId();
             if (componentId != null) {
                 if (LOG.isDebugEnabled()) {
@@ -48,10 +48,10 @@ public abstract class CMDComponentSpecExpander {
                     Collection<String> newPath = new HashSet<String>(path);
                     newPath.add(componentId);
                     // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
-                    CMDComponentSpec spec = getUncachedComponent(componentId);
+                    ComponentSpec spec = getUncachedComponent(componentId);
                     if (spec != null) {
-                        CMDComponentType nested = spec.getCMDComponent();
-                        expandNestedComponent(nested.getCMDComponent(), newPath);
+                        ComponentType nested = spec.getComponent();
+                        expandNestedComponent(nested.getComponent(), newPath);
                         overwriteAttributes(cmdComponentType, nested);
                         expanded.add(nested);
                     } else {
@@ -63,7 +63,7 @@ public abstract class CMDComponentSpecExpander {
                 }
             } else {
                 // No id = embedded component
-                expandNestedComponent(cmdComponentType.getCMDComponent(), path);
+                expandNestedComponent(cmdComponentType.getComponent(), path);
                 expanded.add(cmdComponentType);//no attributes overwritten
             }
         }
@@ -75,7 +75,7 @@ public abstract class CMDComponentSpecExpander {
      * Copying the cardinality specified in the referenceDeclaration over the
      * values in the actual component.
      */
-    private void overwriteAttributes(CMDComponentType referenceDeclaration, CMDComponentType nested) {
+    private void overwriteAttributes(ComponentType referenceDeclaration, ComponentType nested) {
         if (!referenceDeclaration.getCardinalityMax().isEmpty()) {
             List<String> cardinalityMax = nested.getCardinalityMax();
             cardinalityMax.clear();
@@ -89,34 +89,34 @@ public abstract class CMDComponentSpecExpander {
         nested.setComponentId(referenceDeclaration.getComponentId()); // Setting componentId for better xsd generation.
     }
 
-    protected CMDComponentSpec expandComponent(String componentId) throws ComponentRegistryException {
+    protected ComponentSpec expandComponent(String componentId) throws ComponentRegistryException {
         // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
-        CMDComponentSpec result = getUncachedComponent(componentId);//registry.getUncachedComponent(componentId);
-        CMDComponentType cmdComponentType = result.getCMDComponent();
-        expandNestedComponent(cmdComponentType.getCMDComponent(), componentId);
+        ComponentSpec result = getUncachedComponent(componentId);//registry.getUncachedComponent(componentId);
+        ComponentType cmdComponentType = result.getComponent();
+        expandNestedComponent(cmdComponentType.getComponent(), componentId);
         return result;
     }
 
-    protected CMDComponentSpec expandProfile(String profileId) throws ComponentRegistryException {
+    protected ComponentSpec expandProfile(String profileId) throws ComponentRegistryException {
         // Use uncached components and profiles, because we expand and thus change them this change should not be in the cache.
-        CMDComponentSpec profileSpec = getUncachedProfile(profileId);
+        ComponentSpec profileSpec = getUncachedProfile(profileId);
         expandProfileSpec(profileSpec, profileId);
         return profileSpec;
     }
 
-    private void expandProfileSpec(CMDComponentSpec profileSpec, String profileId) throws ComponentRegistryException {
+    private void expandProfileSpec(ComponentSpec profileSpec, String profileId) throws ComponentRegistryException {
         // make a temporary list of the root component (singleton)
-        final CMDComponentType rootComponent = profileSpec.getCMDComponent();
-        final ArrayList<CMDComponentType> rootComponentList = Lists.newArrayList(rootComponent);
+        final ComponentType rootComponent = profileSpec.getComponent();
+        final ArrayList<ComponentType> rootComponentList = Lists.newArrayList(rootComponent);
         // expand 'all' components
         expandNestedComponent(rootComponentList, profileId);
         // put the expanded root back in the profile spec
-        profileSpec.setCMDComponent(rootComponentList.get(0));
+        profileSpec.setComponent(rootComponentList.get(0));
     }
 
-//    protected CMDComponentSpec expandComment(String commentId) throws ComponentRegistryException {
-//        CMDComponentSpec result = getUncachedComment(commentId);
-//        List<CMDComponentType> cmdComponents = result.getCMDComponent();
+//    protected ComponentSpec expandComment(String commentId) throws ComponentRegistryException {
+//        ComponentSpec result = getUncachedComment(commentId);
+//        List<ComponentType> cmdComponents = result.getComponent();
 //        expandNestedComponent(cmdComponents);
 //        return result;
 //    }
@@ -126,8 +126,8 @@ public abstract class CMDComponentSpecExpander {
      *
      * @param componentId
      */
-    protected abstract CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException;
+    protected abstract ComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException;
 
-    protected abstract CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException;
-//    protected abstract CMDComponentSpec getUncachedComment(String commentId) throws ComponentRegistryException;
+    protected abstract ComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException;
+//    protected abstract ComponentSpec getUncachedComment(String commentId) throws ComponentRegistryException;
 }
