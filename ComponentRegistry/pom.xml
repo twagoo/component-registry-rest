@@ -29,7 +29,7 @@
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
         <frontEndVersion>2.0.3</frontEndVersion>
-        <cmd-toolkit.version>1.1</cmd-toolkit.version>
+        <cmd-toolkit.version>1.2-SNAPSHOT</cmd-toolkit.version>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <jackson.version>1.9.13</jackson.version>
@@ -418,7 +418,7 @@
                 <directory>src/test/resources</directory>
             </testResource>
             <testResource>
-                <directory>${project.build.directory}/cmd-toolkit</directory>
+                <directory>${project.build.directory}/cmd-toolkit/toolkit</directory>
             </testResource>
         </testResources>
         <plugins>
@@ -468,7 +468,7 @@
                                     <version>${cmd-toolkit.version}</version>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>src/main/binding/components</outputDirectory> <!-- TODO: extract elsewhere -->
-                                    <includes>cmd-toolkit/general-component-schema.xsd</includes>
+                                    <includes>toolkit/xsd/cmd-component.xsd</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -527,7 +527,7 @@
                         <configuration>
                             <schemaDirectory>src/main/binding/components</schemaDirectory>
                             <schemaIncludes>
-                                <include>cmd-toolkit/general-component-schema.xsd</include>
+                                <include>toolkit/xsd/cmd-component.xsd</include>
                             </schemaIncludes>
                             <bindingDirectory>src/main/binding/components</bindingDirectory>
                             <extension>true</extension>

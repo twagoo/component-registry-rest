@@ -2,12 +2,16 @@
           xmlns:xs="http://www.w3.org/2001/XMLSchema"
           version="2.0"> 
           <!-- TODO Patrick component schema location here needs to be better handled. Not hardcoded for instance. -->
-   <bindings schemaLocation="cmd-toolkit/general-component-schema.xsd"
-     node="/xs:schema/xs:complexType[@name='CMD_Element_type']/xs:sequence/xs:element[@name='ValueScheme']">
+   <bindings schemaLocation="toolkit/xsd/cmd-component.xsd"
+     node="/xs:schema/xs:complexType[@name='Element_type']/xs:sequence/xs:element[@name='ValueScheme']">
       <property name="ValueScheme" />
    </bindings>
-   <bindings schemaLocation="cmd-toolkit/general-component-schema.xsd"
-     node="/xs:schema/xs:attributeGroup[@name='clarin_element_attributes']/xs:attribute[@name='ValueScheme']">
+   <bindings schemaLocation="toolkit/xsd/cmd-component.xsd"
+     node="/xs:schema/xs:complexType[@name='AttributeList_type']/xs:sequence/xs:element[@name='Attribute']/xs:complexType/xs:sequence/xs:element[@name='ValueScheme']">
+      <property name="AttributeValueScheme" />
+   </bindings>
+   <bindings schemaLocation="toolkit/xsd/cmd-component.xsd"
+     node="/xs:schema/xs:attributeGroup[@name='element_attributes']/xs:attribute[@name='ValueScheme']">
       <property name="ValueSchemeAttribute" />
    </bindings>
 </bindings>
