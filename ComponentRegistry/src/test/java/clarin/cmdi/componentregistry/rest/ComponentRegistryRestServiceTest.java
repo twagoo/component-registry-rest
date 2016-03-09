@@ -684,7 +684,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
         content += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
         content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
@@ -695,7 +695,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
         content += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
         content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
@@ -708,7 +708,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         content = "";
         content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
         content += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
         content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
@@ -1273,7 +1273,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         // kid component, not public
         String content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
         content += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
         content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
@@ -1285,7 +1285,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         // a containing component, referring to the kid (which is not public, so the containing component cannot be registered
         content = "";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
         content += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
         content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
@@ -1303,7 +1303,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         /// profiles ///
         content = "";
         content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
         content += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
         content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
@@ -1416,7 +1416,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
         compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        compContent += "    xsi:noNamespaceSchemaLocation=\"../../general-component-schema.xsd\">\n";
+        compContent += "    xsi:noNamespaceSchemaLocation=\"../../cmd-component.xsd\">\n";
         compContent += "    \n";
         compContent += "    <Header/>\n";
         compContent += "    \n";
@@ -1739,7 +1739,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         profileContent += "    <Header />\n";
         profileContent += "    <CMD_Component name=\"ProfileTest1\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "        <CMD_Element name=\"Age\">\n";

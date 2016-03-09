@@ -52,7 +52,7 @@ public class MDValidatorTest extends BaseUnitTest {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         profileContent += "    <Header />\n";
         profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "	   <AttributeList>\n";
@@ -113,7 +113,7 @@ public class MDValidatorTest extends BaseUnitTest {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         profileContent += "    <Header />\n";
         profileContent += "    <CMD_Component filename=\"component-actor.xml\"/>\n";
         profileContent += "</CMD_ComponentSpec>\n";
@@ -138,7 +138,7 @@ public class MDValidatorTest extends BaseUnitTest {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">";
         profileContent += "    <Header />";
         profileContent += "    <CMD_Component name=\"Test\">";
         profileContent += "	<CMD_Component ComponentId=\""
@@ -190,7 +190,7 @@ public class MDValidatorTest extends BaseUnitTest {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">";
         profileContent += "    <Header />";
         profileContent += "    <CMD_Component name=\"Test\">";
         profileContent += "	<CMD_Component ComponentId=\""
@@ -248,7 +248,7 @@ public class MDValidatorTest extends BaseUnitTest {
         String content = "";
         content += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header />\n";
         content += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         content += "        <CMD_Element name=\"Name\" ValueScheme=\"string\" />\n";
@@ -322,7 +322,7 @@ public class MDValidatorTest extends BaseUnitTest {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         profileContent += "    <Header />\n";
         profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "        <CMD_Element name=\"Age\">\n";

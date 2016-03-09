@@ -418,7 +418,7 @@
                 <directory>src/test/resources</directory>
             </testResource>
             <testResource>
-                <directory>${project.build.directory}/cmd-toolkit/toolkit</directory>
+                <directory>${project.build.directory}/cmd-toolkit</directory>
             </testResource>
         </testResources>
         <plugins>

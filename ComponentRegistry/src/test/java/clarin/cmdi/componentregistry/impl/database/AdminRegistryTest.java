@@ -62,7 +62,7 @@ public class AdminRegistryTest extends BaseUnitTest{
 	ComponentRegistry testRegistry = componentRegistryFactory.getPublicRegistry();
 	String content1 = "";
 	content1 += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	content1 += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	content1 += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
 	content1 += "    <Header/>\n";
 	content1 += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
 	content1 += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
@@ -74,7 +74,7 @@ public class AdminRegistryTest extends BaseUnitTest{
         
 	String content2 = "";
 	content2 += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	content2 += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+	content2 += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
 	content2 += "    <Header/>\n";
 	content2 += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
 	content2 += "        <CMD_Component ComponentId=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";

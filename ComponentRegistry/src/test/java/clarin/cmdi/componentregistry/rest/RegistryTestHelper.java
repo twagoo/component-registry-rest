@@ -103,7 +103,7 @@ public final class RegistryTestHelper {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         profileContent += "    <Header />\n";
         profileContent += "    <CMD_Component name=\"" + name + "\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "        <AttributeList>\n";
@@ -193,7 +193,7 @@ public final class RegistryTestHelper {
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
         compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        compContent += "    xsi:noNamespaceSchemaLocation=\"../../general-component-schema.xsd\">\n";
+        compContent += "    xsi:noNamespaceSchemaLocation=\"../../cmd-component.xsd\">\n";
         compContent += "    \n";
         compContent += "    <Header/>\n";
         compContent += "    \n";

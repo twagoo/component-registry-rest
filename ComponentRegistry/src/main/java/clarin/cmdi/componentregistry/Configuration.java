@@ -20,8 +20,8 @@ public class Configuration {
 
     private final static Logger LOG = LoggerFactory.getLogger(Configuration.class);
     //NOTE: Default values, can be overwritten in applicationContext.xml
-    private String generalComponentSchema = "https://infra.clarin.eu/cmd/general-component-schema.xsd";
-    private String component2SchemaXsl = "https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
+    private String generalComponentSchema = "https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd";
+    private String component2SchemaXsl = "https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl";
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
@@ -34,7 +34,7 @@ public class Configuration {
 
     {//Default values
         schemaLocations.put(ComponentSpec.class.getName(),
-                "http://www.clarin.eu/cmd/ http://infra.clarin.eu/cmd/general-component-schema.xsd");
+                "http://www.clarin.eu/cmd https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd");
     }
     private final static Configuration INSTANCE = new Configuration();
 
