@@ -61,26 +61,26 @@ public class AdminRegistryTest extends BaseUnitTest{
 
 	ComponentRegistry testRegistry = componentRegistryFactory.getPublicRegistry();
 	String content1 = "";
-	content1 += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	content1 += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
+	content1 += "<ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	content1 += "    xsi:noNamespaceSchemaLocation=\"http://lux16.mpi.nl/cmd-component.xsd\">\n";
 	content1 += "    <Header/>\n";
-	content1 += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
-	content1 += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-	content1 += "    </CMD_Component>\n";
-	content1 += "</CMD_ComponentSpec>\n";
+	content1 += "    <Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+	content1 += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
+	content1 += "    </Component>\n";
+	content1 += "</ComponentSpec>\n";
 	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content1, true);
        
         assertEquals(1, testRegistry.getComponentDescriptions().size());
         
 	String content2 = "";
-	content2 += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-	content2 += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
+	content2 += "<ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+	content2 += "    xsi:noNamespaceSchemaLocation=\"http://lux16.mpi.nl/cmd-component.xsd\">\n";
 	content2 += "    <Header/>\n";
-	content2 += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-	content2 += "        <CMD_Component ComponentId=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
-	content2 += "        </CMD_Component>\n";
-	content2 += "    </CMD_Component>\n";
-	content2 += "</CMD_ComponentSpec>\n";
+	content2 += "    <Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+	content2 += "        <Component ComponentId=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
+	content2 += "        </Component>\n";
+	content2 += "    </Component>\n";
+	content2 += "</ComponentSpec>\n";
 	ProfileDescription profileDesc = RegistryTestHelper.addProfile(testRegistry, "YYY1", content2, true);
        
 

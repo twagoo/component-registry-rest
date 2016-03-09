@@ -39,6 +39,7 @@ public class MDValidator implements Validator {
     static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
     static final String PARSE_ERROR = "Error in validation input file: ";
     static final String SCHEMA_ERROR = "Error in reading general component schema: ";
+    static final String VALIDATION_ERROR = "Error while validating file: ";
     static final String IO_ERROR = "Error while reading specification or general component schema: ";
     static final String INTERNAL_ERROR = "Internal error: ";    
     static final String COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR = "referenced component cannot be found in the appropriate registry components: ";
@@ -88,10 +89,10 @@ public class MDValidator implements Validator {
                 final List<Message> validatorMessages = validator.getMessages();
                 if (validatorMessages.size() > 0) {
                     for (Message message : validatorMessages) {
-                        errorMessages.add(PARSE_ERROR + message.getText());
+                        errorMessages.add(VALIDATION_ERROR + message.getText());
                     }
                 } else {
-                    errorMessages.add(PARSE_ERROR + UNKNOWN_VALIDATION_ERROR);
+                    errorMessages.add(VALIDATION_ERROR + UNKNOWN_VALIDATION_ERROR);
                 }
             } else {
                 spec = unmarshalSpec(originalSpecBytes);
@@ -106,8 +107,8 @@ public class MDValidator implements Validator {
             errorMessages.add(PARSE_ERROR + e.getMessage());
             LOG.error(PARSE_ERROR, e);
         } catch (ValidatorException e) {
-            errorMessages.add(PARSE_ERROR + e.getMessage());
-            LOG.error(PARSE_ERROR, e);
+            errorMessages.add(VALIDATION_ERROR + e.getMessage());
+            LOG.error(VALIDATION_ERROR, e);
         } catch (IOException e) {
             errorMessages.add(IO_ERROR + e.getMessage());
             LOG.error(IO_ERROR, e);

@@ -102,23 +102,27 @@ public final class RegistryTestHelper {
     private static String getProfileTestContentString(String name) {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        profileContent += "<ComponentSpec  CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
-        profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"" + name + "\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+        profileContent += "    <Header>\n";
+        profileContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        profileContent += "     <Name>"+name+"</Name>\n";
+        profileContent += "     <Status>development</Status>\n";
+        profileContent += "    </Header>\n";
+        profileContent += "    <Component name=\"" + name + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
         profileContent += "        <AttributeList>\n";
         profileContent += "            <Attribute>\n";
         profileContent += "                <Name>Name</Name>\n";
         profileContent += "                <Type>string</Type>\n";
         profileContent += "            </Attribute>\n";
         profileContent += "        </AttributeList>\n";
-        profileContent += "        <CMD_Element name=\"Age\">\n";
+        profileContent += "        <Element name=\"Age\">\n";
         profileContent += "            <ValueScheme>\n";
         profileContent += "                <pattern>[23][0-9]</pattern>\n";
         profileContent += "            </ValueScheme>\n";
-        profileContent += "        </CMD_Element>\n";
-        profileContent += "    </CMD_Component>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
+        profileContent += "        </Element>\n";
+        profileContent += "    </Component>\n";
+        profileContent += "</ComponentSpec>\n";
         return profileContent;
     }
 
@@ -192,24 +196,26 @@ public final class RegistryTestHelper {
         String compContent = "";
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
-        compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        compContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         compContent += "    xsi:noNamespaceSchemaLocation=\"../../cmd-component.xsd\">\n";
-        compContent += "    \n";
-        compContent += "    <Header/>\n";
-        compContent += "    \n";
-        compContent += "    <CMD_Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
-        compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        compContent += "        <CMD_Element name=\"Date\">\n";
+        compContent += "    <Header>\n";
+        compContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        compContent += "     <Name>"+componentName+"</Name>\n";
+        compContent += "     <Status>development</Status>\n";
+        compContent += "    </Header>\n";
+        compContent += "    <Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+        compContent += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
+        compContent += "        <Element name=\"Date\">\n";
         compContent += "            <ValueScheme>\n";
         compContent += "                <!-- matching dates of the pattern yyyy-mm-dd (ISO 8601); this only matches dates from the years 1000 through 2999 and does allow some invalid dates (e.g. February, the 30th) -->\n";
         compContent += "                <pattern>(1|2)\\d{3}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])</pattern>                \n";
         compContent += "            </ValueScheme>\n";
-        compContent += "        </CMD_Element>\n";
-        compContent += "        <CMD_Element name=\"Owner\" ValueScheme=\"string\" />\n";
-        compContent += "        <CMD_Element name=\"Publisher\" ValueScheme=\"string\" />\n";
-        compContent += "    </CMD_Component>\n";
+        compContent += "        </Element>\n";
+        compContent += "        <Element name=\"Owner\" ValueScheme=\"string\" />\n";
+        compContent += "        <Element name=\"Publisher\" ValueScheme=\"string\" />\n";
+        compContent += "    </Component>\n";
         compContent += "\n";
-        compContent += "</CMD_ComponentSpec>\n";
+        compContent += "</ComponentSpec>\n";
         return compContent;
     }
 

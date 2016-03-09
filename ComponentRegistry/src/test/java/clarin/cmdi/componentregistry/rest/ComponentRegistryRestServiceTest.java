@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PRIVATE;
+import static clarin.cmdi.componentregistry.rest.MDValidator.VALIDATION_ERROR;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -1772,7 +1773,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 "Subsequent elements should not be allowed to have the same name",
                 response.isRegistered());
         assertTrue(response.getErrors().get(0)
-                .contains(MDValidator.PARSE_ERROR));
+                .contains(MDValidator.VALIDATION_ERROR));
     }
 
     @Test
@@ -1804,8 +1805,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertFalse(response.isRegistered());
         assertEquals(2, response.getErrors().size());
         assertNotNull(response.getErrors().get(0));
-        assertEquals(MDValidator.PARSE_ERROR, response.getErrors().get(1)
-                .substring(0, MDValidator.PARSE_ERROR.length()));
+        assertEquals(MDValidator.VALIDATION_ERROR, response.getErrors().get(1)
+                .substring(0, MDValidator.VALIDATION_ERROR.length()));
     }
 
     @Test
