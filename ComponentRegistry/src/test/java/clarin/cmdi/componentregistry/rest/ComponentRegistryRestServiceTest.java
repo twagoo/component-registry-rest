@@ -684,39 +684,39 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPublicItems();
 
         String content = "";
-        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
-        content += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
-        content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "    <Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+        content += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
                 baseRegistry, "XXX1", content, true);
 
         content = "";
-        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
-        content += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-        content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
+        content += "    <Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        content += "        <Component ComponentId=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
-        content += "        </CMD_Component>\n";
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "        </Component>\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
         ComponentDescription compDesc2 = RegistryTestHelper.addComponent(
                 baseRegistry, "YYY1", content, true);
 
         content = "";
-        content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
-        content += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-        content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
+        content += "    <Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        content += "        <Component ComponentId=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
-        content += "        </CMD_Component>\n";
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "        </Component>\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
         ProfileDescription profile = RegistryTestHelper.addProfile(
                 baseRegistry, "TestProfile3", content, true);
 
@@ -860,8 +860,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                         + "profile1/xml")).accept(MediaType.TEXT_XML)
                 .get(String.class).trim();
         assertTrue(profile
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-        assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
+        assertTrue(profile.endsWith("</ComponentSpec>"));
         assertTrue(profile.contains("xsi:schemaLocation"));
 
         ClientResponse respie = this.getAuthenticatedResource(getResource()
@@ -1018,8 +1018,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(component
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-        assertTrue(component.endsWith("</CMD_ComponentSpec>"));
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
+        assertTrue(component.endsWith("</ComponentSpec>"));
         assertTrue(component.contains("xsi:schemaLocation"));
 
         ClientResponse respie = this.getAuthenticatedResource(getResource()
@@ -1273,27 +1273,27 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         // kid component, not public
         String content = "";
-        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
-        content += "    <CMD_Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
-        content += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "    <Component name=\"XXX\" CardinalityMin=\"1\" CardinalityMax=\"10\">\n";
+        content += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
                 baseRegistry, "XXX1", content, false);
 
         // a containing component, referring to the kid (which is not public, so the containing component cannot be registered
         content = "";
-        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
-        content += "    <CMD_Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-        content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
+        content += "    <Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        content += "        <Component ComponentId=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
-        content += "        </CMD_Component>\n";
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "        </Component>\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
         FormDataMultiPart form = createFormData(content);
         RegisterResponse response = getAuthenticatedResource(
                 "/registry/components").type(MediaType.MULTIPART_FORM_DATA)
@@ -1303,15 +1303,15 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         /// profiles ///
         content = "";
-        content += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         content += "    <Header/>\n";
-        content += "    <CMD_Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-        content += "        <CMD_Component ComponentId=\"" + compDesc1.getId()
+        content += "    <Component name=\"ZZZ\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
+        content += "        <Component ComponentId=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
-        content += "        </CMD_Component>\n";
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "        </Component>\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
 
         form = createFormData(content);
         response = getAuthenticatedResource("/registry/profiles").type(
@@ -1416,19 +1416,19 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         String compContent = "";
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
-        compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        compContent += "<ComponentSpec CMDVersion=\"1.2\" sProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         compContent += "    xsi:noNamespaceSchemaLocation=\"../../cmd-component.xsd\">\n";
         compContent += "    \n";
         compContent += "    <Header/>\n";
         compContent += "    \n";
-        compContent += "    <CMD_Component name=\"Nested\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
-        compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        compContent += "        <CMD_Component ComponentId=\""
+        compContent += "    <Component name=\"Nested\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+        compContent += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
+        compContent += "        <Component ComponentId=\""
                 + desc.getId()
                 + "\" name=\"Recursive\" CardinalityMin=\"1\" CardinalityMax=\"1\" />\n";
-        compContent += "    </CMD_Component>\n";
+        compContent += "    </Component>\n";
         compContent += "\n";
-        compContent += "</CMD_ComponentSpec>\n";
+        compContent += "</ComponentSpec>\n";
 
         // Update component
         form = createFormData(
@@ -1707,7 +1707,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         System.out.println("testRegisterProfileInvalidData");
         fillUpPrivateItems();
         FormDataMultiPart form = new FormDataMultiPart();
-        String notAValidProfile = "<CMD_ComponentSpec> </CMD_ComponentSpec>";
+        String notAValidProfile = "<ComponentSpec> </ComponentSpec>";
         form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
                 new ByteArrayInputStream(notAValidProfile.getBytes()),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
@@ -1739,22 +1739,22 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         FormDataMultiPart form = new FormDataMultiPart();
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        profileContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
         profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
         profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"ProfileTest1\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-        profileContent += "        <CMD_Element name=\"Age\">\n";
+        profileContent += "    <Component name=\"ProfileTest1\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+        profileContent += "        <Element name=\"Age\">\n";
         profileContent += "            <ValueScheme>\n";
         profileContent += "                <pattern>[23][0-9]</pattern>\n";
         profileContent += "            </ValueScheme>\n";
-        profileContent += "        </CMD_Element>\n";
-        profileContent += "        <CMD_Element name=\"Age\">\n";
+        profileContent += "        </Element>\n";
+        profileContent += "        <Element name=\"Age\">\n";
         profileContent += "            <ValueScheme>\n";
         profileContent += "                <pattern>[23][0-9]</pattern>\n";
         profileContent += "            </ValueScheme>\n";
-        profileContent += "        </CMD_Element>\n";
-        profileContent += "    </CMD_Component>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
+        profileContent += "        </Element>\n";
+        profileContent += "    </Component>\n";
+        profileContent += "</ComponentSpec>\n";
         form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
                 RegistryTestHelper.getComponentContentAsStream(profileContent),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
@@ -1784,17 +1784,17 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         FormDataMultiPart form = new FormDataMultiPart();
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec> \n"; // No isProfile attribute
+        profileContent += "<ComponentSpec> \n"; // No isProfile attribute
         profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
+        profileContent += "    <Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
         profileContent += "        <AttributeList>\n";
         profileContent += "            <Attribute>\n";
         profileContent += "                <Name>Name</Name>\n";
         profileContent += "                <Type>string</Type>\n";
         profileContent += "            </Attribute>\n";
         profileContent += "        </AttributeList>\n";
-        profileContent += "    </CMD_Component>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
+        profileContent += "    </Component>\n";
+        profileContent += "</ComponentSpec>\n";
         form.field("data", new ByteArrayInputStream(profileContent.getBytes()),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         form.field("name", "");// Empty name so invalid

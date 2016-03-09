@@ -40,9 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public final class RegistryTestHelper {
 
     private static MDMarshaller marshaller;
-    
-   
-            
 
     @Autowired
     public void setMarshaller(MDMarshaller marshaller) {
@@ -101,28 +98,25 @@ public final class RegistryTestHelper {
 
     private static String getProfileTestContentString(String name) {
         String profileContent = "";
-        profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<ComponentSpec  CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
-        profileContent += "    <Header>\n";
-        profileContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
-        profileContent += "     <Name>"+name+"</Name>\n";
-        profileContent += "     <Status>development</Status>\n";
-        profileContent += "    </Header>\n";
-        profileContent += "    <Component name=\"" + name + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
-        profileContent += "        <AttributeList>\n";
-        profileContent += "            <Attribute>\n";
-        profileContent += "                <Name>Name</Name>\n";
-        profileContent += "                <Type>string</Type>\n";
-        profileContent += "            </Attribute>\n";
-        profileContent += "        </AttributeList>\n";
-        profileContent += "        <Element name=\"Age\">\n";
-        profileContent += "            <ValueScheme>\n";
-        profileContent += "                <pattern>[23][0-9]</pattern>\n";
-        profileContent += "            </ValueScheme>\n";
-        profileContent += "        </Element>\n";
-        profileContent += "    </Component>\n";
-        profileContent += "</ComponentSpec>\n";
+        profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+                + "    xsi:noNamespaceSchemaLocation=\"http://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd\">\n"
+                + "    <Header>\n"
+                + "        <ID>clarin.eu:cr1:p_12345678</ID>\n"
+                + "        <Name>" + name + "</Name>\n"
+                + "        <Status>development</Status>\n"
+                + "    </Header>\n"
+                + "    <Component name=\"" + name + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n"
+                + "        <AttributeList>\n"
+                + "            <Attribute name=\"Name\" ValueScheme=\"string\" />\n"
+                + "        </AttributeList>\n"
+                + "        <Element name=\"Age\">\n"
+                + "            <ValueScheme>\n"
+                + "                <pattern>[23][0-9]</pattern>\n"
+                + "            </ValueScheme>\n"
+                + "        </Element>\n"
+                + "    </Component>\n"
+                + "</ComponentSpec>";
         return profileContent;
     }
 
@@ -197,10 +191,10 @@ public final class RegistryTestHelper {
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
         compContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        compContent += "    xsi:noNamespaceSchemaLocation=\"../../cmd-component.xsd\">\n";
+        compContent += "    xsi:noNamespaceSchemaLocation=\"http://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd\">\n";
         compContent += "    <Header>\n";
         compContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
-        compContent += "     <Name>"+componentName+"</Name>\n";
+        compContent += "     <Name>" + componentName + "</Name>\n";
         compContent += "     <Status>development</Status>\n";
         compContent += "    </Header>\n";
         compContent += "    <Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
@@ -282,11 +276,10 @@ public final class RegistryTestHelper {
         testRegistry.registerComment(spec, principal);
         return spec;
     }
-    
+
     public Comment addCommentBypassAuthorisation(CommentsDao commentsDao, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
         return addCommentBypassAuthorisation(commentsDao, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
-
 
     private Comment addCommentBypassAuthorisation(CommentsDao commentsDao, InputStream content, String principal) throws ParseException,
             JAXBException,
@@ -309,8 +302,8 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-    
-     public static String getanotherPrincipalCommentTestContentStringForProfile(String commentName, String profileId) {
+
+    public static String getanotherPrincipalCommentTestContentStringForProfile(String commentName, String profileId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -333,8 +326,8 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-    
-     public static String getAnotherPrincipalCommentTestContentStringForComponent(String commentName, String componentId) {
+
+    public static String getAnotherPrincipalCommentTestContentStringForComponent(String commentName, String componentId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -361,8 +354,6 @@ public final class RegistryTestHelper {
     public static InputStream getCommentTestContent() {
         return getTestCommentContent("Actual", ProfileDescription.PROFILE_PREFIX + "profile1");
     }
-    
-  
 
     /**
      * Testing a big xsd string is a bit hard, so doing a best effort by
@@ -394,7 +385,6 @@ public final class RegistryTestHelper {
         fop.flush();
         fop.close();
 
-
     }
 
     /**
@@ -408,7 +398,6 @@ public final class RegistryTestHelper {
     public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
 
         writeBytesToFile(str.getBytes(), filename);
-
 
     }
 
@@ -424,7 +413,6 @@ public final class RegistryTestHelper {
 
         writeBytesToFile(os.toByteArray(), filename);
 
-
     }
 
     /**
@@ -436,7 +424,6 @@ public final class RegistryTestHelper {
      * @throws JAXBException
      */
     public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         marshaller.marshal(cdesc, os);
@@ -455,7 +442,6 @@ public final class RegistryTestHelper {
     public static String openTestDir(String dirName) {
 
         File testDir = new File("target/" + dirName);
-
 
         testDir.mkdir();
 
