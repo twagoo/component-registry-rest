@@ -8,7 +8,7 @@ Usage:
 - make a database backup :D
 - run the utility:
 
-    java -jar ComponentSpecFixer-1.0-SNAPSHOT.jar
+    java -jar component-updater-1.0-SNAPSHOT.jar | tee component-updater.log
 
 - inspect the output
 - optionally: run the application
