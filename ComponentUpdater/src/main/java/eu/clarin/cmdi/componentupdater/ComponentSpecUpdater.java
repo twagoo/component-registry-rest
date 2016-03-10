@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -54,6 +55,7 @@ public class ComponentSpecUpdater {
         final TransformerFactory factory = TransformerFactory.newInstance();
         final InputStream xsltStream = CMDToolkit.class.getResourceAsStream(CMDToolkit.XSLT_COMPONENT_UPGRADE);
         transformer = factory.newTransformer(new StreamSource(xsltStream));
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
     }
 
     private void run() {
