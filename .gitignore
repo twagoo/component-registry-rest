@@ -2,3 +2,5 @@
 /ComponentRegistry/src/main/binding/components/cmd-toolkit/
 /ComponentRegistry/src/generated/
 /ComponentRegistry/src/main/binding/components/toolkit/
+/ComponentUpdater/target/
+/ComponentUpdater/src/main/resources/datasource.properties
