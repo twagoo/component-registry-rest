@@ -62,54 +62,6 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         baseRegistry = componentRegistryFactory.getBaseRegistry(DummyPrincipal.DUMMY_CREDENTIALS);
     }
 
-   
-    private ComponentDescription component1;
-    private ComponentDescription component2;
-    private ProfileDescription profile1;
-    private ProfileDescription profile2;
-    private ComponentDescription component3;
-    private ProfileDescription profile3;
-    private Comment profile1Comment1;
-    private Comment profile1Comment2;
-    private Comment component1Comment3;
-    private Comment component1Comment4;
-    private Comment profile3Comment5;
-    private Comment component3Comment7;
-
-    private void fillUpPublicItems() throws Exception {
-
-        profile1 = RegistryTestHelper.addProfile(baseRegistry, "profile2", true);
-        profile2 = RegistryTestHelper.addProfile(baseRegistry, "profile1", true);
-        component1 = RegistryTestHelper.addComponent(baseRegistry,
-                "component2", true);
-        component2 = RegistryTestHelper.addComponent(baseRegistry,
-                "component1", true);
-        profile1Comment2 = RegistryTestHelper.addComment(baseRegistry, "comment2",
-                ProfileDescription.PROFILE_PREFIX + "profile1",
-                "JUnit@test.com");
-        profile1Comment1 = RegistryTestHelper.addComment(baseRegistry, "comment1",
-                ProfileDescription.PROFILE_PREFIX + "profile1",
-                "JUnit@test.com");
-        component1Comment3 = RegistryTestHelper.addComment(baseRegistry, "comment3",
-                ComponentDescription.COMPONENT_PREFIX + "component1",
-                "JUnit@test.com");
-        component1Comment4 = RegistryTestHelper.addComment(baseRegistry, "comment4",
-                ComponentDescription.COMPONENT_PREFIX + "component1",
-                "JUnit@test.com");
-    }
-
-    private void fillUpPrivateItems() throws Exception {
-        profile3 = RegistryTestHelper.addProfile(baseRegistry, "profile3", false);
-        component3 = RegistryTestHelper.addComponent(baseRegistry,
-                "component3", false);
-        profile3Comment5 = RegistryTestHelper.addComment(baseRegistry, "comment5",
-                ProfileDescription.PROFILE_PREFIX + "profile3",
-                "JUnit@test.com");
-        component3Comment7 = RegistryTestHelper.addComment(baseRegistry, "comment7",
-                ComponentDescription.COMPONENT_PREFIX + "component3",
-                "JUnit@test.com");
-    }
-    
      protected void createAntherUserRecord() {
 	RegistryUser user = new RegistryUser();
 	user.setName("Another database test user");
@@ -120,34 +72,6 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
     private void MakeGroupA(){
         groupService.createNewGroup("group A", DummyPrincipal.DUMMY_PRINCIPAL.getName());
     }
-    
-     private void fillUpGroupA() throws ParseException, JAXBException, ItemNotFoundException{
-         
-        MakeGroupA();
-        
-        RegistryTestHelper.addProfile(baseRegistry, "profile-1", false);
-        RegistryTestHelper.addComponent(baseRegistry, "component-1", false);
-        RegistryTestHelper.addComponent(baseRegistry, "component-2", false);
-        
-        Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX+"profile-1");
-        ownership.setGroupId(1);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
-        
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"component-1");
-        ownership.setGroupId(1);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
-        
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX+"component-2");
-        ownership.setGroupId(1);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
-        
-    }
-     
-     
     
     private void MakeGroupB() throws ItemNotFoundException{
         createAntherUserRecord();
@@ -252,8 +176,8 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(component
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-        assertTrue(component.endsWith("</CMD_ComponentSpec>"));
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
+        assertTrue(component.endsWith("</ComponentSpec>"));
         assertTrue(component.contains("xsi:schemaLocation"));
         
         id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
@@ -267,8 +191,8 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(profile
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-        assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
+        assertTrue(profile.endsWith("</ComponentSpec>"));
         assertTrue(profile.contains("xsi:schemaLocation"));
 
         id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";

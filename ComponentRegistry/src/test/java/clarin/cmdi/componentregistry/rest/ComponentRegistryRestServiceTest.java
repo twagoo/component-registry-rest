@@ -13,7 +13,6 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PRIVATE;
-import static clarin.cmdi.componentregistry.rest.MDValidator.VALIDATION_ERROR;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -249,21 +248,21 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 .path("/registry/components/" + id)
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull("unauthenticated component request", component);
-        assertEquals("Access", component.getComponent().getName());
+        assertEquals("component1", component.getComponent().getName());
 
         // make an authenticated reponse
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + id))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull("authenticated component request", component);
-        assertEquals("Access", component.getComponent().getName());
+        assertEquals("component1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id2))
                 .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Access", component.getComponent().getName());
+        assertEquals("component2", component.getComponent().getName());
         assertEquals(id2, component.getHeader().getID());
-        assertEquals("Access", component.getHeader().getName());
+        assertEquals("component2", component.getHeader().getName());
         assertEquals("Test Description", component.getHeader().getDescription());
     }
 
@@ -1349,7 +1348,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterUserspaceComponent() throws Exception {
 
-        System.out.println("testREgisterUserspaceComponent");
+        System.out.println("testRegisterUserspaceComponent");
 
         fillUpPrivateItems();
 
@@ -1714,7 +1713,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Test
     public void testRegisterCommentUnauthenticated() throws Exception {
 
-        System.out.println("testREgisterCommentUnauthentified");
+        System.out.println("testRegisterCommentUnauthentified");
 
         fillUpPublicItems();
 

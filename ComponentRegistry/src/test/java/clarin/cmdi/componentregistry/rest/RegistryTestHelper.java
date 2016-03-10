@@ -47,7 +47,7 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
-        return addComponent(testRegistry, id, getComponentTestContent(), isPublic);
+        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic);
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
@@ -183,7 +183,11 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getComponentTestContent() {
-        return getComponentTestContentAsStream("Access");
+        return getComponentTestContent("Access");
+    }
+    
+    public static InputStream getComponentTestContent(String name) {
+        return getComponentTestContentAsStream(name);
     }
 
     public static String getComponentTestContentString(String componentName) {

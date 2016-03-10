@@ -156,10 +156,8 @@ public class MDValidatorTest extends BaseUnitTest {
         MDValidator validator = new MDValidator(new ByteArrayInputStream(
                 profileContent.getBytes()), desc, testRegistry, marshaller);
         assertFalse(validator.validate());
-        assertEquals(2, validator.getErrorMessages().size()); // the exception is thrown and propagated on the first non-registered component
+        assertEquals(1, validator.getErrorMessages().size()); // the exception is thrown and propagated on the first non-registered component
         assertTrue(validator.getErrorMessages().get(0)
-                .startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
-        assertTrue(validator.getErrorMessages().get(1)
                 .startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
 
         // registering publically the first component

@@ -349,25 +349,25 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Actor", component.getComponent().getName());
+        assertEquals("profile-1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Access", component.getComponent().getName());
+        assertEquals("component-1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Actor", component.getComponent().getName());
+        assertEquals("Bprofile-1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
-        assertEquals("Access", component.getComponent().getName());
+        assertEquals("Bcomponent-1", component.getComponent().getName());
 
         clientResponse = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1"))
@@ -1068,8 +1068,8 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(component
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-        assertTrue(component.endsWith("</CMD_ComponentSpec>"));
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
+        assertTrue(component.endsWith("</ComponentSpec>"));
         assertTrue(component.contains("xsi:schemaLocation"));
 
         id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
@@ -1083,8 +1083,8 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(profile
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<CMD_ComponentSpec"));
-        assertTrue(profile.endsWith("</CMD_ComponentSpec>"));
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
+        assertTrue(profile.endsWith("</ComponentSpec>"));
         assertTrue(profile.contains("xsi:schemaLocation"));
 
         id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
