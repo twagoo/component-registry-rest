@@ -15,5 +15,11 @@ Usage:
 - inspect the output
 - optionally: run the application
 
-Note: add the argument "-d" (after -jar ...) to run the utility without actually
+Notes: 
+
+- add the argument "-d" (after -jar ...) to run the utility without actually
 applying the changes (dry-run).
+
+- you can use the 'skipValidation' property to skip validation after conversion:
+    -DskipValidation=true
+
