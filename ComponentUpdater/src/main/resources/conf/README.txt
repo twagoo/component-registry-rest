@@ -8,7 +8,12 @@ Usage:
 - make a database backup :D
 - run the utility:
 
-    java -jar component-updater-1.0-SNAPSHOT.jar | tee component-updater.log
+    java \ 
+        -DconversionParamsPropertiesFile=conversion-params.properties \
+        -jar component-updater-1.0-SNAPSHOT.jar | tee component-updater.log
 
 - inspect the output
 - optionally: run the application
+
+Note: add the argument "-d" (after -jar ...) to run the utility without actually
+applying the changes (dry-run).
