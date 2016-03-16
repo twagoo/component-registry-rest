@@ -68,6 +68,10 @@
     -->
   <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twagoo@mpi.nl twan.goosen_mpi.nl@clarin.eu dietuyt@mpi.nl dietuyt_mpi.nl@clarin.eu menwin@mpi.nl menwin_mpi.nl@clarin.eu"/>
   <!--
+	Base location of the CMDI toolkit
+    -->  
+  <Parameter name="eu.clarin.cmdi.componentregistry.toolkitLocation" value="https://infra.clarin.eu/CMDI/1.x"/>
+  <!--
 	Location of the CMDI general component schema that validates component specifications
     -->
   <Parameter name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" value="https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd"/>

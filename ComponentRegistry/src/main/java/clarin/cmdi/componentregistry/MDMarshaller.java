@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.components.ComponentSpec;
+import eu.clarin.cmdi.toolkit.CMDToolkit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -105,6 +106,7 @@ public class MDMarshaller implements Serializable {
     public void generateXsd(ComponentSpec spec, OutputStream outputStream) {
 	try {
 	    Transformer transformer = componentToSchemaTemplates.newTransformer();
+            transformer.setParameter(CMDToolkit.XSLT_PARAM_TOOLKIT, Configuration.getInstance().getToolkitLocation());
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    marshal(spec, out);
 	    ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());

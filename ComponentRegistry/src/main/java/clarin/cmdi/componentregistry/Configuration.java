@@ -25,6 +25,7 @@ public class Configuration {
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
+    private String toolkitLocation;
 
     {//Default values
         displayNameShibbolethKeys.add("displayName");
@@ -65,6 +66,14 @@ public class Configuration {
         return schemaLocations.get(key);
     }
 
+    public String getToolkitLocation() {
+        return toolkitLocation;
+    }
+
+    public String[] getAdminUsersArray() {
+        return adminUsers.toArray(new String[0]);
+    }
+
     public boolean isAdminUser(Principal principal) {
         if (principal != null) {
             return principal.getName().trim().length() > 0 // user name must be set (in case an empty entry is in admin users list)
@@ -88,7 +97,7 @@ public class Configuration {
 
     /**
      *
-     * @param adminUsers Whitespace-separated list of admin users
+     * @param adminUsersList list of admin users
      */
     public void setAdminUsersList(String adminUsersList) {
         String[] adminUsersArray = adminUsersList.trim().split("\\s+");
@@ -123,7 +132,9 @@ public class Configuration {
         this.ccrRestUrl = ccrRestUrl;
     }
 
-    public String[] getAdminUsersArray() {
-        return adminUsers.toArray(new String[0]);
+    public void setToolkitLocation(String toolkitLocation) {
+        LOG.info("Setting toolkitLocation to {}", toolkitLocation);
+        this.toolkitLocation = toolkitLocation;
     }
+    
 }

@@ -12,7 +12,6 @@ import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
-import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.impl.database.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -43,7 +42,6 @@ import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
