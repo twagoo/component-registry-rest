@@ -107,7 +107,7 @@ public class MDMarshaller implements Serializable {
     public void generateXsd(ComponentSpec spec, OutputStream outputStream) {
         try {
             Transformer transformer = componentToSchemaTemplates.newTransformer();
-            transformer.setParameter(CMDToolkit.XSLT_PARAM_TOOLKIT, Configuration.getInstance().getToolkitLocation());
+            transformer.setParameter(CMDToolkit.XSLT_PARAM_COMP2SCHEMA_TOOL_KITLOCATION, Configuration.getInstance().getToolkitLocation());
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             marshal(spec, out);
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
