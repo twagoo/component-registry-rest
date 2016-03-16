@@ -874,7 +874,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(profile
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
         assertTrue(profile.endsWith("</ComponentSpec>"));
-        assertTrue(profile.contains("xsi:schemaLocation"));
+        assertTrue(profile.contains("xsi:noNamespaceSchemaLocation"));
 
         ClientResponse respie = this.getAuthenticatedResource(getResource()
                 .path("/registry/profiles/"
@@ -1032,7 +1032,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(component
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
         assertTrue(component.endsWith("</ComponentSpec>"));
-        assertTrue(component.contains("xsi:schemaLocation"));
+        assertTrue(component.contains("xsi:noNamespaceSchemaLocation"));
 
         ClientResponse respie = this.getAuthenticatedResource(getResource()
                 .path("/registry/components/"

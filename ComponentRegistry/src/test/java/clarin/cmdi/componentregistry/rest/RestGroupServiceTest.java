@@ -1070,7 +1070,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(component
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
         assertTrue(component.endsWith("</ComponentSpec>"));
-        assertTrue(component.contains("xsi:schemaLocation"));
+        assertTrue(component.contains("xsi:noNamespaceSchemaLocation"));
 
         id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
         String profile = this.getAuthenticatedResource(getResource()
@@ -1085,7 +1085,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(profile
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
         assertTrue(profile.endsWith("</ComponentSpec>"));
-        assertTrue(profile.contains("xsi:schemaLocation"));
+        assertTrue(profile.contains("xsi:noNamespaceSchemaLocation"));
 
         id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
         ClientResponse resp = this.getAuthenticatedResource(getResource()

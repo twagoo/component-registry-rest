@@ -20,22 +20,16 @@ public class Configuration {
 
     private final static Logger LOG = LoggerFactory.getLogger(Configuration.class);
     //NOTE: Default values, can be overwritten in applicationContext.xml
+    private String toolkitLocation = "https://infra.clarin.eu/CMDI/1.x";
     private String generalComponentSchema = "https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd";
     private String component2SchemaXsl = "https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl";
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
-    private String toolkitLocation;
-
+    
     {//Default values
         displayNameShibbolethKeys.add("displayName");
         displayNameShibbolethKeys.add("commonName");
-    }
-    private final Map<String, String> schemaLocations = new HashMap<String, String>();
-
-    {//Default values
-        schemaLocations.put(ComponentSpec.class.getName(),
-                "http://www.clarin.eu/cmd https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd");
     }
     private final static Configuration INSTANCE = new Configuration();
 
@@ -60,10 +54,6 @@ public class Configuration {
 
     public String getCcrRestUrl() {
         return ccrRestUrl;
-    }
-
-    public String getSchemaLocation(String key) {
-        return schemaLocations.get(key);
     }
 
     public String getToolkitLocation() {
@@ -110,11 +100,6 @@ public class Configuration {
     public void setComponent2SchemaXsl(String component2SchemaXsl) {
         LOG.info("Setting component2SchemaXsl to {}", component2SchemaXsl);
         this.component2SchemaXsl = component2SchemaXsl;
-    }
-
-    public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {
-        LOG.info("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
-        schemaLocations.put(ComponentSpec.class.getName(), componentSpecSchemaLocation);
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {

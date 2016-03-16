@@ -34,6 +34,9 @@ Version specific update instructions
       name="eu.clarin.cmdi.componentregistry.toolkitLocation" 
       value="https://infra.clarin.eu/CMDI/1.x"/>
 
+- The following context parameters are no longer used and can be removed:
+
+    * eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation
 
 === 2.0 ===
 

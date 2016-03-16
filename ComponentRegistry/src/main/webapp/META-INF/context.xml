@@ -79,11 +79,6 @@
 	Location of the stylesheet that transforms component specifications into XML schema documents
     -->
   <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" value="https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl"/>
-  <!-- 
-        Schema location that will go into xsi:schemaLocation attribute of component specification. Beware this should follow
-        XML standards and have a namespace component (URI) and schema location component (URL) separated by a space
-    -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation" value="http://www.clarin.eu/cmd https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd"/>
   <!--
 	Base location of the ISOcat service
     -->
