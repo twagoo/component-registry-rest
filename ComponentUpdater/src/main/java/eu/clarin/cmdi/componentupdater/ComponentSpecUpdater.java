@@ -62,6 +62,7 @@ public class ComponentSpecUpdater {
         final TransformerFactory factory = TransformerFactory.newInstance();
         final InputStream xsltStream = CMDToolkit.class.getResourceAsStream(CMDToolkit.XSLT_COMPONENT_UPGRADE);
         transformer = factory.newTransformer(new StreamSource(xsltStream));
+        //TODO: catch transformer output
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         for (Entry<String, String> entry : parameters.entrySet()) {
             transformer.setParameter(entry.getKey(), entry.getValue());
@@ -95,10 +96,12 @@ public class ComponentSpecUpdater {
                         final String id = descr.getId();
                         logger.info("Updating {} ({}/{})", id, count, descriptions.size());
                         
-                        final String content = componentDao.getContent(false, id);
+                        //set status string
+                        final String status = componentDao.isPublic(id) ? "production":"development";
                         final Map<String, String> params = new HashMap<>(1);
-                        params.put("cmd-component-status", "production"); //TODO: get from db
+                        params.put("cmd-component-status", status);
 
+                        final String content = componentDao.getContent(false, id);
                         if (content.contains("CMDVersion=\"1.2\"")) {
                             logger.warn("Component {} already appears to be a CMDI 1.2 component. Skipping conversion!", id);
                         } else {
@@ -106,6 +109,9 @@ public class ComponentSpecUpdater {
                                 logger.trace("Transformation input: {}", content);
                                 final String newContent = transformXml(content, params);
                                 logger.debug("Transformation output: {}", newContent);
+                                
+                                //TODO: Validate result
+                                
                                 if (dryRun && logger.isInfoEnabled()) {
                                     final int previewLength = Math.min(500, Math.min(content.length(), newContent.length()));
                                     logger.info("Transformation result:\n-------\n{}...\n=======>\n{}...\n-------", content.substring(0, previewLength), newContent.substring(0, previewLength));
