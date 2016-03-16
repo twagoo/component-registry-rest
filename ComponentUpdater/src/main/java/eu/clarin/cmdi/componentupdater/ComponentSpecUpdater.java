@@ -2,6 +2,8 @@ package eu.clarin.cmdi.componentupdater;
 
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import clarin.cmdi.schema.cmd.Validator;
+import clarin.cmdi.schema.cmd.ValidatorException;
 import eu.clarin.cmdi.toolkit.CMDToolkit;
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import javax.xml.XMLConstants;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -26,9 +27,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +64,7 @@ public class ComponentSpecUpdater {
         componentDao = applicationContext.getBean(ComponentDao.class);
         transactionTemplate = new TransactionTemplate(applicationContext.getBean(PlatformTransactionManager.class));
         transformer = createTransformer(parameters);
-        componentValidator = createValidator();
+        componentValidator = new Validator(CMDToolkit.class.getResource(CMDToolkit.COMPONENT_SCHEMA));
     }
 
     private static Transformer createTransformer(final Map<String, String> transformationParams) throws IllegalArgumentException, TransformerFactoryConfigurationError, TransformerConfigurationException {
@@ -97,13 +95,6 @@ public class ComponentSpecUpdater {
             transformer.setParameter(entry.getKey(), entry.getValue());
         }
         return transformer;
-    }
-
-    private static Validator createValidator() throws SAXException {
-        //create validator
-        final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        final Schema componentSchema = schemaFactory.newSchema(new StreamSource(CMDToolkit.class.getResourceAsStream(CMDToolkit.COMPONENT_SCHEMA)));
-        return componentSchema.newValidator();
     }
 
     private void run() {
@@ -191,8 +182,13 @@ public class ComponentSpecUpdater {
     private void validate(final String id, final String newContent) throws RuntimeException {
         logger.debug("Validating content of {}", id);
         try {
-            componentValidator.validate(new StreamSource(new StringReader(newContent)));
-        } catch (SAXException ex) {
+            if (!componentValidator.validateProfile(new StreamSource(new StringReader(newContent)))) {
+                logger.error("Validation error(s) in {}: '{}'\n\n{}", id, componentValidator.getMessages(), newContent);
+                if (!dryRun) {
+                    throw new RuntimeException("Validation error");
+                }
+            }
+        } catch (ValidatorException ex) {
             logger.error("Validation error in {}: '{}'\n\n{}", id, ex.getMessage(), newContent);
             throw new RuntimeException("Failed to validate " + id, ex);
         } catch (IOException ex) {
