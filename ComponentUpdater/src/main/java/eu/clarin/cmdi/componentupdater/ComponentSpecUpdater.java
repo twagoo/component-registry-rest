@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import javax.xml.XMLConstants;
+import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -22,6 +23,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -63,21 +65,45 @@ public class ComponentSpecUpdater {
         applicationContext = new ClassPathXmlApplicationContext("/spring-config/applicationContext.xml", "/spring-config/container-environment.xml");
         componentDao = applicationContext.getBean(ComponentDao.class);
         transactionTemplate = new TransactionTemplate(applicationContext.getBean(PlatformTransactionManager.class));
+        transformer = createTransformer(parameters);
+        componentValidator = createValidator();
+    }
 
+    private static Transformer createTransformer(final Map<String, String> transformationParams) throws IllegalArgumentException, TransformerFactoryConfigurationError, TransformerConfigurationException {
         // create transformer
         final TransformerFactory factory = TransformerFactory.newInstance();
         final InputStream xsltStream = CMDToolkit.class.getResourceAsStream(CMDToolkit.XSLT_COMPONENT_UPGRADE);
-        transformer = factory.newTransformer(new StreamSource(xsltStream));
-        //TODO: catch transformer output
+        Transformer transformer = factory.newTransformer(new StreamSource(xsltStream));
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        for (Entry<String, String> entry : parameters.entrySet()) {
+        transformer.setErrorListener(new ErrorListener() {
+            @Override
+            public void warning(TransformerException exception) throws TransformerException {
+                logger.warn("Warning while transforming: {}", exception.getMessageAndLocation(), exception);
+            }
+
+            @Override
+            public void error(TransformerException exception) throws TransformerException {
+                logger.error("Error while transforming: {}", exception.getMessageAndLocation());
+                throw exception;
+            }
+
+            @Override
+            public void fatalError(TransformerException exception) throws TransformerException {
+                logger.error("Fatal arror while transforming: {}", exception.getMessageAndLocation());
+                throw exception;
+            }
+        });
+        for (Entry<String, String> entry : transformationParams.entrySet()) {
             transformer.setParameter(entry.getKey(), entry.getValue());
         }
+        return transformer;
+    }
 
+    private static Validator createValidator() throws SAXException {
         //create validator
         final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         final Schema componentSchema = schemaFactory.newSchema(new StreamSource(CMDToolkit.class.getResourceAsStream(CMDToolkit.COMPONENT_SCHEMA)));
-        componentValidator = componentSchema.newValidator();
+        return componentSchema.newValidator();
     }
 
     private void run() {
