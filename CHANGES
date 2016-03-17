@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-2.0.4 (March 2016)
+- Fixed an issue with the editing of vocabularies of legacy components <https://github.com/clarin-eric/component-registry-front-end/issues/28>
+
 Release ComponentRegistry-2.0.3 (March 2016)
 - Fixed display of profiles with linked root component <https://github.com/clarin-eric/component-registry-front-end/issues/26>
 - Added link to front end to "index.jsp" auth debugging page
