@@ -5,12 +5,12 @@
     <parent>
         <groupId>eu.clarin.cmdi</groupId>
         <artifactId>componentRegistry.parent</artifactId>
-        <version>2.0.3</version>
+        <version>2.0.4</version>
     </parent>
     <groupId>eu.clarin.cmdi</groupId>
     <artifactId>component-registry-rest</artifactId>
     <packaging>${packaging}</packaging>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
     <name>ComponentRegistry</name>
     <description>
         ComponentRegistry is part of the clarin metadata infrastructure (cmdi). 
@@ -28,7 +28,8 @@
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-        <frontEndVersion>2.0.3</frontEndVersion>
+        <frontEndVersion>2.0.4</frontEndVersion>
+        <cmd-toolkit.version>1.1</cmd-toolkit.version>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <jackson.version>1.9.13</jackson.version>
@@ -416,6 +417,9 @@
             <testResource>
                 <directory>src/test/resources</directory>
             </testResource>
+            <testResource>
+                <directory>${project.build.directory}/cmd-toolkit</directory>
+            </testResource>
         </testResources>
         <plugins>
             <plugin>
@@ -446,6 +450,72 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- This puts the general component schema in place to be picked up by the JAXB plugin -->
+                        <id>unpack-general-component-schema</id>
+                        <phase>generate-sources</phase> <!-- Needs to run before maven-jaxb2-plugin -->
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>clarin.cmdi</groupId>
+                                    <artifactId>cmd-toolkit</artifactId>
+                                    <version>${cmd-toolkit.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>src/main/binding/components</outputDirectory> <!-- TODO: extract elsewhere -->
+                                    <includes>cmd-toolkit/general-component-schema.xsd</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- This makes the entire toolkit available, to be used as resources for tests -->
+                        <id>unpack-toolkit</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>clarin.cmdi</groupId>
+                                    <artifactId>cmd-toolkit</artifactId>
+                                    <version>${cmd-toolkit.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/cmd-toolkit</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Unpack the user interface so that it can be bundled with the back end -->
+                        <id>unpack-ui</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>component-registry-react-ui</artifactId>
+                                    <version>${frontEndVersion}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
+                                    <!-- exclude bundled external config, we provide our own -->
+                                    <excludes>compRegConfig.jsp</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
                 <executions>
@@ -457,7 +527,7 @@
                         <configuration>
                             <schemaDirectory>src/main/binding/components</schemaDirectory>
                             <schemaIncludes>
-                                <include>general-component-schema.xsd</include>
+                                <include>cmd-toolkit/general-component-schema.xsd</include>
                             </schemaIncludes>
                             <bindingDirectory>src/main/binding/components</bindingDirectory>
                             <extension>true</extension>
@@ -483,32 +553,6 @@
                             <generatePackage>clarin.cmdi.componentregistry.rss</generatePackage>
                             <catalog>src/main/resources/catalog.cat</catalog>
                             <catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-ui</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>component-registry-react-ui</artifactId>
-                                    <version>${frontEndVersion}</version>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
-                                    <!-- exclude bundled external config, we provide our own -->
-                                    <excludes>compRegConfig.jsp</excludes>
-                                </artifactItem>
-                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
