@@ -128,8 +128,21 @@ public class ComponentRegistryRestService {
     private final static Logger LOG = LoggerFactory
             .getLogger(ComponentRegistryRestService.class);
 
-    @Path("/registry")
+    /**
+     * Requests a registry service for a specific version of CMDI
+     * @return RegistryService resource with the requested service
+     */
+    @Path("/registry/{cmdVersion: [0-9]+\\.[0-9x]+}")
     public Class<RegistryService> versionService() {
+        return RegistryService.class;
+    }
+
+    /**
+     * Requests a registry service for the default version of CMDI
+     * @return RegistryService resource for default version
+     */
+    @Path("/registry")
+    public Class<RegistryService> defaultVersionService() {
         return RegistryService.class;
     }
 
@@ -139,6 +152,10 @@ public class ComponentRegistryRestService {
     @Transactional(rollbackFor = {Exception.class, ValidationException.class})
     @Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
     public static class RegistryService {
+
+        @PathParam("cmdVersion")
+        @DefaultValue("1.1")
+        private String cmdVersion;
 
         @Context
         private UriInfo uriInfo;
@@ -156,6 +173,25 @@ public class ComponentRegistryRestService {
         private MDMarshaller marshaller;
         @InjectParam(value = "GroupService")
         private GroupService groupService;
+
+        private enum CmdVersion {
+            CMD_1_1,
+            CMD_1_2
+        }
+
+        private CmdVersion getCmdVersion() {
+            switch (cmdVersion) {
+                case "1.1":
+                    return CmdVersion.CMD_1_1;
+                case "1.2":
+                    return CmdVersion.CMD_1_2;
+                case "1.x":
+                    return CmdVersion.CMD_1_2;
+                default:
+                    // also in case of null ('default' registry)
+                    return CmdVersion.CMD_1_1;
+            }
+        }
 
         private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
             Principal userPrincipal = security.getUserPrincipal();
