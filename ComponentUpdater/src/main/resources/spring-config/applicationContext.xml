@@ -23,12 +23,6 @@
 	<tx:annotation-driven proxy-target-class="true" />
 	<jpa:repositories base-package="clarin.cmdi.componentregistry.persistence.jpa" />
 
-	<!-- Load properties from context.xml via servlet container -->
-<!--	<bean
-		class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer">
-		<property name="ignoreUnresolvablePlaceholders" value="true" />
-	</bean>-->
-
 	<!-- Fallback properties for unit tests, loads properties from /test/γ -->
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -52,10 +46,10 @@
 			value="${eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl}" />
 		<property name="component2SchemaXsl"
 			value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
-		<property name="componentSpecSchemaLocation"
-			value="${eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation}" />
 		<property name="ccrRestUrl"
 			value="${eu.clarin.cmdi.componentregistry.ccrRestUrl}" />
+                <property name="toolkitLocation"
+                        value="${eu.clarin.cmdi.componentregistry.toolkitLocation}" />
 		<!-- Extra attribute keys that are passed in a shibboleth authenticated 
 			request principal. You need to configure the shhaa.xml file to enable the 
 			extra attributes. -->
