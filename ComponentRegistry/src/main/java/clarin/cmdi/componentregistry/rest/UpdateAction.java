@@ -1,7 +1,5 @@
 package clarin.cmdi.componentregistry.rest;
 
-//import java.security.Principal;
-
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
