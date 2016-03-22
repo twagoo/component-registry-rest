@@ -22,9 +22,9 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
-import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.GROUPID_PARAM;
-import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_GROUP;
-import static clarin.cmdi.componentregistry.rest.IComponentRegistryRestService.REGISTRY_SPACE_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.GROUPID_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_GROUP;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.multipart.FormDataMultiPart;
@@ -612,13 +612,13 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
     private FormDataMultiPart createFormData(Object content, String description) {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content,
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content,
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
-        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
                 description);
-        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
-        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
         return form;
     }
 
@@ -985,7 +985,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         FormDataMultiPart form = new FormDataMultiPart();
         String id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD,
                 RegistryTestHelper.getCommentTestContentStringForProfile("comment1", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         CommentResponse response = getAuthenticatedResource(
@@ -1006,7 +1006,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         form = new FormDataMultiPart();
         id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD,
                 RegistryTestHelper.getCommentTestContentStringForComponent("comment2", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         response = getAuthenticatedResource(
@@ -1028,7 +1028,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         // not my group
         form = new FormDataMultiPart();
         id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD,
                 RegistryTestHelper.getCommentTestContentStringForProfile("comment3", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         ClientResponse cresponse = getAuthenticatedResource(
@@ -1039,7 +1039,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         form = new FormDataMultiPart();
         id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD,
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD,
                 RegistryTestHelper.getCommentTestContentStringForComponent("comment4", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         cresponse = getAuthenticatedResource(

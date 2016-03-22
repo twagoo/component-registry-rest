@@ -143,13 +143,13 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
 
     private FormDataMultiPart createFormData(Object content, String description) {
         FormDataMultiPart form = new FormDataMultiPart();
-        form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content,
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content,
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        form.field(IComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
-        form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD, "Test1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
                 description);
-        form.field(IComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
-        form.field(IComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD, "My domain");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
         return form;
     }
     

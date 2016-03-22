@@ -164,10 +164,10 @@ public class ConcurrentRestServiceTest extends
 	    final String name, final boolean alsoDelete, InputStream content,
 	    final List<String> errors) throws InterruptedException {
 	final FormDataMultiPart form = new FormDataMultiPart();
-	form.field(IComponentRegistryRestService.DATA_FORM_FIELD, content,
+	form.field(ComponentRegistryRestService.DATA_FORM_FIELD, content,
 		MediaType.APPLICATION_OCTET_STREAM_TYPE);
-	form.field(IComponentRegistryRestService.NAME_FORM_FIELD, name);
-	form.field(IComponentRegistryRestService.DESCRIPTION_FORM_FIELD, name
+	form.field(ComponentRegistryRestService.NAME_FORM_FIELD, name);
+	form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD, name
 		+ " Description");
 	Thread t = new Thread(new Runnable() {
 

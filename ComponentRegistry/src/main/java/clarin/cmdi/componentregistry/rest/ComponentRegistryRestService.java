@@ -21,6 +21,23 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_BASE_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_HOST_HEADER_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_PATH_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_PROTOCOL_HEADER_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.DATA_FORM_FIELD;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.DESCRIPTION_FORM_FIELD;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.DOMAIN_FORM_FIELD;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.GROUPID_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.GROUP_FORM_FIELD;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.METADATA_EDITOR_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.NAME_FORM_FIELD;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.NUMBER_OF_RSSITEMS;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_GROUP;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PRIVATE;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PUBLISHED;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.USER_SPACE_PARAM;
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
@@ -29,6 +46,7 @@ import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
+import com.sun.jersey.spi.resource.Singleton;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -85,10 +103,29 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Path("/registry")
 @Service
+@Singleton
 @Transactional(rollbackFor = {Exception.class, ValidationException.class})
 @Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
-public class ComponentRegistryRestService implements
-        IComponentRegistryRestService {
+public class ComponentRegistryRestService {
+
+    public static final String APPLICATION_URL_BASE_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlBase";
+    public static final String APPLICATION_URL_PATH_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlPath";
+    public static final String APPLICATION_URL_PROTOCOL_HEADER_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader";
+    public static final String APPLICATION_URL_HOST_HEADER_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlHostHeader";
+    public static final String DATA_FORM_FIELD = "data";
+    public static final String NAME_FORM_FIELD = "name";
+    public static final String DESCRIPTION_FORM_FIELD = "description";
+    public static final String GROUP_FORM_FIELD = "group";
+    public static final String DOMAIN_FORM_FIELD = "domainName";
+    public static final String REGISTRY_SPACE_PARAM = "registrySpace";
+    public static final String USER_SPACE_PARAM = "userspace";
+    public static final String GROUPID_PARAM = "groupId";
+    public static final String METADATA_EDITOR_PARAM = "mdEditor";
+    public static final String NUMBER_OF_RSSITEMS = "limit";
+
+    public static final String REGISTRY_SPACE_PUBLISHED = "published";
+    public static final String REGISTRY_SPACE_PRIVATE = "private";
+    public static final String REGISTRY_SPACE_GROUP = "group";
 
     private final static Logger LOG = LoggerFactory
             .getLogger(ComponentRegistryRestService.class);
