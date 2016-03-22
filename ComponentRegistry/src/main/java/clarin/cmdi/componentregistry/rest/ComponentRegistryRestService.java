@@ -1,10 +1,12 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.CmdVersion;
 import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.ComponentSpecConverter;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
@@ -55,6 +57,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.security.Principal;
 import java.text.ParseException;
@@ -90,6 +93,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.nio.cs.StreamEncoder;
 
 /**
  * Handles CRUD operations on
@@ -126,6 +130,8 @@ public class ComponentRegistryRestService {
 
     private final static Logger LOG = LoggerFactory
             .getLogger(ComponentRegistryRestService.class);
+
+    public final static CmdVersion CANONICAL_CMD_VERSION = CmdVersion.CMD_1_2;
 
     /**
      * Requests a registry service for a specific version of CMDI
@@ -174,25 +180,24 @@ public class ComponentRegistryRestService {
         private MDMarshaller marshaller;
         @InjectParam(value = "GroupService")
         private GroupService groupService;
-
-        private enum CmdVersion {
-            CMD_1_1,
-            CMD_1_2
-        }
+        @InjectParam(value = "ComponentSpecConverter")
+        private ComponentSpecConverter componentSpecConverter;
 
         private CmdVersion getCmdVersion() {
-            switch (cmdVersion) {
-                case "1.1":
-                    return CmdVersion.CMD_1_1;
-                case "1.2":
-                    return CmdVersion.CMD_1_2;
-                case "1.x":
-                    //latest version
-                    return CmdVersion.CMD_1_2;
-                default:
-                    // also in case of null ('default' registry)
-                    return CmdVersion.CMD_1_1;
+            if (cmdVersion != null) {
+                switch (cmdVersion) {
+                    case "1.1":
+                        return CmdVersion.CMD_1_1;
+                    case "1.2":
+                        return CmdVersion.CMD_1_2;
+                    case "1.x":
+                        //latest version
+                        return CmdVersion.CMD_1_2;
+                }
+                // default: fall through, same as null case
             }
+            // also in case of null: 'default' registry
+            return CmdVersion.CMD_1_1;
         }
 
         private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
@@ -291,6 +296,7 @@ public class ComponentRegistryRestService {
             }
 
             try {
+                //TODO: List should differ for different values for getCmdVersion()
                 ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
                 List<ComponentDescription> result = cr.getComponentDescriptions();
                 LOG.debug(
@@ -346,6 +352,7 @@ public class ComponentRegistryRestService {
                 return new ArrayList<>();
             }
             try {
+                //TODO: List should differ for different values for getCmdVersion()
                 ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
                 List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
                 LOG.debug(
@@ -382,7 +389,7 @@ public class ComponentRegistryRestService {
             LOG.debug("Component with id: {} is requested.", componentId);
             try {
                 ComponentSpec mdComponent = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
-                return Response.ok(mdComponent).build();
+                return createComponentSpecResponse(mdComponent);
             } catch (ItemNotFoundException e) {
                 return Response.status(Status.NOT_FOUND).build();
             } catch (ComponentRegistryException e1) {
@@ -391,6 +398,26 @@ public class ComponentRegistryRestService {
                 return Response.serverError().status(Status.UNAUTHORIZED).build();
             } catch (UserUnauthorizedException e) {
                 return Response.serverError().status(Status.FORBIDDEN).build();
+            }
+        }
+
+        private Response createComponentSpecResponse(ComponentSpec mdProfile) {
+            final CmdVersion registryVersion = getCmdVersion();
+            if (CANONICAL_CMD_VERSION != registryVersion) {
+                final StringWriter writer = new StringWriter();
+                componentSpecConverter.convertComponentSpec(CANONICAL_CMD_VERSION, registryVersion, mdProfile, writer);
+                final String result = writer.toString();
+                if(result == null || result.isEmpty()) {
+                    return Response
+                            .status(Status.BAD_REQUEST)
+                            .entity("Cannot convert spec from " + CANONICAL_CMD_VERSION + " to " + registryVersion)
+                            .type(MediaType.TEXT_PLAIN)
+                            .build();
+                } else {
+                    return Response.ok(result).build();
+                }
+            } else {
+                return Response.ok(mdProfile).build();
             }
         }
 
@@ -409,7 +436,7 @@ public class ComponentRegistryRestService {
             LOG.debug("Profile with id {} is requested.", profileId);
             try {
                 ComponentSpec mdProfile = this.getBaseRegistry().getMDProfileAccessControled(profileId);
-                return Response.ok(mdProfile).build();
+                return createComponentSpecResponse(mdProfile);
             } catch (ItemNotFoundException e) {
                 return Response.status(Status.NOT_FOUND).build();
             } catch (ComponentRegistryException e1) {
@@ -446,7 +473,7 @@ public class ComponentRegistryRestService {
                             try {
                                 try {
                                     try {
-                                        registry.getMDComponentAsXml(componentId, output);
+                                        registry.getMDComponentAsXml(componentId, output); //TODO: function of version number
                                     } catch (ItemNotFoundException e) {
                                         LOG.warn("Could not retrieve component {}: {}",
                                                 componentId, e.getMessage());
@@ -1239,7 +1266,7 @@ public class ComponentRegistryRestService {
                         public void write(OutputStream output) throws IOException,
                                 WebApplicationException {
                             try {
-                                registry.getMDProfileAsXml(profileId, output);
+                                registry.getMDProfileAsXml(profileId, output); //TODO: function of version number
                             } catch (ComponentRegistryException | UserUnauthorizedException | ItemNotFoundException e) {
                                 LOG.warn("Could not retrieve component {}: {}",
                                         profileId, e.getMessage());
@@ -1258,7 +1285,7 @@ public class ComponentRegistryRestService {
                         public void write(OutputStream output) throws IOException,
                                 WebApplicationException {
                             try {
-                                registry.getMDProfileAsXsd(profileId, output);
+                                registry.getMDProfileAsXsd(profileId, output); //TODO: function of version number
                             } catch (ComponentRegistryException | UserUnauthorizedException | ItemNotFoundException e) {
                                 LOG.warn("Could not retrieve component {}: {}",
                                         profileId, e.getMessage());
