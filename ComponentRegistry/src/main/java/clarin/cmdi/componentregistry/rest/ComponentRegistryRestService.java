@@ -174,7 +174,6 @@ public class ComponentRegistryRestService implements
         return (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED));
     }
 
-    @Override
     @GET
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -228,7 +227,6 @@ public class ComponentRegistryRestService implements
 
     }
 
-    @Override
     @GET
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -283,7 +281,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/components/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -311,7 +308,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/profiles/{profileId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -339,7 +335,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/components/{componentId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
@@ -358,7 +353,7 @@ public class ComponentRegistryRestService implements
             String fileName = desc.getName() + "." + rawType;
             if ("xml".equalsIgnoreCase(rawType)) {
                 result = new StreamingOutput() {
-                    @Override
+
                     public void write(OutputStream output) throws IOException,
                             WebApplicationException {
                         try {
@@ -392,7 +387,7 @@ public class ComponentRegistryRestService implements
                 return createDownloadResponse(result, fileName);
             } else if ("xsd".equalsIgnoreCase(rawType)) {
                 result = new StreamingOutput() {
-                    @Override
+
                     public void write(OutputStream output) throws IOException,
                             WebApplicationException {
                         try {
@@ -434,7 +429,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/components/usage/{componentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -472,7 +466,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -508,7 +501,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -544,7 +536,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/profiles/{profileId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -579,7 +570,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/components/{componentId}/comments/{commentId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -623,7 +613,6 @@ public class ComponentRegistryRestService implements
      * @return
      */
     // TODO: test via POSTMAN
-    @Override
     @POST
     @Path("/profiles/{profileId}")
     @ApiOperation(value = "Allows for deletion of single profile (workaround for Flex which does not support the DELETE method)")
@@ -637,7 +626,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/profiles/{profileId}/comments/{commentId}")
     @ApiOperation(value = "Allows for deletion of single profile comment (workaround for Flex which does not support the DELETE method)")
@@ -652,7 +640,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/components/{componentId}/comments/{commentId}")
     @ApiOperation(value = "Allows for deletion of single component comment (workaround for Flex which does not support the DELETE method)")
@@ -667,7 +654,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/profiles/{profileId}/publish")
     @Consumes("multipart/form-data")
@@ -722,7 +708,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/profiles/{profileId}/update")
     @Consumes("multipart/form-data")
@@ -799,7 +784,6 @@ public class ComponentRegistryRestService implements
      * @param method
      * @return
      */
-    @Override
     @POST
     @Path("/components/{componentId}")
     @ApiOperation(value = "Allows for deletion of single component (workaround for Flex which does not support the DELETE method)")
@@ -813,7 +797,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/components/{componentId}/publish")
     @Consumes("multipart/form-data")
@@ -872,7 +855,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/components/{componentId}/update")
     @Consumes("multipart/form-data")
@@ -946,7 +928,6 @@ public class ComponentRegistryRestService implements
         desc.setRegistrationDate(new Date());
     }
 
-    @Override
     @DELETE
     @Path("/components/{componentId}")
     @ApiOperation(value = "Deletes the component with the specified ID from its registry")
@@ -996,7 +977,6 @@ public class ComponentRegistryRestService implements
         return Response.ok("Component with id" + componentId + " deleted.").build();
     }
 
-    @Override
     @DELETE
     @Path("/profiles/{profileId}")
     @ApiOperation(value = "Deletes the profile with the specified ID from its registry")
@@ -1043,7 +1023,6 @@ public class ComponentRegistryRestService implements
         return Response.ok().build();
     }
 
-    @Override
     @DELETE
     @Path("/profiles/{profileId}/comments/{commentId}")
     @ApiOperation(value = "Deletes a comment from a profile")
@@ -1104,7 +1083,6 @@ public class ComponentRegistryRestService implements
         return Response.ok("Comment with id " + commentId + " deleted.").build();
     }
 
-    @Override
     @DELETE
     @Path("/components/{componentId}/comments/{commentId}")
     @ApiOperation(value = "Deletes a comment from a component")
@@ -1162,7 +1140,6 @@ public class ComponentRegistryRestService implements
         return Response.ok("Comment with id " + commentId + " deleted.").build();
     }
 
-    @Override
     @GET
     @Path("/profiles/{profileId}/{rawType}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
@@ -1188,7 +1165,7 @@ public class ComponentRegistryRestService implements
             String fileName = desc.getName() + "." + rawType;
             if ("xml".equalsIgnoreCase(rawType)) {
                 result = new StreamingOutput() {
-                    @Override
+
                     public void write(OutputStream output) throws IOException,
                             WebApplicationException {
                         try {
@@ -1206,7 +1183,7 @@ public class ComponentRegistryRestService implements
                 };
             } else if ("xsd".equalsIgnoreCase(rawType)) {
                 result = new StreamingOutput() {
-                    @Override
+
                     public void write(OutputStream output) throws IOException,
                             WebApplicationException {
                         try {
@@ -1249,7 +1226,6 @@ public class ComponentRegistryRestService implements
 
     }
 
-    @Override
     @POST
     @Path("/profiles")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1295,7 +1271,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/components")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1341,7 +1316,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/components/{componentId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1376,7 +1350,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @POST
     @Path("/profiles/{profileId}/comments")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1413,7 +1386,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/pingSession")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1438,7 +1410,7 @@ public class ComponentRegistryRestService implements
         return Response
                 .ok()
                 .entity(String.format("<session stillActive=\"%s\"/>",
-                                stillActive)).build();
+                        stillActive)).build();
     }
 
     private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
@@ -1608,8 +1580,10 @@ public class ComponentRegistryRestService implements
     }
 
     /**
-     * 
-     * @see ComponentRegistryRestService#getApplicationBaseURI(javax.servlet.ServletContext, javax.servlet.http.HttpServletRequest) 
+     *
+     * @see
+     * ComponentRegistryRestService#getApplicationBaseURI(javax.servlet.ServletContext,
+     * javax.servlet.http.HttpServletRequest)
      */
     private String getApplicationBaseURI() {
         return getApplicationBaseURI(servletContext, request);
@@ -1639,7 +1613,6 @@ public class ComponentRegistryRestService implements
     /**
      * @param componentRegistryFactory the componentRegistryFactory to set
      */
-    @Override
     public void setComponentRegistryFactory(
             ComponentRegistryFactory componentRegistryFactory) {
         this.componentRegistryFactory = componentRegistryFactory;
@@ -1674,7 +1647,6 @@ public class ComponentRegistryRestService implements
      * @throws ComponentRegistryException
      * @throws ParseException
      */
-    @Override
     @GET
     @Path("/components/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1719,7 +1691,6 @@ public class ComponentRegistryRestService implements
      * @throws ComponentRegistryException
      * @throws ParseException
      */
-    @Override
     @GET
     @Path("/profiles/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1773,7 +1744,6 @@ public class ComponentRegistryRestService implements
      * @throws JAXBException
      * @throws ParseException
      */
-    @Override
     @GET
     @Path("/profiles/{profileId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1823,7 +1793,6 @@ public class ComponentRegistryRestService implements
      * @throws JAXBException
      * @throws ParseException
      */
-    @Override
     @GET
     @Path("/components/{componentId}/comments/rss")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1861,7 +1830,6 @@ public class ComponentRegistryRestService implements
 
     }
 
-    @Override
     @GET
     @Path("/AllowedTypes")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1875,7 +1843,6 @@ public class ComponentRegistryRestService implements
         return (new AllowedAttributetypesXML());
     }
 
-    @Override
     @GET
     @Path("/groups/usermembership")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1890,7 +1857,6 @@ public class ComponentRegistryRestService implements
         return groups;
     }
 
-    @Override
     @GET
     @Path("/items/{itemId}/groups")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1900,7 +1866,6 @@ public class ComponentRegistryRestService implements
         return groupService.getGroupsTheItemIsAMemberOf(itemId);
     }
 
-    @Override
     @POST
     @Path("/items/{itemId}/transferownership")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1920,7 +1885,6 @@ public class ComponentRegistryRestService implements
         }
     }
 
-    @Override
     @GET
     @Path("/items/{itemId}")
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
