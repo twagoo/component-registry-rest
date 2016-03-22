@@ -406,17 +406,24 @@ public class ComponentRegistryRestService {
         private Response createComponentSpecResponse(ComponentSpec mdProfile) throws IOException {
             final CmdVersion registryVersion = getCmdVersion();
             if (CANONICAL_CMD_VERSION != registryVersion) {
+                //TODO: only if accepting XML - check!
+                
+                // get XML representation of original to serve as input for conversion
                 byte[] originalByes = null;
-                final StringWriter resultWriter = new StringWriter();
                 try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
                     marshaller.marshal(mdProfile, os);
                     originalByes = os.toByteArray();
                 } catch (JAXBException ex) {
                     throw new RuntimeException("Failed to marshal component before conversion", ex);
                 }
+                
+                // perform conversion
+                final StringWriter resultWriter = new StringWriter();
                 try (InputStream is = new ByteArrayInputStream(originalByes)) {
                     componentSpecConverter.convertComponentSpec(CANONICAL_CMD_VERSION, registryVersion, is, resultWriter);
                 }
+                
+                // handle result
                 final String result = resultWriter.toString();
                 if (result == null || result.isEmpty()) {
                     return Response
