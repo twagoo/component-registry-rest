@@ -143,7 +143,7 @@ public class ComponentRegistryRestService {
     private ComponentRegistryFactory componentRegistryFactory;
     @InjectParam(value = "mdMarshaller")
     private MDMarshaller marshaller;
-    @Autowired
+    @InjectParam(value = "GroupService")
     private GroupService groupService;
 
     private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
