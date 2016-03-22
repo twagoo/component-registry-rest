@@ -53,6 +53,8 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -401,13 +403,22 @@ public class ComponentRegistryRestService {
             }
         }
 
-        private Response createComponentSpecResponse(ComponentSpec mdProfile) {
+        private Response createComponentSpecResponse(ComponentSpec mdProfile) throws IOException {
             final CmdVersion registryVersion = getCmdVersion();
             if (CANONICAL_CMD_VERSION != registryVersion) {
-                final StringWriter writer = new StringWriter();
-                componentSpecConverter.convertComponentSpec(CANONICAL_CMD_VERSION, registryVersion, mdProfile, writer);
-                final String result = writer.toString();
-                if(result == null || result.isEmpty()) {
+                byte[] originalByes = null;
+                final StringWriter resultWriter = new StringWriter();
+                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                    marshaller.marshal(mdProfile, os);
+                    originalByes = os.toByteArray();
+                } catch (JAXBException ex) {
+                    throw new RuntimeException("Failed to marshal component before conversion", ex);
+                }
+                try (InputStream is = new ByteArrayInputStream(originalByes)) {
+                    componentSpecConverter.convertComponentSpec(CANONICAL_CMD_VERSION, registryVersion, is, resultWriter);
+                }
+                final String result = resultWriter.toString();
+                if (result == null || result.isEmpty()) {
                     return Response
                             .status(Status.BAD_REQUEST)
                             .entity("Cannot convert spec from " + CANONICAL_CMD_VERSION + " to " + registryVersion)

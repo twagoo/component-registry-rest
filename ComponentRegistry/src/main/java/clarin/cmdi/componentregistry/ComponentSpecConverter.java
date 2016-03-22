@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.ComponentSpec;
+import java.io.InputStream;
 import java.io.Writer;
 
 /**
@@ -9,6 +9,6 @@ import java.io.Writer;
  */
 public interface ComponentSpecConverter {
     
-    void convertComponentSpec(CmdVersion sourceVersion, CmdVersion targetVersion, ComponentSpec spec, Writer writer);
+    void convertComponentSpec(CmdVersion sourceVersion, CmdVersion targetVersion, InputStream stream, Writer writer);
     
 }
