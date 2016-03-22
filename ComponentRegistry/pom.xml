@@ -23,7 +23,7 @@
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
         <serviceUrlBase>http://localhost:8080</serviceUrlBase>
-        <serviceUrlPath>/${project.artifactId}</serviceUrlPath>
+        <serviceUrlPath>/ComponentRegistry</serviceUrlPath> <!-- defined in META-INF/context.xml -->
         <!-- Will be inserted in context.xml -->
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
