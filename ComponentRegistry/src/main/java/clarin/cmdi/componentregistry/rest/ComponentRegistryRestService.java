@@ -101,11 +101,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @author george.georgovassilis@mpi.nl
  *
  */
-@Path("/registry")
+@Path("/")
 @Service
 @Singleton
-@Transactional(rollbackFor = {Exception.class, ValidationException.class})
-@Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
 public class ComponentRegistryRestService {
 
     public static final String APPLICATION_URL_BASE_PARAM = "eu.clarin.cmdi.componentregistry.serviceUrlBase";
@@ -129,1876 +127,1893 @@ public class ComponentRegistryRestService {
 
     private final static Logger LOG = LoggerFactory
             .getLogger(ComponentRegistryRestService.class);
-    @Context
-    private UriInfo uriInfo;
-    @Context
-    private SecurityContext security;
-    @Context
-    private HttpServletRequest request;
-    @Context
-    private HttpServletResponse response;
-    @Context
-    private ServletContext servletContext;
-    @InjectParam(value = "componentRegistryFactory")
-    private ComponentRegistryFactory componentRegistryFactory;
-    @InjectParam(value = "mdMarshaller")
-    private MDMarshaller marshaller;
-    @InjectParam(value = "GroupService")
-    private GroupService groupService;
 
-    private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
-        Principal userPrincipal = security.getUserPrincipal();
-        if (userPrincipal == null) {
-            return componentRegistryFactory.getBaseRegistry(null);
-        } else {
+    @Path("/registry")
+    public Class<RegistryService> versionService() {
+        return RegistryService.class;
+    }
+
+    /**
+     * Subresource for a registry service
+     */
+    @Transactional(rollbackFor = {Exception.class, ValidationException.class})
+    @Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
+    public static class RegistryService {
+
+        @Context
+        private UriInfo uriInfo;
+        @Context
+        private SecurityContext security;
+        @Context
+        private HttpServletRequest request;
+        @Context
+        private HttpServletResponse response;
+        @Context
+        private ServletContext servletContext;
+        @InjectParam(value = "componentRegistryFactory")
+        private ComponentRegistryFactory componentRegistryFactory;
+        @InjectParam(value = "mdMarshaller")
+        private MDMarshaller marshaller;
+        @InjectParam(value = "GroupService")
+        private GroupService groupService;
+
+        private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
+            Principal userPrincipal = security.getUserPrincipal();
+            if (userPrincipal == null) {
+                return componentRegistryFactory.getBaseRegistry(null);
+            } else {
+                UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
+                return componentRegistryFactory.getBaseRegistry(userCredentials);
+            }
+        }
+
+        private ComponentRegistry getRegistry(RegistrySpace space, Number groupId) {
+            Principal userPrincipal = security.getUserPrincipal();
             UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
-            return componentRegistryFactory.getBaseRegistry(userCredentials);
-        }
-    }
-
-    private ComponentRegistry getRegistry(RegistrySpace space, Number groupId) {
-        Principal userPrincipal = security.getUserPrincipal();
-        UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
-        try {
-            return componentRegistryFactory.getComponentRegistry(space, null, userCredentials, groupId);
-        } catch (UserUnauthorizedException uuEx) {
-            LOG.warn("Unauthorized access to {} registry by user {}", space,
-                    userCredentials);
-            LOG.debug("Details for unauthorized access", uuEx);
-            throw new WebApplicationException(uuEx, Status.FORBIDDEN);
-        }
-    }
-
-    /**
-     *
-     * @return Principal of current request
-     * @throws AuthenticationRequiredException If no user principal found
-     */
-    private Principal checkAndGetUserPrincipal()
-            throws AuthenticationRequiredException {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            throw new AuthenticationRequiredException("No user principal found.");
-        }
-        return principal;
-    }
-
-    private UserCredentials getUserCredentials(Principal userPrincipal) {
-        UserCredentials userCredentials = null;
-        if (userPrincipal != null) {
-            userCredentials = new UserCredentials(userPrincipal);
-        }
-        return userCredentials;
-    }
-
-    private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
-        //checking credentials 
-        RegistrySpace regSpace = RegistrySpace.valueOf(space.toUpperCase());
-        if (regSpace != RegistrySpace.PUBLISHED) {
-            // ensure that user is authenticated
-            this.getUserCredentials(this.checkAndGetUserPrincipal());
-        }
-        // initializing the registry
-        Number groupIdNumber = null;
-        if (groupId != null && !groupId.isEmpty()) {
-            groupIdNumber = Integer.parseInt(groupId);
-        }
-
-        return this.getRegistry(regSpace, groupIdNumber);
-    }
-
-    private boolean checkRegistrySpaceString(String registrySpace) {
-        return (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED));
-    }
-
-    @GET
-    @Path("/components")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "A listing of the descriptions of components in the specified registry space")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Registry requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public registry is not owned by current user"),
-        @ApiResponse(code = 404, message = "Registry space does not exist")
-    })
-    public List<ComponentDescription> getRegisteredComponents(
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
-            @QueryParam(GROUPID_PARAM) String groupId,
-            @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace)
-            throws ComponentRegistryException, IOException {
-        long start = System.currentTimeMillis();
-
-        // deprecated parameter, processed here for backwards compatibility
-        if (!Strings.isNullOrEmpty(userSpace)) {
-            LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
-            if (Boolean.valueOf(userSpace)) {
-                registrySpace = REGISTRY_SPACE_PRIVATE;
-            }
-        }
-
-        if (!checkRegistrySpaceString(registrySpace)) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
-            return new ArrayList<ComponentDescription>();
-        }
-
-        try {
-            ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-            List<ComponentDescription> result = cr.getComponentDescriptions();
-            LOG.debug(
-                    "Releasing {} registered components into the world ({} millisecs)",
-                    result.size(), (System.currentTimeMillis() - start));
-
-            return result;
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new ArrayList<ComponentDescription>();
-
-        } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-            return new ArrayList<ComponentDescription>();
-
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
-            return new ArrayList<ComponentDescription>();
-        }
-
-    }
-
-    @GET
-    @Path("/profiles")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "A listing of the descriptions of profiles in the specified registry space")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Registry requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public registry is not owned by current user"),
-        @ApiResponse(code = 404, message = "Registry space does not exist")
-    })
-    public List<ProfileDescription> getRegisteredProfiles(
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
-            @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
-            @QueryParam(GROUPID_PARAM) String groupId,
-            @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace
-    )
-            throws ComponentRegistryException, IOException {
-
-        long start = System.currentTimeMillis();
-
-        // deprecated parameter, processed here for backwards compatibility
-        if (!Strings.isNullOrEmpty(userSpace)) {
-            LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
-            if (Boolean.valueOf(userSpace)) {
-                registrySpace = REGISTRY_SPACE_PRIVATE;
-            }
-        }
-
-        if (!checkRegistrySpaceString(registrySpace)) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
-            return new ArrayList<ProfileDescription>();
-        }
-        try {
-            ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-            List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
-            LOG.debug(
-                    "Releasing {} registered components into the world ({} millisecs)",
-                    result.size(), (System.currentTimeMillis() - start));
-
-            return result;
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new ArrayList<ProfileDescription>();
-
-        } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-            return new ArrayList<ProfileDescription>();
-
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
-            return new ArrayList<ProfileDescription>();
-        }
-    }
-
-    @GET
-    @Path("/components/{componentId}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "The component specification of a single component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response getRegisteredComponent(
-            @PathParam("componentId") String componentId) throws IOException {
-        LOG.debug("Component with id: {} is requested.", componentId);
-        try {
-            ComponentSpec mdComponent = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
-            return Response.ok(mdComponent).build();
-        } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
-        } catch (ComponentRegistryException e1) {
-            return Response.serverError().status(Status.CONFLICT).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.serverError().status(Status.UNAUTHORIZED).build();
-        } catch (UserUnauthorizedException e) {
-            return Response.serverError().status(Status.FORBIDDEN).build();
-        }
-    }
-
-    @GET
-    @Path("/profiles/{profileId}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "The component specification of a single profile")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response getRegisteredProfile(
-            @PathParam("profileId") String profileId) throws IOException {
-        LOG.debug("Profile with id {} is requested.", profileId);
-        try {
-            ComponentSpec mdProfile = this.getBaseRegistry().getMDProfileAccessControled(profileId);
-            return Response.ok(mdProfile).build();
-        } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
-        } catch (ComponentRegistryException e1) {
-            return Response.serverError().status(Status.CONFLICT).build();
-        } catch (UserUnauthorizedException e) {
-            return Response.serverError().status(Status.FORBIDDEN).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.serverError().status(Status.UNAUTHORIZED).build();
-        }
-    }
-
-    @GET
-    @Path("/components/{componentId}/{rawType}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
-    @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single component (publicly accessible regardless of state!)")
-    @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response getRegisteredComponentRawType(
-            @PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) throws ComponentRegistryException {
-
-        LOG.debug("Component with id: {} and rawType: {} is requested.", componentId, rawType);
-        try {
-            final ComponentRegistry registry = this.getBaseRegistry();
-            ComponentDescription desc = registry.getComponentDescription(componentId);
-            StreamingOutput result = null;
-            String fileName = desc.getName() + "." + rawType;
-            if ("xml".equalsIgnoreCase(rawType)) {
-                result = new StreamingOutput() {
-
-                    public void write(OutputStream output) throws IOException,
-                            WebApplicationException {
-                        try {
-                            try {
-                                try {
-                                    registry.getMDComponentAsXml(componentId, output);
-                                } catch (ItemNotFoundException e) {
-                                    LOG.warn("Could not retrieve component {}: {}",
-                                            componentId, e.getMessage());
-                                    LOG.debug("Details", e);
-                                    throw new WebApplicationException(Response
-                                            .serverError()
-                                            .status(Status.INTERNAL_SERVER_ERROR)
-                                            .build());
-                                }
-                            } catch (ComponentRegistryException e) {
-                                LOG.warn("Could not retrieve component {}: {}",
-                                        componentId, e.getMessage());
-                                LOG.debug("Details", e);
-                                throw new WebApplicationException(Response
-                                        .serverError()
-                                        .status(Status.INTERNAL_SERVER_ERROR)
-                                        .build());
-                            }
-
-                        } catch (UserUnauthorizedException e2) {
-                            LOG.error(e2.toString());
-                        }
-                    }
-                };
-                return createDownloadResponse(result, fileName);
-            } else if ("xsd".equalsIgnoreCase(rawType)) {
-                result = new StreamingOutput() {
-
-                    public void write(OutputStream output) throws IOException,
-                            WebApplicationException {
-                        try {
-                            try {
-                                try {
-                                    registry.getMDComponentAsXsd(componentId, output);
-                                } catch (ItemNotFoundException e) {
-                                    LOG.warn("Could not retrieve component {}: {}",
-                                            componentId, e.getMessage());
-                                    LOG.debug("Details", e);
-                                    throw new WebApplicationException(Response
-                                            .serverError()
-                                            .status(Status.INTERNAL_SERVER_ERROR)
-                                            .build());
-                                }
-                            } catch (ComponentRegistryException e) {
-                                LOG.warn("Could not retrieve component {}: {}",
-                                        componentId, e.getMessage());
-                                LOG.debug("Details", e);
-                                throw new WebApplicationException(Response
-                                        .serverError()
-                                        .status(Status.INTERNAL_SERVER_ERROR)
-                                        .build());
-                            }
-                        } catch (UserUnauthorizedException e2) {
-                            LOG.error(e2.toString());
-                        }
-
-                    }
-                };
-                return createDownloadResponse(result, fileName);
-            } else {
-                return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
-            }
-        } catch (ItemNotFoundException e3) {
-            return Response.status(Status.NOT_FOUND).build();
-        } catch (AuthenticationRequiredException e) {
-            return Response.serverError().status(Status.UNAUTHORIZED).build();
-        }
-    }
-
-    @GET
-    @Path("/components/usage/{componentId}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a descriptions listing of components that use the identified component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated")
-    })
-    public List<BaseDescription> getComponentUsage(
-            @PathParam("componentId") String componentId) throws ComponentRegistryException, IOException {
-
-        final long start = System.currentTimeMillis();
-        try {
-            ComponentRegistry registry = this.getBaseRegistry();
-            List<ComponentDescription> components = registry.getUsageInComponents(componentId);
-            List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
-
-            LOG.debug(
-                    "Found {} components and {} profiles that use component {} ({} millisecs)",
-                    components.size(), profiles.size(), componentId,
-                    (System.currentTimeMillis() - start));
-
-            List<BaseDescription> usages = new ArrayList<BaseDescription>(components.size() + profiles.size());
-            usages.addAll(components);
-            usages.addAll(profiles);
-
-            return usages;
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Could not retrieve profile usage {}", componentId);
-            LOG.debug("Details", e);
-            return new ArrayList<BaseDescription>();
-        } catch (AuthenticationRequiredException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
-            return new ArrayList<BaseDescription>();
-        }
-    }
-
-    @GET
-    @Path("/profiles/{profileId}/comments")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a listing of all comments that have been made on the identified profile")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public List<Comment> getCommentsFromProfile(
-            @PathParam("profileId") String profileId)
-            throws IOException {
-        long start = System.currentTimeMillis();
-        try {
-            List<Comment> comments = this.getBaseRegistry().getCommentsInProfile(profileId);
-            LOG.debug(
-                    "Releasing {} registered comments in profile into the world ({} millisecs)",
-                    comments.size(), (System.currentTimeMillis() - start));
-            return comments;
-        } catch (ComponentRegistryException e) {
-            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
-            return new ArrayList<Comment>();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-            return new ArrayList<Comment>();
-        } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e.getMessage());
-            return new ArrayList<Comment>();
-        } catch (AuthenticationRequiredException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
-            return new ArrayList<Comment>();
-        }
-    }
-
-    @GET
-    @Path("/components/{componentId}/comments")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a listing of all comments that have been made on the identified component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public List<Comment> getCommentsFromComponent(
-            @PathParam("componentId") String componentId)
-            throws IOException {
-        long start = System.currentTimeMillis();
-        try {
-            List<Comment> comments = this.getBaseRegistry().getCommentsInComponent(componentId);
-            LOG.debug(
-                    "Releasing {} registered comments in Component into the world ({} millisecs)",
-                    comments.size(), (System.currentTimeMillis() - start));
-            return comments;
-        } catch (ComponentRegistryException e) {
-            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
-            return new ArrayList<Comment>();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-            return new ArrayList<Comment>();
-        } catch (UserUnauthorizedException e1) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
-            return new ArrayList<Comment>();
-        } catch (AuthenticationRequiredException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
-            return new ArrayList<Comment>();
-        }
-    }
-
-    @GET
-    @Path("/profiles/{profileId}/comments/{commentId}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a single comment on a profile")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Component requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public component is not owned by current user"),
-        @ApiResponse(code = 404, message = "Component or comment does not exist")
-    })
-    public Comment getSpecifiedCommentFromProfile(
-            @PathParam("profileId") String profileId,
-            @PathParam("commentId") String commentId)
-            throws IOException {
-
-        LOG.debug("Comments of profile with id {} are requested.", commentId);
-        try {
-
-            return this.getBaseRegistry().getSpecifiedCommentInProfile(profileId, commentId);
-        } catch (ComponentRegistryException e) {
-            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
-            return new Comment();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-            return new Comment();
-        } catch (UserUnauthorizedException e1) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
-            return new Comment();
-        } catch (AuthenticationRequiredException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
-            return new Comment();
-        }
-    }
-
-    @GET
-    @Path("/components/{componentId}/comments/{commentId}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a single comment on a component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Component requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public component is not owned by current user"),
-        @ApiResponse(code = 404, message = "Component or comment does not exist")
-    })
-    public Comment getSpecifiedCommentFromComponent(
-            @PathParam("componentId") String componentId,
-            @PathParam("commentId") String commentId)
-            throws IOException {
-        LOG.debug("Comments of component with id {} are requested.", commentId);
-        try {
-            Comment result = this.getBaseRegistry().getSpecifiedCommentInComponent(componentId, commentId);
-            return result;
-        } catch (ComponentRegistryException e) {
-            response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
-            return new Comment();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-            return new Comment();
-        } catch (UserUnauthorizedException e1) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
-            return new Comment();
-        } catch (AuthenticationRequiredException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
-            return new Comment();
-        }
-    }
-
-    /**
-     *
-     * Purely helper method for my front-end (FLEX) which only does post/get
-     * requests. The query param is checked and the "proper" method is called.
-     *
-     * @param profileId
-     * @param method
-     * @return
-     */
-    // TODO: test via POSTMAN
-    @POST
-    @Path("/profiles/{profileId}")
-    @ApiOperation(value = "Allows for deletion of single profile (workaround for Flex which does not support the DELETE method)")
-    public Response manipulateRegisteredProfile(
-            @PathParam("profileId") String profileId,
-            @FormParam("method") String method) {
-        if ("delete".equalsIgnoreCase(method)) {
-            return this.deleteRegisteredProfile(profileId);
-        } else {
-            return Response.ok().build();
-        }
-    }
-
-    @POST
-    @Path("/profiles/{profileId}/comments/{commentId}")
-    @ApiOperation(value = "Allows for deletion of single profile comment (workaround for Flex which does not support the DELETE method)")
-    public Response manipulateCommentFromProfile(
-            @PathParam("profileId") String profileId,
-            @PathParam("commentId") String commentId,
-            @FormParam("method") String method) {
-        if ("delete".equalsIgnoreCase(method)) {
-            return this.deleteCommentFromProfile(profileId, commentId);
-        } else {
-            return Response.ok().build();
-        }
-    }
-
-    @POST
-    @Path("/components/{componentId}/comments/{commentId}")
-    @ApiOperation(value = "Allows for deletion of single component comment (workaround for Flex which does not support the DELETE method)")
-    public Response manipulateCommentFromComponent(
-            @PathParam("componentId") String componentId,
-            @PathParam("commentId") String commentId,
-            @FormParam("method") String method) {
-        if ("delete".equalsIgnoreCase(method)) {
-            return this.deleteCommentFromComponent(componentId, commentId);
-        } else {
-            return Response.ok().build();
-        }
-    }
-
-    @POST
-    @Path("/profiles/{profileId}/publish")
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Changes the state of the specified profile to published")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response publishRegisteredProfile(
-            @PathParam("profileId") String profileId,
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-
-        try {
-            Principal principal = checkAndGetUserPrincipal();
-            ComponentRegistry registry = this.getBaseRegistry();
-            registry.setRegistrySpace(RegistrySpace.PUBLISHED);
-            ProfileDescription desc = registry.getProfileDescriptionAccessControlled(profileId);
-            if (desc != null) {
-                if (desc.isPublic()) {
-                    return Response.status(Status.CONFLICT).entity("Cannot publish already published profile.")
-                            .build();
-                }
-                desc.setPublic(true);
-                this.updateDescription(desc, name, description, domainName, group);
-                return this.register(input, desc, new PublishAction(principal), registry);
-            } else {
-                LOG.error("Update of nonexistent profile {} failed.", profileId);
-                return Response
-                        .serverError()
-                        .entity("Invalid id, cannot update nonexistent profile")
-                        .build();
-            }
-
-        } catch (AuthenticationRequiredException e) {
-            return Response.serverError().status(Status.UNAUTHORIZED)
-                    .build();
-        } catch (ItemNotFoundException e1) {
-            return Response.status(Status.NOT_FOUND).entity(e1.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Could not retrieve profile {}", profileId);
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
-                    .build();
-        }
-    }
-
-    @POST
-    @Path("/profiles/{profileId}/update")
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Updates an already registered (but unpublished) profile")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response updateRegisteredProfile(
-            @PathParam("profileId") String profileId,
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        try {
-            ComponentRegistry br = this.getBaseRegistry();
-            ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
-            if (desc != null) {
-                if (desc.isPublic()) {
-                    return Response.status(Status.CONFLICT).entity("Cannot update already published profile.")
-                            .build();
-
-                }
-                Number groupId;
-                RegistrySpace space;
-                List<Number> groupIds = br.getItemGroups(profileId);
-                if (groupIds == null || groupIds.isEmpty()) {
-                    groupId = null;
-                    space = RegistrySpace.PRIVATE;
-                } else {
-                    groupId = groupIds.get(0);
-                    space = RegistrySpace.GROUP;
-                }
-
-                updateDescription(desc, name, description, domainName, group);
-                ComponentRegistry cr = this.getRegistry(space, groupId);
-                return register(input, desc, new UpdateAction(), cr);
-            } else {
-                LOG.error("Update of nonexistent id (" + profileId
-                        + ") failed.");
-                return Response
-                        .serverError()
-                        .entity("Invalid id, cannot update nonexistent profile")
-                        .build();
-            }
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Could not retrieve profile {}", profileId);
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
-                    .build();
-
-        } catch (ItemNotFoundException ex2) {
-            return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
-                    .build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
-        }
-
-    }
-
-    /**
-     *
-     * Purely helper method for my front-end (FLEX) which van only do post/get
-     * requests. The query param is checked and the "proper" method is called.
-     *
-     * @param componentId
-     * @param method
-     * @return
-     */
-    @POST
-    @Path("/components/{componentId}")
-    @ApiOperation(value = "Allows for deletion of single component (workaround for Flex which does not support the DELETE method)")
-    public Response manipulateRegisteredComponent(
-            @PathParam("componentId") String componentId,
-            @FormParam("method") String method) {
-        if ("delete".equalsIgnoreCase(method)) {
-            return this.deleteRegisteredComponent(componentId);
-        } else {
-            return Response.ok("Nothing to do, not 'delete' method").build();
-        }
-    }
-
-    @POST
-    @Path("/components/{componentId}/publish")
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Changes the state of the specified component to published")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response publishRegisteredComponent(
-            @PathParam("componentId") String componentId,
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-
-        try {
-            Principal principal = checkAndGetUserPrincipal();
-            ComponentRegistry registry = this.getBaseRegistry();
-            ComponentDescription desc = registry.getComponentDescriptionAccessControlled(componentId);
-            if (desc != null) {
-                if (desc.isPublic()) {
-                    return Response.status(Status.CONFLICT).entity("Cannot publish already published omponent.")
-                            .build();
-                }
-                desc.setPublic(true);
-                this.updateDescription(desc, name, description, domainName, group);
-                return this.register(input, desc, new PublishAction(principal), registry);
-            } else {
-                LOG.error("Update of nonexistent id (" + componentId
-                        + ") failed.");
-                return Response
-                        .serverError()
-                        .entity("Invalid id, cannot update nonexistent profile")
-                        .build();
-            }
-        } catch (AuthenticationRequiredException e) {
-            LOG.warn("Could not retrieve component {}", componentId);
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.UNAUTHORIZED)
-                    .build();
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Could not retrieve component {}", componentId);
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (ItemNotFoundException e) {
-            LOG.warn("Could not retrieve component {}", componentId);
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
-                    .build();
-        }
-    }
-
-    @POST
-    @Path("/components/{componentId}/update")
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Updates an already registered (but unpublished) component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response updateRegisteredComponent(
-            @PathParam("componentId") String componentId,
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        try {
-            ComponentRegistry br = this.getBaseRegistry();
-            ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
-            if (desc != null) {
-                if (desc.isPublic()) {
-                    return Response.status(Status.CONFLICT).entity("Cannot update already published component.")
-                            .build();
-                }
-                Number groupId;
-                RegistrySpace space;
-                List<Number> groupIds = br.getItemGroups(componentId);
-                if (groupIds == null || groupIds.isEmpty()) {
-                    groupId = null;
-                    space = RegistrySpace.PRIVATE;
-                } else {
-                    groupId = groupIds.get(0);
-                    space = RegistrySpace.GROUP;
-                }
-
-                this.updateDescription(desc, name, description, domainName, group);
-                ComponentRegistry cr = this.getRegistry(space, groupId);
-                return this.register(input, desc, new UpdateAction(), cr);
-            } else {
-                LOG.error("Update of nonexistent id (" + componentId
-                        + ") failed.");
-                return Response
-                        .serverError()
-                        .entity("Invalid id, cannot update nonexistent component")
-                        .build();
-            }
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Could not retrieve component {}", componentId);
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
-                    .build();
-        } catch (ItemNotFoundException ex2) {
-            return Response.status(Status.FORBIDDEN).entity(ex2.getMessage())
-                    .build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
-        }
-
-    }
-
-    private void updateDescription(BaseDescription desc, String name,
-            String description, String domainName, String group) {
-        desc.setName(name);
-        desc.setDescription(description);
-        desc.setDomainName(domainName);
-        desc.setGroupName(group);
-        desc.setRegistrationDate(new Date());
-    }
-
-    @DELETE
-    @Path("/components/{componentId}")
-    @ApiOperation(value = "Deletes the component with the specified ID from its registry")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response deleteRegisteredComponent(
-            @PathParam("componentId") String componentId) {
-        try {
-            ComponentRegistry registry = this.getBaseRegistry();
-            LOG.debug("Component with id {} set for deletion.", componentId);
-            registry.deleteMDComponent(componentId, false);
-        } catch (DeleteFailedException e) {
-            LOG.info("Component with id {} deletion failed. Reason: {}",
-                    componentId, e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Component with id " + componentId + " deletion failed.",
-                    e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (ItemNotFoundException e) {
-            LOG.warn("Component with id " + componentId + " is not found.");
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .build();
-        } catch (IOException e) {
-            LOG.error("Component with id " + componentId + " deletion failed.",
-                    e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Component with id {} deletion failed: {}", componentId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
-        }
-
-        LOG.info("Component with id: {} deleted.", componentId);
-        return Response.ok("Component with id" + componentId + " deleted.").build();
-    }
-
-    @DELETE
-    @Path("/profiles/{profileId}")
-    @ApiOperation(value = "Deletes the profile with the specified ID from its registry")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response deleteRegisteredProfile(
-            @PathParam("profileId") String profileId) {
-        try {
-            LOG.debug("Profile with id: {} set for deletion.", profileId);
-            this.getBaseRegistry().deleteMDProfile(profileId);
-        } catch (DeleteFailedException e) {
-            LOG.info("Profile with id: {} deletion failed: {}", profileId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.warn("Could not retrieve component", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (ItemNotFoundException e) {
-            LOG.warn("Profile with id " + profileId + " is not found.");
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .build();
-        } catch (IOException e) {
-            LOG.error("Profile with id: " + profileId + " deletion failed.", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Profile with id: {} deletion failed: {}", profileId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
-        }
-
-        LOG.info("Profile with id: {} deleted.", profileId);
-        return Response.ok().build();
-    }
-
-    @DELETE
-    @Path("/profiles/{profileId}/comments/{commentId}")
-    @ApiOperation(value = "Deletes a comment from a profile")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Comment is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Comment does not exist")
-    })
-    public Response deleteCommentFromProfile(
-            @PathParam("profileId") String profileId,
-            @PathParam("commentId") String commentId) {
-        try {
-            final ComponentRegistry registry = this.getBaseRegistry();
             try {
-                final Comment comment = registry.getSpecifiedCommentInProfile(profileId, commentId);
+                return componentRegistryFactory.getComponentRegistry(space, null, userCredentials, groupId);
+            } catch (UserUnauthorizedException uuEx) {
+                LOG.warn("Unauthorized access to {} registry by user {}", space,
+                        userCredentials);
+                LOG.debug("Details for unauthorized access", uuEx);
+                throw new WebApplicationException(uuEx, Status.FORBIDDEN);
+            }
+        }
+
+        /**
+         *
+         * @return Principal of current request
+         * @throws AuthenticationRequiredException If no user principal found
+         */
+        private Principal checkAndGetUserPrincipal()
+                throws AuthenticationRequiredException {
+            Principal principal = security.getUserPrincipal();
+            if (principal == null) {
+                throw new AuthenticationRequiredException("No user principal found.");
+            }
+            return principal;
+        }
+
+        private UserCredentials getUserCredentials(Principal userPrincipal) {
+            UserCredentials userCredentials = null;
+            if (userPrincipal != null) {
+                userCredentials = new UserCredentials(userPrincipal);
+            }
+            return userCredentials;
+        }
+
+        private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
+            //checking credentials 
+            RegistrySpace regSpace = RegistrySpace.valueOf(space.toUpperCase());
+            if (regSpace != RegistrySpace.PUBLISHED) {
+                // ensure that user is authenticated
+                this.getUserCredentials(this.checkAndGetUserPrincipal());
+            }
+            // initializing the registry
+            Number groupIdNumber = null;
+            if (groupId != null && !groupId.isEmpty()) {
+                groupIdNumber = Integer.parseInt(groupId);
+            }
+
+            return this.getRegistry(regSpace, groupIdNumber);
+        }
+
+        private boolean checkRegistrySpaceString(String registrySpace) {
+            return (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE) || registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED));
+        }
+
+        @GET
+        @Path("/components")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "A listing of the descriptions of components in the specified registry space")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Registry requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public registry is not owned by current user"),
+            @ApiResponse(code = 404, message = "Registry space does not exist")
+        })
+        public List<ComponentDescription> getRegisteredComponents(
+                @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(GROUPID_PARAM) String groupId,
+                @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace)
+                throws ComponentRegistryException, IOException {
+            long start = System.currentTimeMillis();
+
+            // deprecated parameter, processed here for backwards compatibility
+            if (!Strings.isNullOrEmpty(userSpace)) {
+                LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
+                if (Boolean.valueOf(userSpace)) {
+                    registrySpace = REGISTRY_SPACE_PRIVATE;
+                }
+            }
+
+            if (!checkRegistrySpaceString(registrySpace)) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
+                return new ArrayList<ComponentDescription>();
+            }
+
+            try {
+                ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
+                List<ComponentDescription> result = cr.getComponentDescriptions();
+                LOG.debug(
+                        "Releasing {} registered components into the world ({} millisecs)",
+                        result.size(), (System.currentTimeMillis() - start));
+
+                return result;
+            } catch (AuthenticationRequiredException e) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
+                return new ArrayList<ComponentDescription>();
+
+            } catch (UserUnauthorizedException e) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
+                return new ArrayList<ComponentDescription>();
+
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
+                return new ArrayList<ComponentDescription>();
+            }
+
+        }
+
+        @GET
+        @Path("/profiles")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "A listing of the descriptions of profiles in the specified registry space")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Registry requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public registry is not owned by current user"),
+            @ApiResponse(code = 404, message = "Registry space does not exist")
+        })
+        public List<ProfileDescription> getRegisteredProfiles(
+                @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
+                @QueryParam(GROUPID_PARAM) String groupId,
+                @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace
+        )
+                throws ComponentRegistryException, IOException {
+
+            long start = System.currentTimeMillis();
+
+            // deprecated parameter, processed here for backwards compatibility
+            if (!Strings.isNullOrEmpty(userSpace)) {
+                LOG.warn("Usage of deprecated {} parameter", USER_SPACE_PARAM);
+                if (Boolean.valueOf(userSpace)) {
+                    registrySpace = REGISTRY_SPACE_PRIVATE;
+                }
+            }
+
+            if (!checkRegistrySpaceString(registrySpace)) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
+                return new ArrayList<ProfileDescription>();
+            }
+            try {
+                ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
+                List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
+                LOG.debug(
+                        "Releasing {} registered components into the world ({} millisecs)",
+                        result.size(), (System.currentTimeMillis() - start));
+
+                return result;
+            } catch (AuthenticationRequiredException e) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
+                return new ArrayList<ProfileDescription>();
+
+            } catch (UserUnauthorizedException e) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
+                return new ArrayList<ProfileDescription>();
+
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
+                return new ArrayList<ProfileDescription>();
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "The component specification of a single component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getRegisteredComponent(
+                @PathParam("componentId") String componentId) throws IOException {
+            LOG.debug("Component with id: {} is requested.", componentId);
+            try {
+                ComponentSpec mdComponent = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
+                return Response.ok(mdComponent).build();
+            } catch (ItemNotFoundException e) {
+                return Response.status(Status.NOT_FOUND).build();
+            } catch (ComponentRegistryException e1) {
+                return Response.serverError().status(Status.CONFLICT).build();
+            } catch (AuthenticationRequiredException e) {
+                return Response.serverError().status(Status.UNAUTHORIZED).build();
+            } catch (UserUnauthorizedException e) {
+                return Response.serverError().status(Status.FORBIDDEN).build();
+            }
+        }
+
+        @GET
+        @Path("/profiles/{profileId}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "The component specification of a single profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getRegisteredProfile(
+                @PathParam("profileId") String profileId) throws IOException {
+            LOG.debug("Profile with id {} is requested.", profileId);
+            try {
+                ComponentSpec mdProfile = this.getBaseRegistry().getMDProfileAccessControled(profileId);
+                return Response.ok(mdProfile).build();
+            } catch (ItemNotFoundException e) {
+                return Response.status(Status.NOT_FOUND).build();
+            } catch (ComponentRegistryException e1) {
+                return Response.serverError().status(Status.CONFLICT).build();
+            } catch (UserUnauthorizedException e) {
+                return Response.serverError().status(Status.FORBIDDEN).build();
+            } catch (AuthenticationRequiredException e) {
+                return Response.serverError().status(Status.UNAUTHORIZED).build();
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}/{rawType}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+        @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single component (publicly accessible regardless of state!)")
+        @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getRegisteredComponentRawType(
+                @PathParam("componentId") final String componentId, @PathParam("rawType") String rawType) throws ComponentRegistryException {
+
+            LOG.debug("Component with id: {} and rawType: {} is requested.", componentId, rawType);
+            try {
+                final ComponentRegistry registry = this.getBaseRegistry();
+                ComponentDescription desc = registry.getComponentDescription(componentId);
+                StreamingOutput result = null;
+                String fileName = desc.getName() + "." + rawType;
+                if ("xml".equalsIgnoreCase(rawType)) {
+                    result = new StreamingOutput() {
+
+                        public void write(OutputStream output) throws IOException,
+                                WebApplicationException {
+                            try {
+                                try {
+                                    try {
+                                        registry.getMDComponentAsXml(componentId, output);
+                                    } catch (ItemNotFoundException e) {
+                                        LOG.warn("Could not retrieve component {}: {}",
+                                                componentId, e.getMessage());
+                                        LOG.debug("Details", e);
+                                        throw new WebApplicationException(Response
+                                                .serverError()
+                                                .status(Status.INTERNAL_SERVER_ERROR)
+                                                .build());
+                                    }
+                                } catch (ComponentRegistryException e) {
+                                    LOG.warn("Could not retrieve component {}: {}",
+                                            componentId, e.getMessage());
+                                    LOG.debug("Details", e);
+                                    throw new WebApplicationException(Response
+                                            .serverError()
+                                            .status(Status.INTERNAL_SERVER_ERROR)
+                                            .build());
+                                }
+
+                            } catch (UserUnauthorizedException e2) {
+                                LOG.error(e2.toString());
+                            }
+                        }
+                    };
+                    return createDownloadResponse(result, fileName);
+                } else if ("xsd".equalsIgnoreCase(rawType)) {
+                    result = new StreamingOutput() {
+
+                        public void write(OutputStream output) throws IOException,
+                                WebApplicationException {
+                            try {
+                                try {
+                                    try {
+                                        registry.getMDComponentAsXsd(componentId, output);
+                                    } catch (ItemNotFoundException e) {
+                                        LOG.warn("Could not retrieve component {}: {}",
+                                                componentId, e.getMessage());
+                                        LOG.debug("Details", e);
+                                        throw new WebApplicationException(Response
+                                                .serverError()
+                                                .status(Status.INTERNAL_SERVER_ERROR)
+                                                .build());
+                                    }
+                                } catch (ComponentRegistryException e) {
+                                    LOG.warn("Could not retrieve component {}: {}",
+                                            componentId, e.getMessage());
+                                    LOG.debug("Details", e);
+                                    throw new WebApplicationException(Response
+                                            .serverError()
+                                            .status(Status.INTERNAL_SERVER_ERROR)
+                                            .build());
+                                }
+                            } catch (UserUnauthorizedException e2) {
+                                LOG.error(e2.toString());
+                            }
+
+                        }
+                    };
+                    return createDownloadResponse(result, fileName);
+                } else {
+                    return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
+                }
+            } catch (ItemNotFoundException e3) {
+                return Response.status(Status.NOT_FOUND).build();
+            } catch (AuthenticationRequiredException e) {
+                return Response.serverError().status(Status.UNAUTHORIZED).build();
+            }
+        }
+
+        @GET
+        @Path("/components/usage/{componentId}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a descriptions listing of components that use the identified component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated")
+        })
+        public List<BaseDescription> getComponentUsage(
+                @PathParam("componentId") String componentId) throws ComponentRegistryException, IOException {
+
+            final long start = System.currentTimeMillis();
+            try {
+                ComponentRegistry registry = this.getBaseRegistry();
+                List<ComponentDescription> components = registry.getUsageInComponents(componentId);
+                List<ProfileDescription> profiles = registry.getUsageInProfiles(componentId);
+
+                LOG.debug(
+                        "Found {} components and {} profiles that use component {} ({} millisecs)",
+                        components.size(), profiles.size(), componentId,
+                        (System.currentTimeMillis() - start));
+
+                List<BaseDescription> usages = new ArrayList<BaseDescription>(components.size() + profiles.size());
+                usages.addAll(components);
+                usages.addAll(profiles);
+
+                return usages;
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile usage {}", componentId);
+                LOG.debug("Details", e);
+                return new ArrayList<BaseDescription>();
+            } catch (AuthenticationRequiredException e1) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode());
+                return new ArrayList<BaseDescription>();
+            }
+        }
+
+        @GET
+        @Path("/profiles/{profileId}/comments")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a listing of all comments that have been made on the identified profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public List<Comment> getCommentsFromProfile(
+                @PathParam("profileId") String profileId)
+                throws IOException {
+            long start = System.currentTimeMillis();
+            try {
+                List<Comment> comments = this.getBaseRegistry().getCommentsInProfile(profileId);
+                LOG.debug(
+                        "Releasing {} registered comments in profile into the world ({} millisecs)",
+                        comments.size(), (System.currentTimeMillis() - start));
+                return comments;
+            } catch (ComponentRegistryException e) {
+                response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+                return new ArrayList<Comment>();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
+                return new ArrayList<Comment>();
+            } catch (UserUnauthorizedException e) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e.getMessage());
+                return new ArrayList<Comment>();
+            } catch (AuthenticationRequiredException e1) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
+                return new ArrayList<Comment>();
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}/comments")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a listing of all comments that have been made on the identified component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public List<Comment> getCommentsFromComponent(
+                @PathParam("componentId") String componentId)
+                throws IOException {
+            long start = System.currentTimeMillis();
+            try {
+                List<Comment> comments = this.getBaseRegistry().getCommentsInComponent(componentId);
+                LOG.debug(
+                        "Releasing {} registered comments in Component into the world ({} millisecs)",
+                        comments.size(), (System.currentTimeMillis() - start));
+                return comments;
+            } catch (ComponentRegistryException e) {
+                response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+                return new ArrayList<Comment>();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
+                return new ArrayList<Comment>();
+            } catch (UserUnauthorizedException e1) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
+                return new ArrayList<Comment>();
+            } catch (AuthenticationRequiredException e1) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
+                return new ArrayList<Comment>();
+            }
+        }
+
+        @GET
+        @Path("/profiles/{profileId}/comments/{commentId}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a single comment on a profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Component requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public component is not owned by current user"),
+            @ApiResponse(code = 404, message = "Component or comment does not exist")
+        })
+        public Comment getSpecifiedCommentFromProfile(
+                @PathParam("profileId") String profileId,
+                @PathParam("commentId") String commentId)
+                throws IOException {
+
+            LOG.debug("Comments of profile with id {} are requested.", commentId);
+            try {
+
+                return this.getBaseRegistry().getSpecifiedCommentInProfile(profileId, commentId);
+            } catch (ComponentRegistryException e) {
+                response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+                return new Comment();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
+                return new Comment();
+            } catch (UserUnauthorizedException e1) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
+                return new Comment();
+            } catch (AuthenticationRequiredException e1) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
+                return new Comment();
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}/comments/{commentId}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a single comment on a component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Component requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public component is not owned by current user"),
+            @ApiResponse(code = 404, message = "Component or comment does not exist")
+        })
+        public Comment getSpecifiedCommentFromComponent(
+                @PathParam("componentId") String componentId,
+                @PathParam("commentId") String commentId)
+                throws IOException {
+            LOG.debug("Comments of component with id {} are requested.", commentId);
+            try {
+                Comment result = this.getBaseRegistry().getSpecifiedCommentInComponent(componentId, commentId);
+                return result;
+            } catch (ComponentRegistryException e) {
+                response.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
+                return new Comment();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
+                return new Comment();
+            } catch (UserUnauthorizedException e1) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
+                return new Comment();
+            } catch (AuthenticationRequiredException e1) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
+                return new Comment();
+            }
+        }
+
+        /**
+         *
+         * Purely helper method for my front-end (FLEX) which only does post/get
+         * requests. The query param is checked and the "proper" method is
+         * called.
+         *
+         * @param profileId
+         * @param method
+         * @return
+         */
+        // TODO: test via POSTMAN
+        @POST
+        @Path("/profiles/{profileId}")
+        @ApiOperation(value = "Allows for deletion of single profile (workaround for Flex which does not support the DELETE method)")
+        public Response manipulateRegisteredProfile(
+                @PathParam("profileId") String profileId,
+                @FormParam("method") String method) {
+            if ("delete".equalsIgnoreCase(method)) {
+                return this.deleteRegisteredProfile(profileId);
+            } else {
+                return Response.ok().build();
+            }
+        }
+
+        @POST
+        @Path("/profiles/{profileId}/comments/{commentId}")
+        @ApiOperation(value = "Allows for deletion of single profile comment (workaround for Flex which does not support the DELETE method)")
+        public Response manipulateCommentFromProfile(
+                @PathParam("profileId") String profileId,
+                @PathParam("commentId") String commentId,
+                @FormParam("method") String method) {
+            if ("delete".equalsIgnoreCase(method)) {
+                return this.deleteCommentFromProfile(profileId, commentId);
+            } else {
+                return Response.ok().build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/comments/{commentId}")
+        @ApiOperation(value = "Allows for deletion of single component comment (workaround for Flex which does not support the DELETE method)")
+        public Response manipulateCommentFromComponent(
+                @PathParam("componentId") String componentId,
+                @PathParam("commentId") String commentId,
+                @FormParam("method") String method) {
+            if ("delete".equalsIgnoreCase(method)) {
+                return this.deleteCommentFromComponent(componentId, commentId);
+            } else {
+                return Response.ok().build();
+            }
+        }
+
+        @POST
+        @Path("/profiles/{profileId}/publish")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Changes the state of the specified profile to published")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response publishRegisteredProfile(
+                @PathParam("profileId") String profileId,
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @FormDataParam(NAME_FORM_FIELD) String name,
+                @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+                @FormDataParam(GROUP_FORM_FIELD) String group,
+                @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+
+            try {
+                Principal principal = checkAndGetUserPrincipal();
+                ComponentRegistry registry = this.getBaseRegistry();
+                registry.setRegistrySpace(RegistrySpace.PUBLISHED);
+                ProfileDescription desc = registry.getProfileDescriptionAccessControlled(profileId);
+                if (desc != null) {
+                    if (desc.isPublic()) {
+                        return Response.status(Status.CONFLICT).entity("Cannot publish already published profile.")
+                                .build();
+                    }
+                    desc.setPublic(true);
+                    this.updateDescription(desc, name, description, domainName, group);
+                    return this.register(input, desc, new PublishAction(principal), registry);
+                } else {
+                    LOG.error("Update of nonexistent profile {} failed.", profileId);
+                    return Response
+                            .serverError()
+                            .entity("Invalid id, cannot update nonexistent profile")
+                            .build();
+                }
+
+            } catch (AuthenticationRequiredException e) {
+                return Response.serverError().status(Status.UNAUTHORIZED)
+                        .build();
+            } catch (ItemNotFoundException e1) {
+                return Response.status(Status.NOT_FOUND).entity(e1.getMessage()).build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/profiles/{profileId}/update")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates an already registered (but unpublished) profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateRegisteredProfile(
+                @PathParam("profileId") String profileId,
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @FormDataParam(NAME_FORM_FIELD) String name,
+                @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+                @FormDataParam(GROUP_FORM_FIELD) String group,
+                @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+            try {
+                ComponentRegistry br = this.getBaseRegistry();
+                ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                if (desc != null) {
+                    if (desc.isPublic()) {
+                        return Response.status(Status.CONFLICT).entity("Cannot update already published profile.")
+                                .build();
+
+                    }
+                    Number groupId;
+                    RegistrySpace space;
+                    List<Number> groupIds = br.getItemGroups(profileId);
+                    if (groupIds == null || groupIds.isEmpty()) {
+                        groupId = null;
+                        space = RegistrySpace.PRIVATE;
+                    } else {
+                        groupId = groupIds.get(0);
+                        space = RegistrySpace.GROUP;
+                    }
+
+                    updateDescription(desc, name, description, domainName, group);
+                    ComponentRegistry cr = this.getRegistry(space, groupId);
+                    return register(input, desc, new UpdateAction(), cr);
+                } else {
+                    LOG.error("Update of nonexistent id (" + profileId
+                            + ") failed.");
+                    return Response
+                            .serverError()
+                            .entity("Invalid id, cannot update nonexistent profile")
+                            .build();
+                }
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+        }
+
+        /**
+         *
+         * Purely helper method for my front-end (FLEX) which van only do
+         * post/get requests. The query param is checked and the "proper" method
+         * is called.
+         *
+         * @param componentId
+         * @param method
+         * @return
+         */
+        @POST
+        @Path("/components/{componentId}")
+        @ApiOperation(value = "Allows for deletion of single component (workaround for Flex which does not support the DELETE method)")
+        public Response manipulateRegisteredComponent(
+                @PathParam("componentId") String componentId,
+                @FormParam("method") String method) {
+            if ("delete".equalsIgnoreCase(method)) {
+                return this.deleteRegisteredComponent(componentId);
+            } else {
+                return Response.ok("Nothing to do, not 'delete' method").build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/publish")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Changes the state of the specified component to published")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response publishRegisteredComponent(
+                @PathParam("componentId") String componentId,
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @FormDataParam(NAME_FORM_FIELD) String name,
+                @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+                @FormDataParam(GROUP_FORM_FIELD) String group,
+                @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+
+            try {
+                Principal principal = checkAndGetUserPrincipal();
+                ComponentRegistry registry = this.getBaseRegistry();
+                ComponentDescription desc = registry.getComponentDescriptionAccessControlled(componentId);
+                if (desc != null) {
+                    if (desc.isPublic()) {
+                        return Response.status(Status.CONFLICT).entity("Cannot publish already published omponent.")
+                                .build();
+                    }
+                    desc.setPublic(true);
+                    this.updateDescription(desc, name, description, domainName, group);
+                    return this.register(input, desc, new PublishAction(principal), registry);
+                } else {
+                    LOG.error("Update of nonexistent id (" + componentId
+                            + ") failed.");
+                    return Response
+                            .serverError()
+                            .entity("Invalid id, cannot update nonexistent profile")
+                            .build();
+                }
+            } catch (AuthenticationRequiredException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.UNAUTHORIZED)
+                        .build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (ItemNotFoundException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.NOT_FOUND)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/update")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates an already registered (but unpublished) component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateRegisteredComponent(
+                @PathParam("componentId") String componentId,
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @FormDataParam(NAME_FORM_FIELD) String name,
+                @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+                @FormDataParam(GROUP_FORM_FIELD) String group,
+                @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+            try {
+                ComponentRegistry br = this.getBaseRegistry();
+                ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                if (desc != null) {
+                    if (desc.isPublic()) {
+                        return Response.status(Status.CONFLICT).entity("Cannot update already published component.")
+                                .build();
+                    }
+                    Number groupId;
+                    RegistrySpace space;
+                    List<Number> groupIds = br.getItemGroups(componentId);
+                    if (groupIds == null || groupIds.isEmpty()) {
+                        groupId = null;
+                        space = RegistrySpace.PRIVATE;
+                    } else {
+                        groupId = groupIds.get(0);
+                        space = RegistrySpace.GROUP;
+                    }
+
+                    this.updateDescription(desc, name, description, domainName, group);
+                    ComponentRegistry cr = this.getRegistry(space, groupId);
+                    return this.register(input, desc, new UpdateAction(), cr);
+                } else {
+                    LOG.error("Update of nonexistent id (" + componentId
+                            + ") failed.");
+                    return Response
+                            .serverError()
+                            .entity("Invalid id, cannot update nonexistent component")
+                            .build();
+                }
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.FORBIDDEN).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+        }
+
+        private void updateDescription(BaseDescription desc, String name,
+                String description, String domainName, String group) {
+            desc.setName(name);
+            desc.setDescription(description);
+            desc.setDomainName(domainName);
+            desc.setGroupName(group);
+            desc.setRegistrationDate(new Date());
+        }
+
+        @DELETE
+        @Path("/components/{componentId}")
+        @ApiOperation(value = "Deletes the component with the specified ID from its registry")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response deleteRegisteredComponent(
+                @PathParam("componentId") String componentId) {
+            try {
+                ComponentRegistry registry = this.getBaseRegistry();
+                LOG.debug("Component with id {} set for deletion.", componentId);
+                registry.deleteMDComponent(componentId, false);
+            } catch (DeleteFailedException e) {
+                LOG.info("Component with id {} deletion failed. Reason: {}",
+                        componentId, e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Component with id " + componentId + " deletion failed.",
+                        e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (ItemNotFoundException e) {
+                LOG.warn("Component with id " + componentId + " is not found.");
+                return Response.serverError().status(Status.NOT_FOUND)
+                        .build();
+            } catch (IOException e) {
+                LOG.error("Component with id " + componentId + " deletion failed.",
+                        e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException e) {
+                LOG.info("Component with id {} deletion failed: {}", componentId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+            LOG.info("Component with id: {} deleted.", componentId);
+            return Response.ok("Component with id" + componentId + " deleted.").build();
+        }
+
+        @DELETE
+        @Path("/profiles/{profileId}")
+        @ApiOperation(value = "Deletes the profile with the specified ID from its registry")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response deleteRegisteredProfile(
+                @PathParam("profileId") String profileId) {
+            try {
+                LOG.debug("Profile with id: {} set for deletion.", profileId);
+                this.getBaseRegistry().deleteMDProfile(profileId);
+            } catch (DeleteFailedException e) {
+                LOG.info("Profile with id: {} deletion failed: {}", profileId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (ItemNotFoundException e) {
+                LOG.warn("Profile with id " + profileId + " is not found.");
+                return Response.serverError().status(Status.NOT_FOUND)
+                        .build();
+            } catch (IOException e) {
+                LOG.error("Profile with id: " + profileId + " deletion failed.", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException e) {
+                LOG.info("Profile with id: {} deletion failed: {}", profileId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+            LOG.info("Profile with id: {} deleted.", profileId);
+            return Response.ok().build();
+        }
+
+        @DELETE
+        @Path("/profiles/{profileId}/comments/{commentId}")
+        @ApiOperation(value = "Deletes a comment from a profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Comment is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Comment does not exist")
+        })
+        public Response deleteCommentFromProfile(
+                @PathParam("profileId") String profileId,
+                @PathParam("commentId") String commentId) {
+            try {
+                final ComponentRegistry registry = this.getBaseRegistry();
+                try {
+                    final Comment comment = registry.getSpecifiedCommentInProfile(profileId, commentId);
+                    if (comment != null
+                            && profileId.equals(comment.getComponentId())) {
+                        LOG.debug("Comment with id: {} set for deletion.", commentId);
+                        registry.deleteComment(commentId);
+                    } else {
+                        throw new ComponentRegistryException(
+                                "Comment not found for specified profile");
+                    }
+                } catch (ItemNotFoundException e1) {
+                    LOG.info("Comment with id: {} deletion failed: {}", commentId,
+                            e1.getMessage());
+                    LOG.debug("Deletion failure details:", e1);
+                    return Response.serverError().status(Status.NOT_FOUND)
+                            .entity("" + e1.getMessage()).build();
+                }
+
+            } catch (DeleteFailedException e) {
+                LOG.info("Comment with id: {} deletion failed: {}", commentId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (ComponentRegistryException e) {
+                LOG.info("Could not find comment " + commentId + " for " + profileId);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (IOException e) {
+                LOG.error("Comment with id: " + commentId + " deletion failed.", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException e) {
+                LOG.info("Comment with id: {} deletion failed: {}", commentId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+            LOG.info("Comment with id: {} deleted.", commentId);
+            return Response.ok("Comment with id " + commentId + " deleted.").build();
+        }
+
+        @DELETE
+        @Path("/components/{componentId}/comments/{commentId}")
+        @ApiOperation(value = "Deletes a comment from a component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Comment is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Comment does not exist")
+        })
+        public Response deleteCommentFromComponent(
+                @PathParam("componentId") String componentId,
+                @PathParam("commentId") String commentId) {
+            try {
+                final ComponentRegistry registry = this.getBaseRegistry();
+                final Comment comment = registry.getSpecifiedCommentInComponent(componentId, commentId);
                 if (comment != null
-                        && profileId.equals(comment.getComponentId())) {
+                        && componentId.equals(comment.getComponentId())) {
                     LOG.debug("Comment with id: {} set for deletion.", commentId);
                     registry.deleteComment(commentId);
                 } else {
                     throw new ComponentRegistryException(
-                            "Comment not found for specified profile");
+                            "Comment not found for specified component");
                 }
-            } catch (ItemNotFoundException e1) {
+            } catch (ItemNotFoundException e) {
                 LOG.info("Comment with id: {} deletion failed: {}", commentId,
-                        e1.getMessage());
-                LOG.debug("Deletion failure details:", e1);
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.NOT_FOUND)
+                        .entity("" + e.getMessage()).build();
+            } catch (DeleteFailedException e) {
+                LOG.info("Comment with id: {} deletion failed: {}", commentId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (ComponentRegistryException e) {
+                LOG.info("Could not retrieve component " + componentId + " for the component " + componentId);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (IOException e) {
+                LOG.error("Comment with id: " + commentId + " deletion failed.", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException e) {
+                LOG.info("Comment with id: {} deletion failed: {}", commentId,
+                        e.getMessage());
+                LOG.debug("Deletion failure details:", e);
+                return Response.serverError().status(Status.FORBIDDEN)
+                        .entity("" + e.getMessage()).build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+            LOG.info("Comment with id: {} deleted.", commentId);
+            return Response.ok("Comment with id " + commentId + " deleted.").build();
+        }
+
+        @GET
+        @Path("/profiles/{profileId}/{rawType}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
+        @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single profile (publicly accessible regardless of state!)")
+        @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getRegisteredProfileRawType(
+                @PathParam("profileId") final String profileId,
+                @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
+
+            LOG.debug("Profile with id {} and rawType {} is requested.", profileId,
+                    rawType);
+            try {
+                final ComponentRegistry registry = this.getBaseRegistry();
+
+                final ProfileDescription desc = registry.getProfileDescription(profileId);
+                if (desc == null) {
+                    return Response.status(Status.NOT_FOUND).build();
+                }
+
+                StreamingOutput result = null;
+                String fileName = desc.getName() + "." + rawType;
+                if ("xml".equalsIgnoreCase(rawType)) {
+                    result = new StreamingOutput() {
+
+                        public void write(OutputStream output) throws IOException,
+                                WebApplicationException {
+                            try {
+                                registry.getMDProfileAsXml(profileId, output);
+                            } catch (Exception e) {
+                                LOG.warn("Could not retrieve component {}: {}",
+                                        profileId, e.getMessage());
+                                LOG.debug("Details", e);
+                                throw new WebApplicationException(Response
+                                        .serverError()
+                                        .status(Status.INTERNAL_SERVER_ERROR)
+                                        .build());
+                            }
+                        }
+                    };
+                } else if ("xsd".equalsIgnoreCase(rawType)) {
+                    result = new StreamingOutput() {
+
+                        public void write(OutputStream output) throws IOException,
+                                WebApplicationException {
+                            try {
+                                registry.getMDProfileAsXsd(profileId, output);
+                            } catch (Exception e) {
+                                LOG.warn("Could not retrieve component {}: {}",
+                                        profileId, e.getMessage());
+                                LOG.debug("Details", e);
+                                throw new WebApplicationException(Response
+                                        .serverError()
+                                        .status(Status.INTERNAL_SERVER_ERROR)
+                                        .build());
+                            }
+                        }
+                    };
+                } else {
+                    return Response.status(Status.NOT_FOUND).entity("Unsupported raw type " + rawType).build();
+                }
+                return createDownloadResponse(result, fileName);
+            } catch (ItemNotFoundException e) {
+                return Response.serverError().status(Status.NOT_FOUND)
+                        .entity("" + e.getMessage()).build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+
+        }
+
+        private Response createDownloadResponse(StreamingOutput result,
+                String fileName) {
+            // Making response so it triggers browsers native save as dialog.
+            Response response = Response
+                    .ok()
+                    .type("application/x-download")
+                    .header("Content-Disposition",
+                            "attachment; filename=\"" + fileName + "\"")
+                    .entity(result).build();
+            return response;
+
+        }
+
+        @POST
+        @Path("/profiles")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Registers a profile specification (data content) with the associated metadata (form content) in the user's private space")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Current user has no access")
+        })
+        public Response registerProfile(
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @FormDataParam(NAME_FORM_FIELD) String name,
+                @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+                @FormDataParam(GROUP_FORM_FIELD) String group,
+                @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+            try {
+                Principal principal = checkAndGetUserPrincipal();
+                UserCredentials userCredentials = getUserCredentials(principal);
+                ProfileDescription desc = this.createNewProfileDescription();
+                desc.setCreatorName(userCredentials.getDisplayName());
+                desc.setUserId(userCredentials.getPrincipalName()); // Hash used to
+                // be created
+                // here, now Id
+                // is
+                // constructed
+                // by impl
+                desc.setName(name);
+                desc.setDescription(description);
+                desc.setGroupName(group);
+                desc.setDomainName(domainName);
+                desc.setPublic(false);
+                LOG.debug("Trying to register Profile: {}", desc);
+                ComponentRegistry cr = this.getRegistry(RegistrySpace.PRIVATE, null);
+                return this.register(input, desc, new NewAction(), cr);
+            } catch (AuthenticationRequiredException e) {
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.UNAUTHORIZED)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/components")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Registers a component specification (data content) with the associated metadata (form content) in the user's private space")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Current user has no access")
+        })
+        public Response registerComponent(
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @FormDataParam(NAME_FORM_FIELD) String name,
+                @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
+                @FormDataParam(GROUP_FORM_FIELD) String group,
+                @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
+            try {
+                Principal principal = checkAndGetUserPrincipal();
+                UserCredentials userCredentials = getUserCredentials(principal);
+                ComponentDescription desc = this.createNewComponentDescription();
+                desc.setCreatorName(userCredentials.getDisplayName());
+                desc.setUserId(userCredentials.getPrincipalName()); // Hash used to
+                // be created
+                // here, now Id
+                // is
+                // constructed
+                // by impl
+                desc.setName(name);
+                desc.setDescription(description);
+                desc.setGroupName(group);
+                desc.setDomainName(domainName);
+                desc.setPublic(false);
+                LOG.debug("Trying to register Component: {}", desc);
+                ComponentRegistry cr = this.getRegistry(RegistrySpace.PRIVATE, null);
+                return this.register(input, desc, new NewAction(), cr);
+            } catch (AuthenticationRequiredException e) {
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.UNAUTHORIZED)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/comments")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Publishes a comment on the specified component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response registerCommentInComponent(
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @PathParam("componentId") String componentId) throws ComponentRegistryException {
+            try {
+                ComponentRegistry registry = this.getBaseRegistry();
+                ComponentDescription description = registry.getComponentDescriptionAccessControlled(componentId);
+
+                LOG.debug("Trying to register comment to {}", componentId);
+
+                return this.registerComment(input, description, registry);
+            } catch (AuthenticationRequiredException e) {
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.UNAUTHORIZED)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN)
+                        .build();
+            } catch (ItemNotFoundException e) {
+                return Response.serverError().status(Status.NOT_FOUND)
+                        .entity("" + e.getMessage()).build();
+            }
+        }
+
+        @POST
+        @Path("/profiles/{profileId}/comments")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Publishes a comment on the specified profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response registerCommentInProfile(
+                @FormDataParam(DATA_FORM_FIELD) InputStream input,
+                @PathParam("profileId") String profileId)
+                throws ComponentRegistryException {
+            try {
+                ComponentRegistry registry = this.getBaseRegistry();
+                ProfileDescription description = registry
+                        .getProfileDescriptionAccessControlled(profileId);
+
+                LOG.debug("Trying to register comment to {}", profileId);
+
+                return this.registerComment(input, description, registry);
+            } catch (AuthenticationRequiredException e) {
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.UNAUTHORIZED)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN)
+                        .build();
+            } catch (ItemNotFoundException e1) {
                 return Response.serverError().status(Status.NOT_FOUND)
                         .entity("" + e1.getMessage()).build();
             }
-
-        } catch (DeleteFailedException e) {
-            LOG.info("Comment with id: {} deletion failed: {}", commentId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.info("Could not find comment " + commentId + " for " + profileId);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (IOException e) {
-            LOG.error("Comment with id: " + commentId + " deletion failed.", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Comment with id: {} deletion failed: {}", commentId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
         }
 
-        LOG.info("Comment with id: {} deleted.", commentId);
-        return Response.ok("Comment with id " + commentId + " deleted.").build();
-    }
-
-    @DELETE
-    @Path("/components/{componentId}/comments/{commentId}")
-    @ApiOperation(value = "Deletes a comment from a component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Comment is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Comment does not exist")
-    })
-    public Response deleteCommentFromComponent(
-            @PathParam("componentId") String componentId,
-            @PathParam("commentId") String commentId) {
-        try {
-            final ComponentRegistry registry = this.getBaseRegistry();
-            final Comment comment = registry.getSpecifiedCommentInComponent(componentId, commentId);
-            if (comment != null
-                    && componentId.equals(comment.getComponentId())) {
-                LOG.debug("Comment with id: {} set for deletion.", commentId);
-                registry.deleteComment(commentId);
-            } else {
-                throw new ComponentRegistryException(
-                        "Comment not found for specified component");
+        @GET
+        @Path("/pingSession")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Keeps the session alive")
+        public Response pingSession() {
+            boolean stillActive = false;
+            Principal userPrincipal = security.getUserPrincipal();
+            if (LOG.isInfoEnabled()) {
+                LOG.debug("ping by <{}>",
+                        (userPrincipal == null ? "unauthorized user"
+                                : userPrincipal.getName()));
             }
-        } catch (ItemNotFoundException e) {
-            LOG.info("Comment with id: {} deletion failed: {}", commentId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .entity("" + e.getMessage()).build();
-        } catch (DeleteFailedException e) {
-            LOG.info("Comment with id: {} deletion failed: {}", commentId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (ComponentRegistryException e) {
-            LOG.info("Could not retrieve component " + componentId + " for the component " + componentId);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (IOException e) {
-            LOG.error("Comment with id: " + commentId + " deletion failed.", e);
-            return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
-                    .build();
-        } catch (UserUnauthorizedException e) {
-            LOG.info("Comment with id: {} deletion failed: {}", commentId,
-                    e.getMessage());
-            LOG.debug("Deletion failure details:", e);
-            return Response.serverError().status(Status.FORBIDDEN)
-                    .entity("" + e.getMessage()).build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
+            if (request != null) {
+                if (userPrincipal != null
+                        && !ComponentRegistryFactory.ANONYMOUS_USER
+                        .equals(userPrincipal.getName())) {
+                    stillActive = !((HttpServletRequest) request).getSession()
+                            .isNew();
+                }
+            }
+            return Response
+                    .ok()
+                    .entity(String.format("<session stillActive=\"%s\"/>",
+                            stillActive)).build();
         }
 
-        LOG.info("Comment with id: {} deleted.", commentId);
-        return Response.ok("Comment with id " + commentId + " deleted.").build();
-    }
+        private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
+            try {
 
-    @GET
-    @Path("/profiles/{profileId}/{rawType}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
-    @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single profile (publicly accessible regardless of state!)")
-    @ApiResponses(value = {
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response getRegisteredProfileRawType(
-            @PathParam("profileId") final String profileId,
-            @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
+                DescriptionValidator descriptionValidator = new DescriptionValidator(
+                        desc);
+                MDValidator validator = new MDValidator(input, desc, registry, marshaller);
+                RegisterResponse response = new RegisterResponse();
+                //obsolete. Make it setstatus
+                response.setIsPrivate(!desc.isPublic());
+                this.validate(response, descriptionValidator, validator);
+                if (response.getErrors().isEmpty()) {
 
-        LOG.debug("Profile with id {} and rawType {} is requested.", profileId,
-                rawType);
-        try {
-            final ComponentRegistry registry = this.getBaseRegistry();
+                    ComponentSpec spec = validator.getComponentSpec();
 
-            final ProfileDescription desc = registry.getProfileDescription(profileId);
-            if (desc == null) {
-                return Response.status(Status.NOT_FOUND).build();
-            }
+                    try {
+                        checkForRecursion(validator, registry, desc);
 
-            StreamingOutput result = null;
-            String fileName = desc.getName() + "." + rawType;
-            if ("xml".equalsIgnoreCase(rawType)) {
-                result = new StreamingOutput() {
-
-                    public void write(OutputStream output) throws IOException,
-                            WebApplicationException {
-                        try {
-                            registry.getMDProfileAsXml(profileId, output);
-                        } catch (Exception e) {
-                            LOG.warn("Could not retrieve component {}: {}",
-                                    profileId, e.getMessage());
-                            LOG.debug("Details", e);
-                            throw new WebApplicationException(Response
-                                    .serverError()
-                                    .status(Status.INTERNAL_SERVER_ERROR)
-                                    .build());
+                        // Add profile
+                        int returnCode = action.execute(desc, spec, response,
+                                registry);
+                        if (returnCode == 0) {
+                            response.setRegistered(true);
+                            response.setDescription(desc);
+                        } else {
+                            response.setRegistered(false);
+                            response.addError("Unable to register at this moment. Internal server error.");
                         }
-                    }
-                };
-            } else if ("xsd".equalsIgnoreCase(rawType)) {
-                result = new StreamingOutput() {
-
-                    public void write(OutputStream output) throws IOException,
-                            WebApplicationException {
-                        try {
-                            registry.getMDProfileAsXsd(profileId, output);
-                        } catch (Exception e) {
-                            LOG.warn("Could not retrieve component {}: {}",
-                                    profileId, e.getMessage());
-                            LOG.debug("Details", e);
-                            throw new WebApplicationException(Response
-                                    .serverError()
-                                    .status(Status.INTERNAL_SERVER_ERROR)
-                                    .build());
-                        }
-                    }
-                };
-            } else {
-                return Response.status(Status.NOT_FOUND).entity("Unsupported raw type " + rawType).build();
-            }
-            return createDownloadResponse(result, fileName);
-        } catch (ItemNotFoundException e) {
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .entity("" + e.getMessage()).build();
-        } catch (AuthenticationRequiredException e1) {
-            return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
-                    .build();
-        }
-
-    }
-
-    private Response createDownloadResponse(StreamingOutput result,
-            String fileName) {
-        // Making response so it triggers browsers native save as dialog.
-        Response response = Response
-                .ok()
-                .type("application/x-download")
-                .header("Content-Disposition",
-                        "attachment; filename=\"" + fileName + "\"")
-                .entity(result).build();
-        return response;
-
-    }
-
-    @POST
-    @Path("/profiles")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Registers a profile specification (data content) with the associated metadata (form content) in the user's private space")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Current user has no access")
-    })
-    public Response registerProfile(
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        try {
-            Principal principal = checkAndGetUserPrincipal();
-            UserCredentials userCredentials = getUserCredentials(principal);
-            ProfileDescription desc = this.createNewProfileDescription();
-            desc.setCreatorName(userCredentials.getDisplayName());
-            desc.setUserId(userCredentials.getPrincipalName()); // Hash used to
-            // be created
-            // here, now Id
-            // is
-            // constructed
-            // by impl
-            desc.setName(name);
-            desc.setDescription(description);
-            desc.setGroupName(group);
-            desc.setDomainName(domainName);
-            desc.setPublic(false);
-            LOG.debug("Trying to register Profile: {}", desc);
-            ComponentRegistry cr = this.getRegistry(RegistrySpace.PRIVATE, null);
-            return this.register(input, desc, new NewAction(), cr);
-        } catch (AuthenticationRequiredException e) {
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.UNAUTHORIZED)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
-                    .build();
-        }
-    }
-
-    @POST
-    @Path("/components")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Registers a component specification (data content) with the associated metadata (form content) in the user's private space")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Current user has no access")
-    })
-    public Response registerComponent(
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @FormDataParam(NAME_FORM_FIELD) String name,
-            @FormDataParam(DESCRIPTION_FORM_FIELD) String description,
-            @FormDataParam(GROUP_FORM_FIELD) String group,
-            @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
-        try {
-            Principal principal = checkAndGetUserPrincipal();
-            UserCredentials userCredentials = getUserCredentials(principal);
-            ComponentDescription desc = this.createNewComponentDescription();
-            desc.setCreatorName(userCredentials.getDisplayName());
-            desc.setUserId(userCredentials.getPrincipalName()); // Hash used to
-            // be created
-            // here, now Id
-            // is
-            // constructed
-            // by impl
-            desc.setName(name);
-            desc.setDescription(description);
-            desc.setGroupName(group);
-            desc.setDomainName(domainName);
-            desc.setPublic(false);
-            LOG.debug("Trying to register Component: {}", desc);
-            ComponentRegistry cr = this.getRegistry(RegistrySpace.PRIVATE, null);
-            return this.register(input, desc, new NewAction(), cr);
-        } catch (AuthenticationRequiredException e) {
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.UNAUTHORIZED)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
-                    .build();
-        }
-    }
-
-    @POST
-    @Path("/components/{componentId}/comments")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Publishes a comment on the specified component")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response registerCommentInComponent(
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @PathParam("componentId") String componentId) throws ComponentRegistryException {
-        try {
-            ComponentRegistry registry = this.getBaseRegistry();
-            ComponentDescription description = registry.getComponentDescriptionAccessControlled(componentId);
-
-            LOG.debug("Trying to register comment to {}", componentId);
-
-            return this.registerComment(input, description, registry);
-        } catch (AuthenticationRequiredException e) {
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.UNAUTHORIZED)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN)
-                    .build();
-        } catch (ItemNotFoundException e) {
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .entity("" + e.getMessage()).build();
-        }
-    }
-
-    @POST
-    @Path("/profiles/{profileId}/comments")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @Consumes("multipart/form-data")
-    @ApiOperation(value = "Publishes a comment on the specified profile")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "User is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public Response registerCommentInProfile(
-            @FormDataParam(DATA_FORM_FIELD) InputStream input,
-            @PathParam("profileId") String profileId)
-            throws ComponentRegistryException {
-        try {
-            ComponentRegistry registry = this.getBaseRegistry();
-            ProfileDescription description = registry
-                    .getProfileDescriptionAccessControlled(profileId);
-
-            LOG.debug("Trying to register comment to {}", profileId);
-
-            return this.registerComment(input, description, registry);
-        } catch (AuthenticationRequiredException e) {
-            LOG.debug("Details", e);
-            return Response.serverError().status(Status.UNAUTHORIZED)
-                    .build();
-        } catch (UserUnauthorizedException ex) {
-            return Response.status(Status.FORBIDDEN)
-                    .build();
-        } catch (ItemNotFoundException e1) {
-            return Response.serverError().status(Status.NOT_FOUND)
-                    .entity("" + e1.getMessage()).build();
-        }
-    }
-
-    @GET
-    @Path("/pingSession")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Keeps the session alive")
-    public Response pingSession() {
-        boolean stillActive = false;
-        Principal userPrincipal = security.getUserPrincipal();
-        if (LOG.isInfoEnabled()) {
-            LOG.debug("ping by <{}>",
-                    (userPrincipal == null ? "unauthorized user"
-                            : userPrincipal.getName()));
-        }
-        if (request != null) {
-            if (userPrincipal != null
-                    && !ComponentRegistryFactory.ANONYMOUS_USER
-                    .equals(userPrincipal.getName())) {
-                stillActive = !((HttpServletRequest) request).getSession()
-                        .isNew();
-            }
-        }
-        return Response
-                .ok()
-                .entity(String.format("<session stillActive=\"%s\"/>",
-                        stillActive)).build();
-    }
-
-    private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
-        try {
-
-            DescriptionValidator descriptionValidator = new DescriptionValidator(
-                    desc);
-            MDValidator validator = new MDValidator(input, desc, registry, marshaller);
-            RegisterResponse response = new RegisterResponse();
-            //obsolete. Make it setstatus
-            response.setIsPrivate(!desc.isPublic());
-            this.validate(response, descriptionValidator, validator);
-            if (response.getErrors().isEmpty()) {
-
-                ComponentSpec spec = validator.getComponentSpec();
-
-                try {
-                    checkForRecursion(validator, registry, desc);
-
-                    // Add profile
-                    int returnCode = action.execute(desc, spec, response,
-                            registry);
-                    if (returnCode == 0) {
-                        response.setRegistered(true);
-                        response.setDescription(desc);
-                    } else {
+                    } catch (ComponentRegistryException ex) {
+                        // Recursion detected
                         response.setRegistered(false);
-                        response.addError("Unable to register at this moment. Internal server error.");
+                        response.addError("Error while expanding specification. "
+                                + ex.getMessage());
+                    } catch (ItemNotFoundException ex) {
+                        // Recursion detected
+                        response.setRegistered(false);
+                        response.addError("Error while expanding specification. "
+                                + ex.getMessage());
                     }
-                } catch (ComponentRegistryException ex) {
-                    // Recursion detected
+                } else {
+                    LOG.warn("Registration failed with validation errors: {}",
+                            Arrays.toString(response.getErrors().toArray()));
                     response.setRegistered(false);
-                    response.addError("Error while expanding specification. "
-                            + ex.getMessage());
-                } catch (ItemNotFoundException ex) {
-                    // Recursion detected
-                    response.setRegistered(false);
-                    response.addError("Error while expanding specification. "
-                            + ex.getMessage());
                 }
-            } else {
-                LOG.warn("Registration failed with validation errors: {}",
-                        Arrays.toString(response.getErrors().toArray()));
-                response.setRegistered(false);
-            }
-            LOG.info("Registered new {} {}", desc.isProfile() ? "profile"
-                    : "component", desc);
-            response.setIsProfile(desc.isProfile());
-            return Response.ok(response).build();
-        } finally {
-            try {
-                input.close();// either we read the input or there was an
-                // exception, we need to close it.
-            } catch (IOException e) {
-                LOG.error("Error when closing inputstream: ", e);
-            }
-        }
-    }
-
-    /**
-     *
-     * @param validator
-     * @param registry
-     * @param desc
-     * @throws ComponentRegistryException if recursion is detected or something
-     * goes wrong while trying to detect recursion
-     */
-    private void checkForRecursion(MDValidator validator,
-            ComponentRegistry registry, BaseDescription desc)
-            throws ComponentRegistryException {
-        try {
-            // Expand to check for recursion. Operate on copy so that original
-            // does not get expanded.
-            final ComponentSpec specCopy = validator
-                    .getCopyOfCMDComponentSpec();
-            // In case of recursion, the following will throw a
-            // ComponentRegistryException
-            registry.getExpander().expandNestedComponent(
-                    Lists.newArrayList(specCopy.getComponent()), desc.getId());
-        } catch (JAXBException ex) {
-            throw new ComponentRegistryException(
-                    "Unmarshalling failed while preparing recursion detection",
-                    ex);
-        }
-    }
-
-    private Response registerComment(InputStream input, BaseDescription description, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
-        try {
-            CommentValidator validator = new CommentValidator(input, description, marshaller);
-            CommentResponse responseLocal = new CommentResponse();
-
-            responseLocal.setIsPrivate(!description.isPublic());
-            this.validateComment(responseLocal, validator);
-            if (responseLocal.getErrors().isEmpty()) {
-                Comment com = validator.getCommentSpec();
-                // int returnCode = action.executeComment(com, response,
-                // registry, principal.getName());
-
-                // If user name is left empty, fill it using the user's display
-                // name
-                Principal principal = this.checkAndGetUserPrincipal();
-                UserCredentials userCredentials = this.getUserCredentials(principal);
-                if (null == com.getUserName() || "".equals(com.getUserName())) {
-                    if (userCredentials != null) {
-                        com.setUserName(userCredentials.getDisplayName());
-                    } else {
-                        com.setUserName(principal.getName());
-                    }
-                }
+                LOG.info("Registered new {} {}", desc.isProfile() ? "profile"
+                        : "component", desc);
+                response.setIsProfile(desc.isProfile());
+                return Response.ok(response).build();
+            } finally {
                 try {
-                    int returnCode = registry.registerComment(com,
-                            principal.getName());
-                    if (returnCode == 0) {
-                        responseLocal.setRegistered(true);
-                        responseLocal.setComment(com);
-                    } else {
-                        responseLocal.setRegistered(false);
-                        responseLocal.addError("Unable to post at this moment. Internal server error.");
-                    }
-                    if (com.getComponentId() != null) {
-                        LOG.info("Posted new comment on component {}",
-                                com.getComponentId());
-                    } else {
-                        LOG.info("Posted new comment on profile {}",
-                                com.getComponentId());
-                    }
-                } catch (ItemNotFoundException e) {
-                    return Response.serverError().status(Status.NOT_FOUND)
-                            .entity("" + e.getMessage()).build();
+                    input.close();// either we read the input or there was an
+                    // exception, we need to close it.
+                } catch (IOException e) {
+                    LOG.error("Error when closing inputstream: ", e);
                 }
-            } else {
-                LOG.warn(
-                        "Posting of comment failed with validation errors: {}",
-                        Arrays.toString(responseLocal.getErrors().toArray()));
-                responseLocal.setRegistered(false);
             }
-            return Response.ok(responseLocal).build();
-        } catch (ComponentRegistryException ex) {
-            LOG.error("Error while inserting comment: ", ex);
-            return Response.serverError().entity(ex.getMessage()).build();
-        } finally {
+        }
+
+        /**
+         *
+         * @param validator
+         * @param registry
+         * @param desc
+         * @throws ComponentRegistryException if recursion is detected or
+         * something goes wrong while trying to detect recursion
+         */
+        private void checkForRecursion(MDValidator validator,
+                ComponentRegistry registry, BaseDescription desc)
+                throws ComponentRegistryException {
             try {
-                input.close();// either we read the input or there was an
-                // exception, we need to close it.
-            } catch (IOException e) {
-                LOG.error("Error when closing inputstream: ", e);
-                return Response.serverError().build();
+                // Expand to check for recursion. Operate on copy so that original
+                // does not get expanded.
+                final ComponentSpec specCopy = validator
+                        .getCopyOfCMDComponentSpec();
+                // In case of recursion, the following will throw a
+                // ComponentRegistryException
+                registry.getExpander().expandNestedComponent(
+                        Lists.newArrayList(specCopy.getComponent()), desc.getId());
+            } catch (JAXBException ex) {
+                throw new ComponentRegistryException(
+                        "Unmarshalling failed while preparing recursion detection",
+                        ex);
             }
         }
-    }
 
-    private ComponentDescription createNewComponentDescription() {
-        ComponentDescription desc = ComponentDescription.createNewDescription();
-        desc.setHref(createXlink(desc.getId()));
-        return desc;
-    }
+        private Response registerComment(InputStream input, BaseDescription description, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
+            try {
+                CommentValidator validator = new CommentValidator(input, description, marshaller);
+                CommentResponse responseLocal = new CommentResponse();
 
-    private ProfileDescription createNewProfileDescription() {
-        ProfileDescription desc = ProfileDescription.createNewDescription();
-        desc.setHref(createXlink(desc.getId()));
-        return desc;
-    }
+                responseLocal.setIsPrivate(!description.isPublic());
+                this.validateComment(responseLocal, validator);
+                if (responseLocal.getErrors().isEmpty()) {
+                    Comment com = validator.getCommentSpec();
+                    // int returnCode = action.executeComment(com, response,
+                    // registry, principal.getName());
 
-    private String createXlink(String id) {
-        URI uri = uriInfo.getRequestUriBuilder().path(id).build();
-        return uri.toString();
-    }
-
-    /**
-     *
-     * @see
-     * ComponentRegistryRestService#getApplicationBaseURI(javax.servlet.ServletContext,
-     * javax.servlet.http.HttpServletRequest)
-     */
-    private String getApplicationBaseURI() {
-        return getApplicationBaseURI(servletContext, request);
-    }
-
-    private void validate(RegisterResponse response, Validator... validators) throws UserUnauthorizedException {
-        for (Validator validator : validators) {
-            if (!validator.validate()) {
-                for (String error : validator.getErrorMessages()) {
-                    response.addError(error);
+                    // If user name is left empty, fill it using the user's display
+                    // name
+                    Principal principal = this.checkAndGetUserPrincipal();
+                    UserCredentials userCredentials = this.getUserCredentials(principal);
+                    if (null == com.getUserName() || "".equals(com.getUserName())) {
+                        if (userCredentials != null) {
+                            com.setUserName(userCredentials.getDisplayName());
+                        } else {
+                            com.setUserName(principal.getName());
+                        }
+                    }
+                    try {
+                        int returnCode = registry.registerComment(com,
+                                principal.getName());
+                        if (returnCode == 0) {
+                            responseLocal.setRegistered(true);
+                            responseLocal.setComment(com);
+                        } else {
+                            responseLocal.setRegistered(false);
+                            responseLocal.addError("Unable to post at this moment. Internal server error.");
+                        }
+                        if (com.getComponentId() != null) {
+                            LOG.info("Posted new comment on component {}",
+                                    com.getComponentId());
+                        } else {
+                            LOG.info("Posted new comment on profile {}",
+                                    com.getComponentId());
+                        }
+                    } catch (ItemNotFoundException e) {
+                        return Response.serverError().status(Status.NOT_FOUND)
+                                .entity("" + e.getMessage()).build();
+                    }
+                } else {
+                    LOG.warn(
+                            "Posting of comment failed with validation errors: {}",
+                            Arrays.toString(responseLocal.getErrors().toArray()));
+                    responseLocal.setRegistered(false);
+                }
+                return Response.ok(responseLocal).build();
+            } catch (ComponentRegistryException ex) {
+                LOG.error("Error while inserting comment: ", ex);
+                return Response.serverError().entity(ex.getMessage()).build();
+            } finally {
+                try {
+                    input.close();// either we read the input or there was an
+                    // exception, we need to close it.
+                } catch (IOException e) {
+                    LOG.error("Error when closing inputstream: ", e);
+                    return Response.serverError().build();
                 }
             }
         }
-    }
 
-    private void validateComment(CommentResponse response,
-            Validator... validators) throws UserUnauthorizedException {
-        for (Validator validator : validators) {
-            if (!validator.validate()) {
-                for (String error : validator.getErrorMessages()) {
-                    response.addError(error);
+        private ComponentDescription createNewComponentDescription() {
+            ComponentDescription desc = ComponentDescription.createNewDescription();
+            desc.setHref(createXlink(desc.getId()));
+            return desc;
+        }
+
+        private ProfileDescription createNewProfileDescription() {
+            ProfileDescription desc = ProfileDescription.createNewDescription();
+            desc.setHref(createXlink(desc.getId()));
+            return desc;
+        }
+
+        private String createXlink(String id) {
+            URI uri = uriInfo.getRequestUriBuilder().path(id).build();
+            return uri.toString();
+        }
+
+        /**
+         *
+         * @see
+         * ComponentRegistryRestService#getApplicationBaseURI(javax.servlet.ServletContext,
+         * javax.servlet.http.HttpServletRequest)
+         */
+        private String getApplicationBaseURI() {
+            return getApplicationBaseURI(servletContext, request);
+        }
+
+        private void validate(RegisterResponse response, Validator... validators) throws UserUnauthorizedException {
+            for (Validator validator : validators) {
+                if (!validator.validate()) {
+                    for (String error : validator.getErrorMessages()) {
+                        response.addError(error);
+                    }
                 }
             }
         }
-    }
 
-    /**
-     * @param componentRegistryFactory the componentRegistryFactory to set
-     */
-    public void setComponentRegistryFactory(
-            ComponentRegistryFactory componentRegistryFactory) {
-        this.componentRegistryFactory = componentRegistryFactory;
-    }
+        private void validateComment(CommentResponse response,
+                Validator... validators) throws UserUnauthorizedException {
+            for (Validator validator : validators) {
+                if (!validator.validate()) {
+                    for (String error : validator.getErrorMessages()) {
+                        response.addError(error);
+                    }
+                }
+            }
+        }
 
-    private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {
-        if (registrySpace == null || (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId == null)
-                || resource == null) {
+        /**
+         * @param componentRegistryFactory the componentRegistryFactory to set
+         */
+        public void setComponentRegistryFactory(
+                ComponentRegistryFactory componentRegistryFactory) {
+            this.componentRegistryFactory = componentRegistryFactory;
+        }
+
+        private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {
+            if (registrySpace == null || (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId == null)
+                    || resource == null) {
+                return "Undefined registry space or uindefined type of resource";
+            }
+            if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED)) {
+                return "Published " + resource;
+            }
+            if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE)) {
+                return "Private " + resource;
+            }
+
+            if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId != null) {
+                return resource + " of group " + groupId + " '" + cr.getGroupName(Integer.parseInt(groupId)) + "'";
+            }
+
             return "Undefined registry space or uindefined type of resource";
         }
-        if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PUBLISHED)) {
-            return "Published " + resource;
-        }
-        if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_PRIVATE)) {
-            return "Private " + resource;
-        }
 
-        if (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId != null) {
-            return resource + " of group " + groupId + " '" + cr.getGroupName(Integer.parseInt(groupId)) + "'";
-        }
+        /**
+         *
+         * @param isPublished if "true" then profiles and components from the
+         * user's workspace, otherwise -- public
+         * @param limit the number of items to be displayed
+         * @return rss for the components in the database to which we are
+         * currently connected
+         * @throws ComponentRegistryException
+         * @throws ParseException
+         */
+        @GET
+        @Path("/components/rss")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        public Rss getRssComponent(@QueryParam(GROUPID_PARAM) String groupId,
+                @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
+                throws ComponentRegistryException, ParseException, IOException {
+            List<ComponentDescription> components = null;
+            String title = "";
+            try {
+                ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
+                components = cr.getComponentDescriptions();
+                title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components", cr);
+            } catch (AuthenticationRequiredException e) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
+                return new Rss();
+            } catch (UserUnauthorizedException e) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
+                return new Rss();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
+                return new Rss();
+            }
 
-        return "Undefined registry space or uindefined type of resource";
-    }
-
-    /**
-     *
-     * @param isPublished if "true" then profiles and components from the user's
-     * workspace, otherwise -- public
-     * @param limit the number of items to be displayed
-     * @return rss for the components in the database to which we are currently
-     * connected
-     * @throws ComponentRegistryException
-     * @throws ParseException
-     */
-    @GET
-    @Path("/components/rss")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Rss getRssComponent(@QueryParam(GROUPID_PARAM) String groupId,
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
-            @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
-            throws ComponentRegistryException, ParseException, IOException {
-        List<ComponentDescription> components = null;
-        String title = "";
-        try {
-            ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-            components = cr.getComponentDescriptions();
-            title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components", cr);
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new Rss();
-        } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-            return new Rss();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
-            return new Rss();
-        }
-
-        final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "components",
-                Integer.parseInt(limit), components,
-                BaseDescription.COMPARE_ON_DATE, title);
-        final Rss rss = instance.getRss();
-        LOG.debug("Releasing RSS of {} most recently registered components",
-                limit);
-        return rss;
-    }
-
-    /**
-     *
-     * @param isPublished if "true" then profiles and components from the user's
-     * workspace, otherwise -- public
-     * @param limit the number of items to be displayed
-     * @return rss for the profiles in the database to which we are currently
-     * connected
-     * @throws ComponentRegistryException
-     * @throws ParseException
-     */
-    @GET
-    @Path("/profiles/rss")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Rss getRssProfile(@QueryParam(GROUPID_PARAM) String groupId,
-            @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
-            @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
-            throws ComponentRegistryException, ParseException, IOException {
-        List<ProfileDescription> profiles = null;
-        String title = "";
-        try {
-            ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-            profiles = cr.getProfileDescriptions();
-            title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles", cr);
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new Rss();
-        } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-            return new Rss();
-
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
-            return new Rss();
-        }
-        final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "profiles",
-                Integer.parseInt(limit), profiles,
-                BaseDescription.COMPARE_ON_DATE, title);
-        final Rss rss = instance.getRss();
-        LOG.debug("Releasing RSS of {} most recently registered profiles",
-                limit);
-        return rss;
-    }
-
-    private String helpToMakeTitleForRssComments(String itemId, String resource) {
-        if (itemId == null || resource == null) {
-            return "Undefined description";
-        }
-        return ("Comments for " + resource + " " + itemId);
-    }
-
-    /**
-     *
-     * @param profileId the Id of a profile whose comments are to be rss-ed
-     * @param isPublished if "true" then profiles and components from the user's
-     * workspace, otherwise -- public
-     * @param limit the number of items to be displayed
-     * @return rss of the comments for a chosen profile
-     * @throws ComponentRegistryException
-     * @throws IOException
-     * @throws JAXBException
-     * @throws ParseException
-     */
-    @GET
-    @Path("/profiles/{profileId}/comments/rss")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Rss getRssOfCommentsFromProfile(
-            @PathParam("profileId") String profileId,
-            @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
-            throws ComponentRegistryException, IOException, JAXBException,
-            ParseException {
-        try {
-
-            ComponentRegistry cr = this.getBaseRegistry();
-
-            final List<Comment> comments = cr.getCommentsInProfile(profileId);
-            final ProfileDescription pd = cr.getProfileDescriptionAccessControlled(profileId);
-            final String profileName = pd.getName();
-
-            String title = this.helpToMakeTitleForRssComments(profileId, "profile");
-            final RssCreatorComments instance = new RssCreatorComments(
-                    getApplicationBaseURI(), Integer.parseInt(limit), profileId,
-                    profileName, "profile", comments, Comment.COMPARE_ON_DATE, title);
+            final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "components",
+                    Integer.parseInt(limit), components,
+                    BaseDescription.COMPARE_ON_DATE, title);
             final Rss rss = instance.getRss();
-            LOG.debug("Releasing RSS of {} most recent post on profile {}", limit,
-                    profileId);
+            LOG.debug("Releasing RSS of {} most recently registered components",
+                    limit);
             return rss;
-        } catch (UserUnauthorizedException ex) {
-            response.sendError(Status.FORBIDDEN.getStatusCode());
-            return new Rss();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
-            return new Rss();
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new Rss();
         }
-    }
 
-    /**
-     *
-     * @param componentId the Id of a component whose comments are to be rss-ed
-     * @param isPublished if "true" then profiles and components from the user's
-     * workspace, otherwise -- public
-     * @param limit the number of items to be displayed
-     * @return rss of the comments for a chosen component
-     * @throws ComponentRegistryException
-     * @throws IOException
-     * @throws JAXBException
-     * @throws ParseException
-     */
-    @GET
-    @Path("/components/{componentId}/comments/rss")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    public Rss getRssOfCommentsFromComponent(
-            @PathParam("componentId") String componentId,
-            @QueryParam(NUMBER_OF_RSSITEMS)
-            @DefaultValue("20") String limit)
-            throws ComponentRegistryException, IOException, JAXBException,
-            ParseException {
-        try {
-            ComponentRegistry cr = this.getBaseRegistry();
-            final List<Comment> comments = cr.getCommentsInComponent(componentId);
-            final ComponentDescription cd = cr.getComponentDescriptionAccessControlled(componentId);
-            final String componentName = cd.getName();
-            //oboslete. status must be involved, not boolean isPrivate
-            String title = this.helpToMakeTitleForRssComments(componentId, "component");
-            final RssCreatorComments instance = new RssCreatorComments(
-                    getApplicationBaseURI(), Integer.parseInt(limit), componentId,
-                    componentName, "component", comments, Comment.COMPARE_ON_DATE, title);
+        /**
+         *
+         * @param isPublished if "true" then profiles and components from the
+         * user's workspace, otherwise -- public
+         * @param limit the number of items to be displayed
+         * @return rss for the profiles in the database to which we are
+         * currently connected
+         * @throws ComponentRegistryException
+         * @throws ParseException
+         */
+        @GET
+        @Path("/profiles/rss")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        public Rss getRssProfile(@QueryParam(GROUPID_PARAM) String groupId,
+                @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
+                throws ComponentRegistryException, ParseException, IOException {
+            List<ProfileDescription> profiles = null;
+            String title = "";
+            try {
+                ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
+                profiles = cr.getProfileDescriptions();
+                title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles", cr);
+            } catch (AuthenticationRequiredException e) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
+                return new Rss();
+            } catch (UserUnauthorizedException e) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
+                return new Rss();
+
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
+                return new Rss();
+            }
+            final RssCreatorDescriptions instance = new RssCreatorDescriptions(getApplicationBaseURI(), "profiles",
+                    Integer.parseInt(limit), profiles,
+                    BaseDescription.COMPARE_ON_DATE, title);
             final Rss rss = instance.getRss();
-            LOG.debug("Releasing RSS of {} most recent post on component {}",
-                    limit, componentId);
+            LOG.debug("Releasing RSS of {} most recently registered profiles",
+                    limit);
             return rss;
-        } catch (UserUnauthorizedException e) {
-            response.sendError(Status.FORBIDDEN.getStatusCode());
-            return new Rss();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode());
-            return new Rss();
-        } catch (AuthenticationRequiredException e1) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode());
-            return new Rss();
         }
 
-    }
-
-    @GET
-    @Path("/AllowedTypes")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(
-            value = "A listing of values that are allowed as element or attribute type by the CMDI schema",
-            response = AllowedAttributetypesXML.class)
-    public AllowedAttributetypesXML getAllowedAttributeTypes()
-            throws ComponentRegistryException, IOException, JAXBException,
-            ParseException {
-        return (new AllowedAttributetypesXML());
-    }
-
-    @GET
-    @Path("/groups/usermembership")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a listing of groups the current user is a member of (empty list when unauthenticated)")
-    public List<Group> getGroupsTheCurrentUserIsAMemberOf() {
-        Principal principal = security.getUserPrincipal();
-        if (principal == null) {
-            return new ArrayList<Group>();
+        private String helpToMakeTitleForRssComments(String itemId, String resource) {
+            if (itemId == null || resource == null) {
+                return "Undefined description";
+            }
+            return ("Comments for " + resource + " " + itemId);
         }
-        List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
-        return groups;
-    }
 
-    @GET
-    @Path("/items/{itemId}/groups")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Returns a listing of groups to which an item belongs")
-    public List<Group> getGroupsTheItemIsAMemberOf(@PathParam("itemId") String itemId) {
-        return groupService.getGroupsTheItemIsAMemberOf(itemId);
-    }
+        /**
+         *
+         * @param profileId the Id of a profile whose comments are to be rss-ed
+         * @param isPublished if "true" then profiles and components from the
+         * user's workspace, otherwise -- public
+         * @param limit the number of items to be displayed
+         * @return rss of the comments for a chosen profile
+         * @throws ComponentRegistryException
+         * @throws IOException
+         * @throws JAXBException
+         * @throws ParseException
+         */
+        @GET
+        @Path("/profiles/{profileId}/comments/rss")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        public Rss getRssOfCommentsFromProfile(
+                @PathParam("profileId") String profileId,
+                @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
+                throws ComponentRegistryException, IOException, JAXBException,
+                ParseException {
+            try {
 
-    @POST
-    @Path("/items/{itemId}/transferownership")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "Transfers an item to the specified group (either from the private space or another group)")
-    @ApiResponses(value = {
-        @ApiResponse(code = 403, message = "Current user has no access")
-    })
-    public Response transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
-            @QueryParam(GROUPID_PARAM) long groupId) throws IOException {
-        Principal principal = security.getUserPrincipal();
-        try {
-            groupService.transferItemOwnershipFromUserToGroupId(principal.getName(), groupId, itemId);
-            return Response.ok("Ownership transferred").build();
-        } catch (UserUnauthorizedException e) {
-            return Response.status(Status.FORBIDDEN).build();
-        }
-    }
+                ComponentRegistry cr = this.getBaseRegistry();
 
-    @GET
-    @Path("/items/{itemId}")
-    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-        MediaType.APPLICATION_JSON})
-    @ApiOperation(value = "The description (metadata) of a single component or profile item")
-    @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
-        @ApiResponse(code = 404, message = "Item does not exist")
-    })
-    public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
-        LOG.debug("Item with id: {} is requested.", itemId);
-        try {
-            ComponentRegistry cr = this.getBaseRegistry();
-            BaseDescription description;
-            if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
-                description = cr.getComponentDescriptionAccessControlled(itemId);
-                return description;
-            };
-            if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
-                description = cr.getProfileDescriptionAccessControlled(itemId);
-                return description;
-            };
-            response.sendError(Status.BAD_REQUEST.getStatusCode());
-            return new BaseDescription();
+                final List<Comment> comments = cr.getCommentsInProfile(profileId);
+                final ProfileDescription pd = cr.getProfileDescriptionAccessControlled(profileId);
+                final String profileName = pd.getName();
 
-        } catch (UserUnauthorizedException ex2) {
-            response.sendError(Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
-            return new BaseDescription();
-        } catch (ItemNotFoundException e) {
-            response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-            return new BaseDescription();
-        } catch (AuthenticationRequiredException e) {
-            response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new BaseDescription();
-        }
-    }
-
-    /**
-     *
-     * @return The application's base URI as defined by the following context
-     * parameters:
-     *
-     * {@link APPLICATION_URL_BASE_PARAM},
-     *     {@link APPLICATION_URL_PATH_PARAM},
-     *     {@link APPLICATION_URL_PROTOCOL_HEADER_PARAM}, and
-     * {@link APPLICATION_URL_HOST_HEADER_PARAM}
-     *
-     * If correctly configured, it should look something like
-     * "http://catalog.clarin.eu/ds/ComponentRegistry". <em>Be aware that this
-     * can also be null if configured incorrectly!</em>
-     */
-    public static String getApplicationBaseURI(ServletContext servletContext, HttpServletRequest request) {
-        final String path = servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM);
-        if (path != null) {
-            final String protocolHeader = servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM);
-            final String hostHeader = servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM);
-            if (protocolHeader != null && hostHeader != null) {
-
-                return String.format("%s://%s%s",
-                        request.getHeader(protocolHeader),
-                        request.getHeader(hostHeader),
-                        path
-                );
-            } else {
-                final String base = servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM);
-                return base + path;
+                String title = this.helpToMakeTitleForRssComments(profileId, "profile");
+                final RssCreatorComments instance = new RssCreatorComments(
+                        getApplicationBaseURI(), Integer.parseInt(limit), profileId,
+                        profileName, "profile", comments, Comment.COMPARE_ON_DATE, title);
+                final Rss rss = instance.getRss();
+                LOG.debug("Releasing RSS of {} most recent post on profile {}", limit,
+                        profileId);
+                return rss;
+            } catch (UserUnauthorizedException ex) {
+                response.sendError(Status.FORBIDDEN.getStatusCode());
+                return new Rss();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode());
+                return new Rss();
+            } catch (AuthenticationRequiredException e) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
+                return new Rss();
             }
         }
-        LOG.error("Application URI could not be determined. Information available:\n"
-                + " {}: {}\n {}: {}\n {}: {}\n {}: {}",
-                APPLICATION_URL_PATH_PARAM, servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM),
-                APPLICATION_URL_BASE_PARAM, servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM),
-                APPLICATION_URL_PROTOCOL_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM),
-                APPLICATION_URL_HOST_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM)
-        );
-        throw new RuntimeException("Cannot determine application path");
+
+        /**
+         *
+         * @param componentId the Id of a component whose comments are to be
+         * rss-ed
+         * @param isPublished if "true" then profiles and components from the
+         * user's workspace, otherwise -- public
+         * @param limit the number of items to be displayed
+         * @return rss of the comments for a chosen component
+         * @throws ComponentRegistryException
+         * @throws IOException
+         * @throws JAXBException
+         * @throws ParseException
+         */
+        @GET
+        @Path("/components/{componentId}/comments/rss")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        public Rss getRssOfCommentsFromComponent(
+                @PathParam("componentId") String componentId,
+                @QueryParam(NUMBER_OF_RSSITEMS)
+                @DefaultValue("20") String limit)
+                throws ComponentRegistryException, IOException, JAXBException,
+                ParseException {
+            try {
+                ComponentRegistry cr = this.getBaseRegistry();
+                final List<Comment> comments = cr.getCommentsInComponent(componentId);
+                final ComponentDescription cd = cr.getComponentDescriptionAccessControlled(componentId);
+                final String componentName = cd.getName();
+                //oboslete. status must be involved, not boolean isPrivate
+                String title = this.helpToMakeTitleForRssComments(componentId, "component");
+                final RssCreatorComments instance = new RssCreatorComments(
+                        getApplicationBaseURI(), Integer.parseInt(limit), componentId,
+                        componentName, "component", comments, Comment.COMPARE_ON_DATE, title);
+                final Rss rss = instance.getRss();
+                LOG.debug("Releasing RSS of {} most recent post on component {}",
+                        limit, componentId);
+                return rss;
+            } catch (UserUnauthorizedException e) {
+                response.sendError(Status.FORBIDDEN.getStatusCode());
+                return new Rss();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode());
+                return new Rss();
+            } catch (AuthenticationRequiredException e1) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode());
+                return new Rss();
+            }
+
+        }
+
+        @GET
+        @Path("/AllowedTypes")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(
+                value = "A listing of values that are allowed as element or attribute type by the CMDI schema",
+                response = AllowedAttributetypesXML.class)
+        public AllowedAttributetypesXML getAllowedAttributeTypes()
+                throws ComponentRegistryException, IOException, JAXBException,
+                ParseException {
+            return (new AllowedAttributetypesXML());
+        }
+
+        @GET
+        @Path("/groups/usermembership")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a listing of groups the current user is a member of (empty list when unauthenticated)")
+        public List<Group> getGroupsTheCurrentUserIsAMemberOf() {
+            Principal principal = security.getUserPrincipal();
+            if (principal == null) {
+                return new ArrayList<Group>();
+            }
+            List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
+            return groups;
+        }
+
+        @GET
+        @Path("/items/{itemId}/groups")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Returns a listing of groups to which an item belongs")
+        public List<Group> getGroupsTheItemIsAMemberOf(@PathParam("itemId") String itemId) {
+            return groupService.getGroupsTheItemIsAMemberOf(itemId);
+        }
+
+        @POST
+        @Path("/items/{itemId}/transferownership")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "Transfers an item to the specified group (either from the private space or another group)")
+        @ApiResponses(value = {
+            @ApiResponse(code = 403, message = "Current user has no access")
+        })
+        public Response transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
+                @QueryParam(GROUPID_PARAM) long groupId) throws IOException {
+            Principal principal = security.getUserPrincipal();
+            try {
+                groupService.transferItemOwnershipFromUserToGroupId(principal.getName(), groupId, itemId);
+                return Response.ok("Ownership transferred").build();
+            } catch (UserUnauthorizedException e) {
+                return Response.status(Status.FORBIDDEN).build();
+            }
+        }
+
+        @GET
+        @Path("/items/{itemId}")
+        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+            MediaType.APPLICATION_JSON})
+        @ApiOperation(value = "The description (metadata) of a single component or profile item")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
+            @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
+            LOG.debug("Item with id: {} is requested.", itemId);
+            try {
+                ComponentRegistry cr = this.getBaseRegistry();
+                BaseDescription description;
+                if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
+                    description = cr.getComponentDescriptionAccessControlled(itemId);
+                    return description;
+                };
+                if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
+                    description = cr.getProfileDescriptionAccessControlled(itemId);
+                    return description;
+                };
+                response.sendError(Status.BAD_REQUEST.getStatusCode());
+                return new BaseDescription();
+
+            } catch (UserUnauthorizedException ex2) {
+                response.sendError(Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
+                return new BaseDescription();
+            } catch (ItemNotFoundException e) {
+                response.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
+                return new BaseDescription();
+            } catch (AuthenticationRequiredException e) {
+                response.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
+                return new BaseDescription();
+            }
+        }
+
+        /**
+         *
+         * @return The application's base URI as defined by the following
+         * context parameters:
+         *
+         * {@link APPLICATION_URL_BASE_PARAM},
+         *     {@link APPLICATION_URL_PATH_PARAM},
+         *     {@link APPLICATION_URL_PROTOCOL_HEADER_PARAM}, and
+         * {@link APPLICATION_URL_HOST_HEADER_PARAM}
+         *
+         * If correctly configured, it should look something like
+         * "http://catalog.clarin.eu/ds/ComponentRegistry". <em>Be aware that
+         * this can also be null if configured incorrectly!</em>
+         */
+        public static String getApplicationBaseURI(ServletContext servletContext, HttpServletRequest request) {
+            final String path = servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM);
+            if (path != null) {
+                final String protocolHeader = servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM);
+                final String hostHeader = servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM);
+                if (protocolHeader != null && hostHeader != null) {
+
+                    return String.format("%s://%s%s",
+                            request.getHeader(protocolHeader),
+                            request.getHeader(hostHeader),
+                            path
+                    );
+                } else {
+                    final String base = servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM);
+                    return base + path;
+                }
+            }
+            LOG.error("Application URI could not be determined. Information available:\n"
+                    + " {}: {}\n {}: {}\n {}: {}\n {}: {}",
+                    APPLICATION_URL_PATH_PARAM, servletContext.getInitParameter(APPLICATION_URL_PATH_PARAM),
+                    APPLICATION_URL_BASE_PARAM, servletContext.getInitParameter(APPLICATION_URL_BASE_PARAM),
+                    APPLICATION_URL_PROTOCOL_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_PROTOCOL_HEADER_PARAM),
+                    APPLICATION_URL_HOST_HEADER_PARAM, servletContext.getInitParameter(APPLICATION_URL_HOST_HEADER_PARAM)
+            );
+            throw new RuntimeException("Cannot determine application path");
+        }
     }
 
 }
