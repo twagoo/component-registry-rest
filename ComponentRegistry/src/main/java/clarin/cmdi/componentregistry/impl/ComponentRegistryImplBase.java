@@ -2,6 +2,7 @@ package clarin.cmdi.componentregistry.impl;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.CmdVersion;
+import static clarin.cmdi.componentregistry.CmdVersion.CANONICAL_CMD_VERSION;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentSpecConverter;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -22,6 +24,10 @@ import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.components.ComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 /**
  *
@@ -32,6 +38,8 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     private final static Logger LOG = LoggerFactory.getLogger(ComponentRegistryImplBase.class);
 
     protected abstract MDMarshaller getMarshaller();
+
+    protected abstract ComponentSpecConverter getSpecConverter();
 
     /**
      *
@@ -85,11 +93,24 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
 
     protected void writeXml(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) {
         try {
-            //TODO: if cmdVersion not current version convert after marshalling
-            getMarshaller().marshal(spec, outputStream);
+            if (cmdVersion == CANONICAL_CMD_VERSION) {
+                getMarshaller().marshal(spec, outputStream);
+            } else {
+                // If cmdVersion not current version convert
+                try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                    //marshall to temporary byte array so that we get XML in the canonical version
+                    getMarshaller().marshal(spec, os);
+
+                    //turn marshaller output into converter input and write converted XML to output stream
+                    final ByteArrayInputStream is = new ByteArrayInputStream(os.toByteArray());
+                    final OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+                    getSpecConverter().convertComponentSpec(CANONICAL_CMD_VERSION, cmdVersion, is, writer);
+                }
+            }
+
         } catch (UnsupportedEncodingException e) {
             LOG.error("Error in encoding: ", e);
-        } catch (JAXBException e) {
+        } catch (JAXBException | IOException e) {
             LOG.error("Cannot marshall spec: " + spec, e);
         }
     }

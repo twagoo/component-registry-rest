@@ -6,6 +6,7 @@ import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
 import clarin.cmdi.componentregistry.CmdVersion;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
+import clarin.cmdi.componentregistry.ComponentSpecConverter;
 import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.DeleteFailedException;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
@@ -85,6 +86,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     private MDMarshaller marshaller;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private ComponentSpecConverter specConverter;
 
     // 
     /**
@@ -868,6 +871,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     protected MDMarshaller getMarshaller() {
         return marshaller;
+    }
+    
+    @Override
+    protected ComponentSpecConverter getSpecConverter() {
+        return specConverter;
     }
 
     @Override
