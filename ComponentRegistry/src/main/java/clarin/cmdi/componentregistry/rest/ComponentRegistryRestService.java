@@ -491,7 +491,7 @@ public class ComponentRegistryRestService {
                             try {
                                 try {
                                     try {
-                                        registry.getMDComponentAsXml(componentId, output); //TODO: function of version number
+                                        registry.getMDComponentAsXml(componentId, getCmdVersion(), output); //TODO: function of version number
                                     } catch (ItemNotFoundException e) {
                                         LOG.warn("Could not retrieve component {}: {}",
                                                 componentId, e.getMessage());
@@ -514,45 +514,11 @@ public class ComponentRegistryRestService {
                             } catch (UserUnauthorizedException e2) {
                                 LOG.error(e2.toString());
                             }
-                        }
-                    };
-                    return createDownloadResponse(result, fileName);
-                } else if ("xsd".equalsIgnoreCase(rawType)) {
-                    result = new StreamingOutput() {
-
-                        @Override
-                        public void write(OutputStream output) throws IOException,
-                                WebApplicationException {
-                            try {
-                                try {
-                                    try {
-                                        registry.getMDComponentAsXsd(componentId, output);
-                                    } catch (ItemNotFoundException e) {
-                                        LOG.warn("Could not retrieve component {}: {}",
-                                                componentId, e.getMessage());
-                                        LOG.debug("Details", e);
-                                        throw new WebApplicationException(Response
-                                                .serverError()
-                                                .status(Status.INTERNAL_SERVER_ERROR)
-                                                .build());
-                                    }
-                                } catch (ComponentRegistryException e) {
-                                    LOG.warn("Could not retrieve component {}: {}",
-                                            componentId, e.getMessage());
-                                    LOG.debug("Details", e);
-                                    throw new WebApplicationException(Response
-                                            .serverError()
-                                            .status(Status.INTERNAL_SERVER_ERROR)
-                                            .build());
-                                }
-                            } catch (UserUnauthorizedException e2) {
-                                LOG.error(e2.toString());
-                            }
-
                         }
                     };
                     return createDownloadResponse(result, fileName);
                 } else {
+                    //other 'raw types', including xsd are not supported
                     return Response.status(Status.NOT_FOUND).entity("Usupported raw type " + rawType).build();
                 }
             } catch (ItemNotFoundException e3) {
@@ -1284,7 +1250,7 @@ public class ComponentRegistryRestService {
                         public void write(OutputStream output) throws IOException,
                                 WebApplicationException {
                             try {
-                                registry.getMDProfileAsXml(profileId, output); //TODO: function of version number
+                                registry.getMDProfileAsXml(profileId, getCmdVersion(), output); //TODO: function of version number
                             } catch (ComponentRegistryException | UserUnauthorizedException | ItemNotFoundException e) {
                                 LOG.warn("Could not retrieve component {}: {}",
                                         profileId, e.getMessage());
@@ -1303,7 +1269,7 @@ public class ComponentRegistryRestService {
                         public void write(OutputStream output) throws IOException,
                                 WebApplicationException {
                             try {
-                                registry.getMDProfileAsXsd(profileId, output); //TODO: function of version number
+                                registry.getMDProfileAsXsd(profileId, getCmdVersion(), output); //TODO: function of version number
                             } catch (ComponentRegistryException | UserUnauthorizedException | ItemNotFoundException e) {
                                 LOG.warn("Could not retrieve component {}: {}",
                                         profileId, e.getMessage());

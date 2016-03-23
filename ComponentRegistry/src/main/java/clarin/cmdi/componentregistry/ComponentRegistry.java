@@ -108,13 +108,11 @@ public interface ComponentRegistry {
      */
     int publish(BaseDescription desc, ComponentSpec spec, Principal principal) throws UserUnauthorizedException,  AuthenticationRequiredException, ItemNotFoundException;
 
-    void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    void getMDProfileAsXml(String profileId, CmdVersion cmdVersion, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
-    void getMDProfileAsXsd(String profileId, OutputStream outputStream) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    void getMDProfileAsXsd(String profileId, CmdVersion cmdVersion, OutputStream outputStream) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
-    void getMDComponentAsXml(String componentId, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
-
-    void getMDComponentAsXsd(String componentId, OutputStream outputStream) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    void getMDComponentAsXml(String componentId, CmdVersion cmdVersion, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
     /**
      *

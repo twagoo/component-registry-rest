@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.impl;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
+import clarin.cmdi.componentregistry.CmdVersion;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -78,12 +79,14 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         }
     }
 
-    protected void writeXsd(ComponentSpec expandedSpec, OutputStream outputStream) {
+    protected void writeXsd(ComponentSpec expandedSpec, CmdVersion cmdVersion, OutputStream outputStream) {
+        //TODO: pass cmdVersion
         getMarshaller().generateXsd(expandedSpec, outputStream);
     }
 
-    protected void writeXml(ComponentSpec spec, OutputStream outputStream) {
+    protected void writeXml(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) {
         try {
+            //TODO: if cmdVersion not current version convert after marshalling
             getMarshaller().marshal(spec, outputStream);
         } catch (UnsupportedEncodingException e) {
             LOG.error("Error in encoding: ", e);

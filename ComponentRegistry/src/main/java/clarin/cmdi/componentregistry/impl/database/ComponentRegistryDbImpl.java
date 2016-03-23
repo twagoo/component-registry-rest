@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.impl.database;
 import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
+import clarin.cmdi.componentregistry.CmdVersion;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.Configuration;
@@ -617,27 +618,21 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void getMDProfileAsXml(String profileId, OutputStream output) throws ComponentRegistryException {
+    public void getMDProfileAsXml(String profileId, CmdVersion cmdVersion, OutputStream output) throws ComponentRegistryException {
         ComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandProfile(profileId, this);
-        writeXml(expandedSpec, output);
+        writeXml(expandedSpec, cmdVersion, output);
     }
 
     @Override
-    public void getMDProfileAsXsd(String profileId, OutputStream outputStream) throws ComponentRegistryException {
+    public void getMDProfileAsXsd(String profileId, CmdVersion cmdVersion, OutputStream outputStream) throws ComponentRegistryException {
         ComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandProfile(profileId, this);
-        writeXsd(expandedSpec, outputStream);
+        writeXsd(expandedSpec, cmdVersion, outputStream);
     }
 
     @Override
-    public void getMDComponentAsXml(String componentId, OutputStream output) throws ComponentRegistryException {
+    public void getMDComponentAsXml(String componentId, CmdVersion cmdVersion, OutputStream output) throws ComponentRegistryException {
         ComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandComponent(componentId, this);
-        writeXml(expandedSpec, output);
-    }
-
-    @Override
-    public void getMDComponentAsXsd(String componentId, OutputStream outputStream) throws ComponentRegistryException {
-        ComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandComponent(componentId, this);
-        writeXsd(expandedSpec, outputStream);
+        writeXml(expandedSpec, cmdVersion, output);
     }
 
     @Override
