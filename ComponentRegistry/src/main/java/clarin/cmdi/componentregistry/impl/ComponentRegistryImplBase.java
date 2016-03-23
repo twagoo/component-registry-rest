@@ -80,8 +80,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
     }
 
     protected void writeXsd(ComponentSpec expandedSpec, CmdVersion cmdVersion, OutputStream outputStream) {
-        //TODO: pass cmdVersion
-        getMarshaller().generateXsd(expandedSpec, outputStream);
+        getMarshaller().generateXsd(expandedSpec, cmdVersion, outputStream);
     }
 
     protected void writeXml(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) {

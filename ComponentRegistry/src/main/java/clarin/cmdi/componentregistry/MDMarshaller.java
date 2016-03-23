@@ -104,12 +104,19 @@ public class MDMarshaller implements Serializable {
         return generalComponentSchema;
     }
 
-    public void generateXsd(ComponentSpec spec, OutputStream outputStream) {
+    public void generateXsd(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) {
         try {
+            // get stylesheet for the requested version
+            // TODO
             Transformer transformer = componentToSchemaTemplates.newTransformer();
             transformer.setParameter(CMDToolkit.XSLT_PARAM_COMP2SCHEMA_TOOL_KITLOCATION, Configuration.getInstance().getToolkitLocation());
+
+            // create spec XML
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             marshal(spec, out);
+            //TODO: in case of non-canonical cmd version convert
+            
+            // transform to XSD
             ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
             transformer.transform(new StreamSource(input), new StreamResult(outputStream));
         } catch (TransformerConfigurationException e) {
