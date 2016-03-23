@@ -3,6 +3,7 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.CmdVersion;
 import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
+import static clarin.cmdi.componentregistry.CmdVersion.CANONICAL_CMD_VERSION;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -95,7 +96,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.nio.cs.StreamEncoder;
 
 /**
  * Handles CRUD operations on
@@ -132,8 +132,6 @@ public class ComponentRegistryRestService {
 
     private final static Logger LOG = LoggerFactory
             .getLogger(ComponentRegistryRestService.class);
-
-    public final static CmdVersion CANONICAL_CMD_VERSION = CmdVersion.CMD_1_2;
 
     /**
      * Requests a registry service for a specific version of CMDI
