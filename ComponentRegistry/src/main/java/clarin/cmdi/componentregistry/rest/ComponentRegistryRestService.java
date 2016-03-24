@@ -21,7 +21,6 @@ import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_BASE_PARAM;
@@ -175,8 +174,6 @@ public class ComponentRegistryRestService {
         private ServletContext servletContext;
         @InjectParam(value = "mdMarshaller")
         private MDMarshaller marshaller;
-        @InjectParam(value = "GroupService")
-        private GroupService groupService;
         @InjectParam(value = "ComponentSpecConverter")
         private ComponentSpecConverter componentSpecConverter;
 
@@ -1887,20 +1884,6 @@ public class ComponentRegistryRestService {
                 throws ComponentRegistryException, IOException, JAXBException,
                 ParseException {
             return (new AllowedAttributetypesXML());
-        }
-
-        @GET
-        @Path("/groups/usermembership")
-        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-            MediaType.APPLICATION_JSON})
-        @ApiOperation(value = "Returns a listing of groups the current user is a member of (empty list when unauthenticated)")
-        public List<Group> getGroupsTheCurrentUserIsAMemberOf() {
-            Principal principal = security.getUserPrincipal();
-            if (principal == null) {
-                return new ArrayList<>();
-            }
-            List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
-            return groups;
         }
     }
 

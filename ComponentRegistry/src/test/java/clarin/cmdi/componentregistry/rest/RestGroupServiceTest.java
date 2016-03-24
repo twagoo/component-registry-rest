@@ -225,7 +225,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         // test itself
 
         List<Group> result = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/groups/usermembership"))
+                .path("/groups/usermembership"))
                 .accept(MediaType.APPLICATION_XML).get(GROUP_LIST_GENERICTYPE);
 
         assertEquals(1, result.size());
