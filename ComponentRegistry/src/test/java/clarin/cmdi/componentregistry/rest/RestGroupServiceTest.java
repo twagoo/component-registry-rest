@@ -250,7 +250,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         String test_component_id = ComponentDescription.COMPONENT_PREFIX + "test_component";
         //I'm not a member
         ClientResponse cr = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path("/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(403, cr.getStatus());
 
         //make me a member
@@ -258,10 +258,10 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(groupService.userGroupMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), 3));
 
         cr = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path("/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(200, cr.getStatus());
         cr = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path("/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(200, cr.getStatus());
 
         List<String> components = groupService.getComponentIdsInGroup(3);
@@ -287,7 +287,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         String test_profile_id = ProfileDescription.PROFILE_PREFIX + "Dprofile-1";
         // try to move to group C
         ClientResponse cr = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/items/" + test_profile_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path("/items/" + test_profile_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am member of both groups, so should be allowed
         assertEquals("Moving between groups should be allowed as long as user is member", 200, cr.getStatus());
 
@@ -295,7 +295,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         String test_component_id = ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1";
         // try to move to group C
         cr = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path("/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am not a member of groups C, so should not be allowed
         assertEquals("Moving between groups should not be allowed if user is not member", 403, cr.getStatus());
 
@@ -303,7 +303,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         test_component_id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
         // try to move to group B (which I am a member of)
         cr = this.getAuthenticatedResource(getResource()
-                .path(REGISTRY_BASE + "/items/" + test_component_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path("/items/" + test_component_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am not a member of group C, so should not be allowed
         assertEquals("Moving between groups should not be allowed if user is not member", 403, cr.getStatus());
 

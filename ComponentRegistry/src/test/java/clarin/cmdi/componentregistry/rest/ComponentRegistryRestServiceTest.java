@@ -1849,7 +1849,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         System.out.println("testGetDescription");
         fillUpPublicItems();
         String id = ComponentDescription.COMPONENT_PREFIX + "component1";
-        ComponentDescription component = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/items/" + id)).accept(MediaType.APPLICATION_JSON).get(ComponentDescription.class);
+        ComponentDescription component = getAuthenticatedResource(getResource().path("/items/" + id)).accept(MediaType.APPLICATION_JSON).get(ComponentDescription.class);
         assertNotNull(component);
         assertEquals(id, component.getId());
         assertEquals("component1", component.getName());

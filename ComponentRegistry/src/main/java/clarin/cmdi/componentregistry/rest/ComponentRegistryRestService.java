@@ -87,7 +87,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
@@ -160,7 +159,7 @@ public class ComponentRegistryRestService {
      */
     @Transactional(rollbackFor = {Exception.class, ValidationException.class})
     @Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
-    public static class RegistryService {
+    public static class RegistryService extends AbstractComponentRegistryRestService {
 
         @PathParam("cmdVersion")
         @DefaultValue("1.1")
@@ -169,15 +168,11 @@ public class ComponentRegistryRestService {
         @Context
         private UriInfo uriInfo;
         @Context
-        private SecurityContext security;
-        @Context
         private HttpServletRequest servletRequest;
         @Context
         private HttpServletResponse servletResponse;
         @Context
         private ServletContext servletContext;
-        @InjectParam(value = "componentRegistryFactory")
-        private ComponentRegistryFactory componentRegistryFactory;
         @InjectParam(value = "mdMarshaller")
         private MDMarshaller marshaller;
         @InjectParam(value = "GroupService")
@@ -200,16 +195,6 @@ public class ComponentRegistryRestService {
             }
             // also in case of null: 'default' registry
             return CmdVersion.CMD_1_1;
-        }
-
-        private ComponentRegistry getBaseRegistry() throws AuthenticationRequiredException {
-            Principal userPrincipal = security.getUserPrincipal();
-            if (userPrincipal == null) {
-                return componentRegistryFactory.getBaseRegistry(null);
-            } else {
-                UserCredentials userCredentials = this.getUserCredentials(userPrincipal);
-                return componentRegistryFactory.getBaseRegistry(userCredentials);
-            }
         }
 
         private ComponentRegistry getRegistry(RegistrySpace space, Number groupId) {
@@ -237,14 +222,6 @@ public class ComponentRegistryRestService {
                 throw new AuthenticationRequiredException("No user principal found.");
             }
             return principal;
-        }
-
-        private UserCredentials getUserCredentials(Principal userPrincipal) {
-            UserCredentials userCredentials = null;
-            if (userPrincipal != null) {
-                userCredentials = new UserCredentials(userPrincipal);
-            }
-            return userCredentials;
         }
 
         private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
@@ -1688,14 +1665,6 @@ public class ComponentRegistryRestService {
             }
         }
 
-        /**
-         * @param componentRegistryFactory the componentRegistryFactory to set
-         */
-        public void setComponentRegistryFactory(
-                ComponentRegistryFactory componentRegistryFactory) {
-            this.componentRegistryFactory = componentRegistryFactory;
-        }
-
         private String helpToMakeTitleForRssDescriptions(String registrySpace, String groupId, String resource, ComponentRegistry cr) throws ItemNotFoundException {
             if (registrySpace == null || (registrySpace.equalsIgnoreCase(REGISTRY_SPACE_GROUP) && groupId == null)
                     || resource == null) {
@@ -1932,72 +1901,6 @@ public class ComponentRegistryRestService {
             }
             List<Group> groups = groupService.getGroupsOfWhichUserIsAMember(principal.getName());
             return groups;
-        }
-
-        @GET
-        @Path("/items/{itemId}/groups")
-        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-            MediaType.APPLICATION_JSON})
-        @ApiOperation(value = "Returns a listing of groups to which an item belongs")
-        public List<Group> getGroupsTheItemIsAMemberOf(@PathParam("itemId") String itemId) {
-            return groupService.getGroupsTheItemIsAMemberOf(itemId);
-        }
-
-        @POST
-        @Path("/items/{itemId}/transferownership")
-        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-            MediaType.APPLICATION_JSON})
-        @ApiOperation(value = "Transfers an item to the specified group (either from the private space or another group)")
-        @ApiResponses(value = {
-            @ApiResponse(code = 403, message = "Current user has no access")
-        })
-        public Response transferItemOwnershipToGroup(@PathParam("itemId") String itemId,
-                @QueryParam(GROUPID_PARAM) long groupId) throws IOException {
-            Principal principal = security.getUserPrincipal();
-            try {
-                groupService.transferItemOwnershipFromUserToGroupId(principal.getName(), groupId, itemId);
-                return Response.ok("Ownership transferred").build();
-            } catch (UserUnauthorizedException e) {
-                return Response.status(Status.FORBIDDEN).build();
-            }
-        }
-
-        @GET
-        @Path("/items/{itemId}")
-        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-            MediaType.APPLICATION_JSON})
-        @ApiOperation(value = "The description (metadata) of a single component or profile item")
-        @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-            @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
-            @ApiResponse(code = 404, message = "Item does not exist")
-        })
-        public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
-            LOG.debug("Item with id: {} is requested.", itemId);
-            try {
-                ComponentRegistry cr = this.getBaseRegistry();
-                BaseDescription description;
-                if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
-                    description = cr.getComponentDescriptionAccessControlled(itemId);
-                    return description;
-                }
-                if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
-                    description = cr.getProfileDescriptionAccessControlled(itemId);
-                    return description;
-                }
-                servletResponse.sendError(Status.BAD_REQUEST.getStatusCode());
-                return new BaseDescription();
-
-            } catch (UserUnauthorizedException ex2) {
-                servletResponse.sendError(Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
-                return new BaseDescription();
-            } catch (ItemNotFoundException e) {
-                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-                return new BaseDescription();
-            } catch (AuthenticationRequiredException e) {
-                servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-                return new BaseDescription();
-            }
         }
     }
 
