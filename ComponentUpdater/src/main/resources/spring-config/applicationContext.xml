@@ -35,7 +35,17 @@
 		<property name="ignoreResourceNotFound" value="false" />
 	</bean>
 
-	<bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller" />
+	<bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller">
+            <constructor-arg name="stylesheetLocations">
+                <map key-type="clarin.cmdi.componentregistry.CmdVersion">
+                    <!-- current comp2schema -->
+                    <entry key="CMD_1_2" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
+                    <!-- legacy comp2schema -->
+                    <entry key="CMD_1_1" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1}" />
+                </map>
+            </constructor-arg>
+                
+        </bean>
 
 	<bean id="configuration" class="clarin.cmdi.componentregistry.Configuration"
 		factory-method="getInstance">
