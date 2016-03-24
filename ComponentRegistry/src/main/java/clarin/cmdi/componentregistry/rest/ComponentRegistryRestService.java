@@ -106,7 +106,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author george.georgovassilis@mpi.nl
  *
  */
-@Path("/")
+@Path("/registry")
 @Service
 @Singleton
 public class ComponentRegistryRestService {
@@ -140,7 +140,7 @@ public class ComponentRegistryRestService {
      *
      * @return RegistryService resource with the requested service
      */
-    @Path("/registry/{cmdVersion: 1\\.[12x]}")
+    @Path("/{cmdVersion: 1\\.[12x]}")
     public Class<RegistryService> versionService() {
         return RegistryService.class;
     }
@@ -150,7 +150,7 @@ public class ComponentRegistryRestService {
      *
      * @return RegistryService resource for default version
      */
-    @Path("/registry")
+    @Path("/")
     public Class<RegistryService> defaultVersionService() {
         return RegistryService.class;
     }
