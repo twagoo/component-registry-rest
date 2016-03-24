@@ -136,9 +136,11 @@ public class ComponentRegistryRestService {
     /**
      * Requests a registry service for a specific version of CMDI
      *
+     * Allowed versions in path: 1.1, 1.2, 1.x
+     *
      * @return RegistryService resource with the requested service
      */
-    @Path("/registry/{cmdVersion: [0-9]+\\.[0-9x]+}")
+    @Path("/registry/{cmdVersion: 1\\.[12x]}")
     public Class<RegistryService> versionService() {
         return RegistryService.class;
     }
@@ -405,7 +407,7 @@ public class ComponentRegistryRestService {
             final CmdVersion registryVersion = getCmdVersion();
             if (CANONICAL_CMD_VERSION != registryVersion) {
                 //TODO: only if accepting XML - check!
-                
+
                 // get XML representation of original to serve as input for conversion
                 byte[] originalByes = null;
                 try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -414,13 +416,13 @@ public class ComponentRegistryRestService {
                 } catch (JAXBException ex) {
                     throw new RuntimeException("Failed to marshal component before conversion", ex);
                 }
-                
+
                 // perform conversion
                 final StringWriter resultWriter = new StringWriter();
                 try (InputStream is = new ByteArrayInputStream(originalByes)) {
                     componentSpecConverter.convertComponentSpec(CANONICAL_CMD_VERSION, registryVersion, is, resultWriter);
                 }
-                
+
                 // handle result
                 final String result = resultWriter.toString();
                 if (result == null || result.isEmpty()) {
