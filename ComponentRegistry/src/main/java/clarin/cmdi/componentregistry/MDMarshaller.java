@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry;
 
 import clarin.cmdi.componentregistry.components.ComponentSpec;
+import com.google.common.collect.Maps;
 import eu.clarin.cmdi.toolkit.CMDToolkit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -40,14 +42,17 @@ public class MDMarshaller implements Serializable {
      */
     private static final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
     private Schema generalComponentSchema;
-    private final Templates componentToSchemaTemplates;
+    private final Map<CmdVersion, Templates> componentToSchemaTemplatesMap;
     private final ComponentRegistryResourceResolver resourceResolver;
 
     public MDMarshaller() throws TransformerException {
         resourceResolver = new ComponentRegistryResourceResolver();
         final TransformerFactory transformerFactory = TransformerFactory.newInstance(net.sf.saxon.TransformerFactoryImpl.class.getName(), null);
         transformerFactory.setURIResolver(resourceResolver);
-        componentToSchemaTemplates = transformerFactory.newTemplates(resourceResolver.resolve(Configuration.getInstance().getComponent2SchemaXsl(), null));
+
+        componentToSchemaTemplatesMap = Maps.newEnumMap(CmdVersion.class);
+        //TODO: add templates for CMDI 1.1
+        componentToSchemaTemplatesMap.put(CmdVersion.CMD_1_2, transformerFactory.newTemplates(resourceResolver.resolve(Configuration.getInstance().getComponent2SchemaXsl(), null)));
     }
 
     /**
@@ -104,29 +109,28 @@ public class MDMarshaller implements Serializable {
         return generalComponentSchema;
     }
 
-    public void generateXsd(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) {
+    public void generateXsd(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) throws JAXBException, TransformerException {
         try {
-            // get stylesheet for the requested version
-            // TODO
-            Transformer transformer = componentToSchemaTemplates.newTransformer();
-            transformer.setParameter(CMDToolkit.XSLT_PARAM_COMP2SCHEMA_TOOL_KITLOCATION, Configuration.getInstance().getToolkitLocation());
+            final Templates templates = componentToSchemaTemplatesMap.get(cmdVersion);
+            if (templates == null) {
+                LOG.error("No transformation templates to create a schema for {}", cmdVersion);
+                throw new UnsupportedOperationException("Don't know how to make a schema for " + cmdVersion.toString());
+            } else {
+                final Transformer transformer = templates.newTransformer();
+                transformer.setParameter(CMDToolkit.XSLT_PARAM_COMP2SCHEMA_TOOL_KITLOCATION, Configuration.getInstance().getToolkitLocation());
 
-            // create spec XML
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            marshal(spec, out);
-            //TODO: in case of non-canonical cmd version convert
-            
-            // transform to XSD
-            ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
-            transformer.transform(new StreamSource(input), new StreamResult(outputStream));
-        } catch (TransformerConfigurationException e) {
-            LOG.error("Cannot create Transformer", e);
-        } catch (TransformerException e) {
-            LOG.error("Cannot transform xml file: " + getSpecId(spec), e);
+                // create spec XML
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                marshal(spec, out);
+                //TODO: in case of non-canonical cmd version convert
+
+                // transform to XSD
+                ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
+                transformer.transform(new StreamSource(input), new StreamResult(outputStream));
+            }
         } catch (UnsupportedEncodingException e) {
             LOG.error("Error in encoding: ", e);
-        } catch (JAXBException e) {
-            LOG.error("Cannot marshall spec: " + getSpecId(spec), e);
+            throw new RuntimeException();
         }
     }
 

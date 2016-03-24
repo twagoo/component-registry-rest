@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import javax.xml.transform.TransformerException;
 
 /**
  *
@@ -87,7 +88,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         }
     }
 
-    protected void writeXsd(ComponentSpec expandedSpec, CmdVersion cmdVersion, OutputStream outputStream) {
+    protected void writeXsd(ComponentSpec expandedSpec, CmdVersion cmdVersion, OutputStream outputStream) throws JAXBException, TransformerException {
         getMarshaller().generateXsd(expandedSpec, cmdVersion, outputStream);
     }
 

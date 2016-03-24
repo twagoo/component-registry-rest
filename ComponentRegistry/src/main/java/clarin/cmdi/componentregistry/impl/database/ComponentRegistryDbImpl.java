@@ -629,7 +629,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public void getMDProfileAsXsd(String profileId, CmdVersion cmdVersion, OutputStream outputStream) throws ComponentRegistryException {
         ComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandProfile(profileId, this);
-        writeXsd(expandedSpec, cmdVersion, outputStream);
+        try {
+            writeXsd(expandedSpec, cmdVersion, outputStream);
+        } catch (JAXBException | TransformerException ex) {
+            throw new ComponentRegistryException("Error creating XSD for profile" + profileId, ex);
+        }
     }
 
     @Override
@@ -784,13 +788,11 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         if (this.getRegistrySpace() != null) {
             if (this.getRegistrySpace().equals(RegistrySpace.PUBLISHED)) {
                 return ComponentRegistry.PUBLIC_NAME;
-            } else {
-                if (this.getRegistrySpace().equals(RegistrySpace.GROUP)) {
-                    if (groupId != null) {
-                        return "Registry of group" + groupId.toString();
-                    } else {
-                        return "Error: Registry of group null.";
-                    }
+            } else if (this.getRegistrySpace().equals(RegistrySpace.GROUP)) {
+                if (groupId != null) {
+                    return "Registry of group" + groupId.toString();
+                } else {
+                    return "Error: Registry of group null.";
                 }
             }
         };
@@ -872,7 +874,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     protected MDMarshaller getMarshaller() {
         return marshaller;
     }
-    
+
     @Override
     protected ComponentSpecConverter getSpecConverter() {
         return specConverter;
