@@ -1058,14 +1058,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupC();
 
         String id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
-        String component = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + id + "/xsd"))
-                .accept(MediaType.TEXT_XML).get(String.class).trim();
-        assertTrue(component
-                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
-        assertTrue(component.endsWith("</xs:schema>"));
-
-        component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
+        String component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(component
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
