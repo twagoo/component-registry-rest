@@ -15,7 +15,6 @@ import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
-import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -104,7 +103,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author george.georgovassilis@mpi.nl
  *
  */
-@Path("/registry")
+@Path("/")
 @Service
 @Singleton
 public class ComponentRegistryRestService {
@@ -138,7 +137,7 @@ public class ComponentRegistryRestService {
      *
      * @return RegistryService resource with the requested service
      */
-    @Path("/{cmdVersion: 1\\.[12x]}")
+    @Path("/registry/{cmdVersion: 1\\.[12x]}")
     public Class<RegistryService> versionService() {
         return RegistryService.class;
     }
@@ -148,9 +147,22 @@ public class ComponentRegistryRestService {
      *
      * @return RegistryService resource for default version
      */
-    @Path("/")
+    @Path("/registry")
     public Class<RegistryService> defaultVersionService() {
         return RegistryService.class;
+    }
+
+    @GET
+    @Path("/allowedTypes")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
+        MediaType.APPLICATION_JSON})
+    @ApiOperation(
+            value = "A listing of values that are allowed as element or attribute type by the CMDI schema",
+            response = AllowedAttributetypesXML.class)
+    public AllowedAttributetypesXML getAllowedAttributeTypes()
+            throws ComponentRegistryException, IOException, JAXBException,
+            ParseException {
+        return (new AllowedAttributetypesXML());
     }
 
     /**
@@ -1871,19 +1883,6 @@ public class ComponentRegistryRestService {
                 return new Rss();
             }
 
-        }
-
-        @GET
-        @Path("/AllowedTypes")
-        @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
-            MediaType.APPLICATION_JSON})
-        @ApiOperation(
-                value = "A listing of values that are allowed as element or attribute type by the CMDI schema",
-                response = AllowedAttributetypesXML.class)
-        public AllowedAttributetypesXML getAllowedAttributeTypes()
-                throws ComponentRegistryException, IOException, JAXBException,
-                ParseException {
-            return (new AllowedAttributetypesXML());
         }
     }
 
