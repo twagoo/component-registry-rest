@@ -50,7 +50,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     private JdbcTemplate jdbcTemplate;
     private ComponentRegistry baseRegistry;
     
-    private static final String REGISTRY_BASE = "/registry/1.x";
+    public static final String REGISTRY_BASE = "/registry/1.x";
 
     @Before
     public void init() {

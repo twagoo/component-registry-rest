@@ -25,6 +25,7 @@ import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTes
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.GROUPID_PARAM;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_GROUP;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTest.REGISTRY_BASE;
 import clarin.cmdi.componentregistry.rss.Rss;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.multipart.FormDataMultiPart;
@@ -224,7 +225,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         // test itself
 
         List<Group> result = this.getAuthenticatedResource(getResource()
-                .path("/registry/groups/usermembership"))
+                .path(REGISTRY_BASE + "/groups/usermembership"))
                 .accept(MediaType.APPLICATION_XML).get(GROUP_LIST_GENERICTYPE);
 
         assertEquals(1, result.size());
@@ -249,7 +250,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         String test_component_id = ComponentDescription.COMPONENT_PREFIX + "test_component";
         //I'm not a member
         ClientResponse cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path(REGISTRY_BASE + "/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(403, cr.getStatus());
 
         //make me a member
@@ -257,10 +258,10 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(groupService.userGroupMember(DummyPrincipal.DUMMY_PRINCIPAL.getName(), 3));
 
         cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path(REGISTRY_BASE + "/items/" + test_profile_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(200, cr.getStatus());
         cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path(REGISTRY_BASE + "/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(200, cr.getStatus());
 
         List<String> components = groupService.getComponentIdsInGroup(3);
@@ -286,7 +287,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         String test_profile_id = ProfileDescription.PROFILE_PREFIX + "Dprofile-1";
         // try to move to group C
         ClientResponse cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/items/" + test_profile_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path(REGISTRY_BASE + "/items/" + test_profile_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am member of both groups, so should be allowed
         assertEquals("Moving between groups should be allowed as long as user is member", 200, cr.getStatus());
 
@@ -294,7 +295,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         String test_component_id = ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1";
         // try to move to group C
         cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path(REGISTRY_BASE + "/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am not a member of groups C, so should not be allowed
         assertEquals("Moving between groups should not be allowed if user is not member", 403, cr.getStatus());
 
@@ -302,7 +303,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         test_component_id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
         // try to move to group B (which I am a member of)
         cr = this.getAuthenticatedResource(getResource()
-                .path("/registry/items/" + test_component_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
+                .path(REGISTRY_BASE + "/items/" + test_component_id + "/transferownership").queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         // I am not a member of group C, so should not be allowed
         assertEquals("Moving between groups should not be allowed if user is not member", 403, cr.getStatus());
 
@@ -319,63 +320,63 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         // lists
         List<ProfileDescription> response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/profiles").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(PROFILE_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         List<ComponentDescription> responseC = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, responseC.size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/profiles").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(PROFILE_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         responseC = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(2, responseC.size());
 
         ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
 
         assertEquals(403, clientResponse.getStatus());
 
         // particular components and profiles
         ComponentSpec component = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
         assertEquals("profile-1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
         assertEquals("component-1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
         assertEquals("Bprofile-1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
         assertEquals("Bcomponent-1", component.getComponent().getName());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
@@ -404,42 +405,42 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         // lists 
         List<Comment> response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/"))
+                .path(REGISTRY_BASE + "/components/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/"))
+                .path(REGISTRY_BASE + "/components/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(COMMENT_LIST_GENERICTYPE);
         assertEquals(1, response.size());
 
         ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         // particular comments
         Comment responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
@@ -447,7 +448,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(1, Long.parseLong(responseComment.getId()));
 
         responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
@@ -455,26 +456,26 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(2, Long.parseLong(responseComment.getId()));
 
         responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
         assertEquals(3, Long.parseLong(responseComment.getId()));
 
         responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
         assertEquals(4, Long.parseLong(responseComment.getId()));
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
@@ -491,27 +492,27 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         // lists of profiles and components
         Rss response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/components/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "1")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(2, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/profiles/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/components/rss").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "2")).accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(2, response.getChannel().getItem().size());
 
         ClientResponse clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
+                .path(REGISTRY_BASE + "/components").queryParam("registrySpace", REGISTRY_SPACE_GROUP).queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML)
                 .get(ClientResponse.class);
 
         assertEquals(403, clientResponse.getStatus());
@@ -530,42 +531,42 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         // lists 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/rss"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/rss"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/rss"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         response = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/rss"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/rss"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Rss.class);
         assertEquals(1, response.getChannel().getItem().size());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/rss"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/rss"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/rss"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/rss"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         // particular comments
         Comment responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/comments/1"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
@@ -573,7 +574,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(1, Long.parseLong(responseComment.getId()));
 
         responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/comments/2"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
@@ -581,26 +582,26 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(2, Long.parseLong(responseComment.getId()));
 
         responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/comments/3"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
         assertEquals(3, Long.parseLong(responseComment.getId()));
 
         responseComment = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/comments/4"))
                 .accept(MediaType.APPLICATION_XML)
                 .get(Comment.class);
         assertNotNull(responseComment);
         assertEquals(4, Long.parseLong(responseComment.getId()));
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6"))
+                .path(REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
         clientResponse = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5"))
+                .path(REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5"))
                 .accept(MediaType.APPLICATION_JSON).get(ClientResponse.class);
         assertEquals(403, clientResponse.getStatus());
 
@@ -635,7 +636,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         ClientResponse cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/update")).type(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/update")).type(
                         MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(ClientResponse.Status.OK.getStatusCode(),
                 cResponse.getStatus());
@@ -652,7 +653,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/update")).type(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/update")).type(
                         MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(ClientResponse.Status.OK.getStatusCode(),
                 cResponse.getStatus());
@@ -669,7 +670,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1" + "/update")).type(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1" + "/update")).type(
                         MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(403, cResponse.getStatus());
 
@@ -677,7 +678,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         form = createFormData(RegistryTestHelper.getTestProfileContent("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/update")).type(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/update")).type(
                         MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(ClientResponse.Status.OK.getStatusCode(),
                 cResponse.getStatus());
@@ -694,7 +695,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getTestProfileContent("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/update")).type(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/update")).type(
                         MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(ClientResponse.Status.OK.getStatusCode(),
                 cResponse.getStatus());
@@ -711,7 +712,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getTestProfileContent("TESTNAME"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1" + "/update")).type(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1" + "/update")).type(
                         MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
         assertEquals(403, cResponse.getStatus());
 
@@ -732,7 +733,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getTestProfileContent("publishedName"),
                 "Published");
         RegisterResponse response = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/publish"))
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         RegisterResponse.class, form);
         assertFalse(response.isPrivate());
@@ -752,7 +753,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getTestProfileContent("publishedName"),
                 "Published");
         response = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/publish"))
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         RegisterResponse.class, form);
         assertFalse(response.isPrivate());
@@ -772,7 +773,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getTestProfileContent("publishedName"),
                 "Published");
         ClientResponse cr = getAuthenticatedResource(getResource().path(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1" + "/publish"))
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         ClientResponse.class, form);
         assertEquals(403, cr.getStatus());
@@ -784,7 +785,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
                 "Published");
         response = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/publish"))
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         RegisterResponse.class, form);
         assertFalse(response.isPrivate());
@@ -804,7 +805,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
                 "Published");
         response = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/publish"))
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         RegisterResponse.class, form);
         assertFalse(response.isPrivate());
@@ -824,7 +825,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
                 "Published");
         cr = getAuthenticatedResource(getResource().path(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1" + "/publish"))
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1" + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         ClientResponse.class, form);
         assertEquals(403, cr.getStatus());
@@ -842,29 +843,29 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupC();
 
         ClientResponse response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX
                 + "component-1").delete(ClientResponse.class);
         assertEquals(200, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX
                 + "component-1").get(ClientResponse.class);
         assertEquals(404, response.getStatus());
 
         // my group, not my component 
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX
                 + "Bcomponent-1").delete(ClientResponse.class);
         assertEquals(200, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX
                 + "Bcomponent-1").get(ClientResponse.class);
         assertEquals(404, response.getStatus());
 
         // not my group
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX
                 + "Ccomponent-1").delete(ClientResponse.class);
         assertEquals(403, response.getStatus());
 
@@ -881,29 +882,29 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         // profiles
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "profile-1").delete(ClientResponse.class);
         assertEquals(200, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "profile-1").get(ClientResponse.class);
         assertEquals(404, response.getStatus());
 
         // my group, not my component 
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "Bprofile-1").delete(ClientResponse.class);
         assertEquals(200, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "Bprofile-1").get(ClientResponse.class);
         assertEquals(404, response.getStatus());
 
         // not my group
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX
                 + "Cprofile-1").delete(ClientResponse.class);
         assertEquals(403, response.getStatus());
 
@@ -936,40 +937,40 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         (new RegistryTestHelper()).addCommentBypassAuthorisation(commentsDao, "COMMENTCp1", ProfileDescription.PROFILE_PREFIX + "Cprofile-1", "anotherPrincipal");
 
         ClientResponse response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").delete(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").delete(
                         ClientResponse.class);
         assertEquals(200, response.getStatus());
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").get(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1/comments/1").get(
                         ClientResponse.class);
         assertEquals(404, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1/comments/3").delete(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1/comments/3").delete(
                         ClientResponse.class);
         assertEquals(403, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5").delete(
+                REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1/comments/5").delete(
                         ClientResponse.class);
         assertEquals(403, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").delete(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").delete(
                         ClientResponse.class);
         assertEquals(200, response.getStatus());
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").get(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1/comments/2").get(
                         ClientResponse.class);
         assertEquals(404, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1/comments/4").delete(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1/comments/4").delete(
                         ClientResponse.class);
         assertEquals(403, response.getStatus());
 
         response = getAuthenticatedResource(
-                "/registry/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6").delete(
+                REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1/comments/6").delete(
                         ClientResponse.class);
         assertEquals(403, response.getStatus());
 
@@ -989,7 +990,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getCommentTestContentStringForProfile("comment1", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         CommentResponse response = getAuthenticatedResource(
-                "/registry/profiles/" + id + "/comments").type(
+                REGISTRY_BASE + "/profiles/" + id + "/comments").type(
                         MediaType.MULTIPART_FORM_DATA)
                 .post(CommentResponse.class, form);
         assertTrue(response.isRegistered());
@@ -1010,7 +1011,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getCommentTestContentStringForComponent("comment2", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         response = getAuthenticatedResource(
-                "/registry/components/" + id + "/comments").type(
+                REGISTRY_BASE + "/components/" + id + "/comments").type(
                         MediaType.MULTIPART_FORM_DATA)
                 .post(CommentResponse.class, form);
         assertTrue(response.isRegistered());
@@ -1032,7 +1033,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getCommentTestContentStringForProfile("comment3", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         ClientResponse cresponse = getAuthenticatedResource(
-                "/registry/profiles/" + id + "/comments").type(
+                REGISTRY_BASE + "/profiles/" + id + "/comments").type(
                         MediaType.MULTIPART_FORM_DATA)
                 .post(ClientResponse.class, form);
         assertEquals(403, cresponse.getStatus());
@@ -1043,7 +1044,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 RegistryTestHelper.getCommentTestContentStringForComponent("comment4", id),
                 MediaType.APPLICATION_OCTET_STREAM_TYPE);
         cresponse = getAuthenticatedResource(
-                "/registry/components/" + id + "/comments").type(
+                REGISTRY_BASE + "/components/" + id + "/comments").type(
                         MediaType.MULTIPART_FORM_DATA)
                 .post(ClientResponse.class, form);
         assertEquals(403, cresponse.getStatus());
@@ -1058,7 +1059,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupC();
 
         String id = ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1";
-        String component = this.getAuthenticatedResource(getResource().path("/registry/components/" + id + "/xml"))
+        String component = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(component
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
@@ -1067,28 +1068,22 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         id = ProfileDescription.PROFILE_PREFIX + "Bprofile-1";
         String profile = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + id + "/xsd"))
+                .path(REGISTRY_BASE + "/profiles/" + id + "/xsd"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(profile
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xs:schema"));
         assertTrue(profile.endsWith("</xs:schema>"));
 
-        profile = this.getAuthenticatedResource(getResource().path("/registry/profiles/" + id + "/xml"))
+        profile = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + id + "/xml"))
                 .accept(MediaType.TEXT_XML).get(String.class).trim();
         assertTrue(profile
                 .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<ComponentSpec"));
         assertTrue(profile.endsWith("</ComponentSpec>"));
         assertTrue(profile.contains("xsi:noNamespaceSchemaLocation"));
 
-        id = ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1";
-        ClientResponse resp = this.getAuthenticatedResource(getResource()
-                .path("/registry/components/" + id + "/xsd"))
-                .accept(MediaType.TEXT_XML).get(ClientResponse.class);
-        assertEquals("XSD should always be available", 200, resp.getStatus());
-
         id = ProfileDescription.PROFILE_PREFIX + "Cprofile-1";
-        resp = this.getAuthenticatedResource(getResource()
-                .path("/registry/profiles/" + id + "/xsd"))
+        ClientResponse resp = this.getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles/" + id + "/xsd"))
                 .accept(MediaType.TEXT_XML).get(ClientResponse.class);
         assertEquals("XSD should always be available", 200, resp.getStatus());
 
@@ -1099,7 +1094,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupA();
 
         ClientResponse response = getResource()
-                .path("/registry/components")
+                .path(REGISTRY_BASE + "/components")
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam("groupId", "1")
                 .accept(MediaType.APPLICATION_XML)
@@ -1116,7 +1111,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         ClientResponse response = getAuthenticatedResource(
                 getResource()
-                .path("/registry/components")
+                .path(REGISTRY_BASE + "/components")
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "3"))
                 .accept(MediaType.APPLICATION_XML)
@@ -1129,7 +1124,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupA();
 
         List<ComponentDescription> response = getAuthenticatedResource(getResource()
-                .path("/registry/components")
+                .path(REGISTRY_BASE + "/components")
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "1"))
                 .accept(MediaType.APPLICATION_XML)
@@ -1143,7 +1138,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupA();
 
         ClientResponse response = (getResource()
-                .path("/registry/profiles")
+                .path(REGISTRY_BASE + "/profiles")
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "1"))
                 .accept(MediaType.APPLICATION_XML)
@@ -1156,7 +1151,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         fillUpGroupA();
 
         List<ProfileDescription> response = getAuthenticatedResource(getResource()
-                .path("/registry/profiles")
+                .path(REGISTRY_BASE + "/profiles")
                 .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_GROUP)
                 .queryParam(GROUPID_PARAM, "1"))
                 .accept(MediaType.APPLICATION_XML)
