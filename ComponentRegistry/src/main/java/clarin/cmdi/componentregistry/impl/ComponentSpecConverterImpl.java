@@ -5,7 +5,6 @@ import java.io.Writer;
 import clarin.cmdi.componentregistry.ComponentSpecConverter;
 import eu.clarin.cmdi.toolkit.CMDToolkit;
 import java.io.InputStream;
-import java.util.logging.Level;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;

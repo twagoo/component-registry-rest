@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry;
 
+import static clarin.cmdi.componentregistry.CmdVersion.CANONICAL_CMD_VERSION;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import com.google.common.collect.Maps;
 import eu.clarin.cmdi.toolkit.CMDToolkit;
@@ -14,14 +15,15 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
@@ -30,10 +32,11 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 public class MDMarshaller implements Serializable {
-
+    
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
     /**
      * I define W3C_XML_SCHEMA_NS_URI here cannot get it from
@@ -44,15 +47,31 @@ public class MDMarshaller implements Serializable {
     private Schema generalComponentSchema;
     private final Map<CmdVersion, Templates> componentToSchemaTemplatesMap;
     private final ComponentRegistryResourceResolver resourceResolver;
-
-    public MDMarshaller() throws TransformerException {
+    
+    @Autowired
+    private ComponentSpecConverter specConverter;
+    
+    public MDMarshaller(Map<CmdVersion, String> stylesheetLocations) throws TransformerException {
         resourceResolver = new ComponentRegistryResourceResolver();
+        
         final TransformerFactory transformerFactory = TransformerFactory.newInstance(net.sf.saxon.TransformerFactoryImpl.class.getName(), null);
         transformerFactory.setURIResolver(resourceResolver);
 
+        // create templates on basis of stylesheet URIs
         componentToSchemaTemplatesMap = Maps.newEnumMap(CmdVersion.class);
-        //TODO: add templates for CMDI 1.1
-        componentToSchemaTemplatesMap.put(CmdVersion.CMD_1_2, transformerFactory.newTemplates(resourceResolver.resolve(Configuration.getInstance().getComponent2SchemaXsl(), null)));
+        for (Entry<CmdVersion, String> versionStylesheet : stylesheetLocations.entrySet()) {
+            final String stylesheetUri = versionStylesheet.getValue();
+            if (stylesheetUri == null) {
+                // probably missing context parameter
+                LOG.warn("Missing URI for {}", versionStylesheet.getKey());
+            } else {
+                // create templates
+                final Templates templates = transformerFactory.newTemplates(resourceResolver.resolve(stylesheetUri, null));
+                // add to map
+                componentToSchemaTemplatesMap.put(versionStylesheet.getKey(), templates);
+            }
+        }
+        
     }
 
     /**
@@ -67,7 +86,7 @@ public class MDMarshaller implements Serializable {
         String packageName = docClass.getPackage().getName();
         JAXBContext jc = JAXBContext.newInstance(packageName);
         Unmarshaller u = jc.createUnmarshaller();
-
+        
         if (schema != null) {
             u.setSchema(schema);
         }
@@ -83,17 +102,17 @@ public class MDMarshaller implements Serializable {
     public <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         final String packageName = marshallableObject.getClass().getPackage().getName();
         final JAXBContext jc = JAXBContext.newInstance(packageName);
-
+        
         final Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         if (ComponentSpec.class.equals(marshallableObject.getClass())) {
             m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, Configuration.getInstance().getGeneralComponentSchema());
         }
-
+        
         final Writer writer = new OutputStreamWriter(out, "UTF-8");
         m.marshal(marshallableObject, writer);
     }
-
+    
     public synchronized Schema getComponentSchema() {
         if (generalComponentSchema == null) {
             try {
@@ -108,7 +127,7 @@ public class MDMarshaller implements Serializable {
         }
         return generalComponentSchema;
     }
-
+    
     public void generateXsd(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) throws JAXBException, TransformerException {
         try {
             final Templates templates = componentToSchemaTemplatesMap.get(cmdVersion);
@@ -122,10 +141,24 @@ public class MDMarshaller implements Serializable {
                 // create spec XML
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 marshal(spec, out);
-                //TODO: in case of non-canonical cmd version convert
+
+                // check if conversion is necessary
+                final byte[] xmlBytes;
+                if (cmdVersion != CANONICAL_CMD_VERSION) {
+                    //convert to target version before transforming
+                    final byte[] canonicalOut = out.toByteArray();
+                    final ByteArrayOutputStream convertedOut = new ByteArrayOutputStream();
+                    specConverter.convertComponentSpec(CANONICAL_CMD_VERSION, cmdVersion, new ByteArrayInputStream(canonicalOut), new OutputStreamWriter(convertedOut));
+
+                    //use converted XML as input for transformation
+                    xmlBytes = convertedOut.toByteArray();
+                } else {
+                    //use 'canonical' XML as input for transformation
+                    xmlBytes = out.toByteArray();
+                }
 
                 // transform to XSD
-                ByteArrayInputStream input = new ByteArrayInputStream(out.toByteArray());
+                ByteArrayInputStream input = new ByteArrayInputStream(xmlBytes);
                 transformer.transform(new StreamSource(input), new StreamResult(outputStream));
             }
         } catch (UnsupportedEncodingException e) {
@@ -133,7 +166,7 @@ public class MDMarshaller implements Serializable {
             throw new RuntimeException();
         }
     }
-
+    
     private String getSpecId(ComponentSpec spec) {
         String result = "";
         if (spec != null && spec.getHeader() != null) {
