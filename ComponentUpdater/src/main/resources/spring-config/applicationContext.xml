@@ -54,8 +54,6 @@
 			value="${eu.clarin.cmdi.componentregistry.adminUsers}" />
 		<property name="generalComponentSchema"
 			value="${eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl}" />
-		<property name="component2SchemaXsl"
-			value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
 		<property name="ccrRestUrl"
 			value="${eu.clarin.cmdi.componentregistry.ccrRestUrl}" />
                 <property name="toolkitLocation"

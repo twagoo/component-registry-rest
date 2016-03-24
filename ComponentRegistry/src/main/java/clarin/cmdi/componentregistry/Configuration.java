@@ -22,7 +22,6 @@ public class Configuration {
     //NOTE: Default values, can be overwritten in applicationContext.xml
     private String toolkitLocation = "https://infra.clarin.eu/CMDI/1.x";
     private String generalComponentSchema = "https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd";
-    private String component2SchemaXsl = "https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl";
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
@@ -38,10 +37,6 @@ public class Configuration {
 
     public static Configuration getInstance() {
         return INSTANCE;
-    }
-
-    public String getComponent2SchemaXsl() {
-        return component2SchemaXsl;
     }
 
     public List<String> getDisplayNameShibbolethKeys() {
@@ -95,11 +90,6 @@ public class Configuration {
             LOG.info("Setting adminUsersList to {}", Arrays.toString(adminUsersArray));
         }
         setAdminUsers(Arrays.asList(adminUsersArray));
-    }
-
-    public void setComponent2SchemaXsl(String component2SchemaXsl) {
-        LOG.info("Setting component2SchemaXsl to {}", component2SchemaXsl);
-        this.component2SchemaXsl = component2SchemaXsl;
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {

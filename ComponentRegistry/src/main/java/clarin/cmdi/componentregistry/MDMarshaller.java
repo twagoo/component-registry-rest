@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 public class MDMarshaller implements Serializable {
-    
+
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
     /**
      * I define W3C_XML_SCHEMA_NS_URI here cannot get it from
@@ -47,13 +47,13 @@ public class MDMarshaller implements Serializable {
     private Schema generalComponentSchema;
     private final Map<CmdVersion, Templates> componentToSchemaTemplatesMap;
     private final ComponentRegistryResourceResolver resourceResolver;
-    
+
     @Autowired
     private ComponentSpecConverter specConverter;
-    
+
     public MDMarshaller(Map<CmdVersion, String> stylesheetLocations) throws TransformerException {
         resourceResolver = new ComponentRegistryResourceResolver();
-        
+
         final TransformerFactory transformerFactory = TransformerFactory.newInstance(net.sf.saxon.TransformerFactoryImpl.class.getName(), null);
         transformerFactory.setURIResolver(resourceResolver);
 
@@ -71,7 +71,7 @@ public class MDMarshaller implements Serializable {
                 componentToSchemaTemplatesMap.put(versionStylesheet.getKey(), templates);
             }
         }
-        
+
     }
 
     /**
@@ -86,7 +86,7 @@ public class MDMarshaller implements Serializable {
         String packageName = docClass.getPackage().getName();
         JAXBContext jc = JAXBContext.newInstance(packageName);
         Unmarshaller u = jc.createUnmarshaller();
-        
+
         if (schema != null) {
             u.setSchema(schema);
         }
@@ -102,17 +102,17 @@ public class MDMarshaller implements Serializable {
     public <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         final String packageName = marshallableObject.getClass().getPackage().getName();
         final JAXBContext jc = JAXBContext.newInstance(packageName);
-        
+
         final Marshaller m = jc.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         if (ComponentSpec.class.equals(marshallableObject.getClass())) {
             m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, Configuration.getInstance().getGeneralComponentSchema());
         }
-        
+
         final Writer writer = new OutputStreamWriter(out, "UTF-8");
         m.marshal(marshallableObject, writer);
     }
-    
+
     public synchronized Schema getComponentSchema() {
         if (generalComponentSchema == null) {
             try {
@@ -127,7 +127,7 @@ public class MDMarshaller implements Serializable {
         }
         return generalComponentSchema;
     }
-    
+
     public void generateXsd(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) throws JAXBException, TransformerException {
         try {
             final Templates templates = componentToSchemaTemplatesMap.get(cmdVersion);
@@ -145,6 +145,9 @@ public class MDMarshaller implements Serializable {
                 // check if conversion is necessary
                 final byte[] xmlBytes;
                 if (cmdVersion != CANONICAL_CMD_VERSION) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Schema requested for {}, {}. Conversion required.", getSpecId(spec), cmdVersion);
+                    }
                     //convert to target version before transforming
                     final byte[] canonicalOut = out.toByteArray();
                     final ByteArrayOutputStream convertedOut = new ByteArrayOutputStream();
@@ -166,7 +169,7 @@ public class MDMarshaller implements Serializable {
             throw new RuntimeException();
         }
     }
-    
+
     private String getSpecId(ComponentSpec spec) {
         String result = "";
         if (spec != null && spec.getHeader() != null) {
