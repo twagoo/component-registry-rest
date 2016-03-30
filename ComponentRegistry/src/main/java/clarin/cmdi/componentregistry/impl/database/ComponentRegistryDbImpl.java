@@ -598,8 +598,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         int result = 0;
         this.checkAuthorisation(desc);
         if (desc.isPublic()) { // if already in published
-            // todo
-            desc.setHref(ComponentUtils.createPublicHref(desc.getHref()));
             Number id = getIdForDescription(desc);
             try {
                 // Update description & content

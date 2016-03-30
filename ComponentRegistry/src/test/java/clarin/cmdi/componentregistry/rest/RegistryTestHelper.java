@@ -63,7 +63,6 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
-        desc.setHref("link:" + desc.getId());
         desc.setPublic(isPublic);
         return addComponent(content, testRegistry, desc);
     }
@@ -87,7 +86,6 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
-        desc.setHref("link:" + desc.getId());
         desc.setPublic(isPublic);
         return addComponent(content, testRegistry, desc);
     }
@@ -145,7 +143,6 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
-        desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
         return addProfile(content, testRegistry, desc);
     }
@@ -169,7 +166,6 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
-        desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
         return addProfile(content, testRegistry, desc);
     }

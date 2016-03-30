@@ -1646,13 +1646,11 @@ public class ComponentRegistryRestService {
 
         private ComponentDescription createNewComponentDescription() {
             ComponentDescription desc = ComponentDescription.createNewDescription();
-            desc.setHref(createXlink(desc.getId()));
             return desc;
         }
 
         private ProfileDescription createNewProfileDescription() {
             ProfileDescription desc = ProfileDescription.createNewDescription();
-            desc.setHref(createXlink(desc.getId()));
             return desc;
         }
 
