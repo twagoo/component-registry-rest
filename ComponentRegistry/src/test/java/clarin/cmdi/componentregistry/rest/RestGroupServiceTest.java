@@ -744,8 +744,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(1, profiles.size());
         ProfileDescription profileDescription = profiles.get(0);
         assertEquals(ProfileDescription.PROFILE_PREFIX + "profile-1", profileDescription.getId());
-        assertEquals("link:" + ProfileDescription.PROFILE_PREFIX + "profile-1",
-                profileDescription.getHref());
         assertEquals("Published", profileDescription.getDescription());
 
         // not my profile from "my" group
@@ -764,8 +762,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(2, profiles.size());
         profileDescription = profiles.get(0);
         assertEquals(ProfileDescription.PROFILE_PREFIX + "Bprofile-1", profileDescription.getId());
-        assertEquals("link:" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1",
-                profileDescription.getHref());
         assertEquals("Published", profileDescription.getDescription());
 
         // not my profile, not my group 
@@ -796,8 +792,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(1, components.size());
         ComponentDescription componentDescription = components.get(0);
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "component-1", componentDescription.getId());
-        assertEquals("link:" + ComponentDescription.COMPONENT_PREFIX + "component-1",
-                componentDescription.getHref());
         assertEquals("Published", componentDescription.getDescription());
 
         // not my profile from "my" group
@@ -816,8 +810,6 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(2, components.size());
         componentDescription = components.get(0);
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1", componentDescription.getId());
-        assertEquals("link:" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1",
-                componentDescription.getHref());
         assertEquals("Published", componentDescription.getDescription());
 
         // not my profile, not my group 
