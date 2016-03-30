@@ -1266,7 +1266,7 @@ public class ComponentRegistryRestService {
                                 WebApplicationException {
                             try {
                                 final CmdVersion[] versions;
-                                if (targetVersion != null) {
+                                if (targetVersion != null && !targetVersion.isEmpty()) {
                                     //remove trailing slash from target version param and get matching CmdVersion value
                                     versions = new CmdVersion[]{getCmdVersion(), getCmdVersion(targetVersion.replaceAll("\\/$", ""))};
                                 } else {
