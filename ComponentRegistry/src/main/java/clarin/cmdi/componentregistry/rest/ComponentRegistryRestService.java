@@ -20,6 +20,7 @@ import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_BASE_PARAM;
@@ -1330,12 +1331,7 @@ public class ComponentRegistryRestService {
                 UserCredentials userCredentials = getUserCredentials(principal);
                 ProfileDescription desc = this.createNewProfileDescription();
                 desc.setCreatorName(userCredentials.getDisplayName());
-                desc.setUserId(userCredentials.getPrincipalName()); // Hash used to
-                // be created
-                // here, now Id
-                // is
-                // constructed
-                // by impl
+                desc.setUserId(userCredentials.getPrincipalName()); // Hash used to be created here, now Id is constructed by impl
                 desc.setName(name);
                 desc.setDescription(description);
                 desc.setGroupName(group);
@@ -1498,9 +1494,7 @@ public class ComponentRegistryRestService {
 
         private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
             try {
-
-                DescriptionValidator descriptionValidator = new DescriptionValidator(
-                        desc);
+                DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
                 MDValidator validator = new MDValidator(input, desc, registry, marshaller);
                 RegisterResponse response = new RegisterResponse();
                 //obsolete. Make it setstatus
@@ -1512,7 +1506,7 @@ public class ComponentRegistryRestService {
 
                     try {
                         checkForRecursion(validator, registry, desc);
-
+                        
                         // Add profile
                         int returnCode = action.execute(desc, spec, response,
                                 registry);

@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.frontend;
 
-import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import java.io.Serializable;
 
