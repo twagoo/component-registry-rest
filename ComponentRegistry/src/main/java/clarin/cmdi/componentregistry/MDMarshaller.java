@@ -128,45 +128,72 @@ public class MDMarshaller implements Serializable {
         return generalComponentSchema;
     }
 
-    public void generateXsd(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) throws JAXBException, TransformerException {
+    public void generateXsd(ComponentSpec spec, CmdVersion[] cmdVersions, OutputStream outputStream) throws JAXBException, TransformerException {
         try {
-            final Templates templates = componentToSchemaTemplatesMap.get(cmdVersion);
-            if (templates == null) {
-                LOG.error("No transformation templates to create a schema for {}", cmdVersion);
-                throw new UnsupportedOperationException("Don't know how to make a schema for " + cmdVersion.toString());
-            } else {
-                final Transformer transformer = templates.newTransformer();
-                transformer.setParameter(CMDToolkit.XSLT_PARAM_COMP2SCHEMA_TOOL_KITLOCATION, Configuration.getInstance().getToolkitLocation());
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            //create spec XML
+            marshal(spec, out);
+            byte[] xmlBytes = out.toByteArray();
 
-                // create spec XML
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                marshal(spec, out);
+            //we now have XML in the canonical version
+            CmdVersion currentCmdVersion = CANONICAL_CMD_VERSION;
+            if (cmdVersions != null) {
+                //convert for each version, then pass into next iteration... (reduce)
+                for (CmdVersion cmdVersion : cmdVersions) {
+                    if (cmdVersion != null) { // null values can occur, so we need to be tolerant (cheaper than preventing them)
+                        if (cmdVersion != currentCmdVersion) { // check if conversion is necessary
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Schema requested for {}, {}. Conversion required.", getSpecId(spec), cmdVersion);
+                            }
+                            //convert to (current) target version
+                            final ByteArrayOutputStream convertedOut = new ByteArrayOutputStream();
+                            specConverter.convertComponentSpec(currentCmdVersion, cmdVersion, new ByteArrayInputStream(xmlBytes), new OutputStreamWriter(convertedOut));
 
-                // check if conversion is necessary
-                final byte[] xmlBytes;
-                if (cmdVersion != CANONICAL_CMD_VERSION) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Schema requested for {}, {}. Conversion required.", getSpecId(spec), cmdVersion);
+                            //use converted XML as input for next transformation
+                            xmlBytes = convertedOut.toByteArray();
+
+                            //bytes now represent this version
+                            currentCmdVersion = cmdVersion;
+                        }
                     }
-                    //convert to target version before transforming
-                    final byte[] canonicalOut = out.toByteArray();
-                    final ByteArrayOutputStream convertedOut = new ByteArrayOutputStream();
-                    specConverter.convertComponentSpec(CANONICAL_CMD_VERSION, cmdVersion, new ByteArrayInputStream(canonicalOut), new OutputStreamWriter(convertedOut));
-
-                    //use converted XML as input for transformation
-                    xmlBytes = convertedOut.toByteArray();
-                } else {
-                    //use 'canonical' XML as input for transformation
-                    xmlBytes = out.toByteArray();
                 }
-
-                // transform to XSD
-                ByteArrayInputStream input = new ByteArrayInputStream(xmlBytes);
-                transformer.transform(new StreamSource(input), new StreamResult(outputStream));
             }
+
+            /**
+             * *
+             * Ready to transform to XSD!
+             *
+             * `xmlBytes` now has the input XML for the XSD transformation
+             * `currentCmdVersion` now is the CMDI version of that XML
+             */
+            transformXmlToXsd(xmlBytes, currentCmdVersion, outputStream);
         } catch (UnsupportedEncodingException e) {
             LOG.error("Error in encoding: ", e);
             throw new RuntimeException();
+        }
+    }
+
+    /**
+     * 
+     * @param xmlInputBytes represents XML to create XSD for
+     * @param cmdVersion CMDI version of the XML
+     * @param outputStream stream to write XSD to
+     * @throws UnsupportedOperationException
+     * @throws TransformerException 
+     */
+    protected void transformXmlToXsd(final byte[] xmlInputBytes, final CmdVersion cmdVersion, OutputStream outputStream) throws UnsupportedOperationException, TransformerException {
+        final Templates templates = componentToSchemaTemplatesMap.get(cmdVersion);
+        if (templates == null) {
+            LOG.error("No transformation templates to create a schema for {}", cmdVersion);
+            throw new UnsupportedOperationException("Don't know how to make a schema for " + cmdVersion.toString());
+        } else {
+
+            final Transformer transformer = templates.newTransformer();
+            transformer.setParameter(CMDToolkit.XSLT_PARAM_COMP2SCHEMA_TOOL_KITLOCATION, Configuration.getInstance().getToolkitLocation());
+
+            // transform to XSD
+            ByteArrayInputStream input = new ByteArrayInputStream(xmlInputBytes);
+            transformer.transform(new StreamSource(input), new StreamResult(outputStream));
         }
     }
 

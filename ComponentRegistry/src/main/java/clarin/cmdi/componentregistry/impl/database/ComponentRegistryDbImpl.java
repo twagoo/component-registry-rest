@@ -627,10 +627,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public void getMDProfileAsXsd(String profileId, CmdVersion cmdVersion, OutputStream outputStream) throws ComponentRegistryException {
+    public void getMDProfileAsXsd(String profileId, CmdVersion[] cmdVersions, OutputStream outputStream) throws ComponentRegistryException {
         ComponentSpec expandedSpec = CMDComponentSpecExpanderDbImpl.expandProfile(profileId, this);
         try {
-            writeXsd(expandedSpec, cmdVersion, outputStream);
+            writeXsd(expandedSpec, cmdVersions, outputStream);
         } catch (JAXBException | TransformerException ex) {
             throw new ComponentRegistryException("Error creating XSD for profile" + profileId, ex);
         }

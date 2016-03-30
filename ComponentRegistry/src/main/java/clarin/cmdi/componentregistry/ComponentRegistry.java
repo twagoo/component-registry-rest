@@ -110,7 +110,16 @@ public interface ComponentRegistry {
 
     void getMDProfileAsXml(String profileId, CmdVersion cmdVersion, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
-    void getMDProfileAsXsd(String profileId, CmdVersion cmdVersion, OutputStream outputStream) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
+    /**
+     * 
+     * @param profileId id of profile to get XSD for
+     * @param cmdVersions versions to convert to (in order) before generating XSD - leave empty or null to get canonical version
+     * @param outputStream stream XSD output gets written to
+     * @throws ComponentRegistryException
+     * @throws UserUnauthorizedException
+     * @throws ItemNotFoundException 
+     */
+    void getMDProfileAsXsd(String profileId, CmdVersion[] cmdVersions, OutputStream outputStream) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 
     void getMDComponentAsXml(String componentId, CmdVersion cmdVersion, OutputStream output) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException;
 

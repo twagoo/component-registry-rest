@@ -190,8 +190,17 @@ public class ComponentRegistryRestService {
         private ComponentSpecConverter componentSpecConverter;
 
         private CmdVersion getCmdVersion() {
-            if (cmdVersion != null) {
-                switch (cmdVersion) {
+            final CmdVersion version = getCmdVersion(cmdVersion);
+            if (version != null) {
+                return version;
+            } else {
+                return CmdVersion.CMD_1_1;
+            }
+        }
+
+        private static CmdVersion getCmdVersion(String versionString) {
+            if (versionString != null) {
+                switch (versionString) {
                     case "1.1":
                         return CmdVersion.CMD_1_1;
                     case "1.2":
@@ -203,7 +212,7 @@ public class ComponentRegistryRestService {
                 // default: fall through, same as null case
             }
             // also in case of null: 'default' registry
-            return CmdVersion.CMD_1_1;
+            return null;
         }
 
         private ComponentRegistry getRegistry(RegistrySpace space, Number groupId) {
@@ -1207,7 +1216,7 @@ public class ComponentRegistryRestService {
         }
 
         @GET
-        @Path("/profiles/{profileId}/{rawType}")
+        @Path("/profiles/{profileId}/{targetVersion:([0-9]+\\.[0-9]+/)?}{rawType}")
         @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML})
         @ApiOperation(value = "The expanded XML or XSD represenation of the component specification of a single profile (publicly accessible regardless of state!)")
         @ApiResponses(value = {
@@ -1215,7 +1224,9 @@ public class ComponentRegistryRestService {
         })
         public Response getRegisteredProfileRawType(
                 @PathParam("profileId") final String profileId,
-                @PathParam("rawType") String rawType) throws ComponentRegistryException, IllegalArgumentException {
+                @PathParam("targetVersion") final String targetVersion,
+                @PathParam("rawType") String rawType)
+                throws ComponentRegistryException, IllegalArgumentException {
 
             LOG.debug("Profile with id {} and rawType {} is requested.", profileId,
                     rawType);
@@ -1255,7 +1266,14 @@ public class ComponentRegistryRestService {
                         public void write(OutputStream output) throws IOException,
                                 WebApplicationException {
                             try {
-                                registry.getMDProfileAsXsd(profileId, getCmdVersion(), output); //TODO: function of version number
+                                final CmdVersion[] versions;
+                                if (targetVersion != null) {
+                                    //remove trailing slash from target version param and get matching CmdVersion value
+                                    versions = new CmdVersion[]{getCmdVersion(), getCmdVersion(targetVersion.replaceAll("\\/$", ""))};
+                                } else {
+                                    versions = new CmdVersion[]{getCmdVersion()};
+                                }
+                                registry.getMDProfileAsXsd(profileId, versions, output);
                             } catch (ComponentRegistryException | UserUnauthorizedException | ItemNotFoundException e) {
                                 LOG.warn("Could not retrieve component {}: {}",
                                         profileId, e.getMessage());

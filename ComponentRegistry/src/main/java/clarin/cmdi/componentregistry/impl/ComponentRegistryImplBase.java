@@ -88,8 +88,8 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         }
     }
 
-    protected void writeXsd(ComponentSpec expandedSpec, CmdVersion cmdVersion, OutputStream outputStream) throws JAXBException, TransformerException {
-        getMarshaller().generateXsd(expandedSpec, cmdVersion, outputStream);
+    protected void writeXsd(ComponentSpec expandedSpec, CmdVersion[] cmdVersions, OutputStream outputStream) throws JAXBException, TransformerException {
+        getMarshaller().generateXsd(expandedSpec, cmdVersions, outputStream);
     }
 
     protected void writeXml(ComponentSpec spec, CmdVersion cmdVersion, OutputStream outputStream) {
