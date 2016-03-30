@@ -21,7 +21,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -76,6 +75,7 @@ public class MDMarshaller implements Serializable {
 
     /**
      *
+     * @param <T> object type to unmarshall to
      * @param docClass
      * @param inputStream
      * @param schema to validate against, can be null for no validation.
@@ -98,6 +98,11 @@ public class MDMarshaller implements Serializable {
     /**
      * Will wrap the Outputstream in a OutputStreamWriter with encoding set to
      * UTF-8. This to make sure profiles are stored correctly.
+     * @param <T> object type to marshall from
+     * @param marshallableObject object to marshall
+     * @param out stream to marshall to
+     * @throws javax.xml.bind.JAXBException
+     * @throws java.io.UnsupportedEncodingException
      */
     public <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         final String packageName = marshallableObject.getClass().getPackage().getName();
@@ -119,9 +124,7 @@ public class MDMarshaller implements Serializable {
                 SchemaFactory schemaFactory = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
                 schemaFactory.setResourceResolver(new ComponentRegistryResourceResolver());
                 generalComponentSchema = schemaFactory.newSchema(new URL(Configuration.getInstance().getGeneralComponentSchema()));
-            } catch (MalformedURLException e) {
-                LOG.error("Cannot instantiate schema", e);
-            } catch (SAXException e) {
+            } catch (MalformedURLException | SAXException e) {
                 LOG.error("Cannot instantiate schema", e);
             }
         }
@@ -206,18 +209,16 @@ public class MDMarshaller implements Serializable {
     }
 
     /**
+     * @param <T> object type to marshall from
      * @param marshallableObject
      * @return the xml representation of the marshallableObject
-     * @throws jaxb exceptions are wrapped in RuntimeExceptions
      */
     public <T> String marshalToString(T marshallableObject) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             marshal(marshallableObject, out);
             return out.toString("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        } catch (JAXBException e) {
+        } catch (UnsupportedEncodingException | JAXBException e) {
             throw new RuntimeException(e);
         }
     }
