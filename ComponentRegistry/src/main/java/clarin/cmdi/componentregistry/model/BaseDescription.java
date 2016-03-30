@@ -77,7 +77,6 @@ public class BaseDescription implements Serializable {
     @Column(name = "domain_name")
     private String domainName;
 
-    @XmlTransient
     @XmlElement(namespace = "http://www.w3.org/1999/xlink")
     private String href;
 

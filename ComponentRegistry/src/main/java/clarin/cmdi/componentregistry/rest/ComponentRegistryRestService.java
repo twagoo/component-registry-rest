@@ -42,6 +42,7 @@ import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.US
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
@@ -64,6 +65,7 @@ import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -289,7 +291,7 @@ public class ComponentRegistryRestService {
 
             if (!checkRegistrySpaceString(registrySpace)) {
                 servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
 
             try {
@@ -300,7 +302,8 @@ public class ComponentRegistryRestService {
                         "Releasing {} registered components into the world ({} millisecs)",
                         result.size(), (System.currentTimeMillis() - start));
 
-                return result;
+                //insert hrefs in descriptions
+                return fillHrefs(result);
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
                 return new ArrayList<>();
@@ -346,7 +349,7 @@ public class ComponentRegistryRestService {
 
             if (!checkRegistrySpaceString(registrySpace)) {
                 servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
             try {
                 //TODO: List should differ for different values for getCmdVersion()
@@ -355,8 +358,8 @@ public class ComponentRegistryRestService {
                 LOG.debug(
                         "Releasing {} registered components into the world ({} millisecs)",
                         result.size(), (System.currentTimeMillis() - start));
-
-                return result;
+                //insert hrefs in descriptions
+                return fillHrefs(result);
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
                 return new ArrayList<>();
@@ -1519,6 +1522,7 @@ public class ComponentRegistryRestService {
                         int returnCode = action.execute(desc, spec, response,
                                 registry);
                         if (returnCode == 0) {
+                            desc.setHref(createXlink(desc.getId()));
                             response.setRegistered(true);
                             response.setDescription(desc);
                         } else {
@@ -1657,6 +1661,16 @@ public class ComponentRegistryRestService {
         private String createXlink(String id) {
             URI uri = uriInfo.getRequestUriBuilder().path(id).build();
             return uri.toString();
+        }
+
+        private <T extends BaseDescription> List<T> fillHrefs(List<T> result) {
+            return Lists.transform(result, new Function<T, T>() {
+                @Override
+                public T apply(T input) {
+                    input.setHref(createXlink(input.getId()));
+                    return input;
+                }
+            });
         }
 
         /**
