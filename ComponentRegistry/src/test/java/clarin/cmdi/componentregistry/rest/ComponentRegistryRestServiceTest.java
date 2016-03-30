@@ -8,6 +8,9 @@ import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
+import static clarin.cmdi.componentregistry.model.ComponentStatus.DEVELOPMENT;
+import static clarin.cmdi.componentregistry.model.ComponentStatus.PRODUCTION;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
@@ -49,7 +52,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private ComponentRegistry baseRegistry;
-    
+
     public static final String REGISTRY_BASE = "/registry/1.x";
 
     @Before
@@ -266,6 +269,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(id2, component.getHeader().getID());
         assertEquals("component2", component.getHeader().getName());
         assertEquals("Test Description", component.getHeader().getDescription());
+
     }
 
     @Test //ok
@@ -824,9 +828,10 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
         assertEquals("Test Description", profile.getHeader().getDescription());
+        assertEquals(ComponentStatus.DEVELOPMENT.toString(), profile.getHeader().getStatus());
 
         try {
-            profile = this.getAuthenticatedResource(getResource()
+            this.getAuthenticatedResource(getResource()
                     .path(REGISTRY_BASE + "/profiles/"
                             + ProfileDescription.PROFILE_PREFIX + "profileXXXX"))
                     .accept(MediaType.APPLICATION_XML)
@@ -1075,9 +1080,10 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, getUserProfiles().size());
         assertEquals(2, getPublicProfiles().size());
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName"),
+                RegistryTestHelper.getTestProfileContent("publishedName", PRODUCTION.toString()),
                 "Published");
-        response = getAuthenticatedResource(getResource().path(
+        //post
+        getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + desc.getId() + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
@@ -1093,6 +1099,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("Published", profileDescription.getDescription());
         ComponentSpec spec = getPublicSpec(profileDescription);
         assertEquals("publishedName", spec.getComponent().getName());
+        assertEquals(PRODUCTION.toString(), spec.getHeader().getStatus());
     }
 
     private ComponentSpec getPublicSpec(BaseDescription desc) {
@@ -1129,7 +1136,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form = createFormData(
                 RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
                 "Published");
-        response = getAuthenticatedResource(getResource().path(
+        //post
+        getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components/" + desc.getId() + "/publish"))
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                 RegisterResponse.class, form);
@@ -1476,6 +1484,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         components = getUserComponents();
         assertEquals(2, components.size());
         assertEquals(0, getPublicComponents().size());
+        assertEquals(DEVELOPMENT.toString(), spec.getHeader().getStatus());
 
         // second, now update
         form = createFormData(
@@ -1503,6 +1512,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         components = getUserComponents();
         assertEquals(2, components.size());
         assertEquals(0, getPublicComponents().size());
+        assertEquals("Component status should not have been altered", DEVELOPMENT.toString(), spec.getHeader().getStatus());
     }
 
     @Test
@@ -1539,10 +1549,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         profiles = getUserProfiles();
         assertEquals(2, profiles.size());
         assertEquals(0, getPublicComponents().size());
+        assertEquals(DEVELOPMENT.toString(), spec.getHeader().getStatus());
 
         // Now update
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                RegistryTestHelper.getTestProfileContent("TESTNAME", DEVELOPMENT.toString()),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + desc.getId() + "/update")).type(
@@ -1566,6 +1577,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         profiles = getUserProfiles();
         assertEquals(2, profiles.size());
         assertEquals(0, getPublicComponents().size());
+        assertEquals("Component status should not have been altered", DEVELOPMENT.toString(), spec.getHeader().getStatus());
     }
 
     private ComponentSpec getUserComponent(ComponentDescription desc) {

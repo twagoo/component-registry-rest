@@ -22,6 +22,8 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import static clarin.cmdi.componentregistry.model.ComponentStatus.DEVELOPMENT;
+import static clarin.cmdi.componentregistry.model.ComponentStatus.PRODUCTION;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 
@@ -95,6 +97,10 @@ public final class RegistryTestHelper {
     }
 
     private static String getProfileTestContentString(String name) {
+        return getProfileTestContentString(name, "development");
+    }
+
+    private static String getProfileTestContentString(String name, String status) {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 + "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
@@ -102,7 +108,7 @@ public final class RegistryTestHelper {
                 + "    <Header>\n"
                 + "        <ID>clarin.eu:cr1:p_12345678</ID>\n"
                 + "        <Name>" + name + "</Name>\n"
-                + "        <Status>development</Status>\n"
+                + "        <Status>" + status + "</Status>\n"
                 + "    </Header>\n"
                 + "    <Component name=\"" + name + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n"
                 + "        <AttributeList>\n"
@@ -123,11 +129,15 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getTestProfileContent(String name) {
+        return getTestProfileContent(name, DEVELOPMENT.toString());
+    }
+
+    public static InputStream getTestProfileContent(String name, String status) {
         return new ByteArrayInputStream(getProfileTestContentString(name).getBytes());
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
-        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id), isPublic);
+        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, isPublic ? PRODUCTION.toString() : DEVELOPMENT.toString()), isPublic);
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
@@ -181,7 +191,7 @@ public final class RegistryTestHelper {
     public static InputStream getComponentTestContent() {
         return getComponentTestContent("Access");
     }
-    
+
     public static InputStream getComponentTestContent(String name) {
         return getComponentTestContentAsStream(name);
     }
