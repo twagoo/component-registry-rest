@@ -20,7 +20,6 @@ import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.APPLICATION_URL_BASE_PARAM;
@@ -1493,6 +1492,11 @@ public class ComponentRegistryRestService {
         }
 
         private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
+            if(getCmdVersion() != CANONICAL_CMD_VERSION) {
+                //don't allow registration on the non-canonical registries
+                throw serviceException(Status.BAD_REQUEST, "New or updated components and profiles should be submitted to the registry for " + CANONICAL_CMD_VERSION.toString());
+            }
+            
             try {
                 DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
                 MDValidator validator = new MDValidator(input, desc, registry, marshaller);

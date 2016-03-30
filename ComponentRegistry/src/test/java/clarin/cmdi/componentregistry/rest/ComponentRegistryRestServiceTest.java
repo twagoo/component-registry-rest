@@ -54,6 +54,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     private ComponentRegistry baseRegistry;
 
     public static final String REGISTRY_BASE = "/registry/1.x";
+    public static final String NON_CANONICAL_REGISTRY_BASE = "/registry/1.1";    
 
     @Before
     public void init() {
@@ -1642,6 +1643,31 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         String url = getResource().path(REGISTRY_BASE + "/components/" + desc.getId()).getUriBuilder().build().toString();
         assertEquals(url,
                 desc.getHref());
+    }
+
+    @Test
+    public void testRegisterComponentNonCanonical() throws Exception {
+
+        System.out.println("testRegisterComponentNonCanonical");
+
+        fillUpPrivateItems();
+
+        final FormDataMultiPart form = new FormDataMultiPart();
+        form.field(ComponentRegistryRestService.DATA_FORM_FIELD,
+                RegistryTestHelper.getComponentTestContent(),
+                MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        form.field(ComponentRegistryRestService.NAME_FORM_FIELD,
+                "ComponentTest1");
+        form.field(ComponentRegistryRestService.DESCRIPTION_FORM_FIELD,
+                "My Test Component");
+        form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD,
+                "TestDomain");
+        form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
+        
+        final ClientResponse cResponse = getAuthenticatedResource(
+                NON_CANONICAL_REGISTRY_BASE + "/components").type(MediaType.MULTIPART_FORM_DATA)
+                .post(ClientResponse.class, form);
+        assertEquals(Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
     }
 
     @Test

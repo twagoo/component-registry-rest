@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTest.REGISTRY_BASE;
 import static org.junit.Assert.*;
 
 /**
@@ -80,7 +81,7 @@ public class ConcurrentRestServiceTest extends
 
     private void assertProfiles(int nrOfProfiles, RegistrySpace registrySpace) {
 	List<ProfileDescription> response = getAuthenticatedResource(
-		getResource().path("/registry/profiles").queryParam(
+		getResource().path(REGISTRY_BASE + "/profiles").queryParam(
 			REGISTRY_SPACE_PARAM, registrySpace.name())).accept(
 		MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
 	Collections.sort(response, descriptionComparator);
@@ -104,7 +105,7 @@ public class ConcurrentRestServiceTest extends
 
     private void assertComponents(int nrOfComponents, RegistrySpace registrySpace) {
 	List<ComponentDescription> cResponse = getAuthenticatedResource(
-		getResource().path("/registry/components").queryParam(
+		getResource().path(REGISTRY_BASE + "/components").queryParam(
 			REGISTRY_SPACE_PARAM, registrySpace.name())).accept(
 		MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
 	Collections.sort(cResponse, descriptionComparator);
@@ -137,7 +138,7 @@ public class ConcurrentRestServiceTest extends
 		    new Object[] { i + 1000,
 			    registrySpace.name(),
 			    shouldDelete ? "ALSO DELETED" : "not deleted" });
-	    Thread thread = createThread("/registry/profiles/", registrySpace,
+	    Thread thread = createThread(REGISTRY_BASE + "/profiles/", registrySpace,
 		    "Test Profile" + (i + 1000), shouldDelete,
 		    RegistryTestHelper.getTestProfileContent(), errors);
 	    ts.add(thread);
@@ -153,7 +154,7 @@ public class ConcurrentRestServiceTest extends
 		    new Object[] { i + 1000,
 			    registrySpace.name(),
 			    shouldDelete ? "ALSO DELETED" : "not deleted" });
-	    Thread thread = createThread("/registry/components/", registrySpace,
+	    Thread thread = createThread(REGISTRY_BASE + "/components/", registrySpace,
 		    "Test Component" + (i + 1000), shouldDelete,
 		    RegistryTestHelper.getComponentTestContent(), errors);
 	    ts.add(thread);
