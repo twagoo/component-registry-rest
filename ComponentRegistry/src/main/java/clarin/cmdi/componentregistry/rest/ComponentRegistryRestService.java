@@ -295,15 +295,18 @@ public class ComponentRegistryRestService {
             }
 
             try {
-                //TODO: List should differ for different values for getCmdVersion()
-                ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                List<ComponentDescription> result = cr.getComponentDescriptions();
-                LOG.debug(
-                        "Releasing {} registered components into the world ({} millisecs)",
-                        result.size(), (System.currentTimeMillis() - start));
-
+                final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
+                final List<ComponentDescription> result = cr.getComponentDescriptions();
                 //insert hrefs in descriptions
-                return fillHrefs(result);
+                fillHrefs(result);
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(
+                            "Releasing {} registered components into the world ({} millisecs)",
+                            result.size(), (System.currentTimeMillis() - start));
+                }
+
+                return result;
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
                 return new ArrayList<>();
@@ -352,14 +355,18 @@ public class ComponentRegistryRestService {
                 return Collections.emptyList();
             }
             try {
-                //TODO: List should differ for different values for getCmdVersion()
-                ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
-                LOG.debug(
-                        "Releasing {} registered components into the world ({} millisecs)",
-                        result.size(), (System.currentTimeMillis() - start));
+                final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
+                final List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
                 //insert hrefs in descriptions
-                return fillHrefs(result);
+                fillHrefs(result);
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(
+                            "Releasing {} registered components into the world ({} millisecs)",
+                            result.size(), (System.currentTimeMillis() - start));
+                }
+
+                return result;
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
                 return new ArrayList<>();
@@ -1659,18 +1666,25 @@ public class ComponentRegistryRestService {
         }
 
         private String createXlink(String id) {
-            URI uri = uriInfo.getRequestUriBuilder().path(id).build();
-            return uri.toString();
+            return uriInfo
+                    .getRequestUriBuilder()
+                    .path(id) // add component or profile id to get its path 
+                    .replaceQuery("") // no query parameters needed (or desired), so reset query to prevent adoption from current request
+                    .build()
+                    .toString();
         }
 
-        private <T extends BaseDescription> List<T> fillHrefs(List<T> result) {
-            return Lists.transform(result, new Function<T, T>() {
-                @Override
-                public T apply(T input) {
-                    input.setHref(createXlink(input.getId()));
-                    return input;
-                }
-            });
+        /**
+         * Fills in the 'href' property of descriptions in a list
+         *
+         * @param <T>
+         * @param descriptions list of descriptions to expand href in
+         * @see BaseDescription#setHref(java.lang.String)
+         */
+        private <T extends BaseDescription> void fillHrefs(List<T> descriptions) {
+            for (T description : descriptions) {
+                description.setHref(createXlink(description.getId()));
+            }
         }
 
         /**
