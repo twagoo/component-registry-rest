@@ -42,7 +42,6 @@ import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.US
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
-import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 
@@ -60,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.net.URI;
 import java.security.Principal;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -290,8 +288,7 @@ public class ComponentRegistryRestService {
             }
 
             if (!checkRegistrySpaceString(registrySpace)) {
-                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
-                return Collections.emptyList();
+                throw serviceException(Status.NOT_FOUND, "illegal registry space");
             }
 
             try {
@@ -308,16 +305,13 @@ public class ComponentRegistryRestService {
 
                 return result;
             } catch (AuthenticationRequiredException e) {
-                servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-                return new ArrayList<>();
+                throw serviceException(Status.UNAUTHORIZED, e.toString());
 
             } catch (UserUnauthorizedException e) {
-                servletResponse.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-                return new ArrayList<>();
+                throw serviceException(Status.FORBIDDEN, e.toString());
 
             } catch (ItemNotFoundException e) {
-                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
-                return new ArrayList<>();
+                throw serviceException(Status.NOT_FOUND, e.toString());
             }
 
         }
@@ -351,8 +345,7 @@ public class ComponentRegistryRestService {
             }
 
             if (!checkRegistrySpaceString(registrySpace)) {
-                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "illegal registry space");
-                return Collections.emptyList();
+                throw serviceException(Status.NOT_FOUND, "illegal registry space");
             }
             try {
                 final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
@@ -368,16 +361,11 @@ public class ComponentRegistryRestService {
 
                 return result;
             } catch (AuthenticationRequiredException e) {
-                servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
-                return new ArrayList<>();
-
+                throw serviceException(Status.UNAUTHORIZED, e.toString());
             } catch (UserUnauthorizedException e) {
-                servletResponse.sendError(Status.FORBIDDEN.getStatusCode(), e.toString());
-                return new ArrayList<>();
-
+                throw serviceException(Status.FORBIDDEN, e.toString());
             } catch (ItemNotFoundException e) {
-                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), e.toString());
-                return new ArrayList<>();
+                throw serviceException(Status.NOT_FOUND, e.toString());
             }
         }
 
@@ -563,10 +551,10 @@ public class ComponentRegistryRestService {
             } catch (ComponentRegistryException e) {
                 LOG.warn("Could not retrieve profile usage {}", componentId);
                 LOG.debug("Details", e);
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (AuthenticationRequiredException e1) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode());
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
         }
 
@@ -592,16 +580,16 @@ public class ComponentRegistryRestService {
                 return comments;
             } catch (ComponentRegistryException e) {
                 servletResponse.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (ItemNotFoundException e) {
                 servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (UserUnauthorizedException e) {
                 servletResponse.sendError(Status.FORBIDDEN.getStatusCode(), e.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (AuthenticationRequiredException e1) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
         }
 
@@ -627,16 +615,16 @@ public class ComponentRegistryRestService {
                 return comments;
             } catch (ComponentRegistryException e) {
                 servletResponse.sendError(Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (ItemNotFoundException e) {
                 servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), e.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (UserUnauthorizedException e1) {
                 servletResponse.sendError(Status.FORBIDDEN.getStatusCode(), e1.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             } catch (AuthenticationRequiredException e1) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e1.getMessage());
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
         }
 
@@ -1926,7 +1914,6 @@ public class ComponentRegistryRestService {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode());
                 return new Rss();
             }
-
         }
     }
 
