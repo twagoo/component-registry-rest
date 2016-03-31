@@ -66,6 +66,7 @@ public class ComponentSpecUpdater {
         transactionTemplate = new TransactionTemplate(applicationContext.getBean(PlatformTransactionManager.class));
         transformer = createTransformer(parameters);
         componentValidator = new Validator(CMDToolkit.class.getResource(CMDToolkit.COMPONENT_SCHEMA));
+        //TODO: pass the URL of a derived schema that adds a phase that excludes certain schematron checks we decided to skip for the upgrade
     }
     
     private static Transformer createTransformer(final Map<String, String> transformationParams) throws IllegalArgumentException, TransformerFactoryConfigurationError, TransformerConfigurationException {
