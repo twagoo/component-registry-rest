@@ -15,6 +15,7 @@ import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.schema.cmd.Validator.Message;
 import clarin.cmdi.schema.cmd.ValidatorException;
+import eu.clarin.cmdi.toolkit.CMDToolkit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public class MDValidator implements Validator {
     static final String SCHEMA_ERROR = "Error in reading general component schema: ";
     static final String VALIDATION_ERROR = "Error while validating file: ";
     static final String IO_ERROR = "Error while reading specification or general component schema: ";
-    static final String INTERNAL_ERROR = "Internal error: ";    
+    static final String INTERNAL_ERROR = "Internal error: ";
     static final String COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR = "referenced component cannot be found in the appropriate registry components: ";
     static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
     static final String ILLEGAL_ATTRIBUTE_NAME_ERROR = "Illegal attribute name: ";
@@ -53,6 +54,7 @@ public class MDValidator implements Validator {
     private final BaseDescription description;
     private final ComponentRegistry registry;
     private final MDMarshaller marshaller;
+    private boolean preRegistrationMode = true;
 
     /**
      *
@@ -80,6 +82,11 @@ public class MDValidator implements Validator {
     public boolean validate() throws UserUnauthorizedException {
         try {
             clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
+            if (preRegistrationMode) {
+                validator.setSchematronPhase(CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_PRE_REGISTRATION);
+            } else {
+                validator.setSchematronPhase(CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION);
+            }
             validator.setResourceResolver(new ComponentRegistryResourceResolver());
             // We may need to reuse the input stream, so save it to a byte array first
             originalSpecBytes = getBytesFromInputStream();
@@ -121,7 +128,7 @@ public class MDValidator implements Validator {
                 errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e2);
             } catch (NullIdException e3) {
                 errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e3);
-            } catch(AuthenticationRequiredException e) {
+            } catch (AuthenticationRequiredException e) {
                 errorMessages.add(INTERNAL_ERROR + e);
             }
         }
@@ -170,7 +177,7 @@ public class MDValidator implements Validator {
                 };
                 // a private component for a private registry is available only if its owner is the owner of the resgitry
                 if (RegistrySpace.PRIVATE.equals(registry.getRegistrySpace())) {
-                    if(registry.canCurrentUserAccessDescription(componentId)) {
+                    if (registry.canCurrentUserAccessDescription(componentId)) {
                         return;
                     }
                     errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private registry)");
@@ -231,10 +238,18 @@ public class MDValidator implements Validator {
         // Re-unmarshall original bytes
         return unmarshalSpec(originalSpecBytes);
 
-
     }
 
     private ComponentSpec unmarshalSpec(byte[] inputBytes) throws JAXBException {
         return marshaller.unmarshal(ComponentSpec.class, new ByteArrayInputStream(inputBytes), null);
+    }
+
+    /**
+     *
+     * @param preRegistrationMode whether to carry out validation in
+     * pre-registration mode
+     */
+    public void setPreRegistrationMode(boolean preRegistrationMode) {
+        this.preRegistrationMode = preRegistrationMode;
     }
 }

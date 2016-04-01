@@ -1500,6 +1500,7 @@ public class ComponentRegistryRestService {
             try {
                 DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
                 MDValidator validator = new MDValidator(input, desc, registry, marshaller);
+                validator.setPreRegistrationMode(true);
                 RegisterResponse response = new RegisterResponse();
                 //obsolete. Make it setstatus
                 response.setIsPrivate(!desc.isPublic());
