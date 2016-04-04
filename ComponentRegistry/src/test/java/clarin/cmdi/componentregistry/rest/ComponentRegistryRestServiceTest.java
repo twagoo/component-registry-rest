@@ -54,7 +54,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     private ComponentRegistry baseRegistry;
 
     public static final String REGISTRY_BASE = "/registry/1.x";
-    public static final String NON_CANONICAL_REGISTRY_BASE = "/registry/1.1";    
+    public static final String NON_CANONICAL_REGISTRY_BASE = "/registry/1.1";
 
     @Before
     public void init() {
@@ -830,6 +830,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("profile2", profile.getHeader().getName());
         assertEquals("Test Description", profile.getHeader().getDescription());
         assertEquals(ComponentStatus.DEVELOPMENT.toString(), profile.getHeader().getStatus());
+        assertEquals("1.2", profile.getCMDVersion());
+        assertEquals("1.2", profile.getCMDOriginalVersion());
 
         try {
             this.getAuthenticatedResource(getResource()
@@ -1101,6 +1103,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ComponentSpec spec = getPublicSpec(profileDescription);
         assertEquals("publishedName", spec.getComponent().getName());
         assertEquals(PRODUCTION.toString(), spec.getHeader().getStatus());
+        assertEquals("1.2", spec.getCMDVersion());
+        assertEquals("1.2", spec.getCMDOriginalVersion());
     }
 
     private ComponentSpec getPublicSpec(BaseDescription desc) {
@@ -1663,7 +1667,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         form.field(ComponentRegistryRestService.DOMAIN_FORM_FIELD,
                 "TestDomain");
         form.field(ComponentRegistryRestService.GROUP_FORM_FIELD, "TestGroup");
-        
+
         final ClientResponse cResponse = getAuthenticatedResource(
                 NON_CANONICAL_REGISTRY_BASE + "/components").type(MediaType.MULTIPART_FORM_DATA)
                 .post(ClientResponse.class, form);
