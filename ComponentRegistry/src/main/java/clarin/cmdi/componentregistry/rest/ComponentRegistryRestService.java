@@ -1492,29 +1492,30 @@ public class ComponentRegistryRestService {
         }
 
         private Response register(InputStream input, BaseDescription desc, RegisterAction action, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
-            if(getCmdVersion() != CANONICAL_CMD_VERSION) {
+            if (getCmdVersion() != CANONICAL_CMD_VERSION) {
                 //don't allow registration on the non-canonical registries
                 throw serviceException(Status.BAD_REQUEST, "New or updated components and profiles should be submitted to the registry for " + CANONICAL_CMD_VERSION.toString());
             }
-            
-            try {
-                DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-                MDValidator validator = new MDValidator(input, desc, registry, marshaller);
-                validator.setPreRegistrationMode(action.isPreRegistration());
-                RegisterResponse response = new RegisterResponse();
-                //obsolete. Make it setstatus
-                response.setIsPrivate(!desc.isPublic());
-                this.validate(response, descriptionValidator, validator);
-                if (response.getErrors().isEmpty()) {
 
-                    ComponentSpec spec = validator.getComponentSpec();
+            try {
+                final RegisterResponse response = new RegisterResponse();
+                response.setIsPrivate(!desc.isPublic());
+
+                //validate
+                final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
+                final MDValidator validator = new MDValidator(input, desc, registry, marshaller);
+                validator.setPreRegistrationMode(action.isPreRegistration());
+                
+                this.validate(response, descriptionValidator, validator);
+                
+                if (response.getErrors().isEmpty()) {
+                    final ComponentSpec spec = validator.getComponentSpec();
 
                     try {
                         checkForRecursion(validator, registry, desc);
-                        
+
                         // Add profile
-                        int returnCode = action.execute(desc, spec, response,
-                                registry);
+                        final int returnCode = action.execute(desc, spec, response, registry);
                         if (returnCode == 0) {
                             desc.setHref(createXlink(desc.getId()));
                             response.setRegistered(true);
@@ -1529,8 +1530,6 @@ public class ComponentRegistryRestService {
                         response.addError("Error while expanding specification. "
                                 + ex.getMessage());
                     }
-                    // Recursion detected
-
                 } else {
                     LOG.warn("Registration failed with validation errors: {}",
                             Arrays.toString(response.getErrors().toArray()));
