@@ -10,15 +10,14 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 public class UpdateAction implements RegisterAction {
     
-//    private final Principal principal;
-//
-//    public UpdateAction(Principal principal) {
-//        this.principal = principal;
-//    }
-    
     @Override
     public int execute(BaseDescription desc, ComponentSpec spec, RegisterResponse response, ComponentRegistry registry)  throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException{
         return registry.update(desc, spec, false);
+    }
+
+    @Override
+    public boolean isPreRegistration() {
+        return false;
     }
 
 }

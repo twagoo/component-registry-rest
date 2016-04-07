@@ -18,4 +18,9 @@ public class NewAction implements RegisterAction {
         spec.setCMDOriginalVersion(CANONICAL_CMD_VERSION.getVersionNumber());
         return registry.register(desc, spec);
     }
+
+    @Override
+    public boolean isPreRegistration() {
+        return true;
+    }
 }

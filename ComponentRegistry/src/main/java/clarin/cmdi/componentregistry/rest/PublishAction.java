@@ -25,4 +25,9 @@ public class PublishAction implements RegisterAction {
         spec.getHeader().setStatus(ComponentStatus.PRODUCTION.toString());
         return registry.publish(desc, spec, principal);
     }
+
+    @Override
+    public boolean isPreRegistration() {
+        return false;
+    }
 }

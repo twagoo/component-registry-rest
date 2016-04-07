@@ -12,4 +12,6 @@ public interface RegisterAction {
 
     int execute(BaseDescription desc, ComponentSpec spec, RegisterResponse response, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException;
 
+    boolean isPreRegistration();
+    
 }
