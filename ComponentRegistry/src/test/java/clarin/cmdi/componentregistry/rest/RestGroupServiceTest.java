@@ -264,7 +264,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .path("/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(200, cr.getStatus());
 
-        List<String> components = groupService.getComponentRefsInGroup(3);
+        List<String> components = groupService.getComponentIdsInGroup(3);
         assertEquals(3, components.size());
         assertEquals(test_component_id, components.get(2));
         List<String> profiles = groupService.getProfileIdsInGroup(3);

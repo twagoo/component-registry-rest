@@ -262,7 +262,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public List<String> getComponentRefsInGroup(long groupId) {
+    public List<String> getComponentIdsInGroup(long groupId) {
         List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
         Set<String> componentIds = new HashSet<String>();
         for (Ownership o : ownerships) {
