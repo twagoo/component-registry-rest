@@ -363,6 +363,12 @@
 
     <profiles>
         <profile>
+            <id>jar</id>
+            <properties>
+                <packaging>jar</packaging>
+            </properties>
+        </profile>
+        <profile>
             <!-- development profile that directs logging output to the console -->
             <id>development</id>
             <properties>
