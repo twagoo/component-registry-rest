@@ -218,7 +218,7 @@ public class Groups extends SecureAdminWebPage {
             public List getObject() {
                 final Long groupId = selectedGroup.getObject();
                 return Lists.newArrayList(Iterables.concat(
-                        groupService.getComponentIdsInGroup(groupId),
+                        groupService.getComponentRefsInGroup(groupId),
                         groupService.getProfileIdsInGroup(groupId)));
             }
         };

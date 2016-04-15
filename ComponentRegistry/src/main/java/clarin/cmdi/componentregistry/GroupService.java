@@ -107,7 +107,7 @@ public interface GroupService {
      * @param groupId
      * @return
      */
-    List<String> getComponentIdsInGroup(long groupId);
+    List<String> getComponentRefsInGroup(long groupId);
 
     /**
      * Get a list of groups the item is a member of. While it's technically possible for an item to belong to none, one or multiple groups, the transferXOwnerwhip methods make sure

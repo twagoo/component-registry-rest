@@ -106,17 +106,17 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponent(baseRegistry, "component-2", false);
 
         Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX + "profile-1");
+        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "profile-1");
         ownership.setGroupId(1);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "component-1");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "component-1");
         ownership.setGroupId(1);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "component-2");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "component-2");
         ownership.setGroupId(1);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
@@ -138,17 +138,17 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponent(baseRegistry, "Bcomponent-2", false);
 
         Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX + "Bprofile-1");
+        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Bprofile-1");
         ownership.setGroupId(2);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1");
         ownership.setGroupId(2);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-2");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-2");
         ownership.setGroupId(2);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
@@ -168,17 +168,17 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Ccomponent-2", false);
 
         Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX + "Cprofile-1");
+        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Cprofile-1");
         ownership.setGroupId(3);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1");
         ownership.setGroupId(3);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-2");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-2");
         ownership.setGroupId(3);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
@@ -199,17 +199,17 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Dcomponent-2", false);
 
         Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX + "Dprofile-1");
+        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Dprofile-1");
         ownership.setGroupId(4);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1");
         ownership.setGroupId(4);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-2");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-2");
         ownership.setGroupId(4);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
@@ -264,7 +264,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .path("/items/" + test_component_id + "/transferownership").queryParam("groupId", "3")).accept(MediaType.APPLICATION_XML).post(ClientResponse.class);
         assertEquals(200, cr.getStatus());
 
-        List<String> components = groupService.getComponentIdsInGroup(3);
+        List<String> components = groupService.getComponentRefsInGroup(3);
         assertEquals(3, components.size());
         assertEquals(test_component_id, components.get(2));
         List<String> profiles = groupService.getProfileIdsInGroup(3);

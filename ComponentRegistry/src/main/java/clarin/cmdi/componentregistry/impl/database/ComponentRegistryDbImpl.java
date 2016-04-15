@@ -318,7 +318,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         if (this.canCurrentUserAccessDescription(profileId)) {
             try {
                 Comment comment = commentsDao.findOne(Long.parseLong(commentId));
-                if (comment != null && profileId.equals(comment.getComponentId())) {
+                if (comment != null && profileId.equals(comment.getComponentRef())) {
                     this.setCanDeleteInComments(Collections.singleton(comment));
                     return comment;
                 } else {
@@ -356,7 +356,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         if (this.canCurrentUserAccessDescription(componentId)) {
             try {
                 Comment comment = commentsDao.findOne(Long.parseLong(commentId));
-                if (comment != null && componentId.equals(comment.getComponentId().toString())) {
+                if (comment != null && componentId.equals(comment.getComponentRef().toString())) {
                     this.setCanDeleteInComments(Collections.singleton(comment));
                     return comment;
                 } else {
@@ -478,8 +478,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     @Override
     public int registerComment(Comment comment, String principalName) throws ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException {
         try {
-            if (comment.getComponentId() != null) {
-                if (this.canCurrentUserAccessDescription(comment.getComponentId())) {
+            if (comment.getComponentRef() != null) {
+                if (this.canCurrentUserAccessDescription(comment.getComponentRef())) {
                     // Convert principal name to user record id
                     Number uid = convertUserIdInComment(comment, principalName);
                     // Set date to current date
@@ -488,7 +488,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                     commentsDao.saveAndFlush(comment);
 
                 } else {
-                    throw new UserUnauthorizedException("The logged-in user cannot access the component/profile with id " + comment.getComponentId());
+                    throw new UserUnauthorizedException("The logged-in user cannot access the component/profile with id " + comment.getComponentRef());
                 }
             } else {
                 throw new ComponentRegistryException("The component/profile id for this comment is null.");
@@ -848,8 +848,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             if (comment != null
                     // Comment must have an existing (in this registry)
                     // componentId or profileId
-                    && comment.getComponentId() != null
-                    && this.canCurrentUserAccessDescription(comment.getComponentId())) {
+                    && comment.getComponentRef() != null
+                    && this.canCurrentUserAccessDescription(comment.getComponentRef())) {
                 this.checkAuthorisationComment(comment);
                 commentsDao.delete(comment);
             } else {
@@ -948,7 +948,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         for (String id : ids) {
             final ComponentSpec spec = getMDComponent(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
-            if (spec != null && hasComponentId(componentId, spec.getComponent())) {
+            if (spec != null && hasComponentRef(componentId, spec.getComponent())) {
                 LOG.debug("Component {} used in component {}", componentId, spec.getHeader().getID());
                 try {
                     result.add(getComponentDescription(id));
@@ -969,7 +969,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         for (String id : profileIds) {
             final ComponentSpec profile = getMDProfile(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
-            if (profile != null && hasComponentId(componentId, profile.getComponent())) {
+            if (profile != null && hasComponentRef(componentId, profile.getComponent())) {
                 LOG.debug("Component {} used in profile {}", componentId, profile.getHeader().getID());
                 try {
                     result.add(getProfileDescription(id));
@@ -981,21 +981,21 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return result;
     }
 
-    private static boolean findComponentId(String componentId, List<ComponentType> componentReferences) {
+    private static boolean findComponentRef(String componentId, List<ComponentType> componentReferences) {
         for (ComponentType cmdComponent : componentReferences) {
-            if (hasComponentId(componentId, cmdComponent)) {
+            if (hasComponentRef(componentId, cmdComponent)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean hasComponentId(String componentId, ComponentType cmdComponent) {
-        if (componentId.equals(cmdComponent.getComponentId())) {
+    private static boolean hasComponentRef(String componentId, ComponentType cmdComponent) {
+        if (componentId.equals(cmdComponent.getComponentRef())) {
             return true;
         } else {
             //recurse over children
-            return findComponentId(componentId, cmdComponent.getComponent());
+            return findComponentRef(componentId, cmdComponent.getComponent());
         }
     }
 
@@ -1004,7 +1004,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         for (String id : profileIds) {
             final ComponentSpec spec = getMDProfile(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
-            if (spec != null && hasComponentId(componentId, spec.getComponent())) {
+            if (spec != null && hasComponentRef(componentId, spec.getComponent())) {
                 LOG.warn("Cannot delete component {}, still used in profile {} and possibly other profiles and/or components", componentId, spec.getHeader().getID());
                 // Profile match - throw
                 throw new DeleteFailedException("Component is still in use by other components or profiles. Request component usage for details.");
@@ -1019,7 +1019,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         for (String id : componentIds) {
             final ComponentSpec spec = getMDComponent(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
-            if (spec != null && hasComponentId(componentId, spec.getComponent())) {
+            if (spec != null && hasComponentRef(componentId, spec.getComponent())) {
                 LOG.warn("Cannot delete component {}, still used in component {} and possibly other components", componentId, spec.getHeader().getID());
                 // Component match -> throw
                 throw new DeleteFailedException("Component is still in use by one or more other components. Request component usage for details.");

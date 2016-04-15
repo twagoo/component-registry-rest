@@ -32,11 +32,11 @@ public class Ownership implements Serializable {
     private long groupId;
     private long userId;
 
-    public String getComponentId() {
+    public String getComponentRef() {
 	return componentId;
     }
 
-    public void setComponentId(String componentId) {
+    public void setComponentRef(String componentId) {
 	this.componentId = componentId;
     }
 

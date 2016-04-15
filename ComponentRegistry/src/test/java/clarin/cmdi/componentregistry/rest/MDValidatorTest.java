@@ -86,10 +86,10 @@ public class MDValidatorTest extends BaseUnitTest {
         profileContent += "     <Status>development</Status>\n";
         profileContent += "    </Header>\n";
         profileContent += "    <Component name=\"Test\">";
-        profileContent += "	<Component ComponentId=\""
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>"; // id not
         // registered
-        profileContent += "	<Component ComponentId=\""
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id2 + "\"/>"; // id not
         // registered
         profileContent += "    </Component>";
@@ -142,10 +142,10 @@ public class MDValidatorTest extends BaseUnitTest {
         profileContent += "     <Status>development</Status>\n";
         profileContent += "    </Header>\n";
         profileContent += "    <Component name=\"Test\">";
-        profileContent += "	<Component ComponentId=\""
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>"; // id not
         // registered
-        profileContent += "	<Component ComponentId=\""
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id2 + "\"/>"; // id not
         // registered
         profileContent += "    </Component>";
@@ -205,7 +205,7 @@ public class MDValidatorTest extends BaseUnitTest {
         content += "    </Header>\n";
         content += "    <Component name=\"Actor\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
         content += "        <Element name=\"Name\" ValueScheme=\"string\" />\n";
-        content += "      <Component ComponentId=\""
+        content += "      <Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>\n"; // id not
         // registered
         content += "    </Component>\n";

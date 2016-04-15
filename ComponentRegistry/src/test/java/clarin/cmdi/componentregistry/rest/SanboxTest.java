@@ -84,17 +84,17 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponent(baseRegistry, "Bcomponent-2", false);
 
         Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX + "Bprofile-1");
+        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Bprofile-1");
         ownership.setGroupId(2);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1");
         ownership.setGroupId(2);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-2");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-2");
         ownership.setGroupId(2);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
@@ -110,17 +110,17 @@ public class SanboxTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Ccomponent-2", false);
 
         Ownership ownership = new Ownership();
-        ownership.setComponentId(ProfileDescription.PROFILE_PREFIX + "Cprofile-1");
+        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Cprofile-1");
         ownership.setGroupId(3);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1");
         ownership.setGroupId(3);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);
 
-        ownership.setComponentId(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-2");
+        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-2");
         ownership.setGroupId(3);
         ownership.setUserId(0);
         groupService.addOwnership(ownership);

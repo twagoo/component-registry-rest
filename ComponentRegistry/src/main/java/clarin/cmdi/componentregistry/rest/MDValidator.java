@@ -164,14 +164,14 @@ public class MDValidator implements Validator {
 
     private void checkComponentInSpace(ComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
         if (isDefinedInSeparateFile(cmdComponentType)) {
-            String id = cmdComponentType.getComponentId();
+            String id = cmdComponentType.getComponentRef();
             if (id == null) {
                 String name = (cmdComponentType.getName() == null) ? "null" : cmdComponentType.getName();
                 throw new NullIdException("The component with the name " + name + " has a null id. :(");
             }
             ComponentSpec registeredComponent = registry.getMDComponent(id);
             if (registeredComponent != null) {
-                final String componentId = cmdComponentType.getComponentId();
+                final String componentId = cmdComponentType.getComponentRef();
                 if (registry.isItemPublic(id)) {  // if  a component is public, it is available for any registry
                     return;
                 };
@@ -189,7 +189,7 @@ public class MDValidator implements Validator {
                             errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + "in the group space, the group id is null");
                             return;
                         }
-                        List<Number> componentGroupIds = registry.getItemGroups(cmdComponentType.getComponentId());
+                        List<Number> componentGroupIds = registry.getItemGroups(cmdComponentType.getComponentRef());
                         if (componentGroupIds.contains(registry.getGroupId())) {
                             return;
                         }
@@ -201,7 +201,7 @@ public class MDValidator implements Validator {
                 }
 
             };
-            errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentId());
+            errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentRef());
         }
 
     }

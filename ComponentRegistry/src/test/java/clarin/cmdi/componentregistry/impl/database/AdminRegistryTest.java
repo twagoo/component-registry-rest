@@ -83,7 +83,7 @@ public class AdminRegistryTest extends BaseUnitTest{
         content2 += "     <Status>development</Status>\n";
         content2 += "    </Header>\n";
 	content2 += "    <Component name=\"YYY\" CardinalityMin=\"1\" CardinalityMax=\"unbounded\">\n";
-	content2 += "        <Component ComponentId=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
+	content2 += "        <Component ComponentRef=\"" + compDesc1.getId() + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
 	content2 += "        </Component>\n";
 	content2 += "    </Component>\n";
 	content2 += "</ComponentSpec>\n";

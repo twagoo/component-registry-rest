@@ -37,7 +37,7 @@ public abstract class CMDComponentSpecExpander {
     private void expandNestedComponent(List<ComponentType> cmdComponents, Collection<String> path) throws ComponentRegistryException {
         List<ComponentType> expanded = new ArrayList<ComponentType>();
         for (ComponentType cmdComponentType : cmdComponents) {
-            String componentId = cmdComponentType.getComponentId();
+            String componentId = cmdComponentType.getComponentRef();
             if (componentId != null) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("[Level {}] Expanding {}", path.size(), componentId);
@@ -86,7 +86,7 @@ public abstract class CMDComponentSpecExpander {
             cardinalityMin.clear();
             cardinalityMin.addAll(referenceDeclaration.getCardinalityMin());
         }
-        nested.setComponentId(referenceDeclaration.getComponentId()); // Setting componentId for better xsd generation.
+        nested.setComponentRef(referenceDeclaration.getComponentRef()); // Setting componentId for better xsd generation.
     }
 
     protected ComponentSpec expandComponent(String componentId) throws ComponentRegistryException {

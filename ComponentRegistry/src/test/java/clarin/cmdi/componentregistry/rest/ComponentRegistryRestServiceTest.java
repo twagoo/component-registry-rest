@@ -378,7 +378,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(comment);
         assertEquals("comment4", comment.getComment());
         assertEquals(component1Comment4.getId(), comment.getId());
-        assertEquals(id, comment.getComponentId());
+        assertEquals(id, comment.getComponentRef());
     }
 
     @Test //ok
@@ -402,7 +402,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(comment);
         assertEquals("comment1", comment.getComment());
         assertEquals(profile1Comment1.getId(), comment.getId());
-        assertEquals(id, comment.getComponentId());
+        assertEquals(id, comment.getComponentRef());
     }
 
     @Test  //ok
@@ -714,7 +714,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"YYY\">\n";
-        content += "        <Component ComponentId=\"" + compDesc1.getId()
+        content += "        <Component ComponentRef=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
         content += "        </Component>\n";
         content += "    </Component>\n";
@@ -731,7 +731,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"ZZZ\">\n";
-        content += "        <Component ComponentId=\"" + compDesc1.getId()
+        content += "        <Component ComponentRef=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
         content += "        </Component>\n";
         content += "    </Component>\n";
@@ -1292,7 +1292,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"YYY\">\n";
-        content += "        <Component ComponentId=\"" + compDesc1.getId()
+        content += "        <Component ComponentRef=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
         content += "        </Component>\n";
         content += "    </Component>\n";
@@ -1314,7 +1314,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"ZZZ\">\n";
-        content += "        <Component ComponentId=\"" + compDesc1.getId()
+        content += "        <Component ComponentRef=\"" + compDesc1.getId()
                 + "\" CardinalityMin=\"0\" CardinalityMax=\"99\">\n";
         content += "        </Component>\n";
         content += "    </Component>\n";
@@ -1427,7 +1427,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         compContent += "    </Header>\n";
         compContent += "    <Component name=\"Nested\">\n";
         compContent += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        compContent += "        <Component ComponentId=\""
+        compContent += "        <Component ComponentRef=\""
                 + desc.getId()
                 + "\" name=\"Recursive\" CardinalityMin=\"1\" CardinalityMax=\"1\" />\n";
         compContent += "    </Component>\n";

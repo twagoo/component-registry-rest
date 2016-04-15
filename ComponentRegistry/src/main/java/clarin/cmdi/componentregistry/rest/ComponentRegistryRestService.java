@@ -1124,7 +1124,7 @@ public class ComponentRegistryRestService {
                 try {
                     final Comment comment = registry.getSpecifiedCommentInProfile(profileId, commentId);
                     if (comment != null
-                            && profileId.equals(comment.getComponentId())) {
+                            && profileId.equals(comment.getComponentRef())) {
                         LOG.debug("Comment with id: {} set for deletion.", commentId);
                         registry.deleteComment(commentId);
                     } else {
@@ -1177,7 +1177,7 @@ public class ComponentRegistryRestService {
                 final ComponentRegistry registry = this.getBaseRegistry();
                 final Comment comment = registry.getSpecifiedCommentInComponent(componentId, commentId);
                 if (comment != null
-                        && componentId.equals(comment.getComponentId())) {
+                        && componentId.equals(comment.getComponentRef())) {
                     LOG.debug("Comment with id: {} set for deletion.", commentId);
                     registry.deleteComment(commentId);
                 } else {
@@ -1609,12 +1609,12 @@ public class ComponentRegistryRestService {
                             responseLocal.setRegistered(false);
                             responseLocal.addError("Unable to post at this moment. Internal server error.");
                         }
-                        if (com.getComponentId() != null) {
+                        if (com.getComponentRef() != null) {
                             LOG.info("Posted new comment on component {}",
-                                    com.getComponentId());
+                                    com.getComponentRef());
                         } else {
                             LOG.info("Posted new comment on profile {}",
-                                    com.getComponentId());
+                                    com.getComponentRef());
                         }
                     } catch (ItemNotFoundException e) {
                         return Response.serverError().status(Status.NOT_FOUND)
