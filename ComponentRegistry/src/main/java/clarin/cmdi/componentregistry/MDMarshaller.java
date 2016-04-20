@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
-public class MDMarshaller implements Serializable {
+public class MDMarshaller implements Serializable, IMarshaller {
 
     private final static Logger LOG = LoggerFactory.getLogger(MDMarshaller.class);
     /**
@@ -49,6 +49,10 @@ public class MDMarshaller implements Serializable {
 
     @Autowired
     private ComponentSpecConverter specConverter;
+    
+    public MDMarshaller() throws TransformerException {
+        this(Maps.<CmdVersion, String>newHashMap());
+    }
 
     public MDMarshaller(Map<CmdVersion, String> stylesheetLocations) throws TransformerException {
         resourceResolver = new ComponentRegistryResourceResolver();
@@ -82,6 +86,7 @@ public class MDMarshaller implements Serializable {
      * @return
      * @throws JAXBException
      */
+    @Override
     public <T> T unmarshal(Class<T> docClass, InputStream inputStream, Schema schema) throws JAXBException {
         String packageName = docClass.getPackage().getName();
         JAXBContext jc = JAXBContext.newInstance(packageName);
@@ -104,6 +109,7 @@ public class MDMarshaller implements Serializable {
      * @throws javax.xml.bind.JAXBException
      * @throws java.io.UnsupportedEncodingException
      */
+    @Override
     public <T> void marshal(T marshallableObject, OutputStream out) throws JAXBException, UnsupportedEncodingException {
         final String packageName = marshallableObject.getClass().getPackage().getName();
         final JAXBContext jc = JAXBContext.newInstance(packageName);
@@ -118,6 +124,7 @@ public class MDMarshaller implements Serializable {
         m.marshal(marshallableObject, writer);
     }
 
+    @Override
     public synchronized Schema getComponentSchema() {
         if (generalComponentSchema == null) {
             try {
@@ -131,6 +138,7 @@ public class MDMarshaller implements Serializable {
         return generalComponentSchema;
     }
 
+    @Override
     public void generateXsd(ComponentSpec spec, CmdVersion[] cmdVersions, OutputStream outputStream) throws JAXBException, TransformerException {
         try {
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -213,6 +221,7 @@ public class MDMarshaller implements Serializable {
      * @param marshallableObject
      * @return the xml representation of the marshallableObject
      */
+    @Override
     public <T> String marshalToString(T marshallableObject) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {

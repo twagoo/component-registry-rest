@@ -15,8 +15,8 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.IMarshaller;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
-import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
@@ -38,7 +38,7 @@ public class AdminRegistry {
 	    .getLogger(AdminRegistry.class);
     private ComponentRegistryFactory componentRegistryFactory;
     private ComponentDao componentDao;
-    private MDMarshaller marshaller;
+    private IMarshaller marshaller;
 
     public void setComponentRegistryFactory(
 	    ComponentRegistryFactory componentRegistryFactory) {
@@ -49,7 +49,7 @@ public class AdminRegistry {
 	this.componentDao = componentDao;
     }
 
-    public void setMarshaller(MDMarshaller marshaller) {
+    public void setMarshaller(IMarshaller marshaller) {
 	this.marshaller = marshaller;
     }
 

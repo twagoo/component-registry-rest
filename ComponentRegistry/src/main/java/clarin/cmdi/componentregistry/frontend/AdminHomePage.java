@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.IMarshaller;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
-import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
@@ -51,7 +51,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     @SpringBean
     private ComponentDao componentDao;
     @SpringBean
-    private MDMarshaller marshaller;
+    private IMarshaller marshaller;
 
     public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException, ItemNotFoundException {
         super(parameters);
