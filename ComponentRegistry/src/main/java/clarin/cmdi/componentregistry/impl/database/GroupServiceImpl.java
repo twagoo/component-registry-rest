@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private void checkOwnership(Ownership ownership) {
-        if (ownership.getComponentId() == null) {
+        if (ownership.getComponentRef() == null) {
             throw new RuntimeException("Ownership needs a componentId");
         }
         if (ownership.getUserId() == 0 && ownership.getGroupId() == 0) {
@@ -100,7 +101,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     private void assertOwnershipDoesNotExist(Ownership ownership) {
-        Ownership o = ownershipDao.findOwnershipByGroupAndComponent(ownership.getGroupId(), ownership.getComponentId());
+        Ownership o = ownershipDao.findOwnershipByGroupAndComponent(ownership.getGroupId(), ownership.getComponentRef());
         if (o != null) {
             throw new ValidationException("Ownership exists");
         }
@@ -265,8 +266,8 @@ public class GroupServiceImpl implements GroupService {
         List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
         Set<String> componentIds = new HashSet<String>();
         for (Ownership o : ownerships) {
-            if (ComponentUtils.isComponentId(o.getComponentId())) {
-                componentIds.add(o.getComponentId());
+            if (ComponentUtils.isComponentId(o.getComponentRef())) {
+                componentIds.add(o.getComponentRef());
             }
         }
         List<String> idsList = new ArrayList<String>(componentIds);
@@ -279,8 +280,8 @@ public class GroupServiceImpl implements GroupService {
         List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
         Set<String> profileIds = new HashSet<String>();
         for (Ownership o : ownerships) {
-            if (ComponentUtils.isProfileId(o.getComponentId())) {
-                profileIds.add(o.getComponentId());
+            if (ComponentUtils.isProfileId(o.getComponentRef())) {
+                profileIds.add(o.getComponentRef());
             }
         }
         List<String> idsList = new ArrayList<String>(profileIds);
@@ -333,7 +334,7 @@ public class GroupServiceImpl implements GroupService {
 
         ownershipDao.delete(currentOwnerships);
         final Ownership ownership = new Ownership();
-        ownership.setComponentId(itemId);
+        ownership.setComponentRef(itemId);
         ownership.setGroupId(target.getId());
         addOwnership(ownership);
     }

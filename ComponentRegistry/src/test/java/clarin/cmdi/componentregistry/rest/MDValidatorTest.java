@@ -6,7 +6,7 @@ import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -44,90 +44,31 @@ public class MDValidatorTest extends BaseUnitTest {
     public void testValidateSucces() throws UserUnauthorizedException {
         MDValidator validator = this.getValidProfileValidator();
         boolean result = validator.validate();
-        assertTrue(result);
-    }
-
-    @Test
-    public void testValidateIllegalComponentAttributeName() throws UserUnauthorizedException {
-        String profileContent = "";
-        profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-        profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-        profileContent += "	   <AttributeList>\n";
-        profileContent += "		<Attribute>\n";
-        profileContent += "		    <Name>myattribute</Name>\n"; // this should be
-        // allowed
-        profileContent += "		    <Type>string</Type>\n";
-        profileContent += "		</Attribute>\n";
-        profileContent += "		<Attribute>\n";
-        profileContent += "		    <Name>ref</Name>\n"; // this should NOT be
-        // allowed
-        profileContent += "		    <Type>string</Type>\n";
-        profileContent += "		</Attribute>\n";
-        profileContent += "		<Attribute>\n";
-        profileContent += "		    <Name>ComponentId</Name>\n"; // neither should
-        // this
-        profileContent += "		    <Type>string</Type>\n";
-        profileContent += "		</Attribute>\n";
-        profileContent += "	   </AttributeList>\n";
-        profileContent += "        <CMD_Element name=\"Age\">\n";
-        profileContent += "		<AttributeList>\n";
-        profileContent += "		    <Attribute>\n";
-        profileContent += "			<Name>ref</Name>\n"; // allowed here, only
-        // forbidden on components
-        profileContent += "			<Type>string</Type>\n";
-        profileContent += "		    </Attribute>\n";
-        profileContent += "		    <Attribute>\n";
-        profileContent += "			<Name>ComponentId</Name>\n"; // allowed here, only
-        // forbidden on
-        // components
-        profileContent += "			<Type>string</Type>\n";
-        profileContent += "		    </Attribute>\n";
-        profileContent += "		</AttributeList>\n";
-        profileContent += "            <ValueScheme>\n";
-        profileContent += "                <pattern>[23][0-9]</pattern>\n";
-        profileContent += "            </ValueScheme>\n";
-        profileContent += "        </CMD_Element>\n";
-        profileContent += "    </CMD_Component>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
-        InputStream input = new ByteArrayInputStream(profileContent.getBytes());
-
-        ProfileDescription desc = ProfileDescription.createNewDescription();
-
-        MDValidator validator = new MDValidator(input, desc, testRegistry, marshaller);
-        assertFalse(validator.validate());
-        assertEquals("Messages expected for 2 failed tests:\n"
-                + "- Actor/@ref ('ref' attribute not allowed on component)\n"
-                + "- Actor/@ComponentId ('ComponentId' attribute not allowed on component)",
-                2, validator.getErrorMessages().size());
-        assertTrue(validator.getErrorMessages().get(0)
-                .startsWith(MDValidator.PARSE_ERROR));
-        assertTrue(validator.getErrorMessages().get(1)
-                .startsWith(MDValidator.PARSE_ERROR));
+        String messages = result || validator.getErrorMessages() == null ? "" : validator.getErrorMessages().toString();
+        assertTrue(messages, result);
     }
 
     @Test
     public void testValidateNoComponentId() throws Exception {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-        profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component filename=\"component-actor.xml\"/>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
+        profileContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
+        profileContent += "    <Header>\n";
+        profileContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        profileContent += "     <Name>Test</Name>\n";
+        profileContent += "     <Status>development</Status>\n";
+        profileContent += "    </Header>\n";
+        profileContent += "    <Component name=\"Test\"/>\n";
+        profileContent += "</ComponentSpec>\n";
         InputStream input = new ByteArrayInputStream(profileContent.getBytes());
 
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setPublic(true);
         MDValidator validator = new MDValidator(input, desc, testRegistry, marshaller);
         assertFalse(validator.validate());
-        assertTrue(validator
-                .getErrorMessages()
-                .get(0)
-                .startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
-        //
+        assertEquals(1, validator.getErrorMessages().size());
+        assertTrue(validator.getErrorMessages().get(0).startsWith(MDValidator.VALIDATION_ERROR));
     }
 
     @Test
@@ -137,18 +78,22 @@ public class MDValidatorTest extends BaseUnitTest {
 
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">";
-        profileContent += "    <Header />";
-        profileContent += "    <CMD_Component name=\"Test\">";
-        profileContent += "	<CMD_Component ComponentId=\""
+        profileContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">";
+        profileContent += "    <Header>\n";
+        profileContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        profileContent += "     <Name>Test</Name>\n";
+        profileContent += "     <Status>development</Status>\n";
+        profileContent += "    </Header>\n";
+        profileContent += "    <Component name=\"Test\">";
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>"; // id not
         // registered
-        profileContent += "	<CMD_Component ComponentId=\""
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id2 + "\"/>"; // id not
         // registered
-        profileContent += "    </CMD_Component>";
-        profileContent += "</CMD_ComponentSpec>";
+        profileContent += "    </Component>";
+        profileContent += "</ComponentSpec>";
 
         // Ids not registered. will return 2 errors: one per each id.
         ProfileDescription desc = ProfileDescription.createNewDescription();
@@ -161,7 +106,7 @@ public class MDValidatorTest extends BaseUnitTest {
                 .getErrorMessages()
                 .get(0)
                 .startsWith(MDValidator.COMPONENT_NOT_REGISTERED_ERROR));
-
+        
         // id1 will be added as public and therefore only id2 is not registered
         RegistryTestHelper.addComponent(testRegistry, id1, true);
         validator = new MDValidator(new ByteArrayInputStream(
@@ -189,18 +134,22 @@ public class MDValidatorTest extends BaseUnitTest {
 
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">";
-        profileContent += "    <Header />";
-        profileContent += "    <CMD_Component name=\"Test\">";
-        profileContent += "	<CMD_Component ComponentId=\""
+        profileContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">";
+        profileContent += "    <Header>\n";
+        profileContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        profileContent += "     <Name>Test</Name>\n";
+        profileContent += "     <Status>development</Status>\n";
+        profileContent += "    </Header>\n";
+        profileContent += "    <Component name=\"Test\">";
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>"; // id not
         // registered
-        profileContent += "	<CMD_Component ComponentId=\""
+        profileContent += "	<Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id2 + "\"/>"; // id not
         // registered
-        profileContent += "    </CMD_Component>";
-        profileContent += "</CMD_ComponentSpec>";
+        profileContent += "    </Component>";
+        profileContent += "</ComponentSpec>";
 
         // Public Registry
         ProfileDescription desc = ProfileDescription.createNewDescription();
@@ -247,16 +196,20 @@ public class MDValidatorTest extends BaseUnitTest {
 
         String content = "";
         content += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        content += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        content += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-        content += "    <Header />\n";
-        content += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-        content += "        <CMD_Element name=\"Name\" ValueScheme=\"string\" />\n";
-        content += "      <CMD_Component ComponentId=\""
+        content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        content += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
+        content += "    <Header>\n";
+        content += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        content += "     <Name>Actor</Name>\n";
+        content += "     <Status>development</Status>\n";
+        content += "    </Header>\n";
+        content += "    <Component name=\"Actor\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+        content += "        <Element name=\"Name\" ValueScheme=\"string\" />\n";
+        content += "      <Component ComponentRef=\""
                 + ComponentDescription.COMPONENT_PREFIX + id1 + "\"/>\n"; // id not
         // registered
-        content += "    </CMD_Component>\n";
-        content += "</CMD_ComponentSpec>\n";
+        content += "    </Component>\n";
+        content += "</ComponentSpec>\n";
 
         ComponentDescription desc = ComponentDescription.createNewDescription();
         MDValidator validator = new MDValidator(new ByteArrayInputStream(
@@ -276,7 +229,7 @@ public class MDValidatorTest extends BaseUnitTest {
     }
 
     /**
-     * Test of getCMDComponentSpec method, of class MDValidator.
+     * Test of getComponentSpec method, of class MDValidator.
      */
     @Test
     public void testGetCMDComponentSpec() throws Exception {
@@ -287,25 +240,25 @@ public class MDValidatorTest extends BaseUnitTest {
         MDValidator validator = new MDValidator(input, desc, testRegistry, marshaller);
 
         // Spec is created during validation, before it should be null
-        assertNull(validator.getCMDComponentSpec());
+        assertNull(validator.getComponentSpec());
         validator.validate();
 
         // Get spec created during validation
-        final CMDComponentSpec cmdComponentSpec = validator
-                .getCMDComponentSpec();
+        final ComponentSpec cmdComponentSpec = validator
+                .getComponentSpec();
         assertNotNull(cmdComponentSpec);
 
         // Spec content should match XML
         assertTrue(cmdComponentSpec.isIsProfile());
-        assertEquals("Actor", cmdComponentSpec.getCMDComponent().getName());
+        assertEquals("Actor", cmdComponentSpec.getComponent().getName());
 
         // Spec copy should be a freshly unmarshalled copy
-        final CMDComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
+        final ComponentSpec specCopy = validator.getCopyOfCMDComponentSpec();
         assertNotSame(cmdComponentSpec, specCopy);
 
         // Content should still match XML
         assertTrue(specCopy.isIsProfile());
-        assertEquals("Actor", specCopy.getCMDComponent().getName());
+        assertEquals("Actor", specCopy.getComponent().getName());
     }
 
     private MDValidator getValidProfileValidator() {
@@ -321,17 +274,21 @@ public class MDValidatorTest extends BaseUnitTest {
     private String getValidProfileString() {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-        profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"Actor\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-        profileContent += "        <CMD_Element name=\"Age\">\n";
+        profileContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        profileContent += "    xsi:noNamespaceSchemaLocation=\"cmd-component.xsd\">\n";
+        profileContent += "    <Header>\n";
+        profileContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        profileContent += "     <Name>Actor</Name>\n";
+        profileContent += "     <Status>development</Status>\n";
+        profileContent += "    </Header>\n";
+        profileContent += "    <Component name=\"Actor\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+        profileContent += "        <Element name=\"Age\">\n";
         profileContent += "            <ValueScheme>\n";
         profileContent += "                <pattern>[23][0-9]</pattern>\n";
         profileContent += "            </ValueScheme>\n";
-        profileContent += "        </CMD_Element>\n";
-        profileContent += "    </CMD_Component>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
+        profileContent += "        </Element>\n";
+        profileContent += "    </Component>\n";
+        profileContent += "</ComponentSpec>\n";
         return profileContent;
     }
 }

@@ -1,7 +1,6 @@
-package clarin.cmdi.componentregistry.impl.database;
+package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.ItemNotFoundException;
-import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;

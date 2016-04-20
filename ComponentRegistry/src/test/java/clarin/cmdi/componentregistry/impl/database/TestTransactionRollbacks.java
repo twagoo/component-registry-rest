@@ -44,7 +44,6 @@ public class TestTransactionRollbacks extends BaseUnitTest {
 	cd.setDescription("description");
 	cd.setDomainName("domain name");
 	cd.setGroupName("group name");
-	cd.setHref("href");
 	cd.setName("name");
 	cd.setRegistrationDate(new Date());
 	cd.setUserId("123");

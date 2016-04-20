@@ -23,13 +23,13 @@
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
         <serviceUrlBase>http://localhost:8080</serviceUrlBase>
-        <serviceUrlPath>/${project.artifactId}</serviceUrlPath>
+        <serviceUrlPath>/ComponentRegistry</serviceUrlPath> <!-- defined in META-INF/context.xml -->
         <!-- Will be inserted in context.xml -->
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
-        <frontEndVersion>2.0.4</frontEndVersion>
-        <cmd-toolkit.version>1.1</cmd-toolkit.version>
+        <frontEndVersion>2.1.0-dev-SNAPSHOT</frontEndVersion>
+        <cmd-toolkit.version>1.2-SNAPSHOT</cmd-toolkit.version>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
         <jackson.version>1.9.13</jackson.version>
@@ -318,7 +318,7 @@
         <dependency>
             <groupId>clarin.cmdi</groupId>
             <artifactId>cmd-validate</artifactId>
-            <version>1.2</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -335,10 +335,39 @@
             <artifactId>json</artifactId>
             <version>20090211</version>
         </dependency>
+        <dependency>
+            <groupId>clarin.cmdi</groupId>
+            <artifactId>cmd-toolkit</artifactId>
+            <version>${cmd-toolkit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <scope>test</scope>
+            <version>2.44.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.opera</groupId>
+            <artifactId>operadriver</artifactId>
+            <scope>test</scope>
+            <version>1.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.seleniumhq.selenium</groupId>
+                    <artifactId>selenium-remote-driver</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 
     <profiles>
+        <profile>
+            <id>jar</id>
+            <properties>
+                <packaging>jar</packaging>
+            </properties>
+        </profile>
         <profile>
             <!-- development profile that directs logging output to the console -->
             <id>development</id>
@@ -426,8 +455,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -468,7 +497,7 @@
                                     <version>${cmd-toolkit.version}</version>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>src/main/binding/components</outputDirectory> <!-- TODO: extract elsewhere -->
-                                    <includes>cmd-toolkit/general-component-schema.xsd</includes>
+                                    <includes>toolkit/xsd/cmd-component.xsd</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -527,7 +556,7 @@
                         <configuration>
                             <schemaDirectory>src/main/binding/components</schemaDirectory>
                             <schemaIncludes>
-                                <include>cmd-toolkit/general-component-schema.xsd</include>
+                                <include>toolkit/xsd/cmd-component.xsd</include>
                             </schemaIncludes>
                             <bindingDirectory>src/main/binding/components</bindingDirectory>
                             <extension>true</extension>

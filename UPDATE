@@ -21,6 +21,27 @@ Procedure for updating
 
 Version specific update instructions
 -------------------------------------
+=== 2.1 ===
+
+- This is the first version to support CMDI 1.2. Therefore all components and
+  profiles in the database need to be converted to CMDI 1.2 once before running
+  the application. Use the bundled 'Component spec updater' utility for this.
+  It has its own bundled usage instructions.
+
+- The following new context parameters need to be configured:
+
+    <Parameter 
+      name="eu.clarin.cmdi.componentregistry.toolkitLocation" 
+      value="https://infra.clarin.eu/CMDI/1.x"/>
+
+    <Parameter 
+      name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1"
+      value="https://infra.clarin.eu/CMDI/1.1/xslt/comp2schema-v2/comp2schema.xsl"/>
+
+
+- The following context parameters are no longer used and can be removed:
+
+    * eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation
 
 === 2.0 ===
 

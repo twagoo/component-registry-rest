@@ -63,11 +63,11 @@ class CommentValidator implements Validator {
 	    errorMessages.add(COMMENT_SPECIFICATION_ERROR + "comment has to be filled in");
 	}
 	if (description.isProfile()) {
-	    if (comment.getComponentId() == null || comment.getComponentId().isEmpty()) {
+	    if (comment.getComponentRef() == null || comment.getComponentRef().isEmpty()) {
 		errorMessages.add(COMMENT_SPECIFICATION_ERROR + "profileId could not be found");
 	    }
 	} else {
-	    if (comment.getComponentId() == null || comment.getComponentId().isEmpty()) {
+	    if (comment.getComponentRef() == null || comment.getComponentRef().isEmpty()) {
 		errorMessages.add(COMMENT_SPECIFICATION_ERROR + "componentId could not be found");
 	    }
 	}

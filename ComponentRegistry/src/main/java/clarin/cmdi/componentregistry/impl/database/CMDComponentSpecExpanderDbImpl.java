@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 
 /**
  *
@@ -17,23 +17,23 @@ public class CMDComponentSpecExpanderDbImpl extends CMDComponentSpecExpander {
         dbImplRegistry = registry;
     }
 
-    public static CMDComponentSpec expandComponent(String componentId, ComponentRegistryDbImpl registry) throws ComponentRegistryException {
+    public static ComponentSpec expandComponent(String componentId, ComponentRegistryDbImpl registry) throws ComponentRegistryException {
         CMDComponentSpecExpanderDbImpl expander = new CMDComponentSpecExpanderDbImpl(registry);
         return expander.expandComponent(componentId);
     }
 
-    public static CMDComponentSpec expandProfile(String profileId, ComponentRegistryDbImpl registry) throws ComponentRegistryException {
+    public static ComponentSpec expandProfile(String profileId, ComponentRegistryDbImpl registry) throws ComponentRegistryException {
         CMDComponentSpecExpanderDbImpl expander = new CMDComponentSpecExpanderDbImpl(registry);
         return expander.expandProfile(profileId);
     }
 
     @Override
-    protected CMDComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException {
+    protected ComponentSpec getUncachedComponent(String componentId) throws ComponentRegistryException {
         return dbImplRegistry.getUncachedMDComponent(componentId);
     }
 
     @Override
-    protected CMDComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException {
+    protected ComponentSpec getUncachedProfile(String profileId) throws ComponentRegistryException {
         return dbImplRegistry.getUncachedMDProfile(profileId);
     }
 }

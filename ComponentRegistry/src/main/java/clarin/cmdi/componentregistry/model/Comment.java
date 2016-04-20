@@ -100,11 +100,11 @@ public class Comment {
 	return id== null?dbId+"":id;
     }
 
-    public String getComponentId() {
+    public String getComponentRef() {
 	return componentId;
     }
 
-    public void setComponentId(String componentDescriptionId) {
+    public void setComponentRef(String componentDescriptionId) {
 	this.componentId = componentDescriptionId;
     }
 

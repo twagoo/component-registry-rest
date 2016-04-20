@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,21 +20,15 @@ public class Configuration {
 
     private final static Logger LOG = LoggerFactory.getLogger(Configuration.class);
     //NOTE: Default values, can be overwritten in applicationContext.xml
-    private String generalComponentSchema = "https://infra.clarin.eu/cmd/general-component-schema.xsd";
-    private String component2SchemaXsl = "https://infra.clarin.eu/cmd/xslt/comp2schema-v2/comp2schema.xsl";//"http://www.clarin.eu/cmd/comp2schema.xsl";
+    private String toolkitLocation = "https://infra.clarin.eu/CMDI/1.x";
+    private String generalComponentSchema = "https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd";
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
-
+    
     {//Default values
         displayNameShibbolethKeys.add("displayName");
         displayNameShibbolethKeys.add("commonName");
-    }
-    private final Map<String, String> schemaLocations = new HashMap<String, String>();
-
-    {//Default values
-        schemaLocations.put(CMDComponentSpec.class.getName(),
-                "http://www.clarin.eu/cmd/ http://infra.clarin.eu/cmd/general-component-schema.xsd");
     }
     private final static Configuration INSTANCE = new Configuration();
 
@@ -43,10 +37,6 @@ public class Configuration {
 
     public static Configuration getInstance() {
         return INSTANCE;
-    }
-
-    public String getComponent2SchemaXsl() {
-        return component2SchemaXsl;
     }
 
     public List<String> getDisplayNameShibbolethKeys() {
@@ -61,8 +51,12 @@ public class Configuration {
         return ccrRestUrl;
     }
 
-    public String getSchemaLocation(String key) {
-        return schemaLocations.get(key);
+    public String getToolkitLocation() {
+        return toolkitLocation;
+    }
+
+    public String[] getAdminUsersArray() {
+        return adminUsers.toArray(new String[0]);
     }
 
     public boolean isAdminUser(Principal principal) {
@@ -88,7 +82,7 @@ public class Configuration {
 
     /**
      *
-     * @param adminUsers Whitespace-separated list of admin users
+     * @param adminUsersList list of admin users
      */
     public void setAdminUsersList(String adminUsersList) {
         String[] adminUsersArray = adminUsersList.trim().split("\\s+");
@@ -96,16 +90,6 @@ public class Configuration {
             LOG.info("Setting adminUsersList to {}", Arrays.toString(adminUsersArray));
         }
         setAdminUsers(Arrays.asList(adminUsersArray));
-    }
-
-    public void setComponent2SchemaXsl(String component2SchemaXsl) {
-        LOG.info("Setting component2SchemaXsl to {}", component2SchemaXsl);
-        this.component2SchemaXsl = component2SchemaXsl;
-    }
-
-    public void setComponentSpecSchemaLocation(String componentSpecSchemaLocation) {
-        LOG.info("Setting componentSpecSchemaLocation to {}", componentSpecSchemaLocation);
-        schemaLocations.put(CMDComponentSpec.class.getName(), componentSpecSchemaLocation);
     }
 
     public void setDisplayNameShibbolethKeys(List<String> displayNameShibbolethKeys) {
@@ -123,7 +107,9 @@ public class Configuration {
         this.ccrRestUrl = ccrRestUrl;
     }
 
-    public String[] getAdminUsersArray() {
-        return adminUsers.toArray(new String[0]);
+    public void setToolkitLocation(String toolkitLocation) {
+        LOG.info("Setting toolkitLocation to {}", toolkitLocation);
+        this.toolkitLocation = toolkitLocation;
     }
+    
 }

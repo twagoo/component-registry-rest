@@ -19,9 +19,11 @@ import clarin.cmdi.componentregistry.DatesHelper;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import static clarin.cmdi.componentregistry.model.ComponentStatus.DEVELOPMENT;
+import static clarin.cmdi.componentregistry.model.ComponentStatus.PRODUCTION;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 
@@ -40,9 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public final class RegistryTestHelper {
 
     private static MDMarshaller marshaller;
-    
-   
-            
 
     @Autowired
     public void setMarshaller(MDMarshaller marshaller) {
@@ -50,7 +49,7 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
-        return addComponent(testRegistry, id, getComponentTestContent(), isPublic);
+        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic);
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
@@ -66,13 +65,12 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
-        desc.setHref("link:" + desc.getId());
         desc.setPublic(isPublic);
         return addComponent(content, testRegistry, desc);
     }
 
     public static ComponentDescription addComponent(InputStream content, ComponentRegistry testRegistry, ComponentDescription desc) throws JAXBException {
-        CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
+        ComponentSpec spec = marshaller.unmarshal(ComponentSpec.class, content, marshaller.getComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
     }
@@ -90,7 +88,6 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
-        desc.setHref("link:" + desc.getId());
         desc.setPublic(isPublic);
         return addComponent(content, testRegistry, desc);
     }
@@ -100,25 +97,30 @@ public final class RegistryTestHelper {
     }
 
     private static String getProfileTestContentString(String name) {
+        return getProfileTestContentString(name, "development");
+    }
+
+    private static String getProfileTestContentString(String name, String status) {
         String profileContent = "";
-        profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        profileContent += "<CMD_ComponentSpec isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        profileContent += "    xsi:noNamespaceSchemaLocation=\"general-component-schema.xsd\">\n";
-        profileContent += "    <Header />\n";
-        profileContent += "    <CMD_Component name=\"" + name + "\" CardinalityMin=\"0\" CardinalityMax=\"unbounded\">\n";
-        profileContent += "        <AttributeList>\n";
-        profileContent += "            <Attribute>\n";
-        profileContent += "                <Name>Name</Name>\n";
-        profileContent += "                <Type>string</Type>\n";
-        profileContent += "            </Attribute>\n";
-        profileContent += "        </AttributeList>\n";
-        profileContent += "        <CMD_Element name=\"Age\">\n";
-        profileContent += "            <ValueScheme>\n";
-        profileContent += "                <pattern>[23][0-9]</pattern>\n";
-        profileContent += "            </ValueScheme>\n";
-        profileContent += "        </CMD_Element>\n";
-        profileContent += "    </CMD_Component>\n";
-        profileContent += "</CMD_ComponentSpec>\n";
+        profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xml=\"http://www.w3.org/XML/1998/namespace\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+                + "    xsi:noNamespaceSchemaLocation=\"http://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd\">\n"
+                + "    <Header>\n"
+                + "        <ID>clarin.eu:cr1:p_12345678</ID>\n"
+                + "        <Name>" + name + "</Name>\n"
+                + "        <Status>" + status + "</Status>\n"
+                + "    </Header>\n"
+                + "    <Component name=\"" + name + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n"
+                + "        <AttributeList>\n"
+                + "            <Attribute name=\"Name\" ValueScheme=\"string\" />\n"
+                + "        </AttributeList>\n"
+                + "        <Element name=\"Age\">\n"
+                + "            <ValueScheme>\n"
+                + "                <pattern>[23][0-9]</pattern>\n"
+                + "            </ValueScheme>\n"
+                + "        </Element>\n"
+                + "    </Component>\n"
+                + "</ComponentSpec>";
         return profileContent;
     }
 
@@ -127,11 +129,15 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getTestProfileContent(String name) {
+        return getTestProfileContent(name, DEVELOPMENT.toString());
+    }
+
+    public static InputStream getTestProfileContent(String name, String status) {
         return new ByteArrayInputStream(getProfileTestContentString(name).getBytes());
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
-        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(), isPublic);
+        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, isPublic ? PRODUCTION.toString() : DEVELOPMENT.toString()), isPublic);
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
@@ -147,13 +153,12 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
-        desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
         return addProfile(content, testRegistry, desc);
     }
 
     public static ProfileDescription addProfile(InputStream content, ComponentRegistry testRegistry, ProfileDescription desc) throws JAXBException {
-        CMDComponentSpec spec = marshaller.unmarshal(CMDComponentSpec.class, content, marshaller.getCMDComponentSchema());
+        ComponentSpec spec = marshaller.unmarshal(ComponentSpec.class, content, marshaller.getComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
     }
@@ -171,13 +176,12 @@ public final class RegistryTestHelper {
         desc.setName(id);
         desc.setDescription("Test Description");
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
-        desc.setHref("link:" + ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
         return addProfile(content, testRegistry, desc);
     }
 
-    public static CMDComponentSpec getTestProfile() throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getTestProfileContent(), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getTestProfile() throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getTestProfileContent(), marshaller.getComponentSchema());
     }
 
     public static String getComponentTestContentString() {
@@ -185,31 +189,37 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getComponentTestContent() {
-        return getComponentTestContentAsStream("Access");
+        return getComponentTestContent("Access");
+    }
+
+    public static InputStream getComponentTestContent(String name) {
+        return getComponentTestContentAsStream(name);
     }
 
     public static String getComponentTestContentString(String componentName) {
         String compContent = "";
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
-        compContent += "<CMD_ComponentSpec isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
-        compContent += "    xsi:noNamespaceSchemaLocation=\"../../general-component-schema.xsd\">\n";
-        compContent += "    \n";
-        compContent += "    <Header/>\n";
-        compContent += "    \n";
-        compContent += "    <CMD_Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
-        compContent += "        <CMD_Element name=\"Availability\" ValueScheme=\"string\" />\n";
-        compContent += "        <CMD_Element name=\"Date\">\n";
+        compContent += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
+        compContent += "    xsi:noNamespaceSchemaLocation=\"http://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd\">\n";
+        compContent += "    <Header>\n";
+        compContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
+        compContent += "     <Name>" + componentName + "</Name>\n";
+        compContent += "     <Status>development</Status>\n";
+        compContent += "    </Header>\n";
+        compContent += "    <Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
+        compContent += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
+        compContent += "        <Element name=\"Date\">\n";
         compContent += "            <ValueScheme>\n";
         compContent += "                <!-- matching dates of the pattern yyyy-mm-dd (ISO 8601); this only matches dates from the years 1000 through 2999 and does allow some invalid dates (e.g. February, the 30th) -->\n";
         compContent += "                <pattern>(1|2)\\d{3}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])</pattern>                \n";
         compContent += "            </ValueScheme>\n";
-        compContent += "        </CMD_Element>\n";
-        compContent += "        <CMD_Element name=\"Owner\" ValueScheme=\"string\" />\n";
-        compContent += "        <CMD_Element name=\"Publisher\" ValueScheme=\"string\" />\n";
-        compContent += "    </CMD_Component>\n";
+        compContent += "        </Element>\n";
+        compContent += "        <Element name=\"Owner\" ValueScheme=\"string\" />\n";
+        compContent += "        <Element name=\"Publisher\" ValueScheme=\"string\" />\n";
+        compContent += "    </Component>\n";
         compContent += "\n";
-        compContent += "</CMD_ComponentSpec>\n";
+        compContent += "</ComponentSpec>\n";
         return compContent;
     }
 
@@ -234,8 +244,8 @@ public final class RegistryTestHelper {
     }
 
     //////////////////////
-    public static CMDComponentSpec getComponentFromString(String contentString) throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getComponentFromString(String contentString) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getComponentSchema());
     }
 
     public static InputStream getComponentContentAsStream(String content) {
@@ -246,15 +256,15 @@ public final class RegistryTestHelper {
         return getComponentContentAsStream(getComponentTestContentString(componentName));
     }
 
-    public static CMDComponentSpec getTestComponent() throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContent(), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getTestComponent() throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentTestContent(), marshaller.getComponentSchema());
     }
 
-    public static CMDComponentSpec getTestComponent(String name) throws JAXBException {
-        return marshaller.unmarshal(CMDComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getCMDComponentSchema());
+    public static ComponentSpec getTestComponent(String name) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getComponentSchema());
     }
 
-    public static String getXml(CMDComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
+    public static String getXml(ComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         marshaller.marshal(componentSpec, os);
         String xml = os.toString();
@@ -276,11 +286,10 @@ public final class RegistryTestHelper {
         testRegistry.registerComment(spec, principal);
         return spec;
     }
-    
+
     public Comment addCommentBypassAuthorisation(CommentsDao commentsDao, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
         return addCommentBypassAuthorisation(commentsDao, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
-
 
     private Comment addCommentBypassAuthorisation(CommentsDao commentsDao, InputStream content, String principal) throws ParseException,
             JAXBException,
@@ -303,8 +312,8 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-    
-     public static String getanotherPrincipalCommentTestContentStringForProfile(String commentName, String profileId) {
+
+    public static String getanotherPrincipalCommentTestContentStringForProfile(String commentName, String profileId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -327,8 +336,8 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-    
-     public static String getAnotherPrincipalCommentTestContentStringForComponent(String commentName, String componentId) {
+
+    public static String getAnotherPrincipalCommentTestContentStringForComponent(String commentName, String componentId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         comContent += "<comment xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
@@ -355,8 +364,6 @@ public final class RegistryTestHelper {
     public static InputStream getCommentTestContent() {
         return getTestCommentContent("Actual", ProfileDescription.PROFILE_PREFIX + "profile1");
     }
-    
-  
 
     /**
      * Testing a big xsd string is a bit hard, so doing a best effort by
@@ -388,7 +395,6 @@ public final class RegistryTestHelper {
         fop.flush();
         fop.close();
 
-
     }
 
     /**
@@ -402,7 +408,6 @@ public final class RegistryTestHelper {
     public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
 
         writeBytesToFile(str.getBytes(), filename);
-
 
     }
 
@@ -418,7 +423,6 @@ public final class RegistryTestHelper {
 
         writeBytesToFile(os.toByteArray(), filename);
 
-
     }
 
     /**
@@ -430,7 +434,6 @@ public final class RegistryTestHelper {
      * @throws JAXBException
      */
     public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         marshaller.marshal(cdesc, os);
@@ -449,7 +452,6 @@ public final class RegistryTestHelper {
     public static String openTestDir(String dirName) {
 
         File testDir = new File("target/" + dirName);
-
 
         testDir.mkdir();
 

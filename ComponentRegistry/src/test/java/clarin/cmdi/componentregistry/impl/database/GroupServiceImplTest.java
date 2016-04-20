@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
+import clarin.cmdi.componentregistry.GroupService;
 import java.util.List;
 
 import org.junit.Before;
@@ -147,7 +148,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 		.longValue());
 	// Add an ownership to that profile to the current user
 	Ownership ownership = new Ownership();
-	ownership.setComponentId(profile.getId());
+	ownership.setComponentRef(profile.getId());
 	ownership.setUserId(user.getId().longValue());
 	groupService.addOwnership(ownership);
 
@@ -173,7 +174,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 
 	// Add an ownership to that profile to the group
 	Ownership ownership = new Ownership();
-	ownership.setComponentId(profile.getId());
+	ownership.setComponentRef(profile.getId());
 	ownership.setGroupId(group.getId());
 	groupService.addOwnership(ownership);
 
@@ -218,7 +219,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 
 	// Add an ownership to that profile to the current user
 	Ownership ownership = new Ownership();
-	ownership.setComponentId(componentDescription.getId());
+	ownership.setComponentRef(componentDescription.getId());
 	ownership.setUserId(user.getId().longValue());
 	groupService.addOwnership(ownership);
 
@@ -245,7 +246,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
 
 	// Add an ownership to that component to the group
 	Ownership ownership = new Ownership();
-	ownership.setComponentId(componentDescription.getId());
+	ownership.setComponentRef(componentDescription.getId());
 	ownership.setGroupId(group.getId());
 	groupService.addOwnership(ownership);
 

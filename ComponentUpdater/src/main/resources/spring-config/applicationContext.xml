@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/tx 
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/data/jpa
+	 http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+     ">
+
+	<context:annotation-config />
+	<context:component-scan base-package="clarin.cmdi.componentregistry" />
+	<!-- target class proxying must be enabled, otherwise Jersey won't find 
+		the @path annotations on ComponentRegistryRestService -->
+	<tx:annotation-driven proxy-target-class="true" />
+	<jpa:repositories base-package="clarin.cmdi.componentregistry.persistence.jpa" />
+
+	<!-- Fallback properties for unit tests, loads properties from /test/γ -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+                    <list>
+                        <value>classpath:spring-config/component-registry.properties</value>
+                        <value>classpath:datasource.properties</value>
+                    </list>
+                </property>
+		<property name="ignoreResourceNotFound" value="false" />
+	</bean>
+
+	<bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller">
+            <constructor-arg name="stylesheetLocations">
+                <map key-type="clarin.cmdi.componentregistry.CmdVersion">
+                    <!-- current comp2schema -->
+                    <entry key="CMD_1_2" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
+                    <!-- legacy comp2schema -->
+                    <entry key="CMD_1_1" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1}" />
+                </map>
+            </constructor-arg>
+                
+        </bean>
+
+	<bean id="configuration" class="clarin.cmdi.componentregistry.Configuration"
+		factory-method="getInstance">
+		<!-- Read admin users from init param -->
+		<property name="adminUsersList"
+			value="${eu.clarin.cmdi.componentregistry.adminUsers}" />
+		<property name="generalComponentSchema"
+			value="${eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl}" />
+		<property name="ccrRestUrl"
+			value="${eu.clarin.cmdi.componentregistry.ccrRestUrl}" />
+                <property name="toolkitLocation"
+                        value="${eu.clarin.cmdi.componentregistry.toolkitLocation}" />
+		<!-- Extra attribute keys that are passed in a shibboleth authenticated 
+			request principal. You need to configure the shhaa.xml file to enable the 
+			extra attributes. -->
+		<property name="displayNameShibbolethKeys">
+			<list>
+				<value>displayName</value>
+				<value>commonName</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="componentsCache"
+		class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
+	<bean id="profilesCache"
+		class="clarin.cmdi.componentregistry.impl.database.CMDComponentSpecCache" />
+
+	<!-- Prototype bean for component registry (service) -->
+	<bean id="componentRegistryDbImpl"
+		class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryDbImpl"
+		scope="prototype" />
+
+	<!-- Factory that will create component registries for us (and autowire 
+		them), to be used by actual ComponentRegistryFactory -->
+	<bean id="componentRegistryBeanFactory"
+		class="org.springframework.beans.factory.config.ServiceLocatorFactoryBean">
+		<property name="serviceLocatorInterface"
+			value="clarin.cmdi.componentregistry.impl.database.ComponentRegistryBeanFactory" />
+	</bean>
+
+	<!-- Component registry factory that will be used by rest service to get 
+		user and public registries -->
+	<bean id="componentRegistryFactory"
+		class="clarin.cmdi.componentregistry.impl.database.ComponentRegistryFactoryDbImpl"></bean>
+
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<property name="dataSource" ref="applicationServerDataSource"/>
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="generateDdl" value="true" />
+			</bean>
+		</property>
+		<property name="jpaDialect">
+		<bean class="clarin.cmdi.componentregistry.impl.database.PostgresJpaDialect"/>
+		</property>
+		<property name="persistenceUnitName" value="clarin.cmdi.componentregistry" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.dialect">${eu.clarin.cmdi.componentregistry.jpaDialect}</prop>
+				<prop key="hibernate.show_sql">false</prop>
+                                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+				<!-- prop key="hibernate.hbm2ddl.auto">update</prop -->
+			</props>
+
+		</property>
+	</bean>
+
+	<!-- Unit tests reload the same beans over and over -->
+	<context:mbean-export registration="replaceExisting" />
+
+</beans>

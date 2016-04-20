@@ -92,7 +92,7 @@ public class CommentResponseTest extends BaseUnitTest{
 	com.setComment("Name");
 	com.setId("myId");
 	com.setUserId(123);
-	com.setComponentId("myD");
+	com.setComponentRef("myD");
 	com.setCommentDate(testDate);
 	com.setUserName("J. Unit");
 	return com;

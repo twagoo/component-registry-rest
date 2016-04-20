@@ -28,7 +28,7 @@ public class CommentTest extends BaseUnitTest{
 	comment1.setCommentDate(testDate);
 	comment1.setComment("tester");
 	comment1.setId("1");
-	comment1.setComponentId("clarin.eu:cr1:p_1297242111880");
+	comment1.setComponentRef("clarin.eu:cr1:p_1297242111880");
 	comment1.setUserId(8);
 	comment1.setUserName("J. Unit");
 
@@ -48,7 +48,7 @@ public class CommentTest extends BaseUnitTest{
 
 	Comment comment = marshaller.unmarshal(Comment.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertEquals(comment1.getId(), comment.getId());
-	assertEquals(comment1.getComponentId(), comment.getComponentId());
+	assertEquals(comment1.getComponentRef(), comment.getComponentRef());
     }
 
     @Test
@@ -58,7 +58,7 @@ public class CommentTest extends BaseUnitTest{
 	comment1.setCommentDate(testDate);
 	comment1.setComment("tester");
 	comment1.setId("1");
-	comment1.setComponentId("clarin.eu:cr1:c_1297242111880");
+	comment1.setComponentRef("clarin.eu:cr1:c_1297242111880");
 	comment1.setUserId(8);
 	comment1.setUserName("J. Unit");
 
@@ -78,6 +78,6 @@ public class CommentTest extends BaseUnitTest{
 
 	Comment comment = marshaller.unmarshal(Comment.class, new ByteArrayInputStream(expected.getBytes()), null);
 	assertEquals(comment1.getId(), comment.getId());
-	assertEquals(comment1.getComponentId(), comment.getComponentId());
+	assertEquals(comment1.getComponentRef(), comment.getComponentRef());
     }
 }
