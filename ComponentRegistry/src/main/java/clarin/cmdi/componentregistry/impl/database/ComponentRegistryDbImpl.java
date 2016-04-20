@@ -832,12 +832,22 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public List<ProfileDescription> getDeletedProfileDescriptions() throws ComponentRegistryException {
-        return ComponentUtils.toProfiles(componentDao.getDeletedDescriptions(getUserId()));
+        if (registrySpace == RegistrySpace.PRIVATE) {
+            return ComponentUtils.toProfiles(componentDao.getDeletedDescriptions(getUserId()));
+        } else {
+            LOG.warn("Delete profiles list not available for {} space", registrySpace);
+            return Collections.emptyList();
+        }
     }
 
     @Override
     public List<ComponentDescription> getDeletedComponentDescriptions() throws ComponentRegistryException {
-        return ComponentUtils.toComponents(componentDao.getDeletedDescriptions(getUserId()));
+        if (registrySpace == RegistrySpace.PRIVATE) {
+            return ComponentUtils.toComponents(componentDao.getDeletedDescriptions(getUserId()));
+        } else {
+            LOG.warn("Delete components list not available for {} space", registrySpace);
+            return Collections.emptyList();
+        }
     }
 
     @Override

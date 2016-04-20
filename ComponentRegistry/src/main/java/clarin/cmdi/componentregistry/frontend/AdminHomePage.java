@@ -41,6 +41,8 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -66,13 +68,21 @@ public class AdminHomePage extends SecureAdminWebPage {
         adminRegistry.setMarshaller(marshaller);
         info = new CMDItemInfo(marshaller);
         addLinks();
+
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
         feedback.setOutputMarkupId(true);
-        add(feedback);
-        Form form = new ItemEditForm("form");
-        add(form);
+        
+        final Form form = createEditForm(feedback);
+        add(new WebMarkupContainer("infoView")
+                .add(feedback)
+                .add(form)
+                .setOutputMarkupId(true));
 
-        Button deleteButton = new AjaxFallbackButton("delete", form) {
+    }
+
+    private Form createEditForm(final FeedbackPanel feedback) throws ItemNotFoundException, ComponentRegistryException {
+        final Form form = new ItemEditForm("form");
+        Button deleteButton = new IndicatingAjaxButton("delete", form) {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
@@ -98,11 +108,10 @@ public class AdminHomePage extends SecureAdminWebPage {
                 return info.isDeletable();
 
             }
-        ;
+            ;
         };
-	form.add(deleteButton);
-
-        Button undeleteButton = new AjaxFallbackButton("undelete", form) {
+        form.add(deleteButton);
+        Button undeleteButton = new IndicatingAjaxButton("undelete", form) {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
@@ -128,11 +137,9 @@ public class AdminHomePage extends SecureAdminWebPage {
             }
         };
         form.add(undeleteButton);
-
         CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
         form.add(forceUpdateCheck);
-
-        Button submitButton = new AjaxFallbackButton("submit", form) {
+        Button submitButton = new IndicatingAjaxButton("submit", form) {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
@@ -141,14 +148,12 @@ public class AdminHomePage extends SecureAdminWebPage {
                 try {
                     adminRegistry.submitFile(info, userPrincipal);
                     info("submitting done.");
-                    reloadTreeModel(info);
                 } catch (Exception e) {
                     LOG.error("Admin: ", e);
                     error("Cannot submit: " + info.getName() + "\n error=" + e);
                 }
                 if (target != null) {
                     target.addComponent(form);
-                    target.addComponent(tree);
                     target.addComponent(feedback);
                 }
             }
@@ -159,10 +164,6 @@ public class AdminHomePage extends SecureAdminWebPage {
             }
         };
         form.add(submitButton);
-
-
-
-
         try {
             tree = createTree("tree", form, createDBTreeModel());
             add(tree);
@@ -180,11 +181,11 @@ public class AdminHomePage extends SecureAdminWebPage {
                 }
             });
 
-        } catch (UserUnauthorizedException e) {            
+        } catch (UserUnauthorizedException e) {
             LOG.error("Admin: ", e);
             error("Cannot create tree: error = " + e);
         }
-        
+        return form;
     }
 
     private void reloadTreeModel(CMDItemInfo info) throws UserUnauthorizedException, ItemNotFoundException {
@@ -281,9 +282,9 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         final UserCredentials userCredentials = new UserCredentials(getUserPrincipal());
         final RegistryUser user = componentRegistryFactory.getOrCreateUser(userCredentials);
-        
-        final List<String> groups = groupService.listGroupNames();            
-        for(String group:groups) {
+
+        final List<String> groups = groupService.listGroupNames();
+        for (String group : groups) {
             final Number groupId = groupService.getGroupIdByName(group);
             final ComponentRegistry registry = componentRegistryFactory.getComponentRegistry(RegistrySpace.GROUP, new OwnerUser(user.getId()), userCredentials, groupId);
             addRegistry(rootNode, registry, String.format("Registry of group %s", group));
