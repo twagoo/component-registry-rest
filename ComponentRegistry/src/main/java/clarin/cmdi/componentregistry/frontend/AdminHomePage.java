@@ -28,14 +28,18 @@ import org.slf4j.LoggerFactory;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.IMarshaller;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
+import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.RegistrySpace;
+import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 
 @SuppressWarnings("serial")
@@ -48,6 +52,8 @@ public class AdminHomePage extends SecureAdminWebPage {
     private transient AdminRegistry adminRegistry = new AdminRegistry();
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
+    @SpringBean(name = "GroupService")
+    private GroupService groupService;
     @SpringBean
     private ComponentDao componentDao;
     @SpringBean
@@ -270,12 +276,26 @@ public class AdminHomePage extends SecureAdminWebPage {
         add(publicNode, publicRegistry);
         List<ComponentRegistry> userRegistries = componentRegistryFactory.getAllUserRegistries();
         for (ComponentRegistry registry : userRegistries) {
-            DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(new DisplayDataNode(registry.getName(), false));
-            rootNode.add(userNode);
-            add(userNode, registry);
+            addRegistry(rootNode, registry, registry.getName());
+        }
+
+        final UserCredentials userCredentials = new UserCredentials(getUserPrincipal());
+        final RegistryUser user = componentRegistryFactory.getOrCreateUser(userCredentials);
+        
+        final List<String> groups = groupService.listGroupNames();            
+        for(String group:groups) {
+            final Number groupId = groupService.getGroupIdByName(group);
+            final ComponentRegistry registry = componentRegistryFactory.getComponentRegistry(RegistrySpace.GROUP, new OwnerUser(user.getId()), userCredentials, groupId);
+            addRegistry(rootNode, registry, String.format("Registry of group %s", group));
         }
         TreeModel model = new DefaultTreeModel(rootNode);
         return model;
+    }
+
+    private void addRegistry(DefaultMutableTreeNode rootNode, ComponentRegistry registry, String name) throws UserUnauthorizedException, ItemNotFoundException, ComponentRegistryException {
+        DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(new DisplayDataNode(name, false));
+        rootNode.add(userNode);
+        add(userNode, registry);
     }
 
     private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {

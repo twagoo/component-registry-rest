@@ -885,11 +885,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     private List<ComponentDescription> getComponentDescriptionsInGroup(Number groupId)
             throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-
-        String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
-        String groupName = groupService.getGroupNameById(groupId.longValue());
+        final RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
+        final String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
+        final String groupName = groupService.getGroupNameById(groupId.longValue());
         if (!groupService.userGroupMember(principalName, groupId.longValue())
-                && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
+                && !groupService.isUserOwnerOfGroup(groupName, principalName)
+                && !configuration.isAdminUser(regOwner.getPrincipalName())) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to components of the group " + groupId);
         }
 
@@ -905,11 +906,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private List<ProfileDescription> getProfileDescriptionsInGroup(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-
-        String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
-        String groupName = groupService.getGroupNameById(groupId.longValue());
+        final RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
+        final String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
+        final String groupName = groupService.getGroupNameById(groupId.longValue());
         if (!groupService.userGroupMember(principalName, groupId.longValue())
-                && !groupService.isUserOwnerOfGroup(groupName, principalName)) {
+                && !groupService.isUserOwnerOfGroup(groupName, principalName)
+                && !configuration.isAdminUser(regOwner.getPrincipalName())) {
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to profiles of the group " + groupId);
         }
 
