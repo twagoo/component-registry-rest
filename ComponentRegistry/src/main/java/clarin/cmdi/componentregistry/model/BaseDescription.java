@@ -41,7 +41,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 @Entity
 @Table(name = "basedescription")
 public class BaseDescription implements Serializable {
-
+    //TODO: Add status, derivedFrom and successor fields
 
     @SequenceGenerator( name = "basedescription_id_seq", sequenceName = "basedescription_id_seq", allocationSize = 1, initialValue = 1 )
     @GeneratedValue( strategy = GenerationType.SEQUENCE, generator = "basedescription_id_seq" )

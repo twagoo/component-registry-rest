@@ -455,7 +455,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public int register(BaseDescription description, ComponentSpec spec) {
-        enrichSpecHeader(spec, description);
+        enrichSpecHeader(spec, description); //TODO: turn around - fill description from spec header content
         try {
             String xml = componentSpecToString(spec);
             // Convert principal name to user record id
