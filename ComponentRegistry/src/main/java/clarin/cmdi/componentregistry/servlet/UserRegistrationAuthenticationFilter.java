@@ -1,5 +1,7 @@
 package clarin.cmdi.componentregistry.servlet;
 
+import clarin.cmdi.componentregistry.ComponentRegistryFactory;
+import clarin.cmdi.componentregistry.UserCredentials;
 import java.io.IOException;
 import java.security.Principal;
 import javax.servlet.Filter;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Creates the user in the database on authentication if not already registered.
@@ -22,6 +25,9 @@ import org.slf4j.LoggerFactory;
 public class UserRegistrationAuthenticationFilter implements Filter {
 
     private final static Logger logger = LoggerFactory.getLogger(UserRegistrationAuthenticationFilter.class);
+
+    @Autowired
+    private ComponentRegistryFactory componentRegistryFactory;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -37,7 +43,9 @@ public class UserRegistrationAuthenticationFilter implements Filter {
             if (user != null && (session == null || session.getAttribute("user") == null)) {
                 httpRequest.getSession().setAttribute("user", user);
                 logger.debug("Authenticated session started for " + user.getName());
-                //TODO: 
+                if (componentRegistryFactory.getOrCreateUser(new UserCredentials(user)) == null) {
+                    logger.warn("User could not retrieved or registered: {}", user);
+                }
             }
         }
 

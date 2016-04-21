@@ -25,8 +25,7 @@ i.e. development or testing environments. -->
     
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
-        <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter
-        </filter-class>
+        <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>
         <init-param>
             <param-name>encoding</param-name>
             <param-value>UTF-8</param-value>
@@ -37,8 +36,9 @@ i.e. development or testing environments. -->
         <filter-class>clarin.cmdi.componentregistry.servlet.DontCacheFilter</filter-class>
     </filter>
     <filter>
-        <filter-name>UserRegistrationAuthenticationFilter</filter-name>
-        <filter-class>clarin.cmdi.componentregistry.servlet.UserRegistrationAuthenticationFilter</filter-class>
+        <!-- delegate for UserRegistrationAuthenticationFilter defined as bean in Spring applicationContext -->
+        <filter-name>userRegistrationAuthenticationFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>NoCachingFilter</filter-name>
@@ -49,9 +49,10 @@ i.e. development or testing environments. -->
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
-        <filter-name>UserRegistrationAuthenticationFilter</filter-name>
+        <filter-name>userRegistrationAuthenticationFilter</filter-name>
         <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
+    <filter>
         <filter-name>wicket.componentregistry</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter
         </filter-class>

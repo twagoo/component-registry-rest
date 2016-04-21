@@ -126,6 +126,10 @@
 
 		</property>
 	</bean>
+        
+        <!-- To be configured in web.xml through DelegatingFilterProxy to ensure autowiring -->
+        <bean id="userRegistrationAuthenticationFilter"
+              class="clarin.cmdi.componentregistry.servlet.UserRegistrationAuthenticationFilter"/>
 
 	<!-- Unit tests reload the same beans over and over -->
 	<context:mbean-export registration="replaceExisting" />
