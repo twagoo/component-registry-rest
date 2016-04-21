@@ -22,7 +22,7 @@ i.e. development or testing environments. -->
         <param-name>eu.clarin.cmdi.componentregistry.jpaDialect</param-name>
         <param-value>org.hibernate.dialect.PostgreSQLDialect</param-value>
     </context-param>
-
+    
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
         <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter
@@ -36,6 +36,10 @@ i.e. development or testing environments. -->
         <filter-name>NoCachingFilter</filter-name>
         <filter-class>clarin.cmdi.componentregistry.servlet.DontCacheFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>UserRegistrationAuthenticationFilter</filter-name>
+        <filter-class>clarin.cmdi.componentregistry.servlet.UserRegistrationAuthenticationFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>NoCachingFilter</filter-name>
         <url-pattern>/rest/registry/*</url-pattern>
@@ -44,7 +48,10 @@ i.e. development or testing environments. -->
         <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <filter>
+    <filter-mapping>
+        <filter-name>UserRegistrationAuthenticationFilter</filter-name>
+        <url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
         <filter-name>wicket.componentregistry</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter
         </filter-class>
@@ -95,7 +102,7 @@ i.e. development or testing environments. -->
     <servlet-mapping>
         <servlet-name>ComponentRegistry Web Application</servlet-name>
         <url-pattern>/rest/*</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>    
     
     <servlet>
         <servlet-name>Concept Registry Servlet</servlet-name>
@@ -129,6 +136,18 @@ i.e. development or testing environments. -->
             <http-method>DELETE</http-method>
             <http-method>PUT</http-method>
             <http-method>POST</http-method>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>tomcat</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <security-constraint>
+        <display-name>ComponentRegistry SWF GET</display-name>
+        <web-resource-collection>
+            <web-resource-name>ComponentRegistry access</web-resource-name>
+            <description />
+            <url-pattern>/*</url-pattern>
+            <http-method>GET</http-method>
         </web-resource-collection>
         <auth-constraint>
             <role-name>tomcat</role-name>

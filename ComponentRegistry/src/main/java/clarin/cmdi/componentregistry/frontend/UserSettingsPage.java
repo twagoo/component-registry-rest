@@ -22,7 +22,6 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataAccessException;
 
 /**
