@@ -53,6 +53,7 @@ i.e. development or testing environments. -->
         <filter-name>userRegistrationAuthenticationFilter</filter-name>
         <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
+    <filter>
         <filter-name>wicket.componentregistry</filter-name>
         <filter-class>org.apache.wicket.protocol.http.WicketFilter
         </filter-class>
