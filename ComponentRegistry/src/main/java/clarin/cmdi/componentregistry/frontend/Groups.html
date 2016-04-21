@@ -16,7 +16,12 @@
         <form wicket:id="groupForm">
             <div wicket:id="feedback"></div>            
             Group name: <input type="text" wicket:id="name" /> <br />
-            Owner name: <input type="text" wicket:id="owner" /> <br />
+            Owner name: 
+            <!--<input type="text" wicket:id="owner" />--> 
+            <select wicket:id="ownerPrincipal">
+                <option>user</option>
+            </select>
+            <br />
             <input type="submit" value="Create group" />
         </form>
 
