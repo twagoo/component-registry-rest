@@ -31,6 +31,7 @@ public class UserRegistrationAuthenticationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        logger.info("Users will be registered once authenticated");
     }
 
     @Override
@@ -40,11 +41,20 @@ public class UserRegistrationAuthenticationFilter implements Filter {
             final Principal user = httpRequest.getUserPrincipal();
             final HttpSession session = httpRequest.getSession(false);
 
-            if (user != null && (session == null || session.getAttribute("user") == null)) {
-                httpRequest.getSession().setAttribute("user", user);
+            if (user != null
+                    && //is authenticated request?
+                    //do we have 'marked' session yet?
+                    (session == null || session.getAttribute("user") == null)) {
+                //First request of authenticated session!
                 logger.debug("Authenticated session started for " + user.getName());
+                
+                //Set 'user' attribute to 'mark' session and prevent check on subsequent requests.
+                httpRequest.getSession() //this will create the session if needed
+                        .setAttribute("user", user);
+
+                //Check if user exists and/or register user in data store
                 if (componentRegistryFactory.getOrCreateUser(new UserCredentials(user)) == null) {
-                    logger.warn("User could not retrieved or registered: {}", user);
+                    logger.error("User could not retrieved or registered: {}", user);
                 }
             }
         }
