@@ -26,6 +26,13 @@
             <groupId>clarin.cmdi</groupId>
             <artifactId>cmd-toolkit</artifactId>
             <version>1.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <!-- to prevent saxon clashes -->
+                    <groupId>nl.mpi.tla</groupId>
+                    <artifactId>SchemAnon</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>clarin.cmdi</groupId>

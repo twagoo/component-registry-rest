@@ -93,9 +93,7 @@ public class ComponentSpecUpdater {
                 throw exception;
             }
         });
-        for (Entry<String, String> entry : transformationParams.entrySet()) {
-            transformer.setParameter(entry.getKey(), entry.getValue());
-        }
+        applyTransformerParameters(transformer, transformationParams);
         return transformer;
     }
     
@@ -172,19 +170,15 @@ public class ComponentSpecUpdater {
         final StringWriter resultWriter = new StringWriter();
         final Result result = new StreamResult(resultWriter);
 
-        // set extra params before transform
-        for (Entry<String, String> param : extraParams.entrySet()) {
-            transformer.setParameter(param.getKey(), param.getValue());
-        }
+        applyTransformerParameters(transformer, extraParams);
         
         try {
             transformer.transform(source, result);
             return resultWriter.toString();
         } finally {
             //reset parameters
-            for (Entry<String, String> param : extraParams.entrySet()) {
-                transformer.setParameter(param.getKey(), parameters.get(param.getKey()));
-            }
+            transformer.clearParameters();
+            applyTransformerParameters(transformer, parameters);
         }
     }
     
@@ -258,6 +252,12 @@ public class ComponentSpecUpdater {
         } catch (IOException ex) {
             logger.error("Could not read conversion parameters from properties file {}", conversionParamsPropertiesFile, ex);
             System.exit(1);
+        }
+    }
+
+    protected static void applyTransformerParameters(Transformer transformer, final Map<String, String> transformationParams) {
+        for (Entry<String, String> entry : transformationParams.entrySet()) {
+            transformer.setParameter(entry.getKey(), entry.getValue());
         }
     }
 }

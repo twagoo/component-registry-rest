@@ -124,7 +124,7 @@
 
 		</property>
 	</bean>
-
+        
 	<!-- Unit tests reload the same beans over and over -->
 	<context:mbean-export registration="replaceExisting" />
 
