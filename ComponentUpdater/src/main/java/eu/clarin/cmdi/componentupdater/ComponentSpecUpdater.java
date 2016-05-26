@@ -5,11 +5,13 @@ import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.schema.cmd.Validator;
 import clarin.cmdi.schema.cmd.ValidatorException;
 import eu.clarin.cmdi.toolkit.CMDToolkit;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,7 @@ public class ComponentSpecUpdater {
     private static final Logger logger = LoggerFactory.getLogger(ComponentSpecUpdater.class);
     private boolean dryRun = false;
 
+    private final static TransformerFactory tFactory = TransformerFactory.newInstance();
     private ClassPathXmlApplicationContext applicationContext;
     private ComponentDao componentDao;
     private TransactionTemplate transactionTemplate;
@@ -60,21 +63,42 @@ public class ComponentSpecUpdater {
     private Validator componentValidator;
     private boolean doValidate = true;
 
-    private void init() throws TransformerConfigurationException, SAXException {
+    private void init() throws TransformerConfigurationException, SAXException, IOException, TransformerException {
         applicationContext = new ClassPathXmlApplicationContext("/spring-config/applicationContext.xml", "/spring-config/container-environment.xml");
         componentDao = applicationContext.getBean(ComponentDao.class);
         transactionTemplate = new TransactionTemplate(applicationContext.getBean(PlatformTransactionManager.class));
         transformer = createTransformer(parameters);
-        componentValidator = new Validator(CMDToolkit.class.getResource(CMDToolkit.COMPONENT_SCHEMA));
-        //TODO: pass the URL of a derived schema that adds a phase that excludes certain schematron checks we decided to skip for the upgrade
-        componentValidator.setSchematronPhase(CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION);
+        componentValidator = new Validator(getAdaptedComponentSchemaUrl(CMDToolkit.class.getResource(CMDToolkit.COMPONENT_SCHEMA)));
+        componentValidator.setSchematronPhase("cmdi11upgrade");
+    }
+
+    /**
+     * Creates adapted version of the component schema and returns the URL
+     *
+     * @param originalSchema
+     * @return
+     * @throws TransformerConfigurationException
+     * @throws IOException
+     * @throws TransformerException
+     */
+    private URL getAdaptedComponentSchemaUrl(URL originalSchema) throws TransformerConfigurationException, IOException, TransformerException {
+        // prepare input and output locations
+        final StreamSource originalXsdSource = new StreamSource(originalSchema.toString());
+        final File targetFile = File.createTempFile("cmd-component-for-upgrade", ".xsd");
+        targetFile.deleteOnExit();
+        final StreamResult result = new StreamResult(targetFile);
+
+        // transform XSD into XSD with added phase for upgrade
+        final StreamSource streamSource = new StreamSource(getClass().getResourceAsStream("/xslt/insertUpgradePhase.xsl"));
+        final Transformer schemaTransformer = tFactory.newTransformer(streamSource);
+        schemaTransformer.transform(originalXsdSource, result);
+        return targetFile.toURI().toURL();
     }
 
     private static Transformer createTransformer(final Map<String, String> transformationParams) throws IllegalArgumentException, TransformerFactoryConfigurationError, TransformerConfigurationException {
         // create transformer
-        final TransformerFactory factory = TransformerFactory.newInstance();
         final InputStream xsltStream = CMDToolkit.class.getResourceAsStream(CMDToolkit.XSLT_COMPONENT_UPGRADE);
-        Transformer transformer = factory.newTransformer(new StreamSource(xsltStream));
+        Transformer transformer = tFactory.newTransformer(new StreamSource(xsltStream));
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setErrorListener(new ErrorListener() {
             @Override
@@ -212,7 +236,7 @@ public class ComponentSpecUpdater {
         return parameters;
     }
 
-    public static void main(String[] args) throws TransformerConfigurationException, SAXException {
+    public static void main(String[] args) throws TransformerConfigurationException, SAXException, IOException, TransformerException {
         final ComponentSpecUpdater updater = new ComponentSpecUpdater();
 
         final List<String> arguments = Arrays.asList(args);
