@@ -122,12 +122,19 @@ public class ConceptRegistryServlet extends HttpServlet {
             // convert to JSON
             logger.debug("Converting DCIF XML to JSON");
             final JSONObject dcifJson = XML.toJSONObject(xmlWriter.toString());
-            
+
             // extract Concept objects (strip off envelope)
             final JSONObject dcSelection = dcifJson.getJSONObject("dcif:dataCategorySelection");
             final JSONArray dcArray;
             if (dcSelection.has("dcif:dataCategory")) {
-                dcArray = dcSelection.getJSONArray("dcif:dataCategory");
+                final JSONArray optJSONArray = dcSelection.optJSONArray("dcif:dataCategory");
+                if (optJSONArray == null) {
+                    //single result, must be a JSON object so wrap that in array
+                    dcArray = new JSONArray();
+                    dcArray.put(dcSelection.getJSONObject("dcif:dataCategory"));
+                } else {
+                    dcArray = optJSONArray;
+                }
             } else {
                 // no DCs, return an empty array
                 dcArray = new JSONArray();
