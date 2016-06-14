@@ -95,7 +95,7 @@ public class MDValidatorTest extends BaseUnitTest {
         profileContent += "    </Component>";
         profileContent += "</ComponentSpec>";
 
-        // Ids not registered. will return 2 errors: one per each id.
+        // Ids not registered. two points of failure: one per each id.
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setPublic(true);
         MDValidator validator = new MDValidator(new ByteArrayInputStream(
