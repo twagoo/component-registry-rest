@@ -69,3 +69,12 @@ Some aspects require additional configuration depending on the context:
 - Public base location for the application: needs to be configured, and will 
   need additional attention if the application is running behind a proxy. 
   See context.xml for details.
+
+Read-only mode
+---------------------------
+There is a read-only mode of the application that can be used for example during
+maintenance. To activate this, replace the current web.xml file with the 
+alternative 'web-readonly.xml' and for that time the application will deny all
+POST, PUT and DELETE operations on the REST service and will show an 
+'unavailable' page instead of the front end. All GET requests to /rest/* will
+be accepted though.
