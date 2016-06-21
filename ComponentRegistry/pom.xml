@@ -415,6 +415,25 @@
                 <!-- web.xml for shibboleth authentication -->
             </properties>
         </profile>
+        <profile>
+            <id>readonly</id>
+            <build>
+                <finalName>${artifactId}-${version}-readonly</finalName>
+            </build>
+            <properties>
+                <logging.level>info</logging.level>
+                <serviceRootUrl></serviceRootUrl>
+                <serviceUrlBase>http://catalog.clarin.eu</serviceUrlBase>
+                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
+                <!-- Will be inserted in context.xml -->
+                <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
+                <!-- Shibboleth login URI for SHHAA -->
+                <shibLO>https://catalog.clarin.eu/Shibboleth.sso/Logout</shibLO>
+                <!-- Shibboleth logout URI for SHHAA -->
+                <webXmlPath>src/main/webapp/WEB-INF/web-readonly.xml</webXmlPath>
+                <!-- web.xml for shibboleth authentication -->
+            </properties>
+        </profile>
     </profiles>
 
     <build>
