@@ -25,7 +25,7 @@ Version specific update instructions
 
 - This is the first version to support CMDI 1.2. Therefore all components and
   profiles in the database need to be converted to CMDI 1.2 once before running
-  the application. Use the bundled 'Component spec updater' utility for this.
+  the application. Use the provided 'Component spec updater' utility for this.
   It has its own bundled usage instructions.
 
 - The following new context parameters need to be configured:

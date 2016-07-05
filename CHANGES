@@ -1,5 +1,26 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-2.1 (July 2016)
+- Switch to CMDI 1.2 (see UPDATE)
+- Front end adaptations for CMDI 1.2
+	<https://github.com/clarin-eric/component-registry-front-end/issues/29>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/30>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/32>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/33>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/34>
+- Concept search fixes
+	<https://github.com/clarin-eric/component-registry-front-end/issues/21>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/36>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/38>
+- Fixed issues on cancelling edit
+	<https://github.com/clarin-eric/component-registry-front-end/issues/23>
+	<https://github.com/clarin-eric/component-registry-front-end/issues/39>
+- It is no longer possible for 'private' to be selected in components panel in editor when editing a group item
+	<https://github.com/clarin-eric/component-registry-front-end/issues/35>
+- Improved group management in admin console
+	<https://github.com/clarin-eric/component-registry-rest/issues/3>
+	<https://github.com/clarin-eric/component-registry-rest/issues/4>
+
 Release ComponentRegistry-2.0.5 (June 2016)
 - Added a 'read only' mode. For instructions, see 'INSTALL'. No further changes.
 

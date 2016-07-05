@@ -25,8 +25,7 @@ i.e. development or testing environments. -->
     
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
-        <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter
-        </filter-class>
+        <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>
         <init-param>
             <param-name>encoding</param-name>
             <param-value>UTF-8</param-value>
