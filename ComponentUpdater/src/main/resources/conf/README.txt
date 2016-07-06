@@ -8,9 +8,9 @@ Usage:
 - make a database backup :D
 - run the utility:
 
-    java \ 
+    java \
         -DconversionParamsPropertiesFile=conversion-params.properties \
-        -jar component-updater-1.0-SNAPSHOT.jar | tee component-updater.log
+        -jar component-updater-2.1.0.jar | tee component-updater.log
 
 - inspect the output
 - optionally: run the application
