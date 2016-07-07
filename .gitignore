@@ -1,3 +1,7 @@
 /ComponentRegistry/target/
 /ComponentRegistry/src/main/binding/components/cmd-toolkit/
 /ComponentRegistry/src/generated/
+/ComponentRegistry/src/main/binding/components/toolkit/
+/ComponentUpdater/target/
+/ComponentUpdater/src/main/resources/datasource.properties
+/ComponentUpdater/src/main/resources/conversion-params.properties

@@ -2,7 +2,7 @@ package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
-import clarin.cmdi.componentregistry.impl.database.GroupService;
+import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
@@ -42,27 +42,70 @@ public class Groups extends SecureAdminWebPage {
     @SpringBean
     private UserDao userDao;
     private final IModel<Long> selectedGroup = new Model<Long>(null);
+    private final IModel<List<RegistryUser>> usersModel;
+    private IModel<List<String>> groupsModel;
 
     public Groups(PageParameters parameters) {
         super(parameters);
+// model for group options
+
         addLinks();
+
+        usersModel = createUsersModel();
+        groupsModel = createGroupsModel();
 
         add(createGroupForm("groupForm"));
         add(createGroupList("groups"));
         add(createGroupInfo("group"));
     }
 
+    private IModel<List<String>> createGroupsModel() {
+        return new AbstractReadOnlyModel<List<String>>() {
+
+            @Override
+            public List<String> getObject() {
+                return groupService.listGroupNames();
+            }
+        };
+    }
+
+    private IModel<List<RegistryUser>> createUsersModel() {
+        return new AbstractReadOnlyModel<List<RegistryUser>>() {
+
+            @Override
+            public List<RegistryUser> getObject() {
+                // return all users sorted by their tostring value (ignoring case)
+                return new Ordering<Object>() {
+
+                    @Override
+                    public int compare(Object t, Object t1) {
+                        return t.toString().compareToIgnoreCase(t1.toString());
+                    }
+
+                }.sortedCopy(userDao.getAllUsers());
+            }
+        };
+    }
+
     private Component createGroupForm(String id) {
         final IModel<String> nameModel = new Model<String>("");
-        final IModel<String> ownerModel = new Model<String>("");
+        final IModel<RegistryUser> ownerModel = new Model<RegistryUser>(null);
 
         final Form form = new Form(id) {
 
             @Override
             protected void onSubmit() {
+                final String ownerPrincipal = ownerModel.getObject().getPrincipalName();
+                final String group = nameModel.getObject();
                 try {
-                    final long groupId = groupService.createNewGroup(nameModel.getObject(), ownerModel.getObject());
+                    final long groupId = groupService.createNewGroup(group, ownerPrincipal);
                     info("Group with id " + groupId + " has been created");
+                    try {
+                        groupService.makeMember(ownerPrincipal, group);
+                        info("User " + ownerPrincipal + " added to group " + group);
+                    } catch (ItemNotFoundException ex) {
+                        error("Could not add owner to group. Reason: " + ex.getMessage());
+                    }
                 } catch (ValidationException ex) {
                     error(ex.getMessage());
                 }
@@ -71,7 +114,11 @@ public class Groups extends SecureAdminWebPage {
         };
         form.add(new FeedbackPanel("feedback"));
         form.add(new TextField("name", nameModel).setRequired(true));
-        form.add(new TextField("owner", ownerModel).setRequired(true));
+        // owner user selector
+        final DropDownChoice<RegistryUser> usersChoice = new DropDownChoice<RegistryUser>("ownerPrincipal", ownerModel, usersModel);
+        usersChoice.setRequired(true);
+        form.add(usersChoice);
+
         return form;
     }
 
@@ -93,15 +140,6 @@ public class Groups extends SecureAdminWebPage {
                 }
             }
 
-        };
-
-        // model for group options
-        final IModel<List<String>> groupsModel = new AbstractReadOnlyModel<List<String>>() {
-
-            @Override
-            public List<String> getObject() {
-                return groupService.listGroupNames();
-            }
         };
 
         // group selector
@@ -157,22 +195,6 @@ public class Groups extends SecureAdminWebPage {
 
         };
         memberForm.add(new FeedbackPanel("feedback"));
-
-        final IModel<List<RegistryUser>> usersModel = new AbstractReadOnlyModel<List<RegistryUser>>() {
-
-            @Override
-            public List<RegistryUser> getObject() {
-                // return all users sorted by their tostring value (ignoring case)
-                return new Ordering<Object>() {
-
-                    @Override
-                    public int compare(Object t, Object t1) {
-                        return t.toString().compareToIgnoreCase(t1.toString());
-                    }
-
-                }.sortedCopy(userDao.getAllUsers());
-            }
-        };
 
         final DropDownChoice<RegistryUser> usersChoice = new DropDownChoice<RegistryUser>("principal", principalModel, usersModel);
         usersChoice.setRequired(true);

@@ -28,7 +28,7 @@ public class RssCreatorCommentsTest {
         comm.setCanDelete(canDelete);
         comm.setComment(comtext);
         comm.setCommentDate(date);
-        comm.setComponentId(descrId);
+        comm.setComponentRef(descrId);
         comm.setId(commentId);
         comm.setUserName(userName);
 

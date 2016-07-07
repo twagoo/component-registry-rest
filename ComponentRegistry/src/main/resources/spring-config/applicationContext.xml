@@ -37,7 +37,17 @@
 		<property name="ignoreResourceNotFound" value="true" />
 	</bean>
 
-	<bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller" />
+	<bean id="mdMarshaller" class="clarin.cmdi.componentregistry.MDMarshaller">
+            <constructor-arg name="stylesheetLocations">
+                <map key-type="clarin.cmdi.componentregistry.CmdVersion">
+                    <!-- current comp2schema -->
+                    <entry key="CMD_1_2" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
+                    <!-- legacy comp2schema -->
+                    <entry key="CMD_1_1" value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1}" />
+                </map>
+            </constructor-arg>
+                
+        </bean>
 
 	<bean id="configuration" class="clarin.cmdi.componentregistry.Configuration"
 		factory-method="getInstance">
@@ -46,12 +56,10 @@
 			value="${eu.clarin.cmdi.componentregistry.adminUsers}" />
 		<property name="generalComponentSchema"
 			value="${eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl}" />
-		<property name="component2SchemaXsl"
-			value="${eu.clarin.cmdi.componentregistry.component2SchemaXslUrl}" />
-		<property name="componentSpecSchemaLocation"
-			value="${eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation}" />
 		<property name="ccrRestUrl"
 			value="${eu.clarin.cmdi.componentregistry.ccrRestUrl}" />
+                <property name="toolkitLocation"
+                        value="${eu.clarin.cmdi.componentregistry.toolkitLocation}" />
 		<!-- Extra attribute keys that are passed in a shibboleth authenticated 
 			request principal. You need to configure the shhaa.xml file to enable the 
 			extra attributes. -->
@@ -118,6 +126,10 @@
 
 		</property>
 	</bean>
+        
+        <!-- To be configured in web.xml through DelegatingFilterProxy to ensure autowiring -->
+        <bean id="userRegistrationAuthenticationFilter"
+              class="clarin.cmdi.componentregistry.servlet.UserRegistrationAuthenticationFilter"/>
 
 	<!-- Unit tests reload the same beans over and over -->
 	<context:mbean-export registration="replaceExisting" />

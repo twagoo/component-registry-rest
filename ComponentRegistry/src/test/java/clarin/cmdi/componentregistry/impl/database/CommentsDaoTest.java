@@ -39,7 +39,7 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Test
     public void testInsertProfileComment() {
 	Comment comment = createTestComment();
-	comment.setComponentId(TEST_COMMENT_PROFILE_ID);
+	comment.setComponentRef(TEST_COMMENT_PROFILE_ID);
 
 	assertEquals(0, commentsDao.getAllComments().size());
 	comment.setUserId(TEST_COMMENT_USER_ID);
@@ -51,7 +51,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	assertEquals(1, comments.size());
 
 	assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
-	assertEquals(TEST_COMMENT_PROFILE_ID, comments.get(0).getComponentId());
+	assertEquals(TEST_COMMENT_PROFILE_ID, comments.get(0).getComponentRef());
 	assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
 	assertEquals(TEST_COMMENT_USER_NAME, comments.get(0).getUserName());
 	assertEquals(TEST_COMMENT_USER_ID, comments.get(0).getUserId());
@@ -60,7 +60,7 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Test
     public void testInsertComponentComment() {
 	Comment comment = createTestComment();
-	comment.setComponentId(TEST_COMMENT_COMPONENT_ID);
+	comment.setComponentRef(TEST_COMMENT_COMPONENT_ID);
 
 	assertEquals(0, commentsDao.getAllComments().size());
 	
@@ -73,7 +73,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	assertEquals(1, comments.size());
 
 	assertEquals(TEST_COMMENT_NAME, comments.get(0).getComment());
-	assertEquals(TEST_COMMENT_COMPONENT_ID, comments.get(0).getComponentId());
+	assertEquals(TEST_COMMENT_COMPONENT_ID, comments.get(0).getComponentRef());
 	assertEquals(TEST_COMMENT_DATE, comments.get(0).getCommentDate());
 	assertEquals(TEST_COMMENT_USER_NAME, comments.get(0).getUserName());
 	assertEquals(TEST_COMMENT_USER_ID, comments.get(0).getUserId());
@@ -82,11 +82,11 @@ public class CommentsDaoTest extends BaseUnitTest{
     @Test
     public void testGetById() {
 	Comment comment1 = createTestComment();
-	comment1.setComponentId(TEST_COMMENT_PROFILE_ID);
+	comment1.setComponentRef(TEST_COMMENT_PROFILE_ID);
 	comment1.setUserId(TEST_COMMENT_USER_ID);
 	Number commentId = Long.parseLong(commentsDao.saveAndFlush(comment1).getId());
 	Comment commentById = commentsDao.findOne(commentId.longValue());
-	assertEquals(TEST_COMMENT_PROFILE_ID, commentById.getComponentId());
+	assertEquals(TEST_COMMENT_PROFILE_ID, commentById.getComponentRef());
 	assertEquals(TEST_COMMENT_NAME, commentById.getComment());
     }
 
@@ -97,7 +97,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 
 	int size = descriptions.size();
 	Comment comment1 = createTestComment();
-	comment1.setComponentId(TEST_COMMENT_PROFILE_ID);
+	comment1.setComponentRef(TEST_COMMENT_PROFILE_ID);
 	comment1.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.save(comment1);
 
@@ -105,7 +105,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	assertEquals(size + 1, descriptions.size());
 
 	Comment comment2 = createTestComment();
-	comment2.setComponentId(TEST_COMMENT_PROFILE_ID);
+	comment2.setComponentRef(TEST_COMMENT_PROFILE_ID);
 	comment2.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.save(comment2);
 
@@ -120,7 +120,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 
 	int size = descriptions.size();
 	Comment comment1 = createTestComment();
-	comment1.setComponentId(TEST_COMMENT_COMPONENT_ID);
+	comment1.setComponentRef(TEST_COMMENT_COMPONENT_ID);
 	comment1.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.saveAndFlush(comment1);
 
@@ -128,7 +128,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	assertEquals(size + 1, descriptions.size());
 
 	Comment comment2 = createTestComment();
-	comment2.setComponentId(TEST_COMMENT_COMPONENT_ID);
+	comment2.setComponentRef(TEST_COMMENT_COMPONENT_ID);
 	comment2.setUserId(TEST_COMMENT_USER_ID);
 	commentsDao.saveAndFlush(comment2);
 

@@ -15,11 +15,11 @@ import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.DeleteFailedException;
+import clarin.cmdi.componentregistry.IMarshaller;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
-import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -38,7 +38,7 @@ public class AdminRegistry {
 	    .getLogger(AdminRegistry.class);
     private ComponentRegistryFactory componentRegistryFactory;
     private ComponentDao componentDao;
-    private MDMarshaller marshaller;
+    private IMarshaller marshaller;
 
     public void setComponentRegistryFactory(
 	    ComponentRegistryFactory componentRegistryFactory) {
@@ -49,7 +49,7 @@ public class AdminRegistry {
 	this.componentDao = componentDao;
     }
 
-    public void setMarshaller(MDMarshaller marshaller) {
+    public void setMarshaller(IMarshaller marshaller) {
 	this.marshaller = marshaller;
     }
 
@@ -64,7 +64,7 @@ public class AdminRegistry {
 	    BaseDescription originalDescription = info.getDataNode()
 		    .getDescription();
 	    BaseDescription description = null;
-	    CMDComponentSpec spec = null;
+	    ComponentSpec spec = null;
 	    if (originalDescription.isProfile()) {
 		description = marshaller.unmarshal(ProfileDescription.class,
 			IOUtils.toInputStream(info.getDescription(), "UTF-8"),
@@ -74,7 +74,7 @@ public class AdminRegistry {
 			IOUtils.toInputStream(info.getDescription(), "UTF-8"),
 			null);
 	    }
-	    spec = marshaller.unmarshal(CMDComponentSpec.class,
+	    spec = marshaller.unmarshal(ComponentSpec.class,
 		    IOUtils.toInputStream(info.getContent(), "UTF-8"), null);
 	    checkId(originalDescription.getId(), description.getId());
             ComponentRegistry cr = this.getRegistry(new UserCredentials(userPrincipal));

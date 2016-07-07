@@ -1,9 +1,6 @@
 package clarin.cmdi.componentregistry.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 

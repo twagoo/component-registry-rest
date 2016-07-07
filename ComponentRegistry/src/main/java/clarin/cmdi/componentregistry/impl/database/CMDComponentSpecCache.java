@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.impl.database;
 
-import clarin.cmdi.componentregistry.components.CMDComponentSpec;
+import clarin.cmdi.componentregistry.components.ComponentSpec;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -12,9 +12,9 @@ import org.apache.commons.collections.map.LRUMap;
  *
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
-public class CMDComponentSpecCache implements Map<String, CMDComponentSpec> {
+public class CMDComponentSpecCache implements Map<String, ComponentSpec> {
 
-    private Map<String, CMDComponentSpec> specCacheMap;
+    private Map<String, ComponentSpec> specCacheMap;
 
     public CMDComponentSpecCache() {
 	specCacheMap = Collections.synchronizedMap(new LRUMap(100));
@@ -41,22 +41,22 @@ public class CMDComponentSpecCache implements Map<String, CMDComponentSpec> {
     }
 
     @Override
-    public CMDComponentSpec get(Object key) {
+    public ComponentSpec get(Object key) {
 	return specCacheMap.get(key);
     }
 
     @Override
-    public CMDComponentSpec put(String key, CMDComponentSpec value) {
+    public ComponentSpec put(String key, ComponentSpec value) {
 	return specCacheMap.put(key, value);
     }
 
     @Override
-    public CMDComponentSpec remove(Object key) {
+    public ComponentSpec remove(Object key) {
 	return specCacheMap.remove(key);
     }
 
     @Override
-    public void putAll(Map<? extends String, ? extends CMDComponentSpec> m) {
+    public void putAll(Map<? extends String, ? extends ComponentSpec> m) {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -71,12 +71,12 @@ public class CMDComponentSpecCache implements Map<String, CMDComponentSpec> {
     }
 
     @Override
-    public Collection<CMDComponentSpec> values() {
+    public Collection<ComponentSpec> values() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public Set<Entry<String, CMDComponentSpec>> entrySet() {
+    public Set<Entry<String, ComponentSpec>> entrySet() {
 	throw new UnsupportedOperationException("Not supported yet.");
     }
 }

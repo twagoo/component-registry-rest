@@ -11,7 +11,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hibernate.annotations.GenericGenerator;
 
 /**
  * Models ownership of a profile or component by a user or group. A valid {@link Ownership} has either the {@link #profileId} or the {@link #componentId} filled out
@@ -33,11 +32,11 @@ public class Ownership implements Serializable {
     private long groupId;
     private long userId;
 
-    public String getComponentId() {
+    public String getComponentRef() {
 	return componentId;
     }
 
-    public void setComponentId(String componentId) {
+    public void setComponentRef(String componentId) {
 	this.componentId = componentId;
     }
 

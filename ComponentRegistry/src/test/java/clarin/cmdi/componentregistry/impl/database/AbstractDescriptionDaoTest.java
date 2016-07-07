@@ -46,7 +46,6 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	description.setCreatorName("Aap");
 	description.setGroupName("MyGroup");
 	description.setDomainName("MyDomain \u00CA");
-	description.setHref("http://MyHref");
 
 	description.setRegistrationDate(regDate);
 
@@ -61,7 +60,6 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	assertEquals("Aap", descr.getCreatorName());
 	assertEquals("MyGroup", descr.getGroupName());
 	assertEquals("MyDomain \u00CA", descr.getDomainName());
-	assertEquals("http://MyHref", descr.getHref());
 	assertEquals(regDate, descr.getRegistrationDate());
 	assertEquals(testComponent,
 		getDao().getContent(false, description.getId()));
@@ -131,7 +129,6 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	description.setCreatorName("Aap");
 	description.setGroupName("MyGroup");
 	description.setDomainName("MyDomain");
-	description.setHref("http://MyHref");
 
 	String testComponent = getContentString();
 	Number newId = getDao().insertDescription(description, testComponent,
@@ -143,7 +140,6 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	description.setCreatorName("AnotherAap");
 	description.setGroupName("AnotherGroup");
 	description.setDomainName("AnotherDomain\u00CA");
-	description.setHref("http://AnotherHref");
 	// Update in db
 	getDao().updateDescription(newId, description, null);
 	description = getDao().getById(newId);
@@ -154,7 +150,6 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	assertEquals("AnotherAap", description.getCreatorName());
 	assertEquals("AnotherGroup", description.getGroupName());
 	assertEquals("AnotherDomain\u00CA", description.getDomainName());
-	assertEquals("http://AnotherHref", description.getHref());
 
 	// Update content
 	String testContent2 = "<test>Test content</test>";

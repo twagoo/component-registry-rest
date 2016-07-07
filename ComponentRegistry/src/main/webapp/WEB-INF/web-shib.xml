@@ -29,8 +29,8 @@
     <context-param>
         <param-name>ShhaaConfigLocation</param-name>
         <param-value>/WEB-INF/shhaa.xml</param-value>
-    </context-param>    
-
+    </context-param>   
+     
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
         <filter-class>clarin.cmdi.componentregistry.servlet.CharacterEncodingFilter</filter-class>
@@ -43,15 +43,23 @@
         <filter-name>NoCachingFilter</filter-name>
         <filter-class>clarin.cmdi.componentregistry.servlet.DontCacheFilter</filter-class>
     </filter>
+    <filter>
+        <!-- delegate for UserRegistrationAuthenticationFilter defined as bean in Spring applicationContext -->
+        <filter-name>userRegistrationAuthenticationFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    
     <filter-mapping>
         <filter-name>NoCachingFilter</filter-name>
         <url-pattern>/rest/registry/*</url-pattern>
     </filter-mapping>
-    
-    
     <filter-mapping>
         <filter-name>characterEncodingFilter</filter-name>
         <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>userRegistrationAuthenticationFilter</filter-name>
+        <url-pattern>/rest/*</url-pattern>
     </filter-mapping>
   
     <!-- Make sure this one is declared before the wicket filter, the order matters. Shibboleth should trigger the login, before continuing with the wicket filter.-->

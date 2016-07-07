@@ -1,10 +1,7 @@
 package clarin.cmdi.componentregistry.frontend;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
-import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.RegistrySpace;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 

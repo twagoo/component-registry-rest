@@ -6,7 +6,6 @@ import org.junit.Before;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentStatus;
 import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
@@ -16,10 +15,6 @@ import clarin.cmdi.componentregistry.rest.DummyPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 
 /**
  * 

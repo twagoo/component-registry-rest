@@ -7,7 +7,9 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 
 import clarin.cmdi.componentregistry.Configuration;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.protocol.http.servlet.AbortWithHttpStatusException;
 
 public abstract class SecureAdminWebPage extends WebPage {
 
@@ -17,11 +19,15 @@ public abstract class SecureAdminWebPage extends WebPage {
         if (!Configuration.getInstance().isAdminUser(userPrincipal)) {
             setResponsePage(new AccessDeniedPage());
         }
-        add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName() + ".\n"));
+        if (userPrincipal == null) {
+            throw new AbortWithHttpStatusException(HttpServletResponse.SC_UNAUTHORIZED, false);
+        } else {
+            add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName() + ".\n"));
+        }
     }
 
     protected final Principal getUserPrincipal() {
-	return getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
+        return getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
     }
 
     @SuppressWarnings(value = "serial")

@@ -1,8 +1,8 @@
 package clarin.cmdi.componentregistry.frontend;
 
+import clarin.cmdi.componentregistry.IMarshaller;
 import java.io.Serializable;
 
-import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 
@@ -10,7 +10,7 @@ public class CMDItemInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final MDMarshaller marshaller;
+    private final IMarshaller marshaller;
     private String description;
     private String content;
     private String name;
@@ -23,7 +23,7 @@ public class CMDItemInfo implements Serializable {
 
     private boolean editable = false;
 
-    public CMDItemInfo(MDMarshaller marshaller) {
+    public CMDItemInfo(IMarshaller marshaller) {
 	this.marshaller = marshaller;
     }
     
