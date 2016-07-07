@@ -20,7 +20,7 @@
     see WEB-INF/spring-config/datasource-jdbc.xml
     
     A database creation script can be found at 
-    <http://svn.clarin.eu/ComponentRegistry/tags/ComponentRegistry-${project.version}/ComponentRegistry/src/main/sql/create.sql>
+    <https://github.com/clarin-eric/component-registry-rest/raw/master/ComponentRegistry/src/main/sql/create.sql>
     
     == SPRING CONFIGURATION ==
     
@@ -34,7 +34,7 @@
     This application uses Shibboleth authentication. Make sure that the URIs
     for login/logout are set correctly in WEB-INF/shhaa.xml. 
 -->
-<Context antiJARLocking="true" path="/ComponentRegistry">
+<Context path="/ComponentRegistry">
   <!-- 
 	Passed to the Flex via compRegConfig.jsp so that it can locate the 
 	ComponentRegistry REST service. Just supply the PUBLIC application root 
@@ -42,27 +42,29 @@
         
         "serviceUrlPath" is MANDATORY in all cases and should contain the path 
         of the application relative to the server root, starting with a forward
-        slash but no trailing slash, e.g. "/ComponentRegistry", or "" for root
-        deployment.
+        slash, e.g. "/ComponentRegistry".
         
         In addition, either "serviceUrlPath" OR the two parameters
         "serviceUrlProtocolHeader" and "serviceUrlHostHeader" need to be 
         defined.
     -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlBase" value="${serviceUrlBase}"/>
-  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlPath" value="${serviceUrlPath}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlPath" value="/ds/ComponentRegistry"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlBase" value="https://catalog.clarin.eu" />
  <!--
   Uncomment two lines below iff you would like to use the protocol and host
   provided in the request headers.
+ -->
+
+  <!--
   <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader" value="X-FORWARDED-PROTO"/>
   <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlHostHeader" value="X-FORWARDED-HOST"/>
- -->
-  
+  -->
+
   <!--
 	Location that gets redirected to from /documentation.jsp, which in turn is linked to
 	from the Flex application through the 'Help' link button.
     -->
-  <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="http://www.clarin.eu/cmdi"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="http://www.clarin.eu/cmdi#compreg"/>
   <!--
 	Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
