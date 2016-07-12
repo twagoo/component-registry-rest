@@ -1,6 +1,9 @@
 Bug Fixes and Features
 
-Release ComponentRegistry-2.1 (July 2016)
+Release ComponentRegistry-2.1.1 (July 2016)
+- Fixed a number of issues related to submitting and publishing specs from the front end
+
+Release ComponentRegistry-2.1.0 (July 2016)
 - Switch to CMDI 1.2 (see UPDATE)
 - Front end adaptations for CMDI 1.2
 	<https://github.com/clarin-eric/component-registry-front-end/issues/29>
