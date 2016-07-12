@@ -43,6 +43,21 @@ Version specific update instructions
 
     * eu.clarin.cmdi.componentregistry.componentSpecSchemaLocation
 
+ - The following parameters need to be updated to link to right CMDI toolkit 
+   locations:
+
+    <Parameter 
+        name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" 
+        value="https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd"/>
+
+    <Parameter 
+        name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl"
+        value="https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl"/>
+
+    <Parameter 
+        name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1" 
+        value="https://infra.clarin.eu/CMDI/1.1/xslt/comp2schema-v2/comp2schema.xsl"/>
+
 === 2.0 ===
 
 - The application's public base URL is configured differently as of this 

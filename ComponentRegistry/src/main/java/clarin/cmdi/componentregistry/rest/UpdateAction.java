@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
+import clarin.cmdi.componentregistry.CmdVersion;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
@@ -12,6 +13,8 @@ public class UpdateAction implements RegisterAction {
     
     @Override
     public int execute(BaseDescription desc, ComponentSpec spec, RegisterResponse response, ComponentRegistry registry)  throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException{
+        spec.setCMDOriginalVersion(CmdVersion.CANONICAL_CMD_VERSION.getVersionNumber());
+        spec.setCMDVersion(CmdVersion.CANONICAL_CMD_VERSION.getVersionNumber());
         return registry.update(desc, spec, false);
     }
 
