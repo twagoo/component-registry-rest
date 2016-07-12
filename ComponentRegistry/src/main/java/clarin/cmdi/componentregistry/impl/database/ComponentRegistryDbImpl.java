@@ -604,6 +604,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                 componentDao.updateDescription(id, desc, componentSpecToString(spec));
                 // Set to public
                 componentDao.setPublished(id, true);
+                invalidateCache(desc);
             } catch (DataAccessException ex) {
                 LOG.error("Database error while updating component", ex);
                 return -1;
