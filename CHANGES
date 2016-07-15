@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-2.1.2 (July 2016)
+- Fixed logging issues
+
 Release ComponentRegistry-2.1.1 (July 2016)
 - Fixed a number of issues related to submitting and publishing specs from the front end
 
