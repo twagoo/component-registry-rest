@@ -21,6 +21,11 @@ Procedure for updating
 
 Version specific update instructions
 -------------------------------------
+=== 2.2 ===
+- An update to the database schema is required. Carry this out after stopping
+the previous version but before starting the new version when deploying. Use
+the script 'upgrade-2.2.sql' bundled with the deployment package.
+
 === 2.1 ===
 
 - This is the first version to support CMDI 1.2. Therefore all components and
