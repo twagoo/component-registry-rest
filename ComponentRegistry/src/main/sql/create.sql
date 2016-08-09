@@ -30,9 +30,9 @@ SET search_path = public, pg_catalog;
 --
 
 CREATE TYPE item_status AS ENUM (
-    'development',
-    'production',
-    'deprecated'
+    'DEVELOPMENT',
+    'PRODUCTION',
+    'DEPRECATED'
 );
 
 

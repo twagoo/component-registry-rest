@@ -1,6 +1,6 @@
 -- expand schema
 
-CREATE TYPE item_status as ENUM('development', 'production', 'deprecated');
+CREATE TYPE item_status as ENUM('DEVELOPMENT', 'PRODUCTION', 'DEPRECATED');
 
 ALTER TABLE basedescription 
     ADD status item_status, 
@@ -9,9 +9,9 @@ ALTER TABLE basedescription
 
 -- set status
 
-UPDATE basedescription SET status = 'production' WHERE is_deleted = false AND content like '%<Status>production</Status>%';
-UPDATE basedescription SET status = 'development' WHERE is_deleted = false AND content like '%<Status>development</Status>%';
-UPDATE basedescription SET status = 'deprecated' WHERE is_deleted = true OR content like '%<Status>deprecated</Status>%';
+UPDATE basedescription SET status = 'PRODUCTION' WHERE is_deleted = false AND content like '%<Status>production</Status>%';
+UPDATE basedescription SET status = 'DEVELOPMENT' WHERE is_deleted = false AND content like '%<Status>development</Status>%';
+UPDATE basedescription SET status = 'DEPRECATED' WHERE is_deleted = true OR content like '%<Status>deprecated</Status>%';
 
 -- set derived from
 
