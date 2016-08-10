@@ -83,7 +83,10 @@ public class BaseDescription implements Serializable {
 
     @Column(name = "group_name")
     private String groupName;
-
+    
+    @Column(name = "status")
+    private ComponentStatus status;
+    
     @Transient
     private int commentsCount;
 
@@ -257,6 +260,14 @@ public class BaseDescription implements Serializable {
      */
     public void setCommentsCount(int commentsCount) {
 	this.commentsCount = commentsCount;
+    }
+
+    public ComponentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ComponentStatus status) {
+        this.status = status;
     }
 
     @Override

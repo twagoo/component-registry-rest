@@ -54,6 +54,7 @@ public class ComponentDaoImpl implements ComponentDao {
         to.setCreatorName(from.getCreatorName());
         to.setDomainName(from.getDomainName());
         to.setGroupName(from.getGroupName());
+        to.setStatus(from.getStatus());
     }
 
     protected String getTableName() {
