@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -31,20 +33,20 @@ import org.apache.commons.codec.digest.DigestUtils;
  * attributes. It is meant to serve as a base for XML generation and JPA
  * persistence. Extending classes are not allowed to model any persistent
  * attributes.
- * 
+ *
  * @author george.georgovassilis@mpi.nl
- * 
+ *
  */
 @XmlRootElement(name = "description")
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({ ComponentDescription.class, ProfileDescription.class })
+@XmlSeeAlso({ComponentDescription.class, ProfileDescription.class})
 @Entity
 @Table(name = "basedescription")
 public class BaseDescription implements Serializable {
     //TODO: Add status, derivedFrom and successor fields
 
-    @SequenceGenerator( name = "basedescription_id_seq", sequenceName = "basedescription_id_seq", allocationSize = 1, initialValue = 1 )
-    @GeneratedValue( strategy = GenerationType.SEQUENCE, generator = "basedescription_id_seq" )
+    @SequenceGenerator(name = "basedescription_id_seq", sequenceName = "basedescription_id_seq", allocationSize = 1, initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "basedescription_id_seq")
     @Id
     @Column(name = "id")
     @XmlTransient
@@ -83,10 +85,18 @@ public class BaseDescription implements Serializable {
 
     @Column(name = "group_name")
     private String groupName;
-    
+
     @Column(name = "status")
     private ComponentStatus status;
-    
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "derivedfrom", referencedColumnName = "id")
+    private BaseDescription derivedfrom; //TODO: only id field?
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "successor", referencedColumnName = "id")
+    private BaseDescription successor; //TODO: only id field?
+
     @Transient
     private int commentsCount;
 
@@ -113,104 +123,104 @@ public class BaseDescription implements Serializable {
 
     public void setDbUserId(long dbUserId) {
         this.dbUserId = dbUserId;
-        setUserId(""+dbUserId);
+        setUserId("" + dbUserId);
     }
 
     public String getContent() {
-	return content;
+        return content;
     }
 
     public void setContent(String content) {
-	this.content = content;
+        this.content = content;
     }
 
     public boolean isDeleted() {
-	return deleted;
+        return deleted;
     }
 
     public void setDeleted(boolean deleted) {
-	this.deleted = deleted;
+        this.deleted = deleted;
     }
 
     /**
      * Whether this profile should be shown in metadata editor (e.g. Arbil)
-     * 
+     *
      * @return the value of showInEditor
      */
     public boolean isShowInEditor() {
-	return shownInEditor;
+        return shownInEditor;
     }
 
     /**
      * Gets whether this profile should be shown in metadata editor (e.g. Arbil)
-     * 
-     * @param showInEditor
-     *            new value of showInEditor
+     *
+     * @param showInEditor new value of showInEditor
      */
     public void setShowInEditor(boolean showInEditor) {
-	this.shownInEditor = showInEditor;
+        this.shownInEditor = showInEditor;
     }
 
     public void setId(String id) {
-	if (id != null && !ComponentUtils.isComponentId(id)
-		&& !ComponentUtils.isProfileId(id))
-	    throw new IllegalArgumentException(
-		    "ID doesn't follow the naming schema for components or profiles "
-			    + id);
-	this.componentId = id;
+        if (id != null && !ComponentUtils.isComponentId(id)
+                && !ComponentUtils.isProfileId(id)) {
+            throw new IllegalArgumentException(
+                    "ID doesn't follow the naming schema for components or profiles "
+                    + id);
+        }
+        this.componentId = id;
     }
 
     public String getId() {
-	return componentId;
+        return componentId;
     }
 
     public Long getDbId() {
-	return dbId;
+        return dbId;
     }
 
     public void setDbId(Long dbId) {
-	this.dbId = dbId;
+        this.dbId = dbId;
     }
 
     public void setDescription(String description) {
-	this.description = description;
+        this.description = description;
     }
 
     public String getDescription() {
-	return description;
+        return description;
     }
 
     public void setName(String name) {
-	this.name = name;
+        this.name = name;
     }
 
     public String getName() {
-	return name;
+        return name;
     }
 
     public void setRegistrationDate(Date registrationDate) {
-	this.registrationDate = registrationDate;
+        this.registrationDate = registrationDate;
     }
 
     public Date getRegistrationDate() {
-	return registrationDate;
+        return registrationDate;
     }
 
     public void setCreatorName(String creatorName) {
-	this.creatorName = creatorName;
+        this.creatorName = creatorName;
     }
 
     public String getCreatorName() {
-	return creatorName;
+        return creatorName;
     }
 
     public void setUserId(String userId) {
-	try {
-	    this.dbUserId = Long.parseLong(userId);
-	} catch (Exception e) {
-	    this.dbUserId = 0;
-	}
-	this.userId = userId;
+        try {
+            this.dbUserId = Long.parseLong(userId);
+        } catch (Exception e) {
+            this.dbUserId = 0;
+        }
+        this.userId = userId;
     }
 
     /**
@@ -218,48 +228,48 @@ public class BaseDescription implements Serializable {
      * userId can be the email address which we don't want to make public.
      */
     public String getUserId() {
-	if (userId == null)
-	    return ""+dbUserId;
-	return userId;
+        if (userId == null) {
+            return "" + dbUserId;
+        }
+        return userId;
     }
 
     public void setDomainName(String domainName) {
-	this.domainName = domainName;
+        this.domainName = domainName;
     }
 
     public String getDomainName() {
-	return domainName;
+        return domainName;
     }
 
     public void setHref(String href) {
-	this.href = href;
+        this.href = href;
     }
 
     public String getHref() {
-	return href;
+        return href;
     }
 
     public void setGroupName(String groupName) {
-	this.groupName = groupName;
+        this.groupName = groupName;
     }
 
     public String getGroupName() {
-	return groupName;
+        return groupName;
     }
 
     /**
      * @return the number of comments posted on this component
      */
     public int getCommentsCount() {
-	return commentsCount;
+        return commentsCount;
     }
 
     /**
-     * @param commentsCount
-     *            the number of comments posted on this component
+     * @param commentsCount the number of comments posted on this component
      */
     public void setCommentsCount(int commentsCount) {
-	this.commentsCount = commentsCount;
+        this.commentsCount = commentsCount;
     }
 
     public ComponentStatus getStatus() {
@@ -270,53 +280,68 @@ public class BaseDescription implements Serializable {
         this.status = status;
     }
 
+    public void setDerivedfrom(BaseDescription derivedfrom) {
+        this.derivedfrom = derivedfrom;
+    }
+
+    public BaseDescription getDerivedfrom() {
+        return derivedfrom;
+    }
+
+    public void setSuccessor(BaseDescription successor) {
+        this.successor = successor;
+    }
+
+    public BaseDescription getSuccessor() {
+        return successor;
+    }
+
     @Override
     public String toString() {
-	return "Name=" + getName() + ", id=" + getId() + ", creatorName="
-		+ getCreatorName() + ", userId=" + getUserId();
+        return "Name=" + getName() + ", id=" + getId() + ", creatorName="
+                + getCreatorName() + ", userId=" + getUserId();
     }
 
     public boolean isProfile() {
-	return this instanceof ProfileDescription;
+        return this instanceof ProfileDescription;
     }
 
     public String getType() {
-	return isProfile() ? "profile" : "component";
+        return isProfile() ? "profile" : "component";
     }
 
     /**
      * Helper method.
-     * 
-     * @param userId
-     *            normal string which will be checked to see if it matches the
-     *            md5 hash of the stored userId
+     *
+     * @param userId normal string which will be checked to see if it matches
+     * the md5 hash of the stored userId
      */
     public boolean isThisTheOwner(String userId) {
-	String userHash = DigestUtils.md5Hex(userId);
-	return userHash.equals(getUserId());
+        String userHash = DigestUtils.md5Hex(userId);
+        return userHash.equals(getUserId());
     }
 
     public boolean isPublic() {
-	return ispublic;
+        return ispublic;
     }
 
     public void setPublic(boolean ispublic) {
-	this.ispublic = ispublic;
+        this.ispublic = ispublic;
     }
-    
+
     /**
      * Compares two descriptions by the their value as returned by
      * {@link BaseDescription#getRegistrationDate() () * }
      */
     public static final Comparator<? super BaseDescription> COMPARE_ON_DATE = new Comparator<BaseDescription>() {
         /**
-         * @returns 1 if o11 is older than o2 (to the bottom), returns -1 if o1 is younger (to the top)
-         * o2
+         * @returns 1 if o11 is older than o2 (to the bottom), returns -1 if o1
+         * is younger (to the top) o2
          */
         @Override
         public int compare(BaseDescription o1, BaseDescription o2) {
             // we need to sort not in standard ascending orde, but in descending, from higher (later date) to the smaller (older date)
-            return ComponentUtils.COMPARE_ON_DATE.compare(o1.getRegistrationDate(),  o2.getRegistrationDate());
+            return ComponentUtils.COMPARE_ON_DATE.compare(o1.getRegistrationDate(), o2.getRegistrationDate());
         }
     };
 
