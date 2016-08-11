@@ -89,13 +89,11 @@ public class BaseDescription implements Serializable {
     @Column(name = "status")
     private ComponentStatus status;
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "derivedfrom", referencedColumnName = "id")
-    private BaseDescription derivedfrom; //TODO: only id field?
+    @Column(name = "derivedfrom")
+    private String derivedfrom; 
 
-    @ManyToOne(optional = true)
-    @JoinColumn(name = "successor", referencedColumnName = "id")
-    private BaseDescription successor; //TODO: only id field?
+    @Column(name = "successor")
+    private String successor; 
 
     @Transient
     private int commentsCount;
@@ -280,19 +278,19 @@ public class BaseDescription implements Serializable {
         this.status = status;
     }
 
-    public void setDerivedfrom(BaseDescription derivedfrom) {
+    public void setDerivedfrom(String derivedfrom) {
         this.derivedfrom = derivedfrom;
     }
 
-    public BaseDescription getDerivedfrom() {
+    public String getDerivedfrom() {
         return derivedfrom;
     }
 
-    public void setSuccessor(BaseDescription successor) {
+    public void setSuccessor(String successor) {
         this.successor = successor;
     }
 
-    public BaseDescription getSuccessor() {
+    public String getSuccessor() {
         return successor;
     }
 

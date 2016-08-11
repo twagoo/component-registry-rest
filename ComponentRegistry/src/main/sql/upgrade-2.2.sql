@@ -4,8 +4,8 @@ CREATE TYPE item_status as ENUM('DEVELOPMENT', 'PRODUCTION', 'DEPRECATED');
 
 ALTER TABLE basedescription 
     ADD status item_status, 
-    ADD derivedfrom integer, 
-    ADD successor integer;
+    ADD derivedfrom character varying, 
+    ADD successor character varying;
 
 -- set status
 
@@ -16,10 +16,7 @@ UPDATE basedescription SET status = 'DEPRECATED' WHERE is_deleted = true OR cont
 -- set derived from
 
 UPDATE basedescription AS bd
-    SET derivedfrom = 
-        (SELECT id 
-            FROM basedescription 
-            WHERE component_id = regexp_replace(bd.content, '.*(<DerivedFrom>)(.*)(</DerivedFrom>).*', '\2'))
+    SET derivedfrom = regexp_replace(bd.content, '.*(<DerivedFrom>)(.*)(</DerivedFrom>).*', '\2')
     WHERE content LIKE '%<DerivedFrom>%';
 
 -- no need to set successor, feature not available before CompReg v2.2

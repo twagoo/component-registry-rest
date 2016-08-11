@@ -62,8 +62,8 @@ CREATE TABLE basedescription (
     show_in_editor boolean DEFAULT true NOT NULL,
     content text DEFAULT ''::text NOT NULL,
     status item_status,
-    derivedfrom integer,
-    successor integer
+    derivedfrom character varying,
+    successor character varying
 );
 
 
