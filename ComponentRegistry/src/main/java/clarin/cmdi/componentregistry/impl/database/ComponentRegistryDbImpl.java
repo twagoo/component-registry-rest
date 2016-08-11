@@ -42,9 +42,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+import org.apache.commons.lang.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -455,8 +457,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public int register(BaseDescription description, ComponentSpec spec) {
-        enrichSpecHeader(spec, description); //TODO: turn around - fill description from spec header content
         try {
+            syncSpecDescriptionHeaders(spec, description);
             String xml = componentSpecToString(spec);
             // Convert principal name to user record id
             Number uid = convertUserInDescription(description);
@@ -465,13 +467,16 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             return 0;
         } catch (DataAccessException ex) {
             LOG.error("Database error while registering component", ex);
-            return -1;
+            return -1; //TODO: throw exception here
         } catch (JAXBException ex) {
             LOG.error("Error while registering component", ex);
-            return -2;
+            return -2; //TODO: throw exception here
         } catch (UnsupportedEncodingException ex) {
             LOG.error("Error while registering component", ex);
-            return -3;
+            return -3; //TODO: throw exception here
+        } catch (ComponentRegistryException ex) {
+            LOG.error("Error while registering component", ex);
+            return -4; //TODO: throw exception here
         }
     }
 
