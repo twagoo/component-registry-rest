@@ -89,10 +89,10 @@ public class BaseDescription implements Serializable {
     @Column(name = "status")
     private ComponentStatus status;
 
-    @Column(name = "derivedfrom")
+    @Column(name = "derivedfrom", nullable = true)
     private String derivedfrom; 
 
-    @Column(name = "successor")
+    @Column(name = "successor", nullable = true)
     private String successor; 
 
     @Transient

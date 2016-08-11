@@ -108,6 +108,7 @@ public final class RegistryTestHelper {
                 + "    <Header>\n"
                 + "        <ID>clarin.eu:cr1:p_12345678</ID>\n"
                 + "        <Name>" + name + "</Name>\n"
+                + "        <Description>" + name + " description</Description>\n"
                 + "        <Status>" + status + "</Status>\n"
                 + "    </Header>\n"
                 + "    <Component name=\"" + name + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n"
@@ -205,6 +206,7 @@ public final class RegistryTestHelper {
         compContent += "    <Header>\n";
         compContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
         compContent += "     <Name>" + componentName + "</Name>\n";
+        compContent += "     <Description>" + componentName + " description</Description>\n";
         compContent += "     <Status>development</Status>\n";
         compContent += "    </Header>\n";
         compContent += "    <Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
