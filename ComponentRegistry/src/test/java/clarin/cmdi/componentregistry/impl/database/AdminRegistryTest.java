@@ -17,6 +17,7 @@ import clarin.cmdi.componentregistry.frontend.CMDItemInfo;
 import clarin.cmdi.componentregistry.frontend.DisplayDataNode;
 import clarin.cmdi.componentregistry.frontend.SubmitFailedException;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
@@ -70,7 +71,7 @@ public class AdminRegistryTest extends BaseUnitTest{
 	content1 += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
 	content1 += "    </Component>\n";
 	content1 += "</ComponentSpec>\n";
-	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content1, true);
+	ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content1, true, ComponentStatus.DEVELOPMENT);
        
         assertEquals(1, testRegistry.getComponentDescriptions().size());
         
@@ -87,7 +88,7 @@ public class AdminRegistryTest extends BaseUnitTest{
 	content2 += "        </Component>\n";
 	content2 += "    </Component>\n";
 	content2 += "</ComponentSpec>\n";
-	ProfileDescription profileDesc = RegistryTestHelper.addProfile(testRegistry, "YYY1", content2, true);
+	ProfileDescription profileDesc = RegistryTestHelper.addProfile(testRegistry, "YYY1", content2, true, ComponentStatus.DEVELOPMENT);
        
 
         // why two registries? 

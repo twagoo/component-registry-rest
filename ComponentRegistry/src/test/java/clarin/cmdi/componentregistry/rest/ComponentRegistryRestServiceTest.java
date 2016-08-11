@@ -703,7 +703,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
-                baseRegistry, "XXX1", content, true);
+                baseRegistry, "XXX1", content, true, DEVELOPMENT);
 
         content = "";
         content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -720,7 +720,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc2 = RegistryTestHelper.addComponent(
-                baseRegistry, "YYY1", content, true);
+                baseRegistry, "YYY1", content, true, DEVELOPMENT);
 
         content = "";
         content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -737,7 +737,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ProfileDescription profile = RegistryTestHelper.addProfile(
-                baseRegistry, "TestProfile3", content, true);
+                baseRegistry, "TestProfile3", content, true, DEVELOPMENT);
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components")).get(COMPONENT_LIST_GENERICTYPE);
@@ -1280,7 +1280,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
-                baseRegistry, "XXX1", content, false);
+                baseRegistry, "XXX1", content, false, DEVELOPMENT);
 
         // a containing component, referring to the kid (which is not public, so the containing component cannot be registered
         content = "";

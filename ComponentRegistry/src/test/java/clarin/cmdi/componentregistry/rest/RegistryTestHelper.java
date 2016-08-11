@@ -22,6 +22,7 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import static clarin.cmdi.componentregistry.model.ComponentStatus.DEVELOPMENT;
 import static clarin.cmdi.componentregistry.model.ComponentStatus.PRODUCTION;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -49,15 +50,15 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
-        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic);
+        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic, DEVELOPMENT);
     }
 
-    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
+    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException, UnsupportedEncodingException {
-        return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")), isPublic);
+        return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")), isPublic, status);
     }
 
-    private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
+    private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
         desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
@@ -66,6 +67,7 @@ public final class RegistryTestHelper {
         desc.setDescription("Test Description");
         desc.setId(ComponentDescription.COMPONENT_PREFIX + id);
         desc.setPublic(isPublic);
+        desc.setStatus(status);
         return addComponent(content, testRegistry, desc);
     }
 
@@ -138,15 +140,15 @@ public final class RegistryTestHelper {
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
-        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, isPublic ? PRODUCTION.toString() : DEVELOPMENT.toString()), isPublic);
+        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, isPublic ? PRODUCTION.toString() : DEVELOPMENT.toString()), isPublic, DEVELOPMENT);
     }
 
-    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic) throws ParseException,
+    public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException, ItemNotFoundException {
-        return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()), isPublic);
+        return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()), isPublic, status);
     }
 
-    private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
+    private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException, ItemNotFoundException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
         desc.setCreatorName(DummyPrincipal.DUMMY_CREDENTIALS.getDisplayName());
@@ -155,6 +157,7 @@ public final class RegistryTestHelper {
         desc.setDescription("Test Description");
         desc.setId(ProfileDescription.PROFILE_PREFIX + id);
         desc.setPublic(isPublic);
+        desc.setStatus(status);
         return addProfile(content, testRegistry, desc);
     }
 
