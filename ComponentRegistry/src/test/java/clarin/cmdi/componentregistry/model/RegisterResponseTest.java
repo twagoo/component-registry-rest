@@ -1,8 +1,5 @@
 package clarin.cmdi.componentregistry.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,11 +9,6 @@ import org.junit.Test;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.DatesHelper;
-import clarin.cmdi.componentregistry.MDMarshaller;
-
-import javax.xml.transform.TransformerException;
-
-import org.junit.Before;
 
 public class RegisterResponseTest extends BaseUnitTest {
 
@@ -63,8 +55,8 @@ public class RegisterResponseTest extends BaseUnitTest {
 		expected += "    <errors/>\n";
 		expected += "    <description xsi:type=\"profileDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
 		expected += "        <id>clarin.eu:cr1:p_myId</id>\n";
-		expected += "        <description>myD</description>\n";
 		expected += "        <name>Name</name>\n";
+		expected += "        <description>myD</description>\n";
 		expected += "        <registrationDate>" + DatesHelper.formatXmlDateTime(testDate) + "</registrationDate>\n";
 		expected += "        <creatorName>myC</creatorName>\n";
 		expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
@@ -96,8 +88,8 @@ public class RegisterResponseTest extends BaseUnitTest {
 		expected += "    <errors/>\n";
 		expected += "    <description xsi:type=\"componentDescription\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n";
 		expected += "        <id>clarin.eu:cr1:c_myId</id>\n";
-		expected += "        <description>myD</description>\n";
 		expected += "        <name>Name</name>\n";
+		expected += "        <description>myD</description>\n";
 		expected += "        <registrationDate>" + DatesHelper.formatXmlDateTime(testDate) + "</registrationDate>\n";
 		expected += "        <creatorName>myC</creatorName>\n";
 		expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";

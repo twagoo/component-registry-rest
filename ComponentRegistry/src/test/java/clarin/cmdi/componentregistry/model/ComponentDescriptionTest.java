@@ -42,8 +42,8 @@ public class ComponentDescriptionTest extends BaseUnitTest{
         expected += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
         expected += "<componentDescription xmlns:ns2=\"http://www.w3.org/1999/xlink\">\n";
         expected += "    <id>clarin.eu:cr1:c_myId</id>\n";
-        expected += "    <description>myD</description>\n";
         expected += "    <name>Name</name>\n";
+        expected += "    <description>myD</description>\n";
         expected += "    <registrationDate>"+DatesHelper.formatXmlDateTime(testDate)+"</registrationDate>\n";
         expected += "    <creatorName>myC</creatorName>\n";
         expected += "    <userId>user1</userId>\n";
