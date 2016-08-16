@@ -1086,8 +1086,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, getUserProfiles().size());
         assertEquals(2, getPublicProfiles().size());
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName", PRODUCTION.toString()),
-                "description");
+                RegistryTestHelper.getTestProfileContent("publishedName3", PRODUCTION.toString()),
+                "publishedName3 description");
         //post
         getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + desc.getId() + "/publish"))
@@ -1102,9 +1102,10 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(desc.getId(), profileDescription.getId());
         assertEquals("http://localhost:9998" + REGISTRY_BASE + "/profiles/" + desc.getId(),
                 profileDescription.getHref());
-        assertEquals("Actor description", profileDescription.getDescription());
+        assertEquals("publishedName3", profileDescription.getName());
+        assertEquals("publishedName3 description", profileDescription.getDescription());
         ComponentSpec spec = getPublicSpec(profileDescription);
-        assertEquals("publishedName", spec.getComponent().getName());
+        assertEquals("publishedName3", spec.getComponent().getName());
         assertEquals(PRODUCTION.toString(), spec.getHeader().getStatus());
         assertEquals("1.2", spec.getCMDVersion());
         assertEquals("1.2", spec.getCMDOriginalVersion());
@@ -1160,7 +1161,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(
                 "http://localhost:9998" + REGISTRY_BASE + "/components/" + desc.getId(),
                 componentDescription.getHref());
-        assertEquals("Published", componentDescription.getDescription());
+        assertEquals("publishedName", componentDescription.getName());
+        assertEquals("publishedName description", componentDescription.getDescription());
         ComponentSpec spec = getPublicSpec(componentDescription);
         assertEquals("publishedName", spec.getComponent().getName());
     }
@@ -1513,8 +1515,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(response.isPrivate());
         desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+        assertEquals("TESTNAME", desc.getName());
+        assertEquals("TESTNAME description", desc.getDescription());
         Date secondDate = desc.getRegistrationDate();
         assertTrue(firstDate.before(secondDate) || firstDate.equals(secondDate));
 
@@ -1578,8 +1580,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertTrue(response.isPrivate());
         desc = (ProfileDescription) response.getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+        assertEquals("TESTNAME", desc.getName());
+        assertEquals("TESTNAME description", desc.getDescription());
         Date secondDate = desc.getRegistrationDate();
         assertTrue(firstDate.before(secondDate) || firstDate.equals(secondDate));
 
