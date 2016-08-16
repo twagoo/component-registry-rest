@@ -6,19 +6,8 @@ package clarin.cmdi.componentregistry.model;
  */
 public enum ComponentStatus {
 
-    DEVELOPMENT("development"),
-    PRODUCTION("production"),
-    DEPRECATED("deprecated");
-
-    private final String stringValue;
-
-    ComponentStatus(String stringValue) {
-        this.stringValue = stringValue;
-    }
-
-    @Override
-    public String toString() {
-        return stringValue;
-    }
+    DEVELOPMENT,
+    PRODUCTION,
+    DEPRECATED
 
 }

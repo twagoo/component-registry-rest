@@ -56,11 +56,11 @@ public class BaseDescription implements Serializable {
     @Column(name = "component_id", nullable = false, unique = true)
     private String componentId;
 
-    @Column(name = "description", nullable = false)
-    private String description;
-
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "description", nullable = false)
+    private String description;
 
     @Column(name = "registration_date")
     @XmlJavaTypeAdapter(XmlDateAdapter.class)

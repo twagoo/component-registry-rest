@@ -140,7 +140,8 @@ public final class RegistryTestHelper {
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
-        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, isPublic ? PRODUCTION.toString() : DEVELOPMENT.toString()), isPublic, DEVELOPMENT);
+        final ComponentStatus status = isPublic ? PRODUCTION : DEVELOPMENT;
+        return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, status.toString()), isPublic, status);
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,

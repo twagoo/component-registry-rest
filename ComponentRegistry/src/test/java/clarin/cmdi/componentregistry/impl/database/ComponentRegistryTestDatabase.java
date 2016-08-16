@@ -33,7 +33,7 @@ public final class ComponentRegistryTestDatabase {
                 + "  group_name VARCHAR(255), "
                 + "  content VARCHAR(10240) DEFAULT '' NOT NULL, "
                 + "  show_in_editor boolean DEFAULT true NOT NULL, "
-                + "  status varchar(255), " //no enum in hsqldb :(
+                + "  status integer, " //no enum in hsqldb :(
                 + "  derivedfrom VARCHAR(255), "
                 + "  successor VARCHAR(255),"
                 + "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (component_id));");
