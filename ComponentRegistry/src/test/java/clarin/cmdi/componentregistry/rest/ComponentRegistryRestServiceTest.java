@@ -269,7 +269,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("component2", component.getComponent().getName());
         assertEquals(id2, component.getHeader().getID());
         assertEquals("component2", component.getHeader().getName());
-        assertEquals("Test Description", component.getHeader().getDescription());
+        assertEquals("component2 description", component.getHeader().getDescription());
 
     }
 
@@ -301,7 +301,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 //        assertEquals("Access", profile.getComponent().getName());
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
-        assertEquals("Test Description", profile.getHeader().getDescription());
+        assertEquals("profile2 description", profile.getHeader().getDescription());
     }
 
     @Test   // ok    
@@ -696,6 +696,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    <Header>\n";
         content += "        <ID>clarin.eu:cr1:p_12345678a</ID>\n";
         content += "        <Name>XXX</Name>\n";
+        content += "        <Description>p_12345678a</Description>";
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"XXX\">\n";
@@ -711,6 +712,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    <Header>\n";
         content += "        <ID>clarin.eu:cr1:p_12345678b</ID>\n";
         content += "        <Name>YYY</Name>\n";
+        content += "        <Description>p_12345678b</Description>";
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"YYY\">\n";
@@ -728,6 +730,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    <Header>\n";
         content += "        <ID>clarin.eu:cr1:p_12345678c</ID>\n";
         content += "        <Name>ZZZ</Name>\n";
+        content += "        <Description>p_12345678c</Description>";
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"ZZZ\">\n";
@@ -828,7 +831,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
-        assertEquals("Test Description", profile.getHeader().getDescription());
+        assertEquals("profile2 description", profile.getHeader().getDescription());
         assertEquals(ComponentStatus.DEVELOPMENT.toString(), profile.getHeader().getStatus());
         assertEquals("1.2", profile.getCMDVersion());
         assertEquals("1.2", profile.getCMDOriginalVersion());
@@ -1047,8 +1050,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ProfileDescription profileDesc = (ProfileDescription) response
                 .getDescription();
         assertNotNull(profileDesc);
-        assertEquals("ProfileTest1", profileDesc.getName());
-        assertEquals("My Test Profile", profileDesc.getDescription());
+        assertEquals("Spec header should override", "Actor", profileDesc.getName());
+        assertEquals("Spec header should override", "Actor description", profileDesc.getDescription());
         assertEquals("TestDomain", profileDesc.getDomainName());
         assertEquals("My Test Group", profileDesc.getGroupName());
         assertEquals(expectedUserId("JUnit@test.com"), profileDesc.getUserId());
@@ -1073,18 +1076,18 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("public registered profiles", 2, getPublicProfiles()
                 .size());
         FormDataMultiPart form = createFormData(
-                RegistryTestHelper.getTestProfileContent(), "Unpublished");
+                RegistryTestHelper.getTestProfileContent(), "description");
         RegisterResponse response = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                         form);
         assertTrue(response.isProfile());
         BaseDescription desc = response.getDescription();
-        assertEquals("Unpublished", desc.getDescription());
+        assertEquals("Actor description", desc.getDescription());
         assertEquals(2, getUserProfiles().size());
         assertEquals(2, getPublicProfiles().size());
         form = createFormData(
                 RegistryTestHelper.getTestProfileContent("publishedName", PRODUCTION.toString()),
-                "Published");
+                "description");
         //post
         getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + desc.getId() + "/publish"))
@@ -1099,7 +1102,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(desc.getId(), profileDescription.getId());
         assertEquals("http://localhost:9998" + REGISTRY_BASE + "/profiles/" + desc.getId(),
                 profileDescription.getHref());
-        assertEquals("Published", profileDescription.getDescription());
+        assertEquals("Actor description", profileDescription.getDescription());
         ComponentSpec spec = getPublicSpec(profileDescription);
         assertEquals("publishedName", spec.getComponent().getName());
         assertEquals(PRODUCTION.toString(), spec.getHeader().getStatus());
@@ -1129,13 +1132,14 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(2, getPublicComponents().size());
 
         FormDataMultiPart form = createFormData(
-                RegistryTestHelper.getComponentTestContent(), "Unpublished");
+                RegistryTestHelper.getComponentTestContent(), "description");
         RegisterResponse response = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components")).type(
                 MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
                         form);
         assertFalse(response.isProfile());
         BaseDescription desc = response.getDescription();
-        assertEquals("Unpublished", desc.getDescription());
+        assertEquals("Access", desc.getName());
+        assertEquals("Access description", desc.getDescription());
         assertEquals(2, getUserComponents().size());
         assertEquals(2, getPublicComponents().size());
         form = createFormData(
@@ -1184,8 +1188,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ProfileDescription profileDesc = (ProfileDescription) response
                 .getDescription();
         assertNotNull(profileDesc);
-        assertEquals("Test1", profileDesc.getName());
-        assertEquals("My Test", profileDesc.getDescription());
+        assertEquals("Actor", profileDesc.getName());
+        assertEquals("Actor description", profileDesc.getDescription());
         assertEquals(expectedUserId("JUnit@test.com"), profileDesc.getUserId());
         assertEquals("Database test user", profileDesc.getCreatorName());
         assertTrue(profileDesc.getId().startsWith(
@@ -1273,6 +1277,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    <Header>\n";
         content += "        <ID>clarin.eu:cr1:p_12345678x</ID>\n";
         content += "        <Name>XXX</Name>\n";
+        content += "        <Description>DDD</Description>\n";
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"XXX\">\n";
@@ -1289,6 +1294,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    <Header>\n";
         content += "        <ID>clarin.eu:cr1:p_12345678y</ID>\n";
         content += "        <Name>YYY</Name>\n";
+        content += "        <Description>DDD</Description>\n";
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"YYY\">\n";
@@ -1311,6 +1317,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    <Header>\n";
         content += "        <ID>clarin.eu:cr1:p_12345678z</ID>\n";
         content += "        <Name>ZZZ</Name>\n";
+        content += "        <Description>DDD</Description>\n";
         content += "        <Status>development</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"ZZZ\">\n";
@@ -1351,8 +1358,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ComponentDescription desc = (ComponentDescription) response
                 .getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("My Test", desc.getDescription());
+        assertEquals("Access", desc.getName());
+        assertEquals("Access description", desc.getDescription());
         assertEquals(expectedUserId("JUnit@test.com"), desc.getUserId());
         assertEquals("Database test user", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
@@ -1480,8 +1487,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ComponentDescription desc = (ComponentDescription) response
                 .getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("My Test", desc.getDescription());
+        assertEquals("Access", desc.getName());
+        assertEquals("Access description", desc.getDescription());
         Date firstDate = desc.getRegistrationDate();
         ComponentSpec spec = getUserComponent(desc);
         assertNotNull(spec);
@@ -1544,8 +1551,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ProfileDescription desc = (ProfileDescription) response
                 .getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("My Test", desc.getDescription());
+        assertEquals("Actor", desc.getName());
+        assertEquals("Actor description", desc.getDescription());
         assertEquals("TestGroup", desc.getGroupName());
         Date firstDate = desc.getRegistrationDate();
         ComponentSpec spec = getUserProfile(desc);
@@ -1635,8 +1642,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         ComponentDescription desc = (ComponentDescription) response
                 .getDescription();
         assertNotNull(desc);
-        assertEquals("ComponentTest1", desc.getName());
-        assertEquals("My Test Component", desc.getDescription());
+        assertEquals("Spec header should override", "Access", desc.getName());
+        assertEquals("Spec header should override", "Access description", desc.getDescription());
         assertEquals(expectedUserId("JUnit@test.com"), desc.getUserId());
         assertEquals("Database test user", desc.getCreatorName());
         assertEquals("TestGroup", desc.getGroupName());
@@ -1895,7 +1902,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertNotNull(component);
         assertEquals(id, component.getId());
         assertEquals("component1", component.getName());
-        assertEquals("Test Description", component.getDescription());
+        assertEquals("component1 description", component.getDescription());
 
     }
 }
