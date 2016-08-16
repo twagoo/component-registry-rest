@@ -577,6 +577,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             if (!forceUpdate && description.isPublic() && !description.isProfile()) {
                 this.checkStillUsed(description.getId());
             }
+            syncSpecDescriptionHeaders(spec, description);
             componentDao.updateDescription(getIdForDescription(description), description, componentSpecToString(spec));
             invalidateCache(description);
             return 0;
@@ -606,6 +607,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             Number id = getIdForDescription(desc);
             try {
                 // Update description & content
+                syncSpecDescriptionHeaders(spec, desc);
                 componentDao.updateDescription(id, desc, componentSpecToString(spec));
                 // Set to public
                 componentDao.setPublished(id, true);
@@ -619,6 +621,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             } catch (UnsupportedEncodingException ex) {
                 LOG.error("Error while updating component", ex);
                 return -3;
+            } catch (ComponentRegistryException ex) {
+                LOG.error("Error while registering component", ex);
+                return -4; //TODO: throw exception here
             }
         }
         return result;
