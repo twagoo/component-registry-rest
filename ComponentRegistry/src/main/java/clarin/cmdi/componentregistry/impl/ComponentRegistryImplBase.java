@@ -21,8 +21,8 @@ import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
-import clarin.cmdi.componentregistry.components.ComponentSpec.Header;
 import clarin.cmdi.componentregistry.model.BaseDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -77,14 +77,30 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         return StringUtils.removeStart(id, ComponentRegistry.REGISTRY_ID);
     }
 
-    protected static void enrichSpecHeader(ComponentSpec spec, BaseDescription description) {
-        Header header = spec.getHeader();
-        header.setID(description.getId());
-        if (StringUtils.isEmpty(header.getName())) {
-            header.setName(description.getName());
+    protected void syncSpecDescriptionHeaders(ComponentSpec spec, BaseDescription description) throws ComponentRegistryException {
+        final ComponentSpec.Header compHeader = spec.getHeader();
+
+        //description id overrules spec id
+        compHeader.setID(description.getId());
+
+        //other header fields form spec override description
+        description.setDescription(compHeader.getDescription());
+        description.setName(compHeader.getName());
+        description.setDerivedfrom(compHeader.getDerivedFrom());
+        description.setSuccessor(compHeader.getSuccessor());
+        
+        if(description.getName() == null || description.getDescription() == null) {
+            throw new ComponentRegistryException("Name and description are required header fields");
         }
-        if (StringUtils.isEmpty(header.getDescription())) {
-            header.setDescription(description.getDescription());
+
+        //status
+        try {
+            //convert to enum value
+            final ComponentStatus status = ComponentStatus.valueOf(compHeader.getStatus().toUpperCase());
+            description.setStatus(status);
+        } catch (IllegalArgumentException ex) {
+            LOG.warn("Encountered invalid component status {} in {}", compHeader.getStatus(), compHeader.getID(), ex);
+            throw new ComponentRegistryException("Encountered invalid component status " + compHeader.getStatus(), ex);
         }
     }
 

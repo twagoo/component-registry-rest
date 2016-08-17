@@ -646,11 +646,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(response.isPrivate());
         ComponentDescription desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+        assertEquals("TESTNAME", desc.getName());
+        assertEquals("TESTNAME description", desc.getDescription());
 
         form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME2"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/update")).type(
@@ -663,11 +663,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(response.isPrivate());
         desc = (ComponentDescription) response.getDescription();
         assertNotNull(desc);
-        assertEquals("Test1", desc.getName());
-        assertEquals("UPDATE DESCRIPTION!", desc.getDescription());
+        assertEquals("TESTNAME2", desc.getName());
+        assertEquals("TESTNAME2 description", desc.getDescription());
 
         form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME"),
+                RegistryTestHelper.getComponentTestContentAsStream("TESTNAME3"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1" + "/update")).type(
@@ -675,7 +675,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(403, cResponse.getStatus());
 
         // profile
-        form = createFormData(RegistryTestHelper.getTestProfileContent("TESTNAME"),
+        form = createFormData(RegistryTestHelper.getTestProfileContent("TESTNAME4"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "profile-1" + "/update")).type(
@@ -688,11 +688,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(response.isPrivate());
         ProfileDescription pdesc = (ProfileDescription) response.getDescription();
         assertNotNull(pdesc);
-        assertEquals("Test1", pdesc.getName());
-        assertEquals("UPDATE DESCRIPTION!", pdesc.getDescription());
+        assertEquals("TESTNAME4", pdesc.getName());
+        assertEquals("TESTNAME4 description", pdesc.getDescription());
 
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                RegistryTestHelper.getTestProfileContent("TESTNAME5"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/update")).type(
@@ -705,11 +705,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(response.isPrivate());
         pdesc = (ProfileDescription) response.getDescription();
         assertNotNull(pdesc);
-        assertEquals("Test1", pdesc.getName());
-        assertEquals("UPDATE DESCRIPTION!", pdesc.getDescription());
+        assertEquals("TESTNAME5", pdesc.getName());
+        assertEquals("TESTNAME5 description", pdesc.getDescription());
 
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("TESTNAME"),
+                RegistryTestHelper.getTestProfileContent("TESTNAME6"),
                 "UPDATE DESCRIPTION!");
         cResponse = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1" + "/update")).type(
@@ -744,11 +744,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(1, profiles.size());
         ProfileDescription profileDescription = profiles.get(0);
         assertEquals(ProfileDescription.PROFILE_PREFIX + "profile-1", profileDescription.getId());
-        assertEquals("Published", profileDescription.getDescription());
+        assertEquals("publishedName description", profileDescription.getDescription());
 
         // not my profile from "my" group
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName"),
+                RegistryTestHelper.getTestProfileContent("publishedName2"),
                 "Published");
         response = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Bprofile-1" + "/publish"))
@@ -760,13 +760,13 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         profiles = baseRegistry.getProfileDescriptions();
         assertEquals(2, profiles.size());
-        profileDescription = profiles.get(0);
+        profileDescription = profiles.get(1);
         assertEquals(ProfileDescription.PROFILE_PREFIX + "Bprofile-1", profileDescription.getId());
-        assertEquals("Published", profileDescription.getDescription());
+        assertEquals("publishedName2 description", profileDescription.getDescription());
 
         // not my profile, not my group 
         form = createFormData(
-                RegistryTestHelper.getTestProfileContent("publishedName"),
+                RegistryTestHelper.getTestProfileContent("publishedName3"),
                 "Published");
         ClientResponse cr = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/profiles/" + ProfileDescription.PROFILE_PREFIX + "Cprofile-1" + "/publish"))
@@ -778,7 +778,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         /// components 
         form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
+                RegistryTestHelper.getComponentTestContentAsStream("publishedName4"),
                 "Published");
         response = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "component-1" + "/publish"))
@@ -792,11 +792,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertEquals(1, components.size());
         ComponentDescription componentDescription = components.get(0);
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "component-1", componentDescription.getId());
-        assertEquals("Published", componentDescription.getDescription());
+        assertEquals("publishedName4 description", componentDescription.getDescription());
 
         // not my profile from "my" group
         form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
+                RegistryTestHelper.getComponentTestContentAsStream("publishedName5"),
                 "Published");
         response = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1" + "/publish"))
@@ -808,13 +808,13 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         components = baseRegistry.getComponentDescriptions();
         assertEquals(2, components.size());
-        componentDescription = components.get(0);
+        componentDescription = components.get(1);
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1", componentDescription.getId());
-        assertEquals("Published", componentDescription.getDescription());
+        assertEquals("publishedName5 description", componentDescription.getDescription());
 
         // not my profile, not my group 
         form = createFormData(
-                RegistryTestHelper.getComponentTestContentAsStream("publishedName"),
+                RegistryTestHelper.getComponentTestContentAsStream("publishedName6"),
                 "Published");
         cr = getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components/" + ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1" + "/publish"))
