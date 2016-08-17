@@ -1,17 +1,18 @@
 -- expand schema
 
-CREATE TYPE item_status as ENUM('DEVELOPMENT', 'PRODUCTION', 'DEPRECATED');
-
 ALTER TABLE basedescription 
-    ADD status item_status, 
+    ADD status integer, 
     ADD derivedfrom character varying, 
     ADD successor character varying;
 
--- set status
+-- set status (maps to clarin.cmdi.componentregistry.model.ComponentStatus enum)
 
-UPDATE basedescription SET status = 'PRODUCTION' WHERE is_deleted = false AND content like '%<Status>production</Status>%';
-UPDATE basedescription SET status = 'DEVELOPMENT' WHERE is_deleted = false AND content like '%<Status>development</Status>%';
-UPDATE basedescription SET status = 'DEPRECATED' WHERE is_deleted = true OR content like '%<Status>deprecated</Status>%';
+-- 0   DEVELOPMENT("development"),
+UPDATE basedescription SET status = '0' WHERE is_deleted = false AND content like '%<Status>development</Status>%';
+-- 1   PRODUCTION("production"),
+UPDATE basedescription SET status = '1' WHERE is_deleted = false AND content like '%<Status>production</Status>%';
+-- 2   DEPRECATED("deprecated");
+UPDATE basedescription SET status = '2' WHERE is_deleted = true OR content like '%<Status>deprecated</Status>%';
 
 -- set derived from
 

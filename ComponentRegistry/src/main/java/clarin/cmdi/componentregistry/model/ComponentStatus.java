@@ -6,6 +6,10 @@ package clarin.cmdi.componentregistry.model;
  */
 public enum ComponentStatus {
 
+    // Please DO NOT change the order of these values as they are mapped to
+    // integer values in the database ('status' column of 'basedescription' 
+    // table)! Any new values should be appended, or the database values need
+    // to be refactored.
     DEVELOPMENT("development"),
     PRODUCTION("production"),
     DEPRECATED("deprecated");
