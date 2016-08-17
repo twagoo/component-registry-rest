@@ -5,6 +5,9 @@ ALTER TABLE basedescription
     ADD derivedfrom character varying, 
     ADD successor character varying;
 
+
+CREATE INDEX idx_basedescription_status ON basedescription USING btree (status);
+
 -- set status (maps to clarin.cmdi.componentregistry.model.ComponentStatus enum)
 
 -- 0   DEVELOPMENT("development"),
