@@ -118,6 +118,7 @@ public class ComponentRegistryRestService {
     public static final String DESCRIPTION_FORM_FIELD = "description";
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
+    public static final String STATUS_FORM_FIELD = "status";
     public static final String REGISTRY_SPACE_PARAM = "registrySpace";
     public static final String USER_SPACE_PARAM = "userspace";
     public static final String GROUPID_PARAM = "groupId";
@@ -842,12 +843,7 @@ public class ComponentRegistryRestService {
                     ComponentRegistry cr = this.getRegistry(space, groupId);
                     return register(input, desc, new UpdateAction(), cr);
                 } else {
-                    LOG.error("Update of nonexistent id (" + profileId
-                            + ") failed.");
-                    return Response
-                            .serverError()
-                            .entity("Invalid id, cannot update nonexistent profile")
-                            .build();
+                    return createNonExistentItemResponse(profileId);
                 }
             } catch (ComponentRegistryException e) {
                 LOG.warn("Could not retrieve profile {}", profileId);
@@ -922,12 +918,7 @@ public class ComponentRegistryRestService {
                     this.updateDescription(desc, name, description, domainName, group);
                     return this.register(input, desc, new PublishAction(principal), registry);
                 } else {
-                    LOG.error("Update of nonexistent id (" + componentId
-                            + ") failed.");
-                    return Response
-                            .serverError()
-                            .entity("Invalid id, cannot update nonexistent profile")
-                            .build();
+                    return createNonExistentItemResponse(componentId);
                 }
             } catch (AuthenticationRequiredException e) {
                 LOG.warn("Could not retrieve component {}", componentId);
@@ -1430,6 +1421,79 @@ public class ComponentRegistryRestService {
         }
 
         @POST
+        @Path("/profiles/{profileId}/status")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates the status of an already registered component or profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateComponentStatus(
+                @PathParam("profileId") String profileId,
+                @FormDataParam(STATUS_FORM_FIELD) String newStatus) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDProfileAccessControled(profileId);
+                    final ComponentStatus targetStatus;
+                    try {
+                        targetStatus = ComponentStatus.valueOf(newStatus.toUpperCase());
+                    } catch (IllegalArgumentException ex) {
+                        LOG.warn("Invalid component status {}", newStatus, ex);
+                        return Response.status(Status.BAD_REQUEST)
+                                .entity("Invalid component status, must be one of accepted values " + Arrays.asList(ComponentStatus.values()))
+                                .build();
+                    }
+                    if (desc.getStatus() == ComponentStatus.DEPRECATED) {
+                        //TODO: allow for admin
+                        return Response.status(Status.BAD_REQUEST)
+                                .entity("Status of deprecated components cannot be changed")
+                                .build();
+                    }
+                    if (targetStatus == ComponentStatus.DEVELOPMENT && desc.getStatus() == ComponentStatus.PRODUCTION) {
+                        return Response
+                                .status(Status.BAD_REQUEST)
+                                .entity("Cannot put item back into development status")
+                                .build();
+                    }
+                    spec.getHeader().setStatus(targetStatus.toString());
+                    desc.setStatus(targetStatus);
+
+                    final int returnCode = br.update(desc, spec, true);
+                    if (returnCode == 0) {
+                        return Response.status(Status.OK)
+                                .entity(targetStatus.toString())
+                                .build();
+                    } else {
+                        return Response.status(Status.INTERNAL_SERVER_ERROR)
+                                .entity("Failed to upate status")
+                                .build();
+                    }
+                } else {
+                    return createNonExistentItemResponse(profileId);
+                }
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
         @Path("/profiles/{profileId}/comments")
         @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
             MediaType.APPLICATION_JSON})
@@ -1506,9 +1570,9 @@ public class ComponentRegistryRestService {
                 final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
                 final MDValidator validator = new MDValidator(input, desc, registry, marshaller);
                 validator.setPreRegistrationMode(action.isPreRegistration());
-                
+
                 this.validate(response, descriptionValidator, validator);
-                
+
                 if (response.getErrors().isEmpty()) {
                     final ComponentSpec spec = validator.getComponentSpec();
 
@@ -1913,6 +1977,14 @@ public class ComponentRegistryRestService {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode());
                 return new Rss();
             }
+        }
+
+        private Response createNonExistentItemResponse(String itemId) {
+            LOG.error("Update of nonexistent id ({}) failed.", itemId);
+            return Response
+                    .serverError()
+                    .entity("Invalid id, cannot update nonexistent item")
+                    .build();
         }
     }
 
