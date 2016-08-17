@@ -50,7 +50,11 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
-        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic, DEVELOPMENT);
+        return addComponent(testRegistry, id, isPublic, DEVELOPMENT);
+    }
+
+    public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic, ComponentStatus status) throws ParseException, JAXBException {
+        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic, status);
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,
@@ -136,7 +140,7 @@ public final class RegistryTestHelper {
     }
 
     public static InputStream getTestProfileContent(String name, String status) {
-        return new ByteArrayInputStream(getProfileTestContentString(name).getBytes());
+        return new ByteArrayInputStream(getProfileTestContentString(name, status).getBytes());
     }
 
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {

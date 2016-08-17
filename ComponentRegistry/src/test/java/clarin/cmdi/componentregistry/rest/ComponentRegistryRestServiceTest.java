@@ -832,7 +832,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
         assertEquals("profile2 description", profile.getHeader().getDescription());
-        assertEquals(ComponentStatus.DEVELOPMENT.toString(), profile.getHeader().getStatus());
+        assertEquals(ComponentStatus.PRODUCTION.toString(), profile.getHeader().getStatus());
         assertEquals("1.2", profile.getCMDVersion());
         assertEquals("1.2", profile.getCMDOriginalVersion());
 
