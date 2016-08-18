@@ -1462,6 +1462,39 @@ public class ComponentRegistryRestService {
             }
         }
 
+        @GET
+        @Path("/components/{componentId}/status")
+        @ApiOperation(value = "Updates the status of an already registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getComponentStatus(
+                @PathParam("componentId") String componentId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                return Response.status(Status.OK)
+                        .entity(desc.getStatus().toString())
+                        .build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
         @POST
         @Path("/components/{componentId}/status")
         @Consumes("multipart/form-data")
@@ -1490,7 +1523,6 @@ public class ComponentRegistryRestService {
                 LOG.debug("Details", e);
                 return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
                         .build();
-
             } catch (UserUnauthorizedException ex) {
                 return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
                         .build();

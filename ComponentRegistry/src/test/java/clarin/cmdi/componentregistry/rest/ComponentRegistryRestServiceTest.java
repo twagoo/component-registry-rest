@@ -1910,7 +1910,43 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testGetComponentStatus() throws Exception {
-        //TODO
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        final String privateId = getUserComponents().get(0).getId();
+        final String publicId = getPublicComponents().get(0).getId();
+
+        //get status for private
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + privateId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("development", cResponse.getEntity(String.class));
+        }
+
+        //get status for public
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("production", cResponse.getEntity(String.class));
+        }
+
+        //deprecate via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+        }
+        //check status
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("deprecated", cResponse.getEntity(String.class));
+        }
+
     }
 
     @Test
@@ -1955,7 +1991,6 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
             assertEquals("Status should have been updated", ComponentStatus.DEPRECATED, privateComponents.get(0).getStatus());
         }
     }
-
 
     @Test
     public void testUpdateStatusOfPrivateProfile() throws Exception {
@@ -2080,7 +2115,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
             assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(1).getStatus());
         }
     }
-    
+
     @Test
     public void testUpdateStatusOfPublicComponent() throws Exception {
         fillUpPublicItems();
