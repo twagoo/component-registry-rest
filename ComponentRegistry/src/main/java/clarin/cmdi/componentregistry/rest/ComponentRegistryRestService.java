@@ -1437,50 +1437,12 @@ public class ComponentRegistryRestService {
                 final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
                 if (desc != null) {
                     final ComponentSpec spec = this.getBaseRegistry().getMDProfileAccessControled(profileId);
-                    final ComponentStatus targetStatus;
-
-                    try {
-                        targetStatus = ComponentStatus.valueOf(newStatus.toUpperCase());
-                    } catch (IllegalArgumentException ex) {
-                        LOG.warn("Invalid component status {}", newStatus, ex);
-                        return Response.status(Status.BAD_REQUEST)
-                                .entity("Invalid component status, must be one of accepted values " + Arrays.asList(ComponentStatus.values()))
-                                .build();
+                    if (spec != null) {
+                        return tryUpdateItemStatus(desc, spec, newStatus, br, profileId);
                     }
-                    if (desc.getStatus() == ComponentStatus.DEPRECATED) {
-                        //TODO: allow for admin
-                        return Response.status(Status.BAD_REQUEST)
-                                .entity("Status of deprecated components cannot be changed")
-                                .build();
-                    }
-                    if (targetStatus == ComponentStatus.DEVELOPMENT && desc.getStatus() == ComponentStatus.PRODUCTION) {
-                        return Response
-                                .status(Status.BAD_REQUEST)
-                                .entity("Cannot put item back into development status")
-                                .build();
-                    }
-                    if (targetStatus == ComponentStatus.PRODUCTION && !desc.isPublic()) {
-                        return Response
-                                .status(Status.BAD_REQUEST)
-                                .entity("Cannot put a private component in production status")
-                                .build();
-                    }
-                    spec.getHeader().setStatus(targetStatus.toString());
-                    desc.setStatus(targetStatus);
-
-                    final int returnCode = br.update(desc, spec, true);
-                    if (returnCode == 0) {
-                        return Response.status(Status.OK)
-                                .entity(targetStatus.toString())
-                                .build();
-                    } else {
-                        return Response.status(Status.INTERNAL_SERVER_ERROR)
-                                .entity("Failed to upate status")
-                                .build();
-                    }
-                } else {
-                    return createNonExistentItemResponse(profileId);
                 }
+                //description or spec not found...
+                return createNonExistentItemResponse(profileId);
             } catch (ComponentRegistryException e) {
                 LOG.warn("Could not retrieve profile {}", profileId);
                 LOG.debug("Details", e);
@@ -1497,6 +1459,53 @@ public class ComponentRegistryRestService {
             } catch (AuthenticationRequiredException e1) {
                 return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                         .build();
+            }
+        }
+
+        private Response tryUpdateItemStatus(final BaseDescription desc, final ComponentSpec spec, String newStatus, final ComponentRegistry br, String profileId) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
+            final ComponentStatus targetStatus;
+            try {
+                targetStatus = ComponentStatus.valueOf(newStatus.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                LOG.warn("Invalid component status {}", newStatus, ex);
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Invalid component status, must be one of accepted values " + Arrays.asList(ComponentStatus.values()))
+                        .build();
+            }
+
+            //Status of deprecated components cannot be changed
+            if (desc.getStatus() == ComponentStatus.DEPRECATED) {
+                //TODO: allow for admin
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("Status of deprecated components cannot be changed")
+                        .build();
+            } //Cannot put item back into development status
+            else if (targetStatus == ComponentStatus.DEVELOPMENT && desc.getStatus() == ComponentStatus.PRODUCTION) {
+                return Response
+                        .status(Status.BAD_REQUEST)
+                        .entity("Cannot put item back into development status")
+                        .build();
+            } //Cannot put a private component in production status
+            else if (targetStatus == ComponentStatus.PRODUCTION && !desc.isPublic()) {
+                return Response
+                        .status(Status.BAD_REQUEST)
+                        .entity("Cannot put a private component in production status")
+                        .build();
+            } else {
+                // all is ok
+                spec.getHeader().setStatus(targetStatus.toString());
+                desc.setStatus(targetStatus);
+
+                final int returnCode = br.update(desc, spec, true);
+                if (returnCode == 0) {
+                    return Response.status(Status.OK)
+                            .entity(targetStatus.toString())
+                            .build();
+                } else {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR)
+                            .entity("Failed to upate status")
+                            .build();
+                }
             }
         }
 
