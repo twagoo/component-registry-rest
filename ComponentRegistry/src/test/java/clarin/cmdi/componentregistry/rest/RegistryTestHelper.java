@@ -50,11 +50,12 @@ public final class RegistryTestHelper {
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
-        return addComponent(testRegistry, id, isPublic, DEVELOPMENT);
+        final ComponentStatus status = isPublic ? PRODUCTION : DEVELOPMENT;
+        return addComponent(testRegistry, id, isPublic, status);
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic, ComponentStatus status) throws ParseException, JAXBException {
-        return addComponent(testRegistry, id, getComponentTestContent(id), isPublic, status);
+        return addComponent(testRegistry, id, getComponentTestContent(id, status.toString()), isPublic, status);
     }
 
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,
@@ -205,7 +206,15 @@ public final class RegistryTestHelper {
         return getComponentTestContentAsStream(name);
     }
 
+    public static InputStream getComponentTestContent(String name, String status) {
+        return getComponentTestContentAsStream(name, status);
+    }
+
     public static String getComponentTestContentString(String componentName) {
+        return getComponentTestContentString(componentName, "development");
+    }
+    
+    public static String getComponentTestContentString(String componentName, String status) {
         String compContent = "";
         compContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         compContent += "\n";
@@ -215,7 +224,7 @@ public final class RegistryTestHelper {
         compContent += "     <ID>clarin.eu:cr1:p_12345678</ID>\n";
         compContent += "     <Name>" + componentName + "</Name>\n";
         compContent += "     <Description>" + componentName + " description</Description>\n";
-        compContent += "     <Status>development</Status>\n";
+        compContent += "     <Status>" + status + "</Status>\n";
         compContent += "    </Header>\n";
         compContent += "    <Component name=\"" + componentName + "\" CardinalityMin=\"1\" CardinalityMax=\"1\">\n";
         compContent += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
@@ -264,6 +273,10 @@ public final class RegistryTestHelper {
 
     public static InputStream getComponentTestContentAsStream(String componentName) {
         return getComponentContentAsStream(getComponentTestContentString(componentName));
+    }
+
+    public static InputStream getComponentTestContentAsStream(String componentName, String status) {
+        return getComponentContentAsStream(getComponentTestContentString(componentName, status));
     }
 
     public static ComponentSpec getTestComponent() throws JAXBException {

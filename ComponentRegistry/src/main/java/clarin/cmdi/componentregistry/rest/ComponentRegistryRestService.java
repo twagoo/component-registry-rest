@@ -1462,6 +1462,48 @@ public class ComponentRegistryRestService {
             }
         }
 
+        @POST
+        @Path("/components/{componentId}/status")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates the status of an already registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateComponentStatus(
+                @PathParam("componentId") String componentId,
+                @FormDataParam(STATUS_FORM_FIELD) String newStatus) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
+                    if (spec != null) {
+                        return tryUpdateItemStatus(desc, spec, newStatus, br, componentId);
+                    }
+                }
+                //description or spec not found...
+                return createNonExistentItemResponse(componentId);
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
         private Response tryUpdateItemStatus(final BaseDescription desc, final ComponentSpec spec, String newStatus, final ComponentRegistry br, String profileId) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
             final ComponentStatus targetStatus;
             try {
