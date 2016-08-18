@@ -1423,13 +1423,13 @@ public class ComponentRegistryRestService {
         @POST
         @Path("/profiles/{profileId}/status")
         @Consumes("multipart/form-data")
-        @ApiOperation(value = "Updates the status of an already registered component or profile")
+        @ApiOperation(value = "Updates the status of an already registered profile")
         @ApiResponses(value = {
             @ApiResponse(code = 401, message = "User is not authenticated"),
             @ApiResponse(code = 403, message = "Item is not owned by current user"),
             @ApiResponse(code = 404, message = "Item does not exist")
         })
-        public Response updateComponentStatus(
+        public Response updateProfileStatus(
                 @PathParam("profileId") String profileId,
                 @FormDataParam(STATUS_FORM_FIELD) String newStatus) {
             try {
@@ -1438,6 +1438,7 @@ public class ComponentRegistryRestService {
                 if (desc != null) {
                     final ComponentSpec spec = this.getBaseRegistry().getMDProfileAccessControled(profileId);
                     final ComponentStatus targetStatus;
+
                     try {
                         targetStatus = ComponentStatus.valueOf(newStatus.toUpperCase());
                     } catch (IllegalArgumentException ex) {
@@ -1456,6 +1457,12 @@ public class ComponentRegistryRestService {
                         return Response
                                 .status(Status.BAD_REQUEST)
                                 .entity("Cannot put item back into development status")
+                                .build();
+                    }
+                    if (targetStatus == ComponentStatus.PRODUCTION && !desc.isPublic()) {
+                        return Response
+                                .status(Status.BAD_REQUEST)
+                                .entity("Cannot put a private component in production status")
                                 .build();
                     }
                     spec.getHeader().setStatus(targetStatus.toString());
