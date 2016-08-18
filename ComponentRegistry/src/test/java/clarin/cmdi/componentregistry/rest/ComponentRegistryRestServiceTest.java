@@ -1946,12 +1946,46 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
             assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
             assertEquals("deprecated", cResponse.getEntity(String.class));
         }
-
     }
 
     @Test
     public void testGetProfileStatus() throws Exception {
-        //TODO
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        final String privateId = getUserProfiles().get(0).getId();
+        final String publicId = getPublicProfiles().get(0).getId();
+
+        //get status for private
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + privateId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("development", cResponse.getEntity(String.class));
+        }
+
+        //get status for public
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("production", cResponse.getEntity(String.class));
+        }
+
+        //deprecate via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+        }
+        //check status
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("deprecated", cResponse.getEntity(String.class));
+        }
     }
 
     @Test
