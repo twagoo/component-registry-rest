@@ -24,12 +24,11 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 public class ComponentUtils {
 
     public static boolean isProfileId(String componentId) {
-        return ("" + componentId).startsWith(ProfileDescription.PROFILE_PREFIX);
+        return componentId != null && componentId.startsWith(ProfileDescription.PROFILE_PREFIX);
     }
 
     public static boolean isComponentId(String componentId) {
-        return ("" + componentId)
-                .startsWith(ComponentDescription.COMPONENT_PREFIX);
+        return componentId != null && componentId.startsWith(ComponentDescription.COMPONENT_PREFIX);
     }
 
     public static void copyPropertiesFrom(BaseDescription from, BaseDescription to) {
@@ -54,7 +53,7 @@ public class ComponentUtils {
         return result;
     }
     /**
-     * Compares two descriptions by the their value as returned by      {@link BaseDescription#getName()
+     * Compares two descriptions by the their value as returned by null     {@link BaseDescription#getName()
      * }
      */
     public static final Comparator<? super BaseDescription> COMPARE_ON_NAME = new Comparator<BaseDescription>() {
@@ -70,9 +69,8 @@ public class ComponentUtils {
             return result;
         }
     };
-    
-    
-     public static final Comparator<? super Date> COMPARE_ON_DATE = new Comparator<Date>() {
+
+    public static final Comparator<? super Date> COMPARE_ON_DATE = new Comparator<Date>() {
         /**
          * @returns 1 if o11 is older than o2, returns -1 if o1 is younger than
          * o2
@@ -80,7 +78,7 @@ public class ComponentUtils {
         @Override
         public int compare(Date o1, Date o2) {
             // we need to sort not in standard ascending orde, but in descending, from higher (later date on the top) to the smaller (older date on the bottm)
-            return (- o1.compareTo(o2));
+            return (-o1.compareTo(o2));
         }
     };
 
@@ -88,7 +86,7 @@ public class ComponentUtils {
         if (baseDescription == null) {
             return null;
         }
-        if (baseDescription.getId().startsWith(ProfileDescription.PROFILE_PREFIX)) {
+        if (isProfileId(baseDescription.getId())) {
             ProfileDescription copy = new ProfileDescription();
             BeanUtils.copyProperties(baseDescription, copy);
             return copy;
@@ -101,7 +99,7 @@ public class ComponentUtils {
         if (baseDescription == null) {
             return null;
         }
-        if (baseDescription.getId().startsWith(ComponentDescription.COMPONENT_PREFIX)) {
+        if (isComponentId(baseDescription.getId())) {
             ComponentDescription copy = new ComponentDescription();
             BeanUtils.copyProperties(baseDescription, copy);
             return copy;

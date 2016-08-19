@@ -15,6 +15,7 @@ import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -1691,6 +1692,11 @@ public class ComponentRegistryRestService {
         }
 
         private Response tryUpdateItemSuccessor(ComponentDescription desc, ComponentSpec spec, final String successorId, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException, ComponentRegistryException {
+            //check if successor is of right type
+            if (ComponentUtils.isProfileId(desc.getId()) != ComponentUtils.isProfileId(successorId)) {
+                return createBadRequestResponse("Successor item must be of the same type");
+            }
+
             //check if successor exists
             final BaseDescription successorDescription;
             try {
@@ -2220,7 +2226,6 @@ public class ComponentRegistryRestService {
                     .entity("Invalid id, cannot update nonexistent item")
                     .build();
         }
-        
 
         private Response createBadRequestResponse(final String msg) {
             return Response
