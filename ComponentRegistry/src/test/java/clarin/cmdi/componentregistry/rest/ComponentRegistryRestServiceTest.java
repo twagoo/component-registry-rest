@@ -2435,9 +2435,93 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testSetProfileSuccessor() throws Exception {
-        //TODO try to set on development private - fail
-        //TODO try to set on published public - fail
-        //TODO try to set on deprecated public - success
-        //TODO try to set on same again - fail
+        fillUpPublicItems();
+        fillUpPrivateItems();
+
+        List<ProfileDescription> publicComponents = getPublicProfiles();
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+        assertNull(publicComponents.get(0).getSuccessor());
+        assertNull(publicComponents.get(1).getSuccessor());
+        List<ProfileDescription> privateComponents = getUserProfiles();
+        assertEquals(ComponentStatus.DEVELOPMENT, privateComponents.get(0).getStatus());
+        assertNull(privateComponents.get(0).getSuccessor());
+
+        final String publicId = publicComponents.get(0).getId();
+        final String privateId = privateComponents.get(0).getId();
+        final String successorId = publicComponents.get(1).getId();
+
+        //try to set on development private - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + privateId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getUserProfiles().get(0).getSuccessor());
+        }
+
+        //try to set on published public - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicProfiles().get(0).getSuccessor());
+        }
+        //deprecate one public component
+        getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles/" + publicId + "/status"))
+                .type(MediaType.MULTIPART_FORM_DATA)
+                .post(ClientResponse.class, new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated"));
+        //try to set non-existing successor on deprecated public - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, "NON-EXISTING-ID"));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicProfiles().get(0).getSuccessor());
+        }
+        //try to set profile as successor to component
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, getPublicProfiles().get(0).getId()));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicProfiles().get(0).getSuccessor());
+        }
+        //try to set existing on deprecated public - success
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been set", successorId, getPublicProfiles().get(0).getSuccessor());
+        }
+        //try to set on same again - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been kept", successorId, getPublicProfiles().get(0).getSuccessor());
+        }
     }
 }
