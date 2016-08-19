@@ -119,6 +119,7 @@ public class ComponentRegistryRestService {
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
     public static final String STATUS_FORM_FIELD = "status";
+    public static final String SUCCESSOR_ID_FORM_FIELD = "status";
     public static final String REGISTRY_SPACE_PARAM = "registrySpace";
     public static final String USER_SPACE_PARAM = "userspace";
     public static final String GROUPID_PARAM = "groupId";
@@ -1611,6 +1612,116 @@ public class ComponentRegistryRestService {
                 } else {
                     return Response.status(Status.INTERNAL_SERVER_ERROR)
                             .entity("Failed to upate status")
+                            .build();
+                }
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}/successor")
+        @ApiOperation(value = "Gets the status of a registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getComponentSuccessor(
+                @PathParam("componentId") String componentId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                final String successorId = desc.getSuccessor();
+                if (successorId == null || successorId.isEmpty()) {
+                    return Response
+                            .status(Status.NOT_FOUND)
+                            .entity("Component has no successor")
+                            .build();
+                } else {
+                    return Response
+                            .status(Status.OK)
+                            .entity(successorId)
+                            .build();
+                }
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/successor")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates the status of an already registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateComponentSuccessor(
+                @PathParam("componentId") String componentId,
+                @FormDataParam(SUCCESSOR_ID_FORM_FIELD) String successorId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
+                    if (spec != null) {
+                        return tryUpdateItemSuccessor(desc, spec, successorId, br, componentId);
+                    }
+                }
+                //description or spec not found...
+                return createNonExistentItemResponse(componentId);
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        private Response tryUpdateItemSuccessor(ComponentDescription desc, ComponentSpec spec, final String successorId, ComponentRegistry br, String componentId) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException {
+            //TODO: check if successor exists
+
+            //Status of deprecated components cannot be changed
+            if (desc.getStatus() != ComponentStatus.DEPRECATED) {
+                return Response
+                        .status(Status.BAD_REQUEST)
+                        .entity("Cannot set successor unless component has been deprecated")
+                        .build();
+            } else {                 //TODO: other cases that do not meet preconditions
+                // all is ok
+                spec.getHeader().setSuccessor(successorId);
+                desc.setSuccessor(successorId);
+
+                final int returnCode = br.update(desc, spec, true);
+                if (returnCode == 0) {
+                    return Response.status(Status.OK)
+                            .entity(successorId)
+                            .build();
+                } else {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR)
+                            .entity("Failed to upate successor information")
                             .build();
                 }
             }

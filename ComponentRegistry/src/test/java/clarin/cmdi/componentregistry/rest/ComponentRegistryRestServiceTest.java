@@ -2235,4 +2235,80 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
             assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
         }
     }
+
+    @Test
+    public void testGetComponentSuccessor() throws Exception {
+        fillUpPublicItems();
+
+        List<ComponentDescription> publicComponents = getPublicComponents();
+        assertEquals("public registered components", 2, publicComponents
+                .size());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+
+        final String componentId = publicComponents.get(0).getId();
+        final String successorId = publicComponents.get(1).getId();
+
+        //get for published public - should be none
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + componentId + "/successor"))
+                    .get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.NOT_FOUND.getStatusCode(),
+                    cResponse.getStatus());
+        }
+        //deprecate and assign successor via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + componentId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + componentId + "/successor")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId)
+                    );
+        }
+        
+        //should be as set now
+        publicComponents = getPublicComponents();
+        assertEquals(successorId, publicComponents.get(0).getSuccessor());
+        
+        //get status via REST, should match
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + componentId + "/successor"))
+                    .get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                    cResponse.getStatus());
+            assertEquals(successorId, cResponse.getEntity(String.class));
+        }
+    }
+
+    @Test
+    public void testSetComponentSuccessor() throws Exception {
+        //TODO try to set on development private - fail
+        //TODO try to set on published public - fail
+        //TODO try to set non-existing successor on deprecated public - fail
+        //TODO try to set existing on deprecated public - success
+        //TODO try to set on same again - fail
+    }
+
+    @Test
+    public void testGetProfileSuccessor() throws Exception {
+        //TODO get for published public - should be none
+        //TODO deprecate and set it, and get again - should be as set
+    }
+
+    @Test
+    public void testSetProfileSuccessor() throws Exception {
+        //TODO try to set on development private - fail
+        //TODO try to set on published public - fail
+        //TODO try to set on deprecated public - success
+        //TODO try to set on same again - fail
+    }
 }
