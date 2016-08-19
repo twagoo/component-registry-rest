@@ -1576,29 +1576,19 @@ public class ComponentRegistryRestService {
                 targetStatus = ComponentStatus.valueOf(newStatus.toUpperCase());
             } catch (IllegalArgumentException ex) {
                 LOG.warn("Invalid component status {}", newStatus, ex);
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("Invalid component status, must be one of accepted values " + Arrays.asList(ComponentStatus.values()))
-                        .build();
+                return createBadRequestResponse("Invalid component status, must be one of accepted values " + Arrays.asList(ComponentStatus.values()));
             }
 
             //Status of deprecated components cannot be changed
             if (desc.getStatus() == ComponentStatus.DEPRECATED) {
                 //TODO: allow for admin
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("Status of deprecated components cannot be changed")
-                        .build();
+                return createBadRequestResponse("Status of deprecated components cannot be changed");
             } //Cannot put item back into development status
             else if (targetStatus == ComponentStatus.DEVELOPMENT && desc.getStatus() == ComponentStatus.PRODUCTION) {
-                return Response
-                        .status(Status.BAD_REQUEST)
-                        .entity("Cannot put item back into development status")
-                        .build();
+                return createBadRequestResponse("Cannot put item back into development status");
             } //Cannot put a private component in production status
             else if (targetStatus == ComponentStatus.PRODUCTION && !desc.isPublic()) {
-                return Response
-                        .status(Status.BAD_REQUEST)
-                        .entity("Cannot put a private component in production status")
-                        .build();
+                return createBadRequestResponse("Cannot put a private component in production status");
             } else {
                 // all is ok
                 spec.getHeader().setStatus(targetStatus.toString());
@@ -1677,7 +1667,7 @@ public class ComponentRegistryRestService {
                 if (desc != null) {
                     final ComponentSpec spec = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
                     if (spec != null) {
-                        return tryUpdateItemSuccessor(desc, spec, successorId, br, componentId);
+                        return tryUpdateItemSuccessor(desc, spec, successorId, br);
                     }
                 }
                 //description or spec not found...
@@ -1700,21 +1690,31 @@ public class ComponentRegistryRestService {
             }
         }
 
-        private Response tryUpdateItemSuccessor(ComponentDescription desc, ComponentSpec spec, final String successorId, ComponentRegistry br, String componentId) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException {
-            //TODO: check if successor exists
+        private Response tryUpdateItemSuccessor(ComponentDescription desc, ComponentSpec spec, final String successorId, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException, ComponentRegistryException {
+            //check if successor exists
+            final BaseDescription successorDescription;
+            try {
+                if (desc.isProfile()) {
+                    successorDescription = registry.getProfileDescription(successorId);
+                } else {
+                    successorDescription = registry.getComponentDescription(successorId);
+                }
+            } catch (ItemNotFoundException ex) {
+                LOG.warn("Request to set non-existing successor {} for {}", successorId, desc.getId());
+                return createBadRequestResponse("Successor id does not resolve to existing item of the same type");
+            }
 
             //Status of deprecated components cannot be changed
             if (desc.getStatus() != ComponentStatus.DEPRECATED) {
-                return Response
-                        .status(Status.BAD_REQUEST)
-                        .entity("Cannot set successor unless component has been deprecated")
-                        .build();
+                return createBadRequestResponse("Cannot set successor unless component has been deprecated");
+            } else if (successorDescription.getStatus() == ComponentStatus.DEPRECATED) {
+                return createBadRequestResponse("Cannot set deprecated item as successor");
             } else {                 //TODO: other cases that do not meet preconditions
                 // all is ok
                 spec.getHeader().setSuccessor(successorId);
                 desc.setSuccessor(successorId);
 
-                final int returnCode = br.update(desc, spec, true);
+                final int returnCode = registry.update(desc, spec, true);
                 if (returnCode == 0) {
                     return Response.status(Status.OK)
                             .entity(successorId)
@@ -2218,6 +2218,14 @@ public class ComponentRegistryRestService {
             return Response
                     .serverError()
                     .entity("Invalid id, cannot update nonexistent item")
+                    .build();
+        }
+        
+
+        private Response createBadRequestResponse(final String msg) {
+            return Response
+                    .status(Status.BAD_REQUEST)
+                    .entity(msg)
                     .build();
         }
     }
