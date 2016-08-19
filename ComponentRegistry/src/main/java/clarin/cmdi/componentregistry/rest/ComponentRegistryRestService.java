@@ -1710,12 +1710,16 @@ public class ComponentRegistryRestService {
                 return createBadRequestResponse("Successor id does not resolve to existing item of the same type");
             }
 
-            //Status of deprecated components cannot be changed
             if (desc.getStatus() != ComponentStatus.DEPRECATED) {
+                //Only deprecated items can get a successor
                 return createBadRequestResponse("Cannot set successor unless component has been deprecated");
+            } else if (desc.getSuccessor() != null) {
+                //Successor can be set only once
+                return createBadRequestResponse("Cannot set successor if already set");
             } else if (successorDescription.getStatus() == ComponentStatus.DEPRECATED) {
+                //Successor must not be deprecated
                 return createBadRequestResponse("Cannot set deprecated item as successor");
-            } else {                 //TODO: other cases that do not meet preconditions
+            } else {
                 // all is ok
                 spec.getHeader().setSuccessor(successorId);
                 desc.setSuccessor(successorId);

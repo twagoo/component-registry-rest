@@ -2368,6 +2368,17 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
             assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
             assertEquals("Successor should have been set", successorId, getPublicComponents().get(0).getSuccessor());
         }
+        //try to set on same again - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been kept", successorId, getPublicComponents().get(0).getSuccessor());
+        }
     }
 
     @Test
