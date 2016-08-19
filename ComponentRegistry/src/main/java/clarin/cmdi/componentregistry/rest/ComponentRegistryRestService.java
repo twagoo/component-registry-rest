@@ -1610,11 +1610,11 @@ public class ComponentRegistryRestService {
 
         @GET
         @Path("/components/{componentId}/successor")
-        @ApiOperation(value = "Gets the status of a registered component")
+        @ApiOperation(value = "Gets the successor of a registered component")
         @ApiResponses(value = {
             @ApiResponse(code = 401, message = "User is not authenticated"),
             @ApiResponse(code = 403, message = "Item is not owned by current user"),
-            @ApiResponse(code = 404, message = "Item does not exist")
+            @ApiResponse(code = 404, message = "Item does not exist (no item or no successor)")
         })
         public Response getComponentSuccessor(
                 @PathParam("componentId") String componentId) {
@@ -1652,11 +1652,11 @@ public class ComponentRegistryRestService {
 
         @GET
         @Path("/profiles/{profileId}/successor")
-        @ApiOperation(value = "Gets the status of a registered component")
+        @ApiOperation(value = "Gets the successor of a registered component")
         @ApiResponses(value = {
             @ApiResponse(code = 401, message = "User is not authenticated"),
             @ApiResponse(code = 403, message = "Item is not owned by current user"),
-            @ApiResponse(code = 404, message = "Item does not exist")
+            @ApiResponse(code = 404, message = "Item does not exist (no item or no successor)")
         })
         public Response getProfileSuccessor(
                 @PathParam("profileId") String profileId) {
@@ -1695,7 +1695,7 @@ public class ComponentRegistryRestService {
         @POST
         @Path("/components/{componentId}/successor")
         @Consumes("multipart/form-data")
-        @ApiOperation(value = "Updates the status of an already registered component")
+        @ApiOperation(value = "Sets the successor for a registered component (must have deprecated status)")
         @ApiResponses(value = {
             @ApiResponse(code = 401, message = "User is not authenticated"),
             @ApiResponse(code = 403, message = "Item is not owned by current user"),
@@ -1734,7 +1734,7 @@ public class ComponentRegistryRestService {
         }@POST
         @Path("/profiles/{profileId}/successor")
         @Consumes("multipart/form-data")
-        @ApiOperation(value = "Updates the status of an already registered component")
+        @ApiOperation(value = "Sets the successor for a registered profile (must have deprecated status)")
         @ApiResponses(value = {
             @ApiResponse(code = 401, message = "User is not authenticated"),
             @ApiResponse(code = 403, message = "Item is not owned by current user"),
