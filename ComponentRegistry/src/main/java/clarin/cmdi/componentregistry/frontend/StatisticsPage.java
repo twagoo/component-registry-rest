@@ -50,14 +50,14 @@ public class StatisticsPage extends SecureAdminWebPage {
     }
 
     private void displayStatistics(ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        List<ProfileDescription> profileList = registry.getProfileDescriptions();
+        List<ProfileDescription> profileList = registry.getProfileDescriptions(null);
         RepeatingView repeating = new RepeatingView("repeating");
         add(repeating);
         add(new Label("profilenumbermessage", "Current number of profiles in the component registry: " + profileList.size()));
         for (ProfileDescription pd : profileList) {
             displayProfileStatistics(pd, repeating, registry);
         }
-        List<ComponentDescription> componentList = registry.getComponentDescriptions();
+        List<ComponentDescription> componentList = registry.getComponentDescriptions(null);
         RepeatingView repeatingcomp = new RepeatingView("repeatingcomp");
         add(repeatingcomp);
         add(new Label("componentnumbermessage", "Current number of components in the component registry: " + componentList.size()));

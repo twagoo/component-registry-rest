@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Set;
 import javax.xml.transform.TransformerException;
 
 /**
@@ -49,7 +50,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
      * @throws ComponentRegistryException
      */
     @Override
-    public List<ProfileDescription> getProfileDescriptionsForMetadaEditor() throws ComponentRegistryException {
+    public List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Set<ComponentStatus> statusFilter) throws ComponentRegistryException {
         // TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDaoImpl, should have *much* better performance
 
         // Get all profile descriptions

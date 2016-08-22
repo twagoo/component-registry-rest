@@ -67,7 +67,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -125,6 +128,7 @@ public class ComponentRegistryRestService {
     public static final String USER_SPACE_PARAM = "userspace";
     public static final String GROUPID_PARAM = "groupId";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
+    public static final String STATUS_FILTER_PARAM = "status";
     public static final String NUMBER_OF_RSSITEMS = "limit";
 
     public static final String REGISTRY_SPACE_PUBLISHED = "published";
@@ -279,6 +283,7 @@ public class ComponentRegistryRestService {
         public List<ComponentDescription> getRegisteredComponents(
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
                 @QueryParam(GROUPID_PARAM) String groupId,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace)
                 throws ComponentRegistryException, IOException {
             long start = System.currentTimeMillis();
@@ -290,6 +295,7 @@ public class ComponentRegistryRestService {
                     registrySpace = REGISTRY_SPACE_PRIVATE;
                 }
             }
+            final Set<ComponentStatus> statusFilter = getStatusFilter(status, registrySpace);
 
             if (!checkRegistrySpaceString(registrySpace)) {
                 throw serviceException(Status.NOT_FOUND, "illegal registry space");
@@ -297,7 +303,7 @@ public class ComponentRegistryRestService {
 
             try {
                 final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                final List<ComponentDescription> result = cr.getComponentDescriptions();
+                final List<ComponentDescription> result = cr.getComponentDescriptions(statusFilter);
                 //insert hrefs in descriptions
                 fillHrefs(result);
 
@@ -334,6 +340,7 @@ public class ComponentRegistryRestService {
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
                 @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
                 @QueryParam(GROUPID_PARAM) String groupId,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace
         )
                 throws ComponentRegistryException, IOException {
@@ -347,13 +354,16 @@ public class ComponentRegistryRestService {
                     registrySpace = REGISTRY_SPACE_PRIVATE;
                 }
             }
+            final Set<ComponentStatus> statusFilter = getStatusFilter(status, registrySpace);
 
             if (!checkRegistrySpaceString(registrySpace)) {
                 throw serviceException(Status.NOT_FOUND, "illegal registry space");
             }
             try {
                 final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                final List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
+                final List<ProfileDescription> result
+                        = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor(statusFilter)
+                                : cr.getProfileDescriptions(statusFilter);
                 //insert hrefs in descriptions
                 fillHrefs(result);
 
@@ -1731,7 +1741,9 @@ public class ComponentRegistryRestService {
                 return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
                         .build();
             }
-        }@POST
+        }
+
+        @POST
         @Path("/profiles/{profileId}/successor")
         @Consumes("multipart/form-data")
         @ApiOperation(value = "Sets the successor for a registered profile (must have deprecated status)")
@@ -2130,13 +2142,14 @@ public class ComponentRegistryRestService {
             MediaType.APPLICATION_JSON})
         public Rss getRssComponent(@QueryParam(GROUPID_PARAM) String groupId,
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
                 throws ComponentRegistryException, ParseException, IOException {
             final List<ComponentDescription> components;
             final String title;
             try {
                 ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                components = cr.getComponentDescriptions();
+                components = cr.getComponentDescriptions(getStatusFilter(status, registrySpace));
                 title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components", cr);
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -2175,13 +2188,14 @@ public class ComponentRegistryRestService {
             MediaType.APPLICATION_JSON})
         public Rss getRssProfile(@QueryParam(GROUPID_PARAM) String groupId,
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
                 throws ComponentRegistryException, ParseException, IOException {
             final List<ProfileDescription> profiles;
             final String title;
             try {
                 ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                profiles = cr.getProfileDescriptions();
+                profiles = cr.getProfileDescriptions(getStatusFilter(status, registrySpace));
                 title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles", cr);
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -2317,6 +2331,30 @@ public class ComponentRegistryRestService {
                     .status(Status.BAD_REQUEST)
                     .entity(msg)
                     .build();
+        }
+
+        private Set<ComponentStatus> getStatusFilter(List<String> filterRequest, String registrySpace) {
+            if (filterRequest == null || filterRequest.isEmpty() || filterRequest.size() == 1 && filterRequest.get(0).isEmpty()) {
+                //defaults depending on space
+                if (REGISTRY_SPACE_PUBLISHED.equals(registrySpace)) {
+                    return EnumSet.of(ComponentStatus.PRODUCTION);
+                } else { //private or group
+                    return EnumSet.of(ComponentStatus.DEVELOPMENT);
+                }
+            } else {
+                final Set<ComponentStatus> statusSet = new HashSet<ComponentStatus>(filterRequest.size());
+                for (String status : filterRequest) {
+                    if (status != null) {
+                        try {
+                            statusSet.add(ComponentStatus.valueOf(status.toUpperCase()));
+                        } catch (IllegalArgumentException ex) {
+                            LOG.warn("Unknown status type in filter: {}", status);
+                            LOG.debug("Encountered invalid type while processing status filter for {} in {}", registrySpace, filterRequest, ex);
+                        }
+                    }
+                }
+                return statusSet;
+            }
         }
     }
 

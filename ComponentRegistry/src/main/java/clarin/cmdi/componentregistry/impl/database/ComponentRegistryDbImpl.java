@@ -22,6 +22,7 @@ import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -42,6 +43,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.xml.bind.JAXBException;
@@ -189,7 +191,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 //        }
 //    }
     @Override
-    public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public List<ProfileDescription> getProfileDescriptions(Set<ComponentStatus> statusFilter) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
             switch (registrySpace) {
                 case PRIVATE:
@@ -249,7 +251,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public List<ComponentDescription> getComponentDescriptions(Set<ComponentStatus> statusFilter) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
             switch (registrySpace) {
                 case PRIVATE:

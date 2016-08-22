@@ -302,11 +302,11 @@ public class AdminHomePage extends SecureAdminWebPage {
     private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
         parent.add(componentsNode);
-        add(componentsNode, registry.getComponentDescriptions(), false, registry.getRegistrySpace());
+        add(componentsNode, registry.getComponentDescriptions(null), false, registry.getRegistrySpace());
 
         DefaultMutableTreeNode profilesNode = new DefaultMutableTreeNode(new DisplayDataNode("Profiles", false));
         parent.add(profilesNode);
-        add(profilesNode, registry.getProfileDescriptions(), false, registry.getRegistrySpace());
+        add(profilesNode, registry.getProfileDescriptions(null), false, registry.getRegistrySpace());
 
         DefaultMutableTreeNode deletedCompNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Components", true));
         parent.add(deletedCompNode);
