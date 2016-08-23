@@ -322,7 +322,13 @@ public class ComponentDaoImpl implements ComponentDao {
      */
     @Override
     public List<BaseDescription> getPrivateBaseDescriptions(Number userId, String prefix, Collection<ComponentStatus> statusFilter) {
-        return augment(jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(), prefix + "%"));
+        final List<BaseDescription> descriptions;
+        if (statusFilter == null || statusFilter.isEmpty()) {
+            descriptions = jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(), prefix + "%");
+        } else {
+            descriptions = jpaComponentDao.findItemsForUserThatAreNotInGroups(userId.longValue(), prefix + "%", statusFilter);
+        }
+        return augment(descriptions);
         //return augment(jpaComponentDao.findNotPublishedUserItems(userId.longValue(),prefix + "%"));
     }
 
@@ -363,16 +369,28 @@ public class ComponentDaoImpl implements ComponentDao {
 
     @Override
     public List<BaseDescription> getPublicBaseDescriptions(String prefix, Collection<ComponentStatus> statusFilter) {
-        return augment(jpaComponentDao.findPublishedItems(prefix + "%"));
+        final List<BaseDescription> descriptions;
+        if (statusFilter == null || statusFilter.isEmpty()) {
+            descriptions = jpaComponentDao.findPublishedItems(prefix + "%");
+        } else {
+            descriptions = jpaComponentDao.findPublishedItems(prefix + "%", statusFilter);
+        }
+        return augment(descriptions);
     }
 
     @Override
     public List<String> getAllNonDeletedProfileIds(String contentFilter, Collection<ComponentStatus> statusFilter) {
         final String prefix = ProfileDescription.PROFILE_PREFIX + "%";
         if (contentFilter == null) {
-            return jpaComponentDao.findNonDeletedItemIds(prefix);
-        } else {
+            if (statusFilter == null || statusFilter.isEmpty()) {
+                return jpaComponentDao.findNonDeletedItemIds(prefix);
+            } else {
+                return jpaComponentDao.findNonDeletedItemIds(prefix, statusFilter);
+            }
+        } else if (statusFilter == null || statusFilter.isEmpty()) {
             return jpaComponentDao.findNonDeletedItemIds(prefix, contentFilter);
+        } else {
+            return jpaComponentDao.findNonDeletedItemIds(prefix, contentFilter, statusFilter);
         }
     }
 
@@ -380,9 +398,15 @@ public class ComponentDaoImpl implements ComponentDao {
     public List<String> getAllNonDeletedComponentIds(String contentFilter, Collection<ComponentStatus> statusFilter) {
         final String prefix = ComponentDescription.COMPONENT_PREFIX + "%";
         if (contentFilter == null) {
-            return jpaComponentDao.findNonDeletedItemIds(prefix);
-        } else {
+            if (statusFilter == null || statusFilter.isEmpty()) {
+                return jpaComponentDao.findNonDeletedItemIds(prefix);
+            } else {
+                return jpaComponentDao.findNonDeletedItemIds(prefix, statusFilter);
+            }
+        } else if (statusFilter == null || statusFilter.isEmpty()) {
             return jpaComponentDao.findNonDeletedItemIds(prefix, contentFilter);
+        } else {
+            return jpaComponentDao.findNonDeletedItemIds(prefix, contentFilter, statusFilter);
         }
     }
 
@@ -395,6 +419,10 @@ public class ComponentDaoImpl implements ComponentDao {
     @Override
     public List<String> getAllItemIdsInGroup(String prefix, Long groupId, Collection<ComponentStatus> statusFilter) {
         // we are ineterested only in non-published components in the group
-        return jpaComponentDao.findAllItemIdsInGroup(false, prefix + "%", groupId);
+        if (statusFilter == null || statusFilter.isEmpty()) {
+            return jpaComponentDao.findAllItemIdsInGroup(false, prefix + "%", groupId);
+        } else {
+            return jpaComponentDao.findAllItemIdsInGroup(false, prefix + "%", groupId, statusFilter);
+        }
     }
 }
