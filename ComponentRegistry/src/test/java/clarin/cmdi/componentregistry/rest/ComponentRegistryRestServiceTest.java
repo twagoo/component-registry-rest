@@ -138,7 +138,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
-    public void testGetPublicProfilesStatus() throws Exception {
+    public void testGetPublicProfilesWithStatus() throws Exception {
 
         System.out.println("testGetPublicProfiles");
 
@@ -213,11 +213,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPublicItems();
 
         RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
-        List<ComponentDescription> response = this.getAuthenticatedResource(getResource()
+        List<ComponentDescription> response = (getResource()
                 .path(REGISTRY_BASE + "/components")).accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(3, response.size());
-        response = this.getAuthenticatedResource(getResource()
+        response = (getResource()
                 .path(REGISTRY_BASE + "/components"))
                 .accept(MediaType.APPLICATION_JSON)
                 .get(COMPONENT_LIST_GENERICTYPE);
@@ -225,6 +225,33 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("component1", response.get(0).getName());
         assertEquals("COMPONENT2", response.get(1).getName());
         assertEquals("component2", response.get(2).getName());
+    }
+
+    @Test //ok
+    public void testGetPublicComponentsWithStatus() throws Exception {
+        fillUpPublicItems();
+
+        //add component and deprecate
+        ComponentDescription newComponent = RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
+        newComponent.setStatus(ComponentStatus.DEPRECATED);
+        baseRegistry.update(newComponent, RegistryTestHelper.getTestComponent("COMPONENT2", "deprecated"), true);
+
+        List<ComponentDescription> response = getResource()
+                .path(REGISTRY_BASE + "/components").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/components").queryParam(STATUS_FILTER_PARAM, "production").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/components").queryParam(STATUS_FILTER_PARAM, "deprecated").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(1, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/components").queryParam(STATUS_FILTER_PARAM, "*").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
     }
 
     @Test  //ok

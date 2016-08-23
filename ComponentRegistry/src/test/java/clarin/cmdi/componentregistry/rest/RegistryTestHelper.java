@@ -287,6 +287,10 @@ public final class RegistryTestHelper {
         return marshaller.unmarshal(ComponentSpec.class, getComponentTestContent(), marshaller.getComponentSchema());
     }
     
+    public static ComponentSpec getTestComponent(String name, String status) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getComponentTestContent(name, status), marshaller.getComponentSchema());
+    }
+    
     public static ComponentSpec getTestComponent(String name) throws JAXBException {
         return marshaller.unmarshal(ComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getComponentSchema());
     }
