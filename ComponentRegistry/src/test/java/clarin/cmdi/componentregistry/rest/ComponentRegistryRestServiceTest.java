@@ -16,6 +16,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PRIVATE;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.STATUS_FILTER_PARAM;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -137,6 +138,36 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     @Test
+    public void testGetPublicProfilesWithStatus() throws Exception {
+
+        System.out.println("testGetPublicProfiles");
+
+        fillUpPublicItems();
+
+        //add profile and deprecate
+        ProfileDescription newProfile = RegistryTestHelper.addProfile(baseRegistry, "PROFILE2", true);
+        newProfile.setStatus(ComponentStatus.DEPRECATED);
+        baseRegistry.update(newProfile, RegistryTestHelper.getTestProfile("PROFILE2", "deprecated"), true);
+
+        List<ProfileDescription> response = getResource()
+                .path(REGISTRY_BASE + "/profiles").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/profiles").queryParam(STATUS_FILTER_PARAM, "production").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/profiles").queryParam(STATUS_FILTER_PARAM, "deprecated").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(1, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/profiles").queryParam(STATUS_FILTER_PARAM, "*").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
+    }
+
+    @Test
     public void testGetPublicProfilesAuthenticated() throws Exception {
 
         System.out.println("testGetPublicProfiles");
@@ -182,11 +213,11 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         fillUpPublicItems();
 
         RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
-        List<ComponentDescription> response = this.getAuthenticatedResource(getResource()
+        List<ComponentDescription> response = (getResource()
                 .path(REGISTRY_BASE + "/components")).accept(MediaType.APPLICATION_XML)
                 .get(COMPONENT_LIST_GENERICTYPE);
         assertEquals(3, response.size());
-        response = this.getAuthenticatedResource(getResource()
+        response = (getResource()
                 .path(REGISTRY_BASE + "/components"))
                 .accept(MediaType.APPLICATION_JSON)
                 .get(COMPONENT_LIST_GENERICTYPE);
@@ -194,6 +225,33 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("component1", response.get(0).getName());
         assertEquals("COMPONENT2", response.get(1).getName());
         assertEquals("component2", response.get(2).getName());
+    }
+
+    @Test //ok
+    public void testGetPublicComponentsWithStatus() throws Exception {
+        fillUpPublicItems();
+
+        //add component and deprecate
+        ComponentDescription newComponent = RegistryTestHelper.addComponent(baseRegistry, "COMPONENT2", true);
+        newComponent.setStatus(ComponentStatus.DEPRECATED);
+        baseRegistry.update(newComponent, RegistryTestHelper.getTestComponent("COMPONENT2", "deprecated"), true);
+
+        List<ComponentDescription> response = getResource()
+                .path(REGISTRY_BASE + "/components").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/components").queryParam(STATUS_FILTER_PARAM, "production").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/components").queryParam(STATUS_FILTER_PARAM, "deprecated").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(1, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/components").queryParam(STATUS_FILTER_PARAM, "*").accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
     }
 
     @Test  //ok
@@ -697,14 +755,14 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <ID>clarin.eu:cr1:p_12345678a</ID>\n";
         content += "        <Name>XXX</Name>\n";
         content += "        <Description>p_12345678a</Description>";
-        content += "        <Status>development</Status>\n";
+        content += "        <Status>production</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"XXX\">\n";
         content += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
-                baseRegistry, "XXX1", content, true, DEVELOPMENT);
+                baseRegistry, "XXX1", content, true, PRODUCTION);
 
         content = "";
         content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -713,7 +771,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <ID>clarin.eu:cr1:p_12345678b</ID>\n";
         content += "        <Name>YYY</Name>\n";
         content += "        <Description>p_12345678b</Description>";
-        content += "        <Status>development</Status>\n";
+        content += "        <Status>production</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"YYY\">\n";
         content += "        <Component ComponentRef=\"" + compDesc1.getId()
@@ -722,7 +780,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc2 = RegistryTestHelper.addComponent(
-                baseRegistry, "YYY1", content, true, DEVELOPMENT);
+                baseRegistry, "YYY1", content, true, PRODUCTION);
 
         content = "";
         content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -731,7 +789,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <ID>clarin.eu:cr1:p_12345678c</ID>\n";
         content += "        <Name>ZZZ</Name>\n";
         content += "        <Description>p_12345678c</Description>";
-        content += "        <Status>development</Status>\n";
+        content += "        <Status>production</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"ZZZ\">\n";
         content += "        <Component ComponentRef=\"" + compDesc1.getId()
@@ -740,7 +798,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ProfileDescription profile = RegistryTestHelper.addProfile(
-                baseRegistry, "TestProfile3", content, true, DEVELOPMENT);
+                baseRegistry, "TestProfile3", content, true, PRODUCTION);
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components")).get(COMPONENT_LIST_GENERICTYPE);
@@ -832,7 +890,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(id2, profile.getHeader().getID());
         assertEquals("profile2", profile.getHeader().getName());
         assertEquals("profile2 description", profile.getHeader().getDescription());
-        assertEquals(ComponentStatus.DEVELOPMENT.toString(), profile.getHeader().getStatus());
+        assertEquals(ComponentStatus.PRODUCTION.toString(), profile.getHeader().getStatus());
         assertEquals("1.2", profile.getCMDVersion());
         assertEquals("1.2", profile.getCMDOriginalVersion());
 
@@ -1239,14 +1297,18 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     private List<ProfileDescription> getPublicProfiles() {
-        return getAuthenticatedResource(REGISTRY_BASE + "/profiles").accept(
-                MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles")
+                .queryParam(STATUS_FILTER_PARAM, "*"))
+                .accept(MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
     }
 
     private List<ProfileDescription> getUserProfiles() {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles").queryParam(
-                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles")
+                .queryParam(STATUS_FILTER_PARAM, "*")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
     }
 
     private FormDataMultiPart createFormData(Object content) {
@@ -1595,26 +1657,36 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     private ComponentSpec getUserComponent(ComponentDescription desc) {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + desc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components/" + desc.getId())
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML)
+                .get(ComponentSpec.class);
     }
 
     private ComponentSpec getUserProfile(ProfileDescription desc) {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + desc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles/" + desc.getId())
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML)
+                .get(ComponentSpec.class);
     }
 
     private List<ComponentDescription> getPublicComponents() {
-        return getAuthenticatedResource(REGISTRY_BASE + "/components").accept(
-                MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components")
+                .queryParam(STATUS_FILTER_PARAM, "*"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
     }
 
     private List<ComponentDescription> getUserComponents() {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components").queryParam(
-                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components")
+                .queryParam(STATUS_FILTER_PARAM, "*")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
     }
 
     @Test
@@ -1905,6 +1977,622 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals(id, component.getId());
         assertEquals("component1", component.getName());
         assertEquals("component1 description", component.getDescription());
+    }
 
+    @Test
+    public void testGetComponentStatus() throws Exception {
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        final String privateId = getUserComponents().get(0).getId();
+        final String publicId = getPublicComponents().get(0).getId();
+
+        //get status for private
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + privateId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("development", cResponse.getEntity(String.class));
+        }
+
+        //get status for public
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("production", cResponse.getEntity(String.class));
+        }
+
+        //deprecate via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+        }
+        //check status
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("deprecated", cResponse.getEntity(String.class));
+        }
+    }
+
+    @Test
+    public void testGetProfileStatus() throws Exception {
+        fillUpPrivateItems();
+        fillUpPublicItems();
+        final String privateId = getUserProfiles().get(0).getId();
+        final String publicId = getPublicProfiles().get(0).getId();
+
+        //get status for private
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + privateId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("development", cResponse.getEntity(String.class));
+        }
+
+        //get status for public
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("production", cResponse.getEntity(String.class));
+        }
+
+        //deprecate via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+        }
+        //check status
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + publicId + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("deprecated", cResponse.getEntity(String.class));
+        }
+    }
+
+    @Test
+    public void testUpdateStatusOfPrivateComponent() throws Exception {
+        fillUpPrivateItems();
+
+        List<ComponentDescription> privateComponents = getUserComponents();
+        assertEquals("private registered components", 1, privateComponents
+                .size());
+        assertEquals(ComponentStatus.DEVELOPMENT, privateComponents.get(0).getStatus());
+
+        // Now update development to production (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "production");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + privateComponents.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+
+            privateComponents = getUserComponents();
+            assertEquals("Status should not have changed", ComponentStatus.DEVELOPMENT, privateComponents.get(0).getStatus());
+        }
+
+        // Now update development to deprecated (should work)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + privateComponents.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+
+            privateComponents = getUserComponents();
+            assertEquals("Status should have been updated", ComponentStatus.DEPRECATED, privateComponents.get(0).getStatus());
+        }
+    }
+
+    @Test
+    public void testUpdateStatusOfPrivateProfile() throws Exception {
+        fillUpPrivateItems();
+
+        List<ProfileDescription> privateProfiles = getUserProfiles();
+        assertEquals("private registered profiles", 1, privateProfiles
+                .size());
+        assertEquals(ComponentStatus.DEVELOPMENT, privateProfiles.get(0).getStatus());
+
+        // Now update development to production (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "production");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + privateProfiles.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+
+            privateProfiles = getUserProfiles();
+            assertEquals("Status should not have changed", ComponentStatus.DEVELOPMENT, privateProfiles.get(0).getStatus());
+        }
+
+        // Now update development to deprecated (should work)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + privateProfiles.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+
+            privateProfiles = getUserProfiles();
+            assertEquals("Status should have been updated", ComponentStatus.DEPRECATED, privateProfiles.get(0).getStatus());
+        }
+    }
+
+    @Test
+    public void testUpdateStatusOfPublicProfile() throws Exception {
+        fillUpPublicItems();
+
+        List<ProfileDescription> publicProfiles = getPublicProfiles();
+        assertEquals("public registered profiles", 2, publicProfiles
+                .size());
+        assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(1).getStatus());
+
+        // Now update production to deprecated (should work)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicProfiles.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicProfiles = getPublicProfiles();
+            assertEquals(ComponentStatus.DEPRECATED, publicProfiles.get(0).getStatus());
+        }
+
+        // Try to give a deprecated component production status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "production");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicProfiles.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicProfiles = getPublicProfiles();
+            assertEquals(ComponentStatus.DEPRECATED, publicProfiles.get(0).getStatus());
+        }
+
+        // Try to give a deprecated component development status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "development");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicProfiles.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicProfiles = getPublicProfiles();
+            assertEquals(ComponentStatus.DEPRECATED, publicProfiles.get(0).getStatus());
+        }
+
+        // Try to give a production component development status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "development");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicProfiles.get(1).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicProfiles = getPublicProfiles();
+            assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(1).getStatus());
+        }
+
+        // Try to update to invalid status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "invalidstatus");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + publicProfiles.get(1).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicProfiles = getPublicProfiles();
+            assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(1).getStatus());
+        }
+    }
+
+    @Test
+    public void testUpdateStatusOfPublicComponent() throws Exception {
+        fillUpPublicItems();
+
+        List<ComponentDescription> publicComponents = getPublicComponents();
+        assertEquals("public registered components", 2, publicComponents
+                .size());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+
+        // Now update production to deprecated (should work)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicComponents.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicComponents = getPublicComponents();
+            assertEquals(ComponentStatus.DEPRECATED, publicComponents.get(0).getStatus());
+        }
+
+        // Try to give a deprecated component production status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "production");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicComponents.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicComponents = getPublicComponents();
+            assertEquals(ComponentStatus.DEPRECATED, publicComponents.get(0).getStatus());
+        }
+
+        // Try to give a deprecated component development status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "development");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicComponents.get(0).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicComponents = getPublicComponents();
+            assertEquals(ComponentStatus.DEPRECATED, publicComponents.get(0).getStatus());
+        }
+
+        // Try to give a production component development status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "development");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicComponents.get(1).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicComponents = getPublicComponents();
+            assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+        }
+
+        // Try to update to invalid status (should fail)
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "invalidstatus");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + publicComponents.get(1).getId() + "/status")).type(
+                    MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class, form);
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(),
+                    cResponse.getStatus());
+
+            publicComponents = getPublicComponents();
+            assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+        }
+    }
+
+    @Test
+    public void testGetComponentSuccessor() throws Exception {
+        fillUpPublicItems();
+
+        List<ComponentDescription> publicComponents = getPublicComponents();
+        assertEquals("public registered components", 2, publicComponents
+                .size());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+
+        final String componentId = publicComponents.get(0).getId();
+        final String successorId = publicComponents.get(1).getId();
+
+        //get for published public - should be none
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + componentId + "/successor"))
+                    .get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.NOT_FOUND.getStatusCode(),
+                    cResponse.getStatus());
+        }
+        //deprecate and assign successor via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + componentId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/components/" + componentId + "/successor")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId)
+                    );
+        }
+
+        //should be as set now
+        publicComponents = getPublicComponents();
+        assertEquals(successorId, publicComponents.get(0).getSuccessor());
+
+        //get status via REST, should match
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + componentId + "/successor"))
+                    .get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                    cResponse.getStatus());
+            assertEquals(successorId, cResponse.getEntity(String.class));
+        }
+    }
+
+    @Test
+    public void testSetComponentSuccessor() throws Exception {
+        fillUpPublicItems();
+        fillUpPrivateItems();
+
+        List<ComponentDescription> publicComponents = getPublicComponents();
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+        assertNull(publicComponents.get(0).getSuccessor());
+        assertNull(publicComponents.get(1).getSuccessor());
+        List<ComponentDescription> privateComponents = getUserComponents();
+        assertEquals(ComponentStatus.DEVELOPMENT, privateComponents.get(0).getStatus());
+        assertNull(privateComponents.get(0).getSuccessor());
+
+        final String publicId = publicComponents.get(0).getId();
+        final String privateId = privateComponents.get(0).getId();
+        final String successorId = publicComponents.get(1).getId();
+
+        //try to set on development private - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + privateId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getUserComponents().get(0).getSuccessor());
+        }
+
+        //try to set on published public - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicComponents().get(0).getSuccessor());
+        }
+        //deprecate one public component
+        getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components/" + publicId + "/status"))
+                .type(MediaType.MULTIPART_FORM_DATA)
+                .post(ClientResponse.class, new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated"));
+        //try to set non-existing successor on deprecated public - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, "NON-EXISTING-ID"));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicComponents().get(0).getSuccessor());
+        }
+        //try to set profile as successor to component
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, getPublicProfiles().get(0).getId()));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicComponents().get(0).getSuccessor());
+        }
+        //try to set existing on deprecated public - success
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been set", successorId, getPublicComponents().get(0).getSuccessor());
+        }
+        //try to set on same again - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/components/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been kept", successorId, getPublicComponents().get(0).getSuccessor());
+        }
+    }
+
+    @Test
+    public void testGetProfileSuccessor() throws Exception {
+        fillUpPublicItems();
+
+        List<ProfileDescription> publicProfiles = getPublicProfiles();
+        assertEquals("public registered components", 2, publicProfiles
+                .size());
+        assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicProfiles.get(1).getStatus());
+
+        final String profileId = publicProfiles.get(0).getId();
+        final String successorId = publicProfiles.get(1).getId();
+
+        //get for published public - should be none
+        {
+            FormDataMultiPart form = new FormDataMultiPart();
+            form.field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated");
+
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + profileId + "/successor"))
+                    .get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.NOT_FOUND.getStatusCode(),
+                    cResponse.getStatus());
+        }
+        //deprecate and assign successor via REST service
+        {
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + profileId + "/status")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated")
+                    );
+            getAuthenticatedResource(getResource().path(
+                    REGISTRY_BASE + "/profiles/" + profileId + "/successor")).type(
+                            MediaType.MULTIPART_FORM_DATA).post(ClientResponse.class,
+                            new FormDataMultiPart().field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId)
+                    );
+        }
+
+        //should be as set now
+        assertEquals(successorId, getPublicProfiles().get(0).getSuccessor());
+
+        //get status via REST, should match
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + profileId + "/successor"))
+                    .get(ClientResponse.class);
+            assertEquals(ClientResponse.Status.OK.getStatusCode(),
+                    cResponse.getStatus());
+            assertEquals(successorId, cResponse.getEntity(String.class));
+        }
+    }
+
+    @Test
+    public void testSetProfileSuccessor() throws Exception {
+        fillUpPublicItems();
+        fillUpPrivateItems();
+
+        List<ProfileDescription> publicComponents = getPublicProfiles();
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(0).getStatus());
+        assertEquals(ComponentStatus.PRODUCTION, publicComponents.get(1).getStatus());
+        assertNull(publicComponents.get(0).getSuccessor());
+        assertNull(publicComponents.get(1).getSuccessor());
+        List<ProfileDescription> privateComponents = getUserProfiles();
+        assertEquals(ComponentStatus.DEVELOPMENT, privateComponents.get(0).getStatus());
+        assertNull(privateComponents.get(0).getSuccessor());
+
+        final String publicId = publicComponents.get(0).getId();
+        final String privateId = privateComponents.get(0).getId();
+        final String successorId = publicComponents.get(1).getId();
+
+        //try to set on development private - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + privateId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getUserProfiles().get(0).getSuccessor());
+        }
+
+        //try to set on published public - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicProfiles().get(0).getSuccessor());
+        }
+        //deprecate one public component
+        getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles/" + publicId + "/status"))
+                .type(MediaType.MULTIPART_FORM_DATA)
+                .post(ClientResponse.class, new FormDataMultiPart().field(ComponentRegistryRestService.STATUS_FORM_FIELD, "deprecated"));
+        //try to set non-existing successor on deprecated public - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, "NON-EXISTING-ID"));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicProfiles().get(0).getSuccessor());
+        }
+        //try to set profile as successor to component
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, getPublicProfiles().get(0).getId()));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertNull("No successor should have been set", getPublicProfiles().get(0).getSuccessor());
+        }
+        //try to set existing on deprecated public - success
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.OK.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been set", successorId, getPublicProfiles().get(0).getSuccessor());
+        }
+        //try to set on same again - fail
+        {
+            ClientResponse cResponse = getAuthenticatedResource(getResource()
+                    .path(REGISTRY_BASE + "/profiles/" + publicId + "/successor"))
+                    .type(MediaType.MULTIPART_FORM_DATA)
+                    .post(ClientResponse.class,
+                            new FormDataMultiPart()
+                            .field(ComponentRegistryRestService.SUCCESSOR_ID_FORM_FIELD, successorId));
+            assertEquals(ClientResponse.Status.BAD_REQUEST.getStatusCode(), cResponse.getStatus());
+            assertEquals("Successor should have been kept", successorId, getPublicProfiles().get(0).getSuccessor());
+        }
     }
 }

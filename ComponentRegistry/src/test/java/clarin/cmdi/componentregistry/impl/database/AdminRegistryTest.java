@@ -73,7 +73,7 @@ public class AdminRegistryTest extends BaseUnitTest {
         content1 += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(testRegistry, "XXX1", content1, true, ComponentStatus.DEVELOPMENT);
 
-        assertEquals(1, testRegistry.getComponentDescriptions().size());
+        assertEquals(1, testRegistry.getComponentDescriptions(null).size());
 
         String content2 = "";
         content2 += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -112,7 +112,7 @@ public class AdminRegistryTest extends BaseUnitTest {
         fileInfo.setForceUpdate(true);
         adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN); //Component needs to be forced because they can be used by other profiles/components
 
-        assertEquals(1, testRegistry.getComponentDescriptions().size());
+        assertEquals(1, testRegistry.getComponentDescriptions(null).size());
 
         try {
             fileInfo.setForceUpdate(false);
@@ -121,15 +121,15 @@ public class AdminRegistryTest extends BaseUnitTest {
             assertTrue(e.getCause() instanceof DeleteFailedException);
         }
 
-        assertEquals(1, testRegistry.getComponentDescriptions().size());
+        assertEquals(1, testRegistry.getComponentDescriptions(null).size());
         fileInfo.setForceUpdate(true);
         adminReg.delete(fileInfo, PRINCIPAL_ADMIN);
-        assertEquals(0, testRegistry.getComponentDescriptions().size());
+        assertEquals(0, testRegistry.getComponentDescriptions(null).size());
 
-        assertEquals(1, testRegistry.getProfileDescriptions().size());
+        assertEquals(1, testRegistry.getProfileDescriptions(null).size());
         fileInfo.setForceUpdate(false);
         fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), false, profileDesc, RegistrySpace.PUBLISHED));
         adminReg.delete(fileInfo, PRINCIPAL_ADMIN); //Profile do not need to be forced they cannot be used by other profiles
-        assertEquals(0, testRegistry.getProfileDescriptions().size());
+        assertEquals(0, testRegistry.getProfileDescriptions(null).size());
     }
 }

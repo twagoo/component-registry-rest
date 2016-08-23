@@ -121,13 +121,13 @@ public class PrintXmlFromRssRunner {
 
 	if (kind == 1 || kind == 2) { // testing Rss for profiles/components
 	    List<? extends BaseDescription> descriptions =
-		    (kind == 1) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
+		    (kind == 1) ? registry.getProfileDescriptions(null) : registry.getComponentDescriptions(null);
 	    rss = makeRssForDescriptions(descriptions, kind, baseUri, 10);
 	};
 
 	if (kind == 3 || kind == 4) { // testing Rss comments
 	    List<? extends BaseDescription> descriptions =
-		    (kind == 3) ? registry.getProfileDescriptions() : registry.getComponentDescriptions();
+		    (kind == 3) ? registry.getProfileDescriptions(null) : registry.getComponentDescriptions(null);
 	    printIds(descriptions);
 	    System.out.println("Pick up and input one of the description id above");// "clarin.eu:cr1:p_1284723009187" "clarin.eu:cr1:c_1288172614011"
 	    try {

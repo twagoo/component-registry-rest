@@ -15,6 +15,7 @@ import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -44,6 +45,7 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
@@ -66,7 +68,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -118,10 +123,13 @@ public class ComponentRegistryRestService {
     public static final String DESCRIPTION_FORM_FIELD = "description";
     public static final String GROUP_FORM_FIELD = "group";
     public static final String DOMAIN_FORM_FIELD = "domainName";
+    public static final String STATUS_FORM_FIELD = "status";
+    public static final String SUCCESSOR_ID_FORM_FIELD = "status";
     public static final String REGISTRY_SPACE_PARAM = "registrySpace";
     public static final String USER_SPACE_PARAM = "userspace";
     public static final String GROUPID_PARAM = "groupId";
     public static final String METADATA_EDITOR_PARAM = "mdEditor";
+    public static final String STATUS_FILTER_PARAM = "status";
     public static final String NUMBER_OF_RSSITEMS = "limit";
 
     public static final String REGISTRY_SPACE_PUBLISHED = "published";
@@ -276,6 +284,7 @@ public class ComponentRegistryRestService {
         public List<ComponentDescription> getRegisteredComponents(
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
                 @QueryParam(GROUPID_PARAM) String groupId,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace)
                 throws ComponentRegistryException, IOException {
             long start = System.currentTimeMillis();
@@ -287,6 +296,7 @@ public class ComponentRegistryRestService {
                     registrySpace = REGISTRY_SPACE_PRIVATE;
                 }
             }
+            final Set<ComponentStatus> statusFilter = getStatusFilter(status, registrySpace);
 
             if (!checkRegistrySpaceString(registrySpace)) {
                 throw serviceException(Status.NOT_FOUND, "illegal registry space");
@@ -294,7 +304,7 @@ public class ComponentRegistryRestService {
 
             try {
                 final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                final List<ComponentDescription> result = cr.getComponentDescriptions();
+                final List<ComponentDescription> result = cr.getComponentDescriptions(statusFilter);
                 //insert hrefs in descriptions
                 fillHrefs(result);
 
@@ -331,6 +341,7 @@ public class ComponentRegistryRestService {
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
                 @QueryParam(METADATA_EDITOR_PARAM) @DefaultValue("false") boolean metadataEditor,
                 @QueryParam(GROUPID_PARAM) String groupId,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @Deprecated @QueryParam(USER_SPACE_PARAM) @DefaultValue("") String userSpace
         )
                 throws ComponentRegistryException, IOException {
@@ -344,13 +355,16 @@ public class ComponentRegistryRestService {
                     registrySpace = REGISTRY_SPACE_PRIVATE;
                 }
             }
+            final Set<ComponentStatus> statusFilter = getStatusFilter(status, registrySpace);
 
             if (!checkRegistrySpaceString(registrySpace)) {
                 throw serviceException(Status.NOT_FOUND, "illegal registry space");
             }
             try {
                 final ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                final List<ProfileDescription> result = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor() : cr.getProfileDescriptions();
+                final List<ProfileDescription> result
+                        = (metadataEditor) ? cr.getProfileDescriptionsForMetadaEditor(statusFilter)
+                                : cr.getProfileDescriptions(statusFilter);
                 //insert hrefs in descriptions
                 fillHrefs(result);
 
@@ -842,12 +856,7 @@ public class ComponentRegistryRestService {
                     ComponentRegistry cr = this.getRegistry(space, groupId);
                     return register(input, desc, new UpdateAction(), cr);
                 } else {
-                    LOG.error("Update of nonexistent id (" + profileId
-                            + ") failed.");
-                    return Response
-                            .serverError()
-                            .entity("Invalid id, cannot update nonexistent profile")
-                            .build();
+                    return createNonExistentItemResponse(profileId);
                 }
             } catch (ComponentRegistryException e) {
                 LOG.warn("Could not retrieve profile {}", profileId);
@@ -922,12 +931,7 @@ public class ComponentRegistryRestService {
                     this.updateDescription(desc, name, description, domainName, group);
                     return this.register(input, desc, new PublishAction(principal), registry);
                 } else {
-                    LOG.error("Update of nonexistent id (" + componentId
-                            + ") failed.");
-                    return Response
-                            .serverError()
-                            .entity("Invalid id, cannot update nonexistent profile")
-                            .build();
+                    return createNonExistentItemResponse(componentId);
                 }
             } catch (AuthenticationRequiredException e) {
                 LOG.warn("Could not retrieve component {}", componentId);
@@ -1429,6 +1433,404 @@ public class ComponentRegistryRestService {
             }
         }
 
+        @GET
+        @Path("/profiles/{profileId}/status")
+        @ApiOperation(value = "Gets the status of a registered profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getProfileStatus(
+                @PathParam("profileId") String profileId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                return Response.status(Status.OK)
+                        .entity(desc.getStatus().toString())
+                        .build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/profiles/{profileId}/status")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates the status of an already registered profile")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateProfileStatus(
+                @PathParam("profileId") String profileId,
+                @FormDataParam(STATUS_FORM_FIELD) String newStatus) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDProfileAccessControled(profileId);
+                    if (spec != null) {
+                        return tryUpdateItemStatus(desc, spec, newStatus, br, profileId);
+                    }
+                }
+                //description or spec not found...
+                return createNonExistentItemResponse(profileId);
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}/status")
+        @ApiOperation(value = "Gets the status of a registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response getComponentStatus(
+                @PathParam("componentId") String componentId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                return Response.status(Status.OK)
+                        .entity(desc.getStatus().toString())
+                        .build();
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/status")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Updates the status of an already registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateComponentStatus(
+                @PathParam("componentId") String componentId,
+                @FormDataParam(STATUS_FORM_FIELD) String newStatus) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
+                    if (spec != null) {
+                        return tryUpdateItemStatus(desc, spec, newStatus, br, componentId);
+                    }
+                }
+                //description or spec not found...
+                return createNonExistentItemResponse(componentId);
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        private Response tryUpdateItemStatus(final BaseDescription desc, final ComponentSpec spec, String newStatus, final ComponentRegistry br, String profileId) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
+            final ComponentStatus targetStatus;
+            try {
+                targetStatus = ComponentStatus.valueOf(newStatus.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                LOG.warn("Invalid component status {}", newStatus, ex);
+                return createBadRequestResponse("Invalid component status, must be one of accepted values " + Arrays.asList(ComponentStatus.values()));
+            }
+
+            //Status of deprecated components cannot be changed
+            if (desc.getStatus() == ComponentStatus.DEPRECATED) {
+                //TODO: allow for admin
+                return createBadRequestResponse("Status of deprecated components cannot be changed");
+            } //Cannot put item back into development status
+            else if (targetStatus == ComponentStatus.DEVELOPMENT && desc.getStatus() == ComponentStatus.PRODUCTION) {
+                return createBadRequestResponse("Cannot put item back into development status");
+            } //Cannot put a private component in production status
+            else if (targetStatus == ComponentStatus.PRODUCTION && !desc.isPublic()) {
+                return createBadRequestResponse("Cannot put a private component in production status");
+            } else {
+                // all is ok
+                spec.getHeader().setStatus(targetStatus.toString());
+                desc.setStatus(targetStatus);
+
+                final int returnCode = br.update(desc, spec, true);
+                if (returnCode == 0) {
+                    return Response.status(Status.OK)
+                            .entity(targetStatus.toString())
+                            .build();
+                } else {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR)
+                            .entity("Failed to upate status")
+                            .build();
+                }
+            }
+        }
+
+        @GET
+        @Path("/components/{componentId}/successor")
+        @ApiOperation(value = "Gets the successor of a registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist (no item or no successor)")
+        })
+        public Response getComponentSuccessor(
+                @PathParam("componentId") String componentId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                final String successorId = desc.getSuccessor();
+                if (successorId == null || successorId.isEmpty()) {
+                    return Response
+                            .status(Status.NOT_FOUND)
+                            .entity("Component has no successor")
+                            .build();
+                } else {
+                    return Response
+                            .status(Status.OK)
+                            .entity(successorId)
+                            .build();
+                }
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @GET
+        @Path("/profiles/{profileId}/successor")
+        @ApiOperation(value = "Gets the successor of a registered component")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist (no item or no successor)")
+        })
+        public Response getProfileSuccessor(
+                @PathParam("profileId") String profileId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                final String successorId = desc.getSuccessor();
+                if (successorId == null || successorId.isEmpty()) {
+                    return Response
+                            .status(Status.NOT_FOUND)
+                            .entity("Component has no successor")
+                            .build();
+                } else {
+                    return Response
+                            .status(Status.OK)
+                            .entity(successorId)
+                            .build();
+                }
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/components/{componentId}/successor")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Sets the successor for a registered component (must have deprecated status)")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateComponentSuccessor(
+                @PathParam("componentId") String componentId,
+                @FormDataParam(SUCCESSOR_ID_FORM_FIELD) String successorId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDComponentAccessControlled(componentId);
+                    if (spec != null) {
+                        return tryUpdateItemSuccessor(desc, spec, successorId, br);
+                    }
+                }
+                //description or spec not found...
+                return createNonExistentItemResponse(componentId);
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve component {}", componentId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        @POST
+        @Path("/profiles/{profileId}/successor")
+        @Consumes("multipart/form-data")
+        @ApiOperation(value = "Sets the successor for a registered profile (must have deprecated status)")
+        @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "User is not authenticated"),
+            @ApiResponse(code = 403, message = "Item is not owned by current user"),
+            @ApiResponse(code = 404, message = "Item does not exist")
+        })
+        public Response updateProfileSuccessor(
+                @PathParam("profileId") String profileId,
+                @FormDataParam(SUCCESSOR_ID_FORM_FIELD) String successorId) {
+            try {
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                if (desc != null) {
+                    final ComponentSpec spec = this.getBaseRegistry().getMDProfileAccessControled(profileId);
+                    if (spec != null) {
+                        return tryUpdateItemSuccessor(desc, spec, successorId, br);
+                    }
+                }
+                //description or spec not found...
+                return createNonExistentItemResponse(profileId);
+            } catch (ComponentRegistryException e) {
+                LOG.warn("Could not retrieve profile {}", profileId);
+                LOG.debug("Details", e);
+                return Response.serverError().status(Status.INTERNAL_SERVER_ERROR)
+                        .build();
+            } catch (UserUnauthorizedException ex) {
+                return Response.status(Status.FORBIDDEN).entity(ex.getMessage())
+                        .build();
+
+            } catch (ItemNotFoundException ex2) {
+                return Response.status(Status.NOT_FOUND).entity(ex2.getMessage())
+                        .build();
+            } catch (AuthenticationRequiredException e1) {
+                return Response.status(Status.UNAUTHORIZED).entity(e1.getMessage())
+                        .build();
+            }
+        }
+
+        private Response tryUpdateItemSuccessor(BaseDescription desc, ComponentSpec spec, final String successorId, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException, ComponentRegistryException {
+            //check if successor is of right type
+            if (ComponentUtils.isProfileId(desc.getId()) != ComponentUtils.isProfileId(successorId)) {
+                return createBadRequestResponse("Successor item must be of the same type");
+            }
+
+            //check if successor exists
+            final BaseDescription successorDescription;
+            try {
+                if (desc.isProfile()) {
+                    successorDescription = registry.getProfileDescription(successorId);
+                } else {
+                    successorDescription = registry.getComponentDescription(successorId);
+                }
+            } catch (ItemNotFoundException ex) {
+                LOG.warn("Request to set non-existing successor {} for {}", successorId, desc.getId());
+                return createBadRequestResponse("Successor id does not resolve to existing item of the same type");
+            }
+
+            if (desc.getStatus() != ComponentStatus.DEPRECATED) {
+                //Only deprecated items can get a successor
+                return createBadRequestResponse("Cannot set successor unless component has been deprecated");
+            } else if (desc.getSuccessor() != null) {
+                //Successor can be set only once
+                return createBadRequestResponse("Cannot set successor if already set");
+            } else if (successorDescription.getStatus() == ComponentStatus.DEPRECATED) {
+                //Successor must not be deprecated
+                return createBadRequestResponse("Cannot set deprecated item as successor");
+            } else {
+                // all is ok
+                spec.getHeader().setSuccessor(successorId);
+                desc.setSuccessor(successorId);
+
+                final int returnCode = registry.update(desc, spec, true);
+                if (returnCode == 0) {
+                    return Response.status(Status.OK)
+                            .entity(successorId)
+                            .build();
+                } else {
+                    return Response.status(Status.INTERNAL_SERVER_ERROR)
+                            .entity("Failed to upate successor information")
+                            .build();
+                }
+            }
+        }
+
         @POST
         @Path("/profiles/{profileId}/comments")
         @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML,
@@ -1506,9 +1908,9 @@ public class ComponentRegistryRestService {
                 final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
                 final MDValidator validator = new MDValidator(input, desc, registry, marshaller);
                 validator.setPreRegistrationMode(action.isPreRegistration());
-                
+
                 this.validate(response, descriptionValidator, validator);
-                
+
                 if (response.getErrors().isEmpty()) {
                     final ComponentSpec spec = validator.getComponentSpec();
 
@@ -1741,13 +2143,14 @@ public class ComponentRegistryRestService {
             MediaType.APPLICATION_JSON})
         public Rss getRssComponent(@QueryParam(GROUPID_PARAM) String groupId,
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
                 throws ComponentRegistryException, ParseException, IOException {
             final List<ComponentDescription> components;
             final String title;
             try {
                 ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                components = cr.getComponentDescriptions();
+                components = cr.getComponentDescriptions(getStatusFilter(status, registrySpace));
                 title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Components", cr);
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -1786,13 +2189,14 @@ public class ComponentRegistryRestService {
             MediaType.APPLICATION_JSON})
         public Rss getRssProfile(@QueryParam(GROUPID_PARAM) String groupId,
                 @QueryParam(REGISTRY_SPACE_PARAM) @DefaultValue(REGISTRY_SPACE_PUBLISHED) String registrySpace,
+                @QueryParam(STATUS_FILTER_PARAM) List<String> status,
                 @QueryParam(NUMBER_OF_RSSITEMS) @DefaultValue("20") String limit)
                 throws ComponentRegistryException, ParseException, IOException {
             final List<ProfileDescription> profiles;
             final String title;
             try {
                 ComponentRegistry cr = this.initialiseRegistry(registrySpace, groupId);
-                profiles = cr.getProfileDescriptions();
+                profiles = cr.getProfileDescriptions(getStatusFilter(status, registrySpace));
                 title = this.helpToMakeTitleForRssDescriptions(registrySpace, groupId, "Profiles", cr);
             } catch (AuthenticationRequiredException e) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode(), e.toString());
@@ -1912,6 +2316,47 @@ public class ComponentRegistryRestService {
             } catch (AuthenticationRequiredException e1) {
                 servletResponse.sendError(Status.UNAUTHORIZED.getStatusCode());
                 return new Rss();
+            }
+        }
+
+        private Response createNonExistentItemResponse(String itemId) {
+            LOG.error("Update of nonexistent id ({}) failed.", itemId);
+            return Response
+                    .serverError()
+                    .entity("Invalid id, cannot update nonexistent item")
+                    .build();
+        }
+
+        private Response createBadRequestResponse(final String msg) {
+            return Response
+                    .status(Status.BAD_REQUEST)
+                    .entity(msg)
+                    .build();
+        }
+
+        private Set<ComponentStatus> getStatusFilter(List<String> filterRequest, String registrySpace) {
+            if (filterRequest == null || filterRequest.isEmpty() || filterRequest.size() == 1 && filterRequest.get(0).isEmpty()) {
+                //defaults depending on space
+                if (REGISTRY_SPACE_PUBLISHED.equals(registrySpace)) {
+                    return EnumSet.of(ComponentStatus.PRODUCTION);
+                } else { //private or group
+                    return EnumSet.of(ComponentStatus.DEVELOPMENT);
+                }
+            } else if (filterRequest.contains("*")) {
+                return ImmutableSet.copyOf(ComponentStatus.values());
+            } else {
+                final Set<ComponentStatus> statusSet = new HashSet<ComponentStatus>(filterRequest.size());
+                for (String status : filterRequest) {
+                    if (status != null) {
+                        try {
+                            statusSet.add(ComponentStatus.valueOf(status.toUpperCase()));
+                        } catch (IllegalArgumentException ex) {
+                            LOG.warn("Unknown status type in filter: {}", status);
+                            LOG.debug("Encountered invalid type while processing status filter for {} in {}", registrySpace, filterRequest, ex);
+                        }
+                    }
+                }
+                return statusSet;
             }
         }
     }

@@ -89,7 +89,7 @@ public abstract class AbstractDescriptionDaoTest extends BaseUnitTest {
 	// TODO: test queries empty database and is happy that no results are
 	// returned. Should also test the case where there are userspace
 	// descriptions
-	List<BaseDescription> descriptions = getDao().getPrivateBaseDescriptions(-1, ComponentDescription.COMPONENT_PREFIX);
+	List<BaseDescription> descriptions = getDao().getPrivateBaseDescriptions(-1, ComponentDescription.COMPONENT_PREFIX, null);
 	assertEquals(0, descriptions.size());
     }
 

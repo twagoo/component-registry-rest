@@ -22,6 +22,7 @@ import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -42,11 +43,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
-import org.apache.commons.lang.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,18 +189,18 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 //        }
 //    }
     @Override
-    public List<ProfileDescription> getProfileDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public List<ProfileDescription> getProfileDescriptions(Set<ComponentStatus> statusFilter) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
             switch (registrySpace) {
                 case PRIVATE:
                     if (registryOwner == null) {
                         throw new ComponentRegistryException("Private workspace without owner!");
                     }
-                    return ComponentUtils.toProfiles(componentDao.getPrivateBaseDescriptions(registryOwner.getId(), ProfileDescription.PROFILE_PREFIX));
+                    return ComponentUtils.toProfiles(componentDao.getPrivateBaseDescriptions(registryOwner.getId(), ProfileDescription.PROFILE_PREFIX, statusFilter));
                 case GROUP:
-                    return this.getProfileDescriptionsInGroup(groupId);
+                    return this.getProfileDescriptionsInGroup(groupId, statusFilter);
                 case PUBLISHED:
-                    return ComponentUtils.toProfiles(componentDao.getPublicBaseDescriptions(ProfileDescription.PROFILE_PREFIX));
+                    return ComponentUtils.toProfiles(componentDao.getPublicBaseDescriptions(ProfileDescription.PROFILE_PREFIX, statusFilter));
                 default:
                     throw new ComponentRegistryException("Unsupported status type" + registrySpace);
             }
@@ -249,18 +249,18 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     @Override
-    public List<ComponentDescription> getComponentDescriptions() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    public List<ComponentDescription> getComponentDescriptions(Set<ComponentStatus> statusFilter) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         try {
             switch (registrySpace) {
                 case PRIVATE:
                     if (registryOwner == null) {
                         throw new ComponentRegistryException("Private workspace without owner!");
                     }
-                    return ComponentUtils.toComponents(componentDao.getPrivateBaseDescriptions(registryOwner.getId(), ComponentDescription.COMPONENT_PREFIX));
+                    return ComponentUtils.toComponents(componentDao.getPrivateBaseDescriptions(registryOwner.getId(), ComponentDescription.COMPONENT_PREFIX, statusFilter));
                 case GROUP:
-                    return this.getComponentDescriptionsInGroup(groupId);
+                    return this.getComponentDescriptionsInGroup(groupId, statusFilter);
                 case PUBLISHED:
-                    return ComponentUtils.toComponents(componentDao.getPublicBaseDescriptions(ComponentDescription.COMPONENT_PREFIX));
+                    return ComponentUtils.toComponents(componentDao.getPublicBaseDescriptions(ComponentDescription.COMPONENT_PREFIX, statusFilter));
                 default:
                     throw new ComponentRegistryException("Unsupported status type" + registrySpace);
             }
@@ -904,7 +904,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return getName();
     }
 
-    private List<ComponentDescription> getComponentDescriptionsInGroup(Number groupId)
+    private List<ComponentDescription> getComponentDescriptionsInGroup(Number groupId, Set<ComponentStatus> statusFilter)
             throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         final RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
         final String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
@@ -915,7 +915,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to components of the group " + groupId);
         }
 
-        List<String> componentIds = componentDao.getAllItemIdsInGroup(ComponentDescription.COMPONENT_PREFIX, groupId.longValue());
+        List<String> componentIds = componentDao.getAllItemIdsInGroup(ComponentDescription.COMPONENT_PREFIX, groupId.longValue(), statusFilter);
         List<ComponentDescription> components = new ArrayList<ComponentDescription>();
         for (String id : componentIds) {
             BaseDescription description = componentDao.getByCmdId(id);
@@ -926,7 +926,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         return components;
     }
 
-    private List<ProfileDescription> getProfileDescriptionsInGroup(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+    private List<ProfileDescription> getProfileDescriptionsInGroup(Number groupId, Set<ComponentStatus> statusFilter) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
         final RegistryUser regOwner = userDao.getPrincipalNameById(registryOwner.getId());
         final String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
         final String groupName = groupService.getGroupNameById(groupId.longValue());
@@ -936,7 +936,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throw new UserUnauthorizedException("The user \'" + principalName + "\' does not have access to profiles of the group " + groupId);
         }
 
-        List<String> profileIds = componentDao.getAllItemIdsInGroup(ProfileDescription.PROFILE_PREFIX, groupId.longValue());
+        List<String> profileIds = componentDao.getAllItemIdsInGroup(ProfileDescription.PROFILE_PREFIX, groupId.longValue(), statusFilter);
         List<ProfileDescription> profiles = new ArrayList<ProfileDescription>();
         for (String id : profileIds) {
             BaseDescription description = componentDao.getByCmdId(id);
@@ -949,17 +949,17 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public List<ProfileDescription> getProfileDescriptionsForMetadaEditor(Number groupId) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        return this.getProfileDescriptionsInGroup(groupId.longValue());
+        return this.getProfileDescriptionsInGroup(groupId.longValue(), null);
     }
 
     @Override
-    public List<String> getAllNonDeletedProfileIds(String containedId) {
-        return componentDao.getAllNonDeletedProfileIds(containedId);
+    public List<String> getAllNonDeletedProfileIds(String containedId, Set<ComponentStatus> statusFilter) {
+        return componentDao.getAllNonDeletedProfileIds(containedId, statusFilter);
     }
 
     @Override
-    public List<String> getAllNonDeletedComponentIds(String containedId) {
-        return componentDao.getAllNonDeletedComponentIds(containedId);
+    public List<String> getAllNonDeletedComponentIds(String containedId, Set<ComponentStatus> statusFilter) {
+        return componentDao.getAllNonDeletedComponentIds(containedId, statusFilter);
     }
 
     @Override
@@ -967,7 +967,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         LOG.debug("Checking usage of component {} in components", componentId);
         List<ComponentDescription> result = new ArrayList<ComponentDescription>();
         // get the IDs of all non-deleted components that mention the target ID in their XML content
-        List<String> ids = getAllNonDeletedComponentIds(componentId);
+        List<String> ids = getAllNonDeletedComponentIds(componentId, null);
         for (String id : ids) {
             final ComponentSpec spec = getMDComponent(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
@@ -988,7 +988,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         LOG.debug("Checking usage of component {} in profiles", componentId);
         final List<ProfileDescription> result = new ArrayList<ProfileDescription>();
         // get the IDs of all non-deleted profiles that mention the target ID in their XML content
-        final List<String> profileIds = getAllNonDeletedProfileIds(componentId);
+        final List<String> profileIds = getAllNonDeletedProfileIds(componentId, null);
         for (String id : profileIds) {
             final ComponentSpec profile = getMDProfile(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
@@ -1023,7 +1023,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     protected void checkStillUsed(String componentId) throws DeleteFailedException, ComponentRegistryException {
-        final List<String> profileIds = getAllNonDeletedProfileIds(componentId);
+        final List<String> profileIds = getAllNonDeletedProfileIds(componentId, null);
         for (String id : profileIds) {
             final ComponentSpec spec = getMDProfile(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives
@@ -1038,7 +1038,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         LOG.debug("Component {} is not used in any profiles", componentId);
 
         // get the IDs of all non-deleted profiles that mention the target ID in their XML content
-        final List<String> componentIds = getAllNonDeletedComponentIds(componentId);
+        final List<String> componentIds = getAllNonDeletedComponentIds(componentId, null);
         for (String id : componentIds) {
             final ComponentSpec spec = getMDComponent(id);
             // TODO: further checking can be avoided if we can guarantee that there are no false positives

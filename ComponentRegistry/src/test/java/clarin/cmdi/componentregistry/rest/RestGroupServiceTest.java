@@ -740,7 +740,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(response.isProfile());
         assertEquals(ProfileDescription.PROFILE_PREFIX + "profile-1", response.getDescription().getId());
 
-        List<ProfileDescription> profiles = baseRegistry.getProfileDescriptions();
+        List<ProfileDescription> profiles = baseRegistry.getProfileDescriptions(null);
         assertEquals(1, profiles.size());
         ProfileDescription profileDescription = profiles.get(0);
         assertEquals(ProfileDescription.PROFILE_PREFIX + "profile-1", profileDescription.getId());
@@ -758,7 +758,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertTrue(response.isProfile());
         assertEquals(ProfileDescription.PROFILE_PREFIX + "Bprofile-1", response.getDescription().getId());
 
-        profiles = baseRegistry.getProfileDescriptions();
+        profiles = baseRegistry.getProfileDescriptions(null);
         assertEquals(2, profiles.size());
         profileDescription = profiles.get(1);
         assertEquals(ProfileDescription.PROFILE_PREFIX + "Bprofile-1", profileDescription.getId());
@@ -773,7 +773,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         ClientResponse.class, form);
         assertEquals(403, cr.getStatus());
-        profiles = baseRegistry.getProfileDescriptions();
+        profiles = baseRegistry.getProfileDescriptions(null);
         assertEquals(2, profiles.size());
 
         /// components 
@@ -788,7 +788,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertFalse(response.isProfile());
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "component-1", response.getDescription().getId());
 
-        List<ComponentDescription> components = baseRegistry.getComponentDescriptions();
+        List<ComponentDescription> components = baseRegistry.getComponentDescriptions(null);
         assertEquals(1, components.size());
         ComponentDescription componentDescription = components.get(0);
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "component-1", componentDescription.getId());
@@ -806,7 +806,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         assertFalse(response.isProfile());
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1", response.getDescription().getId());
 
-        components = baseRegistry.getComponentDescriptions();
+        components = baseRegistry.getComponentDescriptions(null);
         assertEquals(2, components.size());
         componentDescription = components.get(1);
         assertEquals(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1", componentDescription.getId());
@@ -821,7 +821,7 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
                 .type(MediaType.MULTIPART_FORM_DATA).post(
                         ClientResponse.class, form);
         assertEquals(403, cr.getStatus());
-        components = baseRegistry.getComponentDescriptions();
+        components = baseRegistry.getComponentDescriptions(null);
         assertEquals(2, components.size());
     }
 
@@ -863,11 +863,11 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         baseRegistry.setRegistrySpace(RegistrySpace.GROUP);
         baseRegistry.setGroupId(1);
-        assertEquals(1, baseRegistry.getComponentDescriptions().size());
+        assertEquals(1, baseRegistry.getComponentDescriptions(null).size());
         baseRegistry.setGroupId(2);
-        assertEquals(1, baseRegistry.getComponentDescriptions().size());
+        assertEquals(1, baseRegistry.getComponentDescriptions(null).size());
 //        baseRegistry.setGroupId(3);
-//        assertEquals(2, baseRegistry.getComponentDescriptions().size());
+//        assertEquals(2, baseRegistry.getComponentDescriptions(null).size());
 
         baseRegistry.setRegistrySpace(null);
         baseRegistry.setGroupId(null);
@@ -902,9 +902,9 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
         baseRegistry.setRegistrySpace(RegistrySpace.GROUP);
         baseRegistry.setGroupId(1);
-        assertEquals(0, baseRegistry.getProfileDescriptions().size());
+        assertEquals(0, baseRegistry.getProfileDescriptions(null).size());
         baseRegistry.setGroupId(2);
-        assertEquals(0, baseRegistry.getProfileDescriptions().size());
+        assertEquals(0, baseRegistry.getProfileDescriptions(null).size());
     }
 
     @Test
