@@ -45,6 +45,7 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
@@ -2341,6 +2342,8 @@ public class ComponentRegistryRestService {
                 } else { //private or group
                     return EnumSet.of(ComponentStatus.DEVELOPMENT);
                 }
+            } else if (filterRequest.contains("*")) {
+                return ImmutableSet.copyOf(ComponentStatus.values());
             } else {
                 final Set<ComponentStatus> statusSet = new HashSet<ComponentStatus>(filterRequest.size());
                 for (String status : filterRequest) {
