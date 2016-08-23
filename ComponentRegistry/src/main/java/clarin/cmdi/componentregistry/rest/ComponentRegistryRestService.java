@@ -110,6 +110,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Path("/")
+@Api(value = "/", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
 @Service
 @Singleton
 public class ComponentRegistryRestService {
@@ -147,6 +148,7 @@ public class ComponentRegistryRestService {
      * @return RegistryService resource with the requested service
      */
     @Path("/registry/{cmdVersion: 1\\.[12x]}")
+    @ApiOperation(value = "Registry for a CMDI version")
     public Class<RegistryService> versionService() {
         return RegistryService.class;
     }
@@ -157,6 +159,7 @@ public class ComponentRegistryRestService {
      * @return RegistryService resource for default version
      */
     @Path("/registry")
+    @ApiOperation(value = "Registry for the default CMDI version")
     public Class<RegistryService> defaultVersionService() {
         return RegistryService.class;
     }
@@ -178,7 +181,7 @@ public class ComponentRegistryRestService {
      * Subresource for a registry service
      */
     @Transactional(rollbackFor = {Exception.class, ValidationException.class})
-    @Api(value = "/registry", description = "Rest API for the CMDI Component Registry", produces = MediaType.APPLICATION_XML)
+    @Api(value = "/registry", description = "Profiles and component registry", produces = MediaType.APPLICATION_XML)
     public static class RegistryService extends AbstractComponentRegistryRestService {
 
         @PathParam("cmdVersion")
