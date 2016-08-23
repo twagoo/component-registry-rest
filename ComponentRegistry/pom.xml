@@ -27,16 +27,16 @@
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
+
         <frontEndVersion>2.1.1</frontEndVersion>
         <cmd-toolkit.version>1.2.1</cmd-toolkit.version>
         <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.10.RELEASE</spring.version>
+        <hibernate.version>3.6.10.Final</hibernate.version>
         <jackson.version>1.9.13</jackson.version>
         <jersey.version>1.17.1</jersey.version>
-        <!-- hibernate.version>4.2.4.Final</hibernate.version -->
-        <hibernate.version>3.6.10.Final</hibernate.version>
         <slf4j.version>1.7.21</slf4j.version>
-        <spring-data-jpa.version>1.3.4.RELEASE</spring-data-jpa.version>
+
         <logging.appender>FILE</logging.appender>
         <logging.level>warn</logging.level>
     </properties>
@@ -53,12 +53,30 @@
 
 
 
-    <dependencies>
+    <dependencies>        
+        <!-- Logging -->
+        
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
-            <version>${spring-data-jpa.version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -105,21 +123,6 @@
             <groupId>xml-resolver</groupId>
             <artifactId>xml-resolver</artifactId>
             <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey.contribs</groupId>
@@ -432,7 +435,7 @@
         <profile>
             <id>readonly</id>
             <build>
-                <finalName>${artifactId}-${version}-readonly</finalName>
+                <finalName>${project.artifactId}-${project.version}-readonly</finalName>
             </build>
             <properties>
                 <logging.level>info</logging.level>
@@ -487,6 +490,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.5.1</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
@@ -495,6 +499,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <warName>${project.artifactId}</warName>
                     <webXml>${webXmlPath}</webXml>
@@ -581,6 +586,7 @@
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.13.1</version>
                 <executions>
                     <execution>
                         <id>jaxb-components</id>
