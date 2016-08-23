@@ -608,10 +608,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             try {
                 // Update description & content
                 syncSpecDescriptionHeaders(spec, desc);
+                if (desc.getStatus() == ComponentStatus.DEPRECATED) {
+                    throw new ComponentRegistryException("Cannot publish a component with deprecated status");
+                }
                 componentDao.updateDescription(id, desc, componentSpecToString(spec));
                 // Set to public
                 componentDao.setPublished(id, true);
                 invalidateCache(desc);
+                return result;
             } catch (DataAccessException ex) {
                 LOG.error("Database error while updating component", ex);
                 return -1;
@@ -625,8 +629,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                 LOG.error("Error while registering component", ex);
                 return -4; //TODO: throw exception here
             }
+        } else {
+            LOG.error("Component needs to be marked 'public' when publishing, but isPublic() returned false");
+            return -5;
         }
-        return result;
     }
 
     @Override

@@ -1927,7 +1927,7 @@ public class ComponentRegistryRestService {
                             response.setDescription(desc);
                         } else {
                             response.setRegistered(false);
-                            response.addError("Unable to register at this moment. Internal server error.");
+                            response.addError("Unable to register at this moment. Internal server error. Error code: " + returnCode);
                         }
                     } catch (ComponentRegistryException | ItemNotFoundException ex) {
                         // Recursion detected
