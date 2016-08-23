@@ -9,7 +9,6 @@ import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.BaseDescription;
-import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
 
 public class PublishAction implements RegisterAction {
@@ -25,7 +24,6 @@ public class PublishAction implements RegisterAction {
         response.setIsPrivate(false);
         spec.setCMDOriginalVersion(CmdVersion.CANONICAL_CMD_VERSION.getVersionNumber());
         spec.setCMDVersion(CmdVersion.CANONICAL_CMD_VERSION.getVersionNumber());
-        spec.getHeader().setStatus(ComponentStatus.PRODUCTION.toString());
         return registry.publish(desc, spec, principal);
     }
 
