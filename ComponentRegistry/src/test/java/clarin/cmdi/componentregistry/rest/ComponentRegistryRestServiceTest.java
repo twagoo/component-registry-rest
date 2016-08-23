@@ -1124,8 +1124,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testPublishProfileAsProduction() throws Exception {
-
-        System.out.println("testPublishProfile");
+        System.out.println("testPublishProfileAsProduction");
 
         fillUpPrivateItems();
         fillUpPublicItems();
@@ -1166,11 +1165,12 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 
     @Test
     public void testPublishProfileAsDevelopment() throws Exception {
+        System.out.println("testPublishProfileAsDevelopment");
+
         fillUpPrivateItems();
         fillUpPublicItems();
-        
-        //skipping some tests that already take place in the same context in testPublishProfileAsProduction
 
+        //skipping some tests that already take place in the same context in testPublishProfileAsProduction
         FormDataMultiPart form = createFormData(
                 RegistryTestHelper.getTestProfileContent(), "description");
         RegisterResponse response = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles")).type(
@@ -1186,12 +1186,79 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 RegisterResponse.class, form);
 
         //skipping some tests that already take place in the same context in testPublishProfileAsProduction
-
         ProfileDescription profileDescription = getPublicProfiles().get(2);
         assertEquals(desc.getId(), profileDescription.getId());
         assertEquals(DEVELOPMENT, profileDescription.getStatus());
-        
+
         ComponentSpec spec = getPublicSpec(profileDescription);
+        assertEquals(DEVELOPMENT.toString(), spec.getHeader().getStatus());
+    }
+
+    @Test
+    public void testPublishComponentAsProduction() throws Exception {
+        fillUpPrivateItems();
+        fillUpPublicItems();
+
+        assertEquals("user registered components", 1, getUserComponents().size());
+        assertEquals("public registered components", 2, getPublicComponents()
+                .size());
+        FormDataMultiPart form = createFormData(
+                RegistryTestHelper.getComponentTestContent(), "description");
+        RegisterResponse response = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components")).type(
+                MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class,
+                        form);
+        assertFalse(response.isProfile());
+        BaseDescription desc = response.getDescription();
+        assertEquals("Access description", desc.getDescription());
+        assertEquals(2, getUserComponents().size());
+        assertEquals(2, getPublicComponents().size());
+        form = createFormData(
+                RegistryTestHelper.getComponentTestContent("publishedName3", PRODUCTION.toString()),
+                "publishedName3 description");
+        //post
+        getAuthenticatedResource(getResource().path(
+                REGISTRY_BASE + "/components/" + desc.getId() + "/publish"))
+                .type(MediaType.MULTIPART_FORM_DATA).post(
+                RegisterResponse.class, form);
+
+        assertEquals(1, getUserComponents().size());
+
+        List<ComponentDescription> components = getPublicComponents();
+        assertEquals(3, components.size());
+
+        ComponentDescription componentDescription = components.get(2);
+        assertEquals(desc.getId(), componentDescription.getId());
+        assertEquals(PRODUCTION, componentDescription.getStatus());
+        ComponentSpec spec = getPublicSpec(componentDescription);
+        assertEquals(PRODUCTION.toString(), spec.getHeader().getStatus());
+    }
+
+    @Test
+    public void testPublishComponentAsDevelopment() throws Exception {
+        fillUpPrivateItems();
+        fillUpPublicItems();
+
+        //skipping some tests that already take place in the same context in testPublishComponentAsProduction
+        FormDataMultiPart form = createFormData(
+                RegistryTestHelper.getComponentTestContent(), "description");
+        RegisterResponse response = getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components")).type(
+                MediaType.MULTIPART_FORM_DATA).post(RegisterResponse.class, form);
+        BaseDescription desc = response.getDescription();
+        form = createFormData(
+                RegistryTestHelper.getComponentTestContent("publishedButDevelopment", DEVELOPMENT.toString()),
+                "publishedButDevelopment description");
+        //post
+        getAuthenticatedResource(getResource().path(
+                REGISTRY_BASE + "/components/" + desc.getId() + "/publish"))
+                .type(MediaType.MULTIPART_FORM_DATA).post(
+                RegisterResponse.class, form);
+
+        //skipping some tests that already take place in the same context in testPublishComponentAsProduction
+        ComponentDescription componentDescription = getPublicComponents().get(2);
+        assertEquals(desc.getId(), componentDescription.getId());
+        assertEquals(DEVELOPMENT, componentDescription.getStatus());
+
+        ComponentSpec spec = getPublicSpec(componentDescription);
         assertEquals(DEVELOPMENT.toString(), spec.getHeader().getStatus());
     }
 
