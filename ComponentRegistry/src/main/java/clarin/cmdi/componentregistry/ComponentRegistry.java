@@ -251,7 +251,7 @@ public interface ComponentRegistry {
      * in their XML content (can be null for no filtering)
      * @return
      */
-    List<String> getAllNonDeletedProfileIds(String containedId);
+    List<String> getAllNonDeletedProfileIds(String containedId, Set<ComponentStatus> statusFilter);
 
     /**
      * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted
@@ -261,7 +261,7 @@ public interface ComponentRegistry {
      * id in their XML content (can be null for no filtering)
      * @return
      */
-    List<String> getAllNonDeletedComponentIds(String containedId);
+    List<String> getAllNonDeletedComponentIds(String containedId, Set<ComponentStatus> statusFilter);
 
     Boolean isItemPublic(String id) throws ItemNotFoundException;
 

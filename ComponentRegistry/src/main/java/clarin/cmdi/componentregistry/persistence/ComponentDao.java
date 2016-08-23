@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.dao.DataAccessException;
 
 import clarin.cmdi.componentregistry.model.BaseDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
+import java.util.Collection;
 
 /**
  * Interface for a persistence operation on components and profiles
@@ -21,7 +23,7 @@ public interface ComponentDao {
      * 
      * @return
      */
-    List<BaseDescription> getPublicBaseDescriptions(String prefix);
+    List<BaseDescription> getPublicBaseDescriptions(String prefix, Collection<ComponentStatus> statusFilter);
 
     /**
      * 
@@ -140,7 +142,7 @@ public interface ComponentDao {
      * @return All the user's components not in the public space and are also
      *         not part of any group
      */
-    List<BaseDescription> getPrivateBaseDescriptions(Number userId, String prefix)
+    List<BaseDescription> getPrivateBaseDescriptions(Number userId, String prefix, Collection<ComponentStatus> statusFilter)
 	    throws DataAccessException;
   
     void setDeleted(BaseDescription desc, boolean isDeleted)
@@ -161,18 +163,18 @@ public interface ComponentDao {
      * @param contentFilter filter on profiles that contain this string in their XML content (can be null for no filtering)
      * @return
      */
-    List<String> getAllNonDeletedProfileIds(String contentFilter);
+    List<String> getAllNonDeletedProfileIds(String contentFilter, Collection<ComponentStatus> statusFilter);
 
     /**
      * Get a list of ids ({@link BaseDescription#getId()}) of all non-deleted components
      * @param contentFilter filter on components that contain this string in their XML content (can be null for no filtering)
      * @return
      */
-    List<String> getAllNonDeletedComponentIds(String contentFilter);
+    List<String> getAllNonDeletedComponentIds(String contentFilter, Collection<ComponentStatus> statusFilter);
 
     public List<BaseDescription> getAllNonDeletedDescriptions();
             
     // Olha was here
-    public List<String> getAllItemIdsInGroup(String prefix, Long groupId);
+    public List<String> getAllItemIdsInGroup(String prefix, Long groupId, Collection<ComponentStatus> statusFilter);
 
 }

@@ -54,7 +54,7 @@ public abstract class ComponentRegistryImplBase implements ComponentRegistry {
         // TODO: Below can also be done by accepting and passing a parameter in the ProfileDescriptionDaoImpl, should have *much* better performance
 
         // Get all profile descriptions
-        List<String> descriptionsCollectionIds = getAllNonDeletedProfileIds(null);
+        List<String> descriptionsCollectionIds = getAllNonDeletedProfileIds(null, statusFilter);
         // Filter out ones that do should not be shown for metadata editor
         ArrayList<ProfileDescription> descriptions = new ArrayList<ProfileDescription>();
         for (String id : descriptionsCollectionIds) {
