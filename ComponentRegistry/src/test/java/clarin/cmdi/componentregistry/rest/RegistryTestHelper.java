@@ -41,28 +41,28 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 public final class RegistryTestHelper {
-
+    
     private static MDMarshaller marshaller;
-
+    
     @Autowired
     public void setMarshaller(MDMarshaller marshaller) {
         RegistryTestHelper.marshaller = marshaller;
     }
-
+    
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
         final ComponentStatus status = isPublic ? PRODUCTION : DEVELOPMENT;
         return addComponent(testRegistry, id, isPublic, status);
     }
-
+    
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, boolean isPublic, ComponentStatus status) throws ParseException, JAXBException {
         return addComponent(testRegistry, id, getComponentTestContent(id, status.toString()), isPublic, status);
     }
-
+    
     public static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException, UnsupportedEncodingException {
         return addComponent(testRegistry, id, new ByteArrayInputStream(content.getBytes("UTF-8")), isPublic, status);
     }
-
+    
     private static ComponentDescription addComponent(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
@@ -75,17 +75,17 @@ public final class RegistryTestHelper {
         desc.setStatus(status);
         return addComponent(content, testRegistry, desc);
     }
-
+    
     public static ComponentDescription addComponent(InputStream content, ComponentRegistry testRegistry, ComponentDescription desc) throws JAXBException {
         ComponentSpec spec = marshaller.unmarshal(ComponentSpec.class, content, marshaller.getComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
     }
-
+    
     public static ComponentDescription addComponentAnotherPrincipal(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException {
         return addComponentAnotherPrincipal(testRegistry, id, getComponentTestContent(), isPublic);
     }
-
+    
     private static ComponentDescription addComponentAnotherPrincipal(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
             JAXBException {
         ComponentDescription desc = ComponentDescription.createNewDescription();
@@ -98,15 +98,15 @@ public final class RegistryTestHelper {
         desc.setPublic(isPublic);
         return addComponent(content, testRegistry, desc);
     }
-
+    
     public static String getProfileTestContentString() {
         return getProfileTestContentString("Actor");
     }
-
+    
     private static String getProfileTestContentString(String name) {
         return getProfileTestContentString(name, "development");
     }
-
+    
     private static String getProfileTestContentString(String name, String status) {
         String profileContent = "";
         profileContent += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -131,29 +131,29 @@ public final class RegistryTestHelper {
                 + "</ComponentSpec>";
         return profileContent;
     }
-
+    
     public static InputStream getTestProfileContent() {
         return getTestProfileContent("Actor");
     }
-
+    
     public static InputStream getTestProfileContent(String name) {
         return getTestProfileContent(name, DEVELOPMENT.toString());
     }
-
+    
     public static InputStream getTestProfileContent(String name, String status) {
         return new ByteArrayInputStream(getProfileTestContentString(name, status).getBytes());
     }
-
+    
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
         final ComponentStatus status = isPublic ? PRODUCTION : DEVELOPMENT;
         return addProfile(testRegistry, id, RegistryTestHelper.getTestProfileContent(id, status.toString()), isPublic, status);
     }
-
+    
     public static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, String content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException, ItemNotFoundException {
         return addProfile(testRegistry, id, new ByteArrayInputStream(content.getBytes()), isPublic, status);
     }
-
+    
     private static ProfileDescription addProfile(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic, ComponentStatus status) throws ParseException,
             JAXBException, ItemNotFoundException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
@@ -166,17 +166,17 @@ public final class RegistryTestHelper {
         desc.setStatus(status);
         return addProfile(content, testRegistry, desc);
     }
-
+    
     public static ProfileDescription addProfile(InputStream content, ComponentRegistry testRegistry, ProfileDescription desc) throws JAXBException {
         ComponentSpec spec = marshaller.unmarshal(ComponentSpec.class, content, marshaller.getComponentSchema());
         testRegistry.register(desc, spec);
         return desc;
     }
-
+    
     public static ProfileDescription addProfileAnotherPrincipal(ComponentRegistry testRegistry, String id, boolean isPublic) throws ParseException, JAXBException, ItemNotFoundException {
         return addProfileAnotherPrincipal(testRegistry, id, RegistryTestHelper.getTestProfileContent(), isPublic);
     }
-
+    
     private static ProfileDescription addProfileAnotherPrincipal(ComponentRegistry testRegistry, String id, InputStream content, boolean isPublic) throws ParseException,
             JAXBException, ItemNotFoundException {
         ProfileDescription desc = ProfileDescription.createNewDescription();
@@ -189,27 +189,31 @@ public final class RegistryTestHelper {
         desc.setPublic(isPublic);
         return addProfile(content, testRegistry, desc);
     }
-
+    
     public static ComponentSpec getTestProfile() throws JAXBException {
         return marshaller.unmarshal(ComponentSpec.class, getTestProfileContent(), marshaller.getComponentSchema());
     }
 
+    public static ComponentSpec getTestProfile(String name, String status) throws JAXBException {
+        return marshaller.unmarshal(ComponentSpec.class, getTestProfileContent(name, status), marshaller.getComponentSchema());
+    }
+    
     public static String getComponentTestContentString() {
         return getComponentTestContentString("Access");
     }
-
+    
     public static InputStream getComponentTestContent() {
         return getComponentTestContent("Access");
     }
-
+    
     public static InputStream getComponentTestContent(String name) {
         return getComponentTestContentAsStream(name);
     }
-
+    
     public static InputStream getComponentTestContent(String name, String status) {
         return getComponentTestContentAsStream(name, status);
     }
-
+    
     public static String getComponentTestContentString(String componentName) {
         return getComponentTestContentString(componentName, "development");
     }
@@ -241,7 +245,7 @@ public final class RegistryTestHelper {
         compContent += "</ComponentSpec>\n";
         return compContent;
     }
-
+    
     public static String getStringFromStream(InputStream largeProfileStream) throws IOException {
         try {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(largeProfileStream));
@@ -266,27 +270,27 @@ public final class RegistryTestHelper {
     public static ComponentSpec getComponentFromString(String contentString) throws JAXBException {
         return marshaller.unmarshal(ComponentSpec.class, getComponentContentAsStream(contentString), marshaller.getComponentSchema());
     }
-
+    
     public static InputStream getComponentContentAsStream(String content) {
         return new ByteArrayInputStream(content.getBytes());
     }
-
+    
     public static InputStream getComponentTestContentAsStream(String componentName) {
         return getComponentContentAsStream(getComponentTestContentString(componentName));
     }
-
+    
     public static InputStream getComponentTestContentAsStream(String componentName, String status) {
         return getComponentContentAsStream(getComponentTestContentString(componentName, status));
     }
-
+    
     public static ComponentSpec getTestComponent() throws JAXBException {
         return marshaller.unmarshal(ComponentSpec.class, getComponentTestContent(), marshaller.getComponentSchema());
     }
-
+    
     public static ComponentSpec getTestComponent(String name) throws JAXBException {
         return marshaller.unmarshal(ComponentSpec.class, getComponentTestContentAsStream(name), marshaller.getComponentSchema());
     }
-
+    
     public static String getXml(ComponentSpec componentSpec) throws JAXBException, UnsupportedEncodingException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         marshaller.marshal(componentSpec, os);
@@ -297,11 +301,11 @@ public final class RegistryTestHelper {
         }
         return xml;
     }
-
+    
     public static Comment addComment(ComponentRegistry testRegistry, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException {
         return addComment(testRegistry, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
-
+    
     private static Comment addComment(ComponentRegistry testRegistry, InputStream content, String principal) throws ParseException,
             JAXBException,
             ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException, AuthenticationRequiredException {
@@ -309,11 +313,11 @@ public final class RegistryTestHelper {
         testRegistry.registerComment(spec, principal);
         return spec;
     }
-
+    
     public Comment addCommentBypassAuthorisation(CommentsDao commentsDao, String id, String descriptionId, String principal) throws ParseException, JAXBException, ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
         return addCommentBypassAuthorisation(commentsDao, RegistryTestHelper.getTestCommentContent(id, descriptionId), principal);
     }
-
+    
     private Comment addCommentBypassAuthorisation(CommentsDao commentsDao, InputStream content, String principal) throws ParseException,
             JAXBException,
             ComponentRegistryException, ItemNotFoundException, UserUnauthorizedException {
@@ -323,7 +327,7 @@ public final class RegistryTestHelper {
         commentsDao.saveAndFlush(comment);
         return comment;
     }
-
+    
     public static String getCommentTestContentStringForProfile(String commentName, String profileId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
@@ -335,7 +339,7 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-
+    
     public static String getanotherPrincipalCommentTestContentStringForProfile(String commentName, String profileId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
@@ -347,7 +351,7 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-
+    
     public static String getCommentTestContentStringForComponent(String commentName, String componentId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
@@ -359,7 +363,7 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-
+    
     public static String getAnotherPrincipalCommentTestContentStringForComponent(String commentName, String componentId) {
         String comContent = "";
         comContent += "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
@@ -371,7 +375,7 @@ public final class RegistryTestHelper {
         comContent += "</comment>\n";
         return comContent;
     }
-
+    
     public static InputStream getTestCommentContent(String content, String descriptionId) {
         if (descriptionId.contains("profile")) {
             return new ByteArrayInputStream(getCommentTestContentStringForProfile(content, descriptionId).getBytes());
@@ -379,11 +383,11 @@ public final class RegistryTestHelper {
             return new ByteArrayInputStream(getCommentTestContentStringForComponent(content, descriptionId).getBytes());
         }
     }
-
+    
     public static String getCommentTestContent(String commentId, String descriptionId) {
         return getCommentTestContentStringForProfile(commentId, descriptionId);
     }
-
+    
     public static InputStream getCommentTestContent() {
         return getTestCommentContent("Actual", ProfileDescription.PROFILE_PREFIX + "profile1");
     }
@@ -409,15 +413,15 @@ public final class RegistryTestHelper {
      * @throws JAXBException
      */
     public static void writeBytesToFile(byte[] bytes, String filename) throws IOException, JAXBException {
-
+        
         File file = new File(filename);
         FileOutputStream fop = new FileOutputStream(file);
-
+        
         fop.write(bytes);
-
+        
         fop.flush();
         fop.close();
-
+        
     }
 
     /**
@@ -429,9 +433,9 @@ public final class RegistryTestHelper {
      * @throws JAXBException
      */
     public static void writeStringToFile(String str, String filename) throws IOException, JAXBException {
-
+        
         writeBytesToFile(str.getBytes(), filename);
-
+        
     }
 
     /**
@@ -443,9 +447,9 @@ public final class RegistryTestHelper {
      * @throws JAXBException
      */
     public static void writeStreamToFile(ByteArrayOutputStream os, String filename) throws IOException, JAXBException {
-
+        
         writeBytesToFile(os.toByteArray(), filename);
-
+        
     }
 
     /**
@@ -457,12 +461,12 @@ public final class RegistryTestHelper {
      * @throws JAXBException
      */
     public static void writeComponentIntoFile(ComponentDescription cdesc, String filename) throws IOException, JAXBException {
-
+        
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         marshaller.marshal(cdesc, os);
-
+        
         writeStreamToFile(os, filename);
-
+        
     }
 
     /**
@@ -473,16 +477,16 @@ public final class RegistryTestHelper {
      * @return the absolute part for this directory
      */
     public static String openTestDir(String dirName) {
-
+        
         File testDir = new File("target/" + dirName);
-
+        
         testDir.mkdir();
-
+        
         System.out.println(dirName);
         //String retval = new File(testDir, dirName).getAbsolutePath();
         String retval = new File(testDir, "/").getAbsolutePath();
-
+        
         return (retval);
-
+        
     }
 }

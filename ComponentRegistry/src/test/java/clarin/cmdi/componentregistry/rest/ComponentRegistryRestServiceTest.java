@@ -16,6 +16,7 @@ import clarin.cmdi.componentregistry.model.RegisterResponse;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestServiceTestCase.COMPONENT_LIST_GENERICTYPE;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PARAM;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.REGISTRY_SPACE_PRIVATE;
+import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.STATUS_FILTER_PARAM;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
@@ -34,7 +35,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
 
@@ -135,6 +135,36 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("profile1", response.get(0).getName());
         assertEquals("PROFILE2", response.get(1).getName());
         assertEquals("profile2", response.get(2).getName());
+    }
+
+    @Test
+    public void testGetPublicProfilesStatus() throws Exception {
+
+        System.out.println("testGetPublicProfiles");
+
+        fillUpPublicItems();
+
+        //add profile and deprecate
+        ProfileDescription newProfile = RegistryTestHelper.addProfile(baseRegistry, "PROFILE2", true);
+        newProfile.setStatus(ComponentStatus.DEPRECATED);
+        baseRegistry.update(newProfile, RegistryTestHelper.getTestProfile("PROFILE2", "deprecated"), true);
+
+        List<ProfileDescription> response = getResource()
+                .path(REGISTRY_BASE + "/profiles").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/profiles").queryParam(STATUS_FILTER_PARAM, "production").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(2, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/profiles").queryParam(STATUS_FILTER_PARAM, "deprecated").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(1, response.size());
+        response = getResource()
+                .path(REGISTRY_BASE + "/profiles").queryParam(STATUS_FILTER_PARAM, "*").accept(MediaType.APPLICATION_XML)
+                .get(PROFILE_LIST_GENERICTYPE);
+        assertEquals(3, response.size());
     }
 
     @Test
@@ -698,14 +728,14 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <ID>clarin.eu:cr1:p_12345678a</ID>\n";
         content += "        <Name>XXX</Name>\n";
         content += "        <Description>p_12345678a</Description>";
-        content += "        <Status>development</Status>\n";
+        content += "        <Status>production</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"XXX\">\n";
         content += "        <Element name=\"Availability\" ValueScheme=\"string\" />\n";
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc1 = RegistryTestHelper.addComponent(
-                baseRegistry, "XXX1", content, true, DEVELOPMENT);
+                baseRegistry, "XXX1", content, true, PRODUCTION);
 
         content = "";
         content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"false\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -714,7 +744,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <ID>clarin.eu:cr1:p_12345678b</ID>\n";
         content += "        <Name>YYY</Name>\n";
         content += "        <Description>p_12345678b</Description>";
-        content += "        <Status>development</Status>\n";
+        content += "        <Status>production</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"YYY\">\n";
         content += "        <Component ComponentRef=\"" + compDesc1.getId()
@@ -723,7 +753,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ComponentDescription compDesc2 = RegistryTestHelper.addComponent(
-                baseRegistry, "YYY1", content, true, DEVELOPMENT);
+                baseRegistry, "YYY1", content, true, PRODUCTION);
 
         content = "";
         content += "<ComponentSpec CMDVersion=\"1.2\" isProfile=\"true\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n";
@@ -732,7 +762,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "        <ID>clarin.eu:cr1:p_12345678c</ID>\n";
         content += "        <Name>ZZZ</Name>\n";
         content += "        <Description>p_12345678c</Description>";
-        content += "        <Status>development</Status>\n";
+        content += "        <Status>production</Status>\n";
         content += "    </Header>\n";
         content += "    <Component name=\"ZZZ\">\n";
         content += "        <Component ComponentRef=\"" + compDesc1.getId()
@@ -741,7 +771,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         content += "    </Component>\n";
         content += "</ComponentSpec>\n";
         ProfileDescription profile = RegistryTestHelper.addProfile(
-                baseRegistry, "TestProfile3", content, true, DEVELOPMENT);
+                baseRegistry, "TestProfile3", content, true, PRODUCTION);
 
         List<ComponentDescription> components = this.getAuthenticatedResource(getResource().path(
                 REGISTRY_BASE + "/components")).get(COMPONENT_LIST_GENERICTYPE);
@@ -1240,14 +1270,18 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     private List<ProfileDescription> getPublicProfiles() {
-        return getAuthenticatedResource(REGISTRY_BASE + "/profiles").accept(
-                MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles")
+                .queryParam(STATUS_FILTER_PARAM, "*"))
+                .accept(MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
     }
 
     private List<ProfileDescription> getUserProfiles() {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles").queryParam(
-                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles")
+                .queryParam(STATUS_FILTER_PARAM, "*")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML).get(PROFILE_LIST_GENERICTYPE);
     }
 
     private FormDataMultiPart createFormData(Object content) {
@@ -1596,26 +1630,36 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
     }
 
     private ComponentSpec getUserComponent(ComponentDescription desc) {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + desc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components/" + desc.getId())
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML)
+                .get(ComponentSpec.class);
     }
 
     private ComponentSpec getUserProfile(ProfileDescription desc) {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + desc.getId())
-                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles/" + desc.getId())
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML)
+                .get(ComponentSpec.class);
     }
 
     private List<ComponentDescription> getPublicComponents() {
-        return getAuthenticatedResource(REGISTRY_BASE + "/components").accept(
-                MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components")
+                .queryParam(STATUS_FILTER_PARAM, "*"))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
     }
 
     private List<ComponentDescription> getUserComponents() {
-        return getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components").queryParam(
-                REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE)).accept(
-                        MediaType.APPLICATION_XML).get(COMPONENT_LIST_GENERICTYPE);
+        return getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components")
+                .queryParam(STATUS_FILTER_PARAM, "*")
+                .queryParam(REGISTRY_SPACE_PARAM, REGISTRY_SPACE_PRIVATE))
+                .accept(MediaType.APPLICATION_XML)
+                .get(COMPONENT_LIST_GENERICTYPE);
     }
 
     @Test
