@@ -13,6 +13,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.GROUPID_PARAM;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.spi.resource.Singleton;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Service;
 @Path("/items")
 @Service
 @Singleton
+@Api(value = "/items", produces = MediaType.APPLICATION_XML)
 public class ItemsService extends AbstractComponentRegistryRestService {
 
     private final static Logger logger = LoggerFactory.getLogger(ItemsService.class);

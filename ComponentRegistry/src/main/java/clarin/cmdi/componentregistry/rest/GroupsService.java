@@ -4,6 +4,7 @@ import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.model.Group;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.spi.resource.Singleton;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 @Path("/groups")
 @Service
 @Singleton
+@Api(value = "/groups", produces = MediaType.APPLICATION_XML)
 public class GroupsService extends AbstractComponentRegistryRestService {
 
     @InjectParam(value = "GroupService")
