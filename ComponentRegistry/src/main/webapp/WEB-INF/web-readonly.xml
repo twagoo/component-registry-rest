@@ -66,7 +66,7 @@ i.e. development or testing environments. -->
     </filter-mapping>
     
     <!-- Enable CORS -->
-<!--    <filter>
+    <!--    <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
         <init-param>
@@ -119,14 +119,18 @@ i.e. development or testing environments. -->
     
     <servlet>
         <servlet-name>JerseyJaxrsConfig</servlet-name>
-        <servlet-class>com.wordnik.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
+        <servlet-class>io.swagger.jaxrs.config.DefaultJaxrsConfig</servlet-class>
         <init-param>
             <param-name>api.version</param-name>
             <param-value>1.0.0</param-value>
         </init-param>
         <init-param>
+            <param-name>swagger.api.title</param-name>
+            <param-value>CLARIN Component Registry</param-value>
+        </init-param>
+        <init-param>            
             <param-name>swagger.api.basepath</param-name>
-            <param-value>http://localhost:8080/ComponentRegistry/rest</param-value>
+            <param-value>https://catalog.clarin.eu/ds/ComponentRegistry/rest</param-value>
         </init-param>
         <load-on-startup>2</load-on-startup>
     </servlet>
