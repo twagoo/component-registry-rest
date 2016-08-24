@@ -4,7 +4,7 @@ import clarin.cmdi.componentregistry.GroupService;
 import clarin.cmdi.componentregistry.model.Group;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.spi.resource.Singleton;
-import com.wordnik.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiOperation;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;

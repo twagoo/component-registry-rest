@@ -88,7 +88,7 @@ i.e. development or testing environments. -->
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.wordnik.swagger.jersey.listing</param-value>
+            <param-value>io.swagger.jaxrs.json;io.swagger.sample.resource;io.swagger.jaxrs.listing</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
