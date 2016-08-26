@@ -6,6 +6,7 @@ import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
+import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import com.google.common.base.Strings;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -77,6 +78,8 @@ public class AuthenticationRestService {
     private UriInfo uriInfo;
     @Autowired
     private Configuration configuration;
+    @Autowired
+    private UserDao userDao;
 
     @GET
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -94,7 +97,9 @@ public class AuthenticationRestService {
         } else if(ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
             authInfo = new AuthenticationInfo(false);
         } else {
-            authInfo = new AuthenticationInfo(new UserCredentials(userPrincipal), configuration.isAdminUser(userPrincipal));
+            final UserCredentials credentials = new UserCredentials(userPrincipal);
+            Long id = userDao.getByPrincipalName(userPrincipal.getName()).getId();
+            authInfo = new AuthenticationInfo(credentials, id, configuration.isAdminUser(userPrincipal));
         }
 
         if (Strings.isNullOrEmpty(redirectUri)) {

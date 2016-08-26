@@ -19,6 +19,8 @@ public class AuthenticationInfo {
     private String displayName;
     @XmlElement
     private boolean isAdmin;
+    @XmlElement
+    private Long userId = null;
 
     public AuthenticationInfo() {
     }
@@ -27,13 +29,14 @@ public class AuthenticationInfo {
         this.authenticated = authenticated;
     }
 
-    public AuthenticationInfo(UserCredentials userInfo, boolean isAdmin) {
+    public AuthenticationInfo(UserCredentials userInfo, Long id, boolean isAdmin) {
         this.authenticated = (userInfo != null);
         if (userInfo != null) {
             this.username = userInfo.getPrincipalName();
             this.displayName = userInfo.getDisplayName();
             this.isAdmin = isAdmin;
         }
+        this.userId = id;
     }
 
     public String getUsername() {
@@ -50,6 +53,10 @@ public class AuthenticationInfo {
 
     public boolean isIsAdmin() {
         return isAdmin;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 
 }
