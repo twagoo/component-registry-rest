@@ -572,9 +572,9 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
         try {
             this.checkAuthorisation(description);
             this.checkAge(description);
-            // For public components, check if used in other components or
+            // For published components, check if used in other components or
             // profiles (unless forced)
-            if (!forceUpdate && description.isPublic() && !description.isProfile()) {
+            if (!forceUpdate && description.getStatus() != ComponentStatus.DEVELOPMENT && !description.isProfile()) {
                 this.checkStillUsed(description.getId());
             }
             syncSpecDescriptionHeaders(spec, description);

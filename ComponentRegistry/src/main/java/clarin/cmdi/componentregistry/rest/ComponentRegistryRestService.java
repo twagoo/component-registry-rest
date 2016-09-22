@@ -835,17 +835,16 @@ public class ComponentRegistryRestService {
                 @FormDataParam(GROUP_FORM_FIELD) String group,
                 @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
             try {
-                ComponentRegistry br = this.getBaseRegistry();
-                ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ProfileDescription desc = br.getProfileDescriptionAccessControlled(profileId);
                 if (desc != null) {
-                    if (desc.isPublic()) {
-                        return Response.status(Status.CONFLICT).entity("Cannot update already published profile.")
+                    if (desc.getStatus() != ComponentStatus.DEVELOPMENT) {
+                        return Response.status(Status.CONFLICT).entity("Cannot update a profile with status " + desc.getStatus().toString())
                                 .build();
-
                     }
-                    Number groupId;
-                    RegistrySpace space;
-                    List<Number> groupIds = br.getItemGroups(profileId);
+                    final Number groupId;
+                    final RegistrySpace space;
+                    final List<Number> groupIds = br.getItemGroups(profileId);
                     if (groupIds == null || groupIds.isEmpty()) {
                         groupId = null;
                         space = RegistrySpace.PRIVATE;
@@ -855,7 +854,8 @@ public class ComponentRegistryRestService {
                     }
 
                     updateDescription(desc, name, description, domainName, group);
-                    ComponentRegistry cr = this.getRegistry(space, groupId);
+                    
+                    final ComponentRegistry cr = this.getRegistry(space, groupId);
                     return register(input, desc, new UpdateAction(), cr);
                 } else {
                     return createNonExistentItemResponse(profileId);
@@ -973,16 +973,16 @@ public class ComponentRegistryRestService {
                 @FormDataParam(GROUP_FORM_FIELD) String group,
                 @FormDataParam(DOMAIN_FORM_FIELD) String domainName) {
             try {
-                ComponentRegistry br = this.getBaseRegistry();
-                ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
+                final ComponentRegistry br = this.getBaseRegistry();
+                final ComponentDescription desc = br.getComponentDescriptionAccessControlled(componentId);
                 if (desc != null) {
-                    if (desc.isPublic()) {
-                        return Response.status(Status.CONFLICT).entity("Cannot update already published component.")
+                    if (desc.getStatus() != ComponentStatus.DEVELOPMENT) {
+                        return Response.status(Status.CONFLICT).entity("Cannot update a component with status " + desc.getStatus().toString())
                                 .build();
                     }
-                    Number groupId;
-                    RegistrySpace space;
-                    List<Number> groupIds = br.getItemGroups(componentId);
+                    final Number groupId;
+                    final RegistrySpace space;
+                    final List<Number> groupIds = br.getItemGroups(componentId);
                     if (groupIds == null || groupIds.isEmpty()) {
                         groupId = null;
                         space = RegistrySpace.PRIVATE;
@@ -992,7 +992,8 @@ public class ComponentRegistryRestService {
                     }
 
                     this.updateDescription(desc, name, description, domainName, group);
-                    ComponentRegistry cr = this.getRegistry(space, groupId);
+                    
+                    final ComponentRegistry cr = this.getRegistry(space, groupId);
                     return this.register(input, desc, new UpdateAction(), cr);
                 } else {
                     LOG.error("Update of nonexistent id (" + componentId
