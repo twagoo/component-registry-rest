@@ -80,7 +80,7 @@ public class ConceptRegistryServlet extends HttpServlet {
         //TODO: Scope by concept scheme?
         //TODO: Set fields to be returned (fl=...)
         final WebResource requestResource = service.path("find-concepts").queryParams(queryParams);
-        logger.info("Forwarding CCR request to {}", requestResource.getURI());
+        logger.debug("Forwarding CCR request to {}", requestResource.getURI());
 
         // Send request to CCR
         final InputStream result = requestResource.accept(MediaType.APPLICATION_XML).get(InputStream.class);
