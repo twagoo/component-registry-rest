@@ -116,6 +116,16 @@ i.e. development or testing environments. -->
     </servlet-mapping>
     
     <servlet>
+        <servlet-name>Vocabulary Service Servlet</servlet-name>
+        <servlet-class>clarin.cmdi.componentregistry.servlet.VocabularyServiceServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Vocabulary Service Servlet</servlet-name>
+        <url-pattern>/vocabulary/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
         <servlet-name>JerseyJaxrsConfig</servlet-name>
         <servlet-class>io.swagger.jaxrs.config.DefaultJaxrsConfig</servlet-class>
         <init-param>
