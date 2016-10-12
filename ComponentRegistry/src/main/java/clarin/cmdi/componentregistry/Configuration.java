@@ -1,14 +1,11 @@
 package clarin.cmdi.componentregistry;
 
-import clarin.cmdi.componentregistry.components.ComponentSpec;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +20,7 @@ public class Configuration {
     private String toolkitLocation = "https://infra.clarin.eu/CMDI/1.x";
     private String generalComponentSchema = "https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd";
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
+    private String clavasRestUrl = "";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
     
@@ -49,6 +47,10 @@ public class Configuration {
 
     public String getCcrRestUrl() {
         return ccrRestUrl;
+    }
+    
+    public String getClavasRestUrl() {
+        return clavasRestUrl;
     }
 
     public String getToolkitLocation() {
@@ -105,6 +107,11 @@ public class Configuration {
     public void setCcrRestUrl(String ccrRestUrl) {
         LOG.info("Setting ccrRestUrl to {}", ccrRestUrl);
         this.ccrRestUrl = ccrRestUrl;
+    }
+
+    public void setClavasRestUrl(String clavasRestUrl) {
+        LOG.info("Setting clavasRestUrl to {}", clavasRestUrl);
+        this.clavasRestUrl = clavasRestUrl;
     }
 
     public void setToolkitLocation(String toolkitLocation) {
