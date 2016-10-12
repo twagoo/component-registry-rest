@@ -20,7 +20,7 @@ public class Configuration {
     private String toolkitLocation = "https://infra.clarin.eu/CMDI/1.x";
     private String generalComponentSchema = "https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd";
     private String ccrRestUrl = "https://openskos.meertens.knaw.nl/ccr/api/";
-    private String clavasRestUrl = "";
+    private String clavasRestUrl = "https://openskos.meertens.knaw.nl/clavas/api/";
     private Collection<String> adminUsers = new HashSet<String>();
     private List<String> displayNameShibbolethKeys = new ArrayList<String>();
     

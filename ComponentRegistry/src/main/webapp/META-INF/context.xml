@@ -92,4 +92,6 @@
     -->
     <!-- Test instance (OpenSKOS 2) -->
     <Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="http://145.100.58.79/clavas/public/api/"/>
+    <!-- Production instance -->
+    <!--<Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="https://openskos.meertens.knaw.nl/clavas/api/"/>-->
 </Context>

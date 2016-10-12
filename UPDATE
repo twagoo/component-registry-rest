@@ -26,6 +26,12 @@ Version specific update instructions
 the previous version but before starting the new version when deploying. Use
 the script 'upgrade-2.2.sql' bundled with the deployment package.
 
+- The following new context parameter(s) need to be configured:
+
+    <Parameter 
+        name="eu.clarin.cmdi.componentregistry.clavasRestUrl" 
+        value="https://openskos.meertens.knaw.nl/clavas/api/"/>
+
 === 2.1 ===
 
 - This is the first version to support CMDI 1.2. Therefore all components and
