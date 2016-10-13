@@ -11,7 +11,7 @@ The registry offers a hierarchical structure for browsing the components.
 
 The Component Registry is set up as a Javascript frontend communicating with a
 Java based backend (REST service). Sources for the front end can be found, along
-with more information, at <https://github.com/clarin-eric/react-webpack-comp-reg>.
+with more information, at <https://github.com/clarin-eric/component-registry-front-end>.
 
 The ComponentRegistry is a central software component to the Clarin MetaData
 Infrastructure (CMDI). For more information on CMDI, see
@@ -82,7 +82,7 @@ See the installation instructions for more information.
 
 * Developing the front end:
 
-See <https://github.com/clarin-eric/react-webpack-comp-reg>.
+See <https://github.com/clarin-eric/component-registry-front-end>.
  
 Installation
 ------------
