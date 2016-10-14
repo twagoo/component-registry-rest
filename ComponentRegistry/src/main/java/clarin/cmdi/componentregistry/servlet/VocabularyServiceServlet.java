@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,19 +33,33 @@ public class VocabularyServiceServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
     private final static Logger logger = LoggerFactory.getLogger(VocabularyServiceServlet.class);
+
+    /**
+     * Vocabulary service path on external service
+     */
+    private static final String VOCABULARY_SERVICE_PATH = "conceptscheme";
+    private static final String VOCABULARY_PAGE_SERVICE_PATH_FORMAT = VOCABULARY_SERVICE_PATH + "/%s"; //placeholder for id
+
+    /**
+     * Vocabulary service path on this service
+     */
     private final static String CONCEPT_SCHEMES_PATH = "/conceptscheme";
+    /**
+     * Vocabulary page redirect path on this service
+     */
+    private static final String VOCAB_PAGE_PATH = "/conceptscheme/vocabpage";
 
     private transient WebResource service;
+    private URI serviceUri;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        final URI uri = UriBuilder.fromUri(Configuration.getInstance().getClavasRestUrl()).build();
-        final Client client = Client.create();
-        service = client.resource(uri);
+        this.serviceUri = UriBuilder.fromUri(Configuration.getInstance().getClavasRestUrl()).build();
+        this.service = Client.create().resource(serviceUri);
 
-        logger.info("Instantiated vocabulary servlet on URI {}", uri);
+        logger.info("Instantiated vocabulary servlet on URI {}", serviceUri);
     }
 
     @Override
@@ -50,17 +67,21 @@ public class VocabularyServiceServlet extends HttpServlet {
         final String path = req.getPathInfo();
         if (path != null) {
             if (path.equals(CONCEPT_SCHEMES_PATH)) {
+                //proxy the response (list of concept schemes) from the original service
                 serveConceptSchemes(req, resp);
                 return;
+            } else if (path.equals(VOCAB_PAGE_PATH)) {
+                //redirect the client to the vocabulary page on the original service
+                redirectToVocabularyPage(req, resp);
+                return;
             }
+            //TODO: else if path is '/items'...
         }
-        //TODO: else if path is '/items'...
-        resp.setStatus(404);
-        resp.getWriter().write("Not found");
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not found");
     }
 
     private void serveConceptSchemes(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        WebResource serviceReq = service.path("conceptscheme");
+        WebResource serviceReq = service.path(VOCABULARY_SERVICE_PATH);
 
         //forward query params to service request
         final Map<String, String[]> params = req.getParameterMap();
@@ -93,5 +114,36 @@ public class VocabularyServiceServlet extends HttpServlet {
                 responseOutStream.close();
             }
         }
+    }
+
+    private void redirectToVocabularyPage(HttpServletRequest req, HttpServletResponse resp) throws IllegalArgumentException, UriBuilderException, IOException {
+        // get id from query parameter
+        final String id;
+        {
+            final String[] idParam = req.getParameterValues("id");
+            if (idParam == null || idParam.length == 0) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "vocabulary id must be provided via 'id' query parameter");
+                return;
+            } else {
+                id = idParam[0];
+            }
+        }
+        // construct redirect URI to send client to the right page at the service
+        final StringBuilder redirectUriBuilder = new StringBuilder(
+                UriBuilder.fromUri(serviceUri)
+                        .path(String.format(VOCABULARY_PAGE_SERVICE_PATH_FORMAT, id))
+                        .build().toString());
+        // append request format specifier depending on accept header
+        final String acceptHeader = req.getHeader("Accept");
+        if (acceptHeader != null) {
+            if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
+                redirectUriBuilder.append(".json");
+            } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
+                redirectUriBuilder.append(".html");
+            }
+        }
+        // redirect to page at service
+        resp.setStatus(HttpServletResponse.SC_SEE_OTHER);
+        resp.sendRedirect(resp.encodeRedirectURL(redirectUriBuilder.toString()));
     }
 }
