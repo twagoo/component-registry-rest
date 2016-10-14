@@ -72,7 +72,7 @@ public class VocabularyServiceServlet extends HttpServlet {
                 return;
             } else if (path.equals(VOCAB_PAGE_PATH)) {
                 //redirect the client to the vocabulary page on the original service
-                redirectToVocabularyPage(req, resp);
+                serveVocabularyPage(req, resp);
                 return;
             }
             //TODO: else if path is '/items'...
@@ -99,24 +99,20 @@ public class VocabularyServiceServlet extends HttpServlet {
             if (acceptHeader != null) {
                 if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
                     serviceReq = serviceReq.queryParam("format", "json");
+                    //TODO: forward
                 } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
                     serviceReq = serviceReq.queryParam("format", "html");
+                    //TODO: redirect
                 }
             }
         }
 
         logger.debug("Forwarding vocabulary service request to {}", serviceReq.toString());
 
-        //make GET request and copy directly to response stream
-        try (final InputStream serviceResultStream = serviceReq.get(InputStream.class)) {
-            try (final ServletOutputStream responseOutStream = resp.getOutputStream()) {
-                ByteStreams.copy(serviceResultStream, responseOutStream);
-                responseOutStream.close();
-            }
-        }
+        forwardResponse(serviceReq, resp);
     }
 
-    private void redirectToVocabularyPage(HttpServletRequest req, HttpServletResponse resp) throws IllegalArgumentException, UriBuilderException, IOException {
+    private void serveVocabularyPage(HttpServletRequest req, HttpServletResponse resp) throws IllegalArgumentException, UriBuilderException, IOException {
         // get id from query parameter
         final String id;
         {
@@ -129,7 +125,7 @@ public class VocabularyServiceServlet extends HttpServlet {
             }
         }
         // construct redirect URI to send client to the right page at the service
-        final StringBuilder redirectUriBuilder = new StringBuilder(
+        final StringBuilder targetUriBuilder = new StringBuilder(
                 UriBuilder.fromUri(serviceUri)
                         .path(String.format(VOCABULARY_PAGE_SERVICE_PATH_FORMAT, id))
                         .build().toString());
@@ -137,13 +133,27 @@ public class VocabularyServiceServlet extends HttpServlet {
         final String acceptHeader = req.getHeader("Accept");
         if (acceptHeader != null) {
             if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
-                redirectUriBuilder.append(".json");
+                targetUriBuilder.append(".json");
+                //forward JSON content
+                final WebResource serviceReq = Client.create().resource(targetUriBuilder.toString());
+                forwardResponse(serviceReq, resp);
+                return;
             } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
-                redirectUriBuilder.append(".html");
+                targetUriBuilder.append(".html");
             }
         }
-        // redirect to page at service
+        // redirect to page at service (all cases except for JSON)
         resp.setStatus(HttpServletResponse.SC_SEE_OTHER);
-        resp.sendRedirect(resp.encodeRedirectURL(redirectUriBuilder.toString()));
+        resp.sendRedirect(resp.encodeRedirectURL(targetUriBuilder.toString()));
+    }
+
+    private void forwardResponse(WebResource request, HttpServletResponse resp) throws IOException {
+        //make GET request and copy directly to response stream
+        try (final InputStream serviceResultStream = request.get(InputStream.class)) {
+            try (final ServletOutputStream responseOutStream = resp.getOutputStream()) {
+                ByteStreams.copy(serviceResultStream, responseOutStream);
+                responseOutStream.close();
+            }
+        }
     }
 }
