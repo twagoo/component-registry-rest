@@ -3,13 +3,14 @@ package clarin.cmdi.componentregistry.servlet;
 import clarin.cmdi.componentregistry.Configuration;
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -19,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,15 @@ import org.slf4j.LoggerFactory;
  * Servlet responsible for providing a bridge to the CLAVAS REST interface. Can
  * be called by the front end to circumvent cross-scripting and browser
  * limitation in setting the headers of a request.
+ *
+ * <p>
+ * Sample requests:
+ * <ul>
+ * <li>/conceptscheme</li>
+ * <li>/conceptscheme/vocabpage?id=xyz</li>
+ * <li>/items?scheme=xyz&fields=uri,prefLabel</li>
+ * </ul>
+ * </p>
  *
  */
 public class VocabularyServiceServlet extends HttpServlet {
@@ -40,6 +53,18 @@ public class VocabularyServiceServlet extends HttpServlet {
     private static final String VOCABULARY_SERVICE_PATH = "conceptscheme";
     private static final String VOCABULARY_PAGE_SERVICE_PATH_FORMAT = VOCABULARY_SERVICE_PATH + "/%s"; //placeholder for id
 
+    private static final String QUERY_PARAMETER_FORMAT = "format";
+
+    /**
+     * Service to retrieve vocabulary items as concepts
+     */
+    private static final String VOCABULARY_ITEMS_PATH = "find-concepts";
+    private static final String VOCABULARY_ITEMS_PARAM_QUERY = "q";
+    private static final String VOCABULARY_ITEMS_QUERY_ALL_VALUE = "uri:*";
+    private static final String VOCABULARY_ITEMS_PARAM_ROWS = "rows";
+    private static final String VOCABULARY_ITEMS_PARAM_CONCEPT_SCHEME = "conceptScheme";
+    private static final String VOCABULARY_ITEMS_PARAM_FIELDS = "fl";
+
     /**
      * Vocabulary service path on this service
      */
@@ -48,6 +73,12 @@ public class VocabularyServiceServlet extends HttpServlet {
      * Vocabulary page redirect path on this service
      */
     private static final String VOCAB_PAGE_PATH = "/conceptscheme/vocabpage";
+
+    private static final String VOCAB_ITEMS_PATH = "/items";
+
+    private static final String PARAM_ID = "id";
+    private static final String PARAM_SCHEME_URI = "scheme";
+    private static final String PARAM_FIELDS = "fields";
 
     private transient WebResource service;
     private URI serviceUri;
@@ -67,8 +98,12 @@ public class VocabularyServiceServlet extends HttpServlet {
         final String path = req.getPathInfo();
         if (path != null) {
             if (path.equals(CONCEPT_SCHEMES_PATH)) {
-                //proxy the response (list of concept schemes) from the original service
+                //proxy the response (list of concept schemes (vocabularies)) from the original service
                 serveConceptSchemes(req, resp);
+                return;
+            } else if (path.equals(VOCAB_ITEMS_PATH)) {
+                //proxy the list of concepts (items) within a concept scheme (vocabulary) - JSON only
+                serveConceptItems(req, resp);
                 return;
             } else if (path.equals(VOCAB_PAGE_PATH)) {
                 //redirect the client to the vocabulary page on the original service
@@ -94,7 +129,7 @@ public class VocabularyServiceServlet extends HttpServlet {
         }
 
         //set request format according to Accept header (if no explicit 'format' in request)
-        if (params == null || !params.containsKey("format")) {
+        if (params == null || !params.containsKey(QUERY_PARAMETER_FORMAT)) {
             serviceReq = setFormatFromAcceptHeader(req, serviceReq);
         }
 
@@ -102,37 +137,117 @@ public class VocabularyServiceServlet extends HttpServlet {
         forwardResponse(serviceReq, resp);
     }
 
+    /**
+     * Request concepts for a specific concept scheme ('scheme' parameter).
+     * Optionally fields to be returned can be specified with the 'field'
+     * parameter. Performs two requests: one to get the number of items, another
+     * to perform the actual request. Response is JSON only!
+     *
+     * @param req
+     * @param resp
+     * @throws IOException
+     */
+    private void serveConceptItems(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        final String schemeId = getSingleParamValue(req, PARAM_SCHEME_URI);
+        if (schemeId == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "concept scheme URI for vocabulary must be provided via '" + PARAM_SCHEME_URI + "' query parameter");
+            return;
+        }
+
+        WebResource serviceReq = service.path(VOCABULARY_ITEMS_PATH)
+                .queryParam(VOCABULARY_ITEMS_PARAM_QUERY, VOCABULARY_ITEMS_QUERY_ALL_VALUE)
+                .queryParam(VOCABULARY_ITEMS_PARAM_CONCEPT_SCHEME, schemeId)
+                .queryParam(QUERY_PARAMETER_FORMAT, "json");
+
+        final String fields = getSingleParamValue(req, PARAM_FIELDS);
+        if (fields != null) {
+            serviceReq = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_FIELDS, fields);
+        }
+
+        //get result count
+        final long itemCount;
+        {
+            final WebResource countRequest = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_ROWS, "0");
+            logger.debug("Getting item count for {}", countRequest);
+
+            final ClientResponse countResponse = countRequest.get(ClientResponse.class);
+            final int countResponseStatus = countResponse.getStatus();
+            if (countResponseStatus >= 200 && countResponseStatus < 300) {
+                try {
+                    final JSONObject responseObject = new JSONObject(countResponse.getEntity(String.class));
+                    final JSONObject response = responseObject.getJSONObject("response");
+                    if (response == null) {
+                        logger.warn("Response from {} did not include 'response' object!", countRequest.getURI().toString());
+                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        return;
+                    } else {
+                        itemCount = response.getLong("numFound");
+                    }
+                } catch (JSONException ex) {
+                    throw new RuntimeException("Could not retrieve item count", ex);
+                }
+            } else {
+                logger.warn("Response code {} when requesting item count", countResponseStatus);
+                resp.setStatus(countResponseStatus);
+                return;
+            }
+            logger.debug("Requesting {} items", itemCount);
+        }
+
+        //get all items
+        final WebResource itemsRequest = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_ROWS, Long.toString(itemCount));
+        logger.debug("Getting items for {}", itemsRequest);
+
+        final ClientResponse itemsResponse = itemsRequest.get(ClientResponse.class);
+        final int responseStatus = itemsResponse.getStatus();
+        if (responseStatus >= 200 && responseStatus < 300) {
+            try {
+                final JSONObject responseObject = new JSONObject(itemsResponse.getEntity(String.class));
+                final JSONObject response = responseObject.getJSONObject("response");
+                if (response != null) {
+                    final JSONArray docs = response.getJSONArray("docs");
+                    if (docs != null) {
+                        resp.setStatus(HttpServletResponse.SC_OK);
+                        try (Writer writer = new OutputStreamWriter(resp.getOutputStream())) {
+                            writer.write(docs.toString());
+                            return;
+                        }
+                    }
+                }
+                logger.warn("Structure of find-concepts service not as expected - did not find array at /response/docs");
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            } catch (JSONException ex) {
+                throw new RuntimeException("Could not retrieve items", ex);
+            }
+        } else {
+            logger.warn("Response code {} when requesting vocabulary items", responseStatus);
+            resp.setStatus(responseStatus);
+        }
+    }
+
     private WebResource setFormatFromAcceptHeader(HttpServletRequest req, WebResource serviceReq) {
         final String acceptHeader = req.getHeader("Accept");
         if (acceptHeader != null) {
             if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
-                serviceReq = serviceReq.queryParam("format", "json");
-                //TODO: forward
+                serviceReq = serviceReq.queryParam(QUERY_PARAMETER_FORMAT, "json");
             } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
-                serviceReq = serviceReq.queryParam("format", "html");
-                //TODO: redirect
+                serviceReq = serviceReq.queryParam(QUERY_PARAMETER_FORMAT, "html");
             }
         }
         return serviceReq;
     }
 
     private void serveVocabularyPage(HttpServletRequest req, HttpServletResponse resp) throws IllegalArgumentException, UriBuilderException, IOException {
-        // get id from query parameter
-        final String id;
-        {
-            final String[] idParam = req.getParameterValues("id");
-            if (idParam == null || idParam.length == 0) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "vocabulary id must be provided via 'id' query parameter");
-                return;
-            } else {
-                id = idParam[0];
-            }
+        final String id = getSingleParamValue(req, PARAM_ID);
+        if (id == null) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "vocabulary id must be provided via 'id' query parameter");
+            return;
         }
         // construct redirect URI to send client to the right page at the service
         final StringBuilder targetUriBuilder = new StringBuilder(
                 UriBuilder.fromUri(serviceUri)
-                        .path(String.format(VOCABULARY_PAGE_SERVICE_PATH_FORMAT, id))
-                        .build().toString());
+                .path(String.format(VOCABULARY_PAGE_SERVICE_PATH_FORMAT, id))
+                .build().toString());
         // append request format specifier depending on accept header
         final String acceptHeader = req.getHeader("Accept");
         if (acceptHeader != null) {
@@ -158,6 +273,16 @@ public class VocabularyServiceServlet extends HttpServlet {
                 ByteStreams.copy(serviceResultStream, responseOutStream);
                 responseOutStream.close();
             }
+        }
+    }
+
+    private String getSingleParamValue(HttpServletRequest req, String param) throws IOException {
+        // get id from query parameter
+        final String[] idParam = req.getParameterValues(param);
+        if (idParam == null || idParam.length == 0) {
+            return null;
+        } else {
+            return idParam[0];
         }
     }
 }
