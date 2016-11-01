@@ -95,21 +95,25 @@ public class VocabularyServiceServlet extends HttpServlet {
 
         //set request format according to Accept header (if no explicit 'format' in request)
         if (params == null || !params.containsKey("format")) {
-            final String acceptHeader = req.getHeader("Accept");
-            if (acceptHeader != null) {
-                if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
-                    serviceReq = serviceReq.queryParam("format", "json");
-                    //TODO: forward
-                } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
-                    serviceReq = serviceReq.queryParam("format", "html");
-                    //TODO: redirect
-                }
-            }
+            serviceReq = setFormatFromAcceptHeader(req, serviceReq);
         }
 
         logger.debug("Forwarding vocabulary service request to {}", serviceReq.toString());
-
         forwardResponse(serviceReq, resp);
+    }
+
+    private WebResource setFormatFromAcceptHeader(HttpServletRequest req, WebResource serviceReq) {
+        final String acceptHeader = req.getHeader("Accept");
+        if (acceptHeader != null) {
+            if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
+                serviceReq = serviceReq.queryParam("format", "json");
+                //TODO: forward
+            } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
+                serviceReq = serviceReq.queryParam("format", "html");
+                //TODO: redirect
+            }
+        }
+        return serviceReq;
     }
 
     private void serveVocabularyPage(HttpServletRequest req, HttpServletResponse resp) throws IllegalArgumentException, UriBuilderException, IOException {
