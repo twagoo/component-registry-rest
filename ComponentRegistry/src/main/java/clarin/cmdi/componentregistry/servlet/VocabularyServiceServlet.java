@@ -63,8 +63,12 @@ public class VocabularyServiceServlet extends HttpServlet {
     private static final String VOCABULARY_ITEMS_PATH = "find-concepts";
     private static final String VOCABULARY_ITEMS_PARAM_QUERY = "q";
     private static final String VOCABULARY_ITEMS_QUERY_ALL_VALUE = "uri:*";
+
     private static final String VOCABULARY_ITEMS_PARAM_ROWS = "rows";
+    private static final String ITEM_RETRIEVAL_BATCH_SIZE = "500";
+
     private static final String VOCABULARY_ITEMS_PARAM_OFFSET = "start";
+
     private static final String VOCABULARY_ITEMS_PARAM_CONCEPT_SCHEME = "conceptScheme";
     private static final String VOCABULARY_ITEMS_PARAM_FIELDS = "fl";
 
@@ -177,7 +181,10 @@ public class VocabularyServiceServlet extends HttpServlet {
             final String offset = Integer.toString(results == null ? 0 : results.size());
             logger.debug("Getting items starting at {}", offset);
 
-            final WebResource request = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_OFFSET, offset);
+            final WebResource request = 
+                    serviceReq
+                            .queryParam(VOCABULARY_ITEMS_PARAM_OFFSET, offset)
+                            .queryParam(VOCABULARY_ITEMS_PARAM_ROWS, ITEM_RETRIEVAL_BATCH_SIZE);
             final ClientResponse itemsResponse = request.get(ClientResponse.class);
             final int responseStatus = itemsResponse.getStatus();
             if (responseStatus >= 200 && responseStatus < 300) {
