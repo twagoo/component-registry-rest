@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -62,6 +64,7 @@ public class VocabularyServiceServlet extends HttpServlet {
     private static final String VOCABULARY_ITEMS_PARAM_QUERY = "q";
     private static final String VOCABULARY_ITEMS_QUERY_ALL_VALUE = "uri:*";
     private static final String VOCABULARY_ITEMS_PARAM_ROWS = "rows";
+    private static final String VOCABULARY_ITEMS_PARAM_OFFSET = "start";
     private static final String VOCABULARY_ITEMS_PARAM_CONCEPT_SCHEME = "conceptScheme";
     private static final String VOCABULARY_ITEMS_PARAM_FIELDS = "fl";
 
@@ -164,64 +167,63 @@ public class VocabularyServiceServlet extends HttpServlet {
             serviceReq = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_FIELDS, fields);
         }
 
-        //get result count
-        final long itemCount;
-        {
-            final WebResource countRequest = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_ROWS, "0");
-            logger.debug("Getting item count for {}", countRequest);
+        //keep some stats on the retrieved records (service will not necessarily return all at once)
+        int target = 0;
+        long lastFetchSize = 0;
+        List results = null;
+        //start fetch loop
+        do {
+            //continue where we left off
+            final String offset = Integer.toString(results == null ? 0 : results.size());
+            logger.debug("Getting items starting at {}", offset);
 
-            final ClientResponse countResponse = countRequest.get(ClientResponse.class);
-            final int countResponseStatus = countResponse.getStatus();
-            if (countResponseStatus >= 200 && countResponseStatus < 300) {
+            final WebResource request = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_OFFSET, offset);
+            final ClientResponse itemsResponse = request.get(ClientResponse.class);
+            final int responseStatus = itemsResponse.getStatus();
+            if (responseStatus >= 200 && responseStatus < 300) {
                 try {
-                    final JSONObject responseObject = new JSONObject(countResponse.getEntity(String.class));
+                    final JSONObject responseObject = new JSONObject(itemsResponse.getEntity(String.class));
                     final JSONObject response = responseObject.getJSONObject("response");
                     if (response == null) {
-                        logger.warn("Response from {} did not include 'response' object!", countRequest.getURI().toString());
+                        logger.warn("Structure of find-concepts service not as expected - did not find /response");
                         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         return;
-                    } else {
-                        itemCount = response.getLong("numFound");
+                    }
+
+                    //get total results count
+                    target = response.getInt("numFound");
+                    if (results == null) {
+                        results = new ArrayList(target);
+                    }
+
+                    //get documents
+                    final JSONArray docs = response.getJSONArray("docs");
+                    if (docs == null) {
+                        logger.warn("Structure of find-concepts service not as expected - did not find array at /response/docs");
+                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        return;
+                    }
+                    
+                    lastFetchSize = docs.length();
+                    //add documents to result collection
+                    for (int i = 0; i < lastFetchSize; i++) {
+                        results.add(docs.get(i));
                     }
                 } catch (JSONException ex) {
-                    throw new RuntimeException("Could not retrieve item count", ex);
+                    throw new RuntimeException("Could not retrieve items", ex);
                 }
             } else {
-                logger.warn("Response code {} when requesting item count", countResponseStatus);
-                resp.setStatus(countResponseStatus);
+                logger.warn("Response code {} when requesting vocabulary items", responseStatus);
+                resp.setStatus(responseStatus);
                 return;
             }
-            logger.debug("Requesting {} items", itemCount);
-        }
+        } while (results.size() < target && lastFetchSize > 0); //continue unless we have a complete result or retreived nothing last time
 
-        //get all items
-        final WebResource itemsRequest = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_ROWS, Long.toString(itemCount));
-        logger.debug("Getting items for {}", itemsRequest);
-
-        final ClientResponse itemsResponse = itemsRequest.get(ClientResponse.class);
-        final int responseStatus = itemsResponse.getStatus();
-        if (responseStatus >= 200 && responseStatus < 300) {
-            try {
-                final JSONObject responseObject = new JSONObject(itemsResponse.getEntity(String.class));
-                final JSONObject response = responseObject.getJSONObject("response");
-                if (response != null) {
-                    final JSONArray docs = response.getJSONArray("docs");
-                    if (docs != null) {
-                        resp.setStatus(HttpServletResponse.SC_OK);
-                        try (Writer writer = new OutputStreamWriter(resp.getOutputStream())) {
-                            writer.write(docs.toString());
-                            return;
-                        }
-                    }
-                }
-                logger.warn("Structure of find-concepts service not as expected - did not find array at /response/docs");
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (JSONException ex) {
-                throw new RuntimeException("Could not retrieve items", ex);
-            }
-        } else {
-            logger.warn("Response code {} when requesting vocabulary items", responseStatus);
-            resp.setStatus(responseStatus);
+        //turn back into a single JSON array
+        final JSONArray docs = new JSONArray(results);
+        resp.setStatus(HttpServletResponse.SC_OK);
+        try (Writer writer = new OutputStreamWriter(resp.getOutputStream())) {
+            writer.write(docs.toString());
         }
     }
 
