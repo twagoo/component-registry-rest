@@ -86,6 +86,7 @@ public class VocabularyServiceServlet extends HttpServlet {
     private static final String PARAM_ID = "id";
     private static final String PARAM_SCHEME_URI = "scheme";
     private static final String PARAM_FIELDS = "fields";
+    private static final String PARAM_MAX_RESULTS = "maxResults";
 
     private transient WebResource service;
     private URI serviceUri;
@@ -170,6 +171,14 @@ public class VocabularyServiceServlet extends HttpServlet {
         if (fields != null) {
             baseRequest = baseRequest.queryParam(VOCABULARY_ITEMS_PARAM_FIELDS, fields);
         }
+        
+        final Integer maxResults;
+        final String maxResultsParam = getSingleParamValue(req, PARAM_MAX_RESULTS);
+        if(maxResultsParam != null) {
+            maxResults = Integer.valueOf(maxResultsParam);
+        } else {
+            maxResults = null;
+        }
 
         //keep some stats on the retrieved records (service will not necessarily return all at once)
         int target = 0;
@@ -181,9 +190,12 @@ public class VocabularyServiceServlet extends HttpServlet {
             final String offset = Integer.toString(results == null ? 0 : results.size());
             logger.trace("Getting items starting at {}", offset);
 
+            final String rows = (maxResults == null) ? ITEM_RETRIEVAL_BATCH_SIZE : maxResults.toString();
+            logger.trace("Getting {} items at a time", rows);
+
             final WebResource request = baseRequest
                     .queryParam(VOCABULARY_ITEMS_PARAM_OFFSET, offset)
-                    .queryParam(VOCABULARY_ITEMS_PARAM_ROWS, ITEM_RETRIEVAL_BATCH_SIZE);
+                    .queryParam(VOCABULARY_ITEMS_PARAM_ROWS, rows);
             logger.debug("Retrieving items from {}", request);
             final ClientResponse itemsResponse = request.get(ClientResponse.class);
             final int responseStatus = itemsResponse.getStatus();
@@ -224,7 +236,7 @@ public class VocabularyServiceServlet extends HttpServlet {
                 resp.setStatus(responseStatus);
                 return;
             }
-        } while (results.size() < target && lastFetchSize > 0); //continue unless we have a complete result or retreived nothing last time
+        } while (results.size() < target && (maxResults == null || results.size() < maxResults) && lastFetchSize > 0); //continue unless we have a complete result or retreived nothing last time
         
         logger.debug("Retrieved {} items", results.size());
         
