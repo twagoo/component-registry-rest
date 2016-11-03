@@ -161,14 +161,14 @@ public class VocabularyServiceServlet extends HttpServlet {
             return;
         }
 
-        WebResource serviceReq = service.path(VOCABULARY_ITEMS_PATH)
+        WebResource baseRequest = service.path(VOCABULARY_ITEMS_PATH)
                 .queryParam(VOCABULARY_ITEMS_PARAM_QUERY, VOCABULARY_ITEMS_QUERY_ALL_VALUE)
                 .queryParam(VOCABULARY_ITEMS_PARAM_CONCEPT_SCHEME, schemeId)
                 .queryParam(QUERY_PARAMETER_FORMAT, "json");
 
         final String fields = getSingleParamValue(req, PARAM_FIELDS);
         if (fields != null) {
-            serviceReq = serviceReq.queryParam(VOCABULARY_ITEMS_PARAM_FIELDS, fields);
+            baseRequest = baseRequest.queryParam(VOCABULARY_ITEMS_PARAM_FIELDS, fields);
         }
 
         //keep some stats on the retrieved records (service will not necessarily return all at once)
@@ -179,12 +179,12 @@ public class VocabularyServiceServlet extends HttpServlet {
         do {
             //continue where we left off
             final String offset = Integer.toString(results == null ? 0 : results.size());
-            logger.debug("Getting items starting at {}", offset);
+            logger.trace("Getting items starting at {}", offset);
 
-            final WebResource request = 
-                    serviceReq
-                            .queryParam(VOCABULARY_ITEMS_PARAM_OFFSET, offset)
-                            .queryParam(VOCABULARY_ITEMS_PARAM_ROWS, ITEM_RETRIEVAL_BATCH_SIZE);
+            final WebResource request = baseRequest
+                    .queryParam(VOCABULARY_ITEMS_PARAM_OFFSET, offset)
+                    .queryParam(VOCABULARY_ITEMS_PARAM_ROWS, ITEM_RETRIEVAL_BATCH_SIZE);
+            logger.debug("Retrieving items from {}", request);
             final ClientResponse itemsResponse = request.get(ClientResponse.class);
             final int responseStatus = itemsResponse.getStatus();
             if (responseStatus >= 200 && responseStatus < 300) {
@@ -210,7 +210,7 @@ public class VocabularyServiceServlet extends HttpServlet {
                         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                         return;
                     }
-                    
+
                     lastFetchSize = docs.length();
                     //add documents to result collection
                     for (int i = 0; i < lastFetchSize; i++) {
@@ -225,7 +225,9 @@ public class VocabularyServiceServlet extends HttpServlet {
                 return;
             }
         } while (results.size() < target && lastFetchSize > 0); //continue unless we have a complete result or retreived nothing last time
-
+        
+        logger.debug("Retrieved {} items", results.size());
+        
         //turn back into a single JSON array
         final JSONArray docs = new JSONArray(results);
         resp.setStatus(HttpServletResponse.SC_OK);
