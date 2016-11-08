@@ -35,6 +35,7 @@ public class ComponentDescriptionTest extends BaseUnitTest{
         desc.setHref("linkToMyComponent");
         desc.setGroupName("MyGroup");
         desc.setDomainName("Linguistics");
+        desc.setPublic(false);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         marshaller.marshal(desc, out);
@@ -51,6 +52,7 @@ public class ComponentDescriptionTest extends BaseUnitTest{
         expected += "    <ns2:href>linkToMyComponent</ns2:href>\n";
         expected += "    <groupName>MyGroup</groupName>\n";
         expected += "    <commentsCount>0</commentsCount>\n";
+        expected += "    <isPublic>false</isPublic>\n";
         expected += "</componentDescription>\n";
         assertEquals(expected, out.toString());
 

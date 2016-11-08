@@ -61,6 +61,7 @@ public class RegisterResponseTest extends BaseUnitTest {
 		expected += "        <creatorName>myC</creatorName>\n";
 		expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 		expected += "        <commentsCount>2</commentsCount>\n";
+		expected += "        <isPublic>false</isPublic>\n";
 		expected += "        <showInEditor>true</showInEditor>\n";
 		expected += "    </description>\n";
 		expected += "</registerResponse>\n";
@@ -95,6 +96,7 @@ public class RegisterResponseTest extends BaseUnitTest {
 		expected += "        <ns2:href>linkToMyProfile</ns2:href>\n";
 		expected += "        <groupName>imdi</groupName>\n";
 		expected += "        <commentsCount>2</commentsCount>\n";
+		expected += "        <isPublic>false</isPublic>\n";
 		expected += "    </description>\n";
 		expected += "</registerResponse>\n";
 		assertXMLEqual(expected, out.toString());

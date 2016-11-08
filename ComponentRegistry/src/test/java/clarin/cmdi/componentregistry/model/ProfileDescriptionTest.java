@@ -40,6 +40,7 @@ public class ProfileDescriptionTest extends BaseUnitTest{
 	desc.setHref("linkToMyProfile");
 	desc.setGroupName("MyGroup");
 	desc.setCommentsCount(2);
+        desc.setPublic(true);
 
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	marshaller.marshal(desc, out);
@@ -56,6 +57,7 @@ public class ProfileDescriptionTest extends BaseUnitTest{
 	expected += "    <ns2:href>linkToMyProfile</ns2:href>\n";
 	expected += "    <groupName>MyGroup</groupName>\n";
 	expected += "    <commentsCount>2</commentsCount>\n";
+	expected += "    <isPublic>true</isPublic>\n";
 	expected += "    <showInEditor>true</showInEditor>\n";
 	expected += "</profileDescription>\n";
 	assertEquals(expected, out.toString());
