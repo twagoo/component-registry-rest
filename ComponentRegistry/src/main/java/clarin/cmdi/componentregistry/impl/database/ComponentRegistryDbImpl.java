@@ -571,11 +571,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public int update(BaseDescription description, ComponentSpec spec, boolean forceUpdate) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         try {
             this.checkAuthorisation(description);
-            this.checkAge(description);
-            // For published components, check if used in other components or
-            // profiles (unless forced)
-            if (!forceUpdate && description.getStatus() != ComponentStatus.DEVELOPMENT && !description.isProfile()) {
-                this.checkStillUsed(description.getId());
+            if (!forceUpdate) {
+                this.checkAge(description);
+                // For published components, check if used in other components or profiles
+                if (description.getStatus() != ComponentStatus.DEVELOPMENT && !description.isProfile()) {
+                    this.checkStillUsed(description.getId());
+                }
             }
             syncSpecDescriptionHeaders(spec, description);
             componentDao.updateDescription(getIdForDescription(description), description, componentSpecToString(spec));
@@ -785,7 +786,7 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     private void checkAge(BaseDescription desc) throws DeleteFailedException {
         String principalName = userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName();
-        if (desc.isPublic() && !configuration.isAdminUser(principalName)) {
+        if (desc.getStatus() != ComponentStatus.DEVELOPMENT && !configuration.isAdminUser(principalName)) {
             Date regDate = desc.getRegistrationDate();
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH) - 1);
