@@ -756,12 +756,45 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     }
 
     private void checkAuthorisation(BaseDescription desc) throws UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
-        if (!this.canCurrentUserAccessDescription(desc.getId())) {
-            String principalName = (registryOwner != null) ? userDao.getPrincipalNameById(registryOwner.getId()).getPrincipalName() : "null";
-            throw new UserUnauthorizedException("Unauthorized operation user '" + principalName
+        final RegistryUser user = userDao.getPrincipalNameById(registryOwner.getId());
+
+        if (configuration.isAdminUser(user.getPrincipalName())) {
+            //admin is always authorised
+            return;
+        }
+
+        //read access?
+        final boolean readAccess = this.canCurrentUserAccessDescription(desc.getId());
+
+        //check write access
+        final boolean writeAccess;
+        if (!readAccess) {
+            writeAccess = false;
+        } else if (registryOwner.getId().equals(desc.getDbUserId())) {
+            //is owner!
+            writeAccess = true;
+        } else {
+            //is group member? might overlap with item group(s)
+            LOG.debug("User {} is not the owner of requested item", registryOwner.getId());
+
+            final List<Group> userGroups = groupService.getGroupsOfWhichUserIsAMember(user.getPrincipalName());
+            if (userGroups.isEmpty()) {
+                //not a member of any group, so no chance via this path
+                writeAccess = false;
+            } else {
+                //any overlap with item groups?
+                final List<Group> itemGroups = groupService.getGroupsTheItemIsAMemberOf(desc.getId());
+                //any overlap?
+                itemGroups.retainAll(userGroups);
+                writeAccess = !itemGroups.isEmpty();
+            }
+        }
+        if (!writeAccess) {
+            throw new UserUnauthorizedException("Unauthorized operation user '" + user.getPrincipalName()
                     + "' is not the creator (nor a member of the group, nor an administrator) of the "
                     + (desc.isProfile() ? "profile" : "component") + "(" + desc + ").");
         }
+
     }
 
     private void checkAuthorisationComment(Comment desc) throws UserUnauthorizedException {
