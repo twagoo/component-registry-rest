@@ -100,9 +100,6 @@ public class MDValidator implements Validator {
                     errorMessages.add(MISMATCH_ERROR);
                 }
             }
-        } catch (MalformedURLException e) {
-            errorMessages.add(SCHEMA_ERROR + e.getMessage());
-            LOG.error(SCHEMA_ERROR, e);
         } catch (JAXBException e) {
             errorMessages.add(PARSE_ERROR + e.getMessage());
             LOG.error(PARSE_ERROR, e);

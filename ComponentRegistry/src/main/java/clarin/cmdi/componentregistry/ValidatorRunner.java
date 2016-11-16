@@ -9,7 +9,9 @@ import java.util.List;
 import javax.xml.transform.stream.StreamSource;
 
 /**
+ * "Bridge" to the CMDValidate validator for component specifications
  *
+ * @see https://github.com/clarin-eric/cmd-validate
  * @author twagoo
  */
 public abstract class ValidatorRunner {
@@ -18,17 +20,23 @@ public abstract class ValidatorRunner {
 
     private final StreamSource source;
     private final String schematronPhase;
+    private final URL componentSchemaUrl;
 
     public ValidatorRunner(StreamSource source, String schematronPhase) {
         this.source = source;
         this.schematronPhase = schematronPhase;
+        try {
+            this.componentSchemaUrl = new URL(Configuration.getInstance().getGeneralComponentSchema());
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("Invalid general component schema URL", ex);
+        }
     }
 
-    public boolean validate() throws MalformedURLException, ValidatorException, IOException {
-        clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
+    public boolean validate() throws ValidatorException, IOException {
+        final Validator validator = new Validator(componentSchemaUrl);
         validator.setSchematronPhase(this.schematronPhase);
         validator.setResourceResolver(new ComponentRegistryResourceResolver());
-        
+
         if (validator.validateProfile(source)) {
             return true;
         } else {
