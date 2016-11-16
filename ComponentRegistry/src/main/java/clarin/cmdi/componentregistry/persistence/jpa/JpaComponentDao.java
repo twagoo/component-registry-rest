@@ -21,62 +21,104 @@ import java.util.Collection;
  */
 public interface JpaComponentDao extends JpaRepository<BaseDescription, Long> {
 
-    @Query("select c from BaseDescription c where c.componentId = ?1")
+    @Query("SELECT c FROM BaseDescription c WHERE c.componentId = ?1")
     BaseDescription findByComponentId(String componentId);
 
-    @Query("select c from BaseDescription c where c.ispublic = true and c.deleted = false order by upper(c.name), c.id")
+    @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = true and c.deleted = false ORDER BY upper(c.name), c.id")
     List<BaseDescription> findPublicItems();
 
-    @Query("select c from BaseDescription c where c.ispublic = true and c.deleted = false and c.componentId like ?1 order by upper(c.name) asc")
+    @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = true and c.deleted = false and c.componentId like ?1 ORDER BY upper(c.name) asc")
     List<BaseDescription> findPublishedItems(String idPrefix);
 
-    @Query("select c from BaseDescription c where c.ispublic = true and c.deleted = false and c.componentId like ?1 and status in ?2 order by upper(c.name) asc")
+    @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = true and c.deleted = false and c.componentId like ?1 and status in ?2 ORDER BY upper(c.name) asc")
     List<BaseDescription> findPublishedItems(String idPrefix, Collection<ComponentStatus> statusFilter);
 
-    @Query("select c from BaseDescription c where c.ispublic = false and c.deleted = true and c.dbUserId = ?1 order by upper(c.name), c.id")
+    @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = false and c.deleted = true and c.dbUserId = ?1 ORDER BY upper(c.name), c.id")
     List<BaseDescription> findDeletedItemsForUser(Long userId);
 
-    @Query("select c from BaseDescription c where c.ispublic = true and c.deleted = true order by upper(c.name), c.id")
+    @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = true and c.deleted = true ORDER BY upper(c.name), c.id")
     List<BaseDescription> findPublicDeletedItems();
 
-    //compare @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 order by upper(c.name), c.id")
-    @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 AND not exists (select 1 from Ownership o where o.componentId = c.componentId) order by upper(c.name), c.id")
+    //compare @Query("SELECT c FROM BaseDescription c WHERE c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 order by upper(c.name), c.id")
+    @Query("SELECT c FROM BaseDescription c"
+            + " WHERE c.dbUserId = ?1"
+            + " AND c.deleted = false"
+            + " AND c.ispublic = false"
+            + " AND c.componentId like ?2"
+            + " AND not exists (select 1 from Ownership o WHERE o.componentId = c.componentId)"
+            + " ORDER BY upper(c.name), c.id")
     List<BaseDescription> findItemsForUserThatAreNotInGroups(Long userId, String idPrefix);
 
-    @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 AND not exists (select 1 from Ownership o where o.componentId = c.componentId) AND status in ?3 order by upper(c.name), c.id")
+    @Query("SELECT c FROM BaseDescription c"
+            + " WHERE c.dbUserId = ?1"
+            + " AND c.deleted = false"
+            + " AND c.ispublic = false"
+            + " AND c.componentId like ?2"
+            + " AND not exists (select 1 from Ownership o WHERE o.componentId = c.componentId)"
+            + " AND status in ?3"
+            + " ORDER BY upper(c.name), c.id")
     List<BaseDescription> findItemsForUserThatAreNotInGroups(Long userId, String idPrefix, Collection<ComponentStatus> statusFilter);
 
     @Modifying
-    @Query(nativeQuery = true, value = "update basedescription set content = ?2 where component_id like ?1")
+    @Query(nativeQuery = true, value = "update basedescription set content = ?2 WHERE component_id like ?1")
     void updateContent(String componentId, String content);
 
-    @Query(nativeQuery = true, value = "select content from basedescription where component_id like ?1 and is_deleted = ?2")
+    @Query(nativeQuery = true, value = "SELECT content from basedescription WHERE component_id like ?1 and is_deleted = ?2")
     String findContentByComponentId(String componentId, boolean deleted);
 
-    @Query(nativeQuery = true, value = "select content from basedescription where component_id like ?1")
+    @Query(nativeQuery = true, value = "SELECT content from basedescription WHERE component_id like ?1")
     String findContentByComponentId(String componentId);
 
-    @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 order by c.id asc")
+    @Query("SELECT c.componentId FROM BaseDescription c WHERE c.deleted = false and c.componentId like ?1 ORDER BY c.id asc")
     List<String> findNonDeletedItemIds(String componentIdPrefix);
 
-    @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 and status in ?2 order by c.id asc")
+    @Query("SELECT c.componentId FROM BaseDescription c"
+            + " WHERE c.deleted = false"
+            + " AND c.componentId like ?1"
+            + " AND status in ?2"
+            + " ORDER BY c.id asc")
     List<String> findNonDeletedItemIds(String componentIdPrefix, Collection<ComponentStatus> statusFilter);
 
-    @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 and content like CONCAT('%', ?2, '%') order by c.id asc")
+    @Query("SELECT c.componentId FROM BaseDescription c"
+            + " WHERE c.deleted = false"
+            + " AND c.componentId like ?1"
+            + " AND content like CONCAT('%', ?2, '%')"
+            + " ORDER BY c.id asc")
     List<String> findNonDeletedItemIds(String componentIdPrefix, String contentFilter);
 
-    @Query("select c.componentId from BaseDescription c where c.deleted = false and c.componentId like ?1 and content like CONCAT('%', ?2, '%') and status in ?3 order by c.id asc")
+    @Query("SELECT c.componentId FROM BaseDescription c"
+            + " WHERE c.deleted = false"
+            + " AND c.componentId like ?1"
+            + " AND content like CONCAT('%', ?2, '%')"
+            + " AND status in ?3"
+            + " ORDER BY c.id asc")
     List<String> findNonDeletedItemIds(String componentIdPrefix, String contentFilter, Collection<ComponentStatus> statusFilter);
 
-    @Query("select c from BaseDescription c where c.deleted = false order by c.id asc")
+    @Query("SELECT c FROM BaseDescription c"
+            + " WHERE c.deleted = false"
+            + " ORDER BY c.id asc")
     List<BaseDescription> findNonDeletedDescriptions();
 
-    @Query("select c from BaseDescription c where c.dbUserId = ?1 AND c.deleted = false AND c.ispublic = false AND c.componentId like ?2 order by upper(c.name), c.id")
+    @Query("SELECT c FROM BaseDescription c"
+            + " WHERE c.dbUserId = ?1"
+            + " AND c.deleted = false"
+            + " AND c.ispublic = false"
+            + " AND c.componentId like ?2"
+            + " ORDER BY upper(c.name), c.id")
     List<BaseDescription> findNotPublishedUserItems(Long userId, String idPrefix);
 
-    @Query("select c.componentId from BaseDescription c where c.ispublic = ?1 AND c.componentId like ?2 AND exists (select o from Ownership o where o.componentId = c.componentId AND o.groupId = ?3)")
+    @Query("SELECT c.componentId FROM BaseDescription c"
+            + " WHERE c.ispublic = ?1"
+            + " AND c.componentId like ?2"
+            + " AND exists (select o from Ownership o WHERE o.componentId = c.componentId AND o.groupId = ?3)"
+            + " ORDER BY upper(c.name) asc")
     List<String> findAllItemIdsInGroup(boolean isPublished, String idPrefix, long groupId);
 
-    @Query("select c.componentId from BaseDescription c where c.ispublic = ?1 AND c.componentId like ?2 AND exists (select o from Ownership o where o.componentId = c.componentId AND o.groupId = ?3) AND status in ?4")
+    @Query("SELECT c.componentId FROM BaseDescription c"
+            + " WHERE c.ispublic = ?1"
+            + " AND c.componentId like ?2"
+            + " AND exists (select o from Ownership o WHERE o.componentId = c.componentId AND o.groupId = ?3)"
+            + " AND status in ?4"
+            + " ORDER BY upper(c.name) asc")
     List<String> findAllItemIdsInGroup(boolean isPublished, String idPrefix, long groupId, Collection<ComponentStatus> statusFilter);
 }
