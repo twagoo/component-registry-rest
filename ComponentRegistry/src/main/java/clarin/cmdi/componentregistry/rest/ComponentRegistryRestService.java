@@ -788,6 +788,7 @@ public class ComponentRegistryRestService {
                 ProfileDescription desc = registry.getProfileDescriptionAccessControlled(profileId);
                 if (desc != null) {
                     if (desc.isPublic()) {
+                        LOG.warn("Attempt to publish already public profile {}", profileId);
                         return Response.status(Status.CONFLICT).entity("Cannot publish already published profile.")
                                 .build();
                     }
@@ -926,6 +927,7 @@ public class ComponentRegistryRestService {
                 ComponentDescription desc = registry.getComponentDescriptionAccessControlled(componentId);
                 if (desc != null) {
                     if (desc.isPublic()) {
+                        LOG.warn("Attempt to publish already public component {}", componentId);
                         return Response.status(Status.CONFLICT).entity("Cannot publish already published omponent.")
                                 .build();
                     }
