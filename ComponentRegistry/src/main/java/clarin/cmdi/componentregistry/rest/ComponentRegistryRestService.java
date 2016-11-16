@@ -14,6 +14,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.ValidatorRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
@@ -44,6 +45,7 @@ import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.US
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
+import clarin.cmdi.schema.cmd.ValidatorException;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -51,6 +53,7 @@ import com.google.common.collect.Lists;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.resource.Singleton;
+import eu.clarin.cmdi.toolkit.CMDToolkit;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -61,6 +64,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Principal;
 import java.text.ParseException;
@@ -94,6 +98,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
+import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -855,7 +860,7 @@ public class ComponentRegistryRestService {
                     }
 
                     updateDescription(desc, name, description, domainName, group);
-                    
+
                     final ComponentRegistry cr = this.getRegistry(space, groupId);
                     return register(input, desc, new UpdateAction(), cr);
                 } else {
@@ -994,7 +999,7 @@ public class ComponentRegistryRestService {
                     }
 
                     this.updateDescription(desc, name, description, domainName, group);
-                    
+
                     final ComponentRegistry cr = this.getRegistry(space, groupId);
                     return this.register(input, desc, new UpdateAction(), cr);
                 } else {
@@ -1917,20 +1922,22 @@ public class ComponentRegistryRestService {
                 this.validate(response, descriptionValidator, validator);
 
                 if (response.getErrors().isEmpty()) {
-                    final ComponentSpec spec = validator.getComponentSpec();
-
                     try {
-                        checkForRecursion(validator, registry, desc);
-
-                        // Add profile
-                        final int returnCode = action.execute(desc, spec, response, registry);
-                        if (returnCode == 0) {
-                            desc.setHref(createXlink(desc.getId()));
-                            response.setRegistered(true);
-                            response.setDescription(desc);
-                        } else {
-                            response.setRegistered(false);
-                            response.addError("Unable to register at this moment. Internal server error. Error code: " + returnCode);
+                        // check for recursion
+                        final ComponentSpec expandedSpec = checkForRecursion(validator, registry, desc);
+                        // validate again with expanded spec
+                        if (validateExpanded(response, expandedSpec, action.isPreRegistration())) {
+                            final ComponentSpec spec = validator.getComponentSpec();
+                            // Add profile
+                            final int returnCode = action.execute(desc, spec, response, registry);
+                            if (returnCode == 0) {
+                                desc.setHref(createXlink(desc.getId()));
+                                response.setRegistered(true);
+                                response.setDescription(desc);
+                            } else {
+                                response.setRegistered(false);
+                                response.addError("Unable to register at this moment. Internal server error. Error code: " + returnCode);
+                            }
                         }
                     } catch (ComponentRegistryException | ItemNotFoundException ex) {
                         // Recursion detected
@@ -1938,11 +1945,14 @@ public class ComponentRegistryRestService {
                         response.addError("Error while expanding specification. "
                                 + ex.getMessage());
                     }
-                } else {
+                }
+
+                if (!response.getErrors().isEmpty()) {
                     LOG.warn("Registration failed with validation errors: {}",
                             Arrays.toString(response.getErrors().toArray()));
                     response.setRegistered(false);
                 }
+
                 LOG.info("Registered new {} {}", desc.isProfile() ? "profile"
                         : "component", desc);
                 response.setIsProfile(desc.isProfile());
@@ -1962,10 +1972,11 @@ public class ComponentRegistryRestService {
          * @param validator
          * @param registry
          * @param desc
+         * @return expanded version of the component specification
          * @throws ComponentRegistryException if recursion is detected or
          * something goes wrong while trying to detect recursion
          */
-        private void checkForRecursion(MDValidator validator,
+        private ComponentSpec checkForRecursion(MDValidator validator,
                 ComponentRegistry registry, BaseDescription desc)
                 throws ComponentRegistryException {
             try {
@@ -1977,10 +1988,32 @@ public class ComponentRegistryRestService {
                 // ComponentRegistryException
                 registry.getExpander().expandNestedComponent(
                         Lists.newArrayList(specCopy.getComponent()), desc.getId());
+                return specCopy;
             } catch (JAXBException ex) {
                 throw new ComponentRegistryException(
                         "Unmarshalling failed while preparing recursion detection",
                         ex);
+            }
+        }
+
+        private boolean validateExpanded(final RegisterResponse response, final ComponentSpec expandedSpec, final boolean preRegistrationMode) {
+            final String expandedSpecXml = marshaller.marshalToString(expandedSpec);
+            final String schematronPhase = preRegistrationMode
+                    ? CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_PRE_REGISTRATION
+                    : CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION;
+
+            final ValidatorRunner validatorRunner = new ValidatorRunner(new StreamSource(new StringReader(expandedSpecXml)), schematronPhase) {
+                @Override
+                protected void handleError(String text) {
+                    response.addError(text);
+                }
+            };
+            try {
+                return validatorRunner.validate();
+            } catch (ValidatorException|IOException ex) {
+                LOG.warn("Validator exception", ex);
+                response.addError("Validator error: " + ex.getMessage());
+                return false;
             }
         }
 

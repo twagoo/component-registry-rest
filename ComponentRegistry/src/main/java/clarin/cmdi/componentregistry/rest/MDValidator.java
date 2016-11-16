@@ -1,11 +1,8 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
-import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
-import clarin.cmdi.componentregistry.ComponentRegistryResourceResolver;
-import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.NullIdException;
@@ -15,15 +12,12 @@ import clarin.cmdi.componentregistry.ValidatorRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
-import clarin.cmdi.schema.cmd.Validator.Message;
 import clarin.cmdi.schema.cmd.ValidatorException;
 import eu.clarin.cmdi.toolkit.CMDToolkit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
