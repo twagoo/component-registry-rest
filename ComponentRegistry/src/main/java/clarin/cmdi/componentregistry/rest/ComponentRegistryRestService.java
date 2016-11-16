@@ -1951,10 +1951,10 @@ public class ComponentRegistryRestService {
                     LOG.warn("Registration failed with validation errors: {}",
                             Arrays.toString(response.getErrors().toArray()));
                     response.setRegistered(false);
+                } else {
+                    LOG.info("Registered new {} {}", desc.isProfile() ? "profile"
+                            : "component", desc);
                 }
-
-                LOG.info("Registered new {} {}", desc.isProfile() ? "profile"
-                        : "component", desc);
                 response.setIsProfile(desc.isProfile());
                 return Response.ok(response).build();
             } finally {
@@ -2010,7 +2010,7 @@ public class ComponentRegistryRestService {
             };
             try {
                 return validatorRunner.validate();
-            } catch (ValidatorException|IOException ex) {
+            } catch (ValidatorException | IOException ex) {
                 LOG.warn("Validator exception", ex);
                 response.addError("Validator error: " + ex.getMessage());
                 return false;
