@@ -1,6 +1,7 @@
 package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
+import clarin.cmdi.componentregistry.CMDComponentSpecExpander;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.ComponentRegistryResourceResolver;
@@ -10,6 +11,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.NullIdException;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.ValidatorRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -45,9 +47,8 @@ public class MDValidator implements Validator {
     static final String COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR = "referenced component cannot be found in the appropriate registry components: ";
     static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
     static final String ILLEGAL_ATTRIBUTE_NAME_ERROR = "Illegal attribute name: ";
-    static final String UNKNOWN_VALIDATION_ERROR = "Unknown validation error";
     static final Collection<String> ILLEGAL_ATTRIBUTE_NAMES = Collections.unmodifiableCollection(Arrays.asList("ref", "ComponentId"));
-    private List<String> errorMessages = new ArrayList<String>();
+    private final List<String> errorMessages = new ArrayList<>();
     private ComponentSpec spec = null;
     private byte[] originalSpecBytes;
     private final InputStream input;
@@ -59,12 +60,10 @@ public class MDValidator implements Validator {
     /**
      *
      * @param input In order to validate the input is consumed. So use
+     * @param marshaller
      * @see getComponentSpec to get the parsed ComponentSpec.
-     * @param desc
+     * @param description
      * @param registry (registry you currently used)
-     * @param userRegistry can be null, We get user registry as well so we can
-     * give nice error messages if needed. Can be the same as
-     * @param registry
      */
     public MDValidator(InputStream input, BaseDescription description, ComponentRegistry registry, MDMarshaller marshaller) {
         this.input = input;
@@ -81,26 +80,21 @@ public class MDValidator implements Validator {
     @Override
     public boolean validate() throws UserUnauthorizedException {
         try {
-            clarin.cmdi.schema.cmd.Validator validator = new clarin.cmdi.schema.cmd.Validator(new URL(Configuration.getInstance().getGeneralComponentSchema()));
-            if (preRegistrationMode) {
-                validator.setSchematronPhase(CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_PRE_REGISTRATION);
-            } else {
-                validator.setSchematronPhase(CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION);
-            }
-            validator.setResourceResolver(new ComponentRegistryResourceResolver());
             // We may need to reuse the input stream, so save it to a byte array first
             originalSpecBytes = getBytesFromInputStream();
-            StreamSource source = new StreamSource(new ByteArrayInputStream(originalSpecBytes));
-            if (!validator.validateProfile(source)) {
-                final List<Message> validatorMessages = validator.getMessages();
-                if (validatorMessages.size() > 0) {
-                    for (Message message : validatorMessages) {
-                        errorMessages.add(VALIDATION_ERROR + message.getText());
-                    }
-                } else {
-                    errorMessages.add(VALIDATION_ERROR + UNKNOWN_VALIDATION_ERROR);
+            final StreamSource source = new StreamSource(new ByteArrayInputStream(originalSpecBytes));
+            final String schematronPhase = preRegistrationMode
+                    ? CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_PRE_REGISTRATION
+                    : CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION;
+
+            final ValidatorRunner validatorRunner = new ValidatorRunner(source, schematronPhase) {
+                @Override
+                protected void handleError(String text) {
+                    errorMessages.add(VALIDATION_ERROR + text);
                 }
-            } else {
+            };
+
+            if (validatorRunner.validate()) {
                 spec = unmarshalSpec(originalSpecBytes);
                 if (spec.isIsProfile() != description.isProfile()) {
                     errorMessages.add(MISMATCH_ERROR);
@@ -124,10 +118,8 @@ public class MDValidator implements Validator {
                 validateComponents(spec);
             } catch (ComponentRegistryException e) {
                 errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + e);
-            } catch (ItemNotFoundException e2) {
+            } catch (ItemNotFoundException | NullIdException e2) {
                 errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e2);
-            } catch (NullIdException e3) {
-                errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e3);
             } catch (AuthenticationRequiredException e) {
                 errorMessages.add(INTERNAL_ERROR + e);
             }
@@ -159,10 +151,6 @@ public class MDValidator implements Validator {
     }
 
     private void validateDescribedComponents(ComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
-        this.checkComponentInSpace(cmdComponentType);
-    }
-
-    private void checkComponentInSpace(ComponentType cmdComponentType) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, NullIdException, AuthenticationRequiredException {
         if (isDefinedInSeparateFile(cmdComponentType)) {
             String id = cmdComponentType.getComponentRef();
             if (id == null) {
@@ -174,7 +162,7 @@ public class MDValidator implements Validator {
                 final String componentId = cmdComponentType.getComponentRef();
                 if (registry.isItemPublic(id)) {  // if  a component is public, it is available for any registry
                     return;
-                };
+                }
                 // a private component for a private registry is available only if its owner is the owner of the resgitry
                 if (RegistrySpace.PRIVATE.equals(registry.getRegistrySpace())) {
                     if (registry.canCurrentUserAccessDescription(componentId)) {
@@ -182,7 +170,6 @@ public class MDValidator implements Validator {
                     }
                     errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private registry)");
                     return;
-
                 } else { // a private component in a group registry is availabe only if it belongs to the group
                     if (RegistrySpace.GROUP.equals(registry.getRegistrySpace())) {
                         if (registry.getGroupId() == null) {
@@ -199,8 +186,7 @@ public class MDValidator implements Validator {
                     errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private component in public registry).");
                     return;
                 }
-
-            };
+            }
             errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentRef());
         }
 
