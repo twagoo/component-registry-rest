@@ -50,16 +50,14 @@ import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
 import clarin.cmdi.componentregistry.validation.CommentValidator;
+import clarin.cmdi.componentregistry.validation.ExpandedSpecValidator;
 import clarin.cmdi.componentregistry.validation.RecursionDetector;
-import clarin.cmdi.schema.cmd.ValidatorException;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.multipart.FormDataParam;
 import com.sun.jersey.spi.resource.Singleton;
-import eu.clarin.cmdi.toolkit.CMDToolkit;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -70,7 +68,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Principal;
 import java.text.ParseException;
@@ -104,7 +101,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBException;
-import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1920,40 +1916,19 @@ public class ComponentRegistryRestService {
                 final RegisterResponse response = new RegisterResponse();
                 response.setIsPrivate(!desc.isPublic());
 
-                //validate
-                final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-                final ComponentSpecValidator validator = new ComponentSpecValidator(input, desc, registry, marshaller);
-                final RecursionDetector recursionDetector = new RecursionDetector(new RecursionDetector.ComponentSpecCopyFactory() {
-                    @Override
-                    public ComponentSpec newSpecCopy() throws ComponentRegistryException {
-                        try {
-                            return validator.getCopyOfCMDComponentSpec();
-                        } catch (JAXBException ex) {
-                            throw new ComponentRegistryException(
-                                    "Unmarshalling failed while preparing recursion detection",
-                                    ex);
-                        }
-                    }
-                }, registry, desc);
-                validator.setPreRegistrationMode(action.isPreRegistration());
-
-                this.validate(response, descriptionValidator, validator, recursionDetector);
+                final ComponentSpec spec = validate(desc, input, registry, action, response);
 
                 if (response.getErrors().isEmpty()) {
                     try {
-                        // validate again with expanded spec
-                        if (validateExpanded(response, recursionDetector.getExpandedSpecCopy(), action.isPreRegistration())) {
-                            final ComponentSpec spec = validator.getComponentSpec();
-                            // Add profile
-                            final int returnCode = action.execute(desc, spec, response, registry);
-                            if (returnCode == 0) {
-                                desc.setHref(createXlink(desc.getId()));
-                                response.setRegistered(true);
-                                response.setDescription(desc);
-                            } else {
-                                response.setRegistered(false);
-                                response.addError("Unable to register at this moment. Internal server error. Error code: " + returnCode);
-                            }
+                        // Add profile
+                        final int returnCode = action.execute(desc, spec, response, registry);
+                        if (returnCode == 0) {
+                            desc.setHref(createXlink(desc.getId()));
+                            response.setRegistered(true);
+                            response.setDescription(desc);
+                        } else {
+                            response.setRegistered(false);
+                            response.addError("Unable to register at this moment. Internal server error. Error code: " + returnCode);
                         }
                     } catch (ItemNotFoundException ex) {
                         // Recursion detected
@@ -1983,34 +1958,14 @@ public class ComponentRegistryRestService {
             }
         }
 
-        private boolean validateExpanded(final RegisterResponse response, final ComponentSpec expandedSpec, final boolean preRegistrationMode) {
-            final String expandedSpecXml = marshaller.marshalToString(expandedSpec);
-            final String schematronPhase = preRegistrationMode
-                    ? CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_PRE_REGISTRATION
-                    : CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION;
-
-            final CMDValidateRunner validatorRunner = new CMDValidateRunner(new StreamSource(new StringReader(expandedSpecXml)), schematronPhase) {
-                @Override
-                protected void handleError(String text) {
-                    response.addError(text);
-                }
-            };
-            try {
-                return validatorRunner.validate();
-            } catch (ValidatorException | IOException ex) {
-                LOG.warn("Validator exception", ex);
-                response.addError("Validator error: " + ex.getMessage());
-                return false;
-            }
-        }
-
         private Response registerComment(InputStream input, BaseDescription description, ComponentRegistry registry) throws UserUnauthorizedException, AuthenticationRequiredException {
             try {
-                CommentValidator validator = new CommentValidator(input, description, marshaller);
-                CommentResponse responseLocal = new CommentResponse();
-
+                final CommentValidator validator = new CommentValidator(input, description, marshaller);
+                final CommentResponse responseLocal = new CommentResponse();
                 responseLocal.setIsPrivate(!description.isPublic());
-                this.validate(responseLocal, validator);
+
+                this.applyValidators(responseLocal, validator);
+
                 if (responseLocal.getErrors().isEmpty()) {
                     Comment com = validator.getCommentSpec();
                     // int returnCode = action.executeComment(com, response,
@@ -2111,7 +2066,62 @@ public class ComponentRegistryRestService {
             return ComponentRegistryRestService.getApplicationBaseURI(servletContext, servletRequest);
         }
 
-        private void validate(ComponentRegistryResponse response, Validator... validators) throws UserUnauthorizedException {
+        /**
+         * Performs a number of validation steps and adds all errors encountered
+         * to the response object. A component spec is unmarshalled in the
+         * process, and returned in the end
+         *
+         * @param desc description of registered item
+         * @param input input stream of registered spec
+         * @param registry registry on which we are registering
+         * @param action current registration action
+         * @param response response object we are building (will be modified)
+         * @return the original (unexpanded) component spec object unmarshalled from the input stream
+         * while validating
+         * @throws UserUnauthorizedException
+         */
+        private ComponentSpec validate(BaseDescription desc, InputStream input, ComponentRegistry registry, RegisterAction action, final RegisterResponse response) throws UserUnauthorizedException {
+            //validators: description validator
+            final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
+
+            //spec validator
+            final ComponentSpecValidator specValidator = new ComponentSpecValidator(input, desc, registry, marshaller);
+            specValidator.setPreRegistrationMode(action.isPreRegistration());
+
+            //recursion detection (additional validation, must be executed AFTER a succesful spec validation!!)
+            final RecursionDetector recursionDetector = new RecursionDetector(new RecursionDetector.ComponentSpecCopyFactory() {
+                @Override
+                public ComponentSpec newSpecCopy() throws ComponentRegistryException {
+                    try {
+                        //fresh spec copy can be obtained from the spec validator (after validation)
+                        return specValidator.getCopyOfCMDComponentSpec();
+                    } catch (JAXBException ex) {
+                        throw new ComponentRegistryException(
+                                "Unmarshalling failed while preparing recursion detection",
+                                ex);
+                    }
+                }
+            }, registry, desc);
+
+            //validation of the expanded spec (additional validation, must be executed AFTER a succesful recursion detection!!)
+            final ExpandedSpecValidator expandedSpecValidator = new ExpandedSpecValidator(marshaller, new ExpandedSpecValidator.ExpandedComponentSpecContainer() {
+                @Override
+                public ComponentSpec getExpandedSpec() throws ComponentRegistryException {
+                    //is available after recursion detection
+                    return recursionDetector.getExpandedSpecCopy();
+                }
+            });
+            expandedSpecValidator.setPreRegistrationMode(action.isPreRegistration());
+            
+            //apply all the validators
+            applyValidators(response, 
+                    descriptionValidator, specValidator, recursionDetector, expandedSpecValidator);
+            
+            //return component spec for reuse
+            return specValidator.getComponentSpec();
+        }
+
+        private void applyValidators(ComponentRegistryResponse response, Validator... validators) throws UserUnauthorizedException {
             for (Validator validator : validators) {
                 // if there have been validation errors before, check if the validator can be run
                 if (validator.runIfInvalid() || response.getErrors().isEmpty()) {
