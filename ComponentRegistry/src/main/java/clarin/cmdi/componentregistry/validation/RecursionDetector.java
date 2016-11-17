@@ -6,20 +6,17 @@ import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Expands a spec to check for recursion.
  *
  * @author twagoo
  */
-public class RecursionDetector implements Validator {
+public class RecursionDetector extends BaseValidator {
 
     private final ComponentSpecCopyFactory specCopyFactory;
     private final ComponentRegistry registry;
     private final BaseDescription desc;
-    private final List<String> errorMessages = new ArrayList<>();
     private ComponentSpec expandedSpecCopy;
 
     public RecursionDetector(ComponentSpecCopyFactory specCopyFactory, ComponentRegistry registry, BaseDescription desc) {
@@ -41,14 +38,10 @@ public class RecursionDetector implements Validator {
             //expansion succeeded
             return true;
         } catch (ComponentRegistryException ex) {
-            errorMessages.add(ex.getMessage());
+            //expansion failed (assuming because of recursion)
+            addErrorMessage(ex.getMessage());
             return false;
         }
-    }
-
-    @Override
-    public List<String> getErrorMessages() {
-        return errorMessages;
     }
 
     public ComponentSpec getExpandedSpecCopy() {

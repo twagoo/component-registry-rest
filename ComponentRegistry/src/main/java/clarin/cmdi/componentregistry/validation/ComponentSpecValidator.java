@@ -8,7 +8,6 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.NullIdException;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.validation.CMDValidateRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -18,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +26,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ComponentSpecValidator implements Validator {
+public class ComponentSpecValidator extends BaseValidator {
 
     private final static Logger LOG = LoggerFactory.getLogger(ComponentSpecValidator.class);
     public static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
@@ -42,7 +40,6 @@ public class ComponentSpecValidator implements Validator {
     public static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
     public static final String ILLEGAL_ATTRIBUTE_NAME_ERROR = "Illegal attribute name: ";
     public static final Collection<String> ILLEGAL_ATTRIBUTE_NAMES = Collections.unmodifiableCollection(Arrays.asList("ref", "ComponentId"));
-    private final List<String> errorMessages = new ArrayList<>();
     private ComponentSpec spec = null;
     private byte[] originalSpecBytes;
     private final InputStream input;
@@ -67,11 +64,6 @@ public class ComponentSpecValidator implements Validator {
     }
 
     @Override
-    public List<String> getErrorMessages() {
-        return errorMessages;
-    }
-
-    @Override
     public boolean validate() throws UserUnauthorizedException {
         try {
             // We may need to reuse the input stream, so save it to a byte array first
@@ -84,38 +76,38 @@ public class ComponentSpecValidator implements Validator {
             final CMDValidateRunner validatorRunner = new CMDValidateRunner(source, schematronPhase) {
                 @Override
                 protected void handleError(String text) {
-                    errorMessages.add(VALIDATION_ERROR + text);
+                    addErrorMessage(VALIDATION_ERROR + text);
                 }
             };
 
             if (validatorRunner.validate()) {
                 spec = unmarshalSpec(originalSpecBytes);
                 if (spec.isIsProfile() != description.isProfile()) {
-                    errorMessages.add(MISMATCH_ERROR);
+                    addErrorMessage(MISMATCH_ERROR);
                 }
             }
         } catch (JAXBException e) {
-            errorMessages.add(PARSE_ERROR + e.getMessage());
+            addErrorMessage(PARSE_ERROR + e.getMessage());
             LOG.error(PARSE_ERROR, e);
         } catch (ValidatorException e) {
-            errorMessages.add(VALIDATION_ERROR + e.getMessage());
+            addErrorMessage(VALIDATION_ERROR + e.getMessage());
             LOG.error(VALIDATION_ERROR, e);
         } catch (IOException e) {
-            errorMessages.add(IO_ERROR + e.getMessage());
+            addErrorMessage(IO_ERROR + e.getMessage());
             LOG.error(IO_ERROR, e);
         }
-        if (errorMessages.isEmpty()) {
+        if (!hasErrors()) {
             try {
                 validateComponents(spec);
             } catch (ComponentRegistryException e) {
-                errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + e);
+                addErrorMessage(COMPONENT_REGISTRY_EXCEPTION_ERROR + e);
             } catch (ItemNotFoundException | NullIdException e2) {
-                errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + e2);
+                addErrorMessage(COMPONENT_NOT_REGISTERED_ERROR + e2);
             } catch (AuthenticationRequiredException e) {
-                errorMessages.add(INTERNAL_ERROR + e);
+                addErrorMessage(INTERNAL_ERROR + e);
             }
         }
-        return errorMessages.isEmpty();
+        return !hasErrors();
     }
 
     private byte[] getBytesFromInputStream() throws IOException {
@@ -159,26 +151,26 @@ public class ComponentSpecValidator implements Validator {
                     if (registry.canCurrentUserAccessDescription(componentId)) {
                         return;
                     }
-                    errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private registry)");
+                    addErrorMessage(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private registry)");
                     return;
                 } else { // a private component in a group registry is availabe only if it belongs to the group
                     if (RegistrySpace.GROUP.equals(registry.getRegistrySpace())) {
                         if (registry.getGroupId() == null) {
-                            errorMessages.add(COMPONENT_REGISTRY_EXCEPTION_ERROR + "in the group space, the group id is null");
+                            addErrorMessage(COMPONENT_REGISTRY_EXCEPTION_ERROR + "in the group space, the group id is null");
                             return;
                         }
                         List<Number> componentGroupIds = registry.getItemGroups(cmdComponentType.getComponentRef());
                         if (componentGroupIds.contains(registry.getGroupId())) {
                             return;
                         }
-                        errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (group registry) " + registry.getGroupId());
+                        addErrorMessage(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (group registry) " + registry.getGroupId());
                         return;
                     }
-                    errorMessages.add(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private component in public registry).");
+                    addErrorMessage(COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR + componentId + " (private component in public registry).");
                     return;
                 }
             }
-            errorMessages.add(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentRef());
+            addErrorMessage(COMPONENT_NOT_REGISTERED_ERROR + cmdComponentType.getComponentRef());
         }
 
     }
