@@ -8,7 +8,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.NullIdException;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.validation.ValidatorRunner;
+import clarin.cmdi.componentregistry.validation.CMDValidateRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -28,9 +28,9 @@ import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CMDValidator implements Validator {
+public class ComponentSpecValidator implements Validator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(CMDValidator.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ComponentSpecValidator.class);
     public static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
     public static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
     public static final String PARSE_ERROR = "Error in validation input file: ";
@@ -59,7 +59,7 @@ public class CMDValidator implements Validator {
      * @param description
      * @param registry (registry you currently used)
      */
-    public CMDValidator(InputStream input, BaseDescription description, ComponentRegistry registry, MDMarshaller marshaller) {
+    public ComponentSpecValidator(InputStream input, BaseDescription description, ComponentRegistry registry, MDMarshaller marshaller) {
         this.input = input;
         this.description = description;
         this.registry = registry;
@@ -81,7 +81,7 @@ public class CMDValidator implements Validator {
                     ? CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_PRE_REGISTRATION
                     : CMDToolkit.SCHEMATRON_PHASE_CMD_COMPONENT_POST_REGISTRATION;
 
-            final ValidatorRunner validatorRunner = new ValidatorRunner(source, schematronPhase) {
+            final CMDValidateRunner validatorRunner = new CMDValidateRunner(source, schematronPhase) {
                 @Override
                 protected void handleError(String text) {
                     errorMessages.add(VALIDATION_ERROR + text);

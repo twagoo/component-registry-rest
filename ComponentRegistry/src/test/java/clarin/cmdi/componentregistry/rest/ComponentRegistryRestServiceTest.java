@@ -1,6 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.validation.CMDValidator;
+import clarin.cmdi.componentregistry.validation.ComponentSpecValidator;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
@@ -1981,7 +1981,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 "Subsequent elements should not be allowed to have the same name",
                 response.isRegistered());
         assertTrue(response.getErrors().get(0)
-                .contains(CMDValidator.VALIDATION_ERROR));
+                .contains(ComponentSpecValidator.VALIDATION_ERROR));
     }
 
     @Test
@@ -2013,8 +2013,8 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertFalse(response.isRegistered());
         assertEquals(2, response.getErrors().size());
         assertNotNull(response.getErrors().get(0));
-        assertEquals(CMDValidator.VALIDATION_ERROR, response.getErrors().get(1)
-                .substring(0, CMDValidator.VALIDATION_ERROR.length()));
+        assertEquals(ComponentSpecValidator.VALIDATION_ERROR, response.getErrors().get(1)
+                .substring(0, ComponentSpecValidator.VALIDATION_ERROR.length()));
     }
 
     @Test
@@ -2058,7 +2058,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertFalse(response.isRegistered());
         assertTrue(response.isProfile());
         assertEquals(1, response.getErrors().size());
-        assertEquals(CMDValidator.MISMATCH_ERROR, response.getErrors().get(0));
+        assertEquals(ComponentSpecValidator.MISMATCH_ERROR, response.getErrors().get(0));
     }
 
     @Test

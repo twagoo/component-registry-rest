@@ -16,7 +16,7 @@ import javax.xml.transform.stream.StreamSource;
  * @see https://github.com/clarin-eric/cmd-validate
  * @author twagoo
  */
-public abstract class ValidatorRunner {
+public abstract class CMDValidateRunner {
 
     static final String UNKNOWN_VALIDATION_ERROR = "Unknown validation error";
 
@@ -24,7 +24,7 @@ public abstract class ValidatorRunner {
     private final String schematronPhase;
     private final URL componentSchemaUrl;
 
-    public ValidatorRunner(StreamSource source, String schematronPhase) {
+    public CMDValidateRunner(StreamSource source, String schematronPhase) {
         this.source = source;
         this.schematronPhase = schematronPhase;
         try {
