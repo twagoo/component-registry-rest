@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.validation;
 
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
@@ -8,7 +8,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.NullIdException;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.ValidatorRunner;
+import clarin.cmdi.componentregistry.validation.ValidatorRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.components.ComponentType;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -28,20 +28,20 @@ import javax.xml.transform.stream.StreamSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MDValidator implements Validator {
+public class CMDValidator implements Validator {
 
-    private final static Logger LOG = LoggerFactory.getLogger(MDValidator.class);
-    static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
-    static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
-    static final String PARSE_ERROR = "Error in validation input file: ";
-    static final String SCHEMA_ERROR = "Error in reading general component schema: ";
-    static final String VALIDATION_ERROR = "Error while validating file: ";
-    static final String IO_ERROR = "Error while reading specification or general component schema: ";
-    static final String INTERNAL_ERROR = "Internal error: ";
-    static final String COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR = "referenced component cannot be found in the appropriate registry components: ";
-    static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
-    static final String ILLEGAL_ATTRIBUTE_NAME_ERROR = "Illegal attribute name: ";
-    static final Collection<String> ILLEGAL_ATTRIBUTE_NAMES = Collections.unmodifiableCollection(Arrays.asList("ref", "ComponentId"));
+    private final static Logger LOG = LoggerFactory.getLogger(CMDValidator.class);
+    public static final String MISMATCH_ERROR = "Cannot register component as a profile or vica versa.";
+    public static final String COMPONENT_NOT_REGISTERED_ERROR = "referenced component is not registered or does not have a correct componentId: ";
+    public static final String PARSE_ERROR = "Error in validation input file: ";
+    public static final String SCHEMA_ERROR = "Error in reading general component schema: ";
+    public static final String VALIDATION_ERROR = "Error while validating file: ";
+    public static final String IO_ERROR = "Error while reading specification or general component schema: ";
+    public static final String INTERNAL_ERROR = "Internal error: ";
+    public static final String COMPONENT_NOT_REGISTERED_IN_APPROPRIATE_SPACE_ERROR = "referenced component cannot be found in the appropriate registry components: ";
+    public static final String COMPONENT_REGISTRY_EXCEPTION_ERROR = "An exception occurred while accessing the component registry: ";
+    public static final String ILLEGAL_ATTRIBUTE_NAME_ERROR = "Illegal attribute name: ";
+    public static final Collection<String> ILLEGAL_ATTRIBUTE_NAMES = Collections.unmodifiableCollection(Arrays.asList("ref", "ComponentId"));
     private final List<String> errorMessages = new ArrayList<>();
     private ComponentSpec spec = null;
     private byte[] originalSpecBytes;
@@ -59,7 +59,7 @@ public class MDValidator implements Validator {
      * @param description
      * @param registry (registry you currently used)
      */
-    public MDValidator(InputStream input, BaseDescription description, ComponentRegistry registry, MDMarshaller marshaller) {
+    public CMDValidator(InputStream input, BaseDescription description, ComponentRegistry registry, MDMarshaller marshaller) {
         this.input = input;
         this.description = description;
         this.registry = registry;

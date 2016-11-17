@@ -1,5 +1,7 @@
-package clarin.cmdi.componentregistry;
+package clarin.cmdi.componentregistry.validation;
 
+import clarin.cmdi.componentregistry.ComponentRegistryResourceResolver;
+import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.schema.cmd.Validator;
 import clarin.cmdi.schema.cmd.ValidatorException;
 import java.io.IOException;

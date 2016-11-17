@@ -1,5 +1,6 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.validation;
 
+import clarin.cmdi.componentregistry.validation.DescriptionValidator;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

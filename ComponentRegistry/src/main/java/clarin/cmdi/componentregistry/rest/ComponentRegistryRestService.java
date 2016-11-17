@@ -1,5 +1,8 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.validation.CMDValidator;
+import clarin.cmdi.componentregistry.validation.DescriptionValidator;
+import clarin.cmdi.componentregistry.validation.Validator;
 import clarin.cmdi.componentregistry.CmdVersion;
 import clarin.cmdi.componentregistry.AllowedAttributetypesXML;
 import clarin.cmdi.componentregistry.AuthenticationRequiredException;
@@ -14,7 +17,7 @@ import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
-import clarin.cmdi.componentregistry.ValidatorRunner;
+import clarin.cmdi.componentregistry.validation.ValidatorRunner;
 import clarin.cmdi.componentregistry.components.ComponentSpec;
 import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
@@ -1916,7 +1919,7 @@ public class ComponentRegistryRestService {
 
                 //validate
                 final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
-                final MDValidator validator = new MDValidator(input, desc, registry, marshaller);
+                final CMDValidator validator = new CMDValidator(input, desc, registry, marshaller);
                 validator.setPreRegistrationMode(action.isPreRegistration());
 
                 this.validate(response, descriptionValidator, validator);
@@ -1976,7 +1979,7 @@ public class ComponentRegistryRestService {
          * @throws ComponentRegistryException if recursion is detected or
          * something goes wrong while trying to detect recursion
          */
-        private ComponentSpec checkForRecursion(MDValidator validator,
+        private ComponentSpec checkForRecursion(CMDValidator validator,
                 ComponentRegistry registry, BaseDescription desc)
                 throws ComponentRegistryException {
             try {

@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.validation;
 
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import java.util.List;

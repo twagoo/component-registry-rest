@@ -1,4 +1,4 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.validation;
 
 import java.util.ArrayList;
 import java.util.List;
