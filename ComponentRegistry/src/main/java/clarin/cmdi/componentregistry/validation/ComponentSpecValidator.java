@@ -229,4 +229,9 @@ public class ComponentSpecValidator implements Validator {
     public void setPreRegistrationMode(boolean preRegistrationMode) {
         this.preRegistrationMode = preRegistrationMode;
     }
+
+    @Override
+    public boolean runIfInvalid() {
+        return true;
+    }
 }

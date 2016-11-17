@@ -1,24 +1,14 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.validation;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
-import clarin.cmdi.componentregistry.MDMarshaller;
-import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import javax.xml.transform.TransformerException;
-
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Test class for CommentValidator

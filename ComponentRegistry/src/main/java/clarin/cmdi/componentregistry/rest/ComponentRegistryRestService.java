@@ -25,6 +25,7 @@ import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
 import clarin.cmdi.componentregistry.model.CommentResponse;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentRegistryResponse;
 import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegisterResponse;
@@ -48,6 +49,8 @@ import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.US
 import clarin.cmdi.componentregistry.rss.Rss;
 import clarin.cmdi.componentregistry.rss.RssCreatorComments;
 import clarin.cmdi.componentregistry.rss.RssCreatorDescriptions;
+import clarin.cmdi.componentregistry.validation.CommentValidator;
+import clarin.cmdi.componentregistry.validation.RecursionDetector;
 import clarin.cmdi.schema.cmd.ValidatorException;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
@@ -1920,16 +1923,26 @@ public class ComponentRegistryRestService {
                 //validate
                 final DescriptionValidator descriptionValidator = new DescriptionValidator(desc);
                 final ComponentSpecValidator validator = new ComponentSpecValidator(input, desc, registry, marshaller);
+                final RecursionDetector recursionDetector = new RecursionDetector(new RecursionDetector.ComponentSpecCopyFactory() {
+                    @Override
+                    public ComponentSpec newSpecCopy() throws ComponentRegistryException {
+                        try {
+                            return validator.getCopyOfCMDComponentSpec();
+                        } catch (JAXBException ex) {
+                            throw new ComponentRegistryException(
+                                    "Unmarshalling failed while preparing recursion detection",
+                                    ex);
+                        }
+                    }
+                }, registry, desc);
                 validator.setPreRegistrationMode(action.isPreRegistration());
 
-                this.validate(response, descriptionValidator, validator);
+                this.validate(response, descriptionValidator, validator, recursionDetector);
 
                 if (response.getErrors().isEmpty()) {
                     try {
-                        // check for recursion
-                        final ComponentSpec expandedSpec = checkForRecursion(validator, registry, desc);
                         // validate again with expanded spec
-                        if (validateExpanded(response, expandedSpec, action.isPreRegistration())) {
+                        if (validateExpanded(response, recursionDetector.getExpandedSpecCopy(), action.isPreRegistration())) {
                             final ComponentSpec spec = validator.getComponentSpec();
                             // Add profile
                             final int returnCode = action.execute(desc, spec, response, registry);
@@ -1942,7 +1955,7 @@ public class ComponentRegistryRestService {
                                 response.addError("Unable to register at this moment. Internal server error. Error code: " + returnCode);
                             }
                         }
-                    } catch (ComponentRegistryException | ItemNotFoundException ex) {
+                    } catch (ItemNotFoundException ex) {
                         // Recursion detected
                         response.setRegistered(false);
                         response.addError("Error while expanding specification. "
@@ -1967,35 +1980,6 @@ public class ComponentRegistryRestService {
                 } catch (IOException e) {
                     LOG.error("Error when closing inputstream: ", e);
                 }
-            }
-        }
-
-        /**
-         *
-         * @param validator
-         * @param registry
-         * @param desc
-         * @return expanded version of the component specification
-         * @throws ComponentRegistryException if recursion is detected or
-         * something goes wrong while trying to detect recursion
-         */
-        private ComponentSpec checkForRecursion(ComponentSpecValidator validator,
-                ComponentRegistry registry, BaseDescription desc)
-                throws ComponentRegistryException {
-            try {
-                // Expand to check for recursion. Operate on copy so that original
-                // does not get expanded.
-                final ComponentSpec specCopy = validator
-                        .getCopyOfCMDComponentSpec();
-                // In case of recursion, the following will throw a
-                // ComponentRegistryException
-                registry.getExpander().expandNestedComponent(
-                        Lists.newArrayList(specCopy.getComponent()), desc.getId());
-                return specCopy;
-            } catch (JAXBException ex) {
-                throw new ComponentRegistryException(
-                        "Unmarshalling failed while preparing recursion detection",
-                        ex);
             }
         }
 
@@ -2026,7 +2010,7 @@ public class ComponentRegistryRestService {
                 CommentResponse responseLocal = new CommentResponse();
 
                 responseLocal.setIsPrivate(!description.isPublic());
-                this.validateComment(responseLocal, validator);
+                this.validate(responseLocal, validator);
                 if (responseLocal.getErrors().isEmpty()) {
                     Comment com = validator.getCommentSpec();
                     // int returnCode = action.executeComment(com, response,
@@ -2127,22 +2111,16 @@ public class ComponentRegistryRestService {
             return ComponentRegistryRestService.getApplicationBaseURI(servletContext, servletRequest);
         }
 
-        private void validate(RegisterResponse response, Validator... validators) throws UserUnauthorizedException {
+        private void validate(ComponentRegistryResponse response, Validator... validators) throws UserUnauthorizedException {
             for (Validator validator : validators) {
-                if (!validator.validate()) {
-                    for (String error : validator.getErrorMessages()) {
-                        response.addError(error);
-                    }
-                }
-            }
-        }
-
-        private void validateComment(CommentResponse response,
-                Validator... validators) throws UserUnauthorizedException {
-            for (Validator validator : validators) {
-                if (!validator.validate()) {
-                    for (String error : validator.getErrorMessages()) {
-                        response.addError(error);
+                // if there have been validation errors before, check if the validator can be run
+                if (validator.runIfInvalid() || response.getErrors().isEmpty()) {
+                    // perform actual validation
+                    if (!validator.validate()) {
+                        // any errors?
+                        for (String error : validator.getErrorMessages()) {
+                            response.addError(error);
+                        }
                     }
                 }
             }

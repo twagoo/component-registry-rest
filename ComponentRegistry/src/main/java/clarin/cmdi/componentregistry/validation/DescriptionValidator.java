@@ -26,6 +26,11 @@ public class DescriptionValidator implements Validator {
         }
         return errorMessages.isEmpty();
     }
+
+    @Override
+    public boolean runIfInvalid() {
+        return true;
+    }
     
     private boolean isOk(String... fields) {
         boolean isOk = true;

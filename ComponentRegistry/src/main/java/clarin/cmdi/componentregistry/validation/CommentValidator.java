@@ -1,6 +1,5 @@
-package clarin.cmdi.componentregistry.rest;
+package clarin.cmdi.componentregistry.validation;
 
-import clarin.cmdi.componentregistry.validation.Validator;
 import clarin.cmdi.componentregistry.MDMarshaller;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.Comment;
@@ -16,7 +15,7 @@ import javax.xml.bind.JAXBException;
  * Implementation of Validator
  * @author jean-charles Ferrières <jean-charles.ferrieres@mpi.nl>
  */
-class CommentValidator implements Validator {
+public class CommentValidator implements Validator {
 
     static final String PARSE_ERROR = "Error in validation input file. Error is: ";
     static final String COMMENT_SPECIFICATION_ERROR = "Illegal comment specification: ";
@@ -76,5 +75,10 @@ class CommentValidator implements Validator {
 
     public Comment getCommentSpec() {
 	return com;
+    }
+
+    @Override
+    public boolean runIfInvalid() {
+        return true;
     }
 }
