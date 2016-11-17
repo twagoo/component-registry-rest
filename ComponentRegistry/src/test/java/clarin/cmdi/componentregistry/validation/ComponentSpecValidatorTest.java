@@ -1,6 +1,5 @@
 package clarin.cmdi.componentregistry.validation;
 
-import clarin.cmdi.componentregistry.validation.ComponentSpecValidator;
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
@@ -27,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author george.georgovassilis@mpi.nl
  *
  */
-pubComponentSpecValidatorTestidatorTest extends BaseUnitTest {
+public class ComponentSpecValidatorTest extends BaseUnitTest {
 
     @Autowired
     private ComponentRegistryFactory componentRegistryFactory;
