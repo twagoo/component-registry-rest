@@ -1,5 +1,50 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-2.2.0 (December 2016)
+- Component lifecycle management:
+	- Items in the public, private and team spaces can be given the deprecated status.
+	- A successor can be assigned to deprecated items.
+	- Successors are linked to from deprecated items in the user interface.
+	- In the Component Editor, an item can be replaced by its successor with a single click
+	- Private items can be optionally be published as draft, leading to a public item with development status that can still be modified
+	- A filter in the Component Browser allows for viewing of development, production and/or deprecated items
+	- The different statuses are visually distinguished in the Component Browser and Editor
+- Component Editor enhancements and additions:
+	- A CMDI 1.1/CMDI 1.2 mode selector makes it easy to edit with compatibility in mind
+	- Multilingual documentation can be added to components, elements and attribute
+	- "Automatic value expressions" can be added to elements and attributes
+	- Regular expressions as element/attribute type ('pattern') are now validated
+	- Added client side validation
+	- Controlled vocabularies:
+		- Two vocabulary types are now supported: open and closed vocabularies
+		- External vocabularies can be linked to open and closed vocabularies
+		- Available CLAVAS vocabularies can be selected from a list without having to enter a URI
+		- External vocabularies can be imported into a closed vocabulary
+		- A batch editing (CSV) mode for vocabulary items has been added
+		- The tabular vocabulary editor supports cell navigation using the tab key
+- Component Editor fixes:
+	- Missing value schemes (types) of elements and attributes are highlighted in the editor
+- UI and usability improvements/fixes:
+	- Icons have been added to many buttons making it easier to find and recognise oft needed functionalities
+	- Items can be published (as draft or for production) from the component browser
+	- Linked components can be accessed via a link in their title in the viewer of the Component Browser
+	- After updating an item and/or when the space changes, the Component Browser's table is scrolled to the position of the selected item
+	- Concept links for inline components are now shown in the viewer
+	- Linked component description shown in the Component Browser's viewer and Component Editor
+	- 'Move to team' dropdown now shows full list also after save as new
+	- Various performance improvements
+- Back end improvements and fixes:
+	- Components are expanded during validation, thus catching more potential issues
+	- Improved authorisation checks on public/production items
+	- Fixed the availability of interactive API documentation (at /api-docs)
+	- Indexing of lifecycle status information for fast filtered retrieval
+	
+Note: for more information about CMDI 1.2 features, see <https://www.clarin.eu/cmdi12>.
+
+Milestones:
+- Back end: <https://github.com/clarin-eric/component-registry-rest/milestone/2>
+- Front end: <https://github.com/clarin-eric/component-registry-front-end/milestone/3>
+
 Release ComponentRegistry-2.1.2 (July 2016)
 - Fixed logging issues
 
