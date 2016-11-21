@@ -54,12 +54,10 @@ i.e. development or testing environments. -->
     </filter-mapping>
     <filter>
         <filter-name>wicket.componentregistry</filter-name>
-        <filter-class>org.apache.wicket.protocol.http.WicketFilter
-        </filter-class>
+        <filter-class>org.apache.wicket.protocol.http.WicketFilter</filter-class>
         <init-param>
             <param-name>applicationClassName</param-name>
-            <param-value>clarin.cmdi.componentregistry.frontend.AdminApp
-            </param-value>
+            <param-value>clarin.cmdi.componentregistry.frontend.AdminApp</param-value>
         </init-param>
         <init-param>
             <param-name>configuration</param-name>
@@ -138,7 +136,7 @@ i.e. development or testing environments. -->
         </init-param>
         <init-param>            
             <param-name>swagger.api.basepath</param-name>
-            <param-value>http://localhost:8080/ComponentRegistry/rest</param-value>
+            <param-value>https://catalog.clarin.eu/ds/ComponentRegistry/rest</param-value>
         </init-param>
         <load-on-startup>2</load-on-startup>
     </servlet>
