@@ -31,6 +31,11 @@ the script 'upgrade-2.2.sql' bundled with the deployment package.
     <Parameter 
         name="eu.clarin.cmdi.componentregistry.clavasRestUrl" 
         value="https://openskos.meertens.knaw.nl/clavas/api/"/>
+        
+    Note: until the production release of OpenSKOS 2 (December 2016?), use the following 
+    URL as value (but never for production purposes!):
+
+    	http://145.100.58.79/clavas/public/api/
 
 === 2.1 ===
 
