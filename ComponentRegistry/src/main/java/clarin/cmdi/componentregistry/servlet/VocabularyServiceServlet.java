@@ -4,7 +4,9 @@ import clarin.cmdi.componentregistry.Configuration;
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.UniformInterface;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.WebResource.Builder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -243,6 +245,7 @@ public class VocabularyServiceServlet extends HttpServlet {
         //turn back into a single JSON array
         final JSONArray docs = new JSONArray(results);
         resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("application/json;charset=UTF-8");
         try (Writer writer = new OutputStreamWriter(resp.getOutputStream())) {
             writer.write(docs.toString());
         }
@@ -277,7 +280,7 @@ public class VocabularyServiceServlet extends HttpServlet {
             if (acceptHeader.contains(MediaType.APPLICATION_JSON)) {
                 targetUriBuilder.append(".json");
                 //forward JSON content
-                final WebResource serviceReq = Client.create().resource(targetUriBuilder.toString());
+                final Builder serviceReq = Client.create().resource(targetUriBuilder.toString()).accept(MediaType.APPLICATION_JSON_TYPE);
                 forwardResponse(serviceReq, resp);
                 return;
             } else if (acceptHeader.contains(MediaType.TEXT_HTML)) {
@@ -289,9 +292,13 @@ public class VocabularyServiceServlet extends HttpServlet {
         resp.sendRedirect(resp.encodeRedirectURL(targetUriBuilder.toString()));
     }
 
-    private void forwardResponse(WebResource request, HttpServletResponse resp) throws IOException {
+    private void forwardResponse(UniformInterface request, HttpServletResponse resp) throws IOException {
         //make GET request and copy directly to response stream
-        try (final InputStream serviceResultStream = request.get(InputStream.class)) {
+        final ClientResponse response = request.get(ClientResponse.class);
+        //also forward content type header
+        resp.setContentType(response.getHeaders().getFirst("content-type"));
+        final InputStream get = response.getEntityInputStream();
+        try (final InputStream serviceResultStream = get) {
             try (final ServletOutputStream responseOutStream = resp.getOutputStream()) {
                 ByteStreams.copy(serviceResultStream, responseOutStream);
                 responseOutStream.close();
