@@ -65,7 +65,7 @@
         Location that gets redirected to from /documentation.jsp, which in turn is linked to
         from the Flex application through the 'Help' link button.
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="http://www.clarin.eu/cmdi#compreg"/>
+    <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="https://www.clarin.eu/content/component-registry-documentation"/>
     <!--
         Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
