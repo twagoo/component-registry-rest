@@ -246,7 +246,7 @@ public class VocabularyServiceServlet extends HttpServlet {
         final JSONArray docs = new JSONArray(results);
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType("application/json;charset=UTF-8");
-        try (Writer writer = new OutputStreamWriter(resp.getOutputStream())) {
+        try (Writer writer = new OutputStreamWriter(resp.getOutputStream(), "UTF-8")) {
             writer.write(docs.toString());
         }
     }
