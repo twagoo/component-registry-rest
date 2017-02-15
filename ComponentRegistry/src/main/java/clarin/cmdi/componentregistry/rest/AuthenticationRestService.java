@@ -93,8 +93,10 @@ public class AuthenticationRestService {
 
         final AuthenticationInfo authInfo;
         if (userPrincipal == null) {
+            logger.trace("Unauthenticated (userPrincipal == null)");
             authInfo = new AuthenticationInfo(false);
-        } else if(ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+        } else if(userPrincipal.getName() == null || userPrincipal.getName().isEmpty() || ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+            logger.debug("User principal set but no user name ({}): {}", userPrincipal.getName(), userPrincipal);
             authInfo = new AuthenticationInfo(false);
         } else {
             final UserCredentials credentials = new UserCredentials(userPrincipal);
