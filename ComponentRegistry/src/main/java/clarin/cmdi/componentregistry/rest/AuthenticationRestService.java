@@ -6,6 +6,7 @@ import clarin.cmdi.componentregistry.Configuration;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
+import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import com.google.common.base.Strings;
 import io.swagger.annotations.Api;
@@ -76,33 +77,47 @@ public class AuthenticationRestService {
     private SecurityContext security;
     @Context
     private UriInfo uriInfo;
-    @Autowired
+    @Autowired(required = true)
     private Configuration configuration;
-    @Autowired
+    @Autowired(required = true)
     private UserDao userDao;
 
     @GET
     @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @ApiOperation(value = "Information on the current authentication state. Pass 'redirect' query parameter to make this method redirect to the URI specified as its value.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "If no query parameters are passed, with the authentications status in its body"),
+        @ApiResponse(code = 200, message = "If no query parameters are passed, with the authentications status in its body")
+        ,
         @ApiResponse(code = 303, message = "A redirect to the URI provided as the value of the 'redirect' parameter")
     })
     public Response getAuthenticationInformation(@QueryParam("redirect") @DefaultValue("") String redirectUri) throws JSONException, AuthenticationRequiredException {
+        logger.trace("Authentication information requested. Security context {}. Redirect URI: '{}'", security, redirectUri);
+
         final Principal userPrincipal = security.getUserPrincipal();
+        logger.trace("User principal: {}", userPrincipal);
 
         final AuthenticationInfo authInfo;
         if (userPrincipal == null) {
             logger.trace("Unauthenticated (userPrincipal == null)");
             authInfo = new AuthenticationInfo(false);
-        } else if(userPrincipal.getName() == null || userPrincipal.getName().isEmpty() || ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
-            logger.debug("User principal set but no user name ({}): {}", userPrincipal.getName(), userPrincipal);
+        } else if (userPrincipal.getName() == null || userPrincipal.getName().isEmpty() || ComponentRegistryFactory.ANONYMOUS_USER.equals(userPrincipal.getName())) {
+            logger.trace("User principal set but no user name ({}): {}", userPrincipal.getName(), userPrincipal);
             authInfo = new AuthenticationInfo(false);
         } else {
             final UserCredentials credentials = new UserCredentials(userPrincipal);
-            Long id = userDao.getByPrincipalName(userPrincipal.getName()).getId();
+            final RegistryUser user = userDao.getByPrincipalName(userPrincipal.getName());
+            
+            final Long id;
+            if (user == null) {
+                logger.trace("Unregistered user {}", userPrincipal.getName());
+                id = null;
+            } else {
+                id = user.getId();
+            }
             authInfo = new AuthenticationInfo(credentials, id, configuration.isAdminUser(userPrincipal));
         }
+
+        logger.trace("Authentication info: {}", authInfo);
 
         if (Strings.isNullOrEmpty(redirectUri)) {
             return Response.ok(authInfo).build();
@@ -114,11 +129,12 @@ public class AuthenticationRestService {
     @POST
     @ApiOperation(value = "Triggers the service to require the client to authenticate by means of the configured authentication mechanism. Notice that this might require user interaction!")
     @ApiResponses(value = {
-        @ApiResponse(code = 303, message = "A redirect, either to a Shibboleth authentication page/discovery service or other identification mechanism, and ultimately to the same URI as requested (which should be picked up as a GET)"),
+        @ApiResponse(code = 303, message = "A redirect, either to a Shibboleth authentication page/discovery service or other identification mechanism, and ultimately to the same URI as requested (which should be picked up as a GET)")
+        ,
         @ApiResponse(code = 401, message = "If unauthenticated, a request to authenticate may be returned (not in case of Shibboleth authentication)")
     })
     public Response triggerAuthenticationRequest() {
-        logger.debug("Client has triggered authentication request");
+        logger.debug("Client has triggered authentication request {} -> {}", security.getUserPrincipal(), uriInfo.getRequestUri());
 
         //done - redirect to GET
         return Response.seeOther(uriInfo.getRequestUri()).build();
