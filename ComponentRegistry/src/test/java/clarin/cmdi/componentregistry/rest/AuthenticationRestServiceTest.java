@@ -5,11 +5,10 @@
  */
 package clarin.cmdi.componentregistry.rest;
 
-import clarin.cmdi.componentregistry.ComponentRegistry;
-import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
 import com.sun.jersey.api.client.ClientResponse;
+import java.security.Principal;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -23,11 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Autowired
-    private ComponentRegistryFactory componentRegistryFactory;
-    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    private ComponentRegistry baseRegistry;
 
     public static final String REGISTRY_BASE = "/registry/1.x";
     public static final String NON_CANONICAL_REGISTRY_BASE = "/registry/1.1";
@@ -36,7 +31,6 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
     public void init() {
         ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
         createUserRecord();
-        baseRegistry = componentRegistryFactory.getBaseRegistry(DummyPrincipal.DUMMY_CREDENTIALS);
     }
 
     /**
@@ -63,13 +57,14 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
      */
     @Test
     public void testGetAuthenticationInformationAuthenticatedKnownUser() throws Exception {
-        if (getUserDao().getByPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName()) == null) {
+        final DummyPrincipal registeredUser = DummyPrincipal.DUMMY_PRINCIPAL;
+        
+        if (getUserDao().getByPrincipalName(registeredUser.getName()) == null) {
             throw new RuntimeException("Expected user does not exist, cannot complete test");
         }
 
         final ClientResponse response
-                = getAuthenticatedResource(
-                        DummyPrincipal.DUMMY_PRINCIPAL,
+                = getAuthenticatedResource(registeredUser,
                         getResource().path("/authentication"))
                         .get(ClientResponse.class);
 
@@ -77,7 +72,35 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
 
         final AuthenticationInfo authInfo = response.getEntity(AuthenticationInfo.class);
         assertTrue(authInfo.isAuthenticated());
-        assertEquals(DummyPrincipal.DUMMY_PRINCIPAL.getName(), authInfo.getUsername());
+        assertEquals(registeredUser.getName(), authInfo.getUsername());
+    }
+
+    /**
+     *
+     * Test of getAuthenticationInformation method, of class
+     * AuthenticationRestService.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetAuthenticationInformationAuthenticatedUnknownUser() throws Exception {
+        final Principal unregisteredUser = new DummyPrincipal("unregistered@unregistered.org");
+        
+        if (getUserDao().getByPrincipalName(unregisteredUser.getName()) != null) {
+            throw new RuntimeException("Unregistered exists in database, cannot complete test");
+        }
+
+        final ClientResponse response
+                = getAuthenticatedResource(
+                        unregisteredUser,
+                        getResource().path("/authentication"))
+                        .get(ClientResponse.class);
+
+        assertEquals(200, response.getStatus());
+
+        final AuthenticationInfo authInfo = response.getEntity(AuthenticationInfo.class);
+        assertTrue(authInfo.isAuthenticated());
+        assertEquals(unregisteredUser.getName(), authInfo.getUsername());
     }
 
     /**
