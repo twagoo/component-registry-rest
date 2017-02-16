@@ -59,4 +59,9 @@ public class AuthenticationInfo {
         return userId;
     }
 
+    @Override
+    public String toString() {
+        return String.format("User id: [%d], user name: [%s], display name: [%s], isAuthenticated: [%b], isAdmin: [%b]", userId, username, displayName, authenticated, isAdmin);
+    }
+
 }
