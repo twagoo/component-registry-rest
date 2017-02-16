@@ -11,8 +11,6 @@ import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.ClientResponse.Status;
-import com.sun.jersey.api.client.WebResource;
-import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
 import org.junit.Before;
@@ -107,6 +105,7 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
         final AuthenticationInfo authInfo = response.getEntity(AuthenticationInfo.class);
         assertTrue(authInfo.isAuthenticated());
         assertEquals(registeredUser.getName(), authInfo.getUsername());
+        assertEquals(getExpectedUserId(registeredUser.getName()), authInfo.getUserId());
     }
 
     /**
@@ -135,6 +134,7 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
         final AuthenticationInfo authInfo = response.getEntity(AuthenticationInfo.class);
         assertTrue(authInfo.isAuthenticated());
         assertEquals(unregisteredUser.getName(), authInfo.getUsername());
+        assertNull(authInfo.getUserId());
     }
 
 }

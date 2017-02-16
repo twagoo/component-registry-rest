@@ -64,9 +64,9 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         createUserRecord();
         baseRegistry = componentRegistryFactory.getBaseRegistry(DummyPrincipal.DUMMY_CREDENTIALS);
     }
-
+    
     private String expectedUserId(String principal) {
-        return getUserDao().getByPrincipalName(principal).getId().toString();
+        return getExpectedUserId(principal).toString();
     }
     private Comment profile1Comment1;
     private Comment profile1Comment2;

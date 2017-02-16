@@ -138,6 +138,10 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
         user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
         userDao.save(user);
     }
+    
+    protected Number getExpectedUserId(String principal) {
+        return getUserDao().getByPrincipalName(principal).getId();
+    }
 
     protected UserDao getUserDao() {
         return userDao;
