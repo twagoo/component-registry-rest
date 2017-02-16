@@ -8,7 +8,11 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
 import com.google.common.collect.ImmutableMap;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.ClientResponse.Status;
+import com.sun.jersey.api.client.WebResource;
+import java.net.URI;
 import java.security.Principal;
 import java.util.Map;
 import org.junit.Before;
@@ -65,6 +69,27 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
      * @throws java.lang.Exception
      */
     @Test
+    public void testGetAuthenticationInformationRedirect() throws Exception {
+        final Client client = client();
+        client.setFollowRedirects(false);
+
+        final ClientResponse response
+                = getResource()
+                        .path("/authentication").queryParam("redirect", "http://test.org")
+                        .get(ClientResponse.class);
+
+        assertEquals(Status.SEE_OTHER.getStatusCode(), response.getStatus());
+        assertEquals("http://test.org", response.getHeaders().getFirst("Location"));
+    }
+
+    /**
+     *
+     * Test of getAuthenticationInformation method, of class
+     * AuthenticationRestService.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
     public void testGetAuthenticationInformationAuthenticatedKnownUser() throws Exception {
         final DummyPrincipal registeredUser = DummyPrincipal.DUMMY_PRINCIPAL;
 
@@ -110,15 +135,6 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
         final AuthenticationInfo authInfo = response.getEntity(AuthenticationInfo.class);
         assertTrue(authInfo.isAuthenticated());
         assertEquals(unregisteredUser.getName(), authInfo.getUsername());
-    }
-
-    /**
-     * Test of triggerAuthenticationRequest method, of class
-     * AuthenticationRestService.
-     */
-    @Test
-    public void testTriggerAuthenticationRequest() {
-
     }
 
 }
