@@ -7,3 +7,4 @@
 /ComponentUpdater/src/main/resources/conversion-params.properties
 .DS_Store
 *~
+/ComponentRegistry/nbproject/

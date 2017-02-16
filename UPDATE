@@ -36,6 +36,9 @@ the script 'upgrade-2.2.sql' bundled with the deployment package.
     URL as value (but never for production purposes!):
 
     	http://145.100.58.79/clavas/public/api/
+    	
+Note: Version 2.2.1 is a maintenance update and no actions are required when upgrading
+from 2.2.0 to 2.2.1.
 
 === 2.1 ===
 

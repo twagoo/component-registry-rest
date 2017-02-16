@@ -1,5 +1,8 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-2.2.1 (February 2017)
+- Fixed issue on authentication when user not previously registered
+
 Release ComponentRegistry-2.2.0 (December 2016)
 - Component lifecycle management:
 	- Items in the public, private and team spaces can be given the deprecated status.
