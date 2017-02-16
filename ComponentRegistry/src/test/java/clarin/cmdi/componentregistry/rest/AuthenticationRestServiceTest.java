@@ -7,8 +7,10 @@ package clarin.cmdi.componentregistry.rest;
 
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.model.AuthenticationInfo;
+import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.client.ClientResponse;
 import java.security.Principal;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -21,6 +23,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceTestCase {
 
+    private static final String UNREGISTERED_USER_NAME = "unregistered@unregistered.org";
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -31,6 +35,11 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
     public void init() {
         ComponentRegistryTestDatabase.resetAndCreateAllTables(jdbcTemplate);
         createUserRecord();
+    }
+
+    @Override
+    protected Map<String, String> getSecurityFilterInitParams() {
+        return ImmutableMap.of(DummySecurityFilter.ALLOWED_USERS_PARAM, DummyPrincipal.DUMMY_PRINCIPAL.getName() + " " + UNREGISTERED_USER_NAME);
     }
 
     /**
@@ -58,7 +67,7 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
     @Test
     public void testGetAuthenticationInformationAuthenticatedKnownUser() throws Exception {
         final DummyPrincipal registeredUser = DummyPrincipal.DUMMY_PRINCIPAL;
-        
+
         if (getUserDao().getByPrincipalName(registeredUser.getName()) == null) {
             throw new RuntimeException("Expected user does not exist, cannot complete test");
         }
@@ -84,8 +93,8 @@ public class AuthenticationRestServiceTest extends ComponentRegistryRestServiceT
      */
     @Test
     public void testGetAuthenticationInformationAuthenticatedUnknownUser() throws Exception {
-        final Principal unregisteredUser = new DummyPrincipal("unregistered@unregistered.org");
-        
+        final Principal unregisteredUser = new DummyPrincipal(UNREGISTERED_USER_NAME);
+
         if (getUserDao().getByPrincipalName(unregisteredUser.getName()) != null) {
             throw new RuntimeException("Unregistered exists in database, cannot complete test");
         }

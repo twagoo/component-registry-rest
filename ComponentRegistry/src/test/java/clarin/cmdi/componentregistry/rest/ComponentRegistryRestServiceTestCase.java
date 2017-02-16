@@ -24,6 +24,8 @@ import com.sun.jersey.test.framework.JerseyTest;
 import com.sun.jersey.test.framework.WebAppDescriptor;
 import com.sun.jersey.test.framework.spi.container.TestContainerFactory;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.Map;
 
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +87,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     private UserDao userDao;
 
     protected String getApplicationContextFile() {
-	// sorry for the duplication, but JerseyTest is not aware of
+        // sorry for the duplication, but JerseyTest is not aware of
         // @ContextConfiguration
         return "classpath:spring-config/applicationContext.xml, classpath:spring-config/test-applicationContext-fragment.xml";
     }
@@ -96,7 +98,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
                 .contextParam("contextConfigLocation",
                         getApplicationContextFile())
                 .contextParam("eu.clarin.cmdi.componentregistry.serviceUrlBase", "localhost") // deliberately inaccurate,
-                .contextParam("eu.clarin.cmdi.componentregistry.serviceUrlPath", "test")      // for use of user/front end only
+                .contextParam("eu.clarin.cmdi.componentregistry.serviceUrlPath", "test") // for use of user/front end only
                 .servletClass(SpringServlet.class)
                 .initParam(WebComponent.RESOURCE_CONFIG_CLASS,
                         ClassNamesResourceConfig.class.getName())
@@ -104,7 +106,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
                         ClassNamesResourceConfig.PROPERTY_CLASSNAMES,
                         FormDataMultiPartDispatchProvider.class.getName() + ";"
                         + ComponentRegistryRestService.class.getName())
-                .addFilter(DummySecurityFilter.class, "DummySecurityFilter")
+                .addFilter(DummySecurityFilter.class, "DummySecurityFilter", getSecurityFilterInitParams())
                 .requestListenerClass(RequestContextListener.class)
                 .contextListenerClass(ContextLoaderListener.class);
         return builder.build();
@@ -115,7 +117,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     }
 
     protected Builder getAuthenticatedResource(String path) {
-	return getAuthenticatedResource(getResource().path(path));
+        return getAuthenticatedResource(getResource().path(path));
     }
 
     protected Builder getAuthenticatedResource(WebResource resource) {
@@ -139,6 +141,10 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     protected UserDao getUserDao() {
         return userDao;
+    }
+
+    protected Map<String, String> getSecurityFilterInitParams() {
+        return Collections.emptyMap();
     }
 
 }

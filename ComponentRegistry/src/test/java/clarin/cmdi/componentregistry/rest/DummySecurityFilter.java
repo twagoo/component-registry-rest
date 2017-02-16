@@ -21,20 +21,23 @@ import com.sun.jersey.core.util.Base64;
 
 /**
  * Dummy security filter, very handy for unit testing.
- * 
+ *
  */
 public class DummySecurityFilter implements Filter {
-
-    private final List<String> ALLOWED_USERS = Arrays.asList(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+    
+    public static final String ALLOWED_USERS_PARAM = "allowedUsers";
+    private final static List<String> DEFAULT_ALLOWED_USERS = Arrays.asList(DummyPrincipal.DUMMY_PRINCIPAL.getName());
+    private List<String> allowedUsers;
 
     /**
      * Dummy validation for unit tests
+     *
      * @param username
      * @param password
      * @return
      */
     private boolean isValid(String username, String password) {
-        return ALLOWED_USERS.contains(username);
+        return allowedUsers.contains(username);
     }
 
     @Override
@@ -92,7 +95,11 @@ public class DummySecurityFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
+        final String allowedUsersParam = filterConfig.getInitParameter(ALLOWED_USERS_PARAM);
+        if (allowedUsersParam == null) {
+            allowedUsers = DEFAULT_ALLOWED_USERS;
+        } else {
+            allowedUsers = Arrays.asList(allowedUsersParam.split("\\s"));
+        }
     }
-
 }
