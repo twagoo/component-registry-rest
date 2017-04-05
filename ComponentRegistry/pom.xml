@@ -28,7 +28,7 @@
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
 
-        <frontEndVersion>2.2.0</frontEndVersion>
+        <frontEndVersion>2.2.2-dev-SNAPSHOT</frontEndVersion>
         <cmd-toolkit.version>1.2.1</cmd-toolkit.version>
         <spring-data-jpa.version>1.3.5.RELEASE</spring-data-jpa.version>
         <spring.version>3.2.17.RELEASE</spring.version>
@@ -404,7 +404,7 @@
                 <!-- Shibboleth login URI for SHHAA -->
                 <shibLO>http://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
                 <!-- Shibboleth logout URI for SHHAA -->
-                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
+                <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
                 <!-- web.xml for shibboleth authentication -->
             </properties>
         </profile>
