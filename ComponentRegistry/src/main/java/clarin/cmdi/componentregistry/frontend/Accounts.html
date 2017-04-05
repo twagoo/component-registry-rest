@@ -1,0 +1,33 @@
+<html
+    xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.3-strict.dtd">
+    <head>
+        <title>CMDI ComponentRegistry Group Management</title>
+        <link rel="stylesheet" type="text/css" href="css/adminstyle.css"/>
+    </head>
+    <body>
+        <span wicket:id="message"></span>
+        <div class="links">
+            <a wicket:id="home">AdminHome</a>
+        </div>
+
+        <hr />
+
+        <h2>New account</h2>
+
+        <h2>Manage account</h2>
+        <div wicket:id="feedback"></div>
+        <form wicket:id="accountSelect">
+            Principal name: 
+            <select wicket:id="principal">
+                <option>user</option>
+            </select>
+            <input type="submit" value="Select" />
+        </form>
+        <form class="manageAccount" wicket:id="userDetails">
+            <div><label>User id: <span class="manageAccountValue" wicket:id="id">[id]</span></label></div>
+            <div><label>Principal name: <input class="manageAccountValue" type="text" wicket:id="principalName" /></label></div>
+            <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
+            <input type="submit" value="Update" />
+        </form>
+    </body>
+</html>

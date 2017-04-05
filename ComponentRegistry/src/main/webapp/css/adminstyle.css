@@ -26,3 +26,22 @@ textArea.descriptionTextArea {
        width: 100%;
        height: 200px;
 }
+
+form.manageAccount > div {
+    margin-bottom: .5em;
+}
+
+form.manageAccount label {
+    position: relative;
+}
+
+form.manageAccount label .manageAccountValue {
+    display: block;
+    position: absolute;
+    left: 10em;
+    top: 0;
+
+    width: 20em;
+    font-family: serif;
+    font-size: initial;    
+}

@@ -9,7 +9,6 @@ import javax.swing.tree.TreeModel;
 
 import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxFallbackButton;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -204,6 +203,12 @@ public class AdminHomePage extends SecureAdminWebPage {
             @Override
             public void onClick() {
                 setResponsePage(MassMigratePage.class);
+            }
+        });
+        add(new Link("accounts") {
+            @Override
+            public void onClick() {
+                setResponsePage(Accounts.class);
             }
         });
         add(new Link("groups") {
