@@ -14,7 +14,7 @@ public class AdminApp extends WebApplication {
 	
 	mountPage("userSettings", UserSettingsPage.class);
         mountPage("accounts", Accounts.class);
-        mountPage("groups", Groups.class);
+        mountPage("teams", Groups.class);
         mountPage("statistics", StatisticsPage.class);
         mountPage("log", ViewLogPage.class);
     }
