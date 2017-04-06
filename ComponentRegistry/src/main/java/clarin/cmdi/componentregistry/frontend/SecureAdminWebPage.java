@@ -2,14 +2,15 @@ package clarin.cmdi.componentregistry.frontend;
 
 import java.security.Principal;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
 
 import clarin.cmdi.componentregistry.Configuration;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.protocol.http.servlet.AbortWithHttpStatusException;
+import org.apache.wicket.request.http.flow.AbortWithHttpErrorCodeException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public abstract class SecureAdminWebPage extends WebPage {
 
@@ -20,14 +21,18 @@ public abstract class SecureAdminWebPage extends WebPage {
             setResponsePage(new AccessDeniedPage());
         }
         if (userPrincipal == null) {
-            throw new AbortWithHttpStatusException(HttpServletResponse.SC_UNAUTHORIZED, false);
+            throw new AbortWithHttpErrorCodeException(HttpServletResponse.SC_UNAUTHORIZED);
         } else {
             add(new MultiLineLabel("message", "Component Registry Admin Page.\nYou are logged in as: " + userPrincipal.getName() + ".\n"));
         }
     }
 
     protected final Principal getUserPrincipal() {
-        return getWebRequestCycle().getWebRequest().getHttpServletRequest().getUserPrincipal();
+        return getHttpServletRequest().getUserPrincipal();
+    }
+
+    protected HttpServletRequest getHttpServletRequest() {
+        return (HttpServletRequest) getRequest().getContainerRequest();
     }
 
     @SuppressWarnings(value = "serial")

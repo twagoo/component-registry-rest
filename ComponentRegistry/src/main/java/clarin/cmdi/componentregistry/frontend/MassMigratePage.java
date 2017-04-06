@@ -3,14 +3,13 @@ package clarin.cmdi.componentregistry.frontend;
 import java.io.Serializable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxLink;
 import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.basic.MultiLineLabel;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +58,7 @@ public class MassMigratePage extends SecureAdminWebPage {
             @Override
             public void onClick(final AjaxRequestTarget target) {
                 if (target != null) {
-                    target.addComponent(feedback);
+                    target.add(feedback);
                 }
                 startMigration();
             }

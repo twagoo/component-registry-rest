@@ -3,10 +3,8 @@ package clarin.cmdi.componentregistry.frontend;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 
@@ -25,6 +23,7 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import java.util.Collection;
 import java.util.Collections;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
  *

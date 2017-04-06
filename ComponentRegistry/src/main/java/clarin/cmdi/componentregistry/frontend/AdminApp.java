@@ -10,13 +10,13 @@ public class AdminApp extends WebApplication {
     protected void init() {
         super.init();
         getDebugSettings().setAjaxDebugModeEnabled(false);
-        addComponentInstantiationListener(new SpringComponentInjector(this));
+        getComponentInstantiationListeners().add(new SpringComponentInjector(this));
 	
-	mountBookmarkablePage("userSettings", UserSettingsPage.class);
-        mountBookmarkablePage("accounts", Accounts.class);
-        mountBookmarkablePage("groups", Groups.class);
-        mountBookmarkablePage("statistics", StatisticsPage.class);
-        mountBookmarkablePage("log", ViewLogPage.class);
+	mountPage("userSettings", UserSettingsPage.class);
+        mountPage("accounts", Accounts.class);
+        mountPage("groups", Groups.class);
+        mountPage("statistics", StatisticsPage.class);
+        mountPage("log", ViewLogPage.class);
     }
 
     @Override

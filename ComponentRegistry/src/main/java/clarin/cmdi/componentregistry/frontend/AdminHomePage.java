@@ -7,18 +7,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.markup.html.tree.BaseTree;
-import org.apache.wicket.markup.html.tree.ITreeState;
-import org.apache.wicket.markup.html.tree.LinkTree;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.slf4j.Logger;
@@ -41,7 +36,11 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.extensions.markup.html.tree.BaseTree;
+import org.apache.wicket.extensions.markup.html.tree.ITreeState;
+import org.apache.wicket.extensions.markup.html.tree.LinkTree;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -86,7 +85,7 @@ public class AdminHomePage extends SecureAdminWebPage {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
                 info("deleting:" + info.getName());
-                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                Principal userPrincipal = getUserPrincipal();
                 try {
                     adminRegistry.delete(info, userPrincipal);
                     info("Item deleted.");
@@ -96,9 +95,9 @@ public class AdminHomePage extends SecureAdminWebPage {
                     error("Cannot delete: " + info.getName() + "\n error=" + e);
                 }
                 if (target != null) {
-                    target.addComponent(form);
-                    target.addComponent(tree);
-                    target.addComponent(feedback);
+                    target.add(form);
+                    target.add(tree);
+                    target.add(feedback);
                 }
             }
 
@@ -124,9 +123,9 @@ public class AdminHomePage extends SecureAdminWebPage {
                     error("Cannot undelete: " + info.getName() + "\n error=" + e);
                 }
                 if (target != null) {
-                    target.addComponent(form);
-                    target.addComponent(tree);
-                    target.addComponent(feedback);
+                    target.add(form);
+                    target.add(tree);
+                    target.add(feedback);
                 }
             }
 
@@ -142,7 +141,7 @@ public class AdminHomePage extends SecureAdminWebPage {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-                Principal userPrincipal = getWebRequest().getHttpServletRequest().getUserPrincipal();
+                Principal userPrincipal = getUserPrincipal();
                 info("submitting:" + info.getName() + " id=(" + info.getDataNode().getDescription().getId() + ")");
                 try {
                     adminRegistry.submitFile(info, userPrincipal);
@@ -152,8 +151,8 @@ public class AdminHomePage extends SecureAdminWebPage {
                     error("Cannot submit: " + info.getName() + "\n error=" + e);
                 }
                 if (target != null) {
-                    target.addComponent(form);
-                    target.addComponent(feedback);
+                    target.add(form);
+                    target.add(feedback);
                 }
             }
 
@@ -215,7 +214,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                     info.setContent(content);
                 }
                 if (target != null) {
-                    target.addComponent(form);
+                    target.add(form);
                 }
             }
         };

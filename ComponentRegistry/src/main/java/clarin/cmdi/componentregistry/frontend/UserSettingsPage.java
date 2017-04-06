@@ -10,9 +10,8 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 
 import java.security.Principal;
+import javax.servlet.http.HttpServletRequest;
 
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.RequestCycle;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -20,7 +19,7 @@ import org.apache.wicket.markup.html.form.RequiredTextField;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.protocol.http.WebRequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.springframework.dao.DataAccessException;
 
@@ -34,13 +33,14 @@ public class UserSettingsPage extends WebPage {
     private UserDao userDao;
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
-    private RegistryUser registryUser;
+    private final RegistryUser registryUser;
 
     public UserSettingsPage(PageParameters parameters) {
 	super(parameters);
 
-	Principal userPrincipal = ((WebRequestCycle) (RequestCycle.get())).getWebRequest().getHttpServletRequest().getUserPrincipal();
-	registryUser = componentRegistryFactory.getOrCreateUser(new UserCredentials(userPrincipal));
+        final HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+        final Principal userPrincipal = request.getUserPrincipal();
+        registryUser = componentRegistryFactory.getOrCreateUser(new UserCredentials(userPrincipal));
 
 	add(new Label("userName", registryUser.getPrincipalName()));
 
