@@ -11,11 +11,10 @@
         </div>
 
         <hr />
-
-        <h2>New account</h2>
-
-        <h2>Manage account</h2>
+        
         <div wicket:id="feedback"></div>
+
+        <h2>Manage existing account</h2>
         <form wicket:id="accountSelect">
             Principal name: 
             <select wicket:id="principal">
@@ -29,5 +28,16 @@
             <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
             <input type="submit" value="Update" />
         </form>
+
+        <hr />
+        
+        <h2>Creat a new account</h2>
+        <form class="manageAccount" wicket:id="newAccount">
+            <div><label>Principal name: <input class="manageAccountValue" type="text" wicket:id="principalName" /></label></div>
+            <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
+            <input type="submit" value="Create" />
+        </form>
+
+
     </body>
 </html>

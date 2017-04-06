@@ -4,6 +4,7 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import com.google.common.collect.Ordering;
 import java.util.List;
+import joptsimple.internal.Strings;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.basic.Label;
@@ -37,15 +38,17 @@ public class Accounts extends SecureAdminWebPage {
 
         usersModel = createUsersModel();
 
-        final IModel<RegistryUser> principalModel = new CompoundPropertyModel<>(null);
         add(new FeedbackPanel("feedback"));
+
+        //manage account
+        final IModel<RegistryUser> principalModel = new CompoundPropertyModel<>(null);
         add(new Form("accountSelect")
                 .add(new DropDownChoice<>("principal", principalModel, usersModel)));
         add(new ManageUserForm("userDetails", principalModel)
                 .setDefaultModel(principalModel)
                 .add(new Label("id"))
-                .add(new TextField("name"))
-                .add(new TextField("principalName"))
+                .add(new TextField("name").setRequired(true))
+                .add(new TextField("principalName").setRequired(true))
                 .add(new Behavior() {
                     @Override
                     public void onConfigure(Component component) {
@@ -55,6 +58,15 @@ public class Accounts extends SecureAdminWebPage {
 
                 })
         );
+
+        //create account
+        final IModel<RegistryUser> newPrincipalModel = new CompoundPropertyModel<>(new RegistryUser());
+        add(new CreateUserForm("newAccount", newPrincipalModel)
+                .setDefaultModel(newPrincipalModel)
+                .add(new TextField("principalName").setRequired(true))
+                .add(new TextField("name").setRequired(true))
+        );
+
     }
 
     private IModel<List<RegistryUser>> createUsersModel() {
@@ -85,26 +97,61 @@ public class Accounts extends SecureAdminWebPage {
         protected void onSubmit() {
             final RegistryUser modified = getModelObject();
             logger.info("Updating user {}", modified.getId());
-            
+
             final RegistryUser target = userDao.getPrincipalNameById(modified.getId());
-            
+
             if (!target.getName().equals(modified.getName())) {
                 logger.info("Setting display name '{}' to '{}' for user {}", target.getName(), modified.getName(), target.getId());
                 target.setName(modified.getName());
             }
 
             if (!target.getPrincipalName().equals(modified.getPrincipalName())) {
-                //TODO: check if new principal name not already taken
-
-                logger.warn("Changing user name via admin interface! User {} '{}' becomes '{}'", target.getId(), target.getPrincipalName(), modified.getPrincipalName());
-                target.setPrincipalName(modified.getPrincipalName());
+                //check if new principal name not already taken
+                if (userDao.getByPrincipalName(modified.getPrincipalName()) != null) {
+                    error(String.format("A user with principal name '%s' already exist", modified.getPrincipalName()));
+                    return;
+                } else {
+                    logger.warn("Changing user name via admin interface! User {} '{}' becomes '{}'", target.getId(), target.getPrincipalName(), modified.getPrincipalName());
+                    target.setPrincipalName(modified.getPrincipalName());
+                }
             }
 
             //apply update
             userDao.saveAndFlush(target);
 
-            getSession().info("User info updated");
+            info("User info updated");
             setModelObject(null);
+        }
+    }
+
+    private class CreateUserForm extends Form<RegistryUser> {
+
+        public CreateUserForm(String id, IModel<RegistryUser> model) {
+            super(id, model);
+        }
+
+        @Override
+        protected void onSubmit() {
+            final RegistryUser user = getModelObject();
+
+            //check if principal name is provided
+            if (Strings.isNullOrEmpty(user.getPrincipalName())) {
+                error("Please provide a principal name for the new user");
+                return;
+            }
+
+            //check if new principal name not already taken
+            if (userDao.getByPrincipalName(user.getPrincipalName()) != null) {
+                error(String.format("A user with principal name '%s' already exist", user.getPrincipalName()));
+                return;
+            }
+
+            logger.info("Creating new user with principal name '{}' and display name '{}'", user.getPrincipalName(), user.getName());
+            final RegistryUser savedUser = userDao.saveAndFlush(user);
+            info("User " + savedUser.getPrincipalName() + " created with id " + savedUser.getId());
+
+            //empty new user for form
+            setModelObject(new RegistryUser());
         }
     }
 

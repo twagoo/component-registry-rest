@@ -45,3 +45,8 @@ form.manageAccount label .manageAccountValue {
     font-family: serif;
     font-size: initial;    
 }
+
+li.feedbackPanelERROR {
+    font-weight: bold;
+    color: red;
+}
