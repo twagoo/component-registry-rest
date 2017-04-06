@@ -84,7 +84,7 @@ public interface GroupService {
      */
     long makeMember(String userName, String groupName) throws ItemNotFoundException;
     
-   // long removeMember(String userName, String groupName) throws ItemNotFoundException;
+    long removeMember(String userName, String groupName) throws ItemNotFoundException;
     
     /**
      * Move ownership of a component or profile from a user to a group

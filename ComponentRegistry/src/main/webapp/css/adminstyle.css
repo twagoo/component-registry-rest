@@ -3,7 +3,7 @@ div.links {
 }
 
 div.container {
-	width: 100%;
+    width: 100%;
 }
 
 div.treeView {
@@ -18,13 +18,13 @@ div.infoView {
 }
 
 textArea.contentTextArea {
-	   width: 100%;
-	   height: 500px;
+    width: 100%;
+    height: 500px;
 }
 
 textArea.descriptionTextArea {
-       width: 100%;
-       height: 200px;
+    width: 100%;
+    height: 200px;
 }
 
 form.manageAccount > div {
@@ -44,6 +44,11 @@ form.manageAccount label .manageAccountValue {
     width: 20em;
     font-family: serif;
     font-size: initial;    
+}
+
+a.remove {
+    font-size: small;
+    text-decoration: none;
 }
 
 li.feedbackPanelERROR {

@@ -18,6 +18,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
@@ -34,9 +35,9 @@ import org.slf4j.LoggerFactory;
  * @author Twan Goosen <twan.goosen@mpi.nl>
  */
 public class Groups extends SecureAdminWebPage {
-
+    
     private final static Logger logger = LoggerFactory.getLogger(Groups.class);
-
+    
     @SpringBean
     private GroupService groupService;
     @SpringBean
@@ -44,55 +45,55 @@ public class Groups extends SecureAdminWebPage {
     private final IModel<Long> selectedGroup = new Model<Long>(null);
     private final IModel<List<RegistryUser>> usersModel;
     private IModel<List<String>> groupsModel;
-
+    
     public Groups(PageParameters parameters) {
         super(parameters);
 // model for group options
 
         addLinks();
-
+        
         usersModel = createUsersModel();
         groupsModel = createGroupsModel();
-
+        
         add(createGroupForm("groupForm"));
         add(createGroupList("groups"));
         add(createGroupInfo("group"));
     }
-
+    
     private IModel<List<String>> createGroupsModel() {
         return new AbstractReadOnlyModel<List<String>>() {
-
+            
             @Override
             public List<String> getObject() {
                 return groupService.listGroupNames();
             }
         };
     }
-
+    
     private IModel<List<RegistryUser>> createUsersModel() {
         return new AbstractReadOnlyModel<List<RegistryUser>>() {
-
+            
             @Override
             public List<RegistryUser> getObject() {
                 // return all users sorted by their tostring value (ignoring case)
                 return new Ordering<Object>() {
-
+                    
                     @Override
                     public int compare(Object t, Object t1) {
                         return t.toString().compareToIgnoreCase(t1.toString());
                     }
-
+                    
                 }.sortedCopy(userDao.getAllUsers());
             }
         };
     }
-
+    
     private Component createGroupForm(String id) {
         final IModel<String> nameModel = new Model<String>("");
         final IModel<RegistryUser> ownerModel = new Model<RegistryUser>(null);
-
+        
         final Form form = new Form(id) {
-
+            
             @Override
             protected void onSubmit() {
                 final String ownerPrincipal = ownerModel.getObject().getPrincipalName();
@@ -110,7 +111,7 @@ public class Groups extends SecureAdminWebPage {
                     error(ex.getMessage());
                 }
             }
-
+            
         };
         form.add(new FeedbackPanel("feedback"));
         form.add(new TextField("name", nameModel).setRequired(true));
@@ -118,14 +119,14 @@ public class Groups extends SecureAdminWebPage {
         final DropDownChoice<RegistryUser> usersChoice = new DropDownChoice<RegistryUser>("ownerPrincipal", ownerModel, usersModel);
         usersChoice.setRequired(true);
         form.add(usersChoice);
-
+        
         return form;
     }
-
+    
     private Component createGroupList(String id) {
         final IModel<String> groupModel = new Model<String>(null);
         final Form form = new Form(id) {
-
+            
             @Override
             protected void onSubmit() {
                 final String groupName = groupModel.getObject();
@@ -139,29 +140,29 @@ public class Groups extends SecureAdminWebPage {
                     }
                 }
             }
-
+            
         };
 
         // group selector
         final DropDownChoice<String> groupChoice = new DropDownChoice<String>("group", groupModel, groupsModel);
         groupChoice.setRequired(true);
         form.add(groupChoice);
-
+        
         return form;
     }
-
+    
     private Component createGroupInfo(String id) {
         final WebMarkupContainer container = new WebMarkupContainer(id) {
-
+            
             @Override
             public boolean isVisible() {
                 return selectedGroup.getObject() != null;
             }
-
+            
         };
-
+        
         container.add(new Label("name", new AbstractReadOnlyModel<String>() {
-
+            
             @Override
             public String getObject() {
                 try {
@@ -174,14 +175,14 @@ public class Groups extends SecureAdminWebPage {
         container.add(createNewMemberForm("newMember"));
         container.add(createGroupMembersView("members"));
         container.add(createItemsView("items"));
-
+        
         return container;
     }
-
+    
     private Form createNewMemberForm(String id) {
         final IModel<RegistryUser> principalModel = new Model<RegistryUser>(null);
         final Form memberForm = new Form(id) {
-
+            
             @Override
             protected void onSubmit() {
                 try {
@@ -192,19 +193,19 @@ public class Groups extends SecureAdminWebPage {
                     error(ex);
                 }
             }
-
+            
         };
         memberForm.add(new FeedbackPanel("feedback"));
-
+        
         final DropDownChoice<RegistryUser> usersChoice = new DropDownChoice<RegistryUser>("principal", principalModel, usersModel);
         usersChoice.setRequired(true);
         memberForm.add(usersChoice);
         return memberForm;
     }
-
+    
     private ListView createGroupMembersView(String id) {
         final IModel<List> membersModel = new AbstractReadOnlyModel<List>() {
-
+            
             @Override
             public List getObject() {
                 final Long groupId = selectedGroup.getObject();
@@ -216,26 +217,35 @@ public class Groups extends SecureAdminWebPage {
             }
         };
         final ListView membersView = new ListView(id, membersModel) {
-
+            
             @Override
             protected void populateItem(ListItem li) {
                 final RegistryUser user = (RegistryUser) li.getModelObject();
-                li.add(new Label("name", user.getName()));
-//                li.add(new Link("remove") {
-//
-//                    @Override
-//                    public void onClick() {
-//                        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//                    }
-//                });
+                li.add(new Label("name", String.format("%s [%s]", user.getName(), user.getPrincipalName())));
+                li.add(new Link("remove") {
+                    
+                    @Override
+                    public void onClick() {
+                        try {
+                            final String groupName = groupService.getGroupNameById(selectedGroup.getObject());
+                            final String userName = user.getPrincipalName();
+                            
+                            logger.info("Revoking team membership: '{}' in '{}'", userName, groupName);
+                            groupService.removeMember(userName, groupName);
+                            info(String.format("User '%s' removed from team '%s'", userName, groupName));
+                        } catch (ItemNotFoundException ex) {
+                            error(ex);
+                        }
+                    }
+                });
             }
         };
         return membersView;
     }
-
+    
     private ListView createItemsView(String id) {
         final IModel<List> itemsModel = new AbstractReadOnlyModel<List>() {
-
+            
             @Override
             public List getObject() {
                 final Long groupId = selectedGroup.getObject();
@@ -245,12 +255,12 @@ public class Groups extends SecureAdminWebPage {
             }
         };
         final ListView itemsView = new ListView(id, itemsModel) {
-
+            
             @Override
             protected void populateItem(ListItem li) {
                 final String id = (String) li.getModelObject();
                 final ExternalLink link = new ExternalLink("link", new AbstractReadOnlyModel<String>() {
-
+                    
                     @Override
                     public String getObject() {
                         if (ComponentUtils.isProfileId(id)) {
@@ -266,5 +276,5 @@ public class Groups extends SecureAdminWebPage {
         };
         return itemsView;
     }
-
+    
 }
