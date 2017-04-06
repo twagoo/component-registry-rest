@@ -8,13 +8,14 @@
         <span wicket:id="message"></span>
 
         <div class="links">
-            <span wicket:id="linksMessage"></span>
-            <a wicket:id="accounts">Manage accounts</a>
-            <a wicket:id="groups">Manage groups</a>
-            <a wicket:id="massMigrate">MassMigrate</a>
-            <a wicket:id="log">View Log</a>
-            <a wicket:id="statistics">View Statistics</a>
+            <span>Browse the data below or choose on of the following options:</span>
+            <wicket:link><a href="Accounts.html">Manage accounts</a></wicket:link>
+            <wicket:link><a href="Groups.html">Manage groups</a></wicket:link>
+            <wicket:link><a href="MassMigratePage.html">MassMigrate</a></wicket:link>
+            <wicket:link><a href="ViewLogPage.html">View log</a></wicket:link>
+            <wicket:link><a href="StatisticsPage.html">View Statistics</a></wicket:link>
         </div>
+        
         <div class="container">
             <div class="treeView">
                 <a wicket:id="expandAll">[expand all]</a>

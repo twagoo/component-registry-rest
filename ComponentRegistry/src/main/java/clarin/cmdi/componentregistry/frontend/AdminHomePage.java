@@ -196,42 +196,6 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
     }
 
-    @Override
-    protected void addLinks() {
-        add(new Label("linksMessage", "Browse the data below or choose on of the following options:"));
-        add(new Link("massMigrate") {
-            @Override
-            public void onClick() {
-                setResponsePage(MassMigratePage.class);
-            }
-        });
-        add(new Link("accounts") {
-            @Override
-            public void onClick() {
-                setResponsePage(Accounts.class);
-            }
-        });
-        add(new Link("groups") {
-
-            @Override
-            public void onClick() {
-                setResponsePage(Groups.class);
-            }
-        });
-        add(new Link("log") {
-            @Override
-            public void onClick() {
-                setResponsePage(ViewLogPage.class);
-            }
-        });
-        add(new Link("statistics") {
-            @Override
-            public void onClick() {
-                setResponsePage(StatisticsPage.class);
-            }
-        });
-    }
-
     private LinkTree createTree(String id, final Form form, TreeModel treeModel) {
         final LinkTree adminTree = new LinkTree(id, treeModel) {
             @Override

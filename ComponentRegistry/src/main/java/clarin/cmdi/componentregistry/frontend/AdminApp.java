@@ -13,6 +13,10 @@ public class AdminApp extends WebApplication {
         addComponentInstantiationListener(new SpringComponentInjector(this));
 	
 	mountBookmarkablePage("userSettings", UserSettingsPage.class);
+        mountBookmarkablePage("accounts", Accounts.class);
+        mountBookmarkablePage("groups", Groups.class);
+        mountBookmarkablePage("statistics", StatisticsPage.class);
+        mountBookmarkablePage("log", ViewLogPage.class);
     }
 
     @Override
