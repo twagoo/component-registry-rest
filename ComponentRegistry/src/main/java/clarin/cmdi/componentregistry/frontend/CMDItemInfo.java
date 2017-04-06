@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.model.BaseDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 
 public class CMDItemInfo implements Serializable {
 
@@ -12,8 +13,11 @@ public class CMDItemInfo implements Serializable {
 
     private final IMarshaller marshaller;
     private String description;
+    private String id;
     private String content;
     private String name;
+    private ComponentStatus status;
+    private boolean published;
     private boolean forceUpdate = false;
 
     private DisplayDataNode displayNode;
@@ -24,11 +28,23 @@ public class CMDItemInfo implements Serializable {
     private boolean editable = false;
 
     public CMDItemInfo(IMarshaller marshaller) {
-	this.marshaller = marshaller;
+        this.marshaller = marshaller;
     }
-    
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     public void setDescription(String descriptionText) {
         this.description = descriptionText;
+    }
+
+    public void setDescription(BaseDescription desc) {
+        this.description = marshaller.marshalToString(desc);
     }
 
     public String getDescription() {
@@ -46,6 +62,22 @@ public class CMDItemInfo implements Serializable {
         return name;
     }
 
+    public ComponentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ComponentStatus status) {
+        this.status = status;
+    }
+
+    public boolean isPublished() {
+        return published;
+    }
+
+    public void setPublished(boolean published) {
+        this.published = published;
+    }
+
     public DisplayDataNode getDataNode() {
         return displayNode;
     }
@@ -57,17 +89,24 @@ public class CMDItemInfo implements Serializable {
         setEditable(false);
         setDescription("");
         setContent("");
+        setId("");
+        setPublished(false);
+        setStatus(null);
         if (dataNode != null) {
             BaseDescription desc = dataNode.getDescription();
             if (desc != null) {
                 String contentDescr = marshaller.marshalToString(desc);
                 setDescription(contentDescr);
+                setId(desc.getId());
                 setEditable(true);
+                setStatus(desc.getStatus());
+                setPublished(desc.isPublic());
+                setName(desc.getName());
                 if (dataNode.isDeleted()) {
                     setUndeletable(true);
                 } else {
                     setDeletable(true);
-                } 
+                }
             }
         }
 
@@ -97,11 +136,10 @@ public class CMDItemInfo implements Serializable {
         this.editable = editable;
     }
 
-    
     public RegistrySpace getSpace() {
-	return displayNode.getSpace();
+        return displayNode.getSpace();
     }
-	
+
     public void setForceUpdate(boolean forceUpdate) {
         this.forceUpdate = forceUpdate;
     }

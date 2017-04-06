@@ -41,7 +41,9 @@ import org.apache.wicket.extensions.markup.html.tree.BaseTree;
 import org.apache.wicket.extensions.markup.html.tree.ITreeState;
 import org.apache.wicket.extensions.markup.html.tree.LinkTree;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.springframework.dao.DataAccessException;
 
 @SuppressWarnings("serial")
 public class AdminHomePage extends SecureAdminWebPage {
@@ -59,7 +61,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     private ComponentDao componentDao;
     @SpringBean
     private IMarshaller marshaller;
-    
+
     private Component infoView;
 
     public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException, ItemNotFoundException {
@@ -73,12 +75,13 @@ public class AdminHomePage extends SecureAdminWebPage {
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
         feedback.setOutputMarkupId(true);
 
-        final Form deleteForm = createDeleteForm(feedback);
-        final Form form = createEditForm(feedback);
         infoView = add(new WebMarkupContainer("infoView")
+                .add(new Label("name"))
+                .add(new Label("id"))
                 .add(feedback)
-                .add(deleteForm)
-                .add(form)
+                .add(createPublishDeleteForm())
+                .add(createEditForm(feedback))
+                .setDefaultModel(new CompoundPropertyModel<>(info))
                 .setOutputMarkupId(true));
 
         try {
@@ -105,8 +108,8 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     }
 
-    private Form createDeleteForm(final FeedbackPanel feedback) throws ItemNotFoundException, ComponentRegistryException {
-        final Form<CMDItemInfo> form = new Form<>("deleteForm");
+    private Form createPublishDeleteForm() throws ItemNotFoundException, ComponentRegistryException {
+        final Form<CMDItemInfo> form = new Form<>("actionsForm");
         CompoundPropertyModel model = new CompoundPropertyModel(info);
         form.setModel(model);
 
@@ -127,7 +130,6 @@ public class AdminHomePage extends SecureAdminWebPage {
                 if (target != null) {
                     target.add(infoView);
                     target.add(tree);
-                    target.add(feedback);
                 }
             }
 
@@ -154,7 +156,6 @@ public class AdminHomePage extends SecureAdminWebPage {
                 if (target != null) {
                     target.add(infoView);
                     target.add(tree);
-                    target.add(feedback);
                 }
             }
 
@@ -181,23 +182,11 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
         form.add(forceUpdateCheck);
-        Button submitButton = new IndicatingAjaxButton("submit", form) {
+
+        final Button submitButton = new IndicatingAjaxButton("submit", form) {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-                Principal userPrincipal = getUserPrincipal();
-                info("submitting:" + info.getName() + " id=(" + info.getDataNode().getDescription().getId() + ")");
-                try {
-                    adminRegistry.submitFile(info, userPrincipal);
-                    info("submitting done.");
-                } catch (Exception e) {
-                    LOG.error("Admin: ", e);
-                    error("Cannot submit: " + info.getName() + "\n error=" + e);
-                }
-                if (target != null) {
-                    target.add(infoView);
-                    target.add(feedback);
-                }
+                submitEditForm(form, feedback, target, false);
             }
 
             @Override
@@ -206,7 +195,49 @@ public class AdminHomePage extends SecureAdminWebPage {
             }
         };
         form.add(submitButton);
+
+        final Button publishButton = new IndicatingAjaxButton("publish", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                submitEditForm(form, feedback, target, true);
+                //reload tree after publish
+                try {
+                    reloadTreeModel(info);
+                    target.add(tree);
+                } catch (UserUnauthorizedException ex) {
+                    LOG.error("error reloading tree model", ex);
+                } catch (ItemNotFoundException ex) {
+                    LOG.error("error reloading tree model", ex);
+                }
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return info.isEditable() && !info.isPublished();
+            }
+        };
+        form.add(publishButton);
         return form;
+    }
+
+    private void submitEditForm(Form<?> form, FeedbackPanel feedback, AjaxRequestTarget target, boolean publish) throws DataAccessException {
+        CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+        Principal userPrincipal = getUserPrincipal();
+        info("submitting:" + info.getName() + " id=(" + info.getId() + ")");
+        try {
+            adminRegistry.submitFile(info, userPrincipal, publish);
+            info("submitting done.");
+        } catch (Exception e) {
+            LOG.error("Admin: ", e);
+            error("Cannot submit: " + info.getName() + "\n error=" + e);
+        }
+        final BaseDescription newDescr = componentDao.getByCmdId(info.getId());
+        info.setDescription(newDescr);
+        info.setName(newDescr.getName());
+        if (target != null) {
+            target.add(infoView);
+            target.add(feedback);
+        }
     }
 
     private void reloadTreeModel(CMDItemInfo info) throws UserUnauthorizedException, ItemNotFoundException {
@@ -230,6 +261,10 @@ public class AdminHomePage extends SecureAdminWebPage {
                     treeState.expandNode(node);
                 }
                 DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
+                if (dn.getDescription() != null) {
+                    //update description
+                    dn.setDesc(componentDao.getById(dn.getDescription().getDbId()));
+                }
                 info.setDataNode(dn);
                 BaseDescription desc = dn.getDescription();
                 if (desc != null) {

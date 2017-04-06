@@ -105,12 +105,12 @@ public class AdminRegistryTest extends BaseUnitTest {
         fileInfo.setContent(content1);
         // TODO: how it should be?
         try {
-            adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN);
+            adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN, false);
         } catch (SubmitFailedException e) {
             fail();
         }
         fileInfo.setForceUpdate(true);
-        adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN); //Component needs to be forced because they can be used by other profiles/components
+        adminReg.submitFile(fileInfo, PRINCIPAL_ADMIN, false); //Component needs to be forced because they can be used by other profiles/components
 
         assertEquals(1, testRegistry.getComponentDescriptions(null).size());
 

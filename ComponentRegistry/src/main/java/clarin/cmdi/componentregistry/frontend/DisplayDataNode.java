@@ -34,6 +34,10 @@ public class DisplayDataNode implements Serializable {
 	return desc;
     }
 
+    public void setDesc(BaseDescription desc) {
+        this.desc = desc;
+    }
+
     public boolean isDeleted() {
 	return isDeleted;
     }
