@@ -14,6 +14,15 @@
         
         <div wicket:id="feedback"></div>
 
+        <h2>Creat a new account</h2>
+        <form class="manageAccount" wicket:id="newAccount">
+            <div><label>Principal name: <input class="manageAccountValue" type="text" wicket:id="principalName" /></label></div>
+            <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
+            <input type="submit" value="Create" />
+        </form>
+        
+        <hr />
+        
         <h2>Manage existing account</h2>
         <form wicket:id="accountSelect">
             Principal name: 
@@ -27,15 +36,6 @@
             <div><label>Principal name: <input class="manageAccountValue" type="text" wicket:id="principalName" /></label></div>
             <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
             <input type="submit" value="Update" />
-        </form>
-
-        <hr />
-        
-        <h2>Creat a new account</h2>
-        <form class="manageAccount" wicket:id="newAccount">
-            <div><label>Principal name: <input class="manageAccountValue" type="text" wicket:id="principalName" /></label></div>
-            <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
-            <input type="submit" value="Create" />
         </form>
 
 
