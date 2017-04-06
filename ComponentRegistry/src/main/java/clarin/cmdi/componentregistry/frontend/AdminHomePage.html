@@ -15,7 +15,7 @@
             <wicket:link><a href="StatisticsPage.html">View Statistics</a></wicket:link>
             <!--<wicket:link><a href="MassMigratePage.html">MassMigrate</a></wicket:link>-->
         </div>
-        
+
         <div class="container">
             <div class="treeView">
                 <a wicket:id="expandAll">[expand all]</a>
@@ -26,9 +26,11 @@
                 <div id="feedbackPanel">
                     <span wicket:id="feedback"></span>
                 </div>
-                <form wicket:id="form">
+                <form wicket:id="deleteForm">
                     <button wicket:id="delete" title="Press delete button to delete this item">delete</button>
                     <button wicket:id="undelete" title="Press undelete button to put this item back in the registry">undelete</button>
+                </form>
+                <form wicket:id="form">
                     <input type="checkbox" wicket:id="forceUpdate" />forceUpdate
                     <button wicket:id="submit">submit edit changes</button>
                     <textarea  class="descriptionTextArea" wicket:id="description" >text</textarea>

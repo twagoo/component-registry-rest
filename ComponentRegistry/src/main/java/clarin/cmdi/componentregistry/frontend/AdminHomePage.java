@@ -35,6 +35,7 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import org.apache.wicket.Component;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.markup.html.tree.BaseTree;
 import org.apache.wicket.extensions.markup.html.tree.ITreeState;
@@ -58,6 +59,8 @@ public class AdminHomePage extends SecureAdminWebPage {
     private ComponentDao componentDao;
     @SpringBean
     private IMarshaller marshaller;
+    
+    private Component infoView;
 
     public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException, ItemNotFoundException {
         super(parameters);
@@ -69,101 +72,17 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
         feedback.setOutputMarkupId(true);
-        
+
+        final Form deleteForm = createDeleteForm(feedback);
         final Form form = createEditForm(feedback);
-        add(new WebMarkupContainer("infoView")
+        infoView = add(new WebMarkupContainer("infoView")
                 .add(feedback)
+                .add(deleteForm)
                 .add(form)
                 .setOutputMarkupId(true));
 
-    }
-
-    private Form createEditForm(final FeedbackPanel feedback) throws ItemNotFoundException, ComponentRegistryException {
-        final Form form = new ItemEditForm("form");
-        Button deleteButton = new IndicatingAjaxButton("delete", form) {
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-                info("deleting:" + info.getName());
-                Principal userPrincipal = getUserPrincipal();
-                try {
-                    adminRegistry.delete(info, userPrincipal);
-                    info("Item deleted.");
-                    reloadTreeModel(info);
-                } catch (Exception e) {
-                    LOG.error("Admin: ", e);
-                    error("Cannot delete: " + info.getName() + "\n error=" + e);
-                }
-                if (target != null) {
-                    target.add(form);
-                    target.add(tree);
-                    target.add(feedback);
-                }
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return info.isDeletable();
-
-            }
-            ;
-        };
-        form.add(deleteButton);
-        Button undeleteButton = new IndicatingAjaxButton("undelete", form) {
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-                info("undeleting:" + info.getName());
-                try {
-                    adminRegistry.undelete(info);
-                    info("Item put back.");
-                    reloadTreeModel(info);
-                } catch (Exception e) {
-                    LOG.error("Admin: ", e);
-                    error("Cannot undelete: " + info.getName() + "\n error=" + e);
-                }
-                if (target != null) {
-                    target.add(form);
-                    target.add(tree);
-                    target.add(feedback);
-                }
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return info.isUndeletable();
-            }
-        };
-        form.add(undeleteButton);
-        CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
-        form.add(forceUpdateCheck);
-        Button submitButton = new IndicatingAjaxButton("submit", form) {
-            @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
-                Principal userPrincipal = getUserPrincipal();
-                info("submitting:" + info.getName() + " id=(" + info.getDataNode().getDescription().getId() + ")");
-                try {
-                    adminRegistry.submitFile(info, userPrincipal);
-                    info("submitting done.");
-                } catch (Exception e) {
-                    LOG.error("Admin: ", e);
-                    error("Cannot submit: " + info.getName() + "\n error=" + e);
-                }
-                if (target != null) {
-                    target.add(form);
-                    target.add(feedback);
-                }
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return info.isEditable();
-            }
-        };
-        form.add(submitButton);
         try {
-            tree = createTree("tree", form, createDBTreeModel());
+            tree = createTree("tree", createDBTreeModel());
             add(tree);
             add(new Link("expandAll") {
                 @Override
@@ -183,6 +102,110 @@ public class AdminHomePage extends SecureAdminWebPage {
             LOG.error("Admin: ", e);
             error("Cannot create tree: error = " + e);
         }
+
+    }
+
+    private Form createDeleteForm(final FeedbackPanel feedback) throws ItemNotFoundException, ComponentRegistryException {
+        final Form<CMDItemInfo> form = new Form<>("deleteForm");
+        CompoundPropertyModel model = new CompoundPropertyModel(info);
+        form.setModel(model);
+
+        Button deleteButton = new IndicatingAjaxButton("delete", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+                info("deleting:" + info.getName());
+                Principal userPrincipal = getUserPrincipal();
+                try {
+                    adminRegistry.delete(info, userPrincipal);
+                    info("Item deleted.");
+                    reloadTreeModel(info);
+                } catch (Exception e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot delete: " + info.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.add(infoView);
+                    target.add(tree);
+                    target.add(feedback);
+                }
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return info.isDeletable();
+
+            }
+        };
+        form.add(deleteButton);
+        Button undeleteButton = new IndicatingAjaxButton("undelete", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+                info("undeleting:" + info.getName());
+                try {
+                    adminRegistry.undelete(info);
+                    info("Item put back.");
+                    reloadTreeModel(info);
+                } catch (Exception e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot undelete: " + info.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.add(infoView);
+                    target.add(tree);
+                    target.add(feedback);
+                }
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return info.isUndeletable();
+            }
+        };
+        form.add(undeleteButton);
+        return form;
+    }
+
+    private Form createEditForm(final FeedbackPanel feedback) throws ItemNotFoundException, ComponentRegistryException {
+        final Form<CMDItemInfo> form = new Form<>("form");
+        CompoundPropertyModel model = new CompoundPropertyModel(info);
+        form.setModel(model);
+
+        TextArea descriptionArea = new TextArea("description");
+        descriptionArea.setOutputMarkupId(true);
+        form.add(descriptionArea);
+        TextArea contentArea = new TextArea("content");
+        contentArea.setOutputMarkupId(true);
+        form.add(contentArea);
+
+        CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
+        form.add(forceUpdateCheck);
+        Button submitButton = new IndicatingAjaxButton("submit", form) {
+            @Override
+            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+                CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+                Principal userPrincipal = getUserPrincipal();
+                info("submitting:" + info.getName() + " id=(" + info.getDataNode().getDescription().getId() + ")");
+                try {
+                    adminRegistry.submitFile(info, userPrincipal);
+                    info("submitting done.");
+                } catch (Exception e) {
+                    LOG.error("Admin: ", e);
+                    error("Cannot submit: " + info.getName() + "\n error=" + e);
+                }
+                if (target != null) {
+                    target.add(infoView);
+                    target.add(feedback);
+                }
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return info.isEditable();
+            }
+        };
+        form.add(submitButton);
         return form;
     }
 
@@ -195,7 +218,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
     }
 
-    private LinkTree createTree(String id, final Form form, TreeModel treeModel) {
+    private LinkTree createTree(String id, TreeModel treeModel) {
         final LinkTree adminTree = new LinkTree(id, treeModel) {
             @Override
             protected void onNodeLinkClicked(Object node, BaseTree tree, AjaxRequestTarget target) {
@@ -214,27 +237,11 @@ public class AdminHomePage extends SecureAdminWebPage {
                     info.setContent(content);
                 }
                 if (target != null) {
-                    target.add(form);
+                    target.add(infoView);
                 }
             }
         };
         return adminTree;
-    }
-
-    private class ItemEditForm extends Form<CMDItemInfo> {
-
-        public ItemEditForm(String name) {
-            super(name);
-            CompoundPropertyModel model = new CompoundPropertyModel(info);
-            setModel(model);
-
-            TextArea descriptionArea = new TextArea("description");
-            descriptionArea.setOutputMarkupId(true);
-            add(descriptionArea);
-            TextArea contentArea = new TextArea("content");
-            contentArea.setOutputMarkupId(true);
-            add(contentArea);
-        }
     }
 
     private TreeModel createDBTreeModel() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
