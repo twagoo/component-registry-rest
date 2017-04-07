@@ -76,7 +76,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         final FeedbackPanel feedback = new FeedbackPanel("feedback");
         feedback.setOutputMarkupId(true);
 
-        infoView = add(new WebMarkupContainer("infoView")
+        add(infoView = new WebMarkupContainer("infoView")
                 .add(new Label("name"))
                 .add(new Label("id"))
                 .add(feedback)
