@@ -40,6 +40,7 @@ import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.markup.html.tree.BaseTree;
 import org.apache.wicket.extensions.markup.html.tree.ITreeState;
 import org.apache.wicket.extensions.markup.html.tree.LinkTree;
+import org.apache.wicket.extensions.markup.html.tree.LinkType;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -276,6 +277,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                 }
             }
         };
+        adminTree.setLinkType(LinkType.AJAX);
         return adminTree;
     }
 
@@ -336,4 +338,11 @@ public class AdminHomePage extends SecureAdminWebPage {
             parent.add(child);
         }
     }
+
+    @Override
+    protected void addLinks() {
+        //no call to super - no home link needed
+    }
+    
+    
 }
