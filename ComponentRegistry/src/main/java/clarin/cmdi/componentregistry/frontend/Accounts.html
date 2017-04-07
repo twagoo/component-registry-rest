@@ -11,7 +11,7 @@
         </div>
 
         <hr />
-        
+
         <div wicket:id="feedback"></div>
 
         <h2>Creat a new account</h2>
@@ -20,9 +20,9 @@
             <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
             <input type="submit" value="Create" />
         </form>
-        
+
         <hr />
-        
+
         <h2>Manage existing account</h2>
         <form wicket:id="accountSelect">
             Principal name: 
@@ -36,8 +36,12 @@
             <div><label>Principal name: <input class="manageAccountValue" type="text" wicket:id="principalName" /></label></div>
             <div><label>Name: <input class="manageAccountValue" type="text" wicket:id="name" /></label></div>
             <input type="submit" value="Update" />
+            <br />
+            <div>
+                [<a wicket:id="delete">Delete account</a>] (may fail if user has data)
+            </div>
         </form>
-
+        <hr />
 
     </body>
 </html>

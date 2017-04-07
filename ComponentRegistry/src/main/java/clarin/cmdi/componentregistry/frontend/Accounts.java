@@ -8,9 +8,11 @@ import joptsimple.internal.Strings;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.CompoundPropertyModel;
@@ -49,6 +51,7 @@ public class Accounts extends SecureAdminWebPage {
                 .add(new Label("id"))
                 .add(new TextField("name").setRequired(true))
                 .add(new TextField("principalName").setRequired(true))
+                .add(new AccountDeleteButton("delete", principalModel))
                 .add(new Behavior() {
                     @Override
                     public void onConfigure(Component component) {
@@ -87,6 +90,33 @@ public class Accounts extends SecureAdminWebPage {
         };
     }
 
+    private class AccountDeleteButton extends Link {
+
+        private final IModel<RegistryUser> principalModel;
+
+        public AccountDeleteButton(String id, IModel<RegistryUser> model) {
+            super(id);
+            this.principalModel = model;
+        }
+
+        @Override
+        public void onClick() {
+            if (principalModel.getObject() != null) {
+                final String principalName = principalModel.getObject().getPrincipalName();
+                logger.info("Deleting user '{}'", principalName);
+                try {
+                    userDao.delete(principalModel.getObject());
+                    info(String.format("User '%s' deleted", principalName));
+                    principalModel.setObject(null);
+                } catch (RuntimeException ex) {
+                    logger.warn("Failed to delete user {}", principalName, ex);
+                    error("Failed to delete user: " + ex.getMessage());
+                }
+            }
+        }
+
+    }
+
     private class ManageUserForm extends Form<RegistryUser> {
 
         public ManageUserForm(String id, IModel<RegistryUser> model) {
@@ -96,31 +126,33 @@ public class Accounts extends SecureAdminWebPage {
         @Override
         protected void onSubmit() {
             final RegistryUser modified = getModelObject();
-            logger.info("Updating user {}", modified.getId());
+            if (modified != null) {
+                logger.info("Updating user {}", modified.getId());
 
-            final RegistryUser target = userDao.getPrincipalNameById(modified.getId());
+                final RegistryUser target = userDao.getPrincipalNameById(modified.getId());
 
-            if (!target.getName().equals(modified.getName())) {
-                logger.info("Setting display name '{}' to '{}' for user {}", target.getName(), modified.getName(), target.getId());
-                target.setName(modified.getName());
-            }
-
-            if (!target.getPrincipalName().equals(modified.getPrincipalName())) {
-                //check if new principal name not already taken
-                if (userDao.getByPrincipalName(modified.getPrincipalName()) != null) {
-                    error(String.format("A user with principal name '%s' already exist", modified.getPrincipalName()));
-                    return;
-                } else {
-                    logger.warn("Changing user name via admin interface! User {} '{}' becomes '{}'", target.getId(), target.getPrincipalName(), modified.getPrincipalName());
-                    target.setPrincipalName(modified.getPrincipalName());
+                if (!target.getName().equals(modified.getName())) {
+                    logger.info("Setting display name '{}' to '{}' for user {}", target.getName(), modified.getName(), target.getId());
+                    target.setName(modified.getName());
                 }
+
+                if (!target.getPrincipalName().equals(modified.getPrincipalName())) {
+                    //check if new principal name not already taken
+                    if (userDao.getByPrincipalName(modified.getPrincipalName()) != null) {
+                        error(String.format("A user with principal name '%s' already exist", modified.getPrincipalName()));
+                        return;
+                    } else {
+                        logger.warn("Changing user name via admin interface! User {} '{}' becomes '{}'", target.getId(), target.getPrincipalName(), modified.getPrincipalName());
+                        target.setPrincipalName(modified.getPrincipalName());
+                    }
+                }
+
+                //apply update
+                userDao.saveAndFlush(target);
+
+                info("User info updated");
+                setModelObject(null);
             }
-
-            //apply update
-            userDao.saveAndFlush(target);
-
-            info("User info updated");
-            setModelObject(null);
         }
     }
 
