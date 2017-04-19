@@ -37,6 +37,7 @@ import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.markup.html.tree.BaseTree;
 import org.apache.wicket.extensions.markup.html.tree.ITreeState;
@@ -175,12 +176,14 @@ public class AdminHomePage extends SecureAdminWebPage {
         CompoundPropertyModel model = new CompoundPropertyModel(info);
         form.setModel(model);
 
-        TextArea descriptionArea = new TextArea("description");
-        descriptionArea.setOutputMarkupId(true);
-        form.add(descriptionArea);
-        TextArea contentArea = new TextArea("content");
-        contentArea.setOutputMarkupId(true);
-        form.add(contentArea);
+        form.add(new TextArea("description")
+                .add(new DisableOnDeletedBehavior(info))
+                .setOutputMarkupId(true)
+        );
+        form.add(new TextArea("content")
+                .add(new DisableOnDeletedBehavior(info))
+                .setOutputMarkupId(true)
+        );
 
         CheckBox forceUpdateCheck = new CheckBox("forceUpdate");
         form.add(forceUpdateCheck);
@@ -190,13 +193,9 @@ public class AdminHomePage extends SecureAdminWebPage {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 submitEditForm(form, feedback, target, false);
             }
-
-            @Override
-            public boolean isEnabled() {
-                return info.isEditable();
-            }
         };
-        form.add(submitButton);
+        form.add(submitButton
+                .add(new DisableOnDeletedBehavior(info)));
 
         final Button publishButton = new IndicatingAjaxButton("publish", form) {
             @Override
@@ -215,10 +214,11 @@ public class AdminHomePage extends SecureAdminWebPage {
 
             @Override
             public boolean isEnabled() {
-                return info.isEditable() && !info.isPublished();
+                return super.isEnabled() && !info.isPublished();
             }
         };
-        form.add(publishButton);
+        form.add(publishButton
+                .add(new DisableOnDeletedBehavior(info)));
         return form;
     }
 
@@ -350,6 +350,24 @@ public class AdminHomePage extends SecureAdminWebPage {
     @Override
     protected void addLinks() {
         //no call to super - no home link needed
+    }
+
+    private static class DisableOnDeletedBehavior extends Behavior {
+
+        private final CMDItemInfo info;
+
+        public DisableOnDeletedBehavior(CMDItemInfo info) {
+            this.info = info;
+        }
+
+        @Override
+        public void onConfigure(Component component) {
+            component.setEnabled(info != null
+                    && info.isEditable()
+                    && info.getDataNode() != null
+                    && !info.getDataNode().isDeleted());
+        }
+
     }
 
 }
