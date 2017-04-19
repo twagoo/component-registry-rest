@@ -29,6 +29,7 @@ import clarin.cmdi.componentregistry.OwnerUser;
 import clarin.cmdi.componentregistry.RegistrySpace;
 import clarin.cmdi.componentregistry.UserCredentials;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
+import clarin.cmdi.componentregistry.impl.ComponentUtils;
 import clarin.cmdi.componentregistry.impl.database.AdminRegistry;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
@@ -228,13 +229,15 @@ public class AdminHomePage extends SecureAdminWebPage {
         try {
             adminRegistry.submitFile(info, userPrincipal, publish);
             info("submitting done.");
+
+            final BaseDescription newDescr = componentDao.getByCmdId(info.getId());
+            info.setDescription(ComponentUtils.toTypeByIdPrefix(newDescr));
+            info.setName(newDescr.getName());
         } catch (Exception e) {
             LOG.error("Admin: ", e);
             error("Cannot submit: " + info.getName() + "\n error=" + e);
         }
-        final BaseDescription newDescr = componentDao.getByCmdId(info.getId());
-        info.setDescription(newDescr);
-        info.setName(newDescr.getName());
+
         if (target != null) {
             target.add(infoView);
             target.add(feedback);
@@ -261,16 +264,21 @@ public class AdminHomePage extends SecureAdminWebPage {
                 } else {
                     treeState.expandNode(node);
                 }
-                DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
-                if (dn.getDescription() != null) {
-                    //update description
-                    dn.setDesc(componentDao.getDeletedById(dn.getDescription().getDbId()));
-                }
-                info.setDataNode(dn);
-                BaseDescription desc = dn.getDescription();
-                if (desc != null) {
-                    String content = componentDao.getContent(dn.isDeleted(), desc.getId());
-                    info.setContent(content);
+                try {
+                    DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
+                    if (dn.getDescription() != null) {
+                        //update description
+                        dn.setDesc(ComponentUtils.toTypeByIdPrefix(componentDao.getDeletedById(dn.getDescription().getDbId())));
+                    }
+                    info.setDataNode(dn);
+                    BaseDescription desc = dn.getDescription();
+                    if (desc != null) {
+                        String content = componentDao.getContent(dn.isDeleted(), desc.getId());
+                        info.setContent(content);
+                    }
+                } catch (ComponentRegistryException ex) {
+                    LOG.error("Error getting node data", ex);
+                    getSession().error("Could not get data for node. See Tomcat log for details.");
                 }
                 if (target != null) {
                     target.add(infoView);
@@ -343,6 +351,5 @@ public class AdminHomePage extends SecureAdminWebPage {
     protected void addLinks() {
         //no call to super - no home link needed
     }
-    
-    
+
 }

@@ -38,7 +38,7 @@ public class ComponentUtils {
     public static Date getDate(String registrationDate) throws ParseException {
         return DateUtils.parseDate(registrationDate,
                 new String[]{DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT
-                    .getPattern()});
+                            .getPattern()});
     }
 
     public static String createPublicHref(String href) {
@@ -53,7 +53,8 @@ public class ComponentUtils {
         return result;
     }
     /**
-     * Compares two descriptions by the their value as returned by null     {@link BaseDescription#getName()
+     * Compares two descriptions by the their value as returned by null null
+     * null null     {@link BaseDescription#getName()
      * }
      */
     public static final Comparator<? super BaseDescription> COMPARE_ON_NAME = new Comparator<BaseDescription>() {
@@ -106,6 +107,20 @@ public class ComponentUtils {
         } else {
             throw new ComponentRegistryException("The item is not a component");
         }
+    }
+
+    /**
+     * "Upcast" a description to either {@link ProfileDescription} or
+     * {@link ComponentDescription} depending on the identifier in the provided
+     * description
+     *
+     * @param newDescr description to convert
+     * @return converted description, either {@link ProfileDescription} or
+     * {@link ComponentDescription}
+     * @throws ComponentRegistryException
+     */
+    public static BaseDescription toTypeByIdPrefix(final BaseDescription newDescr) throws ComponentRegistryException {
+        return isProfileId(newDescr.getId()) ? toProfile(newDescr) : toComponent(newDescr);
     }
 
     public static List<ProfileDescription> toProfiles(
