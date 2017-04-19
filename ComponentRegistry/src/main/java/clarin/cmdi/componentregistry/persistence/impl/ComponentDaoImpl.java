@@ -21,6 +21,7 @@ import clarin.cmdi.componentregistry.persistence.jpa.CommentsDao;
 import clarin.cmdi.componentregistry.persistence.jpa.JpaComponentDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import java.util.Collection;
+import org.springframework.dao.DataAccessException;
 
 /**
  * Base DAO which can be extended to serve {@link ComponentDescription}s and
@@ -258,6 +259,23 @@ public class ComponentDaoImpl implements ComponentDao {
     }
 
     /**
+     * Retrieves description by it's primary key Id, even if the item was
+     * deleted
+     *
+     * @param id Description key
+     * @return The description, if it exists; null otherwise
+     */
+    @Override
+    public BaseDescription getDeletedById(Number id) {
+        BaseDescription baseDescription = jpaComponentDao.findOne(id.longValue());
+        if (baseDescription != null) {
+            augment(baseDescription);
+            return baseDescription;
+        }
+        return null;
+    }
+
+    /**
      * Get by ComponentId / ProfileId, whether in userspace or public
      *
      * @param id Full component id
@@ -313,6 +331,16 @@ public class ComponentDaoImpl implements ComponentDao {
         }
         list = augment(list);
         return list;
+    }
+
+    @Override
+    public List<BaseDescription> getDeletedPublicDescriptions() {
+        return getDeletedDescriptions(null);
+    }
+
+    @Override
+    public List<BaseDescription> getDeletedTeamDescriptions(Number teamId) {
+        return jpaComponentDao.findDeletedItemsForTeam(teamId.longValue());
     }
 
     /**

@@ -883,21 +883,31 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
     @Override
     public List<ProfileDescription> getDeletedProfileDescriptions() throws ComponentRegistryException {
-        if (registrySpace == RegistrySpace.PRIVATE) {
-            return ComponentUtils.toProfiles(componentDao.getDeletedDescriptions(getUserId()));
-        } else {
-            LOG.warn("Delete profiles list not available for {} space", registrySpace);
-            return Collections.emptyList();
+        switch (registrySpace) {
+            case PRIVATE:
+                return ComponentUtils.toProfiles(componentDao.getDeletedDescriptions(getUserId()));
+            case PUBLISHED:
+                return ComponentUtils.toProfiles(componentDao.getDeletedPublicDescriptions());
+            case GROUP:
+                return ComponentUtils.toProfiles(componentDao.getDeletedTeamDescriptions(getGroupId()));
+            default:
+                LOG.warn("Delete profiles list not available for {} space", registrySpace);
+                return Collections.emptyList();
         }
     }
 
     @Override
     public List<ComponentDescription> getDeletedComponentDescriptions() throws ComponentRegistryException {
-        if (registrySpace == RegistrySpace.PRIVATE) {
-            return ComponentUtils.toComponents(componentDao.getDeletedDescriptions(getUserId()));
-        } else {
-            LOG.warn("Delete components list not available for {} space", registrySpace);
-            return Collections.emptyList();
+        switch (registrySpace) {
+            case PRIVATE:
+                return ComponentUtils.toComponents(componentDao.getDeletedDescriptions(getUserId()));
+            case PUBLISHED:
+                return ComponentUtils.toComponents(componentDao.getDeletedPublicDescriptions());
+            case GROUP:
+                return ComponentUtils.toComponents(componentDao.getDeletedTeamDescriptions(getGroupId()));
+            default:
+                LOG.warn("Delete components list not available for {} space", registrySpace);
+                return Collections.emptyList();
         }
     }
 

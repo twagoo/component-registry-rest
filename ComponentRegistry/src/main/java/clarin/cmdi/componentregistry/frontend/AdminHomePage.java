@@ -264,7 +264,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                 DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
                 if (dn.getDescription() != null) {
                     //update description
-                    dn.setDesc(componentDao.getById(dn.getDescription().getDbId()));
+                    dn.setDesc(componentDao.getDeletedById(dn.getDescription().getDbId()));
                 }
                 info.setDataNode(dn);
                 BaseDescription desc = dn.getDescription();

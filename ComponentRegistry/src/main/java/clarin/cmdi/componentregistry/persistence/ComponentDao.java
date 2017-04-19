@@ -94,6 +94,8 @@ public interface ComponentDao {
      */
     BaseDescription getById(Number id) throws DataAccessException;
 
+    BaseDescription getDeletedById(Number id) throws DataAccessException;
+
     /**
      * Get by ComponentId / ProfileId, whether in userspace or public
      * 
@@ -136,6 +138,8 @@ public interface ComponentDao {
      * @param userId
      */
     List<BaseDescription> getDeletedDescriptions(Number userId);
+    List<BaseDescription> getDeletedPublicDescriptions();
+    List<BaseDescription> getDeletedTeamDescriptions(Number teamId);
 
     /**
      * 

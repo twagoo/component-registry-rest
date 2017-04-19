@@ -36,6 +36,12 @@ public interface JpaComponentDao extends JpaRepository<BaseDescription, Long> {
     @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = false and c.deleted = true and c.dbUserId = ?1 ORDER BY upper(c.name), c.id")
     List<BaseDescription> findDeletedItemsForUser(Long userId);
 
+    @Query("SELECT c FROM BaseDescription c"
+            + " WHERE c.ispublic = false and c.deleted = true"
+            + " AND exists (select o from Ownership o WHERE o.componentId = c.componentId AND o.groupId = ?1)"
+            + " ORDER BY upper(c.name), c.id")
+    List<BaseDescription> findDeletedItemsForTeam(Long teamId);
+
     @Query("SELECT c FROM BaseDescription c WHERE c.ispublic = true and c.deleted = true ORDER BY upper(c.name), c.id")
     List<BaseDescription> findPublicDeletedItems();
 
