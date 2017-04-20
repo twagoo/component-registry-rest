@@ -1,5 +1,9 @@
 Bug Fixes and Features
 
+Release ComponentRegistry-2.2.2 (April 2017)
+- New front end version with fixed behaviour of 'Edit (as new)' button
+- Extended administration interface, includes user management and improved component editing
+
 Release ComponentRegistry-2.2.1 (February 2017)
 - Fixed issue on authentication when user not previously registered
 
