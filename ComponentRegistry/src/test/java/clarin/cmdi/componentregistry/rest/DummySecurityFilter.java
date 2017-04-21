@@ -104,6 +104,7 @@ public class DummySecurityFilter implements Filter {
         if (allowedUsersParam == null) {
             allowedUsers = DEFAULT_ALLOWED_USERS;
         } else {
+            logger.info("Custom allowed users parameter: {}", allowedUsersParam);
             allowedUsers = Arrays.asList(allowedUsersParam.split("\\s"));
         }
     }
