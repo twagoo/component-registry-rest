@@ -6,7 +6,6 @@ package clarin.cmdi.componentregistry;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -16,13 +15,29 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import clarin.cmdi.componentregistry.util.XmlDateAdapter;
+import org.junit.After;
+import org.junit.Before;
 
 /**
  *
  * @author olhsha
  */
 public class DatesHelperTest {
+
+    private static final TimeZone TEST_TIME_ZONE = TimeZone.getTimeZone("Europe/Amsterdam");
+    private TimeZone origTimezone;
+
+    @Before
+    public void beforeTest() {
+        //Tests were written assuming the Europe/Amsterdam timezone
+        origTimezone = TimeZone.getDefault();
+        TimeZone.setDefault(TEST_TIME_ZONE);
+    }
+
+    @After
+    public void afterTest() {
+        TimeZone.setDefault(origTimezone);
+    }
 
     /**
      * Test of parseWorks method, of class DatesHelper.
@@ -64,6 +79,5 @@ public class DatesHelperTest {
         String result = DatesHelper.getRFCDateTime(dateString);
         assertEquals(expResult, result);
     }
-
 
 }
