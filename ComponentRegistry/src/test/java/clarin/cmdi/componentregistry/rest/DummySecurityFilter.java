@@ -18,6 +18,8 @@ import javax.ws.rs.core.HttpHeaders;
 
 import com.sun.jersey.api.container.MappableContainerException;
 import com.sun.jersey.core.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Dummy security filter, very handy for unit testing.
@@ -25,6 +27,7 @@ import com.sun.jersey.core.util.Base64;
  */
 public class DummySecurityFilter implements Filter {
     
+    private final static Logger logger = LoggerFactory.getLogger(DummySecurityFilter.class);
     public static final String ALLOWED_USERS_PARAM = "allowedUsers";
     private final static List<String> DEFAULT_ALLOWED_USERS = Arrays.asList(DummyPrincipal.DUMMY_PRINCIPAL.getName());
     private List<String> allowedUsers;
@@ -50,6 +53,7 @@ public class DummySecurityFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         String authentication = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (authentication != null) { //if no authentication then do nothing
+            logger.info("Check auth '{}'. Allowed users: {}", authentication, allowedUsers);
             if (!authentication.startsWith("Basic ")) {
                 throw new MappableContainerException(new AuthenticationException("Only HTTP Basic authentication is supported"));
             }
@@ -65,6 +69,7 @@ public class DummySecurityFilter implements Filter {
                 throw new MappableContainerException(new AuthenticationException("Missing username or password"));
             }
             if (!isValid(username, password)) {
+                logger.info("Invalid user/password: '{}'/'{}'", username, password);
                 throw new MappableContainerException(new AuthenticationException("Invalid user/password"));
             }
             principalResult = new DummyPrincipal(username);
