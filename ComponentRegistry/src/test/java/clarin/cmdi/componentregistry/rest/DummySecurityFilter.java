@@ -100,6 +100,7 @@ public class DummySecurityFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        logger.info("Filter configuration", filterConfig.getInitParameterNames());
         final String allowedUsersParam = filterConfig.getInitParameter(ALLOWED_USERS_PARAM);
         if (allowedUsersParam == null) {
             allowedUsers = DEFAULT_ALLOWED_USERS;
