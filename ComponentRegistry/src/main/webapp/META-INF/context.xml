@@ -91,7 +91,7 @@
         Base location of the CLAVAS vocabulary service 
     -->
     <!-- Test instance (OpenSKOS 2) -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="http://clavas.clarin.eu/clavas/public/api/"/>
+    <Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="http://vocabularies.clarin.eu/clavas/public/api/"/>
     <!-- Production instance -->
     <!--<Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="https://openskos.meertens.knaw.nl/clavas/api/"/>-->
 </Context>
