@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Component Registry context.xml
-    Twan Goosen <twan.goosen@mpi.nl>, 21/9/2011
+    Twan Goosen <twan@clarin.eu>, 2017/12/07
 
     This file contains configuration options for the ComponentRegistry 
     package which includes both the REST service and the Flex UI.
@@ -21,6 +21,11 @@
     
     A database creation script can be found at 
     <https://github.com/clarin-eric/component-registry-rest/raw/master/ComponentRegistry/src/main/sql/create.sql>
+    
+    You can also use the Docker Compose configuration that can be found in the 
+    /docker/compose/postgres directory of the sources. Running `docker-compose up -d`
+    in that directory will start a postgres server and make it available at a host port,
+    and initialise an empty Component Registry database if needed.
     
     == SPRING CONFIGURATION ==
     

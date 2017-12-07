@@ -61,8 +61,9 @@ change the serverRootUrl property in the pom.xml of ComponentRegistry. There are
 profiles for lux16.mpi.nl and catalog.clarin.eu that set these correctly. You can trigger
 these by providing the -Plux16 or -Pclarin options to mvn respectively.
 
-The rest service relies on a Component Registry database, for which a create script can be found in 
-the src/sql directory. For configuration instructions, see the comments in context.xml.
+The rest service relies on a Component Registry database, for which a create script can be
+found in the src/sql directory. For setup and configuration instructions (including a 
+Docker option), see the comments in context.xml.
 
 * NOTE on generating java classes from general-component-schema.xsd.
 The ComponentRegistry needs the general-component-schema.xsd, which should be found at:
