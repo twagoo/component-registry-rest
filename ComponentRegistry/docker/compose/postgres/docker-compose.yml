@@ -1,0 +1,15 @@
+version: '2'
+services:
+  compreg_postgres:
+    image: registry.gitlab.com/clarin-eric/docker-postgres:1.0.1
+    volumes:
+      - ../../../src/main/sql/create.sql:/docker-entrypoint-initdb.d/create.sql
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=compreg
+      - POSTGRES_PASSWORD=compreg
+      - POSTGRES_DB=component_registry
+    ports:
+      - 5432:5432
+volumes:
+  postgres_data:
