@@ -87,6 +87,21 @@ SELECT pg_catalog.setval('groupmembership_id_seq', 1, true);
 
 
 --
+-- Data for Name: itemlock; Type: TABLE DATA; Schema: public; Owner: compreg
+--
+
+COPY itemlock (id, itemid, userid, creationdate) FROM stdin;
+\.
+
+
+--
+-- Name: itemlock_id_seq; Type: SEQUENCE SET; Schema: public; Owner: compreg
+--
+
+SELECT pg_catalog.setval('itemlock_id_seq', 2, false);
+
+
+--
 -- Data for Name: ownership; Type: TABLE DATA; Schema: public; Owner: compreg
 --
 
