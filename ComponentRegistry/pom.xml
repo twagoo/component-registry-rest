@@ -393,45 +393,32 @@
             <properties>
                 <logging.level>debug</logging.level>
                 <logging.appender>CONSOLE</logging.appender>
+
+                <!-- Will be inserted in context.xml -->
                 <serviceUrlBase>http://localhost:8080</serviceUrlBase>
                 <serviceUrlPath>/ComponentRegistry</serviceUrlPath>
-                <!-- Will be inserted in context.xml -->
-                <shibLI>http://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
-                <!-- Shibboleth login URI for SHHAA -->
-                <shibLO>http://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
-                <!-- Shibboleth logout URI for SHHAA -->
+
+                <!-- web.xml for (shibboleth) authentication -->
                 <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
-                <!-- web.xml for shibboleth authentication -->
-            </properties>
-        </profile>
-        <profile>
-            <id>lux16</id>
-            <properties>
-                <serviceUrlBase>http://lux16.mpi.nl</serviceUrlBase>
-                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
-                <!-- Will be inserted in context.xml -->
-                <shibLI>https://lux16.mpi.nl/Shibboleth.sso/Login</shibLI>
-                <!-- Shibboleth login URI for SHHAA -->
-                <shibLO>https://lux16.mpi.nl/Shibboleth.sso/Logout</shibLO>
-                <!-- Shibboleth logout URI for SHHAA -->
-                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
-                <!-- web.xml for shibboleth authentication -->
             </properties>
         </profile>
         <profile>
             <id>clarin</id>
             <properties>
                 <logging.level>warn</logging.level>
+
+                <!-- Will be inserted in context.xml -->
                 <serviceRootUrl></serviceRootUrl>
                 <serviceUrlBase>http://catalog.clarin.eu</serviceUrlBase>
                 <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
-                <!-- Will be inserted in context.xml -->
-                <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
+
                 <!-- Shibboleth login URI for SHHAA -->
-                <shibLO>https://catalog.clarin.eu/Shibboleth.sso/Logout</shibLO>
+                <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth logout URI for SHHAA -->
-                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
+                <shibLO>https://catalog.clarin.eu/Shibboleth.sso/Logout</shibLO>
+
                 <!-- web.xml for shibboleth authentication -->
+                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
             </properties>
         </profile>
         <profile>
@@ -441,16 +428,14 @@
             </build>
             <properties>
                 <logging.level>info</logging.level>
+
+                <!-- Will be inserted in context.xml -->
                 <serviceRootUrl></serviceRootUrl>
                 <serviceUrlBase>http://catalog.clarin.eu</serviceUrlBase>
                 <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
-                <!-- Will be inserted in context.xml -->
-                <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
-                <!-- Shibboleth login URI for SHHAA -->
-                <shibLO>https://catalog.clarin.eu/Shibboleth.sso/Logout</shibLO>
-                <!-- Shibboleth logout URI for SHHAA -->
-                <webXmlPath>src/main/webapp/WEB-INF/web-readonly.xml</webXmlPath>
+
                 <!-- web.xml for shibboleth authentication -->
+                <webXmlPath>src/main/webapp/WEB-INF/web-readonly.xml</webXmlPath>
             </properties>
         </profile>
     </profiles>
