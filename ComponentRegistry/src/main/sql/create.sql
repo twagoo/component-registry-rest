@@ -25,19 +25,6 @@ COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 SET search_path = public, pg_catalog;
 
---
--- Name: item_status; Type: TYPE; Schema: public; Owner: compreg
---
-
-CREATE TYPE item_status AS ENUM (
-    'DEVELOPMENT',
-    'PRODUCTION',
-    'DEPRECATED'
-);
-
-
-ALTER TYPE item_status OWNER TO compreg;
-
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -61,7 +48,7 @@ CREATE TABLE basedescription (
     href character varying,
     show_in_editor boolean DEFAULT true NOT NULL,
     content text DEFAULT ''::text NOT NULL,
-    status item_status,
+    status integer,
     derivedfrom character varying,
     successor character varying
 );
