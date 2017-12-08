@@ -21,7 +21,7 @@ SET search_path = public, pg_catalog;
 --
 
 COPY registry_user (id, name, principal_name) FROM stdin;
-1	admin	admin
+1	The Administrator	admin
 \.
 
 
@@ -68,6 +68,7 @@ SELECT pg_catalog.setval('comments_id_seq', 1, false);
 --
 
 COPY groupmembership (id, groupid, userid) FROM stdin;
+1	1	1
 \.
 
 
@@ -75,7 +76,7 @@ COPY groupmembership (id, groupid, userid) FROM stdin;
 -- Name: groupmembership_id_seq; Type: SEQUENCE SET; Schema: public; Owner: compreg
 --
 
-SELECT pg_catalog.setval('groupmembership_id_seq', 1, false);
+SELECT pg_catalog.setval('groupmembership_id_seq', 1, true);
 
 
 --
@@ -105,6 +106,7 @@ SELECT pg_catalog.setval('registry_user_id_seq', 1, true);
 --
 
 COPY usergroup (id, ownerid, name) FROM stdin;
+1	1	Test team
 \.
 
 
@@ -112,7 +114,7 @@ COPY usergroup (id, ownerid, name) FROM stdin;
 -- Name: usergroup_id_seq; Type: SEQUENCE SET; Schema: public; Owner: compreg
 --
 
-SELECT pg_catalog.setval('usergroup_id_seq', 1, false);
+SELECT pg_catalog.setval('usergroup_id_seq', 1, true);
 
 
 --
