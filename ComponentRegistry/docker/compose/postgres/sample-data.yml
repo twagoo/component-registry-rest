@@ -1,0 +1,5 @@
+version: '2'
+services:
+  compreg_postgres:
+    volumes:
+      - ../../../src/main/sql/sample-data.sql:/docker-entrypoint-initdb.d/create_add-sample-data.sql
