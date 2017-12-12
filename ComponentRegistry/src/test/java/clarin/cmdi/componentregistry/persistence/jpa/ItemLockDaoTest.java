@@ -14,6 +14,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -65,7 +67,7 @@ public class ItemLockDaoTest extends BaseUnitTest {
         assertEquals(lock.getItemId(), retrievedItem.getItemId());
     }
 
-    @Test
+    @Test(expected = DataIntegrityViolationException.class)
     public void testInsertLockTwice() {
         int userId = createUser().intValue();
         int itemId = createItem().intValue();
@@ -75,21 +77,15 @@ public class ItemLockDaoTest extends BaseUnitTest {
         lock.setItemId(itemId);
 
         //save lock
-        final ItemLock savedLock = itemLockDao.save(lock);
-        assertNotNull(savedLock);
+        itemLockDao.save(lock);
 
         //second lock
         final ItemLock lock2 = new ItemLock();
         lock2.setUserId(userId);
         lock2.setItemId(itemId);
-        try {
-            final ItemLock savedLock2 = itemLockDao.save(lock2);
-            assertNull(savedLock2); //should fail
-        } catch (Exception ex) {
-            //Exception expected!
-            return;
-        }
-        fail("Insertion of lock for same item should have failed!");
+        itemLockDao.save(lock2);
+        
+        itemLockDao.flush();
     }
 
     /**
