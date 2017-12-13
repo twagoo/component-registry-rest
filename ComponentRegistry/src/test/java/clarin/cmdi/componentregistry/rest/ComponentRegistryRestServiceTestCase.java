@@ -60,29 +60,6 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
     protected final static GenericType<List<String>> STRING_LIST_GENERICTYPE = new GenericType<List<String>>() {
     };
 
-    private static SingletonTestContainerFactory _testContainerFactory;
-
-    @Override
-    public void setUp() throws Exception {
-        if (!_testContainerFactory.isTestContainerRunning()) {
-            _testContainerFactory.startTestContainer();
-        }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-    }
-
-    @Override
-    protected TestContainerFactory getTestContainerFactory() {
-        if (_testContainerFactory == null) {
-            _testContainerFactory = new SingletonTestContainerFactory(
-                    super.getTestContainerFactory());
-        }
-        ;
-        return _testContainerFactory;
-    }
-
     @Autowired
     private UserDao userDao;
 
