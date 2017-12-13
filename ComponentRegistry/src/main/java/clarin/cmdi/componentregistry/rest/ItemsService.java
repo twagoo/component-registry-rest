@@ -4,11 +4,14 @@ import clarin.cmdi.componentregistry.AuthenticationRequiredException;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryException;
 import clarin.cmdi.componentregistry.GroupService;
+import clarin.cmdi.componentregistry.ItemIsLockedException;
+import clarin.cmdi.componentregistry.ItemLockService;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
+import clarin.cmdi.componentregistry.model.ItemLock;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import static clarin.cmdi.componentregistry.rest.ComponentRegistryRestService.GROUPID_PARAM;
 import com.sun.jersey.api.core.InjectParam;
@@ -21,8 +24,10 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -30,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -48,9 +54,12 @@ public class ItemsService extends AbstractComponentRegistryRestService {
 
     @Context
     private HttpServletResponse servletResponse;
-    
+
     @InjectParam(value = "GroupService")
     private GroupService groupService;
+
+    @InjectParam(value = "ItemLockService")
+    private ItemLockService itemLockService;
 
     @GET
     @Path("/{itemId}")
@@ -58,25 +67,22 @@ public class ItemsService extends AbstractComponentRegistryRestService {
         MediaType.APPLICATION_JSON})
     @ApiOperation(value = "The description (metadata) of a single component or profile item")
     @ApiResponses(value = {
-        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated"),
-        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator"),
+        @ApiResponse(code = 401, message = "Item requires authorisation and user is not authenticated")
+        ,
+        @ApiResponse(code = 403, message = "Non-public item is not owned by current user and user is no administrator")
+        ,
         @ApiResponse(code = 404, message = "Item does not exist")
     })
     public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
         logger.debug("Item with id: {} is requested.", itemId);
         try {
-            ComponentRegistry cr = this.getBaseRegistry();
-            BaseDescription description;
-            if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
-                description = cr.getComponentDescriptionAccessControlled(itemId);
+            BaseDescription description = getItemDescription(itemId);
+            if (description != null) {
                 return description;
+            } else {
+                servletResponse.sendError(Response.Status.BAD_REQUEST.getStatusCode());
+                return new BaseDescription();
             }
-            if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
-                description = cr.getProfileDescriptionAccessControlled(itemId);
-                return description;
-            }
-            servletResponse.sendError(Response.Status.BAD_REQUEST.getStatusCode());
-            return new BaseDescription();
 
         } catch (UserUnauthorizedException ex2) {
             servletResponse.sendError(Response.Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
@@ -115,6 +121,53 @@ public class ItemsService extends AbstractComponentRegistryRestService {
             return Response.ok("Ownership transferred").build();
         } catch (UserUnauthorizedException e) {
             return Response.status(Response.Status.FORBIDDEN).build();
+        }
+    }
+
+    @GET
+    @Path("/{itemId}/lock")
+    @Produces({MediaType.TEXT_XML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response getItemLock(@PathParam("itemId") String itemId) {
+        final ItemLock lock = itemLockService.getLock(itemId);
+        if (lock == null) {
+            return Response.noContent().status(Status.NOT_FOUND).build();
+        } else {
+            return Response.ok(lock).build();
+        }
+    }
+
+    @PUT
+    @Path("/{itemId}/lock")
+    public Response putItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException {
+        try {
+            //TODO: get item as user (e.g. cr.getProfileDescriptionAccessControlled)
+            final ItemLock createdLock = itemLockService.setLock(itemId, security.getUserPrincipal().getName());
+            if (createdLock != null) {
+                return Response.ok(createdLock).build();
+            } else {
+                throw new ComponentRegistryException("Lock was not created for an unkown reason");
+            }
+        } catch (ItemIsLockedException ex) {
+            return Response.status(Status.CONFLICT).entity("The item is already locked").build();
+        }
+    }
+
+    @DELETE
+    @Path("/{itemId}/lock")
+    public Response removeItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException {
+        //TODO: get item as user (e.g. cr.getProfileDescriptionAccessControlled)
+        itemLockService.deleteLock(itemId);
+        return Response.ok().build();
+    }
+
+    private BaseDescription getItemDescription(String itemId) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException, ComponentRegistryException {
+        ComponentRegistry cr = this.getBaseRegistry();
+        if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
+            return cr.getComponentDescriptionAccessControlled(itemId);
+        } else if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
+            return cr.getProfileDescriptionAccessControlled(itemId);
+        } else {
+            return null;
         }
     }
 }
