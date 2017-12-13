@@ -49,7 +49,7 @@ public class ItemLockDaoTest extends BaseUnitTest {
 
     @Test
     public void testInsertLock() {
-        int userId = createUser().intValue();
+        long userId = createUser().longValue();
         int itemId = createItem().intValue();
 
         final ItemLock lock = new ItemLock();
@@ -68,7 +68,7 @@ public class ItemLockDaoTest extends BaseUnitTest {
 
     @Test(expected = DataIntegrityViolationException.class)
     public void testInsertLockTwice() {
-        int userId = createUser().intValue();
+        long userId = createUser().longValue();
         int itemId = createItem().intValue();
 
         final ItemLock lock = new ItemLock();

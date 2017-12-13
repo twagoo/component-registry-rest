@@ -30,7 +30,7 @@ public class ItemLock implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "itemlock_id_seq")
     private Integer id;
     @Column(nullable = false, unique = false)
-    private Integer userId;
+    private Long userId;
     @Column(nullable = false, unique = true)
     private Integer itemId;
 
@@ -78,7 +78,7 @@ public class ItemLock implements Serializable {
      *
      * @return the value of userId
      */
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
@@ -87,7 +87,7 @@ public class ItemLock implements Serializable {
      *
      * @param userId new value of userId
      */
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
