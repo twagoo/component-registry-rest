@@ -22,7 +22,6 @@ import com.sun.jersey.spi.spring.container.servlet.SpringServlet;
 import com.sun.jersey.test.framework.AppDescriptor;
 import com.sun.jersey.test.framework.JerseyTest;
 import com.sun.jersey.test.framework.WebAppDescriptor;
-import com.sun.jersey.test.framework.spi.container.TestContainerFactory;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
@@ -109,11 +108,11 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
                                 .getName() + ":dummy")));
     }
 
-    protected void createUserRecord() {
+    protected RegistryUser createUserRecord() {
         RegistryUser user = new RegistryUser();
         user.setName("Database test user");
         user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
-        userDao.save(user);
+        return userDao.save(user);
     }
     
     protected Number getExpectedUserId(String principal) {
