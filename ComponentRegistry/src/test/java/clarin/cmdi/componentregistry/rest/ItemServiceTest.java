@@ -19,12 +19,14 @@ package clarin.cmdi.componentregistry.rest;
 import clarin.cmdi.componentregistry.ComponentRegistry;
 import clarin.cmdi.componentregistry.ComponentRegistryFactory;
 import clarin.cmdi.componentregistry.GroupService;
+import clarin.cmdi.componentregistry.ItemLockService;
 import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.Group;
+import clarin.cmdi.componentregistry.model.ItemLock;
 import clarin.cmdi.componentregistry.model.Ownership;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
@@ -55,6 +57,8 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private GroupService groupService;
+    @Autowired
+    private ItemLockService itemLockService;
 
     private RegistryUser registryUser;
     private ComponentRegistry baseRegistry;
@@ -149,7 +153,7 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Test
     public void testGetItemGroups() throws Exception {
-        final String componentId = RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "component3", false).getId();
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
         addToTeam(componentId, createTeam("testGroup1"));
         addToTeam(componentId, createTeam("testGroup2"));
 
@@ -163,7 +167,7 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Test
     public void testTransferItemToGroup() throws Exception {
-        final String componentId = RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "component3", false).getId();
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
         addToTeam(componentId, createTeam("testGroup1"));
         //target team
         long targetTeamId = createTeam("testGroup2");
@@ -173,5 +177,93 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
                 .accept(MediaType.APPLICATION_XML)
                 .post(ClientResponse.class);
         assertEquals(Status.OK.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    public void testGetItemLock() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+        itemLockService.setLock(componentId, registryUser.getPrincipalName());
+
+        final ItemLock result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .get(ItemLock.class);
+        assertNotNull("Item lock should have been retrieved", result);
+        assertEquals("Item id should match", (long) baseRegistry.getComponentDescription(componentId).getDbId(), result.getItemId().longValue());
+        assertEquals("User id should match", registryUser.getId(), result.getUserId());
+    }
+
+    @Test
+    public void testGetItemLockNoLock() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+
+        final ClientResponse result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .get(ClientResponse.class);
+        assertEquals("Not found status expected for non-existent lock", Status.NOT_FOUND.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    public void testSetItemLock() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+        final ClientResponse result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put(ClientResponse.class);
+        assertEquals(Status.OK.getStatusCode(), result.getStatus());
+
+        final ItemLock lock = itemLockService.getLock(componentId);
+        assertNotNull("Lock should have been created", lock);
+        assertEquals("Item id should match", (long) baseRegistry.getComponentDescription(componentId).getDbId(), lock.getItemId().longValue());
+        assertEquals("User id should match", registryUser.getId(), lock.getUserId());
+    }
+
+    @Test
+    public void testSetItemLockExistingLock() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+        //put once
+        getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put();
+        //put again
+        final ClientResponse result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put(ClientResponse.class);
+        assertEquals(Status.CONFLICT.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    public void testRemoveItemLock() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+        itemLockService.setLock(componentId, registryUser.getPrincipalName());
+        assertNotNull("Lock should be present before deletion", itemLockService.getLock(componentId));
+        final ClientResponse result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .delete(ClientResponse.class);
+        assertEquals(Status.OK.getStatusCode(), result.getStatus());
+
+        assertNull("Lock should have been removed", itemLockService.getLock(componentId));
+    }
+
+    @Test
+    public void testGetItemLockNonExistentItem() throws Exception {
+        final ClientResponse result = getResource().path("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .get(ClientResponse.class);
+        assertEquals(Status.NOT_FOUND.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    public void testSetItemLockNonExistentItem() throws Exception {
+        final ClientResponse result = getResource().path("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put(ClientResponse.class);
+        assertEquals(Status.CONFLICT.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    public void testRemoveItemLockNonExistentItem() throws Exception {
+        final ClientResponse result = getResource().path("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .delete(ClientResponse.class);
+        assertEquals(Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
 }
