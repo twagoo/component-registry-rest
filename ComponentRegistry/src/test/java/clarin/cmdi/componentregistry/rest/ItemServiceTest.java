@@ -298,6 +298,7 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
                 .accept(MediaType.APPLICATION_XML)
                 .put(ClientResponse.class);
         assertEquals(Status.FORBIDDEN.getStatusCode(), result.getStatus());
+        assertNull(itemLockService.getLock(componentId));
     }
 
     @Test
