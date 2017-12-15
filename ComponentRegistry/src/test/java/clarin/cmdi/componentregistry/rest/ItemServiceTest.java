@@ -290,4 +290,22 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
                 .delete(ClientResponse.class);
         assertEquals(Status.NOT_FOUND.getStatusCode(), result.getStatus());
     }
+
+    @Test
+    public void testSetItemLockProductionItem() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", true, ComponentStatus.PRODUCTION).getId();
+        final ClientResponse result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put(ClientResponse.class);
+        assertEquals(Status.FORBIDDEN.getStatusCode(), result.getStatus());
+    }
+
+    @Test
+    public void testSetItemLockDeprecatedItem() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", true, ComponentStatus.DEPRECATED).getId();
+        final ClientResponse result = getAuthenticatedResource("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put(ClientResponse.class);
+        assertEquals(Status.FORBIDDEN.getStatusCode(), result.getStatus());
+    }
 }

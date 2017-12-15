@@ -10,6 +10,7 @@ import clarin.cmdi.componentregistry.ItemNotFoundException;
 import clarin.cmdi.componentregistry.UserUnauthorizedException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ItemLock;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
@@ -137,9 +138,11 @@ public class ItemsService extends AbstractComponentRegistryRestService {
             //first check whether authenticated
             checkAndGetUserPrincipal();
 
-            if (getBaseDescriptionOrSendError(itemId, servletResponse) == null) {
-                servletResponse.sendError(Status.CONFLICT.getStatusCode(), "Request to put lock on item that does not exist: " + itemId);
-                return Response.noContent().build();
+            final BaseDescription itemDescription = getBaseDescriptionOrSendError(itemId, servletResponse);
+            if (itemDescription == null) {
+                throw serviceException(Status.CONFLICT, "Request to put lock on item that does not exist: " + itemId);
+            } else if (itemDescription.getStatus() != ComponentStatus.DEVELOPMENT) {
+                throw serviceException(Status.FORBIDDEN, "Only development items can be (un)locked");
             }
         } catch (AuthenticationRequiredException ex) {
             throw serviceException(Status.UNAUTHORIZED, "Removing a lock requires authentication");
@@ -173,9 +176,11 @@ public class ItemsService extends AbstractComponentRegistryRestService {
             //first check whether authenticated
             checkAndGetUserPrincipal();
 
-            if (getBaseDescriptionOrSendError(itemId, servletResponse) == null) {
-                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "Request to remove lock of item that does not exist: " + itemId);
-                return Response.noContent().build();
+            final BaseDescription itemDescription = getBaseDescriptionOrSendError(itemId, servletResponse);
+            if (itemDescription == null) {
+                throw serviceException(Status.NOT_FOUND, "Request to remove lock of item that does not exist: " + itemId);
+            } else if (itemDescription.getStatus() != ComponentStatus.DEVELOPMENT) {
+                throw serviceException(Status.FORBIDDEN, "Only development items can be (un)locked");
             }
         } catch (AuthenticationRequiredException ex) {
             throw serviceException(Status.UNAUTHORIZED, "Removing a lock requires authentication");
