@@ -134,10 +134,15 @@ public class ItemsService extends AbstractComponentRegistryRestService {
     public Response putItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
         //test item accessibility
         try {
+            //first check whether authenticated
+            checkAndGetUserPrincipal();
+
             if (getBaseDescriptionOrSendError(itemId, servletResponse) == null) {
                 servletResponse.sendError(Status.CONFLICT.getStatusCode(), "Request to put lock on item that does not exist: " + itemId);
                 return Response.noContent().build();
             }
+        } catch (AuthenticationRequiredException ex) {
+            throw serviceException(Status.UNAUTHORIZED, "Removing a lock requires authentication");
         } catch (ComponentRegistryException ex) {
             logger.warn("Failed to get item for which locking was requested (error response set): {}", ex.getMessage());
             logger.debug("Failed to get item for which locking was requested", ex);
@@ -165,10 +170,15 @@ public class ItemsService extends AbstractComponentRegistryRestService {
     public Response removeItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
         //test item accessibility
         try {
+            //first check whether authenticated
+            checkAndGetUserPrincipal();
+
             if (getBaseDescriptionOrSendError(itemId, servletResponse) == null) {
                 servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "Request to remove lock of item that does not exist: " + itemId);
                 return Response.noContent().build();
             }
+        } catch (AuthenticationRequiredException ex) {
+            throw serviceException(Status.UNAUTHORIZED, "Removing a lock requires authentication");
         } catch (ComponentRegistryException ex) {
             logger.warn("Failed to get item for which lock removal was requested (error response set): {}", ex.getMessage());
             logger.debug("Failed to get item for which lock removal was requested", ex);
@@ -183,15 +193,15 @@ public class ItemsService extends AbstractComponentRegistryRestService {
 
     /**
      * Tries to get the description of the identified item, checking for
-     * authorisation. If the retrieval fails for one of a number of reasons,
-     * an error is set on the response and a ComponentRegistryException is thrown.
+     * authorisation. If the retrieval fails for one of a number of reasons, an
+     * error is set on the response and a ComponentRegistryException is thrown.
      * If the item is not found, null is returned.
      *
      * @param itemId item to try to retrieve
      * @param response servlet response that errors can be sent to
      * @return base description only if it could be retrieved, null if it was
      * not found
-     * @throws ComponentRegistryException 
+     * @throws ComponentRegistryException
      */
     private BaseDescription getBaseDescriptionOrSendError(String itemId, HttpServletResponse response) throws ComponentRegistryException, IOException {
         try {

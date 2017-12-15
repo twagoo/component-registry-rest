@@ -246,20 +246,11 @@ public class ComponentRegistryRestService {
                 throw new WebApplicationException(uuEx, Status.FORBIDDEN);
             }
         }
-
         /**
          *
          * @return Principal of current request
          * @throws AuthenticationRequiredException If no user principal found
          */
-        private Principal checkAndGetUserPrincipal()
-                throws AuthenticationRequiredException {
-            Principal principal = security.getUserPrincipal();
-            if (principal == null) {
-                throw new AuthenticationRequiredException("No user principal found.");
-            }
-            return principal;
-        }
 
         private ComponentRegistry initialiseRegistry(String space, String groupId) throws AuthenticationRequiredException {
             //checking credentials 

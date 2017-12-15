@@ -65,4 +65,17 @@ public class AbstractComponentRegistryRestService {
                 .entity(message)
                 .build());
     }
+
+    /**
+     *
+     * @return Principal of current request
+     * @throws AuthenticationRequiredException If no user principal found
+     */
+    protected final Principal checkAndGetUserPrincipal() throws AuthenticationRequiredException {
+        Principal principal = security.getUserPrincipal();
+        if (principal == null) {
+            throw new AuthenticationRequiredException("No user principal found.");
+        }
+        return principal;
+    }
 }

@@ -25,6 +25,7 @@ import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase
 import clarin.cmdi.componentregistry.impl.database.ValidationException;
 import clarin.cmdi.componentregistry.model.BaseDescription;
 import clarin.cmdi.componentregistry.model.ComponentDescription;
+import clarin.cmdi.componentregistry.model.ComponentStatus;
 import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ItemLock;
 import clarin.cmdi.componentregistry.model.Ownership;
@@ -217,6 +218,17 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
     }
 
     @Test
+    public void testSetItemLockUnauthenticated() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+        final ClientResponse result = getResource().path("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .put(ClientResponse.class);
+        assertEquals(Status.UNAUTHORIZED.getStatusCode(), result.getStatus());
+
+        assertNull("Lock should not have been created", itemLockService.getLock(componentId));
+    }
+
+    @Test
     public void testSetItemLockExistingLock() throws Exception {
         final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
         //put once
@@ -244,6 +256,18 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
     }
 
     @Test
+    public void testRemoveItemLockUnauthenticated() throws Exception {
+        final String componentId = RegistryTestHelper.addComponent(baseRegistry, "component3", false).getId();
+        itemLockService.setLock(componentId, registryUser.getPrincipalName());
+        final ClientResponse result = getResource().path("/items/" + componentId + "/lock")
+                .accept(MediaType.APPLICATION_XML)
+                .delete(ClientResponse.class);
+        assertEquals(Status.UNAUTHORIZED.getStatusCode(), result.getStatus());
+
+        assertNotNull("Lock should not have been removed", itemLockService.getLock(componentId));
+    }
+
+    @Test
     public void testGetItemLockNonExistentItem() throws Exception {
         final ClientResponse result = getResource().path("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
                 .accept(MediaType.APPLICATION_XML)
@@ -253,7 +277,7 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Test
     public void testSetItemLockNonExistentItem() throws Exception {
-        final ClientResponse result = getResource().path("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
+        final ClientResponse result = getAuthenticatedResource("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
                 .accept(MediaType.APPLICATION_XML)
                 .put(ClientResponse.class);
         assertEquals(Status.CONFLICT.getStatusCode(), result.getStatus());
@@ -261,7 +285,7 @@ public class ItemServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Test
     public void testRemoveItemLockNonExistentItem() throws Exception {
-        final ClientResponse result = getResource().path("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
+        final ClientResponse result = getAuthenticatedResource("/items/" + ComponentDescription.COMPONENT_PREFIX + "000000/lock")
                 .accept(MediaType.APPLICATION_XML)
                 .delete(ClientResponse.class);
         assertEquals(Status.NOT_FOUND.getStatusCode(), result.getStatus());
