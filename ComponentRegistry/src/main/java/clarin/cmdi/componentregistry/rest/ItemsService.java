@@ -76,24 +76,17 @@ public class ItemsService extends AbstractComponentRegistryRestService {
     public BaseDescription getBaseDescription(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
         logger.debug("Item with id: {} is requested.", itemId);
         try {
-            BaseDescription description = getItemDescription(itemId);
-            if (description != null) {
-                return description;
+            final BaseDescription description = getBaseDescriptionOrSendError(itemId, servletResponse);
+            if (description == null) {
+                servletResponse.sendError(Response.Status.NOT_FOUND.getStatusCode(), "No such item: " + itemId);
             } else {
-                servletResponse.sendError(Response.Status.BAD_REQUEST.getStatusCode());
-                return new BaseDescription();
+                return description;
             }
-
-        } catch (UserUnauthorizedException ex2) {
-            servletResponse.sendError(Response.Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
-            return new BaseDescription();
-        } catch (ItemNotFoundException e) {
-            servletResponse.sendError(Response.Status.NOT_FOUND.getStatusCode(), e.getMessage());
-            return new BaseDescription();
-        } catch (AuthenticationRequiredException e) {
-            servletResponse.sendError(Response.Status.UNAUTHORIZED.getStatusCode(), e.toString());
-            return new BaseDescription();
+        } catch (ComponentRegistryException ex) {
+            logger.warn("Failed to get description (error response set): {}", ex.getMessage());
+            logger.debug("Failed to get description", ex);
         }
+        return new BaseDescription();
     }
 
     @GET
@@ -138,30 +131,102 @@ public class ItemsService extends AbstractComponentRegistryRestService {
 
     @PUT
     @Path("/{itemId}/lock")
-    public Response putItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException {
+    public Response putItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
+        //test item accessibility
         try {
-            //TODO: get item as user (e.g. cr.getProfileDescriptionAccessControlled)
+            if (getBaseDescriptionOrSendError(itemId, servletResponse) == null) {
+                servletResponse.sendError(Status.CONFLICT.getStatusCode(), "Request to put lock on item that does not exist: " + itemId);
+                return Response.noContent().build();
+            }
+        } catch (ComponentRegistryException ex) {
+            logger.warn("Failed to get item for which locking was requested (error response set): {}", ex.getMessage());
+            logger.debug("Failed to get item for which locking was requested", ex);
+            return Response.noContent().build();
+        }
+
+        //create lock
+        try {
             final ItemLock createdLock = itemLockService.setLock(itemId, security.getUserPrincipal().getName());
             if (createdLock != null) {
+                logger.debug("Item lock set: {} by {}", itemId, security.getUserPrincipal().getName());
                 return Response.ok(createdLock).build();
             } else {
                 throw new ComponentRegistryException("Lock was not created for an unkown reason");
             }
         } catch (ItemIsLockedException ex) {
-            return Response.status(Status.CONFLICT).entity("The item is already locked").build();
+            logger.warn("Attempt to lock item that is already locked: {}", itemId);
+            servletResponse.sendError(Status.CONFLICT.getStatusCode(), "The item is already locked: " + itemId);
+            return Response.noContent().build();
         }
     }
 
     @DELETE
     @Path("/{itemId}/lock")
-    public Response removeItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException {
-        //TODO: get item as user (e.g. cr.getProfileDescriptionAccessControlled)
+    public Response removeItemLock(@PathParam("itemId") String itemId) throws ComponentRegistryException, IOException {
+        //test item accessibility
+        try {
+            if (getBaseDescriptionOrSendError(itemId, servletResponse) == null) {
+                servletResponse.sendError(Status.NOT_FOUND.getStatusCode(), "Request to remove lock of item that does not exist: " + itemId);
+                return Response.noContent().build();
+            }
+        } catch (ComponentRegistryException ex) {
+            logger.warn("Failed to get item for which lock removal was requested (error response set): {}", ex.getMessage());
+            logger.debug("Failed to get item for which lock removal was requested", ex);
+            return Response.noContent().build();
+        }
+
+        //delete lock
         itemLockService.deleteLock(itemId);
+        logger.debug("Item lock removed: {} by {}", itemId, security.getUserPrincipal().getName());
         return Response.ok().build();
     }
 
-    private BaseDescription getItemDescription(String itemId) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException, ComponentRegistryException {
-        ComponentRegistry cr = this.getBaseRegistry();
+    /**
+     * Tries to get the description of the identified item, checking for
+     * authorisation. If the retrieval fails for one of a number of reasons,
+     * an error is set on the response and a ComponentRegistryException is thrown.
+     * If the item is not found, null is returned.
+     *
+     * @param itemId item to try to retrieve
+     * @param response servlet response that errors can be sent to
+     * @return base description only if it could be retrieved, null if it was
+     * not found
+     * @throws ComponentRegistryException 
+     */
+    private BaseDescription getBaseDescriptionOrSendError(String itemId, HttpServletResponse response) throws ComponentRegistryException, IOException {
+        try {
+            BaseDescription description = getItemDescriptionAccesControled(itemId);
+            if (description != null) {
+                return description;
+            } else {
+                // null signifies a not well-formed identifier
+                response.sendError(Response.Status.BAD_REQUEST.getStatusCode(), "Bad ID");
+                throw new ComponentRegistryException("No item:" + itemId);
+            }
+        } catch (ItemNotFoundException e) {
+            return null;
+        } catch (UserUnauthorizedException ex2) {
+            response.sendError(Response.Status.FORBIDDEN.getStatusCode(), ex2.getMessage());
+            throw new ComponentRegistryException("Forbidden:" + itemId);
+        } catch (AuthenticationRequiredException e) {
+            response.sendError(Response.Status.UNAUTHORIZED.getStatusCode(), e.toString());
+            throw new ComponentRegistryException("Unauthorized:" + itemId);
+        }
+    }
+
+    /**
+     *
+     * @param itemId
+     * @return description, if the description ID is well-formed
+     * @throws UserUnauthorizedException if the user does not have access
+     * @throws AuthenticationRequiredException if authorization is required
+     * @throws ItemNotFoundException if the description ID is well-formed but
+     * the item could not be found
+     * @throws ComponentRegistryException an error occurred while getting the
+     * description from the registry
+     */
+    private BaseDescription getItemDescriptionAccesControled(String itemId) throws UserUnauthorizedException, AuthenticationRequiredException, ItemNotFoundException, ComponentRegistryException {
+        final ComponentRegistry cr = this.getBaseRegistry();
         if (itemId.startsWith(ComponentDescription.COMPONENT_PREFIX)) {
             return cr.getComponentDescriptionAccessControlled(itemId);
         } else if (itemId.startsWith(ProfileDescription.PROFILE_PREFIX)) {
