@@ -74,7 +74,7 @@
     <!--
         Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twan_clarin.eu@clarin.eu dieter_clarin.eu@clarin.eu menzo.windhouwer2@meertens.knaw.nl willem_clarin.eu@clarin.eu"/>
+    <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twan_clarin.eu@clarin.eu dieter_clarin.eu@clarin.eu menzo.windhouwer@meertens.knaw.nl willem_clarin.eu@clarin.eu"/>
     <!--
         Base location of the CMDI toolkit
     -->  
