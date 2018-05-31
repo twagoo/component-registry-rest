@@ -48,16 +48,13 @@
     </properties>
 
     <ciManagement>
-        <system>hudson</system>
+        <system>travis</system>
         <url>https://travis-ci.org/clarin-eric/component-registry-rest</url>
     </ciManagement>
     <scm>
-        <connection>scm:svn:http://svn.clarin.eu/ComponentRegistry/trunk/ComponentRegistry</connection>
-        <developerConnection>scm:svn:http://svn.clarin.eu/ComponentRegistry/trunk/ComponentRegistry</developerConnection>
-        <url>http://trac.clarin.eu/browser/ComponentRegistry</url>
+        <connection>scm:git:https://github.com/clarin-eric/component-registry-rest.git</connection>
+        <url>https://github.com/clarin-eric/component-registry-rest</url>
     </scm>
-
-
 
     <dependencies>        
         <!-- Logging -->
