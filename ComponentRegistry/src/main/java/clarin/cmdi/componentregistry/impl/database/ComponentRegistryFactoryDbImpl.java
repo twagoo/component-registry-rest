@@ -14,6 +14,7 @@ import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,18 +120,18 @@ public class ComponentRegistryFactoryDbImpl implements ComponentRegistryFactory 
     public ComponentRegistry getOtherUserComponentRegistry(
             Principal adminPrincipal, Owner owner) {
         try {
-            RegistryUser user;
+            Optional<RegistryUser> user;
             if (owner instanceof OwnerUser) {
-                user = userDao.findOne(owner.getId().longValue());
+                user = userDao.findById(owner.getId().longValue());
             } else {
                 // TODO: Implement for groups ??? Twan
                 throw new UnsupportedOperationException(
                         "Groups not implemented yet");
             }
             ComponentRegistry result = null;
-            if (user != null) {
+            if (user.isPresent()) {
                 if (configuration.isAdminUser(adminPrincipal)) {
-                    result = this.getNewComponentRegistryForUser(user.getId());
+                    result = this.getNewComponentRegistryForUser(user.get().getId());
                 } else {
                     LOG.info("{} not found in list of {}",
                             adminPrincipal.getName(),

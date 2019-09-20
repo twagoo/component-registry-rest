@@ -84,7 +84,7 @@ public class UserDaoTest extends BaseUnitTest {
 	testUser.setName("I. Changed");
 	userDao.save(testUser);
 
-	assertEquals("I. Changed", userDao.findOne(id.longValue()).getName());
+	assertEquals("I. Changed", userDao.findById(id.longValue()).map(RegistryUser::getName).orElseThrow());
     }
 
     public final static String TEST_USER_NAME = "Aap";

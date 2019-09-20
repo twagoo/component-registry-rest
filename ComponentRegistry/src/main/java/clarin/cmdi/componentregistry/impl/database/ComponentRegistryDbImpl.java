@@ -43,6 +43,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.xml.bind.JAXBException;
@@ -319,10 +320,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(profileId)) {
             try {
-                Comment comment = commentsDao.findOne(Long.parseLong(commentId));
-                if (comment != null && profileId.equals(comment.getComponentRef())) {
-                    this.setCanDeleteInComments(Collections.singleton(comment));
-                    return comment;
+                Optional<Comment> comment = commentsDao.findById(Long.parseLong(commentId));
+                if (comment.isPresent() && profileId.equals(comment.get().getComponentRef())) {
+                    this.setCanDeleteInComments(Collections.singleton(comment.get()));
+                    return comment.get();
                 } else {
                     throw new ItemNotFoundException("Comment " + commentId + " for the profile " + profileId + " is not found.");
                 }
@@ -357,10 +358,10 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException, AuthenticationRequiredException {
         if (this.canCurrentUserAccessDescription(componentId)) {
             try {
-                Comment comment = commentsDao.findOne(Long.parseLong(commentId));
-                if (comment != null && componentId.equals(comment.getComponentRef().toString())) {
-                    this.setCanDeleteInComments(Collections.singleton(comment));
-                    return comment;
+                Optional<Comment> comment = commentsDao.findById(Long.parseLong(commentId));
+                if (comment.isPresent() && componentId.equals(comment.get().getComponentRef())) {
+                    this.setCanDeleteInComments(Collections.singleton(comment.get()));
+                    return comment.get();
                 } else {
                     throw new ItemNotFoundException("Comment " + commentId + " for the component " + componentId + " is not found.");
                 }
@@ -845,8 +846,8 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                 }
             }
         };
-        RegistryUser u = userDao.findOne(getUserId().longValue());
-        return "Registry of " + u.getName();
+        Optional<RegistryUser> u = userDao.findById(getUserId().longValue());
+        return "Registry of " + u.map(RegistryUser::getName).orElse("USER NOT FOUND");
     }
 
     @Override
@@ -868,16 +869,14 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
             if (userId == null) {
                 throw new AuthenticationRequiredException("Requested component is not public but no current user");
             }
-            final RegistryUser user = userDao.findOne(userId.longValue());
-            if (user == null) {
-                return false;
-            }
 
-            if (configuration.isAdminUser(user.getPrincipalName())) {
-                return true;
-            }
+            return userDao.findById(userId.longValue()).map(user -> {
+                if (configuration.isAdminUser(user.getPrincipalName())) {
+                    return true;
+                }
 
-            return groupService.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(user, description);
+                return groupService.canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(user, description);
+            }).orElse(false);
         }
     }
 
@@ -915,12 +914,18 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
     public void deleteComment(String commentId) throws IOException,
             UserUnauthorizedException, DeleteFailedException, ItemNotFoundException, AuthenticationRequiredException {
         try {
-            Comment comment = commentsDao.findOne(Long.parseLong(commentId));
-            if (comment != null
-                    // Comment must have an existing (in this registry)
-                    // componentId or profileId
-                    && comment.getComponentRef() != null
+
+            Comment comment = commentsDao.findById(Long.parseLong(commentId))
+                    .orElseThrow(() -> {
+                        return new ItemNotFoundException("Comment " + commentId + " does not exist");
+                    });
+
+            if (comment.getComponentRef() != null
                     && this.canCurrentUserAccessDescription(comment.getComponentRef())) {
+
+                // Comment must have an existing (in this registry)
+                // componentId or profileId
+
                 this.checkAuthorisationComment(comment);
                 commentsDao.delete(comment);
             } else {

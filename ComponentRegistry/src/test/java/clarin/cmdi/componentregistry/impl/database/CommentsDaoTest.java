@@ -85,7 +85,7 @@ public class CommentsDaoTest extends BaseUnitTest{
 	comment1.setComponentRef(TEST_COMMENT_PROFILE_ID);
 	comment1.setUserId(TEST_COMMENT_USER_ID);
 	Number commentId = Long.parseLong(commentsDao.saveAndFlush(comment1).getId());
-	Comment commentById = commentsDao.findOne(commentId.longValue());
+	Comment commentById = commentsDao.findById(commentId.longValue()).orElseThrow();
 	assertEquals(TEST_COMMENT_PROFILE_ID, commentById.getComponentRef());
 	assertEquals(TEST_COMMENT_NAME, commentById.getComment());
     }

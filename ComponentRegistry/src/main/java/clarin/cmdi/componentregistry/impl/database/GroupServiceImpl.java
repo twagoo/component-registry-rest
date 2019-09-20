@@ -46,7 +46,7 @@ import org.springframework.dao.DataAccessException;
 @Service("GroupService")
 @Transactional
 public class GroupServiceImpl implements GroupService {
-    
+
     @Autowired
     private GroupDao groupDao;
     @Autowired
@@ -57,25 +57,25 @@ public class GroupServiceImpl implements GroupService {
     private ComponentDao componentDao;
     @Autowired
     private UserDao userDao;
-    
+
     public void setGroupDao(GroupDao groupDao) {
         this.groupDao = groupDao;
     }
-    
+
     public void setGroupMembershipDao(GroupMembershipDao groupMembershipDao) {
         this.groupMembershipDao = groupMembershipDao;
     }
-    
+
     public void setOwnershipDao(OwnershipDao ownershipDao) {
         this.ownershipDao = ownershipDao;
     }
-    
+
     @Override
     public List<Group> getGroupsOwnedByUser(String ownerPrincipalName) {
         RegistryUser owner = userDao.getByPrincipalName(ownerPrincipalName);
         return groupDao.findGroupOwnedByUser(owner.getId().longValue());
     }
-    
+
     @Override
     public boolean isUserOwnerOfGroup(String groupName, String ownerPrincipalName) {
         List<Group> groups = getGroupsOwnedByUser(ownerPrincipalName);
@@ -84,10 +84,10 @@ public class GroupServiceImpl implements GroupService {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     private void checkOwnership(Ownership ownership) {
         if (ownership.getComponentRef() == null) {
             throw new RuntimeException("Ownership needs a componentId");
@@ -99,26 +99,26 @@ public class GroupServiceImpl implements GroupService {
             throw new RuntimeException("Ownership has both a groupId and a userId ");
         }
     }
-    
+
     private void assertOwnershipDoesNotExist(Ownership ownership) {
         Ownership o = ownershipDao.findOwnershipByGroupAndComponent(ownership.getGroupId(), ownership.getComponentRef());
         if (o != null) {
             throw new ValidationException("Ownership exists");
         }
     }
-    
+
     @Override
     public void addOwnership(Ownership ownership) {
         checkOwnership(ownership);
         assertOwnershipDoesNotExist(ownership);
         ownershipDao.save(ownership);
     }
-    
+
     @Override
     public void removeOwnership(Ownership ownership) {
         throw new RuntimeException("not implemented");
     }
-    
+
     protected boolean canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(RegistryUser user,
             BaseDescription description) {
         // TODO make some joins and multi-id queries to speed the entire method
@@ -146,12 +146,12 @@ public class GroupServiceImpl implements GroupService {
         for (Group group : groups) {
             groupIds.add(group.getId());
         }
-        
+
         List<GroupMembership> memberships = groupMembershipDao.findGroupsTheUserIsAmemberOf(userId);
         for (GroupMembership gm : memberships) {
             groupIds.add(gm.getGroupId());
         }
-        
+
         for (Long groupId : groupIds) {
             ownership = ownershipDao.findOwnershipByGroupAndComponent(groupId, description.getId());
             if (ownership != null) {
@@ -160,32 +160,31 @@ public class GroupServiceImpl implements GroupService {
         }
         return false;
     }
-    
+
     @Override
     public boolean canUserAccessComponentEitherOnHisOwnOrThroughGroupMembership(RegistryUser user,
             BaseDescription baseDescription) {
         return canUserAccessAbstractDescriptionEitherOnHisOwnOrThroughGroupMembership(user, baseDescription);
     }
-    
+
     @Override
     @ManagedOperation(description = "Make a user member of a group")
     @ManagedOperationParameters({
-        @ManagedOperationParameter(name = "principalName", description = "Principal name of the user to make a member")
-        ,
+        @ManagedOperationParameter(name = "principalName", description = "Principal name of the user to make a member"),
         @ManagedOperationParameter(name = "groupName", description = "Name of the group")})
     public long makeMember(String userPrincipalName, String groupName) throws ItemNotFoundException {
-        
+
         RegistryUser user = userDao.getByPrincipalName(userPrincipalName);
-        
+
         if (user == null) {
             throw new ItemNotFoundException("User with the principal name " + userPrincipalName + " is not found.");
         }
         Group group = groupDao.findGroupByName(groupName);
-        
+
         if (group == null) {
             throw new ItemNotFoundException("Group with the  name " + groupName + " is not found.");
         }
-        
+
         GroupMembership gm = groupMembershipDao.findMembership(user.getId().longValue(), group.getId());
         if (gm != null) {
             return gm.getId();
@@ -195,20 +194,20 @@ public class GroupServiceImpl implements GroupService {
         gm.setUserId(user.getId().longValue());
         return groupMembershipDao.save(gm).getId();
     }
-    
+
     @Override
     public long removeMember(String userPrincipalName, String groupName) throws ItemNotFoundException {
         RegistryUser user = userDao.getByPrincipalName(userPrincipalName);
-        
+
         if (user == null) {
             throw new ItemNotFoundException("User with the principal name " + userPrincipalName + " is not found.");
         }
         Group group = groupDao.findGroupByName(groupName);
-        
+
         if (group == null) {
             throw new ItemNotFoundException("Group with the  name " + groupName + " is not found.");
         }
-        
+
         GroupMembership gm = groupMembershipDao.findMembership(user.getId().longValue(), group.getId());
         if (gm == null) {
             return -1;
@@ -241,8 +240,7 @@ public class GroupServiceImpl implements GroupService {
 //    }
     @ManagedOperation(description = "Create a new group")
     @ManagedOperationParameters({
-        @ManagedOperationParameter(name = "name", description = "Name of the group, must be unique")
-        ,
+        @ManagedOperationParameter(name = "name", description = "Name of the group, must be unique"),
         @ManagedOperationParameter(name = "ownerPrincipalName", description = "Principal name of the user")})
     @Override
     public long createNewGroup(String name, String ownerPrincipalName) {
@@ -260,69 +258,69 @@ public class GroupServiceImpl implements GroupService {
         group = groupDao.save(group);
         return group.getId();
     }
-    
+
     @ManagedOperation(description = "List available groups")
     @Override
     public List<String> listGroupNames() {
-        List<String> groupNames = new ArrayList<String>();
-        for (Group group : groupDao.findAll()) {
+        List<String> groupNames = new ArrayList<>();
+        groupDao.findAll().forEach((group) -> {
             groupNames.add(group.getName());
-        }
+        });
         return groupNames;
     }
-    
+
     @Override
     public List<Group> getGroupsOfWhichUserIsAMember(String principal) {
         RegistryUser user = userDao.getByPrincipalName(principal);
         if (user == null || user.getId() == null) {
             return new ArrayList<Group>();
         }
-        List<GroupMembership> memberships = groupMembershipDao.findGroupsTheUserIsAmemberOf(user.getId().longValue());
-        List<Group> groups = new ArrayList<Group>();
-        for (GroupMembership m : memberships) {
-            groups.add(groupDao.findOne(m.getGroupId()));
-        }
+        List<GroupMembership> memberships = groupMembershipDao.findGroupsTheUserIsAmemberOf(user.getId());
+        List<Group> groups = new ArrayList<>();
+        memberships.forEach((m) -> {
+            groupDao.findById(m.getGroupId()).ifPresent(groups::add);
+        });
         return groups;
     }
-    
+
     @Override
     public List<String> getComponentIdsInGroup(long groupId) {
         List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
-        Set<String> componentIds = new HashSet<String>();
+        Set<String> componentIds = new HashSet<>();
         for (Ownership o : ownerships) {
             if (ComponentUtils.isComponentId(o.getComponentRef())) {
                 componentIds.add(o.getComponentRef());
             }
         }
-        List<String> idsList = new ArrayList<String>(componentIds);
+        List<String> idsList = new ArrayList<>(componentIds);
         Collections.sort(idsList);
         return idsList;
     }
-    
+
     @Override
     public List<String> getProfileIdsInGroup(long groupId) {
         List<Ownership> ownerships = ownershipDao.findOwnershipByGroup(groupId);
-        Set<String> profileIds = new HashSet<String>();
+        Set<String> profileIds = new HashSet<>();
         for (Ownership o : ownerships) {
             if (ComponentUtils.isProfileId(o.getComponentRef())) {
                 profileIds.add(o.getComponentRef());
             }
         }
-        List<String> idsList = new ArrayList<String>(profileIds);
+        List<String> idsList = new ArrayList<>(profileIds);
         Collections.sort(idsList);
         return idsList;
     }
-    
+
     @Override
     public List<Group> getGroupsTheItemIsAMemberOf(String itemId) {
-        Set<Ownership> ownerships = new HashSet<Ownership>();
+        Set<Ownership> ownerships = new HashSet<>();
         ownerships.addAll(ownershipDao.findOwnershipByComponentId(itemId));
-        Set<Group> groups = new HashSet<Group>();
+        Set<Group> groups = new HashSet<>();
         for (Ownership ownership : ownerships) {
-            groups.add(groupDao.findOne(ownership.getGroupId()));
+            groupDao.findById(ownership.getGroupId()).ifPresent(groups::add);
         }
-        List<Group> groupList = new ArrayList<Group>(groups);
-        Collections.sort(groupList, new Comparator<Group>() {
+        List<Group> groupList = new ArrayList<>(groups);
+        Collections.sort(groupList, new Comparator<>() {
             @Override
             public int compare(Group g1, Group g2) {
                 return (int) (g1.getId() - g2.getId());
@@ -330,13 +328,11 @@ public class GroupServiceImpl implements GroupService {
         });
         return groupList;
     }
-    
+
     @ManagedOperation(description = "Make a component owned by a group instead of a user")
     @ManagedOperationParameters({
-        @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the component")
-        ,
-        @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to")
-        ,
+        @ManagedOperationParameter(name = "principal", description = "Name of the principal who owns the component"),
+        @ManagedOperationParameter(name = "groupName", description = "Name of the group to move the component to"),
         @ManagedOperationParameter(name = "componentId", description = "Id of component")})
     @Override
     public void transferItemOwnershipToGroup(String principal, String groupName, String itemId) throws UserUnauthorizedException {
@@ -348,23 +344,23 @@ public class GroupServiceImpl implements GroupService {
         if (target == null) {
             throw new ValidationException("No group found with name " + groupName);
         }
-        
+
         if (!this.userGroupMember(principal, target.getId())) {
             throw new UserUnauthorizedException("User " + principal + " is not a member of group " + groupName);
         }
-        
+
         final List<Ownership> currentOwnerships = ownershipDao.findOwnershipByComponentId(itemId);
         if (!userHasRightToMove(item, principal, currentOwnerships)) {
             throw new UserUnauthorizedException("User " + principal + " does not have the rights to move item  " + item.getName());
         }
-        
-        ownershipDao.delete(currentOwnerships);
+
+        ownershipDao.deleteAll(currentOwnerships);
         final Ownership ownership = new Ownership();
         ownership.setComponentRef(itemId);
         ownership.setGroupId(target.getId());
         addOwnership(ownership);
     }
-    
+
     private boolean userHasRightToMove(BaseDescription item, String principal, List<Ownership> currentOwnerships) throws DataAccessException {
         long itemOwnerUser = item.getDbUserId();
         long principalId = userDao.getByPrincipalName(principal).getId();
@@ -380,23 +376,22 @@ public class GroupServiceImpl implements GroupService {
         }
         return false;
     }
-    
+
     @Override
     public void transferItemOwnershipFromUserToGroupId(String principal, long groupId, String componentId) throws UserUnauthorizedException {
-        Group group = groupDao.findOne(groupId);
-        if (group == null) {
-            throw new ValidationException("No group found with id " + groupId);
-        }
+        final Group group = groupDao.findById(groupId).orElseThrow(() -> {
+            return new ValidationException("No group found with id " + groupId);
+        });
         this.transferItemOwnershipToGroup(principal, group.getName(), componentId);
     }
-    
+
     @Override
     public boolean userGroupMember(String principalName, long groupId) {
         RegistryUser user = userDao.getByPrincipalName(principalName);
         GroupMembership gm = groupMembershipDao.findMembership(user.getId(), groupId);
         return gm != null;
     }
-    
+
     @Override
     public Number getGroupIdByName(String groupName) throws ItemNotFoundException {
         Group group = groupDao.findGroupByName(groupName);
@@ -406,22 +401,21 @@ public class GroupServiceImpl implements GroupService {
             throw new ItemNotFoundException("No group with the name " + groupName);
         }
     }
-    
+
     @Override
     public String getGroupNameById(long groupId) throws ItemNotFoundException {
-        Group group = groupDao.findOne(groupId);
-        if (group != null) {
-            return group.getName();
-        } else {
-            throw new ItemNotFoundException("No group with the id " + groupId);
-        }
+        return groupDao.findById(groupId)
+                .orElseThrow(() -> {
+                    return new ItemNotFoundException("No group with the id " + groupId);
+                })
+                .getName();
     }
-    
+
     @Override
     public List<RegistryUser> getUsersInGroup(long groupId) {
         final List<GroupMembership> groupMemberships = groupMembershipDao.findForGroup(groupId);
         return Lists.transform(groupMemberships, new Function<GroupMembership, RegistryUser>() {
-            
+
             @Override
             public RegistryUser apply(GroupMembership f) {
                 return userDao.getPrincipalNameById(f.getUserId());

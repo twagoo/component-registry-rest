@@ -95,7 +95,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testAddMember() throws ItemNotFoundException {
         final String groupName = "group";
-        final Group group = groupDao.findOne(groupService.createNewGroup(groupName, user.getPrincipalName()));
+        final Group group = groupDao.findById(groupService.createNewGroup(groupName, user.getPrincipalName())).orElseThrow();
 
         //add user
         groupService.makeMember(USER_NAME_1, groupName);
@@ -116,7 +116,7 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testRemoveMember() throws ItemNotFoundException {
         final String groupName = "group";
-        final Group group = groupDao.findOne(groupService.createNewGroup(groupName, user.getPrincipalName()));
+        final Group group = groupDao.findById(groupService.createNewGroup(groupName, user.getPrincipalName())).orElseThrow();
 
         //add three users
         groupService.makeMember(USER_NAME_1, groupName);       
@@ -144,11 +144,11 @@ public class GroupServiceImplTest extends BaseUnitTest {
         assertTrue(groups.isEmpty());
 
         // Make a group
-        Group group1 = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user.getPrincipalName()));
+        Group group1 = groupDao.findById(groupService.createNewGroup("Group 1",
+                user.getPrincipalName())).orElseThrow();
         // and another one
-        Group group2 = groupDao.findOne(groupService.createNewGroup("Group 2",
-                user.getPrincipalName()));
+        Group group2 = groupDao.findById(groupService.createNewGroup("Group 2",
+                user.getPrincipalName())).orElseThrow();
         groups = groupService.getGroupsOwnedByUser(user.getPrincipalName());
         assertEquals(2, groups.size());
 
@@ -211,8 +211,8 @@ public class GroupServiceImplTest extends BaseUnitTest {
         BaseDescription profile = makeTestProfile("4567", false, 9999);
 
         // Make a group that belongs to someone else
-        Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user2.getPrincipalName()));
+        Group group = groupDao.findById(groupService.createNewGroup("Group 1",
+                user2.getPrincipalName())).orElseThrow();
 
         groupService.makeMember(user.getPrincipalName(),
                 group.getName());
@@ -283,8 +283,8 @@ public class GroupServiceImplTest extends BaseUnitTest {
                 user3.getId().longValue());
 
         // Make a group that belongs to someone else
-        Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user2.getPrincipalName()));
+        Group group = groupDao.findById(groupService.createNewGroup("Group 1",
+                user2.getPrincipalName())).orElseThrow();
 
         // Make me a member of that group
         groupService.makeMember(user.getPrincipalName(),
@@ -307,8 +307,8 @@ public class GroupServiceImplTest extends BaseUnitTest {
     public void testTransferComponentOwnershipFromUserToGroup() throws UserUnauthorizedException, ItemNotFoundException {
 
         // Make a group
-        Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user.getPrincipalName()));
+        Group group = groupDao.findById(groupService.createNewGroup("Group 1",
+                user.getPrincipalName())).orElseThrow();
 
         // Make user and user2 members of the same group
         groupService.makeMember(user.getPrincipalName(), group.getName());
@@ -359,8 +359,8 @@ public class GroupServiceImplTest extends BaseUnitTest {
     public void testtransferComponentOwnershipFromUserToGroup() throws UserUnauthorizedException, ItemNotFoundException {
 
         // Make a group
-        Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user.getPrincipalName()));
+        Group group = groupDao.findById(groupService.createNewGroup("Group 1",
+                user.getPrincipalName())).orElseThrow();
 
         // Make user and user2 members of the same group
         groupService.makeMember(user.getPrincipalName(), group.getName());
@@ -412,8 +412,8 @@ public class GroupServiceImplTest extends BaseUnitTest {
     public void testTransferItemOwnershipFromUserToGroup() throws UserUnauthorizedException, ItemNotFoundException {
         //TODO: improve test by mixing in components and exclusing components/profiles
         // Make a group
-        Group group = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user.getPrincipalName()));
+        Group group = groupDao.findById(groupService.createNewGroup("Group 1",
+                user.getPrincipalName())).orElseThrow();
 
         // Make user and user2 members of the same group
         groupService.makeMember(user.getPrincipalName(), group.getName());
@@ -464,12 +464,12 @@ public class GroupServiceImplTest extends BaseUnitTest {
     @Test
     public void testGetGroupsTheItemIsAMemberOf() throws UserUnauthorizedException, ItemNotFoundException {
         // Make a group
-        Group group1 = groupDao.findOne(groupService.createNewGroup("Group 1",
-                user.getPrincipalName()));
+        Group group1 = groupDao.findById(groupService.createNewGroup("Group 1",
+                user.getPrincipalName())).orElseThrow();
 
         // And another one which the item is not assigned to. will use to test exclusion
-        Group group2 = groupDao.findOne(groupService.createNewGroup("Group 2",
-                user.getPrincipalName()));
+        Group group2 = groupDao.findById(groupService.createNewGroup("Group 2",
+                user.getPrincipalName())).orElseThrow();
 
         // Make user members of the same group
         groupService.makeMember(user.getPrincipalName(), group1.getName());

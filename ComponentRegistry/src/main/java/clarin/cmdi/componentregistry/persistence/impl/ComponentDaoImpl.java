@@ -235,7 +235,7 @@ public class ComponentDaoImpl implements ComponentDao {
         }
 
         if (content != null) {
-            BaseDescription copy = jpaComponentDao.findOne(id.longValue());
+            BaseDescription copy = jpaComponentDao.findById(id.longValue()).orElseThrow();
             copy.setContent(content);
             jpaComponentDao.saveAndFlush(copy);
             jpaComponentDao.updateContent(copy.getId(), content);
@@ -250,7 +250,7 @@ public class ComponentDaoImpl implements ComponentDao {
      */
     @Override
     public BaseDescription getById(Number id) {
-        BaseDescription baseDescription = jpaComponentDao.findOne(id.longValue());
+        BaseDescription baseDescription = jpaComponentDao.findById(id.longValue()).orElseThrow();
         if (baseDescription != null && !baseDescription.isDeleted()) {
             augment(baseDescription);
             return baseDescription;
@@ -267,7 +267,7 @@ public class ComponentDaoImpl implements ComponentDao {
      */
     @Override
     public BaseDescription getDeletedById(Number id) {
-        BaseDescription baseDescription = jpaComponentDao.findOne(id.longValue());
+        BaseDescription baseDescription = jpaComponentDao.findById(id.longValue()).orElseThrow();
         if (baseDescription != null) {
             augment(baseDescription);
             return baseDescription;
@@ -369,7 +369,7 @@ public class ComponentDaoImpl implements ComponentDao {
 
     @Override
     public void setPublished(Number id, boolean published) {
-        BaseDescription copy = jpaComponentDao.findOne(id.longValue());
+        BaseDescription copy = jpaComponentDao.findById(id.longValue()).orElseThrow();
         copy.setPublic(published);
         jpaComponentDao.saveAndFlush(copy);
     }
@@ -387,7 +387,7 @@ public class ComponentDaoImpl implements ComponentDao {
         }
 
         long userId = baseDescription.getDbUserId();
-        RegistryUser user = userDao.findOne(userId);
+        RegistryUser user = userDao.findById(userId).orElseThrow();
         if (user == null) {
             return null;
         }
