@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.model;
 
+import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,13 +10,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hibernate.annotations.GenericGenerator;
 
 @XmlRootElement(name = "groupmembership")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Entity
 @Table(name = "groupmembership")
-public class GroupMembership {
+public class GroupMembership implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
