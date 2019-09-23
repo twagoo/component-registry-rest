@@ -2,14 +2,10 @@ package clarin.cmdi.componentregistry.impl.database;
 
 import java.util.Date;
 
-import static org.junit.Assert.*;
-
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 
 import clarin.cmdi.componentregistry.BaseUnitTest;
 import clarin.cmdi.componentregistry.model.BaseDescription;
@@ -21,7 +17,6 @@ import clarin.cmdi.componentregistry.persistence.ComponentDao;
  * @author george.georgovassilis@mpi.nl
  * 
  */
-@TransactionConfiguration(defaultRollback = true)
 public class TestTransactionRollbacks extends BaseUnitTest {
 
     @Autowired

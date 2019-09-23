@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase;
@@ -23,7 +22,6 @@ import clarin.cmdi.componentregistry.impl.database.ComponentRegistryTestDatabase
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:spring-config/applicationContext.xml",
 		"classpath:spring-config/test-applicationContext-fragment.xml" })
-@TransactionConfiguration(defaultRollback = true)
 @Transactional
 public abstract class BaseUnitTest extends XMLTestCase {
 
