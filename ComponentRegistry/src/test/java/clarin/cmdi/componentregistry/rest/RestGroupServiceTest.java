@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.util.Assert;
 
@@ -64,7 +63,6 @@ import org.springframework.util.Assert;
  * @author olhsha
  * @author twagoo
  */
-@Ignore("Failing tests after upgrade from Spring 3.x to 5.x - seem to relate to transactions and/or management beans, to be investigated")
 public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
 
     @Autowired
@@ -148,21 +146,31 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponent(baseRegistry, "Bcomponent-1", false);
         RegistryTestHelper.addComponent(baseRegistry, "Bcomponent-2", false);
 
-        Ownership ownership = new Ownership();
-        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Bprofile-1");
-        ownership.setGroupId(2);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+        {
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Bprofile-1");
+            ownership.setGroupId(2);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
 
-        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1");
-        ownership.setGroupId(2);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+        {
 
-        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-2");
-        ownership.setGroupId(2);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-1");
+            ownership.setGroupId(2);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
+
+        {
+
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Bcomponent-2");
+            ownership.setGroupId(2);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
 
     }
 
@@ -178,21 +186,30 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Ccomponent-1", false);
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Ccomponent-2", false);
 
-        Ownership ownership = new Ownership();
-        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Cprofile-1");
-        ownership.setGroupId(3);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+        {
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Cprofile-1");
+            ownership.setGroupId(3);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
 
-        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1");
-        ownership.setGroupId(3);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+        {
 
-        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-2");
-        ownership.setGroupId(3);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-1");
+            ownership.setGroupId(3);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
+
+        {
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Ccomponent-2");
+            ownership.setGroupId(3);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
     }
 
     private void MakeGroupD() throws ItemNotFoundException {
@@ -209,21 +226,30 @@ public class RestGroupServiceTest extends ComponentRegistryRestServiceTestCase {
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Dcomponent-1", false);
         RegistryTestHelper.addComponentAnotherPrincipal(baseRegistry, "Dcomponent-2", false);
 
-        Ownership ownership = new Ownership();
-        ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Dprofile-1");
-        ownership.setGroupId(4);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+        {
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ProfileDescription.PROFILE_PREFIX + "Dprofile-1");
+            ownership.setGroupId(4);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
 
-        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1");
-        ownership.setGroupId(4);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+        {
 
-        ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-2");
-        ownership.setGroupId(4);
-        ownership.setUserId(0);
-        groupService.addOwnership(ownership);
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-1");
+            ownership.setGroupId(4);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
+
+        {
+            Ownership ownership = new Ownership();
+            ownership.setComponentRef(ComponentDescription.COMPONENT_PREFIX + "Dcomponent-2");
+            ownership.setGroupId(4);
+            ownership.setUserId(0);
+            groupService.addOwnership(ownership);
+        }
     }
 
 //    List<Group> getGroupsTheCurrentUserIsAMemberOf();   
