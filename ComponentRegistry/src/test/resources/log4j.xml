@@ -18,8 +18,14 @@
     <logger name="org.springframework.orm.jpa">
         <level value="warn"/>
     </logger>
-    <root>
+    <logger name="org.springframework.data">
         <level value="warn"/>
+    </logger>
+    <logger name="org.hsqldb">
+        <level value="warn"/>
+    </logger>
+    <root>
+        <level value="info"/>
         <appender-ref ref="Stdout"/>
     </root>
 </log4j:configuration>
