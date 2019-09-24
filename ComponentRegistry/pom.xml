@@ -476,6 +476,25 @@
             </properties>
         </profile>
         <profile>
+            <id>docker</id>
+            <properties>
+                <logging.level>{{DOCKER_COMPREG_LOG_LEVEL}}</logging.level>
+
+                <!-- Will be inserted in context.xml -->
+                <serviceRootUrl>{{DOCKER_COMPREG_SERVICE_ROOT_URL}}</serviceRootUrl>
+                <serviceUrlBase>{{DOCKER_COMPREG_SERVICE_URL_BASE}}</serviceUrlBase>
+                <serviceUrlPath>{{DOCKER_COMPREG_SERVICE_URL_PATH}}</serviceUrlPath>
+
+                <!-- Shibboleth login URI for SHHAA -->
+                <shibLI>{{DOCKER_COMPREG_SHIB_LI}}</shibLI>
+                <!-- Shibboleth logout URI for SHHAA -->
+                <shibLO>{{DOCKER_COMPREG_SHIB_LO}}</shibLO>
+
+                <!-- web.xml for shibboleth authentication -->
+                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
+            </properties>
+        </profile>
+        <profile>
             <id>readonly</id>
             <build>
                 <finalName>${project.artifactId}-${project.version}-readonly</finalName>
