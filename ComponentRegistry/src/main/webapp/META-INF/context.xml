@@ -54,49 +54,47 @@
         "serviceUrlProtocolHeader" and "serviceUrlHostHeader" need to be 
         defined.
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlBase" value="${serviceUrlBase}"/>
-    <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlPath" value="${serviceUrlPath}"/>
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlBase" value="${serviceUrlBase}"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlPath" value="${serviceUrlPath}"/>
+  <!--
      Uncomment two lines below iff you would like to use the protocol and host
      provided in the request headers.
     -->
-
-    <!--
+  <!--
     <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlProtocolHeader" value="X-FORWARDED-PROTO"/>
     <Parameter name="eu.clarin.cmdi.componentregistry.serviceUrlHostHeader" value="X-FORWARDED-HOST"/>
     -->
-
-    <!--
+  <!--
         Location that gets redirected to from /documentation.jsp, which in turn is linked to
         from the Flex application through the 'Help' link button.
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="https://www.clarin.eu/content/component-registry-documentation"/>
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.documentationUrl" value="https://www.clarin.eu/content/component-registry-documentation"/>
+  <!--
         Space-separated list of users (getRemoteUser()) that should have access to the admin area of the ComponentRegistry
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twan_clarin.eu@clarin.eu dieter_clarin.eu@clarin.eu menzo.windhouwer@meertens.knaw.nl willem_clarin.eu@clarin.eu"/>
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.adminUsers" value="twan_clarin.eu@clarin.eu dieter_clarin.eu@clarin.eu menzo.windhouwer@meertens.knaw.nl willem_clarin.eu@clarin.eu"/>
+  <!--
         Base location of the CMDI toolkit
-    -->  
-    <Parameter name="eu.clarin.cmdi.componentregistry.toolkitLocation" value="https://infra.clarin.eu/CMDI/1.x"/>
-    <!--
+    -->
+  <Parameter name="eu.clarin.cmdi.componentregistry.toolkitLocation" value="https://infra.clarin.eu/CMDI/1.x"/>
+  <!--
         Location of the CMDI general component schema that validates component specifications
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" value="https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd"/>
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.generalComponentSchemaUrl" value="https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd"/>
+  <!--
         Location of the stylesheet that transforms component specifications into XML schema documents
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" value="https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl"/>
-    <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1" value="https://infra.clarin.eu/CMDI/1.1/xslt/comp2schema-v2/comp2schema.xsl"/>
-    <!--
+  <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl" value="https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl"/>
+  <Parameter name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1" value="https://infra.clarin.eu/CMDI/1.1/xslt/comp2schema-v2/comp2schema.xsl"/>
+  <!--
         Base location of the Concept Registry service
     -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.ccrRestUrl" value="https://openskos.meertens.knaw.nl/ccr/api/"/>
-    <!-- 
+  <Parameter name="eu.clarin.cmdi.componentregistry.ccrRestUrl" value="https://openskos.meertens.knaw.nl/ccr/api/"/>
+  <!-- 
         Base location of the CLAVAS vocabulary service 
     -->
-    <!-- Test instance (OpenSKOS 2) -->
-    <Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="https://vocabularies.clarin.eu/clavas/public/api/"/>
-    <!-- Production instance -->
-    <!--<Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="https://openskos.meertens.knaw.nl/clavas/api/"/>-->
+  <!-- Test instance (OpenSKOS 2) -->
+  <Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="https://vocabularies.clarin.eu/clavas/public/api/"/>
+  <!-- Production instance -->
+  <!--<Parameter name="eu.clarin.cmdi.componentregistry.clavasRestUrl" value="https://openskos.meertens.knaw.nl/clavas/api/"/>-->
 </Context>
