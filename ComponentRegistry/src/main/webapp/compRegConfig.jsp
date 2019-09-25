@@ -19,7 +19,6 @@
     "url": "<%= appUrl %>"
   },
   "backEndVersion": "${project.version}",
-  "frontEndVersion": "${frontEndVersion}",
   "deploy": {
     "path": "<%= 
                 URI.create(appUrl).getPath() //at same URL as app, so simply take path
