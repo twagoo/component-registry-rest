@@ -11,7 +11,7 @@
     </head>
 
     <body>
-        <p><a href="index.html">Click here to go to the Component Registry</a></p>
+        <p><a href="..">Click here to go to the Component Registry</a></p>
         
         <hr />
         

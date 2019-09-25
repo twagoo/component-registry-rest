@@ -28,7 +28,6 @@
         <!-- non-shib web.xml -->
         <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
 
-        <frontEndVersion>2.2.2</frontEndVersion>
         <cmd-toolkit.version>1.2.1</cmd-toolkit.version>
         <spring-data-jpa.version>2.1.10.RELEASE</spring-data-jpa.version>
         <spring.version>5.1.9.RELEASE</spring.version>
@@ -615,27 +614,6 @@
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/cmd-toolkit</outputDirectory>
                                     <includes>toolkit/**/*</includes>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- Unpack the user interface so that it can be bundled with the back end -->
-                        <id>unpack-ui</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>component-registry-react-ui</artifactId>
-                                    <version>${frontEndVersion}</version>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}</outputDirectory>
-                                    <!-- exclude bundled external config, we provide our own -->
-                                    <excludes>compRegConfig.jsp</excludes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
