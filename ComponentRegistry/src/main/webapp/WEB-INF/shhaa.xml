@@ -3,6 +3,10 @@
 <ROOT>
     <shhaa>
 
+        	<webapp>
+		<host>${shibWebappHost}</host>
+	</webapp>
+        
 	<authentication>
 	    <shibheader>
 		<username>oid-eduPersonPrincipalName</username>

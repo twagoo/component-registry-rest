@@ -469,6 +469,7 @@
                 <shibLI>https://catalog.clarin.eu/Shibboleth.sso/Login</shibLI>
                 <!-- Shibboleth logout URI for SHHAA -->
                 <shibLO>https://catalog.clarin.eu/Shibboleth.sso/Logout</shibLO>
+                <shibWebappHost>https://catalog.clarin.eu</shibWebappHost>
 
                 <!-- web.xml for shibboleth authentication -->
                 <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
@@ -488,6 +489,7 @@
                 <shibLI>{{DOCKER_COMPREG_SHIB_LI}}</shibLI>
                 <!-- Shibboleth logout URI for SHHAA -->
                 <shibLO>{{DOCKER_COMPREG_SHIB_LO}}</shibLO>
+                <shibWebappHost>{{DOCKER_COMPREG_SHIB_WEBAPP_HOST}}</shibWebappHost>
 
                 <!-- web.xml for shibboleth authentication -->
                 <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
