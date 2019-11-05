@@ -25,8 +25,15 @@
         <serviceUrlPath>/ComponentRegistry</serviceUrlPath> <!-- defined in META-INF/context.xml -->
         <!-- Will be inserted in context.xml -->
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
-        <!-- non-shib web.xml -->
-        <isocatSearchUrl>http://www.isocat.org/rest/user/guest/search</isocatSearchUrl>
+
+        <documentationUrl>https://www.clarin.eu/content/component-registry-documentation</documentationUrl>
+        <adminUsers>twan_clarin.eu@clarin.eu dieter_clarin.eu@clarin.eu menzo.windhouwer@meertens.knaw.nl willem_clarin.eu@clarin.eu</adminUsers>
+        <toolkitLocation>https://infra.clarin.eu/CMDI/1.x</toolkitLocation>
+        <generalComponentSchemaUrl>https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd</generalComponentSchemaUrl>
+        <component2SchemaXslUrl>https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl</component2SchemaXslUrl>
+        <component2SchemaXslUrlCmdi11>https://infra.clarin.eu/CMDI/1.1/xslt/comp2schema-v2/comp2schema.xsl</component2SchemaXslUrlCmdi11>
+        <ccrRestUrl>https://openskos.meertens.knaw.nl/ccr/api/</ccrRestUrl>
+        <clavasRestUrl>https://vocabularies.clarin.eu/clavas/public/api/</clavasRestUrl>
 
         <cmd-toolkit.version>1.2.1</cmd-toolkit.version>
         <spring-data-jpa.version>2.1.10.RELEASE</spring-data-jpa.version>
@@ -485,14 +492,23 @@
                 <serviceUrlBase>{{DOCKER_COMPREG_SERVICE_URL_BASE}}</serviceUrlBase>
                 <serviceUrlPath>{{DOCKER_COMPREG_SERVICE_URL_PATH}}</serviceUrlPath>
 
+                <!-- web.xml for shibboleth authentication -->
+                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
+                
+                <documentationUrl>{{DOCKER_COMPREG_DOCUMENTATION_URL}}</documentationUrl>
+                <adminUsers>{{DOCKER_COMPREG_ADMIN_USERS}}</adminUsers>
+                <toolkitLocation>{{DOCKER_COMPREG_TOOLKIT_BASE}}</toolkitLocation>
+                <generalComponentSchemaUrl>{{DOCKER_COMPREG_GENERAL_COMPONENT_SCHEMA}}</generalComponentSchemaUrl>
+                <component2SchemaXslUrl>{{DOCKER_COMPREG_COMPONENT_TO_SCHEMA_XSL}}</component2SchemaXslUrl>
+                <component2SchemaXslUrlCmdi11>{{DOCKER_COMPREG_COMPONENT_TO_SCHEMA_XSL_CMDI11}}</component2SchemaXslUrlCmdi11>
+                <ccrRestUrl>{{DOCKER_COMPREG_CCR_REST_SERVICE}}</ccrRestUrl>
+                <clavasRestUrl>{{DOCKER_COMPREG_CLAVAS_REST_SERVICE}}</clavasRestUrl>
+
                 <!-- Shibboleth login URI for SHHAA -->
                 <shibLI>{{DOCKER_COMPREG_SHIB_LI}}</shibLI>
                 <!-- Shibboleth logout URI for SHHAA -->
                 <shibLO>{{DOCKER_COMPREG_SHIB_LO}}</shibLO>
                 <shibWebappHost>{{DOCKER_COMPREG_SHIB_WEBAPP_HOST}}</shibWebappHost>
-
-                <!-- web.xml for shibboleth authentication -->
-                <webXmlPath>src/main/webapp/WEB-INF/web-shib.xml</webXmlPath>
             </properties>
         </profile>
         <profile>
