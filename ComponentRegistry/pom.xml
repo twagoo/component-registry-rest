@@ -27,7 +27,7 @@
         <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
 
         <documentationUrl>https://www.clarin.eu/content/component-registry-documentation</documentationUrl>
-        <adminUsers>twan_clarin.eu@clarin.eu dieter_clarin.eu@clarin.eu menzo.windhouwer@meertens.knaw.nl willem_clarin.eu@clarin.eu</adminUsers>
+        <adminUsers></adminUsers>
         <toolkitLocation>https://infra.clarin.eu/CMDI/1.x</toolkitLocation>
         <generalComponentSchemaUrl>https://infra.clarin.eu/CMDI/1.x/xsd/cmd-component.xsd</generalComponentSchemaUrl>
         <component2SchemaXslUrl>https://infra.clarin.eu/CMDI/1.x/xslt/comp2schema.xsl</component2SchemaXslUrl>
