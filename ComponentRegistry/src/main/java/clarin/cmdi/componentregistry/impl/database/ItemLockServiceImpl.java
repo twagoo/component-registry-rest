@@ -23,6 +23,7 @@ import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import clarin.cmdi.componentregistry.persistence.jpa.ItemLockDao;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
+import java.util.Calendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +62,7 @@ public class ItemLockServiceImpl implements ItemLockService {
             final ItemLock newLock = new ItemLock();
             newLock.setItemId(componentDao.getDbId(componentId).intValue());
             newLock.setUserId(userDao.getByPrincipalName(ownerPrincipalName).getId());
+            newLock.setTimestamp(Calendar.getInstance().getTime());
             return itemLockDao.save(newLock);
         } else {
             final RegistryUser currentOwner = userDao.getPrincipalNameById(existingLock.getUserId());

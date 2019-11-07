@@ -1,29 +1,61 @@
 ﻿-- Table: public.itemlock
 
 -- DROP TABLE public.itemlock;
+    
+--
+-- Name: itemlock_id_seq; Type: SEQUENCE; Schema: public; Owner: compreg
+--
 
-CREATE TABLE itemlock
-(
-    id integer NOT NULL DEFAULT nextval('itemlock_id_seq'::regclass),
+CREATE SEQUENCE itemlock_id_seq
+    START WITH 2
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE itemlock_id_seq OWNER TO compreg;
+
+--
+-- Name: itemlock; Type: TABLE; Schema: public; Owner: compreg
+--
+
+CREATE TABLE itemlock (
+    id integer DEFAULT nextval('itemlock_id_seq'::regclass) NOT NULL,
     itemid integer NOT NULL,
     userid integer NOT NULL,
-    creationdate timestamp with time zone NOT NULL DEFAULT now(),
-    CONSTRAINT itemlock_pkey PRIMARY KEY (id),
-    CONSTRAINT lock UNIQUE (itemid),
-    CONSTRAINT itemid FOREIGN KEY (itemid)
-        REFERENCES basedescription (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
-    CONSTRAINT userid FOREIGN KEY (userid)
-        REFERENCES registry_user (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-)
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
+    creationdate timestamp with time zone DEFAULT now() NOT NULL
+);
 
-ALTER TABLE itemlock
-    OWNER to compreg;
-    
+
+ALTER TABLE itemlock OWNER TO compreg;
+
+--
+-- Name: itemlock itemlock_pkey; Type: CONSTRAINT; Schema: public; Owner: compreg
+--
+
+ALTER TABLE ONLY itemlock
+    ADD CONSTRAINT itemlock_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: itemlock lock; Type: CONSTRAINT; Schema: public; Owner: compreg
+--
+
+ALTER TABLE ONLY itemlock
+    ADD CONSTRAINT lock UNIQUE (itemid);
+
+--
+-- Name: itemlock item_id; Type: FK CONSTRAINT; Schema: public; Owner: compreg
+--
+
+ALTER TABLE ONLY itemlock
+    ADD CONSTRAINT itemid FOREIGN KEY (itemid) REFERENCES basedescription(id);
+
+
+--
+-- Name: itemlock user_id; Type: FK CONSTRAINT; Schema: public; Owner: compreg
+--
+
+ALTER TABLE ONLY itemlock
+    ADD CONSTRAINT userid FOREIGN KEY (userid) REFERENCES registry_user(id);
