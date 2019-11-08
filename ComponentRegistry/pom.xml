@@ -21,6 +21,7 @@
         <packaging>war</packaging>
         <!-- Properties to configure ComponentRegistry override on commandline 
         with -D or change here -->
+        <distribution.nameAppendix>unspecified</distribution.nameAppendix>
         <serviceUrlBase>http://localhost:8080</serviceUrlBase>
         <serviceUrlPath>/ComponentRegistry</serviceUrlPath> <!-- defined in META-INF/context.xml -->
         <!-- Will be inserted in context.xml -->
@@ -433,6 +434,7 @@
             <!-- development profile that directs logging output to the console -->
             <id>development</id>
             <properties>
+                <distribution.nameAppendix>develop</distribution.nameAppendix>
                 <logging.level>debug</logging.level>
                 <logging.appender>CONSOLE</logging.appender>
 
@@ -467,6 +469,7 @@
         <profile>
             <id>docker</id>
             <properties>
+                <distribution.nameAppendix>docker</distribution.nameAppendix>
                 <logging.level>{{DOCKER_COMPREG_LOG_LEVEL}}</logging.level>
 
                 <!-- Will be inserted in context.xml -->
@@ -665,7 +668,14 @@
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.2</version>
+                <version>2.6</version>
+                <configuration>
+                    <finalName>${project.artifactId}-${project.version}-${distribution.nameAppendix}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/release.xml</descriptor>
+                    </descriptors>
+                </configuration>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -673,11 +683,6 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>src/main/assembly/release.xml</descriptor>
-                            </descriptors>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
