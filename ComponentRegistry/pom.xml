@@ -205,7 +205,17 @@
                     <groupId>org.javassist</groupId>
                     <artifactId>javassist</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <!-- replace excluded guava provided via swagger -->
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>28.1-jre</version>
         </dependency>
         <dependency>
             <groupId>com.sun.grizzly</groupId>
@@ -391,11 +401,6 @@
             <version>2.1.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>16.0.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20090211</version>
@@ -408,24 +413,6 @@
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <scope>test</scope>
-            <version>2.44.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.opera</groupId>
-            <artifactId>operadriver</artifactId>
-            <scope>test</scope>
-            <version>1.5</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-remote-driver</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
