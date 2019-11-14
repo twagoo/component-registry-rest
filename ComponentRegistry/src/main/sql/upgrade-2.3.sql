@@ -6,7 +6,7 @@
 -- Name: itemlock_id_seq; Type: SEQUENCE; Schema: public; Owner: compreg
 --
 
-CREATE SEQUENCE itemlock_id_seq
+CREATE SEQUENCE IF NOT EXISTS itemlock_id_seq
     START WITH 2
     INCREMENT BY 1
     NO MINVALUE
@@ -20,7 +20,7 @@ ALTER TABLE itemlock_id_seq OWNER TO compreg;
 -- Name: itemlock; Type: TABLE; Schema: public; Owner: compreg
 --
 
-CREATE TABLE itemlock (
+CREATE TABLE IF NOT EXISTS itemlock (
     id integer DEFAULT nextval('itemlock_id_seq'::regclass) NOT NULL,
     itemid integer NOT NULL,
     userid integer NOT NULL,
