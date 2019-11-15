@@ -1,17 +1,22 @@
-Bug Fixes and Features
+# Bug Fixes and Features
 
-Release NEXT VERSION (TODO)
+For upgrade instructions, see [UPGRADE.md](UPGRADE.md)
 
-- [Updater utility removed]
+## Releasee Component Registry 2.3.0 (December 2019)
+- Java 11 required
+- Many libraries updated, including Spring and Wicket
+- Front end no longer included in back end build
+- Updater utility removed
+- Documentation in markdown
 
-Release ComponentRegistry-2.2.2 (April 2017)
+## Releasee ComponentRegistry-2.2.2 (April 2017)
 - New front end version with fixed behaviour of 'Edit (as new)' button
 - Extended administration interface, includes user management and improved component editing
 
-Release ComponentRegistry-2.2.1 (February 2017)
+## Releasee ComponentRegistry-2.2.1 (February 2017)
 - Fixed issue on authentication when user not previously registered
 
-Release ComponentRegistry-2.2.0 (December 2016)
+## Releasee ComponentRegistry-2.2.0 (December 2016)
 - Component lifecycle management:
 	- Items in the public, private and team spaces can be given the deprecated status.
 	- A successor can be assigned to deprecated items.
@@ -52,17 +57,17 @@ Release ComponentRegistry-2.2.0 (December 2016)
 	
 Note: for more information about CMDI 1.2 features, see <https://www.clarin.eu/cmdi12>.
 
-Milestones:
+### Milestones:
 - Back end: <https://github.com/clarin-eric/component-registry-rest/milestone/2>
 - Front end: <https://github.com/clarin-eric/component-registry-front-end/milestone/3>
 
-Release ComponentRegistry-2.1.2 (July 2016)
+## Releasee ComponentRegistry-2.1.2 (July 2016)
 - Fixed logging issues
 
-Release ComponentRegistry-2.1.1 (July 2016)
+## Releasee ComponentRegistry-2.1.1 (July 2016)
 - Fixed a number of issues related to submitting and publishing specs from the front end
 
-Release ComponentRegistry-2.1.0 (July 2016)
+## Releasee ComponentRegistry-2.1.0 (July 2016)
 - Switch to CMDI 1.2 (see UPDATE)
 - Front end adaptations for CMDI 1.2
 	<https://github.com/clarin-eric/component-registry-front-end/issues/29>
@@ -83,40 +88,40 @@ Release ComponentRegistry-2.1.0 (July 2016)
 	<https://github.com/clarin-eric/component-registry-rest/issues/3>
 	<https://github.com/clarin-eric/component-registry-rest/issues/4>
 
-Release ComponentRegistry-2.0.5 (June 2016)
+## Releasee ComponentRegistry-2.0.5 (June 2016)
 - Added a 'read only' mode. For instructions, see 'INSTALL'. No further changes.
 
-Release ComponentRegistry-2.0.4 (March 2016)
+## Releasee ComponentRegistry-2.0.4 (March 2016)
 - Fixed an issue with the editing of vocabularies of legacy components <https://github.com/clarin-eric/component-registry-front-end/issues/28>
 
-Release ComponentRegistry-2.0.3 (March 2016)
+## Releasee ComponentRegistry-2.0.3 (March 2016)
 - Fixed display of profiles with linked root component <https://github.com/clarin-eric/component-registry-front-end/issues/26>
 - Added link to front end to "index.jsp" auth debugging page
 
-Release ComponentRegistry-2.0.2 (February 2016)
+## Releasee ComponentRegistry-2.0.2 (February 2016)
 - Added Piwik tracking code
 
-Release ComponentRegistry-2.0.1 (February 2016)
+## Releasee ComponentRegistry-2.0.1 (February 2016)
 - Cosmetic fixes
 
-Release ComponentRegistry-2.0 (February 2016)
+## Releasee ComponentRegistry-2.0 (February 2016)
 - New React.JS based front end
 
-Release ComponentRegistry-1.14.6 (12 August 2015)
+## Releasee ComponentRegistry-1.14.6 (12 August 2015)
 - Modification in the processing of CCR responses to account for a planned change in the response format
 
-Release ComponentRegistry-1.14.5 (2 February 2015)
+## Releasee ComponentRegistry-1.14.5 (2 February 2015)
 - The Component Registry now connects to the CLARIN Concept Registry instead of ISOcat. https://trac.clarin.eu/ticket/731
 - Group components can now be saved as new in the private workspace. https://trac.clarin.eu/ticket/717
 - Reduced noice in log output. https://trac.clarin.eu/ticket/714 ; https://trac.clarin.eu/ticket/715
 
-Release ComponentRegistry-1.14.2 (2 December 2014)
+## Releasee ComponentRegistry-1.14.2 (2 December 2014)
 - Fixed a bug which caused incomplete component specification expansion
 
-Release ComponentRegistry-1.14.1 (1 December 2014)
+## Releasee ComponentRegistry-1.14.1 (1 December 2014)
 - Component and profile XML and XSD are available without authentication
 
-Release ComponentRegistry-1.14.0 (28 November 2014)
+## Releasee ComponentRegistry-1.14.0 (28 November 2014)
 - Merged profiles and components on persistence level into BaseComponent
 - Only one component DAO left: ComponentDao
 - DB upgrade script which migrates profiles into components
@@ -129,7 +134,7 @@ Release ComponentRegistry-1.14.0 (28 November 2014)
 - Internal refactoring w.r.t. persistence layer. https://trac.clarin.eu/ticket/360
 - Added Swagger documentation for REST API. https://trac.clarin.eu/ticket/692
 
-Release ComponentRegistry-1.13.0 (25 February 2013)
+## Releasee ComponentRegistry-1.13.0 (25 February 2013)
 - Added RSS feeds for public profiles, components, and comments. https://trac.clarin.eu/ticket/180
 - Added help link to UI. https://trac.clarin.eu/ticket/222
 - Fixed superfluous expansion of components and profiles on save. https://trac.clarin.eu/ticket/223
@@ -137,7 +142,7 @@ Release ComponentRegistry-1.13.0 (25 February 2013)
 - Profiles and components in the Component Browser can be filtered by id. https://trac.clarin.eu/ticket/225
 - Concept link URIs get validated in the Component Editor. https://trac.clarin.eu/ticket/249
 
-Release ComponentRegistry-1.12.0 (21 August 2012):
+## Releasee ComponentRegistry-1.12.0 (21 August 2012):
 - REST service produces 404 status when component requested that does not exist.
 - Users can delete their own comments from the Flex UI. http://trac.clarin.eu/ticket/185
 - Attribute name uniqueness check in editor of Flex UI. http://trac.clarin.eu/ticket/184
@@ -151,11 +156,11 @@ Release ComponentRegistry-1.12.0 (21 August 2012):
 - Made elements and components in component editor collapsable. http://trac.clarin.eu/ticket/217
 - Removed top-level tabs in the Flex UI, added buttons to browser, editor and import for navigation. http://trac.clarin.eu/ticket/218
 
-Release ComponentRegistry-1.11.1 (10 April 2012):
+## Releasee ComponentRegistry-1.11.1 (10 April 2012):
 - Fixed caching of w3c xml.xsd schema in validator
 - Fixes issue with user settings page users without user entry in database
 
-Release ComponentRegistry-1.11.0 (3 April 2012):
+## Releasee ComponentRegistry-1.11.0 (3 April 2012):
 - Upgraded to Saxon-HE 9.4
 - Validation of component specifications now also supports schematron rules in the general component schema.
 - Flex component editor does client side checks for duplicate component names.
@@ -165,7 +170,7 @@ Release ComponentRegistry-1.11.0 (3 April 2012):
 - Users can set their display name through a web form linked from the Flex UI. http://trac.clarin.eu/ticket/156
 - 'Save' button in editor is only enabled when editing existing components/profiles from workspace. http://trac.clarin.eu/ticket/165
 
-Release ComponentRegistry-1.10.0 (4 November 2011):
+## Releasee ComponentRegistry-1.10.0 (4 November 2011):
 - Attributes can be added and edited on components. http://trac.clarin.eu/ticket/125
 - ConceptLinks can be assigned to attributes of components and elements. http://trac.clarin.eu/ticket/125#comment:3
 - ConceptLinks are enabled for Components. The search is filtered to show 'container' type concepts only. http://trac.clarin.eu/ticket/141
@@ -173,34 +178,34 @@ Release ComponentRegistry-1.10.0 (4 November 2011):
 - Added the mdEditor parameter to registry/profiles REST call to filter on profiles that should appear in e.g. Arbil. http://trac.clarin.eu/ticket/160
 - An 'about' screen can be triggered from the context menu that shows some info including the application version. http://trac.clarin.eu/ticket/106
 
-Release ComponentRegistry-1.9.1 (29 September 2011):
+## Releasee ComponentRegistry-1.9.1 (29 September 2011):
 - When recursion is detected while expanding (for XML or XSD), an exception is thrown, which will lead to an error response to the user rather than an infinite loop and no response. http://trac.clarin.eu/ticket/148
 
-Release ComponentRegistry-1.9 (22 September 2011):
+## Releasee ComponentRegistry-1.9 (22 September 2011):
 - Save private components works even when component is used, warning message is shown in Flex UI http://trac.clarin.eu/ticket/134
 
-Release ComponentRegistry-1.8.1 (29 June 2011):
+## Releasee ComponentRegistry-1.8.1 (29 June 2011):
 - Fixed some issues with UTF-8 handling http://trac.clarin.eu/ticket/133
 
-Release ComponentRegistry-1.8 (8 June 2011):
+## Releasee ComponentRegistry-1.8 (8 June 2011):
 - Backend reimplemented to use relational database instead of filesystem storage
 - Specify group for profiles http://trac.clarin.eu/ticket/49
 - Header name from specification copied to description when importing http://trac.clarin.eu/ticket/51
 - Fixed fold-out bug http://trac.clarin.eu/ticket/99
 
-Release ComponentRegistry-1.7 (26 January 2011):
+## Releasee ComponentRegistry-1.7 (26 January 2011):
 - Publishing means moving the private component/profile to public space. http://trac.clarin.eu/ticket/57
 - Edit pane is reloaded with saved component/profile. http://trac.clarin.eu/ticket/91
 - Created "show info" menu item that gives the xsd link and a bookmarkable link to open registry on selected item. http://trac.clarin.eu/ticket/59
 - Profiles in private workspace can have a public xsd. http://trac.clarin.eu/ticket/52
 
-Release ComponentRegistry-1.6.1 (19 November 2010):
+## Releasee ComponentRegistry-1.6.1 (19 November 2010):
 - fixed bug where registry jumps to the editor screen upon a delete
 - added tooltip to MultiLingual
 - added some whitespace to up/down icons
 - fixed issue where profiles with no "defining" component could not be edited. A "defining" component is now always added. For example see imdi-profile-instance
 
-Release ComponentRegistry-1.6 (12 November 2010):
+## Releasee ComponentRegistry-1.6 (12 November 2010):
 - No more dependency on jaxb, use default implementation in java6.
 - xml:lang in profiles/components, http://trac.clarin.eu/ticket/10
 - Add a save and a save as new button, http://trac.clarin.eu/ticket/11
@@ -211,13 +216,13 @@ Release ComponentRegistry-1.6 (12 November 2010):
 - Allow reorder of elements/components in editor, http://trac.clarin.eu/ticket/17
 
 
-Release ComponentRegistry-1.5 (6 September 2010):
+## Releasee ComponentRegistry-1.5 (6 September 2010):
 - cleanup olds libs dir mpg jars can be taken from clarin maven site.
 - update jersey version
 - Admin page: cannot delete stuff, which is still used. Need to be able to update it at least at admin's risk. 
 
 
-Release ComponentRegistry-1.4 (20 August 2010):
+## Releasee ComponentRegistry-1.4 (20 August 2010):
 - Alternatively make the registry open in the browser showing the component/profile (make them bookmarkable). This involves moving the login process to a later stage and having a completely anonymous browsing registry.
 - Fix handling of eduPrincipalName/DisplayName make mapping in registry to keep track of which user has which displayName.
   MIGRATE: add principalName to userMapping.xml, Migrate all descriptions to add userId element.
@@ -233,7 +238,7 @@ Release ComponentRegistry-1.4 (20 August 2010):
 - Changed tooltip in search isocat.
 
 
-Release ComponentRegistry-1.3 (28 June 2010):
+## Releasee ComponentRegistry-1.3 (28 June 2010):
 - Only admin can delete public items after a month in registry.
 - sort ignore case
 - Add some user logging.

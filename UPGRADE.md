@@ -1,7 +1,6 @@
-UPDATING THE COMPONENT REGISTRY REST SERVICE AND FLEX UI
+# Upgrading the Component Registry REST service
 
-Procedure for updating
-----------------------
+## Procedure for updating
 
 - When upgrading to a new version of the ComponentRegistry, check if there are
   updates to the schema of the PostgreSQL database. These will be named 
@@ -19,9 +18,23 @@ Procedure for updating
 
 - Then redeploy the WAR and start the application
 
-Version specific update instructions
--------------------------------------
-=== 2.2 ===
+## Version specific update instructions
+
+### 2.3
+- Java 11 or higher is required
+
+- The front end needs to be deployed separately. See 
+[component-registry-front-end](https://github.com/clarin-eric/component-registry-front-end).
+
+- An update to the database schema is required. Carry this out after stopping
+the previous version but before starting the new version when deploying. Use
+the script 'upgrade-2.3.sql' bundled with the deployment package.
+
+For this release, it is strongly required to use a Docker based deployment strategy.
+See [compose_compreg](https://gitlab.com/CLARIN-ERIC/compose_compreg) and the
+[CLARIN Trac wiki pages](https://trac.clarin.eu/wiki/ComponentRegistryAndEditor).
+
+### 2.2
 - An update to the database schema is required. Carry this out after stopping
 the previous version but before starting the new version when deploying. Use
 the script 'upgrade-2.2.sql' bundled with the deployment package.
@@ -40,7 +53,7 @@ the script 'upgrade-2.2.sql' bundled with the deployment package.
 Note: Version 2.2.1 is a maintenance update and no actions are required when upgrading
 from 2.2.0 to 2.2.1.
 
-=== 2.1 ===
+### 2.1
 
 - This is the first version to support CMDI 1.2. Therefore all components and
   profiles in the database need to be converted to CMDI 1.2 once before running
@@ -77,7 +90,7 @@ from 2.2.0 to 2.2.1.
         name="eu.clarin.cmdi.componentregistry.component2SchemaXslUrl.cmdi_1_1" 
         value="https://infra.clarin.eu/CMDI/1.1/xslt/comp2schema-v2/comp2schema.xsl"/>
 
-=== 2.0 ===
+### 2.0
 
 - The application's public base URL is configured differently as of this 
   release. 
@@ -137,7 +150,7 @@ from 2.2.0 to 2.2.1.
   context.xml or application context fragment, as it is now provided within the web.xml 
   of the application itself.
   
-=== 1.14.5 ===
+### 1.14.5
 
 The context parameter eu.clarin.cmdi.componentregistry.isocatRestUrl has been replaced
 with the new parameter eu.clarin.cmdi.componentregistry.ccrRestUrl. An example 
@@ -148,15 +161,15 @@ configuration with the default value for the new parameter is:
   		name="eu.clarin.cmdi.componentregistry.ccrRestUrl" 
   		value="https://openskos.meertens.knaw.nl/ccr/api/"/>
 
-=== 1.14.2 ===
+### 1.14.2
 
 No additional steps required.
 
-=== 1.14.1 ===
+### 1.14.1
 
 No additional steps required.
 
-=== 1.14.0 ===
+### 1.14.0
 
 - Execute DB update script upgrade-1.14.sql
 
@@ -172,7 +185,7 @@ No additional steps required.
     - Download a suitable version and deploy it as a provided library in the Tomcat
 
 
-=== 1.13 ===
+### 1.13
 
 - The following context fragment have been renamed, and should be updated
   in the context fragment for the Component Registry:
@@ -207,7 +220,7 @@ No additional steps required.
 			name="eu.clarin.cmdi.componentregistry.isocatRestUrl" 
 			value="https://catalog.clarin.eu/isocat/rest/" /> 
 			
-=== 1.11 ==
+### 1.11 ==
 
 - The following should be added to the context fragment for the Component
   Registry:
