@@ -36,7 +36,7 @@
         <ccrRestUrl>https://openskos.meertens.knaw.nl/ccr/api/</ccrRestUrl>
         <clavasRestUrl>https://vocabularies.clarin.eu/clavas/public/api/</clavasRestUrl>
 
-        <cmd-toolkit.version>1.2.1</cmd-toolkit.version>
+        <cmd-toolkit.version>1.2.3</cmd-toolkit.version>
         <spring.version>5.1.11.RELEASE</spring.version>
         <wicket.version>6.30.0</wicket.version>
         <jackson.version>2.9.10</jackson.version>
