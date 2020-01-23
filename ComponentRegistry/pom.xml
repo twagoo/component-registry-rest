@@ -39,10 +39,10 @@
         <cmd-toolkit.version>1.2.3</cmd-toolkit.version>
         <spring.version>5.2.2.RELEASE</spring.version>
         <wicket.version>6.30.0</wicket.version>
-        <jackson.version>2.9.10</jackson.version>
-        <jackson-databind.version>2.9.10.1</jackson-databind.version>
+        <jackson.version>2.10.1</jackson.version>
+        <jackson-databind.version>${jackson.version}</jackson-databind.version>
         <jersey.version>1.19.4</jersey.version>
-        <slf4j.version>1.7.29</slf4j.version>
+        <slf4j.version>1.7.30</slf4j.version>
 
         <logging.appender>FILE</logging.appender>
         <logging.level>warn</logging.level>
@@ -302,7 +302,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>2.1.11.RELEASE</version>
+            <version>2.1.14.RELEASE</version>
             <exclusions>
                 <exclusion>
                     <artifactId>spring-aop</artifactId>
