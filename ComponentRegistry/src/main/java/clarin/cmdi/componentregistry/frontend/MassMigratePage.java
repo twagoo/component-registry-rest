@@ -57,9 +57,7 @@ public class MassMigratePage extends SecureAdminWebPage {
 
             @Override
             public void onClick(final AjaxRequestTarget target) {
-                if (target != null) {
-                    target.add(feedback);
-                }
+                target.add(feedback);
                 startMigration();
             }
         });

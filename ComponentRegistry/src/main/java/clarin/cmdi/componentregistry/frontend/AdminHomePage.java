@@ -12,7 +12,6 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
@@ -36,12 +35,12 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import java.util.Optional;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
 import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
-import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
 import org.apache.wicket.extensions.markup.html.repeater.util.TreeModelProvider;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -108,7 +107,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         Button deleteButton = new IndicatingAjaxButton("delete", form) {
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+            protected void onSubmit(AjaxRequestTarget target) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
                 info("deleting:" + info.getName());
                 Principal userPrincipal = getUserPrincipal();
@@ -120,10 +119,8 @@ public class AdminHomePage extends SecureAdminWebPage {
                     LOG.error("Admin: ", e);
                     error("Cannot delete: " + info.getName() + "\n error=" + e);
                 }
-                if (target != null) {
-                    target.add(infoView);
-                    target.add(tree);
-                }
+                target.add(infoView);
+                target.add(tree);
             }
 
             @Override
@@ -135,7 +132,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         form.add(deleteButton);
         Button undeleteButton = new IndicatingAjaxButton("undelete", form) {
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+            protected void onSubmit(AjaxRequestTarget target) {
                 CMDItemInfo info = (CMDItemInfo) form.getModelObject();
                 info("undeleting:" + info.getName());
                 try {
@@ -146,10 +143,8 @@ public class AdminHomePage extends SecureAdminWebPage {
                     LOG.error("Admin: ", e);
                     error("Cannot undelete: " + info.getName() + "\n error=" + e);
                 }
-                if (target != null) {
-                    target.add(infoView);
-                    target.add(tree);
-                }
+                target.add(infoView);
+                target.add(tree);
             }
 
             @Override
@@ -179,8 +174,9 @@ public class AdminHomePage extends SecureAdminWebPage {
         form.add(forceUpdateCheck);
 
         final Button submitButton = new IndicatingAjaxButton("submit", form) {
+
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+            protected void onSubmit(AjaxRequestTarget target) {
                 submitEditForm(form, feedback, target, false);
             }
         };
@@ -188,8 +184,9 @@ public class AdminHomePage extends SecureAdminWebPage {
                 .add(new DisableOnDeletedBehavior(info)));
 
         final Button publishButton = new IndicatingAjaxButton("publish", form) {
+
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+            protected void onSubmit(AjaxRequestTarget target) {
                 submitEditForm(form, feedback, target, true);
                 //reload tree after publish
                 try {
@@ -255,7 +252,7 @@ public class AdminHomePage extends SecureAdminWebPage {
             @Override
             protected Component newContentComponent(String id, IModel<DefaultMutableTreeNode> nodeModel) {
                 if (nodeModel.getObject().isLeaf()) {
-                    return new AdminTreeItemLeafNode(id, tree, nodeModel, nodeModel);
+                    return new AdminTreeItemLeafNode(id, tree, nodeModel);
                 } else {
                     return super.newContentComponent(id, nodeModel);
                 }
@@ -348,13 +345,10 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     }
 
-    private class AdminTreeItemLeafNode extends Folder {
+    private class AdminTreeItemLeafNode extends Folder<DefaultMutableTreeNode> {
 
-        private final IModel<DefaultMutableTreeNode> nodeModel;
-
-        public AdminTreeItemLeafNode(String id, AbstractTree tree, IModel model, IModel<DefaultMutableTreeNode> nodeModel) {
-            super(id, tree, model);
-            this.nodeModel = nodeModel;
+        public AdminTreeItemLeafNode(String id, AbstractTree tree, IModel<DefaultMutableTreeNode> nodeModel) {
+            super(id, tree, nodeModel);
         }
 
         @Override
@@ -364,7 +358,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         @Override
         protected boolean isSelected() {
-            DisplayDataNode dn = (DisplayDataNode) nodeModel.getObject().getUserObject();
+            DisplayDataNode dn = (DisplayDataNode) getModelObject().getUserObject();
             if (info.getId() != null && dn.getDescription() != null) {
                 return dn.getDescription().getId().equals(info.getId());
             }
@@ -372,17 +366,15 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
 
         @Override
-        protected void onClick(AjaxRequestTarget target) {
-            super.onClick(target);
-
+        protected void onClick(Optional<AjaxRequestTarget> target) {
             try {
-                final DisplayDataNode dn = (DisplayDataNode) nodeModel.getObject().getUserObject();
+                final DisplayDataNode dn = (DisplayDataNode) getModelObject().getUserObject();
                 if (dn.getDescription() != null) {
                     //update description
                     dn.setDesc(ComponentUtils.toTypeByIdPrefix(componentDao.getDeletedById(dn.getDescription().getDbId())));
                 }
                 info.setDataNode(dn);
-                
+
                 final BaseDescription desc = dn.getDescription();
                 if (desc != null) {
                     String content = componentDao.getContent(dn.isDeleted(), desc.getId());
@@ -392,10 +384,11 @@ public class AdminHomePage extends SecureAdminWebPage {
                 LOG.error("Error getting node data", ex);
                 getSession().error("Could not get data for node. See Tomcat log for details.");
             }
-            if (target != null) {
-                target.add(infoView);
-                target.add(tree);
-            }
+            
+            target.ifPresent(t -> {
+                t.add(infoView);
+                t.add(tree);
+            });
         }
     }
 

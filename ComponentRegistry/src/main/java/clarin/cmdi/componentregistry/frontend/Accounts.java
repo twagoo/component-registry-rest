@@ -55,7 +55,6 @@ public class Accounts extends SecureAdminWebPage {
                 .add(new Behavior() {
                     @Override
                     public void onConfigure(Component component) {
-
                         component.setVisible(principalModel.getObject() != null);
                     }
 
