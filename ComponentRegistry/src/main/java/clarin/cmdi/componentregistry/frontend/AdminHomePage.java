@@ -39,12 +39,15 @@ import clarin.cmdi.componentregistry.persistence.ComponentDao;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
-import org.apache.wicket.extensions.markup.html.tree.BaseTree;
-import org.apache.wicket.extensions.markup.html.tree.ITreeState;
-import org.apache.wicket.extensions.markup.html.tree.LinkTree;
-import org.apache.wicket.extensions.markup.html.tree.LinkType;
+import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
+import org.apache.wicket.extensions.markup.html.repeater.util.TreeModelProvider;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.springframework.dao.DataAccessException;
 
@@ -54,7 +57,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     private static final long serialVersionUID = 1L;
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
     private final CMDItemInfo info;
-    private LinkTree tree;
+    private AbstractTree tree;
     private transient AdminRegistry adminRegistry = new AdminRegistry();
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
@@ -90,19 +93,6 @@ public class AdminHomePage extends SecureAdminWebPage {
         try {
             tree = createTree("tree", createDBTreeModel());
             add(tree);
-            add(new Link("expandAll") {
-                @Override
-                public void onClick() {
-                    tree.getTreeState().expandAll();
-                }
-            });
-
-            add(new Link("collapseAll") {
-                @Override
-                public void onClick() {
-                    tree.getTreeState().collapseAll();
-                }
-            });
 
         } catch (UserUnauthorizedException e) {
             LOG.error("Admin: ", e);
@@ -253,39 +243,27 @@ public class AdminHomePage extends SecureAdminWebPage {
         }
     }
 
-    private LinkTree createTree(String id, TreeModel treeModel) {
-        final LinkTree adminTree = new LinkTree(id, treeModel) {
+    private AbstractTree createTree(String id, TreeModel treeModel) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+        TreeModelProvider<DefaultMutableTreeNode> provider = new TreeModelProvider<DefaultMutableTreeNode>(treeModel) {
             @Override
-            protected void onNodeLinkClicked(Object node, BaseTree tree, AjaxRequestTarget target) {
-                super.onNodeLinkClicked(node, tree, target);
-                ITreeState treeState = tree.getTreeState();
-                if (treeState.isNodeExpanded(node)) {
-                    treeState.collapseNode(node);
+            public IModel<DefaultMutableTreeNode> model(DefaultMutableTreeNode object) {
+                return Model.of(object);
+            }
+
+        };
+        final AbstractTree adminTree = new DefaultNestedTree<>(id, provider) {
+            @Override
+            protected Component newContentComponent(String id, IModel<DefaultMutableTreeNode> nodeModel) {
+                if (nodeModel.getObject().isLeaf()) {
+                    return new AdminTreeItemLeafNode(id, tree, nodeModel, nodeModel);
                 } else {
-                    treeState.expandNode(node);
-                }
-                try {
-                    DisplayDataNode dn = (DisplayDataNode) ((DefaultMutableTreeNode) node).getUserObject();
-                    if (dn.getDescription() != null) {
-                        //update description
-                        dn.setDesc(ComponentUtils.toTypeByIdPrefix(componentDao.getDeletedById(dn.getDescription().getDbId())));
-                    }
-                    info.setDataNode(dn);
-                    BaseDescription desc = dn.getDescription();
-                    if (desc != null) {
-                        String content = componentDao.getContent(dn.isDeleted(), desc.getId());
-                        info.setContent(content);
-                    }
-                } catch (ComponentRegistryException ex) {
-                    LOG.error("Error getting node data", ex);
-                    getSession().error("Could not get data for node. See Tomcat log for details.");
-                }
-                if (target != null) {
-                    target.add(infoView);
+                    return super.newContentComponent(id, nodeModel);
                 }
             }
+
         };
-        adminTree.setLinkType(LinkType.AJAX);
+
+        adminTree.setOutputMarkupId(true);
         return adminTree;
     }
 
@@ -368,6 +346,57 @@ public class AdminHomePage extends SecureAdminWebPage {
                     && !info.getDataNode().isDeleted());
         }
 
+    }
+
+    private class AdminTreeItemLeafNode extends Folder {
+
+        private final IModel<DefaultMutableTreeNode> nodeModel;
+
+        public AdminTreeItemLeafNode(String id, AbstractTree tree, IModel model, IModel<DefaultMutableTreeNode> nodeModel) {
+            super(id, tree, model);
+            this.nodeModel = nodeModel;
+        }
+
+        @Override
+        protected boolean isClickable() {
+            return true;
+        }
+
+        @Override
+        protected boolean isSelected() {
+            DisplayDataNode dn = (DisplayDataNode) nodeModel.getObject().getUserObject();
+            if (info.getId() != null && dn.getDescription() != null) {
+                return dn.getDescription().getId().equals(info.getId());
+            }
+            return super.isSelected();
+        }
+
+        @Override
+        protected void onClick(AjaxRequestTarget target) {
+            super.onClick(target);
+
+            try {
+                final DisplayDataNode dn = (DisplayDataNode) nodeModel.getObject().getUserObject();
+                if (dn.getDescription() != null) {
+                    //update description
+                    dn.setDesc(ComponentUtils.toTypeByIdPrefix(componentDao.getDeletedById(dn.getDescription().getDbId())));
+                }
+                info.setDataNode(dn);
+                
+                final BaseDescription desc = dn.getDescription();
+                if (desc != null) {
+                    String content = componentDao.getContent(dn.isDeleted(), desc.getId());
+                    info.setContent(content);
+                }
+            } catch (ComponentRegistryException ex) {
+                LOG.error("Error getting node data", ex);
+                getSession().error("Could not get data for node. See Tomcat log for details.");
+            }
+            if (target != null) {
+                target.add(infoView);
+                target.add(tree);
+            }
+        }
     }
 
 }
