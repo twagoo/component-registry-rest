@@ -15,21 +15,21 @@ public class CMDItemInfoTest extends BaseUnitTest{
     public void testGetUserDir() throws Exception {
 	CMDItemInfo info = new CMDItemInfo(marshaller);
 	//info.setDataNode(new FileNode(createFile("users/user1/components/c_123/description.xml"), false));
-	info.setDataNode(new DisplayDataNode("test", false, createDescription(), RegistrySpace.PRIVATE));
+	info.setDataNode(new DisplayDataNode("test", true, false, createDescription(), RegistrySpace.PRIVATE));
 	assertTrue(info.isDeletable());
 	assertFalse(info.isUndeletable());
 	assertTrue(info.isEditable());
 	assertFalse(info.getDataNode().isDeleted());
 	assertEquals(RegistrySpace.PRIVATE, info.getSpace());
 	//info.setDataNode(new FileNode(createFile("users/user1/components/deleted/c_123/description.xml"), true));
-	info.setDataNode(new DisplayDataNode("test", true, createDescription(), RegistrySpace.PRIVATE));
+	info.setDataNode(new DisplayDataNode("test", true, true, createDescription(), RegistrySpace.PRIVATE));
 	assertFalse(info.isDeletable());
 	assertTrue(info.isUndeletable());
 	assertTrue(info.isEditable());
 	assertTrue(info.getDataNode().isDeleted());
 	assertEquals(RegistrySpace.PRIVATE, info.getSpace());
 	//info.setDataNode(new FileNode(createFile("components/c_123/description.xml"), false));
-	info.setDataNode(new DisplayDataNode("test", false, createDescription(), RegistrySpace.PUBLISHED));
+	info.setDataNode(new DisplayDataNode("test", true, false, createDescription(), RegistrySpace.PUBLISHED));
 	assertTrue(info.isDeletable());
 	assertFalse(info.isUndeletable());
 	assertTrue(info.isEditable());
@@ -40,7 +40,7 @@ public class CMDItemInfoTest extends BaseUnitTest{
 	assertFalse(info.isUndeletable());
 	assertFalse(info.isEditable());
 	//info.setDataNode(new FileNode(createFile("components/deleted/c_123/description.xml"), true));
-	info.setDataNode(new DisplayDataNode("test", true, createDescription(), RegistrySpace.PUBLISHED));
+	info.setDataNode(new DisplayDataNode("test", true, true, createDescription(), RegistrySpace.PUBLISHED));
 	assertFalse(info.isDeletable());
 	assertTrue(info.isUndeletable());
 	assertTrue(info.isEditable());

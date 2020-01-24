@@ -3,7 +3,6 @@ package clarin.cmdi.componentregistry.frontend;
 import java.security.Principal;
 import java.util.List;
 
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
@@ -35,12 +34,17 @@ import clarin.cmdi.componentregistry.model.ComponentDescription;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.ComponentDao;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.wicket.Component;
+import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxButton;
+import org.apache.wicket.extensions.ajax.markup.html.IndicatingAjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.tree.AbstractTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.DefaultNestedTree;
+import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.content.Folder;
 import org.apache.wicket.extensions.markup.html.repeater.util.TreeModelProvider;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -56,7 +60,7 @@ public class AdminHomePage extends SecureAdminWebPage {
     private static final long serialVersionUID = 1L;
     private final static Logger LOG = LoggerFactory.getLogger(AdminHomePage.class);
     private final CMDItemInfo info;
-    private AbstractTree tree;
+    private NestedTree<AdminTreeNode> tree;
     private transient AdminRegistry adminRegistry = new AdminRegistry();
     @SpringBean(name = "componentRegistryFactory")
     private ComponentRegistryFactory componentRegistryFactory;
@@ -68,6 +72,8 @@ public class AdminHomePage extends SecureAdminWebPage {
     private IMarshaller marshaller;
 
     private Component infoView;
+
+    private IModel<Set<AdminTreeNode>> expansionModel = new Model(new HashSet<>());
 
     public AdminHomePage(final PageParameters parameters) throws ComponentRegistryException, ItemNotFoundException {
         super(parameters);
@@ -98,6 +104,22 @@ public class AdminHomePage extends SecureAdminWebPage {
             error("Cannot create tree: error = " + e);
         }
 
+        add(new IndicatingAjaxLink<Void>("reload") {
+            @Override
+            public void onClick(AjaxRequestTarget target) {
+                try {
+                    reloadTreeModel(info);
+                    target.add(tree);
+                } catch (ItemNotFoundException | UserUnauthorizedException ex) {
+                    error(ex.getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public final MarkupContainer add(Component... children) {
+        return super.add(children);
     }
 
     private Form createPublishDeleteForm() throws ItemNotFoundException, ComponentRegistryException {
@@ -115,7 +137,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                     adminRegistry.delete(info, userPrincipal);
                     info("Item deleted.");
                     reloadTreeModel(info);
-                } catch (Exception e) {
+                } catch (ItemNotFoundException | UserUnauthorizedException | SubmitFailedException e) {
                     LOG.error("Admin: ", e);
                     error("Cannot delete: " + info.getName() + "\n error=" + e);
                 }
@@ -139,7 +161,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                     adminRegistry.undelete(info);
                     info("Item put back.");
                     reloadTreeModel(info);
-                } catch (Exception e) {
+                } catch (ItemNotFoundException | UserUnauthorizedException | SubmitFailedException e) {
                     LOG.error("Admin: ", e);
                     error("Cannot undelete: " + info.getName() + "\n error=" + e);
                 }
@@ -192,9 +214,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                 try {
                     reloadTreeModel(info);
                     target.add(tree);
-                } catch (UserUnauthorizedException ex) {
-                    LOG.error("error reloading tree model", ex);
-                } catch (ItemNotFoundException ex) {
+                } catch (UserUnauthorizedException | ItemNotFoundException ex) {
                     LOG.error("error reloading tree model", ex);
                 }
             }
@@ -210,19 +230,19 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private void submitEditForm(Form<?> form, FeedbackPanel feedback, AjaxRequestTarget target, boolean publish) throws DataAccessException {
-        CMDItemInfo info = (CMDItemInfo) form.getModelObject();
+        final CMDItemInfo itemInfo = (CMDItemInfo) form.getModelObject();
         Principal userPrincipal = getUserPrincipal();
-        info("submitting:" + info.getName() + " id=(" + info.getId() + ")");
+        info("submitting:" + itemInfo.getName() + " id=(" + itemInfo.getId() + ")");
         try {
-            adminRegistry.submitFile(info, userPrincipal, publish);
+            adminRegistry.submitFile(itemInfo, userPrincipal, publish);
             info("submitting done.");
 
-            final BaseDescription newDescr = componentDao.getByCmdId(info.getId());
-            info.setDescription(ComponentUtils.toTypeByIdPrefix(newDescr));
-            info.setName(newDescr.getName());
-        } catch (Exception e) {
+            final BaseDescription newDescr = componentDao.getByCmdId(itemInfo.getId());
+            itemInfo.setDescription(ComponentUtils.toTypeByIdPrefix(newDescr));
+            itemInfo.setName(newDescr.getName());
+        } catch (ComponentRegistryException | UserUnauthorizedException | SubmitFailedException | DataAccessException e) {
             LOG.error("Admin: ", e);
-            error("Cannot submit: " + info.getName() + "\n error=" + e);
+            error("Cannot submit: " + itemInfo.getName() + "\n error=" + e);
         }
 
         if (target != null) {
@@ -233,24 +253,25 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     private void reloadTreeModel(CMDItemInfo info) throws UserUnauthorizedException, ItemNotFoundException {
         try {
-            tree.setModelObject(createDBTreeModel());
+            tree = createTree("tree", createDBTreeModel());
+            addOrReplace(tree);
         } catch (ComponentRegistryException e) {
             LOG.error("Admin: ", e);
             error("Cannot reload tree: " + info.getName() + "\n error=" + e);
         }
     }
 
-    private AbstractTree createTree(String id, TreeModel treeModel) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        TreeModelProvider<DefaultMutableTreeNode> provider = new TreeModelProvider<DefaultMutableTreeNode>(treeModel) {
+    private NestedTree<AdminTreeNode> createTree(String id, TreeModel treeModel) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+        final TreeModelProvider<AdminTreeNode> treeModelProvider = new TreeModelProvider<AdminTreeNode>(treeModel) {
             @Override
-            public IModel<DefaultMutableTreeNode> model(DefaultMutableTreeNode object) {
+            public IModel<AdminTreeNode> model(AdminTreeNode object) {
                 return Model.of(object);
             }
 
         };
-        final AbstractTree adminTree = new DefaultNestedTree<>(id, provider) {
+        final NestedTree<AdminTreeNode> adminTree = new DefaultNestedTree<>(id, treeModelProvider, expansionModel) {
             @Override
-            protected Component newContentComponent(String id, IModel<DefaultMutableTreeNode> nodeModel) {
+            protected Component newContentComponent(String id, IModel<AdminTreeNode> nodeModel) {
                 if (nodeModel.getObject().isLeaf()) {
                     return new AdminTreeItemLeafNode(id, tree, nodeModel);
                 } else {
@@ -265,8 +286,8 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private TreeModel createDBTreeModel() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new DisplayDataNode("ComponentRegistry", false));
-        DefaultMutableTreeNode publicNode = new DefaultMutableTreeNode(new DisplayDataNode("Public", false));
+        AdminTreeNode rootNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("ComponentRegistry", false));
+        AdminTreeNode publicNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Public", false));
         rootNode.add(publicNode);
         ComponentRegistry publicRegistry = componentRegistryFactory.getPublicRegistry();
         add(publicNode, publicRegistry);
@@ -288,42 +309,42 @@ public class AdminHomePage extends SecureAdminWebPage {
         return model;
     }
 
-    private void addRegistry(DefaultMutableTreeNode rootNode, ComponentRegistry registry, String name) throws UserUnauthorizedException, ItemNotFoundException, ComponentRegistryException {
-        DefaultMutableTreeNode userNode = new DefaultMutableTreeNode(new DisplayDataNode(name, false));
+    private void addRegistry(AdminTreeNode rootNode, ComponentRegistry registry, String name) throws UserUnauthorizedException, ItemNotFoundException, ComponentRegistryException {
+        AdminTreeNode userNode = new AdminTreeNode(DisplayDataNode.newNonItemNode(name, false));
         rootNode.add(userNode);
         add(userNode, registry);
     }
 
-    private void add(DefaultMutableTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        DefaultMutableTreeNode componentsNode = new DefaultMutableTreeNode(new DisplayDataNode("Components", false));
+    private void add(AdminTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
+        AdminTreeNode componentsNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Components", false));
         parent.add(componentsNode);
         add(componentsNode, registry.getComponentDescriptions(null), false, registry.getRegistrySpace());
 
-        DefaultMutableTreeNode profilesNode = new DefaultMutableTreeNode(new DisplayDataNode("Profiles", false));
+        AdminTreeNode profilesNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Profiles", false));
         parent.add(profilesNode);
         add(profilesNode, registry.getProfileDescriptions(null), false, registry.getRegistrySpace());
 
-        DefaultMutableTreeNode deletedCompNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Components", true));
+        AdminTreeNode deletedCompNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Deleted Components", true));
         parent.add(deletedCompNode);
 
         List<ComponentDescription> deletedComponentDescriptions = registry.getDeletedComponentDescriptions();
         add(deletedCompNode, deletedComponentDescriptions, true, registry.getRegistrySpace());
 
-        DefaultMutableTreeNode deletedProfNode = new DefaultMutableTreeNode(new DisplayDataNode("Deleted Profiles", true));
+        AdminTreeNode deletedProfNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Deleted Profiles", true));
         parent.add(deletedProfNode);
         List<ProfileDescription> deletedProfileDescriptions = registry.getDeletedProfileDescriptions();
         add(deletedProfNode, deletedProfileDescriptions, true, registry.getRegistrySpace());
     }
 
-    private void add(DefaultMutableTreeNode parent, List<? extends BaseDescription> descs, boolean isDeleted, RegistrySpace space) {
+    private void add(AdminTreeNode parent, List<? extends BaseDescription> descs, boolean isDeleted, RegistrySpace space) {
         for (BaseDescription desc : descs) {
-            DefaultMutableTreeNode child = new DefaultMutableTreeNode(new DisplayDataNode(desc.getName(), isDeleted, desc, space));
+            AdminTreeNode child = new AdminTreeNode(new DisplayDataNode(desc.getName(), true, isDeleted, desc, space));
             parent.add(child);
         }
     }
 
     @Override
-    protected void addLinks() {
+    protected final void addLinks() {
         //no call to super - no home link needed
     }
 
@@ -345,9 +366,9 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     }
 
-    private class AdminTreeItemLeafNode extends Folder<DefaultMutableTreeNode> {
+    private class AdminTreeItemLeafNode extends Folder<AdminTreeNode> {
 
-        public AdminTreeItemLeafNode(String id, AbstractTree tree, IModel<DefaultMutableTreeNode> nodeModel) {
+        public AdminTreeItemLeafNode(String id, AbstractTree tree, IModel<AdminTreeNode> nodeModel) {
             super(id, tree, nodeModel);
         }
 
@@ -358,7 +379,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
         @Override
         protected boolean isSelected() {
-            DisplayDataNode dn = (DisplayDataNode) getModelObject().getUserObject();
+            final DisplayDataNode dn = getModelObject().getUserObject();
             if (info.getId() != null && dn.getDescription() != null) {
                 return dn.getDescription().getId().equals(info.getId());
             }
@@ -368,7 +389,7 @@ public class AdminHomePage extends SecureAdminWebPage {
         @Override
         protected void onClick(Optional<AjaxRequestTarget> target) {
             try {
-                final DisplayDataNode dn = (DisplayDataNode) getModelObject().getUserObject();
+                final DisplayDataNode dn = getModelObject().getUserObject();
                 if (dn.getDescription() != null) {
                     //update description
                     dn.setDesc(ComponentUtils.toTypeByIdPrefix(componentDao.getDeletedById(dn.getDescription().getDbId())));
@@ -384,7 +405,7 @@ public class AdminHomePage extends SecureAdminWebPage {
                 LOG.error("Error getting node data", ex);
                 getSession().error("Could not get data for node. See Tomcat log for details.");
             }
-            
+
             target.ifPresent(t -> {
                 t.add(infoView);
                 t.add(tree);

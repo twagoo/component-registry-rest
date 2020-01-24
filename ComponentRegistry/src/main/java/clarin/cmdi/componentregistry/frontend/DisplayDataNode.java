@@ -4,6 +4,7 @@ import clarin.cmdi.componentregistry.RegistrySpace;
 import java.io.Serializable;
 
 import clarin.cmdi.componentregistry.model.BaseDescription;
+import java.util.Objects;
 
 public class DisplayDataNode implements Serializable {
 
@@ -12,17 +13,29 @@ public class DisplayDataNode implements Serializable {
     private final boolean isDeleted;
     private BaseDescription desc;
     private final RegistrySpace space;
+    private final String identifier;
+    private final boolean isItem;
 
-    public DisplayDataNode(String name, boolean isDeleted) {
-	// TODO: what is sensible default status?
-	this(name, isDeleted, null, RegistrySpace.PRIVATE);
+    protected DisplayDataNode(String name, boolean isDeleted) {
+        this(name, false, isDeleted);
     }
 
-    public DisplayDataNode(String name, boolean isDeleted, BaseDescription desc, RegistrySpace space) {
-	this.name = name;
-	this.isDeleted = isDeleted;
-	this.desc = desc;
-	this.space = space;
+    protected DisplayDataNode(String name, boolean isItem, boolean isDeleted) {
+        // TODO: what is sensible default status?
+        this(name, isItem, isDeleted, null, RegistrySpace.PRIVATE);
+    }
+
+    public DisplayDataNode(String name, boolean isItem, boolean isDeleted, BaseDescription desc, RegistrySpace space) {
+        this.name = name;
+        this.isItem = isItem;
+        this.isDeleted = isDeleted;
+        this.desc = desc;
+        this.space = space;
+        if (desc == null) {
+            this.identifier = null;
+        } else {
+            this.identifier = desc.getId();
+        }
     }
 
     /**
@@ -31,7 +44,7 @@ public class DisplayDataNode implements Serializable {
      * @return
      */
     public BaseDescription getDescription() {
-	return desc;
+        return desc;
     }
 
     public void setDesc(BaseDescription desc) {
@@ -39,15 +52,61 @@ public class DisplayDataNode implements Serializable {
     }
 
     public boolean isDeleted() {
-	return isDeleted;
+        return isDeleted;
     }
 
     @Override
     public String toString() {
-	return name;
+        return name;
     }
 
     public RegistrySpace getSpace() {
-	return space;
+        return space;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.name);
+        hash = 97 * hash + Objects.hashCode(this.identifier);
+        hash = 97 * hash + (this.isItem ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DisplayDataNode other = (DisplayDataNode) obj;
+        if (this.isItem != other.isItem) {
+            return false;
+        }
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.identifier, other.identifier)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    
+    
+
+    public static DisplayDataNode newItemNode(String name, String identifier, boolean isDeleted, BaseDescription desc, RegistrySpace space) {
+        return new DisplayDataNode(name, true, isDeleted, desc, space);
+    }
+
+    public static DisplayDataNode newNonItemNode(String name, boolean isDeleted) {
+        return new DisplayDataNode(name, isDeleted);
+    }
+
 }

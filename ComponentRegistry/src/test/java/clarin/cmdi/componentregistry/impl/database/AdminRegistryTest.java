@@ -103,7 +103,7 @@ public class AdminRegistryTest extends BaseUnitTest {
         adminReg.setMarshaller(marshaller);
         CMDItemInfo fileInfo = new CMDItemInfo(marshaller);
         fileInfo.setForceUpdate(false);
-        fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), false, compDesc1, RegistrySpace.PUBLISHED));
+        fileInfo.setDataNode(new DisplayDataNode(compDesc1.getName(), true, false, compDesc1, RegistrySpace.PUBLISHED));
         fileInfo.setContent(content1);
         // TODO: how it should be?
         try {
@@ -130,7 +130,7 @@ public class AdminRegistryTest extends BaseUnitTest {
 
         assertEquals(1, testRegistry.getProfileDescriptions(null).size());
         fileInfo.setForceUpdate(false);
-        fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), false, profileDesc, RegistrySpace.PUBLISHED));
+        fileInfo.setDataNode(new DisplayDataNode(profileDesc.getName(), true, false, profileDesc, RegistrySpace.PUBLISHED));
         adminReg.delete(fileInfo, PRINCIPAL_ADMIN); //Profile do not need to be forced they cannot be used by other profiles
         assertEquals(0, testRegistry.getProfileDescriptions(null).size());
     }
