@@ -15,17 +15,18 @@ public class DisplayDataNode implements Serializable {
     private final RegistrySpace space;
     private final String identifier;
     private final boolean isItem;
+    private int parentHash;
 
-    protected DisplayDataNode(String name, boolean isDeleted) {
-        this(name, false, isDeleted);
+    protected DisplayDataNode(String name, boolean isDeleted, Object parent) {
+        this(name, false, isDeleted, parent);
     }
 
-    protected DisplayDataNode(String name, boolean isItem, boolean isDeleted) {
+    protected DisplayDataNode(String name, boolean isItem, boolean isDeleted, Object parent) {
         // TODO: what is sensible default status?
-        this(name, isItem, isDeleted, null, RegistrySpace.PRIVATE);
+        this(name, isItem, isDeleted, null, RegistrySpace.PRIVATE, parent);
     }
 
-    public DisplayDataNode(String name, boolean isItem, boolean isDeleted, BaseDescription desc, RegistrySpace space) {
+    public DisplayDataNode(String name, boolean isItem, boolean isDeleted, BaseDescription desc, RegistrySpace space, Object parent) {
         this.name = name;
         this.isItem = isItem;
         this.isDeleted = isDeleted;
@@ -36,6 +37,7 @@ public class DisplayDataNode implements Serializable {
         } else {
             this.identifier = desc.getId();
         }
+        this.parentHash = Objects.hashCode(parent);
     }
 
     /**
@@ -66,10 +68,12 @@ public class DisplayDataNode implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.name);
-        hash = 97 * hash + Objects.hashCode(this.identifier);
-        hash = 97 * hash + (this.isItem ? 1 : 0);
+        int hash = 5;
+        hash = 89 * hash + Objects.hashCode(this.name);
+        hash = 89 * hash + Objects.hashCode(this.space);
+        hash = 89 * hash + Objects.hashCode(this.identifier);
+        hash = 89 * hash + (this.isItem ? 1 : 0);
+        hash = 89 * hash + this.parentHash;
         return hash;
     }
 
@@ -88,10 +92,16 @@ public class DisplayDataNode implements Serializable {
         if (this.isItem != other.isItem) {
             return false;
         }
+        if (this.parentHash != other.parentHash) {
+            return false;
+        }
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
         if (!Objects.equals(this.identifier, other.identifier)) {
+            return false;
+        }
+        if (this.space != other.space) {
             return false;
         }
         return true;
@@ -101,12 +111,12 @@ public class DisplayDataNode implements Serializable {
     
     
 
-    public static DisplayDataNode newItemNode(String name, String identifier, boolean isDeleted, BaseDescription desc, RegistrySpace space) {
-        return new DisplayDataNode(name, true, isDeleted, desc, space);
+    public static DisplayDataNode newItemNode(String name, String identifier, boolean isDeleted, BaseDescription desc, RegistrySpace space, Object parent) {
+        return new DisplayDataNode(name, true, isDeleted, desc, space, parent);
     }
 
-    public static DisplayDataNode newNonItemNode(String name, boolean isDeleted) {
-        return new DisplayDataNode(name, isDeleted);
+    public static DisplayDataNode newNonItemNode(String name, boolean isDeleted, Object parent) {
+        return new DisplayDataNode(name, isDeleted, parent);
     }
 
 }

@@ -286,8 +286,8 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private TreeModel createDBTreeModel() throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        AdminTreeNode rootNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("ComponentRegistry", false));
-        AdminTreeNode publicNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Public", false));
+        AdminTreeNode rootNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("ComponentRegistry", false, null));
+        AdminTreeNode publicNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Public", false, rootNode.getUserObject()));
         rootNode.add(publicNode);
         ComponentRegistry publicRegistry = componentRegistryFactory.getPublicRegistry();
         add(publicNode, publicRegistry);
@@ -310,27 +310,27 @@ public class AdminHomePage extends SecureAdminWebPage {
     }
 
     private void addRegistry(AdminTreeNode rootNode, ComponentRegistry registry, String name) throws UserUnauthorizedException, ItemNotFoundException, ComponentRegistryException {
-        AdminTreeNode userNode = new AdminTreeNode(DisplayDataNode.newNonItemNode(name, false));
+        AdminTreeNode userNode = new AdminTreeNode(DisplayDataNode.newNonItemNode(name, false, rootNode.getUserObject()));
         rootNode.add(userNode);
         add(userNode, registry);
     }
 
     private void add(AdminTreeNode parent, ComponentRegistry registry) throws ComponentRegistryException, UserUnauthorizedException, ItemNotFoundException {
-        AdminTreeNode componentsNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Components", false));
+        AdminTreeNode componentsNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Components", false, parent.getUserObject()));
         parent.add(componentsNode);
         add(componentsNode, registry.getComponentDescriptions(null), false, registry.getRegistrySpace());
 
-        AdminTreeNode profilesNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Profiles", false));
+        AdminTreeNode profilesNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Profiles", false, parent.getUserObject()));
         parent.add(profilesNode);
         add(profilesNode, registry.getProfileDescriptions(null), false, registry.getRegistrySpace());
 
-        AdminTreeNode deletedCompNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Deleted Components", true));
+        AdminTreeNode deletedCompNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Deleted Components", true, parent.getUserObject()));
         parent.add(deletedCompNode);
 
         List<ComponentDescription> deletedComponentDescriptions = registry.getDeletedComponentDescriptions();
         add(deletedCompNode, deletedComponentDescriptions, true, registry.getRegistrySpace());
 
-        AdminTreeNode deletedProfNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Deleted Profiles", true));
+        AdminTreeNode deletedProfNode = new AdminTreeNode(DisplayDataNode.newNonItemNode("Deleted Profiles", true, parent.getUserObject()));
         parent.add(deletedProfNode);
         List<ProfileDescription> deletedProfileDescriptions = registry.getDeletedProfileDescriptions();
         add(deletedProfNode, deletedProfileDescriptions, true, registry.getRegistrySpace());
@@ -338,7 +338,7 @@ public class AdminHomePage extends SecureAdminWebPage {
 
     private void add(AdminTreeNode parent, List<? extends BaseDescription> descs, boolean isDeleted, RegistrySpace space) {
         for (BaseDescription desc : descs) {
-            AdminTreeNode child = new AdminTreeNode(new DisplayDataNode(desc.getName(), true, isDeleted, desc, space));
+            AdminTreeNode child = new AdminTreeNode(new DisplayDataNode(desc.getName(), true, isDeleted, desc, space, parent.getUserObject()));
             parent.add(child);
         }
     }
