@@ -48,6 +48,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
+import org.apache.wicket.util.lang.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -846,8 +847,12 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
                 }
             }
         };
-        Optional<RegistryUser> u = userDao.findById(getUserId().longValue());
-        return "Registry of " + u.map(RegistryUser::getName).orElse("USER NOT FOUND");
+
+        final Optional<RegistryUser> u = userDao.findById(getUserId().longValue());
+        return "Registry of "
+                + u
+                        .map(ru -> Objects.equal(ru.getName(), ru.getPrincipalName()) ? ru.getName() : String.format("%s (%s)", ru.getName(), ru.getPrincipalName()))
+                        .orElse("USER NOT FOUND");
     }
 
     @Override
@@ -925,7 +930,6 @@ public class ComponentRegistryDbImpl extends ComponentRegistryImplBase implement
 
                 // Comment must have an existing (in this registry)
                 // componentId or profileId
-
                 this.checkAuthorisationComment(comment);
                 commentsDao.delete(comment);
             } else {
