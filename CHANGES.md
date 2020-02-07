@@ -2,7 +2,11 @@
 
 For upgrade instructions, see [UPGRADE.md](UPGRADE.md)
 
-## Releasee Component Registry 2.3.0 (December 2019)
+## Release Component Registry 2.3.1 (February 2020)
+- Various libraries upgraded
+- Small changes in administration interface (driven by upgrade to Wicket 8)
+
+## Release Component Registry 2.3.0 (December 2019)
 - Java 11 required
 - Many libraries updated, including Spring and Wicket
 - Front end no longer included in back end build

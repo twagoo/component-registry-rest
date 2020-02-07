@@ -20,7 +20,10 @@
 
 ## Version specific update instructions
 
-### 2.3
+### 2.3.1
+Maintenance release, no special actions required if upgrading from 2.3.0
+
+### 2.3.0
 - Java 11 or higher is required
 
 - The front end needs to be deployed separately. See 
