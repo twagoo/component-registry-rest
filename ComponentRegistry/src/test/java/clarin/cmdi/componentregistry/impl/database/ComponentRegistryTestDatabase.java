@@ -36,6 +36,7 @@ public final class ComponentRegistryTestDatabase {
                 + "  status integer, " //no enum in hsqldb :(
                 + "  derivedfrom VARCHAR(255), "
                 + "  successor VARCHAR(255),"
+                + "  recommended boolean DEFAULT false NOT NULL,"
                 + "  CONSTRAINT UNIQUE_PROFILE_ID UNIQUE (component_id));");
     }
 

@@ -113,6 +113,10 @@ public class BaseDescription implements Serializable {
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted;
 
+    @XmlElement(name = "recommended")
+    @Column(name = "recommended", nullable = false)
+    private boolean recommended;
+
     public long getDbUserId() {
         return dbUserId;
     }
@@ -323,6 +327,14 @@ public class BaseDescription implements Serializable {
 
     public void setPublic(boolean ispublic) {
         this.ispublic = ispublic;
+    }
+
+    public boolean isRecommended() {
+        return recommended;
+    }
+
+    public void setRecommended(boolean recommended) {
+        this.recommended = recommended;
     }
 
     /**

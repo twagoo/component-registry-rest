@@ -53,6 +53,7 @@ public class ComponentDescriptionTest extends BaseUnitTest{
         expected += "    <groupName>MyGroup</groupName>\n";
         expected += "    <commentsCount>0</commentsCount>\n";
         expected += "    <isPublic>false</isPublic>\n";
+        expected += "    <recommended>false</recommended>\n";
         expected += "</componentDescription>\n";
         assertEquals(expected, out.toString());
 

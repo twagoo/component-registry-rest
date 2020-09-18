@@ -58,7 +58,8 @@ public class ProfileDescriptionTest extends BaseUnitTest{
 	expected += "    <groupName>MyGroup</groupName>\n";
 	expected += "    <commentsCount>2</commentsCount>\n";
 	expected += "    <isPublic>true</isPublic>\n";
-	expected += "    <showInEditor>true</showInEditor>\n";
+        expected += "    <recommended>false</recommended>\n";
+        expected += "    <showInEditor>true</showInEditor>\n";
 	expected += "</profileDescription>\n";
 	assertEquals(expected, out.toString());
 
