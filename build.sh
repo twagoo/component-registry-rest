@@ -18,7 +18,7 @@
 
 #configuration
 APP_NAME="compreg"
-MAVEN_IMAGE="maven:3.6.2-jdk-11"
+MAVEN_IMAGE="maven:3.6.3-openjdk-11"
 CLEAN_CACHE=${CLEAN_CACHE:-false}
 
 SCRIPT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
