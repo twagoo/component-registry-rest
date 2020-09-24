@@ -60,6 +60,7 @@ public class ComponentDaoImpl implements ComponentDao {
         to.setStatus(from.getStatus());
         to.setDerivedfrom(from.getDerivedfrom());
         to.setSuccessor(from.getSuccessor());
+        to.setRecommended(from.isRecommended());
     }
 
     protected String getTableName() {
