@@ -37,9 +37,9 @@
         <clavasRestUrl>https://vocabularies.clarin.eu/clavas/public/api/</clavasRestUrl>
 
         <cmd-toolkit.version>1.2.3</cmd-toolkit.version>
-        <spring.version>5.2.8.RELEASE</spring.version>
-        <wicket.version>8.9.0</wicket.version>
-        <jackson.version>2.11.2</jackson.version>
+        <spring.version>5.2.9.RELEASE</spring.version>
+        <wicket.version>8.10.0</wicket.version>
+        <jackson.version>2.11.3</jackson.version>
         <jackson-databind.version>${jackson.version}</jackson-databind.version>
         <jersey.version>1.19.4</jersey.version>
         <slf4j.version>1.7.30</slf4j.version>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13</version>
             <scope>test</scope>
         </dependency>       
         <dependency>
