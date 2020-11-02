@@ -1,5 +1,6 @@
 package clarin.cmdi.componentregistry.rest;
 
+import clarin.cmdi.componentregistry.JAXBContextResolver;
 import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -10,11 +11,14 @@ import clarin.cmdi.componentregistry.model.Group;
 import clarin.cmdi.componentregistry.model.ProfileDescription;
 import clarin.cmdi.componentregistry.model.RegistryUser;
 import clarin.cmdi.componentregistry.persistence.jpa.UserDao;
+import com.google.common.collect.ImmutableMap;
 
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.core.ClassNamesResourceConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.core.util.Base64;
 import com.sun.jersey.multipart.impl.FormDataMultiPartDispatchProvider;
 import com.sun.jersey.spi.container.servlet.WebComponent;
@@ -25,6 +29,7 @@ import com.sun.jersey.test.framework.WebAppDescriptor;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +75,11 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
 
     @Override
     protected AppDescriptor configure() {
+        final DefaultClientConfig clientConfig = new DefaultClientConfig();
+        clientConfig.getClasses().add(JAXBContextResolver.class);
+
         WebAppDescriptor.Builder builder = new WebAppDescriptor.Builder()
+                .clientConfig(clientConfig)
                 .contextParam("contextConfigLocation",
                         getApplicationContextFile())
                 .contextParam("eu.clarin.cmdi.componentregistry.serviceUrlBase", "localhost") // deliberately inaccurate,
@@ -114,7 +123,7 @@ public abstract class ComponentRegistryRestServiceTestCase extends JerseyTest {
         user.setPrincipalName(DummyPrincipal.DUMMY_PRINCIPAL.getName());
         return userDao.save(user);
     }
-    
+
     protected Number getExpectedUserId(String principal) {
         return getUserDao().getByPrincipalName(principal).getId();
     }

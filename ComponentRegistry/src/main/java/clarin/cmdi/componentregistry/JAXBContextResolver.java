@@ -39,12 +39,7 @@ public class JAXBContextResolver implements ContextResolver<JAXBContext> {
     private final Class[] types = {ComponentSpec.class, ComponentType.class, ElementType.class};
 
     public JAXBContextResolver() throws Exception {
-        final ImmutableMap<String, String> namespacesMap = ImmutableMap.<String, String>builder()
-                .put("http://www.clarin.eu/cmdi/cues/1", "cue")
-                .build();
-        final JSONConfiguration jsonConfiguration = JSONConfiguration.mappedJettison()
-                .xml2JsonNs(namespacesMap)
-                .build();
+        JSONConfiguration jsonConfiguration = jsonConfiguration();
 
         this.context = new JSONJAXBContext(jsonConfiguration, types);
     }
@@ -57,5 +52,15 @@ public class JAXBContextResolver implements ContextResolver<JAXBContext> {
             }
         }
         return null;
+    }
+
+    public final static JSONConfiguration jsonConfiguration() {
+        final ImmutableMap<String, String> namespacesMap = ImmutableMap.<String, String>builder()
+                .put("http://www.clarin.eu/cmdi/cues/1", "cue")
+                .build();
+        final JSONConfiguration jsonConfiguration = JSONConfiguration.mappedJettison()
+                .xml2JsonNs(namespacesMap)
+                .build();
+        return jsonConfiguration;
     }
 }
