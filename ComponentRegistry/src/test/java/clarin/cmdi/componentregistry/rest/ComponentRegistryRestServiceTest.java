@@ -300,8 +300,39 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
                 cResponse.getStatus());
     }
 
-    @Test //ok
+    @Test
     public void testGetPublicComponent() throws Exception {
+
+        fillUpPublicItems();
+
+        String id = ComponentDescription.COMPONENT_PREFIX + "component1";
+        String id2 = ComponentDescription.COMPONENT_PREFIX + "component2";
+
+        // make an unauthenticated reponse
+        ComponentSpec component = getResource()
+                .path(REGISTRY_BASE + "/components/" + id)
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        assertNotNull("unauthenticated component request", component);
+        assertEquals("component1", component.getComponent().getName());
+
+        // make an authenticated reponse
+        component = this.getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/components/" + id))
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        assertNotNull("authenticated component request", component);
+        assertEquals("component1", component.getComponent().getName());
+
+        component = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + id2))
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        assertNotNull(component);
+        assertEquals("component2", component.getComponent().getName());
+        assertEquals(id2, component.getHeader().getID());
+        assertEquals("component2", component.getHeader().getName());
+        assertEquals("component2 description", component.getHeader().getDescription());
+    }
+
+    @Test
+    public void testGetPublicComponentJson() throws Exception {
 
         fillUpPublicItems();
 
@@ -323,17 +354,47 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         assertEquals("component1", component.getComponent().getName());
 
         component = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/components/" + id2))
-                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(component);
         assertEquals("component2", component.getComponent().getName());
         assertEquals(id2, component.getHeader().getID());
         assertEquals("component2", component.getHeader().getName());
         assertEquals("component2 description", component.getHeader().getDescription());
-
     }
 
-    @Test //ok
+    @Test
     public void testGetPublicProfile() throws Exception {
+
+        fillUpPublicItems();
+
+        String id = ProfileDescription.PROFILE_PREFIX + "profile1";
+        String id2 = ProfileDescription.PROFILE_PREFIX + "profile2";
+
+        // make an unauthenticated reponse
+        ComponentSpec profile = getResource()
+                .path(REGISTRY_BASE + "/profiles/" + id)
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        assertNotNull("unauthenticated component request", profile);
+//        assertEquals("Access", profile.getComponent().getName());
+
+        // make an authenticated reponse
+        profile = this.getAuthenticatedResource(getResource()
+                .path(REGISTRY_BASE + "/profiles/" + id))
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        assertNotNull("authenticated component request", profile);
+//        assertEquals("Access", profile.getComponent().getName());
+
+        profile = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + id2))
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+        assertNotNull(profile);
+//        assertEquals("Access", profile.getComponent().getName());
+        assertEquals(id2, profile.getHeader().getID());
+        assertEquals("profile2", profile.getHeader().getName());
+        assertEquals("profile2 description", profile.getHeader().getDescription());
+    }
+
+    @Test
+    public void testGetPublicProfileJson() throws Exception {
 
         fillUpPublicItems();
 
@@ -355,7 +416,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
 //        assertEquals("Access", profile.getComponent().getName());
 
         profile = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + id2))
-                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
+                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
         assertNotNull(profile);
 //        assertEquals("Access", profile.getComponent().getName());
         assertEquals(id2, profile.getHeader().getID());
@@ -880,7 +941,7 @@ public class ComponentRegistryRestServiceTest extends ComponentRegistryRestServi
         String id2 = ProfileDescription.PROFILE_PREFIX + "profile2";
         ComponentSpec profile = this.getAuthenticatedResource(getResource()
                 .path(REGISTRY_BASE + "/profiles/" + id))
-                .accept(MediaType.APPLICATION_JSON).get(ComponentSpec.class);
+                .accept(MediaType.APPLICATION_XML).get(ComponentSpec.class);
         assertNotNull(profile);
         assertEquals("profile1", profile.getComponent().getName());
         profile = this.getAuthenticatedResource(getResource().path(REGISTRY_BASE + "/profiles/" + id2))
