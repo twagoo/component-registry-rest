@@ -22,6 +22,7 @@ import clarin.cmdi.componentregistry.components.ElementType;
 import com.google.common.collect.ImmutableMap;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONJAXBContext;
+import eu.clarin.cmdi.CmdNamespaces;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
@@ -56,7 +57,7 @@ public class JAXBContextResolver implements ContextResolver<JAXBContext> {
 
     public final static JSONConfiguration jsonConfiguration() {
         final ImmutableMap<String, String> namespacesMap = ImmutableMap.<String, String>builder()
-                .put("http://www.clarin.eu/cmdi/cues/1", "cue")
+                .put(CmdNamespaces.CMD_SPEC_CUES_NS, "cue")
                 .build();
         final JSONConfiguration jsonConfiguration = JSONConfiguration.mapped()
                 .xml2JsonNs(namespacesMap)
