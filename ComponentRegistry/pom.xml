@@ -38,7 +38,7 @@
 
         <cmd-toolkit.version>1.2.3</cmd-toolkit.version>
         <spring.version>5.2.9.RELEASE</spring.version>
-        <wicket.version>8.10.0</wicket.version>
+        <wicket.version>8.11.0</wicket.version>
         <jackson.version>2.11.3</jackson.version>
         <jackson-databind.version>${jackson.version}</jackson-databind.version>
         <jersey.version>1.19.4</jersey.version>
