@@ -465,7 +465,7 @@
 
                 <!-- Will be inserted in context.xml -->
                 <serviceUrlBase>http://localhost:8080</serviceUrlBase>
-                <serviceUrlPath>/ComponentRegistry</serviceUrlPath>
+                <serviceUrlPath>/ds/ComponentRegistry</serviceUrlPath>
 
                 <!-- web.xml for (shibboleth) authentication -->
                 <webXmlPath>src/main/webapp/WEB-INF/web-test.xml</webXmlPath>
