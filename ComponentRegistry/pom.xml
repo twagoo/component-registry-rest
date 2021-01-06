@@ -36,7 +36,7 @@
         <ccrRestUrl>https://openskos.meertens.knaw.nl/ccr/api/</ccrRestUrl>
         <clavasRestUrl>https://vocabularies.clarin.eu/clavas/public/api/</clavasRestUrl>
 
-        <cmd-toolkit.version>1.2.4-beta1</cmd-toolkit.version>
+        <cmd-toolkit.version>1.2.4</cmd-toolkit.version>
         <spring.version>5.2.11.RELEASE</spring.version>
         <wicket.version>8.11.0</wicket.version>
         <jackson.version>2.11.3</jackson.version>
@@ -429,7 +429,7 @@
             <version>20200518</version>
         </dependency>
         <dependency>
-            <groupId>clarin.cmdi</groupId>
+            <groupId>eu.clarin.cmdi</groupId>
             <artifactId>cmd-toolkit</artifactId>
             <version>${cmd-toolkit.version}</version>
             <exclusions>
@@ -618,7 +618,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>clarin.cmdi</groupId>
+                                    <groupId>eu.clarin.cmdi</groupId>
                                     <artifactId>cmd-toolkit</artifactId>
                                     <version>${cmd-toolkit.version}</version>
                                     <overWrite>true</overWrite>
@@ -638,7 +638,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>clarin.cmdi</groupId>
+                                    <groupId>eu.clarin.cmdi</groupId>
                                     <artifactId>cmd-toolkit</artifactId>
                                     <version>${cmd-toolkit.version}</version>
                                     <overWrite>true</overWrite>
