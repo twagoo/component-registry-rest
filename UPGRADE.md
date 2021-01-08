@@ -20,6 +20,11 @@
 
 ## Version specific update instructions
 
+### 2.4.0
+- A database schema update is required. The script for this update can be found as
+`upgrade-2.4.sql`
+- The front end used with this REST service instance must be upgraded to version 2.4.0
+
 ### 2.3.1
 Maintenance release, no special actions required if upgrading from 2.3.0
 

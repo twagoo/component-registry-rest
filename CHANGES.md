@@ -2,6 +2,12 @@
 
 For upgrade instructions, see [UPGRADE.md](UPGRADE.md)
 
+## Release Component Registry 2.4.0 (January 2021)
+
+- Using CMD toolkit version 2.4.0
+- Cues for tools namespace changed to 'http://www.clarin.eu/cmd/cues/1'
+- Components and profiles have a newly added boolean property `recommended`
+
 ## Release Component Registry 2.3.1 (February 2020)
 - Various libraries upgraded
 - Small changes in administration interface (driven by upgrade to Wicket 8)
