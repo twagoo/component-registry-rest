@@ -5,13 +5,10 @@ on:
     types: [published]
 
 jobs:
-  maven-build-test:
+  docker-build-and-deploy:
     runs-on: ubuntu-latest
+    uses: ./.github/workflows/maven.yml
     steps:
-      - name: Check out the repository to the runner
-        uses: actions/checkout@v5
-      - name: Build and test
-        uses: ./.github/workflows/maven.yml
       - name: Set version number
         run: mvn -f ComponentRegistry/pom.xml mvn versions:set -DnewVersion=${GITHUB_REF}
       - name: Build for docker
