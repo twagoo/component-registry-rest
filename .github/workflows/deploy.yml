@@ -28,7 +28,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Docker ready deployment package
-          path: ComponentRegistry/target/component-registry-rest-${GITHUB_TAG}-docker.tar.gz
+          path: ComponentRegistry/target/component-registry-rest-*-docker.tar.gz
+          compression-level: 1
           if-no-files-found: error
 
 ### TRAVIS
