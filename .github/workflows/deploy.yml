@@ -22,11 +22,12 @@ jobs:
         run: mvn install test --batch-mode --no-transfer-progress
       - name: Build for docker
         run: mvn clean install -DskipTests=true -Pdocker --batch-mode
-      - name: Deploy artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: Docker ready deployment package
           path: ComponentRegistry/target/component-registry-rest-${GITHUB_REF##*/}-docker.tar.gz
+          if-no-files-found: error
 
 ### TRAVIS
 # before_deploy:
