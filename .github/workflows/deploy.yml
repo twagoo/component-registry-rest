@@ -2,13 +2,14 @@ name: Deploy release artifact
 
 on:
   release:
+    types: [published]
 
 jobs:
   maven-build-test:
     runs-on: ubuntu-latest
     steps:
       - name: Build and test
-        uses: ./github/workflows/maven.yml
+        uses: ./.github/workflows/maven.yml
       - name: Set version number
         run: mvn -f ComponentRegistry/pom.xml mvn versions:set -DnewVersion=${GITHUB_REF}
       - name: Build for docker
