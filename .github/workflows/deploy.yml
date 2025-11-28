@@ -1,0 +1,36 @@
+name: Deploy release artifact
+
+on:
+  release:
+
+jobs:
+  maven-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and test
+        uses: ./github/workflows/maven.yml
+      - name: Set version number
+        run: mvn -f ComponentRegistry/pom.xml mvn versions:set -DnewVersion=${GITHUB_REF}
+      - name: Build for docker
+        run: mvn clean install -DskipTests=true -Pdocker --batch-mode
+      - name: Deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-artifact
+          path: ComponentRegistry/target/component-registry-rest-${GITHUB_REF}-docker.tar.gz
+
+### TRAVIS
+# before_deploy:
+#   - yes | gem update --system --force
+#   - gem install bundler
+#   - gem install faraday-net_http -v '3.3.0' # Fix faraday version
+#   - gem install uri
+#   - gem install logger
+# deploy:
+#   provider: releases
+#   prerelease: true
+#   token: "${GITHUB_DEPLOY_TOKEN}"
+#   file: "ComponentRegistry/target/component-registry-rest-${TRAVIS_TAG}-docker.tar.gz"
+#   skip_cleanup: true
+#   on:
+#     tags: true
